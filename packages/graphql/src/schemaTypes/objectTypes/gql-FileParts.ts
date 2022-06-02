@@ -57,7 +57,7 @@ export const FileParts = objectType({
     t.nonNull.string('contents', {
       description: `The contents of the file`,
       resolve (root, args, ctx) {
-        return root.contents || ctx.file.readFile(root.absolute)
+        return root.contents || ctx.fs.readFile(root.absolute, 'utf8')
       },
     })
 

@@ -3,7 +3,7 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-context:versions-data-source')
+const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -25,14 +25,28 @@ const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 export class VersionsDataSource {
   private _initialLaunch: boolean
   private _currentTestingType: TestingType | null
-  private _latestVersion: Promise<string>
-  private _npmMetadata: Promise<Record<string, string>>
 
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
     this._currentTestingType = this.ctx.coreData.currentTestingType
-    this._latestVersion = this.getLatestVersion()
-    this._npmMetadata = this.getVersionMetadata()
+    this.#ensureData()
+  }
+
+  #ensureData () {
+    let versionData = this.ctx.coreData.versionData
+
+    if (!versionData) {
+      versionData = {
+        latestVersion: this.getLatestVersion().catch((e) => pkg.version),
+        npmMetadata: this.getVersionMetadata().catch((e) => ({})),
+      }
+
+      this.ctx.update((d) => {
+        d.versionData = versionData
+      })
+    }
+
+    return versionData
   }
 
   /**
@@ -51,7 +65,11 @@ export class VersionsDataSource {
    * }
    */
   async versionData (): Promise<VersionData> {
-    const [latestVersion, npmMetadata] = await Promise.all([this._latestVersion, this._npmMetadata])
+    const versionData = this.#ensureData()
+    const [latestVersion, npmMetadata] = await Promise.all([
+      versionData.latestVersion,
+      versionData.npmMetadata,
+    ])
 
     const latestVersionMetadata: Version = {
       id: latestVersion,
@@ -73,7 +91,11 @@ export class VersionsDataSource {
     if (this.ctx.coreData.currentTestingType !== this._currentTestingType) {
       debug('resetting latest version telemetry call due to a different testing type')
       this._currentTestingType = this.ctx.coreData.currentTestingType
-      this._latestVersion = this.getLatestVersion()
+      this.ctx.update((d) => {
+        if (d.versionData) {
+          d.versionData.latestVersion = this.getLatestVersion()
+        }
+      })
     }
   }
 
@@ -102,7 +124,7 @@ export class VersionsDataSource {
 
     const responseJson = await response.json() as { time: Record<string, string>}
 
-    debug('NPM release dates %o', responseJson.time)
+    debug('NPM release dates received %o', { modified: responseJson.time.modified })
 
     return responseJson.time
   }

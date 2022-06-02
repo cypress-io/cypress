@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
-import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
+import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -20,19 +20,22 @@ export default defineConfig({
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
-    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    devServer,
-    devServerConfig: {
-      optimizeDeps: {
-        include: [
-          '@headlessui/vue',
-          'vue3-file-selector',
-          'p-defer',
-          'just-my-luck',
-          'combine-properties',
-          'faker',
-          '@packages/ui-components/cypress/support/customPercyCommand',
-        ],
+    specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
+      viteConfig: {
+        optimizeDeps: {
+          include: [
+            '@headlessui/vue',
+            'vue3-file-selector',
+            'p-defer',
+            'just-my-luck',
+            'combine-properties',
+            'faker',
+            '@packages/ui-components/cypress/support/customPercyCommand',
+          ],
+        },
       },
     },
   },
@@ -49,6 +52,11 @@ export default defineConfig({
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+
+      on('task', {
+        initGitRepoForTestProject,
+        resetGitRepoForTestProject,
+      })
 
       return await e2ePluginSetup(on, config)
     },

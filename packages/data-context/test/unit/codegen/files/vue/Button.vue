@@ -36,10 +36,10 @@ export default {
     props = reactive(props);
     return {
       classes: computed(() => ({
-        'storybook-button': true,
-        'storybook-button--primary': props.primary,
-        'storybook-button--secondary': !props.primary,
-        [`storybook-button--${props.size || 'medium'}`]: true,
+        'button': true,
+        'button--primary': props.primary,
+        'button--secondary': !props.primary,
+        [`button--${props.size || 'medium'}`]: true,
       })),
       style: computed(() => ({
         backgroundColor: props.backgroundColor,

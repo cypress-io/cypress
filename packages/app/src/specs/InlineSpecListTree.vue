@@ -1,7 +1,8 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container overscroll-contain overflow-y-auto overflow-x-hidden"
+    class="pt-8px specs-list-container"
+    data-cy="specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
@@ -15,7 +16,7 @@
         flex
         group
         relative"
-        data-testid="spec-row-item"
+        data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
       >
@@ -29,7 +30,7 @@
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
-          :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+          :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.capture.prevent="submit(row.data, row.index)"
           @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
@@ -42,7 +43,7 @@
             :selected="isCurrentSpec(row.data)"
             :indexes="row.data?.data?.fileIndexes"
             class="pl-22px"
-            data-testid="spec-file-item"
+            data-cy="spec-file-item"
           />
           <DirectoryItem
             v-else
@@ -50,7 +51,7 @@
             :name="row.data.name"
             :expanded="treeSpecList[row.index].expanded.value"
             :indexes="getDirIndexes(row.data)"
-            data-testid="directory-item"
+            data-cy="directory-item"
           />
         </RouterLink>
       </li>
@@ -61,8 +62,8 @@
 <script setup lang="ts">
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
-import type { SpecTreeNode, FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, getDirIndexes } from './spec-utils'
+import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
@@ -121,7 +122,7 @@ const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
       return
     }
 
-    router.push({ path: '/specs/runner', query: { file: row.data.relative } })
+    router.push({ path: '/specs/runner', query: { file: row.data.relative.replace(/\\/g, '/') } })
   } else {
     row.toggle()
   }
@@ -157,7 +158,7 @@ a::before {
 }
 
 /** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height. */
-/** Header is 64px, padding-bottom is 8px **/
+/** Header is 64px, padding-top is 8px **/
 .specs-list-container {
   height: calc(100vh - 64px - 8px);
 }

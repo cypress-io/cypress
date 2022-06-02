@@ -5,6 +5,7 @@ import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
+import _ from 'lodash'
 
 import 'server-destroy'
 
@@ -16,31 +17,30 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  GitDataSource,
   FileDataSource,
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  StorybookDataSource,
   CloudDataSource,
   EnvDataSource,
-  GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
 } from './sources/'
 import { cached } from './util/cached'
-import type { GraphQLSchema } from 'graphql'
-import type { Server } from 'http'
+import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
+import type { IncomingHttpHeaders, Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { Socket, SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError } from '@packages/errors'
+import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
+import { GraphQLDataSource } from './sources/GraphQLDataSource'
+import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -54,6 +54,7 @@ export interface InternalDataContextOptions {
 
 export interface DataContextConfig {
   schema: GraphQLSchema
+  schemaCloud: GraphQLSchema
   mode: 'run' | 'open'
   modeOptions: Partial<AllModeOptions>
   electronApp?: ElectronApp
@@ -70,7 +71,17 @@ export interface DataContextConfig {
   browserApi: BrowserApiShape
 }
 
+export interface GraphQLRequestInfo {
+  app: 'app' | 'launchpad'
+  operationName: string | null
+  document: DocumentNode
+  operation: OperationTypeNode
+  variables: Record<string, any> | null
+  headers: IncomingHttpHeaders
+}
+
 export class DataContext {
+  readonly graphqlRequestInfo?: GraphQLRequestInfo
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
@@ -85,8 +96,21 @@ export class DataContext {
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
+  get schema () {
+    return this._config.schema
+  }
+
+  get schemaCloud () {
+    return this._config.schemaCloud
+  }
+
   get isRunMode () {
     return this._config.mode === 'run'
+  }
+
+  @cached
+  get graphql () {
+    return new GraphQLDataSource()
   }
 
   get electronApp () {
@@ -102,7 +126,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return !this.currentProject
+    return this.appData.isInGlobalMode
   }
 
   get modeOptions () {
@@ -126,17 +150,25 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.baseError
+    return this.coreData.currentProjectData?.testingTypeData?.activeAppData?.error
+      ?? this.coreData.currentProjectData?.testingTypeData?.error
+      ?? this.coreData.currentProjectData?.error
+      ?? this.coreData.baseError
+      ?? null
+  }
+
+  get warnings () {
+    return [
+      ...this.coreData.currentProjectData?.testingTypeData?.activeAppData?.warnings ?? [],
+      ...this.coreData.currentProjectData?.testingTypeData?.warnings ?? [],
+      ...this.coreData.currentProjectData?.warnings ?? [],
+      ...this.coreData.warnings ?? [],
+    ]
   }
 
   @cached
   get file () {
     return new FileDataSource(this)
-  }
-
-  @cached
-  get git () {
-    return new GitDataSource(this)
   }
 
   @cached
@@ -167,11 +199,6 @@ export class DataContext {
     return new WizardDataSource(this)
   }
 
-  @cached
-  get storybook () {
-    return new StorybookDataSource(this)
-  }
-
   get wizardData () {
     return this.coreData.wizard
   }
@@ -187,7 +214,20 @@ export class DataContext {
 
   @cached
   get cloud () {
-    return new CloudDataSource(this)
+    return new CloudDataSource({
+      fetch: (...args) => this.util.fetch(...args),
+      getUser: () => this.user,
+      logout: () => this.actions.auth.logout().catch(this.logTraceError),
+      onError: (err) => {
+        // This should never happen in prod, and if it does, it means we've intentionally broken the
+        // remote contract with the test runner. Showing the main overlay is too heavy-handed of an action
+        // to take here, so we only show it in development, when we maybe did something wrong in our e2e
+        // Cypress test mocking and want to know immediately in the UI that things are broken
+        if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+          return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
+        }
+      },
+    })
   }
 
   @cached
@@ -198,10 +238,6 @@ export class DataContext {
   @cached
   get emitter () {
     return new DataEmitterActions(this)
-  }
-
-  graphqlClient () {
-    return new GraphQLDataSource(this, this._config.schema)
   }
 
   @cached
@@ -238,12 +274,10 @@ export class DataContext {
 
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
-      if (d.servers.appSocketServer !== socketServer) {
-        d.servers.appSocketServer?.off('connection', this.initialPush)
-        socketServer?.on('connection', this.initialPush)
-      }
-
+      d.servers.appSocketServer?.disconnectSockets(true)
+      d.servers.appSocketNamespace?.disconnectSockets(true)
       d.servers.appSocketServer = socketServer
+      d.servers.appSocketNamespace = socketServer?.of('/data-context')
     })
   }
 
@@ -254,23 +288,11 @@ export class DataContext {
     })
   }
 
-  setGqlSocketServer (socketServer: SocketIOServer | undefined) {
+  setGqlSocketServer (socketServer: SocketIONamespace | undefined) {
     this.update((d) => {
-      if (d.servers.gqlSocketServer !== socketServer) {
-        d.servers.gqlSocketServer?.off('connection', this.initialPush)
-        socketServer?.on('connection', this.initialPush)
-      }
-
+      d.servers.gqlSocketServer?.disconnectSockets(true)
       d.servers.gqlSocketServer = socketServer
     })
-  }
-
-  initialPush = (socket: Socket) => {
-    // TODO: This is a hack that will go away when we refine the whole socket communication
-    // layer w/ GraphQL subscriptions, we shouldn't be pushing so much
-    setTimeout(() => {
-      socket.emit('data-context-push')
-    }, 100)
   }
 
   /**
@@ -345,7 +367,7 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (cypressError: CypressError, title?: string) => {
+  onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
         this.lifecycleManager.runModeExitEarly(cypressError)
@@ -353,11 +375,25 @@ export class DataContext {
         throw cypressError
       }
     } else {
-      this.update((coreData) => {
-        coreData.baseError = { title, cypressError }
+      const err = {
+        id: _.uniqueId('Error'),
+        title,
+        cypressError,
+      }
+
+      this.update((d) => {
+        if (d.currentProjectData?.testingTypeData?.activeAppData) {
+          d.currentProjectData.testingTypeData.activeAppData.error = err
+        } else if (d.currentProjectData?.testingTypeData) {
+          d.currentProjectData.testingTypeData.error = err
+        } else if (d.currentProjectData) {
+          d.currentProjectData.error = err
+        } else {
+          d.baseError = err
+        }
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.errorWarningChange()
     }
   }
 
@@ -366,23 +402,26 @@ export class DataContext {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
-      this.coreData.warnings.push({
+      const warning = {
+        id: _.uniqueId('Warning'),
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         cypressError: err,
+      }
+
+      this.update((d) => {
+        if (d.currentProjectData?.testingTypeData?.activeAppData) {
+          d.currentProjectData.testingTypeData.activeAppData.warnings.push(warning)
+        } else if (d.currentProjectData?.testingTypeData) {
+          d.currentProjectData.testingTypeData.warnings.push(warning)
+        } else if (d.currentProjectData) {
+          d.currentProjectData.warnings.push(warning)
+        } else {
+          d.warnings.push(warning)
+        }
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.errorWarningChange()
     }
-  }
-
-  /**
-   * If we really want to get around the guards added in proxyContext
-   * which disallow referencing ctx.actions / ctx.emitter from context for a GraphQL query,
-   * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
-   * we're certain this is a good idea.
-   */
-  get deref () {
-    return this
   }
 
   async destroy () {
@@ -392,10 +431,6 @@ export class DataContext {
       destroy(),
       this._reset(),
     ])
-  }
-
-  get loader () {
-    return this.util.loader
   }
 
   /**
@@ -413,14 +448,15 @@ export class DataContext {
     globalPubSub.emit('reset:data-context', this)
   }
 
-  private _reset () {
+  _reset () {
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
+
+    resetIssuedWarnings()
 
     return Promise.all([
       this.lifecycleManager.destroy(),
       this.cloud.reset(),
-      this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
@@ -430,9 +466,10 @@ export class DataContext {
     assert(!this.coreData.hasInitializedMode)
     this.coreData.hasInitializedMode = this._config.mode
     if (this._config.mode === 'run') {
-      await this.lifecycleManager.initializeRunMode()
+      await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
+      await this.lifecycleManager.initializeOpenMode(this.coreData.currentTestingType)
     } else {
       throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
@@ -443,16 +480,20 @@ export class DataContext {
       this.actions.dev.watchForRelaunch()
     }
 
+    // We want to fetch the user immediately, but we don't need to block the UI on this
+    this.actions.auth.getUser().catch((e) => {
+      // This error should never happen, since it's internally handled by getUser
+      // Log anyway, just incase
+      this.logTraceError(e)
+    })
+
     const toAwait: Promise<any>[] = [
-      // load the cached user & validate the token on start
-      this.actions.auth.getUser(),
-      // and grab the user device settings
       this.actions.localSettings.refreshLocalSettings(),
     ]
 
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    return Promise.all(toAwait)
+    await Promise.all(toAwait)
   }
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <p data-cy="dom-check">From a secondary origin</p>
+  <p data-cy="cypress-check"></p>
+  <p data-cy="window-before-load"></p>
+  <form>
+    <button type="submit">Submit</button>
+  </form>
+  <button data-cy="alert">Alert</button>
+  <button data-cy="confirm">Confirm</button>
+  <button data-cy="reload">reload</button>
+  <a data-cy="hashChange" href='#hashChange'>hashChange</a>
+  <a data-cy="cross-origin-page"
+        href="/fixtures/primary_origin.html">/fixtures/primary_origin.html</a>
+
+  <script>
+    if (window.Cypress) {
+      document.querySelector('[data-cy="cypress-check"]').innerText = 'Has window.Cypress'
+    }
+
+    if (window.testSecondaryWindowBeforeLoad){
+      document.querySelector('[data-cy="window-before-load"]').innerText = 'Window Before Load Called'
+    }
+
+    document.querySelector('[data-cy="alert"]').addEventListener('click', () => {
+      window.alert('the alert text')
+    })
+
+    document.querySelector('[data-cy="confirm"]').addEventListener('click', () => {
+      window.confirm('the confirm text')
+    })
+
+    document.querySelector('[data-cy="reload"]').addEventListener('click', () => {
+      window.location.reload()
+    })
+  </script>
+</body>
+</html>

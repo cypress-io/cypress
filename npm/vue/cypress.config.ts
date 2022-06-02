@@ -13,19 +13,9 @@ export default defineConfig({
   },
   'component': {
     excludeSpecPattern: 'examples/**/*',
-    devServer (cypressDevServerConfig) {
-      const webpackConfig = require('./webpack.config')
-
-      if (!webpackConfig.resolve) {
-        webpackConfig.resolve = {}
-      }
-
-      webpackConfig.resolve.alias = {
-        ...webpackConfig.resolve.alias,
-        '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
-      }
-
-      return devServer(cypressDevServerConfig, { webpackConfig })
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)

@@ -3,6 +3,7 @@ import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'e
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
+import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 
 import type {
   AllModeOptions,
@@ -20,15 +21,14 @@ import user from './user'
 import * as config from './config'
 import { openProject } from './open_project'
 import cache from './cache'
-import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
-import plugins from './plugins'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
+import { remoteSchemaWrapped } from '@packages/graphql'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -42,6 +42,7 @@ export { getCtx, setCtx, clearCtx }
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
+    schemaCloud: remoteSchemaWrapped,
     ...options,
     browserApi: {
       close: browsers.close,
@@ -54,40 +55,26 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
+      },
     },
     configApi: {
-      getServerPluginHandlers: plugins.getServerPluginHandlers,
       allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
-      findNodePath () {
-        return findSystemNode.findNodeInFullPath()
-      },
     },
     authApi: {
       getUser () {
         return user.get()
       },
-      logIn (onMessage) {
-        const windows = require('./gui/windows')
-        const originalIsMainWindowFocused = windows.isMainWindowFocused()
-        const onLoginFlowComplete = async () => {
-          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.chosenBrowser)) {
-            windows.focusMainWindow()
-          } else {
-            await ctx.actions.browser.focusActiveBrowserWindow()
-          }
-        }
-
-        return auth.start(onMessage, 'launchpad', onLoginFlowComplete)
+      logIn (onMessage, utmCode) {
+        return auth.start(onMessage, utmCode)
       },
       logOut () {
         return user.logOut()
@@ -122,6 +109,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+        // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
+        // https://cypress-io.atlassian.net/browse/UNIFY-1705
         cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
@@ -130,8 +119,14 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getCurrentBrowser () {
+        return (openProject?.projectBase?.browser) ?? undefined
+      },
       getConfig () {
         return openProject.getConfig()
+      },
+      getRemoteStates () {
+        return openProject.getRemoteStates()
       },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,
@@ -173,6 +168,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       copyTextToClipboard (text: string) {
         electron.clipboard.writeText(text)
+      },
+      isMainWindowFocused () {
+        return isMainWindowFocused()
+      },
+      focusMainWindow () {
+        return focusMainWindow()
       },
     },
     localSettingsApi: {

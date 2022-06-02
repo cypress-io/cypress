@@ -50,3 +50,78 @@ cypress.run().then(results => {
     results.status // $ExpectType "finished"
   }
 })
+
+// component options
+const componentConfigNextWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'next',
+    }
+  }
+}
+
+const componentConfigReactWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'react',
+    }
+  }
+}
+
+const componentConfigVueWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'vue',
+    }
+  }
+}
+
+const componentConfigVueCliWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'vue-cli',
+      webpackConfig: {}
+    }
+  }
+}
+
+const componentConfigNuxtWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'nuxt',
+      webpackConfig: {}
+    }
+  }
+}
+
+const componentConfigCRAWebpack: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      framework: 'create-react-app',
+    }
+  }
+}
+
+const componentConfigViteReact: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'react',
+    }
+  }
+}
+
+const componentConfigViteVue: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
+    }
+  }
+}

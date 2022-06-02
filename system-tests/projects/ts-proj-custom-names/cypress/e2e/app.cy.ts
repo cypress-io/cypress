@@ -6,5 +6,5 @@ it('is true', () => {
 
 it('uses custom command', () => {
   // defined in support file
-  cy.customCommand()
+  cy.add(1, 2).then((result: number) => expect(result).to.eq(3))
 })

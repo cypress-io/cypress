@@ -4,7 +4,7 @@ import { installCustomPercyCommand } from '@packages/ui-components/cypress/suppo
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
 import { addNetworkCommands } from '../../support/onlineNetwork'
-import { e2eProjectDirs } from './e2eProjectDirs'
+import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
@@ -14,19 +14,21 @@ import type { E2ETaskMap } from '../e2ePluginSetup'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
+import 'cypress-plugin-tab'
+import 'cypress-axe'
+import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
-
-export type ProjectFixture = typeof e2eProjectDirs[number]
+const SIXTY_SECONDS = 60 * 1000
 
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   retry?: boolean
   retryDelay?: number // default 1000
   retryCount?: number // default 5
-  projectName?: ProjectFixture
+  projectName?: ProjectFixtureDir
   [key: string]: any
 }
 
@@ -36,7 +38,7 @@ export interface WithCtxInjected extends WithCtxOptions {
   sinon: typeof sinon
   pDefer: typeof pDefer
   testState: Record<string, any>
-  projectDir(projectName: ProjectFixture): string
+  projectDir(projectName: ProjectFixtureDir): string
 }
 
 export interface RemoteGraphQLInterceptPayload {
@@ -46,9 +48,10 @@ export interface RemoteGraphQLInterceptPayload {
   document: DocumentNode
   result: ExecutionResult
   callCount: number
+  Response: typeof Response
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -137,15 +140,7 @@ declare global {
       /**
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
-      visitApp(href?: string): Chainable<AUTWindow>
-      /**
-       * Visits the Cypress app, but runs GraphQL requests over HTTP
-       * so we can cy.intercept. This is so we don't need to refactor all of
-       * the current tests to use GraphQL over the socket connection, but we
-       * should ideally make the tests transport agnostic. If we need to assert
-       * on things, we can do it with sinon spying on things in withCtx
-       */
-      __incorrectlyVisitAppWithIntercept(href?: string): Chainable<AUTWindow>
+      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
       /**
        * Visits the Cypress launchpad
        */
@@ -182,13 +177,17 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
+after(() => {
+  taskInternal('__internal__after', undefined)
+})
+
+function scaffoldProject (projectName: ProjectFixtureDir, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName, options)
   })
 }
 
-function addProject (projectName: ProjectFixture, open = false) {
+function addProject (projectName: ProjectFixtureDir, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
     return taskInternal('__internal_addProject', { projectName, open })
   })
@@ -209,8 +208,8 @@ function openGlobalMode (argv?: string[]) {
   })
 }
 
-function openProject (projectName: ProjectFixture, argv: string[] = []) {
-  if (!e2eProjectDirs.includes(projectName)) {
+function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
+  if (!fixtureDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
@@ -223,7 +222,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   })
 }
 
-function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
+function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMockingPrompts: boolean } = { skipMockingPrompts: false }) {
   const { name, family } = Cypress.browser
 
   if (family !== 'chromium' || name === 'electron') {
@@ -233,7 +232,8 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.setCurrentTestingType(o.mode)
+        await ctx.lifecycleManager.waitForInitializeSuccess()
+        ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
@@ -247,8 +247,23 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           initializeActiveProjectStub.restore()
         }
 
+        // Used to format a Cypress error in a way that makes sense to the cy-in-cy
+        // open mode reporter. Typically we'll see all the details we need in the
+        // terminal or in the Cypress UI components, but in the reporter we need to format it a bit
+        function formatError (e: Error & {messageMarkdown?: string, originalError?: Error}) {
+          if (e.messageMarkdown) {
+            e.message = e.messageMarkdown
+            if (e.originalError) {
+              e.message = `${e.message}\n\n${e.originalError.message}`
+            }
+          }
+
+          return e
+        }
+
         function onStartAppError (e: Error) {
-          isInitialized.reject(e)
+          // Cypress Error
+          isInitialized.reject(formatError(e))
           restoreStubs()
         }
 
@@ -263,7 +278,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
             return result
           } catch (e) {
-            isInitialized.reject(e)
+            isInitialized.reject(formatError(e))
           } finally {
             restoreStubs()
           }
@@ -273,22 +288,32 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
         await isInitialized.promise
 
+        if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
+
+        await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
+        if (!o.skipMockingPrompts
+        // avoid re-stubbing already stubbed prompts in case we call startAppServer multiple times
+          && (ctx._apis.projectApi.getCurrentProjectSavedState as any).wrappedMethod === undefined) {
+          // avoid unwanted prompt
+          o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+            firstOpened: 1609459200000,
+            lastOpened: 1609459200000,
+            promptsShown: { ci1: 1609459200000 },
+          })
+        }
+
         return ctx.appServerPort
-      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((serverPort) => {
-        log.set({ message: `port: ${serverPort}` })
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
+        log?.set({ message: `port: ${serverPort}` })
         Cypress.env('e2e_serverPort', serverPort)
       })
     })
   })
 }
 
-interface VisitAppConfig {
-  withIntercept?: boolean
-}
-
-function visitApp (href?: string, config?: VisitAppConfig) {
+function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -299,27 +324,15 @@ function visitApp (href?: string, config?: VisitAppConfig) {
     `)
   }
 
-  const title = config?.withIntercept ? '__incorrectlyVisitAppWithIntercept' : 'visitApp'
-
-  return logInternal(title, () => {
+  return logInternal('visitApp', () => {
     return cy.withCtx(async (ctx) => {
       const config = await ctx.lifecycleManager.getFullInitialConfig()
 
       return config.clientRoute
     }).then((clientRoute) => {
-      const visitConfig: Partial<Cypress.VisitOptions> = config?.withIntercept ? {
-        onBeforeLoad (win) {
-          win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-        },
-      } : {}
-
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, visitConfig)
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
     })
   })
-}
-
-function __incorrectlyVisitAppWithIntercept (href?: string) {
-  return visitApp(href, { withIntercept: true })
 }
 
 function visitLaunchpad () {
@@ -360,9 +373,9 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<CyTaskResult<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
-    _log.set('result', result)
-    _log.end()
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+    _log?.set('result', result)
+    _log?.end()
 
     if (result.error) {
       const err = new Error(result.error.message)
@@ -443,13 +456,13 @@ function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ET
   return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
 }
 
-function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
+function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log | undefined) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
   const _log = typeof name === 'string'
     ? Cypress.log({ name, message: '' })
     : Cypress.log(name)
 
   return cb(_log).then<T>((val) => {
-    _log.end()
+    _log?.end()
 
     return val
   })
@@ -475,7 +488,9 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     .click()
 
     cy.withRetryableCtx(async (ctx, o) => {
-      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq(o.href)
+      // The actual openExternal call may include the GQL port, so we only assert that it starts with the requested href
+      // rather than equalling it exactly.
+      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg.startsWith(o.href)).to.be.true
     }, { href, log: false })
 
     return cy.get('@Link')
@@ -484,7 +499,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
 
 function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    // @ts-expect-error
     return cy.tab().focused({ log: false }).then((el) => {
       const pass = fn(el)
 
@@ -513,7 +527,6 @@ Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
-Cypress.Commands.add('__incorrectlyVisitAppWithIntercept', __incorrectlyVisitAppWithIntercept)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('startAppServer', startAppServer)

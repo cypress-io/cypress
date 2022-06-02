@@ -1,8 +1,8 @@
 <template>
   <div
     id="spec-runner-header"
+    ref="autHeaderEl"
     class="min-h-64px text-14px"
-    :style="{ width: `${props.width}px` }"
   >
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
@@ -18,6 +18,7 @@
           :disabled="isDisabled"
           class="rounded-none border-gray-100 border-r-1px mr-12px"
           variant="text"
+          :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
           <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
@@ -35,6 +36,7 @@
           :disabled="isDisabled"
           class="border-gray-100  mr-12px"
           variant="outline"
+          :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
           <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
@@ -43,11 +45,13 @@
       <SpecRunnerDropdown
         v-if="selectedBrowser?.displayName"
         data-cy="select-browser"
+        :disabled="autStore.isRunning"
       >
         <template #heading>
           <img
             class="min-w-16px w-16px"
             :src="allBrowsersIcons[selectedBrowser.displayName]"
+            :alt="selectedBrowser.displayName"
           >
           {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>
@@ -76,30 +80,40 @@
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
-            <!-- TODO: UNIFY-1316 - This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
-            <p class="mb-16px">
-              The
-              <strong>viewport</strong> determines the width and height of your application.
-              By default the viewport will be
-              <strong>{{ autStore.defaultViewportWidth }}px</strong> by
-              <strong>{{ autStore.defaultViewportHeight }}px</strong> for {{ props.gql.currentTestingType === "e2e" ? 'End-to-end' : 'Component' }}
-              Testing unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
-            </p>
-            <p class="mb-16px">
-              Additionally, you can override the default viewport dimensions by specifying these values in your config file:
-            </p>
+          <div class="max-h-50vw p-24px pt-5 text-gray-700 leading-5 w-346px overflow-auto">
+            <i18n-t
+              tag="p"
+              keypath="runner.viewportTooltip.infoText"
+              class="mb-24px"
+            >
+              <strong class="font-bold">{{ autStore.defaultViewportWidth }}px</strong>
+              <strong class="font-bold">{{ autStore.defaultViewportHeight }}px</strong>
+              {{ props.gql.currentTestingType === "e2e" ? 'end-to-end' : 'component' }}
+            </i18n-t>
 
-            <ShikiHighlight
-              class="rounded border-gray-200 border-1 mb-16px"
-              lang="javascript"
-              :code="code"
-            />
-            <p>
-              <ExternalLink href="https://on.cypress.io/viewport">
-                Read more about viewport here.
-              </ExternalLink>
-            </p>
+            <i18n-t
+              tag="p"
+              keypath="runner.viewportTooltip.configText"
+              class="mb-24px"
+            >
+              <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
+              <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+              <InlineCodeFragment class="text-xs font-medium leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
+              <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+              <InlineCodeFragment class="text-xs font-medium leading-5">cy.viewport()</InlineCodeFragment>
+            </i18n-t>
+            <div class="flex justify-center">
+              <Button
+                class="font-medium"
+                data-cy="viewport-docs"
+                :prefix-icon="BookIcon"
+                prefix-icon-class="icon-dark-indigo-500"
+                variant="outline"
+                :href="t('runner.viewportTooltip.buttonHref')"
+              >
+                {{ t('runner.viewportTooltip.buttonText') }}
+              </Button>
+            </div>
           </div>
         </template>
       </SpecRunnerDropdown>
@@ -130,64 +144,36 @@
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAutStore, useSpecStore } from '../store'
+import { useAutStore, useSpecStore, useSelectorPlaygroundStore } from '../store'
+import { useAutHeader } from './useAutHeader'
 import { gql } from '@urql/vue'
+import { useI18n } from 'vue-i18n'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
-import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
-import { useI18n } from 'vue-i18n'
+import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
   id
+  configFile
   currentTestingType
-
-  currentBrowser {
+  activeBrowser {
     id
     displayName
     majorVersion
   }
   config
   ...VerticalBrowserListItems
-}
-`
-
-gql`
-fragment SpecRunnerHeader_Browser on Browser {
-  id
-  name
-  displayName
-}
-`
-
-gql`
-mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
-  launchpadSetBrowser(id: $browserId) {
-    id
-    currentBrowser {
-      id
-      displayName
-      majorVersion
-    }
-    browsers {
-      id
-      isSelected
-    }
-  }
-  launchOpenProject(specPath: $specPath) {
-    id
-  }
 }
 `
 
@@ -203,10 +189,11 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
-  width: number
 }>()
 
 const showAlert = ref(false)
+
+const { autHeaderEl } = useAutHeader()
 
 watchEffect(() => {
   showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'
@@ -223,14 +210,10 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
-const selectedBrowser = ref({ ...props.gql.currentBrowser })
+const selectedBrowser = ref({ ...props.gql.activeBrowser })
 
 const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
-const code = `{
-  "viewportWidth": ${autStore.defaultViewportWidth},
-  "viewportHeight": ${autStore.defaultViewportHeight}
-}`
 </script>

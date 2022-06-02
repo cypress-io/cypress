@@ -34,7 +34,7 @@ describe('e2e error ui', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/16255
-  systemTests.it('handles errors when integration folder is outside of project root', {
+  systemTests.it('handles errors when test files are outside of project root', {
     project: 'integration-outside-project-root/project-root',
     spec: '../../../e2e/failing.cy.js',
     expectedExitCode: 1,

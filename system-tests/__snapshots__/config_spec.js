@@ -187,12 +187,14 @@ There is a cypress.json file at the path: /foo/bar/.projects/pristine
 
 Cypress version 10.0.0 no longer supports cypress.json.
 
-Please run cypress open to launch the migration tool to migrate to cypress.config.{ts|js}.
+Please run cypress open to launch the migration tool to migrate to cypress.config.{js,ts,mjs,cjs}.
+
+https://on.cypress.io/migration-guide
 
 
 `
 
-exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
+exports['e2e config throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well 1'] = `
 There is both a cypress.config.js and a cypress.json file at the location below:
 
 /foo/bar/.projects/multiple-config-files-with-json
@@ -289,19 +291,15 @@ https://on.cypress.io/migration-guide
 exports['e2e config throws an error if testFiles is set on the config file 1'] = `
 The testFiles configuration option is now invalid when set on the config object in Cypress version 10.0.0.
 
- It is now renamed to specPattern and configured separately as a testing type property: e2e.specPattern and component.specPattern
- 
+It is now renamed to specPattern and configured separately as a testing type property: e2e.specPattern
 
 {
   e2e: {
     specPattern: '...',
   },
-  component: {
-    specPattern: '...',
-  },
 }
 
- https://on.cypress.io/migration-guide
+https://on.cypress.io/migration-guide
 
 `
 
@@ -314,14 +312,14 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (a_record-spec.js)                                                         │
-  │ Searched:   cypress/e2e/*-spec.js                                                              │
+  │ Specs:      1 found (a_record.cy.js)                                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record-spec.js                                                                (1 of 1)
+  Running:  a_record.cy.js                                                                  (1 of 1)
 
 
   a spec
@@ -342,14 +340,14 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     a_record-spec.js                                                                 │
+  │ Spec Ran:     a_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/a_record-spec.js.mp4                (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -359,7 +357,7 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  a_record-spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  a_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -369,8 +367,7 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
 exports['e2e config throws an error if componentFolder is set on the config file 1'] = `
 The componentFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.
 
- It is now renamed to specPattern and configured separately as a component testing property: component.specPattern
- 
+It is now renamed to specPattern and configured separately as a component testing property: component.specPattern
 
 {
   component: {
@@ -378,6 +375,51 @@ The componentFolder configuration option is now invalid when set on the config o
   },
 }
 
- https://on.cypress.io/migration-guide
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if indexHtml is set on the root level 1'] = `
+The indexHtmlFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: component.indexHtmlFile
+
+{
+  component: {
+    indexHtmlFile: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if indexHtml is set on the e2e level 1'] = `
+The e2e.indexHtmlFile configuration option is not valid for e2e testing.
+
+Please remove this option or add this as a component testing type property: component.indexHtmlFile
+
+{
+  e2e: {
+    indexHtmlFile: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if experimentalSessionAndOrigin is set on the component level 1'] = `
+The component.experimentalSessionAndOrigin configuration option is not valid for component testing.
+
+Please remove this option or add this as an e2e testing type property: e2e.experimentalSessionAndOrigin
+
+{
+  e2e: {
+    experimentalSessionAndOrigin: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
 
 `

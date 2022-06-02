@@ -8,7 +8,6 @@ import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
 import * as errors from './errors'
-import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import { checkSupportFile } from './project_utils'
@@ -131,21 +130,16 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.cfg.state
   }
 
+  get remoteStates () {
+    return this._server?.remoteStates
+  }
+
   injectCtSpecificConfig (cfg) {
     cfg.resolved.testingType = { value: 'component' }
-
-    // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-    // But if we don't return it in the plugins function, it never gets set
-    // Since there is no chance that it will have any other value here, we set it to "component"
-    // This allows users to not return config in the `cypress/plugins/index.js` file
-    // https://github.com/cypress-io/cypress/issues/16860
-    const rawJson = cfg.rawJson as Cfg
 
     return {
       ...cfg,
       componentTesting: true,
-      viewportHeight: rawJson.viewportHeight ?? 500,
-      viewportWidth: rawJson.viewportWidth ?? 500,
     }
   }
 
@@ -164,12 +158,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     process.chdir(this.projectRoot)
 
     this._server = this.createServer(this.testingType)
-
-    const { ctDevServerPort } = await this.initializeSpecsAndDevServer(cfg)
-
-    if (this.testingType === 'component') {
-      cfg.baseUrl = `http://localhost:${ctDevServerPort}`
-    }
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
@@ -275,7 +263,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   __reset () {
     preprocessor.close()
-    devServer.close()
 
     process.chdir(localCwd)
   }
@@ -315,46 +302,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     browsers.close()
 
     options.onError(err)
-  }
-
-  async initializeSpecsAndDevServer (updatedConfig: Cfg): Promise<{
-    ctDevServerPort: number | undefined
-  }> {
-    const specs = this.ctx.project.specs || []
-
-    let ctDevServerPort: number | undefined
-
-    if (!this.ctx.currentProject) {
-      throw new Error('Cannot set specs without current project')
-    }
-
-    updatedConfig.specs = specs
-
-    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
-      const { port } = await this.startCtDevServer(specs, updatedConfig)
-
-      ctDevServerPort = port
-    }
-
-    return {
-      ctDevServerPort,
-    }
-  }
-
-  async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
-    // CT uses a dev-server to build the bundle.
-    // We start the dev server here.
-    const devServerOptions = await devServer.start({ specs, config })
-
-    if (!devServerOptions) {
-      throw new Error([
-        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-        'Make sure that the dev-server:start function returns an object.',
-        'For example: on("dev-server:start", () => startWebpackDevServer({ webpackConfig }))',
-      ].join('\n'))
-    }
-
-    return { port: devServerOptions.port }
   }
 
   initializeReporter ({
@@ -462,10 +409,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppSocketServer(io)
   }
 
-  changeToUrl (url) {
-    this.server.changeToUrl(url)
-  }
-
   async closeBrowserTabs () {
     return this.server.socket.closeBrowserTabs()
   }
@@ -506,7 +449,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,
@@ -529,7 +472,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.config.{ts|js})
+  // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
@@ -541,7 +484,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     return {
       ...this._cfg,
-      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],

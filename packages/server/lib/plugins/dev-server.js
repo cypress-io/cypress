@@ -12,18 +12,8 @@ plugins.registerHandler((ipc) => {
     ipc.send('dev-server:specs:changed', specs)
   })
 
-  ipc.on('dev-server:compile:error', (error) => {
-    baseEmitter.emit('dev-server:compile:error', error)
-  })
-
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
-  })
-
-  baseEmitter.on('dev-server:close', () => {
-    debug('base emitter plugin close event')
-
-    ipc.send('dev-server:close')
   })
 })
 
@@ -45,8 +35,6 @@ const API = {
 
   close () {
     debug('close dev-server')
-    baseEmitter.emit('close')
-
     baseEmitter.removeAllListeners()
   },
 }

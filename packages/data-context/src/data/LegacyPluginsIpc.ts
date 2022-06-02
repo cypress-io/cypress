@@ -18,7 +18,7 @@ export class LegacyPluginsIpc extends EventEmitter {
 
   send(event: 'loadLegacyPlugins', legacyConfig: LegacyCypressConfigJson): boolean
   send (event: string, ...args: any[]) {
-    if (this.childProcess.killed) {
+    if (this.childProcess.killed || !this.childProcess.connected) {
       return false
     }
 
@@ -31,5 +31,14 @@ export class LegacyPluginsIpc extends EventEmitter {
   on(event: 'loadLegacyPlugins:reply', listener: (legacyConfig: LegacyCypressConfigJson) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
+  }
+
+  killChildProcess () {
+    this.childProcess.kill()
+    this.childProcess.stdout?.removeAllListeners()
+    this.childProcess.stderr?.removeAllListeners()
+    this.childProcess.removeAllListeners()
+
+    this.removeAllListeners()
   }
 }

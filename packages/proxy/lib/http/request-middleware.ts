@@ -1,19 +1,31 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
-import debugModule from 'debug'
 import type { HttpMiddleware } from './'
+
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
 }>
 
-const debug = debugModule('cypress:proxy:http:request-middleware')
-
 const LogRequest: RequestMiddleware = function () {
-  debug('proxying request %o', {
+  this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
+
+  this.next()
+}
+
+const ExtractIsAUTFrameHeader: RequestMiddleware = async function () {
+  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+
+  if (this.req.headers['x-cypress-is-aut-frame']) {
+    delete this.req.headers['x-cypress-is-aut-frame']
+  }
 
   this.next()
 }
@@ -71,7 +83,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = 'full'
+    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
@@ -131,9 +143,10 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
 }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
-  const remoteState = this.getRemoteState()
+  // get the remote state for the proxied url
+  const remoteState = this.remoteStates.get(this.req.proxiedUrl)
 
-  if (remoteState.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  if (remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
@@ -154,12 +167,12 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const requestBodyBuffered = !!this.req.body
 
-  const { strategy, origin, fileServer } = this.getRemoteState()
+  const { strategy, origin, fileServer } = this.remoteStates.current()
 
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
 
-    requestOptions.url = requestOptions.url.replace(origin, fileServer)
+    requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
   if (requestBodyBuffered) {
@@ -193,6 +206,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
+  ExtractIsAUTFrameHeader,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,

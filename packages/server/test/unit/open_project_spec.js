@@ -6,7 +6,7 @@ const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const runEvents = require(`../../lib/plugins/run_events`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const delay = require('lodash/delay')
 
 const todosPath = Fixtures.projectPath('todos')

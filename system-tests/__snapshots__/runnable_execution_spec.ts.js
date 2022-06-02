@@ -7,14 +7,14 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (beforehook-and-test-navigation.js)                                        │
-  │ Searched:   cypress/e2e/beforehook-and-test-navigation.js                                      │
+  │ Specs:      1 found (beforehook-and-test-navigation.cy.js)                                     │
+  │ Searched:   cypress/e2e/beforehook-and-test-navigation.cy.js                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  beforehook-and-test-navigation.js                                               (1 of 1)
+  Running:  beforehook-and-test-navigation.cy.js                                            (1 of 1)
 
 
   initial domain change
@@ -35,6 +35,16 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
        causes domain navigation:
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
+In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
+
+\`cy.visit('http://localhost:4545/')\`
+\`<commands targeting http://localhost:4545 go here>\`
+
+\`cy.origin('http://localhost:5656', () => {\`
+\`  cy.visit('http://localhost:5656/')\`
+\`  <commands targeting http://localhost:5656 go here>\`
+\`})\`
+
 The new URL is considered a different origin because the following parts of the URL are different:
 
   > port
@@ -48,8 +58,6 @@ The previous URL you visited was:
 You're attempting to visit this URL:
 
   > 'http://localhost:5656'
-
-You may need to restructure some of your test code to avoid this problem.
 
 https://on.cypress.io/cannot-visit-different-origin-domain
       [stack trace lines]
@@ -58,6 +66,16 @@ https://on.cypress.io/cannot-visit-different-origin-domain
        "before each" hook for "never gets here":
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
+In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
+
+\`cy.visit('http://localhost:4545/')\`
+\`<commands targeting http://localhost:4545 go here>\`
+
+\`cy.origin('http://localhost:5656', () => {\`
+\`  cy.visit('http://localhost:5656/')\`
+\`  <commands targeting http://localhost:5656 go here>\`
+\`})\`
+
 The new URL is considered a different origin because the following parts of the URL are different:
 
   > port
@@ -71,8 +89,6 @@ The previous URL you visited was:
 You're attempting to visit this URL:
 
   > 'http://localhost:5656'
-
-You may need to restructure some of your test code to avoid this problem.
 
 https://on.cypress.io/cannot-visit-different-origin-domain
 
@@ -93,7 +109,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     beforehook-and-test-navigation.js                                                │
+  │ Spec Ran:     beforehook-and-test-navigation.cy.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -101,7 +117,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/beforehook-and-test-navigation.     (X second)
-                          js.mp4                                                                    
+                          cy.js.mp4                                                                 
 
 
 ====================================================================================================
@@ -111,7 +127,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  beforehook-and-test-navigation.js        XX:XX        4        2        2        -        - │
+  │ ✖  beforehook-and-test-navigation.cy.j      XX:XX        4        2        2        -        - │
+  │    s                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        2        2        -        -  
 
@@ -127,14 +144,14 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (runnable-run-count.spec.js)                                               │
-  │ Searched:   cypress/e2e/runnable-run-count.spec.js                                             │
+  │ Specs:      1 found (runnable-run-count.cy.js)                                                 │
+  │ Searched:   cypress/e2e/runnable-run-count.cy.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  runnable-run-count.spec.js                                                      (1 of 1)
+  Running:  runnable-run-count.cy.js                                                        (1 of 1)
 
 
   suite 1.0
@@ -165,14 +182,14 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     runnable-run-count.spec.js                                                       │
+  │ Spec Ran:     runnable-run-count.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.spec.js.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.cy.js.mp4        (X second)
 
 
 ====================================================================================================
@@ -182,7 +199,7 @@ exports['e2e runnable execution / runnables run correct number of times with nav
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  runnable-run-count.spec.js               XX:XX        7        7        -        -        - │
+  │ ✔  runnable-run-count.cy.js                 XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
@@ -198,14 +215,14 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (runnables_already_run_suite.js)                                           │
-  │ Searched:   cypress/e2e/runnables_already_run_suite.js                                         │
+  │ Specs:      1 found (runnables_already_run_suite.cy.js)                                        │
+  │ Searched:   cypress/e2e/runnables_already_run_suite.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  runnables_already_run_suite.js                                                  (1 of 1)
+  Running:  runnables_already_run_suite.cy.js                                               (1 of 1)
 
 
   Top level describe 
@@ -238,14 +255,14 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     runnables_already_run_suite.js                                                   │
+  │ Spec Ran:     runnables_already_run_suite.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.js/Top level descri     (1280x720)
-     be -- suite 2 -- should fail (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.cy.js/Top level des     (1280x720)
+     cribe -- suite 2 -- should fail (failed).png                                                   
 
 
 ====================================================================================================
@@ -255,7 +272,7 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  runnables_already_run_suite.js           XX:XX        2        1        1        -        - │
+  │ ✖  runnables_already_run_suite.cy.js        XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 

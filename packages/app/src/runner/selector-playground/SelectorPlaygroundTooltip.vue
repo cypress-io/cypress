@@ -1,42 +1,53 @@
 <template>
-  <div
-    class="relative"
-    @click="start()"
+  <Tooltip
+    :triggers="['hover', 'focus']"
+    :hide-triggers="['hover', 'focus']"
+    :distance="8"
+    hide-arrow
+    handle-resize
+    @mouseenter="mouseEnter"
+    @mouseleave="mouseLeave"
+    @click="click"
   >
-    <slot />
-    <div
-      ref="tooltip"
-      class="rounded flex bg-gray-900 text-center opacity-0 p-8px transform transition-opacity top-0 left-[50%] text-gray-300 translate-y-[calc(-100%-4px)] translate-x-[-50%] duration-250 absolute pointer-events-none"
-      role="tooltip"
-      :class="[tooltipClass, {'opacity-100': isPending}]"
-    >
-      <slot name="popper" />
-    </div>
-  </div>
+    <slot :focus="focus" />
+    <template #popper>
+      <div
+        class="whitespace-nowrap"
+        data-cy="selector-playground-tooltip"
+      >
+        {{ textToShow }}
+      </div>
+    </template>
+  </Tooltip>
 </template>
 
 <script lang="ts" setup>
-import { useTimeoutFn } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
-const tooltip = ref<HTMLDivElement>()
+const props = defineProps<{
+  hoverText: string
+  clickText?: string
+}>()
 
-const tooltipClass = computed(() => {
-  if (!tooltip.value) return ''
+const shown = ref(false)
+const textToShow = ref(props.hoverText)
 
-  const { right } = tooltip.value.getBoundingClientRect()
-  const outerWidth = window.outerWidth
+function mouseEnter () {
+  textToShow.value = props.hoverText
+  shown.value = true
+}
 
-  return (right > outerWidth) ? 'tooltip-overflow' : ''
-})
+function mouseLeave () {
+  shown.value = false
+}
 
-const { start, isPending } = useTimeoutFn(() => {}, 2000, { immediate: false })
+function click () {
+  textToShow.value = props.clickText ?? props.hoverText
+}
+
+function focus () {
+  textToShow.value = props.hoverText
+}
 
 </script>
-
-<style scoped>
-/* Created a class to override !important via greater specificity */
-div.tooltip-overflow {
-  @apply left-auto right-0 translate-x-0
-}
-</style>

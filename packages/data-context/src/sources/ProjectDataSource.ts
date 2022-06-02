@@ -1,25 +1,24 @@
 import os from 'os'
-import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
-import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
-import { scanFSForAvailableDependency } from 'create-cypress-tests'
+import chokidar from 'chokidar'
+import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
 import minimatch from 'minimatch'
-import { debounce, isEqual } from 'lodash'
+import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
 import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
-import mm from 'micromatch'
+import micromatch from 'micromatch'
 import RandExp from 'randexp'
 
-const debug = Debug('cypress:data-context')
+const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
 
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import { STORIES_GLOB } from '.'
+import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -104,7 +103,36 @@ export function transformSpec ({
   }
 }
 
-export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?: 'js' | 'ts') {
+export function getLongestCommonPrefixFromPaths (paths: string[]): string {
+  if (!paths[0]) return ''
+
+  function getPathParts (pathname: string) {
+    return pathname.split(/[\/\\]/g)
+  }
+
+  const lcp = getPathParts(paths[0])
+
+  if (paths.length === 1) return lcp.slice(0, -1).join(path.sep)
+
+  let endIndex = paths[0].length
+
+  for (const filename of paths.slice(1)) {
+    const pathParts = getPathParts(filename)
+
+    for (let i = endIndex - 1; i >= 0; i--) {
+      if (lcp[i] !== pathParts[i]) {
+        endIndex = i
+        delete lcp[i]
+      }
+    }
+
+    if (lcp.length === 0) return ''
+  }
+
+  return lcp.slice(0, endIndex).join(path.sep)
+}
+
+export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -115,36 +143,34 @@ export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?
     return specPattern
   }
 
-  let dirname = parsedGlob.path.dirname
+  // Remove double-slashes from dirname (like if specPattern has /**/*/)
+  let dirname = parsedGlob.path.dirname.replaceAll(/\/\/+/g, '/')
 
-  if (dirname.startsWith('**')) {
-    dirname = dirname.replace('**', 'cypress')
-  }
+  // If a spec can be in any root dir, go ahead and use "cypress/"
+  if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
-  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
+  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+    || `.cy.${fileExtensionToUse}`
+
   let extname = replaceWildCard(extnameWithoutExt, 'cy')
 
-  if (extname.startsWith('.')) {
-    extname = extname.substr(1)
-  }
+  if (extname.startsWith('.')) extname = extname.slice(1)
 
-  if (extname.endsWith('.')) {
-    extname = extname.slice(0, -1)
-  }
+  if (extname.endsWith('.')) extname = extname.slice(0, -1)
 
   const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
 
   const glob = splittedDirname + basename
 
-  const globWithoutBraces = mm.braces(glob, { expand: true })
+  const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
   let finalGlob = globWithoutBraces[0]
 
   if (fileExtensionToUse) {
-    const filteredGlob = mm(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
+    const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
 
     if (filteredGlob?.length) {
       finalGlob = filteredGlob[0]
@@ -212,20 +238,44 @@ export class ProjectDataSource {
     }
   }
 
-  async findSpecs (
-    projectRoot: string,
-    testingType: Cypress.TestingType,
-    specPattern: string[],
-    excludeSpecPattern: string[],
-    globToRemove: string[],
-  ): Promise<FoundSpec[]> {
-    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
+  async findSpecs ({
+    projectRoot,
+    testingType,
+    specPattern,
+    configSpecPattern,
+    excludeSpecPattern,
+    additionalIgnorePattern,
+  }: FindSpecs<string[]>): Promise<FoundSpec[]> {
+    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: [...excludeSpecPattern, ...globToRemove],
+        ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
       },
     )
+
+    // If the specPattern and configSpecPattern are different,
+    // it means the user passed something non-default via --spec (run mode only)
+    // in this scenario, we want to grab everything that matches `--spec`
+    // that falls within their default specPattern. The reason is so we avoid
+    // attempting to run things that are not specs, eg source code, videos, etc.
+    //
+    // Example: developer wants to run tests associated with timers in packages/driver
+    // So they run yarn cypress:run --spec **/timers*
+    // we do **not** want to capture `timers.ts` (source code) or a video in
+    // cypress/videos/timers.cy.ts.mp4, so we take the intersection between specPattern
+    // and --spec.
+    if (!_.isEqual(specPattern, configSpecPattern)) {
+      const defaultSpecAbsolutePaths = await this.ctx.file.getFilesByGlob(
+        projectRoot,
+        configSpecPattern, {
+          absolute: true,
+          ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
+        },
+      )
+
+      specAbsolutePaths = _.intersection(specAbsolutePaths, defaultSpecAbsolutePaths)
+    }
 
     const matched = matchedSpecs({
       projectRoot,
@@ -237,13 +287,14 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher (
-    projectRoot: string,
-    testingType: Cypress.TestingType,
-    specPattern: string[],
-    excludeSpecPattern: string[],
-    additionalIgnore: string[],
-  ) {
+  startSpecWatcher ({
+    projectRoot,
+    testingType,
+    specPattern,
+    configSpecPattern,
+    excludeSpecPattern,
+    additionalIgnorePattern,
+  }: FindSpecs<string[]>) {
     this.stopSpecWatcher()
 
     const currentProject = this.ctx.currentProject
@@ -252,25 +303,52 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    const onSpecsChanged = debounce(async () => {
-      const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
+    // When file system changes are detected, we retrieve any spec files matching
+    // the determined specPattern. This function is debounced to limit execution
+    // during sequential file operations.
+    const onProjectFileSystemChange = _.debounce(async () => {
+      const specs = await this.findSpecs({
+        projectRoot,
+        testingType,
+        specPattern,
+        configSpecPattern,
+        excludeSpecPattern,
+        additionalIgnorePattern,
+      })
 
-      this.ctx.actions.project.setSpecs(specs)
-    })
+      if (_.isEqual(this.specs, specs)) {
+        this.ctx.actions.project.refreshSpecs(specs)
 
-    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
-    this._specWatcher.on('add', onSpecsChanged)
-    this._specWatcher.on('unlink', onSpecsChanged)
-  }
-
-  async defaultSpecFileName () {
-    const defaultFileName = 'cypress/e2e/filename.cy.js'
-
-    try {
-      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        return null
+        // If no differences are found, we do not need to emit events
+        return
       }
 
+      this.ctx.actions.project.setSpecs(specs)
+    }, 250)
+
+    // We respond to all changes to the project's filesystem when
+    // files or directories are added and removed that are not explicitly
+    // ignored by config
+    this._specWatcher = chokidar.watch('.', {
+      ignoreInitial: true,
+      ignorePermissionErrors: true,
+      cwd: projectRoot,
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
+    })
+
+    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
+    this._specWatcher.on('all', onProjectFileSystemChange)
+  }
+
+  async defaultSpecFileName (): Promise<string> {
+    const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+    const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
+
+    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    }
+
+    try {
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
 
@@ -278,19 +356,33 @@ export class ProjectDataSource {
         specPatternSet = specPattern[0]
       }
 
+      // 1. If there is no spec pattern, use the default for this testing type.
       if (!specPatternSet) {
-        return defaultFileName
+        return defaultPathname
       }
 
-      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.lifecycleManager.fileExtensionToUse)
-
-      if (!specFileName) {
-        return defaultFileName
+      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
+      if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
+        return defaultPathname
       }
 
-      return specFileName
-    } catch {
-      return defaultFileName
+      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
+
+      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
+      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
+
+      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
+
+      // 4. Otherwise, return a path that fulfills the spec pattern.
+      if (pathFromSpecPattern) return pathFromSpecPattern
+
+      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
+      return defaultPathname
+    } catch (err) {
+      debug('Error intelligently detecting default filename, using safe default %o', err)
+
+      return defaultPathname
     }
   }
 
@@ -318,12 +410,17 @@ export class ProjectDataSource {
     return false
   }
 
+  destroy () {
+    this.stopSpecWatcher()
+  }
+
   stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
+    this._specWatcher.close().catch(() => {})
+    this._specWatcher = null
   }
 
   getCurrentSpecByAbsolute (absolute: string) {
@@ -334,36 +431,6 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
-  }
-
-  frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
-    return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
-  })
-
-  private guessFramework (projectRoot: string) {
-    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.dependency).reduce(
-        (acc, dep) => ({ ...acc, [dep]: '*' }),
-        {},
-      )
-
-      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
-    })
-
-    return guess ?? null
-  }
-
-  async getCodeGenGlobs () {
-    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
-
-    const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
-
-    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
-
-    return {
-      component: framework?.glob ?? looseComponentGlob,
-      story: STORIES_GLOB,
-    }
   }
 
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
@@ -420,9 +487,9 @@ export class ProjectDataSource {
     const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [e2e])
+      return _.isEqual(specPattern, [e2e])
     }
 
-    return isEqual(specPattern, [component])
+    return _.isEqual(specPattern, [component])
   }
 }

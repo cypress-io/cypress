@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
-import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
@@ -204,7 +203,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   if (options.contextMenu) {
     // adds context menu with copy, paste, inspect element, etc
-    contextMenu({
+    require('electron-context-menu')({
       showInspectElement: true,
       window: win,
     })

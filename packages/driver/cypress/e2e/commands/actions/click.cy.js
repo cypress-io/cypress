@@ -1,9 +1,6 @@
 const { _, $, Promise } = Cypress
 const {
   assertLogLength,
-  getCommandLogWithText,
-  findReactInstance,
-  withMutableReporterState,
   clickCommandLog,
   attachListeners,
   shouldBeCalledWithCount,
@@ -4762,23 +4759,10 @@ describe('mouse state', () => {
 
       cy.get('input:first').click()
 
-      cy.wrap(null)
-      .should(() => {
-        spyTableName.resetHistory()
-        spyTableData.resetHistory()
-
-        return withMutableReporterState(() => {
-          const commandLogEl = getCommandLogWithText('click')
-
-          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
-
-          reactCommandInstance.props.appState.isRunning = false
-
-          commandLogEl.find('.command-wrapper').click()
-
-          expect(spyTableName).calledWith('Mouse Events')
-          expect(spyTableData).calledOnce
-        })
+      clickCommandLog('click')
+      .then(() => {
+        expect(spyTableName).calledWith('Mouse Events')
+        expect(spyTableData).calledOnce
       })
     })
 
@@ -4788,26 +4772,13 @@ describe('mouse state', () => {
 
       cy.get('input:first').dblclick()
 
-      cy.wrap(null, { timeout: 1000 })
-      .should(() => {
-        spyTableName.resetHistory()
-        spyTableData.resetHistory()
-
-        return withMutableReporterState(() => {
-          const commandLogEl = getCommandLogWithText('click')
-
-          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
-
-          reactCommandInstance.props.appState.isRunning = false
-
-          commandLogEl.find('.command-wrapper').click()
-
-          expect(spyTableName).calledWith('Mouse Events')
-          expect(spyTableData).calledOnce
-          expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'click' })
-          expect(spyTableData.lastCall.args[0]).property('13').includes({ 'Event Type': 'click' })
-          expect(spyTableData.lastCall.args[0]).property('14').includes({ 'Event Type': 'dblclick' })
-        })
+      clickCommandLog('click')
+      .then(() => {
+        expect(spyTableName).calledWith('Mouse Events')
+        expect(spyTableData).calledOnce
+        expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'click' })
+        expect(spyTableData.lastCall.args[0]).property('13').includes({ 'Event Type': 'click' })
+        expect(spyTableData.lastCall.args[0]).property('14').includes({ 'Event Type': 'dblclick' })
       })
     })
 
@@ -4817,24 +4788,11 @@ describe('mouse state', () => {
 
       cy.get('input:first').rightclick()
 
-      cy.wrap(null)
-      .should(() => {
-        spyTableName.resetHistory()
-        spyTableData.resetHistory()
-
-        return withMutableReporterState(() => {
-          const commandLogEl = getCommandLogWithText('click')
-
-          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
-
-          reactCommandInstance.props.appState.isRunning = false
-
-          commandLogEl.find('.command-wrapper').click()
-
-          expect(spyTableName).calledWith('Mouse Events')
-          expect(spyTableData).calledOnce
-          expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'contextmenu' })
-        })
+      clickCommandLog('click')
+      .then(() => {
+        expect(spyTableName).calledWith('Mouse Events')
+        expect(spyTableData).calledOnce
+        expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'contextmenu' })
       })
     })
   })

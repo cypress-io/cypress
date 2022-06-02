@@ -1,8 +1,8 @@
-import ChooseExternalEditor from './ChooseExternalEditor.vue'
+import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 import { ChooseExternalEditorFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, () => {
+describe('ChooseExternalEditorModal', () => {
   it('renders editors and UI elements work', () => {
     cy.mountFragment(ChooseExternalEditorFragmentDoc, {
       onResult (result) {
@@ -13,13 +13,19 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
         ]
       },
       render: (gql) => {
-        return <div class="p-16px"><ChooseExternalEditor gql={gql} /></div>
+        return <div class="p-16px"><ChooseExternalEditorModal gql={gql} open /></div>
       },
     })
+
+    cy.contains(defaultMessages.globalPage.externalEditorPreferences)
+    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
+    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
 
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
     .as('chooseEditor')
+
+    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
 
     // initial
     cy.percySnapshot()

@@ -656,6 +656,11 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
+    DEFAULT_SUPPORT_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/supportFile/**/*.{js,jsx,ts,tsx}'],
+      }
+    },
     CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
@@ -986,6 +991,11 @@ describe('visual error templates', () => {
         default: [{ configFile: '/path/to/cypress.config.js' }],
       }
     },
+    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],
@@ -1046,6 +1056,11 @@ describe('visual error templates', () => {
         default: ['/path/to/plugins/file.js'],
       }
     },
+    CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
+      return {
+        default: [{}],
+      }
+    },
     PLUGINS_RUN_EVENT_ERROR: () => {
       return {
         default: ['before:spec', makeErr()],
@@ -1082,12 +1097,22 @@ describe('visual error templates', () => {
         default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
     CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+    CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: () => {
       return {
         default: ['/path/to/config.ts', {}],
       }
@@ -1114,12 +1139,32 @@ describe('visual error templates', () => {
     },
     TEST_FILES_RENAMED: () => {
       return {
-        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     COMPONENT_FOLDER_REMOVED: () => {
       return {
         default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
+      return {
+        default: ['9.6.0'],
+      }
+    },
+    MIGRATION_CYPRESS_NOT_FOUND: () => {
+      return {
+        default: [],
+      }
+    },
+    DEV_SERVER_CONFIG_FILE_NOT_FOUND: () => {
+      return {
+        default: ['vite', '/dev/project', ['vite.config.js', 'vite.config.ts']],
       }
     },
   })

@@ -146,6 +146,28 @@ describe('cy/navigation', () => {
       expect(triggeredHashChange).to.be.false
     })
 
+    it('when no urls or urlPosition in state', () => {
+      const state = $SetterGetter.create({
+        navHistoryDelta: 1,
+      })
+
+      const triggeredHashChange = historyNavigationTriggeredHashChange(state)
+
+      expect(triggeredHashChange).to.be.false
+    })
+
+    it('when no urlPosition in state', () => {
+      const state = $SetterGetter.create({
+        navHistoryDelta: 1,
+        url: 'https://my_url.com/',
+        urls: ['https://my_url.com/', 'https://my_url.com/home'],
+      })
+
+      const triggeredHashChange = historyNavigationTriggeredHashChange(state)
+
+      expect(triggeredHashChange).to.be.false
+    })
+
     it('when neither url has a hash', () => {
       const state = $SetterGetter.create({
         navHistoryDelta: 1,

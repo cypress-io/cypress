@@ -3,14 +3,18 @@
     id="selector-playground"
     class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
-    <button
-      class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
-      :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
-      data-cy="playground-toggle"
-      @click="toggleEnabled"
+    <SelectorPlaygroundTooltip
+      :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
+      class="flex h-full"
     >
-      <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
-    </button>
+      <button
+        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-40px duration-150 items-center justify-center hocus-default"
+        data-cy="playground-toggle"
+        @click="toggleEnabled"
+      >
+        <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
+      </button>
+    </SelectorPlaygroundTooltip>
     <div
       class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
@@ -44,33 +48,35 @@
           </MenuItem>
         </MenuItems>
       </Menu>
-      <code class="h-full flex-1 relative">
+      <code
+        class="flex-1 py-2px pr-2px pl-0 relative overflow-hidden"
+        :style="{height: 'calc(100% + 4px)'}"
+      >
         <span
-          ref="ghostLeft"
           class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
           data-cy="selected-playground-method"
         >
           <span class="text-gray-800">cy</span>.<span class="text-purple-500">{{ selectorPlaygroundStore.method }}</span>(‘
         </span>
-        <span
-          ref="ghostRight"
-          class="font-medium left-[-9999px] absolute inline-block"
-        >{{ selector.replace(/\s/g, '&nbsp;') }}</span>
-        <span
-          class="flex inset-y-0 text-gray-600 absolute items-center pointer-events-none"
-          :style="{left: inputRightOffset + 'px'}"
-        >‘)</span>
         <input
-          ref="copyText"
           v-model="selector"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
           data-cy="playground-selector"
-          :style="{paddingLeft: inputLeftOffset + 'px', paddingRight: matcherWidth + 32 + 24 + 'px'}"
+          :style="{paddingLeft: leftOfInputText + 'ch', paddingRight: widthOfMatchesHelperText + 'px'}"
           class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
           :class="{'hocus-default': selectorPlaygroundStore.isValid, 'hocus-error': !selectorPlaygroundStore.isValid}"
         >
+        <span
+          class="flex inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          :style="{
+            left: `${leftOffsetForClosingParens}ch`,
+          }"
+        >’)</span>
         <div
           ref="match"
-          class="border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-0 text-gray-600 absolute items-center"
+          class="bg-white border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-3px text-gray-600 absolute items-center"
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">
@@ -84,43 +90,44 @@
     </div>
 
     <div class="flex gap-12px">
-      <SelectorPlaygroundTooltip>
-        <Button
-          size="md"
-          variant="outline"
-          data-cy="playground-copy"
-          class="override-border"
-          @click="copyToClipboard"
+      <SelectorPlaygroundTooltip
+        :hover-text="t('runner.selectorPlayground.copyTooltip')"
+        :click-text="t('runner.selectorPlayground.copyTooltipAction')"
+      >
+        <template
+          #default="{focus}"
         >
-          <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
-        </Button>
-        <template #popper>
-          <div
-            class="whitespace-nowrap"
-            data-cy="playground-copy-tooltip"
+          <Button
+            size="md"
+            variant="outline"
+            data-cy="playground-copy"
+            class="override-border"
+            @click="copyToClipboard"
+            @focus="focus"
           >
-            {{ t('runner.selectorPlayground.copyTooltip') }}
-          </div>
+            <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
+          </Button>
         </template>
       </SelectorPlaygroundTooltip>
 
-      <SelectorPlaygroundTooltip>
-        <Button
-          size="md"
-          variant="outline"
-          data-cy="playground-print"
-          class="override-border"
-          @click="printSelected"
+      <SelectorPlaygroundTooltip
+        :hover-text="t('runner.selectorPlayground.printTooltip')"
+        :click-text="t('runner.selectorPlayground.printTooltipAction')"
+      >
+        <template
+          #default="{focus}"
         >
-          <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
-        </Button>
-        <template #popper>
-          <div
-            class="whitespace-nowrap"
-            data-cy="playground-print-tooltip"
+          <Button
+            key="fudge"
+            size="md"
+            variant="outline"
+            data-cy="playground-print"
+            class="override-border"
+            @click="printSelected()"
+            @focus="focus"
           >
-            {{ t('runner.selectorPlayground.printTooltip') }}
-          </div>
+            <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
+          </Button>
         </template>
       </SelectorPlaygroundTooltip>
     </div>
@@ -135,9 +142,9 @@ import type { EventManager } from '../event-manager'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
-import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@cy/gql-components/useClipboard'
+import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 
 const { t } = useI18n()
 
@@ -160,7 +167,19 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const match = ref<HTMLDivElement>()
 const { width: matcherWidth } = useElementSize(match)
 
-const copyText = ref<HTMLInputElement>()
+// Text that is printed to the LEFT of the input
+const leftOfInputText = computed(() => {
+  return (selectorPlaygroundStore.method === 'get' ? 'cy.get(‘' : 'cy.contains(’').length + 1
+})
+
+const widthOfMatchesHelperText = computed(() => {
+  // Arbitrary padding
+  return matcherWidth.value + 32 + 24
+})
+
+const leftOffsetForClosingParens = computed(() => {
+  return leftOfInputText.value + selector.value.length
+})
 
 watch(() => selectorPlaygroundStore.method, () => {
   props.getAutIframe().toggleSelectorHighlight(true)
@@ -183,23 +202,6 @@ const selector = computed({
 
     props.getAutIframe().toggleSelectorHighlight(true)
   },
-})
-
-const inputSize = useElementSize(copyText)
-
-// spooky
-const ghostLeft = ref<HTMLSpanElement>()
-const { width: ghostLeftWidth } = useElementSize(ghostLeft)
-const inputLeftOffset = computed(() => ghostLeftWidth.value + 12)
-
-const ghostRight = ref<HTMLSpanElement>()
-const { width: ghostRightWidth } = useElementSize(ghostRight)
-const inputRightOffset = computed(() => {
-  const leftOffset = inputLeftOffset.value
-  const combined = leftOffset + ghostRightWidth.value
-  const max = inputSize.width.value + leftOffset
-
-  return combined <= max ? combined : max
 })
 
 function setShowingHighlight () {

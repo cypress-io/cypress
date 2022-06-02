@@ -987,16 +987,23 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       hookName = getHookName(runnable)
       const test = getTest() || getTestFromHookOrFindTest(runnable)
 
+      const unsupportedPlugin = $errUtils.getUnsupportedPlugin(runnable)
+
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
-      err = $errUtils.appendErrMsg(
-        err,
-        $errUtils.errByPath('uncaught.error_in_hook', {
-          parentTitle,
-          hookName,
-          retries: test._retries,
-        }).message,
-      )
+      const errMessage = $errUtils.errByPath('uncaught.error_in_hook', {
+        parentTitle,
+        hookName,
+        retries: test._retries,
+        unsupportedPlugin,
+        errMessage: err.message,
+      }).message
+
+      if (unsupportedPlugin) {
+        err = $errUtils.modifyErrMsg(err, errMessage, () => errMessage)
+      } else {
+        err = $errUtils.appendErrMsg(err, errMessage)
+      }
     }
 
     // always set runnable err so we can tap into
@@ -1371,7 +1378,7 @@ export default {
         })
       },
 
-      onRunnableRun (runnableRun, runnable, args) {
+      onRunnableRun (runnableRun, runnable: CypressRunnable, args) {
         // extract out the next(fn) which mocha uses to
         // move to the next runnable - this will be our async seam
         const _next = args[0]
@@ -1542,6 +1549,7 @@ export default {
           }
 
           cy.state('duringUserTestExecution', false)
+          Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
 
           // our runnable is about to run, so let cy know. this enables
           // us to always have a correct runnable set even when we are
@@ -1774,10 +1782,9 @@ export default {
         test = getTestById(testId)
 
         if (test) {
-          // pluralize the instrument
-          // as a property on the runnable
-          let name
-          const logs = test[name = `${instrument}s`] != null ? test[name] : (test[name] = [])
+          // pluralize the instrument as a property on the runnable
+          const name = `${instrument}s`
+          const logs = test[name] != null ? test[name] : (test[name] = [])
 
           // else push it onto the logs
           return logs.push(attrs)

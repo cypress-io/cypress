@@ -11,22 +11,25 @@ const importsToLoad = []
  */
 const supportFile = CypressInstance.config('supportFile')
 const projectRoot = CypressInstance.config('projectRoot')
-
-let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
-
-if (CypressInstance.config('platform') === 'win32') {
-  supportRelativeToProjectRoot = supportFile.replace(projectRoot.replaceAll('/', '\\'))
-}
+const devServerPublicPathRoute = CypressInstance.config('devServerPublicPathRoute')
 
 if (supportFile) {
+  let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
+
+  if (CypressInstance.config('platform') === 'win32') {
+    const platformProjectRoot = projectRoot.replaceAll('/', '\\')
+
+    supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
+  }
+
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
-  importsToLoad.push(() => import(`${supportRelativeToProjectRoot}`))
+  importsToLoad.push(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`))
 }
 
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
-importsToLoad.push(() => import(`/${CypressInstance.spec.relative}`))
+importsToLoad.push(() => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`))
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')

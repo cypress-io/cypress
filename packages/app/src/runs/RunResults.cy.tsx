@@ -1,5 +1,5 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudRunStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunResults from './RunResults.vue'
 
@@ -24,6 +24,21 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
       cy.get(`[title=${defaultMessages.runs.results.skipped}]`).should('contain.text', res.totalSkipped)
       cy.get(`[title=${defaultMessages.runs.results.pending}`).should('contain.text', res.totalPending)
     })
+
+    cy.percySnapshot()
+  })
+
+  it('renders flaky ribbon', () => {
+    cy.mountFragment(RunCardFragmentDoc, {
+      onResult (result) {
+        result.totalFlakyTests = 4
+      },
+      render (gql) {
+        return <RunResults gql={gql} />
+      },
+    })
+
+    cy.contains('4 Flaky')
 
     cy.percySnapshot()
   })

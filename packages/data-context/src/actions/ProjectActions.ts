@@ -1,5 +1,6 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
+import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig } from '@packages/types'
+import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -11,6 +12,7 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
+import { resetIssuedWarnings } from '@packages/config'
 
 export interface ProjectApiShape {
   /**
@@ -30,20 +32,40 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
+  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
+  getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
   getDevServer (): {
-    updateSpecs: (specs: FoundSpec[]) => void
+    updateSpecs(specs: FoundSpec[]): void
+    start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
+    close(): void
+    emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
 }
 
-type SetSpecsFoundBySpecPattern = {
-  path: string
+export interface FindSpecs<T> {
+  projectRoot: string
   testingType: Cypress.TestingType
-  specPattern?: Cypress.Config['specPattern']
-  excludeSpecPattern?: Cypress.Config['excludeSpecPattern']
-  additionalIgnorePattern?: string | string[]
+  /**
+   * This can be over-ridden by the --spec argument (run mode only)
+   * Otherwise it will be the same as `configSpecPattern`
+   */
+  specPattern: T
+  /**
+   * The specPattern resolved from e2e.specPattern or component.specPattern
+   * inside of `cypress.config`.
+   */
+  configSpecPattern: T
+  /**
+   * User can opt to exclude certain patterns in cypress.config.
+   */
+  excludeSpecPattern: T
+  /**
+   * If in component testing mode, we exclude all specs matching the e2e.specPattern.
+   */
+  additionalIgnorePattern: T
 }
 
 type SetForceReconfigureProjectByTestingType = {
@@ -60,16 +82,18 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
+      d.baseError = null
+      d.activeBrowser = null
       d.currentProject = null
+      d.currentProjectData = null
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
-      d.baseError = null
-      d.warnings = []
       d.app.browserStatus = 'closed'
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
+    resetIssuedWarnings()
     await this.api.closeActiveProject()
   }
 
@@ -95,11 +119,13 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+  setAndLoadCurrentTestingType (type: TestingType) {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async setCurrentProject (projectRoot: string) {
+    await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
+
     await this.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
@@ -116,10 +142,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.projects = [
-      ...this.projects,
-      ...projectRoots.map((projectRoot) => ({ projectRoot })),
-    ]
+    this.projects = projectRoots.map((projectRoot) => ({ projectRoot }))
 
     return this.projects
   }
@@ -155,8 +178,8 @@ export class ProjectActions {
     }
   }
 
-  createProject () {
-    //
+  private async updateProjectList (updater: () => Promise<void>) {
+    return updater().then(() => this.loadProjects())
   }
 
   async addProjectFromElectronNativeFolderSelect () {
@@ -166,7 +189,7 @@ export class ProjectActions {
       return
     }
 
-    await this.addProject({ path })
+    await this.addProject({ path, open: true })
 
     this.ctx.emitter.toLaunchpad()
   }
@@ -174,15 +197,10 @@ export class ProjectActions {
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      this.projects.push({ projectRoot })
-      await this.api.insertProjectToCache(projectRoot)
-    }
-
     if (args.open) {
       this.setCurrentProject(projectRoot).catch(this.ctx.onError)
+    } else {
+      await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
     }
   }
 
@@ -202,32 +220,28 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options: LaunchOpts, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
 
     testingType = testingType || this.ctx.coreData.currentTestingType
 
-    if (!testingType) {
-      return null
-    }
+    // It's strange to have no testingType here, but `launchProject` is called when switching testing types,
+    // so it needs to short-circuit and return here.
+    // TODO: Untangle this. https://cypress-io.atlassian.net/browse/UNIFY-1528
+    if (!testingType) return
+
+    this.ctx.coreData.currentTestingType = testingType
+
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) throw new Error('Missing browser in launchProject')
 
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
-    }
-
-    // Ensure that we have loaded browsers to choose from
-    if (this.ctx.appData.refreshingBrowsers) {
-      await this.ctx.appData.refreshingBrowsers
-    }
-
-    const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
-
-    if (!browser) {
-      return null
     }
 
     // launchProject expects a spec when opening browser for url navigation.
@@ -239,27 +253,13 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.coreData.currentTestingType = testingType
-
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
     return
   }
 
   removeProject (projectRoot: string) {
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
-    }
-
-    this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-
-    return this.api.removeProjectFromCache(projectRoot)
-  }
-
-  syncProjects () {
-    //
+    return this.updateProjectList(() => this.api.removeProjectFromCache(projectRoot))
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
@@ -307,6 +307,7 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
+    this.refreshSpecs(specs)
 
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
@@ -315,7 +316,11 @@ export class ProjectActions {
     this.ctx.emitter.specsChange()
   }
 
-  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+  refreshSpecs (specs: FoundSpec[]) {
+    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
+  }
+
+  setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
@@ -330,27 +335,6 @@ export class ProjectActions {
       throw Error(`Cannot create spec without currentProject.`)
     }
 
-    const parsed = path.parse(codeGenCandidate)
-
-    const defaultCText = '.cy'
-    const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
-
-    const getFileExtension = () => {
-      if (erroredCodegenCandidate) {
-        return ''
-      }
-
-      if (codeGenType === 'e2e') {
-        return (
-          possibleExtensions.find((ext) => {
-            return codeGenCandidate.endsWith(ext + parsed.ext)
-          }) || parsed.ext
-        )
-      }
-
-      return defaultCText
-    }
-
     const getCodeGenPath = () => {
       return codeGenType === 'e2e' || erroredCodegenCandidate
         ? this.ctx.path.join(
@@ -360,47 +344,15 @@ export class ProjectActions {
         : codeGenCandidate
     }
 
-    const specFileExtension = getFileExtension()
     const codeGenPath = getCodeGenPath()
 
     const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
       codeGenType,
-      specFileExtension,
       erroredCodegenCandidate,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
-      const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
-      const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
-
-      let foundExt
-
-      for await (const ext of possibleExtensions) {
-        const file = filePathRelative.replace(defaultCText, ext)
-
-        const matchesSpecPattern = await this.ctx.project.matchesSpecPattern(file)
-
-        if (matchesSpecPattern) {
-          foundExt = ext
-          break
-        }
-      }
-
-      if (!foundExt) {
-        return {
-          fileName: filePathRelative,
-          erroredCodegenCandidate: codeGenPath,
-        }
-      }
-
-      codeGenOptions = {
-        ...codeGenOptions,
-        fileName: codeGenOptions.fileName.replace(defaultCText, foundExt),
-      }
-    }
 
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
@@ -416,12 +368,13 @@ export class ProjectActions {
     const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
+      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
 
       await this.setSpecsFoundBySpecPattern({
-        path: this.ctx.currentProject,
+        projectRoot: this.ctx.currentProject,
         testingType,
-        specPattern: cfg.specPattern,
+        specPattern: cfg.specPattern ?? [],
+        configSpecPattern: cfg.specPattern ?? [],
         excludeSpecPattern: cfg.excludeSpecPattern,
         additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
@@ -434,9 +387,10 @@ export class ProjectActions {
     }
   }
 
-  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
-    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+  async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : []
 
+    configSpecPattern = toArray(configSpecPattern)
     specPattern = toArray(specPattern)
 
     excludeSpecPattern = toArray(excludeSpecPattern) || []
@@ -444,21 +398,29 @@ export class ProjectActions {
     // exclude all specs matching e2e if in component testing
     additionalIgnorePattern = toArray(additionalIgnorePattern) || []
 
-    if (!specPattern) {
+    if (!specPattern || !configSpecPattern) {
       throw Error('could not find pattern to load specs')
     }
 
-    const specs = await this.ctx.project.findSpecs(
-      path,
+    const specs = await this.ctx.project.findSpecs({
+      projectRoot,
       testingType,
       specPattern,
+      configSpecPattern,
       excludeSpecPattern,
       additionalIgnorePattern,
-    )
+    })
 
     this.ctx.actions.project.setSpecs(specs)
 
-    this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
+    this.ctx.project.startSpecWatcher({
+      projectRoot,
+      testingType,
+      specPattern,
+      configSpecPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
+    })
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
@@ -479,7 +441,7 @@ export class ProjectActions {
   async reconfigureProject () {
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
-    await this.ctx.actions.wizard.initialize()
+    this.ctx.actions.wizard.initialize()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }
@@ -523,11 +485,28 @@ export class ProjectActions {
       return
     }
 
-    this.ctx.update((d) => {
-      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
-    })
+    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+
+    if (baseUrlWarning) {
+      this.ctx.actions.error.clearWarning(baseUrlWarning.id)
+      this.ctx.emitter.errorWarningChange()
+    }
 
     return this.api.isListening(baseUrl)
     .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
+  }
+
+  async switchTestingTypesAndRelaunch (testingType: Cypress.TestingType): Promise<void> {
+    const isTestingTypeConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured(testingType)
+
+    this.ctx.project.setRelaunchBrowser(isTestingTypeConfigured)
+    this.setAndLoadCurrentTestingType(testingType)
+
+    await this.reconfigureProject()
+
+    if (testingType === 'e2e' && !isTestingTypeConfigured) {
+      // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+      await this.ctx.actions.wizard.scaffoldTestingType()
+    }
   }
 }

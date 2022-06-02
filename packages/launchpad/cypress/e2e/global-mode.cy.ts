@@ -1,7 +1,9 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
+import type { SinonSpy } from 'sinon'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
-const sep = Cypress.platform === 'win32' ? '\\\\' : '/'
+const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
   describe('when no projects have been added', () => {
@@ -42,7 +44,7 @@ describe('Launchpad: Global Mode', () => {
       cy.scaffoldProject('todos')
       .then((projectPath) => {
         cy.withCtx(async (ctx, o) => {
-          ctx.actions.electron.showOpenDialog = o.sinon.stub().resolves(o.projectPath)
+          o.sinon.stub(ctx.actions.electron, 'showOpenDialog').resolves(o.projectPath)
         }, { projectPath })
       })
 
@@ -53,6 +55,9 @@ describe('Launchpad: Global Mode', () => {
       .should('contain', 'browse manually')
       .click()
 
+      cy.get('h1').should('contain', 'Welcome to Cypress!')
+      cy.get('a').contains('Projects').click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
 
@@ -62,9 +67,12 @@ describe('Launchpad: Global Mode', () => {
   })
 
   describe('when projects have been added', () => {
-    const setupAndValidateProjectsList = (projectList) => {
-      cy.openGlobalMode()
-      projectList.forEach((projectName) => {
+    const setupAndValidateProjectsList = (projectList, globalModeOptions?: string[] | undefined) => {
+      cy.openGlobalMode(globalModeOptions)
+
+      // Adding a project puts the project first in the list, so we reverse the list
+      // to ensure the projectList in the UI matches what is passed in.
+      ;[...projectList].reverse().forEach((projectName) => {
         cy.addProject(projectName)
       })
 
@@ -96,6 +104,14 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="project-card"]').should('not.exist')
     })
 
+    it('takes the user to the next step when clicking on a project card when passing testing type on the command line', () => {
+      const projectList = ['todos']
+
+      setupAndValidateProjectsList(projectList, ['--e2e'])
+      cy.get('[data-cy="project-card"]').click()
+      cy.get('[data-cy="project-card"]').should('not.exist')
+    })
+
     it('updates most-recently opened project list when returning from next step', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
@@ -108,12 +124,10 @@ describe('Launchpad: Global Mode', () => {
 
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
-      // TODO: fix most recently updated list ()
-      // https://cypress-io.atlassian.net/browse/UNIFY-646
-      // .then((list) => {
-      // expect(list.get(0)).to.contain(projectList[2])
-      // expect(list.get(0)).to.contain(path.join('cy-projects', path.sep, projectList[2]))
-      // })
+      .then((list) => {
+        expect(list.get(0)).to.contain(projectList[2])
+        expect(list.get(0)).to.contain(getPathForPlatform(path.join('cy-projects', projectList[2])))
+      })
     })
 
     it('can open and close the add project dropzone', () => {
@@ -134,6 +148,72 @@ describe('Launchpad: Global Mode', () => {
 
       cy.get('[data-cy="addProjectButton"').click()
       cy.get('[data-cy="dropzone"]').should('not.exist')
+    })
+
+    it('updates breadcrumb when selecting a project and navigating back', () => {
+      const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
+        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+      }
+
+      const resetSpies = () => {
+        return cy.withCtx((ctx) => {
+          (ctx.actions.project.clearCurrentProject as SinonSpy).resetHistory();
+          (ctx.actions.wizard.resetWizard as SinonSpy).resetHistory();
+          (ctx.lifecycleManager.setAndLoadCurrentTestingType as SinonSpy).resetHistory()
+        })
+      }
+
+      const projectList = ['todos']
+
+      setupAndValidateProjectsList(projectList)
+
+      cy.withCtx((ctx, { sinon }) => {
+        sinon.spy(ctx.actions.project, 'clearCurrentProject')
+        sinon.spy(ctx.actions.wizard, 'resetWizard')
+        sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
+      })
+
+      // Component testing breadcrumbs
+      cy.get('[data-cy="project-card"]').contains('todos').click()
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('todos').click()
+      getBreadcrumbLink('todos', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
+      })
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.called
+        expect(ctx.actions.wizard.resetWizard).to.have.been.called
+      })
+
+      // E2E testing breadcrumbs
+      cy.get('[data-cy="project-card"]').contains('todos').click()
+      cy.get('[data-cy-testingtype="e2e"]').click()
+      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('todos').click()
+      getBreadcrumbLink('todos', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
+      })
+
+      cy.get('[data-cy-testingtype="e2e"]').click()
+      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.called
+        expect(ctx.actions.wizard.resetWizard).to.have.been.called
+      })
     })
 
     describe('Project card menu', () => {
@@ -168,7 +248,7 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[aria-label="Project Actions"]').click()
 
         cy.get('[data-cy="Open In IDE"]').click()
-        cy.contains('Select Preferred Editor')
+        cy.contains('External Editor Preferences')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
@@ -235,6 +315,20 @@ describe('Launchpad: Global Mode', () => {
         cy.get('#project-search').type(`${path.sep}random`)
         cy.contains(defaultMessages.globalPage.noResultsMessage)
       })
+    })
+  })
+
+  describe('error state', () => {
+    it('should not persist the error when going back to the main screen projects', () => {
+      cy.openGlobalMode()
+      cy.addProject('config-with-import-error')
+      cy.addProject('todos')
+      cy.visitLaunchpad()
+      cy.contains('[data-cy="project-card"]', 'todos').should('be.visible')
+      cy.contains('[data-cy="project-card"]', 'config-with-import-error').should('be.visible').click()
+      cy.get('h1').contains('Cypress configuration error')
+      cy.get('a').contains('Projects').click()
+      cy.get('body').should('not.contain', 'Cypress configuration error')
     })
   })
 })

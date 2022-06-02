@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
 import type {
   CypressIncomingRequest,
@@ -6,6 +7,7 @@ import type {
   BrowserPreRequest,
 } from '@packages/proxy'
 import Debug from 'debug'
+import chalk from 'chalk'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PreRequests } from './util/prerequests'
@@ -17,8 +19,16 @@ import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
+import type { Browser } from '@packages/server/lib/browsers/types'
+import type { RemoteStates } from '@packages/server/lib/remote_states'
 
-const debugRequests = Debug('cypress-verbose:proxy:http')
+function getRandomColorFn () {
+  return chalk.hex(`#${Number(
+    Math.floor(Math.random() * 0xFFFFFF),
+  ).toString(16).padStart(6, 'F').toUpperCase()}`)
+}
+
+export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
 export enum HttpStages {
   IncomingRequest,
@@ -42,7 +52,10 @@ type HttpMiddlewareCtx<T> = {
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getPreRequest: (cb: GetPreRequestCb) => void
+  getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
+  setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
 } & T
 
 export const defaultMiddleware = {
@@ -52,22 +65,23 @@ export const defaultMiddleware = {
 }
 
 export type ServerCtx = Readonly<{
-  config: CyServer.Config
+  config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
-  getRemoteState: CyServer.getRemoteState
+  remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
   request: any
+  serverBus: EventEmitter
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
-  'getRemoteState',
   'netStubbingState',
   'next',
   'end',
@@ -76,7 +90,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'skipMiddleware',
 ]
 
-type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
+export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
 
   next: () => void
@@ -192,14 +206,17 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
-  getRemoteState: () => any
+  remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
+  serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
+  previousAUTRequestUrl?: string
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -207,33 +224,44 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
+    this.getCurrentBrowser = opts.getCurrentBrowser
     this.getFileServerToken = opts.getFileServerToken
-    this.getRemoteState = opts.getRemoteState
+    this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.socket = opts.socket
     this.request = opts.request
+    this.serverBus = opts.serverBus
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
     }
   }
 
-  handle (req: Request, res: Response) {
+  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse) {
+    const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
+    const debugUrl = debugVerbose.enabled ?
+      (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
+      : undefined
+
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      getCurrentBrowser: this.getCurrentBrowser,
       getFileServerToken: this.getFileServerToken,
-      getRemoteState: this.getRemoteState,
+      remoteStates: this.remoteStates,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
+      serverBus: this.serverBus,
       debug: (formatter, ...args) => {
-        debugRequests(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        if (!debugVerbose.enabled) return
+
+        debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
       },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
@@ -242,6 +270,8 @@ export class Http {
         })
       },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
+      getPreviousAUTRequestUrl: this.getPreviousAUTRequestUrl,
+      setPreviousAUTRequestUrl: this.setPreviousAUTRequestUrl,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -275,6 +305,14 @@ export class Http {
     return this.renderedHTMLOrigins
   }
 
+  getPreviousAUTRequestUrl = () => {
+    return this.previousAUTRequestUrl
+  }
+
+  setPreviousAUTRequestUrl = (url) => {
+    this.previousAUTRequestUrl = url
+  }
+
   async handleSourceMapRequest (req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
@@ -291,6 +329,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
+    this.setPreviousAUTRequestUrl(undefined)
   }
 
   setBuffer (buffer) {

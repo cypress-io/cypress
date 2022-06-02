@@ -61,8 +61,8 @@ export async function makePackage () {
           scripts: {
             'build-prod': 'tsc || echo \'built, with errors\'',
             'check-ts': 'tsc --noEmit',
-            'clean-deps': 'rm -rf node_modules',
-            'clean': 'rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo \'cleaned\'',
+            'clean-deps': 'rimraf node_modules',
+            'clean': 'rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo \'cleaned\'',
             ...(results.scaffoldTests ? {
               'test-unit': 'mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit',
               'test-integration': 'mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit',
@@ -71,10 +71,12 @@ export async function makePackage () {
           files: ['src'],
           dependencies: {},
           devDependencies: results.scaffoldTests ? {
+            'rimraf': '3.0.2',
             'mocha': '7.0.1',
             'chai': '4.2.0',
             '@packages/ts': '0.0.0-development',
           } : {
+            'rimraf': '3.0.2',
             '@packages/ts': '0.0.0-development',
           },
         },

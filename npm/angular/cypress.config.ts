@@ -1,5 +1,4 @@
 import { defineConfig } from 'cypress'
-import { devServer } from '@cypress/webpack-dev-server'
 import * as webpackConfig from './cypress/plugins/webpack.config'
 
 export default defineConfig({
@@ -12,7 +11,11 @@ export default defineConfig({
     setupNodeEvents (on, config) {
       return require('./cypress/plugins')(on, config)
     },
-    devServer,
-    devServerConfig: { webpackConfig },
+    // @ts-ignore TODO: need to add the ability to define framework not
+    // in list w/o types failing...
+    devServer: {
+      bundler: 'webpack',
+      webpackConfig,
+    },
   },
 })

@@ -34,6 +34,12 @@ describe('InlineSpecList', () => {
     .should('exist')
     .and('have.length', 7)
 
+    // overflow is required for the virtual list to work
+    // this test will fail if the overflow set by `useVirtualList`
+    // is overridden
+    cy.get('[data-cy="specs-list-container"]')
+    .should('have.css', 'overflow-y', 'auto')
+
     cy.percySnapshot()
   })
 

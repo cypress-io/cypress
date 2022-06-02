@@ -1,7 +1,7 @@
 import { keyBy } from 'lodash'
+import { computed } from 'vue'
+import type { TestingType } from '@packages/types'
 import type { SpecGenerator, GeneratorId } from './types'
-import { ComponentGenerator } from './component'
-import { StoryGenerator } from './story'
 import { ScaffoldGenerator } from './scaffold'
 import { EmptyGenerator } from './empty'
 
@@ -9,19 +9,15 @@ export * from './types'
 
 export * from './GeneratorsCommon'
 
-export * from './component'
-
-export * from './story'
-
 export * from './scaffold'
 
 export * from './empty'
 
 export const generatorList: SpecGenerator[] = [
-  ComponentGenerator,
-  StoryGenerator,
   ScaffoldGenerator,
   EmptyGenerator,
 ]
+
+export const getFilteredGeneratorList = (testingType?: TestingType | null) => computed(() => generatorList.filter((g) => g.matches(testingType)))
 
 export const generators = keyBy(generatorList, 'id') as Record<GeneratorId, SpecGenerator>

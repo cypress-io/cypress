@@ -82,17 +82,17 @@ describe('shortcuts', function () {
 
       cy.get('body').then(() => {
         expect(runner.emit).not.to.have.been.calledWith('save:state')
-        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
-      })
-
-      cy.get('body').type('f').then(() => {
-        expect(runner.emit).to.have.been.calledWith('save:state')
         cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'false')
       })
 
       cy.get('body').type('f').then(() => {
         expect(runner.emit).to.have.been.calledWith('save:state')
         cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
+      })
+
+      cy.get('body').type('f').then(() => {
+        expect(runner.emit).to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'false')
       })
     })
 
@@ -141,7 +141,7 @@ describe('shortcuts', function () {
 
     it('has shortcut in tooltips', () => {
       cy.get('.toggle-specs-wrapper > button').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'Collapse Specs List F')
+      cy.get('.cy-tooltip').should('have.text', 'Expand Specs List F')
       cy.get('.toggle-specs-wrapper > button').trigger('mouseout')
 
       cy.get('button.restart').trigger('mouseover')

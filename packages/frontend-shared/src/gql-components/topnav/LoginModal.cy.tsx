@@ -43,6 +43,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
+      cy.contains('a', text.login.cloud).should('be.visible').should('have.attr', 'href', 'https://on.cypress.io/dashboard-introduction')
 
       // begin the login process
       cy.findByRole('button', { name: text.login.actionLogin }).click()

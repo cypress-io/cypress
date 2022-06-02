@@ -126,9 +126,34 @@ describe('lib/browsers/cri-client', function () {
         expect(client).to.be.equal(mockPageClient)
       })
 
-      it('throws when the passed in url is not found', async function () {
+      it('retries when the passed in url is not found', async function () {
+        sinon.stub(protocol, '_getDelayMsForRetry')
+        .onFirstCall().returns(100)
+        .onSecondCall().returns(100)
+        .onThirdCall().returns(100)
+
         const mockPageClient = {}
 
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
+        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
+
+        const browserClient = await getClient()
+
+        const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+        expect(client).to.be.equal(mockPageClient)
+      })
+
+      it('throws when the passed in url is not found after retrying', async function () {
+        sinon.stub(protocol, '_getDelayMsForRetry')
+        .onFirstCall().returns(100)
+        .onSecondCall().returns(undefined)
+
+        const mockPageClient = {}
+
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
         criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
 

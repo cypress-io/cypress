@@ -68,16 +68,15 @@ packages/socket/lib/*.js
 system-tests/.projects
 system-tests/.http-mitm-proxy
 system-tests/fixtures/large-img
+system-tests/lib/fixtureDirs.ts
 
 # from npm/react
 /npm/react/bin/*
 /npm/react/cypress/videos
 /npm/react/.babel-cache
 
-# from npm/design-system
-/npm/design-system/bin/*
-/npm/design-system/cypress/videos
-/npm/design-system/.babel-cache
+# from npm/webpack-dev-server
+/npm/webpack-dev-server/cypress/videos
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
@@ -91,6 +90,7 @@ system-tests/fixtures/large-img
 /packages/launchpad/src/generated
 /packages/app/src/generated
 /packages/frontend-shared/src/generated
+/packages/frontend-shared/cypress/e2e/support/e2eProjectDirs.ts
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template

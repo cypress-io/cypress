@@ -10,7 +10,7 @@
  *
  * The final objective being to be able to replace "ext" with ".cy."
  */
-const specExtRe = '(?:[._-]?(?:[s|S]pec|[T|t]est))?[.])(?<extension>(?:[j|t]s[x]?|coffee)'
+const specExtRe = '(?:[._-]?(?:[s|S]pec|[T|t]est))?[.])(?<extension>(?:[j|t]s[x]?|coffee|cjsx)'
 
 export const regexps = {
   e2e: {

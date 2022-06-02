@@ -6,7 +6,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
 const verify = require('../../cli/lib/tasks/verify')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
 const fs = Promise.promisifyAll(fse)

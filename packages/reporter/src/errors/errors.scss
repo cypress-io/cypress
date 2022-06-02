@@ -53,9 +53,6 @@ $code-border-radius: 4px;
 
   .runnable-err-wrapper {
     cursor: default;
-    margin: 5px 0 5px 9px;
-    padding-left: 10px;
-    border-left: 1px dotted $gray-900;
   }
 
   .studio-err-wrapper {
@@ -72,6 +69,7 @@ $code-border-radius: 4px;
     background-color: $err-background;
     clear: both;
     color: $err-text;
+    font-family: $monospace;
     margin-bottom: 0;
     margin-top: 5px;
     white-space: pre-wrap;
@@ -124,6 +122,7 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-stack-expander {
+    align-items: center;
     border-top: 1px solid rgba($red-400, 0.1);
     display: flex;
 
@@ -239,10 +238,15 @@ $code-border-radius: 4px;
       border-top-left-radius: $code-border-radius;
       border-top-right-radius: $code-border-radius;
       display: block;
-      font-size: 13px;
-      line-height: 24px;
-      padding: 3px 10px;
+      font-size: 14px;
+      line-height: 16px;
+      padding: 8px;
       word-break: break-all;
+
+      svg {
+        margin-right: 6px;
+        vertical-align: middle;
+      }
     }
 
     pre {

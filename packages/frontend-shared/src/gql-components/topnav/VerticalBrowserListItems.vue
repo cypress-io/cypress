@@ -54,17 +54,20 @@
           </template>
           <template v-else-if="!browser.isVersionSupported">
             <div class="h-16px relative">
-              <UnsupportedBrowserTooltip class="top-0 right-0 absolute">
-                <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
+              <Tooltip>
+                <i-cy-circle-bg-question-mark_x16
+                  class="icon-dark-gray-700 icon-light-gray-200"
+                  data-cy="unsupported-browser-tooltip-trigger"
+                />
                 <template #popper>
-                  <div class="w-full">
+                  <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
                     <div class="font-medium text-white mb-2">
                       Unsupported browser
                     </div>
                     {{ browser.warning }}
                   </div>
                 </template>
-              </UnsupportedBrowserTooltip>
+              </Tooltip>
             </div>
           </template>
         </div>
@@ -79,7 +82,7 @@ import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
+import Tooltip from '../../components/Tooltip.vue'
 import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 const { t } = useI18n()

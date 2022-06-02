@@ -2,10 +2,12 @@
   "name": "@cypress/mount-utils",
   "version": "0.0.0-development",
   "description": "Shared utilities for the various component testing adapters",
+  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "tsc || echo 'built, with type errors'",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "watch": "tsc -w"
   },

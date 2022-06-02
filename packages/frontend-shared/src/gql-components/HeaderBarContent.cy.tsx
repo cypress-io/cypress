@@ -20,7 +20,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('not.exist')
     })
 
@@ -28,7 +28,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('exist')
     })
 
@@ -77,14 +77,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     // because outside of global mode, those are buttons that trigger popups
     // so this way we can assert all links at once.
     const expectedDocsLinks = {
-      [text.docsMenu.firstTest]: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
-      [text.docsMenu.testingApp]: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
-      [text.docsMenu.organizingTests]: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
-      [text.docsMenu.bestPractices]: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
-      [text.docsMenu.configuration]: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
-      [text.docsMenu.api]: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
-      [text.docsMenu.ciSetup]: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI',
-      [text.docsMenu.fasterTests]: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
+      [text.docsMenu.firstTest]: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.testingApp]: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.organizingTests]: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.bestPractices]: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.configuration]: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.api]: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.ciSetup]: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI&utm_source=Binary%3A+Launchpad',
+      [text.docsMenu.fasterTests]: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization&utm_source=Binary%3A+Launchpad',
     }
 
     cy.contains('button', text.docsMenu.docsHeading).click()
@@ -120,11 +120,19 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       ),
     })
 
-    cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v8.7.0')
+    cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
     cy.percySnapshot()
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
+    // Set the clock to ensure that our percy snapshots always have the same relative time frame
+    //
+    // With this value they are:
+    //
+    // 8.7.0 - Released 7 months ago
+    // 8.6.0 - Released last year
+    cy.clock(Date.UTC(2022, 4, 26), ['Date'])
+
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         if (result.currentProject) {
@@ -172,12 +180,56 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('displays the active project name', () => {
+  it('displays the active project name and testing type', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('test-project').should('be.visible')
+    cy.contains('e2e testing', { matchCase: false }).should('be.visible')
+  })
+
+  it('displays the branch name', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'develop'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.contains('develop').should('be.visible')
+  })
+
+  it('truncates the branch name if it is long', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'application-program/hard-drive-parse'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
+
+    cy.percySnapshot()
+
+    cy.get('.truncate').realHover()
+    cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
   })
 
   it('the login modal reaches "opening browser" status', () => {
@@ -295,12 +347,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           mountWithSavedState()
 
           cy.contains(
-            'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic"]',
+            'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic&utm_source=Binary%3A+Launchpad"]',
             defaultMessages.topNav.docsMenu.prompts.ci1.seeOtherGuides,
           ).should('be.visible')
 
           cy.contains(
-            'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More&utm_source=Binary%3A+Launchpad"]',
             defaultMessages.topNav.docsMenu.prompts.ci1.intro,
           ).should('be.visible')
         })
@@ -373,7 +425,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('links to more information with expected utm params', () => {
           cy.contains(
-            'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More&utm_source=Binary%3A+Launchpad"]',
             defaultMessages.topNav.docsMenu.prompts.orchestration1.learnMore,
           )
           .should('be.visible')

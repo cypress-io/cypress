@@ -4,7 +4,7 @@ import { loadSpec } from '../support/spec-loader'
 describe('issue 18042', () => {
   it('Call count is shown even if cy.stub().log(false)', function () {
     loadSpec({
-      fileName: 'issue-18042.cy.js',
+      filePath: 'issues/issue-18042.cy.js',
       passCount: 1,
     })
 

@@ -4,7 +4,7 @@ import { loadSpec } from '../support/spec-loader'
 describe('issue 9162', () => {
   it('tests does not hang even if there is a fail in before().', function () {
     loadSpec({
-      fileName: 'issue-9162.cy.js',
+      filePath: 'issues/issue-9162.cy.js',
       passCount: 0,
       failCount: 1,
     })

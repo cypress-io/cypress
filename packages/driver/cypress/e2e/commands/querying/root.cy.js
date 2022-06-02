@@ -35,6 +35,16 @@ describe('src/cy/commands/querying', () => {
       cy.root().should('have.class', 'foo').and('have.class', 'bar')
     })
 
+    // https://github.com/cypress-io/cypress/issues/19985
+    it('respects timeout option', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.not.contain('4000ms')
+        done()
+      })
+
+      cy.root({ timeout: 50 }).should('contain', 'root world')
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []

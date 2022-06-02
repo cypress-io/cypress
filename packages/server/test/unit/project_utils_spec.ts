@@ -1,7 +1,7 @@
 import Chai from 'chai'
 import path from 'path'
 import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
-import Fixtures from '@tooling/system-tests/lib/fixtures'
+import Fixtures from '@tooling/system-tests'
 import stripAnsi from 'strip-ansi'
 
 const todosPath = Fixtures.projectPath('todos')

@@ -32,10 +32,9 @@ export const clickCommandLog = (sel, type) => {
       }
 
       reactCommandInstance.props.appState.isRunning = false
+      const inner = $(commandLogEl).find('.command-wrapper-text')
 
-      $(commandLogEl).find('.command-wrapper')
-      .click()
-      .get(0).scrollIntoView()
+      inner.get(0).click()
 
       // make sure command was pinned, otherwise throw a better error message
       expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
@@ -72,6 +71,20 @@ export const assertLogLength = (logs, expectedLength) => {
   expect(logs.length).to.eq(expectedLength, `received ${logs.length} logs when we expected ${expectedLength}: [${receivedLogs}]`)
 }
 
+export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) => {
+  const matchedLogs = Array.from(logMap.values()).filter((log) => {
+    const props = log.get()
+
+    let consoleProps = _.isFunction(props?.consoleProps) ? props.consoleProps() : props?.consoleProps
+
+    return consoleProps.Command === consolePropCommand && props.id.includes(matchingOrigin)
+  })
+
+  const logAttrs = matchedLogs.map((log) => log.get())
+
+  return logAttrs.length === 1 ? logAttrs[0] : logAttrs
+}
+
 export const attachListeners = (listenerArr) => {
   return (els) => {
     _.each(els, (el, elName) => {
@@ -92,6 +105,10 @@ const getAllFn = (...aliases) => {
       return cy.now('get', alias)
     }),
   )
+}
+
+const shouldWithTimeout = (cb, timeout = 250) => {
+  cy.wrap({}, { timeout }).should(cb)
 }
 
 export const keyEvents = [
@@ -119,6 +136,8 @@ export const expectCaret = (start, end) => {
 }
 
 Cypress.Commands.add('getAll', getAllFn)
+
+Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 
 const chaiSubset = require('chai-subset')
 

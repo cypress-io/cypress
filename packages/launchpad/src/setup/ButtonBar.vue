@@ -46,6 +46,16 @@
           @update="handleAlt"
         />
       </div>
+      <Button
+        v-if="skipFn"
+        size="lg"
+        variant="text"
+        class="text-gray-500"
+        @click="skipFn"
+      >
+        {{ skip }}
+        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-500" />
+      </Button>
     </slot>
   </div>
 </template>
@@ -59,8 +69,10 @@ import Switch from '@cy/components/Switch.vue'
 const props = withDefaults(defineProps<{
   next?: string
   back?: string
+  skip?: string
   nextFn?: () => void
   backFn?: () => void
+  skipFn?: () => void
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
@@ -70,8 +82,10 @@ const props = withDefaults(defineProps<{
   altFn: undefined,
   next: undefined,
   back: undefined,
+  skip: undefined,
   backFn: undefined,
   nextFn: undefined,
+  skipFn: undefined,
   mainVariant: 'primary',
 })
 

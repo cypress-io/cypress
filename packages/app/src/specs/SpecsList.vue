@@ -18,6 +18,7 @@
     </Alert>
     <SpecsListHeader
       v-model="search"
+      :specs-list-input-ref-fn="specsListInputRefFn"
       class="pb-32px"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
@@ -42,7 +43,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
+        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
       </div>
     </div>
     <!--
@@ -66,13 +67,15 @@
           v-for="row in list"
           :id="getIdIfDirectory(row)"
           :key="row.index"
+          :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
+          :data-cy-row="row.data.data?.baseName"
         >
           <template #file>
             <RouterLink
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
               class="focus:outline-transparent"
-              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
               data-cy="spec-item-link"
               @click.meta.prevent="handleCtrlClick"
               @click.ctrl.prevent="handleCtrlClick"
@@ -99,8 +102,8 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.data?.gitInfo"
-              :gql="row.data.data.gitInfo"
+              v-if="row.data.isLeaf && row.data.data?.gitInfo"
+              :gql="row.data.data?.gitInfo"
             />
           </template>
         </SpecsListRowItem>
@@ -120,12 +123,12 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
+import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import type { FuzzyFoundSpec } from './spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -140,6 +143,18 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const { t } = useI18n()
+
+gql`
+subscription SpecsList_GitInfoUpdated {
+  gitInfoChange {
+    id
+    absolute
+    gitInfo {
+      ...SpecListRow
+    }
+  }
+}
+`
 
 gql`
 fragment SpecsList on Spec {
@@ -174,6 +189,8 @@ fragment Specs_SpecsList on Query {
 }
 `
 
+useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
+
 const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
@@ -186,13 +203,19 @@ const showSpecPatternModal = ref(false)
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+const cachedSpecs = useCachedSpecs(
+  computed(() => props.gql.currentProject?.specs ?? []),
+)
 
 const search = ref('')
+const specsListInputRef = ref<HTMLInputElement>()
 const debouncedSearchString = useDebounce(search, 200)
+
+const specsListInputRefFn = () => specsListInputRef
 
 function handleClear () {
   search.value = ''
+  specsListInputRef.value?.focus()
 }
 
 const specs = computed(() => {
@@ -205,7 +228,11 @@ const specs = computed(() => {
   return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
-const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
+const collapsible = computed(() => {
+  return useCollapsibleTree(
+    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true },
+  )
+})
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })

@@ -226,7 +226,7 @@ describe('init component tests script', () => {
     }) as any)
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
-    expect(execStub).to.be.calledWith('yarn add @cypress/vue@3 --dev')
+    expect(execStub).to.be.calledWith('yarn add @cypress/vue --dev')
   })
 
   it('suggest the right instruction based on user template choice', async () => {

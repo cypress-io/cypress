@@ -51,6 +51,21 @@ enum BrowserStatus {
 }
 
 """
+When we don't have an immediate response for the cloudViewer request, we'll use this as a fallback to 
+render the avatar in the header bar / signal authenticated state immediately
+"""
+type CachedUser implements Node {
+  """Email address of the cached user"""
+  email: String
+
+  """Name of the cached user"""
+  fullName: String
+
+  """Relay style Node ID field for the CachedUser field"""
+  id: ID!
+}
+
+"""
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
 type CloudOrganization implements Node {
@@ -202,6 +217,7 @@ type CloudRun implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -210,6 +226,9 @@ type CloudRun implements Node {
 
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
+
+  """Number of flaky tests, null if flake detection is not enabled"""
+  totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -280,6 +299,12 @@ enum CloudRunStatus {
   TIMEDOUT
 }
 
+type CloudRunTag implements Node {
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  name: String
+}
+
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -332,20 +357,10 @@ type CodeFrame {
   line: Int
 }
 
-"""Glob patterns for detecting files for code gen."""
-type CodeGenGlobs implements Node {
-  component: String!
-
-  """Relay style Node ID field for the CodeGenGlobs field"""
-  id: ID!
-  story: String!
-}
-
 enum CodeGenType {
   component
   e2e
   scaffoldIntegration
-  story
 }
 
 enum CodeLanguageEnum {
@@ -354,9 +369,12 @@ enum CodeLanguageEnum {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{ts|js} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
 type CurrentProject implements Node & ProjectLike {
+  """The currently selected browser for the project"""
+  activeBrowser: Browser
+
   """The current branch of the project"""
   branch: String
 
@@ -371,7 +389,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -382,20 +399,16 @@ type CurrentProject implements Node & ProjectLike {
   """Config File Absolute Path"""
   configFileAbsolutePath: String
 
-  """The currently selected browser for the application"""
-  currentBrowser: Browser
-
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
   defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
-
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
 
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
@@ -412,11 +425,17 @@ type CurrentProject implements Node & ProjectLike {
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
 
+  """Whether or not the full config is ready"""
+  isFullConfigReady: Boolean
+
   """Whether we are currently loading the configFile"""
   isLoadingConfigFile: Boolean
 
   """Whether we are currently loading the setupNodeEvents"""
   isLoadingNodeEvents: Boolean
+
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
@@ -434,9 +453,11 @@ type CurrentProject implements Node & ProjectLike {
   """Project saved state"""
   savedState: JSON
 
+  """base64 encoded config used on the runner page"""
+  serveConfig: JSON!
+
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
-  storybook: Storybook
   title: String!
 }
 
@@ -469,7 +490,7 @@ type DevState {
 """Represents an editor on the local machine"""
 type Editor {
   """Binary that opens the editor"""
-  binary: String!
+  binary: String
   id: String!
 
   """name of editor"""
@@ -498,11 +519,14 @@ enum ErrorTypeEnum {
   CHROME_WEB_SECURITY_NOT_SUPPORTED
   COMPONENT_FOLDER_REMOVED
   CONFIG_FILES_LANGUAGE_CONFLICT
-  CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
+  CONFIG_FILE_DEV_SERVER_INVALID_RETURN
+  CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
   CONFIG_FILE_INVALID_DEV_START_EVENT
   CONFIG_FILE_INVALID_ROOT_CONFIG
+  CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT
   CONFIG_FILE_INVALID_ROOT_CONFIG_E2E
   CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT
+  CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E
   CONFIG_FILE_MIGRATION_NEEDED
   CONFIG_FILE_NOT_FOUND
   CONFIG_FILE_REQUIRE_ERROR
@@ -530,7 +554,9 @@ enum ErrorTypeEnum {
   DASHBOARD_STALE_RUN
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
   DASHBOARD_UNKNOWN_INVALID_REQUEST
+  DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
+  DEV_SERVER_CONFIG_FILE_NOT_FOUND
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
   ERROR_WRITING_FILE
@@ -538,6 +564,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
@@ -554,6 +581,7 @@ enum ErrorTypeEnum {
   INCOMPATIBLE_PLUGIN_RETRIES
   INCORRECT_CI_BUILD_ID_USAGE
   INDETERMINATE_CI_BUILD_ID
+  INTEGRATION_FOLDER_REMOVED
   INVALID_CONFIG_OPTION
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
@@ -561,6 +589,8 @@ enum ErrorTypeEnum {
   LEGACY_CONFIG_ERROR_DURING_MIGRATION
   LEGACY_CONFIG_FILE
   MIGRATION_ALREADY_OCURRED
+  MIGRATION_CYPRESS_NOT_FOUND
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
   NODE_VERSION_DEPRECATION_BUNDLED
   NODE_VERSION_DEPRECATION_SYSTEM
@@ -615,6 +645,9 @@ type ErrorWrapper {
   """
   errorStack: String!
   errorType: ErrorTypeEnum!
+
+  """The ID for the error, used to clear the error"""
+  id: ID!
 
   """
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
@@ -681,23 +714,15 @@ type FileParts implements Node {
   relative: String!
 }
 
-enum FrontendFrameworkCategoryEnum {
-  react
-  vue
-}
-
 enum FrontendFrameworkEnum {
-  crav4
-  crav5
   nextjs
   nuxtjs
   react
+  reactscripts
   vue2
   vue3
-  vuecli4vue2
-  vuecli4vue3
-  vuecli5vue2
-  vuecli5vue3
+  vueclivue2
+  vueclivue3
 }
 
 """Error from generated spec"""
@@ -727,6 +752,22 @@ type GitInfo {
 
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
+
+  """short hash for latest commit"""
+  shortHash: String
+
+  """status type - created or modified"""
+  statusType: GitInfoStatusType
+
+  """subject for latest commit"""
+  subject: String
+}
+
+enum GitInfoStatusType {
+  created
+  modified
+  noGitInfo
+  unmodified
 }
 
 """A project which exists on the filesystem but has not been opened"""
@@ -822,20 +863,26 @@ type Migration {
   """whether the testFiles member is custom or not in integration"""
   hasCustomIntegrationTestFiles: Boolean!
 
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
-
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
+
   """List of files needing manual conversion"""
   manualFiles: ManualMigration
+
+  """whether the pre extension info should be displayed"""
+  shouldMigratePreExtension: Boolean
 
   """All spec files after conversion"""
   specFiles: [MigrationFile!]!
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -906,6 +953,12 @@ enum MigrationStepEnum {
 }
 
 type Mutation {
+  """Internal use only, clears the cloud cache"""
+  _clearCloudCache: Boolean
+
+  """Used internally to update the URQL cache in the CloudDataSource"""
+  _cloudCacheInvalidate(args: JSON): Boolean
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -936,7 +989,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Dismisses a warning displayed by the frontend"""
-  dismissWarning: Query
+  dismissWarning(id: ID!): Query
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -946,9 +999,6 @@ type Mutation {
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
-
-  """Hides the launchpad windows"""
-  hideBrowserWindow: Boolean!
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -999,9 +1049,6 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
-  """Initialize the migration wizard to the first step"""
-  migrateStart: Query
-
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1018,14 +1065,22 @@ type Mutation {
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
-  """Re-initializes Cypress from the initial CLI options"""
-  reinitializeCypress: Query
+  """
+  Signal that we are explicitly refetching remote data and should not use the server cache
+  """
+  refetchRemote: Query
+
+  """Clears the cloudViewer cache to refresh the organizations"""
+  refreshOrganizations: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
   """Reset the Auth State"""
   resetAuthState: Query!
+
+  """Resets error and attempts to reload the config"""
+  resetErrorAndLoadConfig(id: ID!): Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user
@@ -1036,10 +1091,10 @@ type Mutation {
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
+  setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Query
-  setCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
@@ -1054,9 +1109,6 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
-
-  """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1121,11 +1173,14 @@ interface ProjectLike {
 
 """Preferences specific to a project"""
 type ProjectPreferences {
-  """The preferred browser to launch"""
-  browserPath: String
-
   """The preferred testing type to start in"""
   testingType: String
+}
+
+type PushFragmentPayload {
+  data: JSON
+  fragment: JSON!
+  target: String!
 }
 
 """The root "Query" type containing all entry fields for our querying"""
@@ -1133,12 +1188,19 @@ type Query {
   """The latest state of the auth process"""
   authState: AuthState!
   baseError: ErrorWrapper
+  cachedUser: CachedUser
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
     id: ID!
   ): Node
+
+  """Returns a list of cloud nodes, by ID. Max 100 nodes per batch"""
+  cloudNodesByIds(
+    """A list of IDs for a Node, conforming to the Relay spec"""
+    ids: [ID!]!
+  ): [Node]
 
   """Lookup an individual project by the slug"""
   cloudProjectBySlug(slug: String!): CloudProjectResult
@@ -1158,6 +1220,11 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
+  """
+  Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)
+  """
+  invokedFromCli: Boolean!
+
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
@@ -1166,6 +1233,7 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+  node(id: ID!): Node
 
   """Whether the project was specified from the --project flag"""
   projectRootFromCI: Boolean!
@@ -1240,41 +1308,52 @@ enum SpecType {
   integration
 }
 
-"""Storybook"""
-type Storybook implements Node {
-  """Relay style Node ID field for the Storybook field"""
-  id: ID!
-
-  """Folder containing storybook configuration files"""
-  storybookRoot: String!
-}
-
 type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """Issued when the current branch of a project changes"""
+  branchChange: CurrentProject
+
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
-  """"""
+  """
+  Triggered when there is a change to the info associated with the cloud project (org added, project added)
+  """
   cloudViewerChange: Query
+
+  """Issued when cypress.config.js is re-executed due to a change"""
+  configChange: CurrentProject
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Triggered when the base error or warning state changes"""
+  errorWarningChange: Query
+
+  """
+  When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
+  """
+  gitInfoChange: [Spec]
+
+  """
+  When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
+  """
+  pushFragment: [PushFragmentPayload]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
 }
 
-"""The bundlers that we can use with Cypress"""
-enum SupportedBundlers {
-  vite
-  webpack4
-  webpack5
+enum SupportStatusEnum {
+  alpha
+  beta
+  full
 }
 
-"""The packages for bundlers that we can use with Cypress"""
-enum SupportedPackage {
+"""The bundlers that we can use with Cypress"""
+enum SupportedBundlers {
   vite
   webpack
 }
@@ -1320,9 +1399,6 @@ The Wizard is a container for any state associated with initial onboarding to Cy
 type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
-
-  """All of the languages to choose from"""
-  allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
   framework: WizardFrontendFramework
 
@@ -1332,14 +1408,10 @@ type Wizard {
   """Command to install required command"""
   installDependenciesCommand: String
 
-  """The list of packages to install that are currently installed"""
-  installedPackages: [String!]
-  language: WizardCodeLanguage
-
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
-  packagesToInstall: [WizardNpmPackage!]
+  packagesToInstall: [WizardNpmPackage!]!
 }
 
 """Wizard bundler"""
@@ -1350,37 +1422,11 @@ type WizardBundler implements Node {
   """Whether this is the detected bundler"""
   isDetected: Boolean!
 
-  """Whether this is the selected framework bundler"""
-  isSelected: Boolean
-
   """Display name of the bundler"""
   name: String!
 
-  """Name of package on npm"""
-  package: SupportedPackage!
-
   """The name of the framework"""
   type: SupportedBundlers!
-}
-
-"""
-A code language that the user can choose from to create their cypress.config
-"""
-type WizardCodeLanguage implements Node {
-  """Relay style Node ID field for the WizardCodeLanguage field"""
-  id: ID!
-
-  """Whether this is the detected language"""
-  isDetected: Boolean!
-
-  """Whether this is the selected language in the wizard"""
-  isSelected: Boolean!
-
-  """The name of the language"""
-  name: String!
-
-  """The key of the language"""
-  type: CodeLanguageEnum!
 }
 
 enum WizardConfigFileStatusEnum {
@@ -1392,8 +1438,8 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
-  """Classification or label of framework. e.g. React, Vue, or Other"""
-  category: FrontendFrameworkCategoryEnum!
+  """The category (framework, like react-scripts, or library, like react"""
+  category: String!
 
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
@@ -1404,30 +1450,46 @@ type WizardFrontendFramework implements Node {
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!
 
-  """The name of the framework"""
+  """The display name of the framework"""
   name: String!
+
+  """Current support status of the framework"""
+  supportStatus: SupportStatusEnum!
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
 
-  """The name of the framework"""
+  """The unique identifier for a framework or library"""
   type: FrontendFrameworkEnum!
 }
 
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
+  """Short description about the purpose of the package"""
   description: String!
+
+  """Version of the package the user has installed"""
+  detectedVersion: String
 
   """Relay style Node ID field for the WizardNpmPackage field"""
   id: ID!
 
+  """Minimum version of the package that Cypress works with"""
+  minVersion: String!
+
   """The package name that you would npm install"""
   name: String!
+
+  """Name of the package on npm"""
   package: String!
+
+  """
+  If the package is installed, does the version satisfy Cypress minimum requirements
+  """
+  satisfied: Boolean!
 }
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  codeLanguage: CodeLanguageEnum
   framework: FrontendFrameworkEnum
 }

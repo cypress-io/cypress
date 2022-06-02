@@ -1,12 +1,10 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
-import { defaultMessages } from '@cy/i18n'
+import { CreateSpecModalFragmentDoc } from '../generated/graphql-test'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
 const modalSelector = '[data-cy=create-spec-modal]'
-
-const messages = defaultMessages.createSpec.component.importFromComponent
 
 describe('<CreateSpecModal />', () => {
   beforeEach(() => {
@@ -17,27 +15,23 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
-            storybook: null,
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: {
-              e2e: {
+            config: [{
+              field: 'e2e',
+              value: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
               },
-              component: {
+            }, {
+              field: 'component',
+              value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            },
+            }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -68,12 +62,6 @@ describe('<CreateSpecModal />', () => {
       .should('not.exist')
     })
   })
-
-  describe('generator', () => {
-    it('renders the generator', () => {
-      cy.contains(messages.header).should('be.visible')
-    })
-  })
 })
 
 describe('playground', () => {
@@ -87,27 +75,23 @@ describe('playground', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
-            storybook: null,
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: {
-              e2e: {
+            config: [{
+              field: 'e2e',
+              value: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
               },
-              component: {
+            }, {
+              field: 'component',
+              value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            },
+            }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -118,5 +102,27 @@ describe('playground', () => {
     .get(modalSelector)
     .should('be.visible')
     .get(modalCloseSelector)
+  })
+})
+
+describe('defaultSpecFileName', () => {
+  it('shows correct default filename for the currentProject', () => {
+    const show = ref(true)
+
+    cy.mountFragment(CreateSpecModalFragmentDoc, {
+      onResult: (result) => {
+        if (result.currentProject) {
+          result.currentProject.defaultSpecFileName = 'path/for/spec.cy.js'
+        }
+      },
+      render: (gql) => {
+        return <CreateSpecModal gql={gql} show onClose={() => show.value = false} />
+      },
+    })
+
+    cy.findByText('Create new empty spec').click()
+    cy.get('input').invoke('val').should('contain', 'spec.cy.js')
+
+    cy.percySnapshot()
   })
 })

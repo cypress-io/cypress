@@ -1,42 +1,46 @@
 <template>
   <WizardLayout
-    :next="canNavigateForward ? t('setupPage.step.continue') : t('setupPage.install.waitForInstall')"
-    :can-navigate-forward="canNavigateForward"
+    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupWizard.installDependencies.waitForInstall')"
+    :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
-    :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
+    :main-button-variant="allDependenciesInstalled ? 'primary' : 'pending'"
+    :skip-fn="!allDependenciesInstalled ? confirmInstalled : undefined"
   >
-    <ManualInstall
-      :gql="props.gql"
-      :packages-installed="packagesInstalled"
-    />
-    <Button
-      v-if="!canNavigateForward && !intervalQueryTrigger.isActive.value"
-      class="right-16px bottom-16px absolute"
-      size="lg"
-      variant="link"
-      @click="intervalQueryTrigger.resume()"
+    <template
+      v-if="allDependenciesInstalled && showSuccessAlert"
+      #accessory
     >
-      {{ t('setupPage.install.checkForUpdates') }}
-    </Button>
+      <Alert
+        v-model="showSuccessAlert"
+        class="w-full"
+        :icon="CircleCheck"
+        :title="t('setupWizard.installDependencies.installationAlertSuccess')"
+        status="success"
+        dismissible
+      />
+    </template>
+    <ManualInstall :gql="props.gql" />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
+import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from '../generated/graphql'
+import CircleCheck from '~icons/cy/circle-check_x16.svg'
+
 import {
   InstallDependencies_ScaffoldFilesDocument,
   Wizard_InstalledPackagesDocument,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useMutation, useQuery } from '@urql/vue'
-import { useIntervalFn, useTimeoutFn } from '@vueuse/core'
-import Button from '../../../frontend-shared/src/components/Button.vue'
+import { useIntervalFn } from '@vueuse/core'
 
 gql`
 mutation InstallDependencies_scaffoldFiles {
@@ -60,15 +64,12 @@ fragment InstallDependencies on Query {
 
 gql`
 fragment Wizard_InstalledPackages_Data on Query {
-  wizard {
-    installedPackages
-  }
   ...InstallDependencies
 }
 `
 
 gql`
-query Wizard_InstalledPackages{
+query Wizard_InstalledPackages {
   ...Wizard_InstalledPackages_Data
 }`
 
@@ -76,38 +77,28 @@ const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
 })
 
-const packagesInstalled = ref<string[]>([])
-
-const toInstall = computed(() => {
-  return props.gql.wizard.packagesToInstall?.map((p) => p.package)
-})
-
-// TODO: UNIFY-1350 convert this to a subscription
-const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
-
-  packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
-    (pkg) => pkg,
-  ) || []
-
-  if (toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
-    intervalQueryTrigger.pause()
-    canNavigateForward.value = true
-  }
-}, 1000, {
-  immediate: true,
-})
-
-useTimeoutFn(() => {
-  intervalQueryTrigger.pause()
-}, 180000)
-
-const canNavigateForward = ref(false)
-
 const props = defineProps<{
   gql: InstallDependenciesFragment
   backFn: () => void
 }>()
+
+const checkForInstalledDependencies = (wizard) => {
+  return wizard?.packagesToInstall?.every((pkg) => pkg.satisfied) || false
+}
+
+const allDependenciesInstalled = ref(checkForInstalledDependencies(props.gql.wizard))
+const showSuccessAlert = ref(true)
+
+if (!allDependenciesInstalled.value) {
+  const intervalQueryTrigger = useIntervalFn(async () => {
+    const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
+
+    if (checkForInstalledDependencies(res.data.value?.wizard)) {
+      intervalQueryTrigger.pause()
+      allDependenciesInstalled.value = true
+    }
+  }, 1000)
+}
 
 const { t } = useI18n()
 const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)

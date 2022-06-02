@@ -20,24 +20,21 @@
       {<br>
       <div class="pl-24px">
         <span
-          v-for="{ field, value, from } in props.gql.config"
+          v-for="{ field, value, from } in sortAlphabetical(props.gql.config)"
           :key="field"
         >
           {{ field }}:
-          <Browsers
-            v-if="field === 'browsers' && Array.isArray(value)"
-            :browsers="value"
-            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
-          />
           <RenderObject
-            v-else-if="value && typeof value === 'object'"
+            v-if="value && typeof value === 'object'"
             :value="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+            :from="from"
           />
           <span
             v-else
             class="rounded-sm px-2px"
             :class="colorMap[from]"
+            :data-cy-config="from"
           >{{ renderPrimitive(value) }}</span>,
           <br>
         </span>
@@ -52,7 +49,6 @@ import Button from '@cy/components/Button.vue'
 import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
-import Browsers from './renderers/Browsers.vue'
 import RenderObject from './renderers/RenderObject.vue'
 import { renderPrimitive } from './renderers/renderPrimitive'
 import { gql } from '@urql/core'
@@ -70,6 +66,12 @@ fragment ConfigCode on CurrentProject {
 const props = defineProps<{
   gql: ConfigCodeFragment
 }>()
+
+const sortAlphabetical = (config) => {
+  return config.sort((a, b) => {
+    return a.field.localeCompare(b.field)
+  })
+}
 
 // a bug in vite demands that we do this passthrough
 const colorMap = CONFIG_LEGEND_COLOR_MAP

@@ -104,7 +104,7 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', async function () {
+  it('throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well', async function () {
     await Fixtures.scaffoldProject('multiple-config-files-with-json')
 
     return systemTests.exec(this, {
@@ -165,6 +165,41 @@ describe('e2e config', () => {
       project: 'invalid-root-level-config',
       configFile: 'invalid-component-baseUrl-config.js',
       testingType: 'component',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if experimentalSessionAndOrigin is set on the component level', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-component-experimentalSessionAndOrigin-config.js',
+      testingType: 'component',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if indexHtml is set on the root level', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-indexHtmlFile-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if indexHtml is set on the e2e level', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-e2e-indexHtmlFile-config.js',
+      testingType: 'e2e',
       expectedExitCode: 1,
       snapshot: true,
     })

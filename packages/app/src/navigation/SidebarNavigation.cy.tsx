@@ -1,4 +1,5 @@
 import SidebarNavigation from './SidebarNavigation.vue'
+import { defaultMessages } from '@cy/i18n'
 
 function mountComponent (initialNavExpandedVal = true) {
   cy.mount(() => {
@@ -7,7 +8,6 @@ function mountComponent (initialNavExpandedVal = true) {
         <div class={[initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
           <SidebarNavigation />
         </div>
-        <div id="tooltip-target"/>
       </div>
     )
   })
@@ -17,29 +17,42 @@ describe('SidebarNavigation', () => {
   it('expands the bar when clicking the expand button', () => {
     mountComponent()
 
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.findByText('test-project').should('not.be.visible')
-    cy.findByLabelText('toggle navigation', {
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
       selector: 'button',
     }).click()
 
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.expanded, {
+      selector: 'button',
+    })
+
     cy.findByText('test-project').should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('shows tooltips on hover', () => {
     mountComponent(false)
-    cy.get('[data-cy="sidebar-header"').realHover()
-    cy.contains('#tooltip-target > div', 'test-project').should('be.visible')
-    cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
+    cy.findByTestId('sidebar-header').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
+    cy.findByTestId('sidebar-header').trigger('mouseout')
 
-    cy.get('[data-e2e-href="/runs"]').realHover()
-    cy.contains('#tooltip-target > div', 'Runs').should('be.visible')
-    cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
+    cy.get('[href="#/runs"]').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
+    cy.get('[href="#/runs"]').trigger('mouseout')
+    cy.percySnapshot()
   })
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.get('[data-cy="sidebar-header"]').click()
+    cy.findByTestId('sidebar-header').click()
+    cy.percySnapshot()
+  })
+
+  it('opens a modal to show keyboard shortcuts', () => {
+    mountComponent()
+    cy.findByTestId('keyboard-modal').should('not.exist')
+    cy.findByTestId('keyboard-modal-trigger').focus().type('{enter}')
+    cy.findByTestId('keyboard-modal').should('be.visible')
   })
 })

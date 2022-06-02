@@ -649,12 +649,6 @@ describe.skip('lib/modes/run', () => {
         proxyUrl: 'http://localhost:12345',
         video: true,
         videosFolder: 'videos',
-        integrationFolder: '/path/to/integrationFolder',
-        resolved: {
-          integrationFolder: {
-            integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
-          },
-        },
       }
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
@@ -805,21 +799,6 @@ describe.skip('lib/modes/run', () => {
       .then(() => {
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
           project: this.projectInstance,
-        })
-      })
-    })
-
-    it('passes exit from config to waitForTestsToFinishRunning', function () {
-      this.projectInstance.getConfig.restore()
-      sinon.stub(this.projectInstance, 'getConfig').resolves({
-        proxyUrl: 'http://localhost:12345',
-        exit: false,
-      })
-
-      return runMode.run()
-      .then(() => {
-        expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
-          exit: false,
         })
       })
     })

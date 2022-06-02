@@ -1,7 +1,6 @@
 <template>
   <TestingTypePicker
     :gql="props.gql"
-    :is-app="false"
     @pick="selectTestingType"
   />
 </template>
@@ -21,7 +20,7 @@ fragment TestingTypeCards on Query {
 
 gql`
 mutation TestingTypeSelection($testingType: TestingTypeEnum!) {
-  setCurrentTestingType(testingType: $testingType) {
+  setAndLoadCurrentTestingType(testingType: $testingType) {
     currentProject {
       id
       currentTestingType
@@ -42,7 +41,9 @@ const props = defineProps<{
 }>()
 
 function selectTestingType (testingType: 'e2e' | 'component') {
-  mutation.executeMutation({ testingType })
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({ testingType })
+  }
 }
 
 </script>

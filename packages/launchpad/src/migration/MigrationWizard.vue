@@ -161,7 +161,6 @@ import {
   MigrationWizard_RenameSpecsDocument,
   MigrationWizard_RenameSupportDocument,
   MigrationWizard_SkipManualRenameDocument,
-  MigrationWizard_StartDocument,
   MigrationWizard_RenameSpecsFolderDocument,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -171,6 +170,7 @@ const { t } = useI18n()
 gql`
 fragment MigrationBaseError on Query {
   baseError {
+    id
     ...BaseError
   }
 }
@@ -204,25 +204,7 @@ const query = useQuery({ query: MigrationWizardQueryDocument, requestPolicy: 'ca
 const migration = computed(() => query.data.value?.migration)
 const steps = computed(() => migration.value?.filteredSteps || [])
 
-// start migration
-
-gql`
-mutation MigrationWizard_Start {
-  migrateStart {
-    migration {
-      filteredSteps {
-        id
-        ...MigrationStep
-      }
-    }
-  }
-}
-`
-
-const start = useMutation(MigrationWizard_StartDocument)
-
 onBeforeMount(async () => {
-  await start.executeMutation({ })
   await query.executeQuery()
 })
 
@@ -250,6 +232,7 @@ mutation MigrationWizard_RenameSpecsFolder {
   migrateRenameSpecsFolder {
     ...MigrationBaseError
     migration {
+      ...ConvertConfigFile
       ...RenameSpecsManual
       filteredSteps {
         id

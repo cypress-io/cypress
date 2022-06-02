@@ -8,12 +8,14 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
+import type { StateFunc } from './state'
+
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -49,7 +51,7 @@ export const LogUtils = {
         return value()
       }
 
-      if (_.isFunction(value)) {
+      if (_.isFunction(value) || _.isSymbol(value)) {
         return value.toString()
       }
 
@@ -92,14 +94,12 @@ export const LogUtils = {
 
     return _
     .chain(tests)
-    .flatMap((test) => {
-      return [test, test.prevAttempts]
-    })
-    .flatMap<{id: number}>((tests) => {
-      return [].concat(tests.agents, tests.routes, tests.commands)
-    }).compact()
-    .union([{ id: 0 }])
-    .map('id')
+    .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
+    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
+    .compact()
+    .union([{ id: '0' }])
+    // id is a string in the form of 'log-origin-#', grab the number off the end.
+    .map(({ id }) => parseInt((id.match(/\d*$/) || ['0'])[0]))
     .max()
     .value()
   },
@@ -108,9 +108,13 @@ export const LogUtils = {
   setCounter: (num) => {
     return counter = num
   },
+
+  getCounter: () => {
+    return counter
+  },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state: StateFunc, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -127,7 +131,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -178,8 +182,10 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
+  counter++
+
   _.defaults(obj, {
-    id: (counter += 1),
+    id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
     instrument: 'command',
     url: state('url'),
@@ -202,26 +208,27 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
+  const logGroupIds = state('logGroupIds') || []
 
-  if (logGroup) {
-    obj.group = logGroup
+  if (logGroupIds.length) {
+    obj.group = _.last(logGroupIds)
+    obj.groupLevel = logGroupIds.length
   }
 
   if (obj.groupEnd) {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+    state('logGroupIds', (logGroupIds).concat(obj.id))
   }
 
   return obj
 }
 
-class Log {
+export class Log {
   cy: any
-  state: any
+  state: StateFunc
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any
@@ -232,7 +239,8 @@ class Log {
     this.cy = cy
     this.state = state
     this.config = config
-    this.fireChangeEvent = fireChangeEvent
+    // only fire the log:state:changed event as fast as every 4ms
+    this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
 
     extendEvents(this)
@@ -372,6 +380,13 @@ class Log {
   }
 
   error (err) {
+    const logGroupIds = this.state('logGroupIds') || []
+
+    // current log was responsible to creating the current log group so end the current group
+    if (_.last(logGroupIds) === this.attributes.id) {
+      this.endGroup()
+    }
+
     this.set({
       ended: true,
       error: err,
@@ -398,6 +413,10 @@ class Log {
     })
 
     return this
+  }
+
+  endGroup () {
+    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
   }
 
   getError (err) {
@@ -428,7 +447,7 @@ class Log {
     this.obj = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
-      visible: $el.length === $el.filter(':visible').length,
+      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
     }
 
     return this.set(this.obj, { silent: true })
@@ -489,8 +508,11 @@ class Log {
 
       consoleObj[key] = _this.get('name')
 
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
+
       // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleProps.apply(this, args))
+      _.extend(consoleObj, consoleObjDefaults)
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -557,16 +579,8 @@ class LogManager {
     this.logs[id] = true
   }
 
-  // only fire the log:state:changed event
-  // as fast as every 4ms
   fireChangeEvent (log) {
-    const triggerStateChanged = () => {
-      return this.trigger(log, 'command:log:changed')
-    }
-
-    const debounceFn = _.debounce(triggerStateChanged, 4)
-
-    return debounceFn()
+    return this.trigger(log, 'command:log:changed')
   }
 
   createLogFn (cy, state, config) {

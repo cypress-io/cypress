@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 import {
-  selectorPlaygroundModel,
   StudioRecorder,
   dom,
 } from '@packages/runner-shared'
@@ -18,8 +17,6 @@ export const UnifiedRunner = {
   dom,
 
   StudioRecorder,
-
-  selectorPlaygroundModel,
 
   shortcuts,
 

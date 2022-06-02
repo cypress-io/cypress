@@ -2,18 +2,8 @@ const { assertLogLength } = require('../../../support/utils')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/actions/check', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#check', () => {
@@ -78,6 +68,21 @@ describe('src/cy/commands/actions/check', () => {
     it('checks a radio', () => {
       cy.get(':radio[name=\'gender\'][value=\'male\']').check().then(($radio) => {
         expect($radio).to.be.checked
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/19098
+    it('removes indeterminate prop when checkbox is checked', () => {
+      const intermediateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      intermediateCheckbox.prop('indeterminate', true)
+
+      $('body').append(intermediateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').check().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
       })
     })
 
@@ -846,6 +851,21 @@ describe('src/cy/commands/actions/check', () => {
 
         expect($chk.get(0)).to.eq(cockatoo.get(0))
         expect($chk.get(1)).to.eq(cockatoo.get(1))
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/19098
+    it('removes indeterminate prop when checkbox is unchecked', () => {
+      const indeterminateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      indeterminateCheckbox.prop('indeterminate', true)
+
+      $('body').append(indeterminateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').uncheck().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
       })
     })
 

@@ -1,17 +1,23 @@
 import os from 'os'
+import path from 'path'
+
 import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
 
 export type BreakingOptionErrorKey =
   | 'COMPONENT_FOLDER_REMOVED'
+  | 'INTEGRATION_FOLDER_REMOVED'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
+  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E'
   | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
   | 'EXPERIMENTAL_SAMESITE_REMOVED'
   | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
   | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
+  | 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED'
   | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
   | 'EXPERIMENTAL_STUDIO_REMOVED'
   | 'FIREFOX_GC_INTERVAL_REMOVED'
@@ -34,6 +40,7 @@ interface ResolvedConfigOption {
    */
   canUpdateDuringTestTime?: boolean
   specificTestingType?: TestingType
+  requireRestartOnChange?: 'server' | 'browser' | 'pingBaseUrl'
 }
 
 interface RuntimeConfigOption {
@@ -45,6 +52,7 @@ interface RuntimeConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
+  requireRestartOnChange?: 'server' | 'browser' | 'pingBaseUrl'
 }
 
 export interface BreakingOption {
@@ -127,6 +135,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
     canUpdateDuringTestTime: true,
+    requireRestartOnChange: 'pingBaseUrl',
   }, {
     name: 'blockHosts',
     defaultValue: null,
@@ -137,16 +146,19 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'clientCertificates',
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: {
       specPattern: defaultSpecPattern.component,
+      indexHtmlFile: 'cypress/support/component-index.html',
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -161,6 +173,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
     // e2e runner overrides
@@ -180,11 +193,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
-    name: 'exit',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -196,30 +204,34 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalSessionSupport',
+    name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
@@ -240,6 +252,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
@@ -323,6 +336,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
@@ -339,12 +353,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
@@ -360,6 +376,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isString,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'video',
     defaultValue: true,
@@ -383,12 +400,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
-    defaultValue: 660,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
     name: 'viewportWidth',
-    defaultValue: 1000,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
@@ -401,11 +418,22 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   },
 ]
 
 const runtimeOptions: Array<RuntimeConfigOption> = [
   {
+    // Internal config field, useful to ignore the e2e specPattern set by the user
+    // or the default one when looking fot CT, it needs to be a config property because after
+    // having the final config that has the e2e property flattened/compacted
+    // we may not be able to get the value to ignore.
+    name: 'additionalIgnorePattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'autoOpen',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -430,6 +458,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // so we don't consider it a "public" option
     isInternal: true,
     canUpdateDuringTestTime: false,
+  }, {
+    name: 'cypressBinaryRoot',
+    defaultValue: path.join(__dirname, '..', '..', '..'),
+    validation: validate.isString,
+    isInternal: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -505,16 +538,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
-  }, {
-    // Internal config field, useful to ignore the e2e specPattern set by the user
-    // or the default one when looking fot CT, it needs to be a config property because after
-    // having the final config that has the e2e property flattened/compacted
-    // we may not be able to get the value to ignore.
-    name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
-    validation: validate.isString,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
   },
 ]
 
@@ -540,6 +563,7 @@ export const breakingOptions: Array<BreakingOption> = [
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
+    isWarning: false,
   }, {
     name: 'componentFolder',
     errorKey: 'COMPONENT_FOLDER_REMOVED',
@@ -561,6 +585,10 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalSessionSupport',
+    errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+    isWarning: true,
+  }, {
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
@@ -574,6 +602,15 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
   }, {
+    name: 'ignoreTestFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'excludeSpecPattern',
+    isWarning: false,
+  }, {
+    name: 'integrationFolder',
+    errorKey: 'INTEGRATION_FOLDER_REMOVED',
+    isWarning: false,
+  }, {
     name: 'nodeVersion',
     value: 'system',
     errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
@@ -586,46 +623,53 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+    isWarning: false,
   }, {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
+    newName: 'specPattern',
     isWarning: false,
   },
 ]
 
 export const breakingRootOptions: Array<BreakingOption> = [
   {
-    name: 'supportFile',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'specPattern',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'excludeSpecPattern',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
     name: 'baseUrl',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
-  },
-  {
+  }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  }, {
+    name: 'excludeSpecPattern',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'indexHtmlFile',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
+    isWarning: false,
+    testingTypes: ['component'],
+  }, {
     name: 'slowTestThreshold',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'specPattern',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'supportFile',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
@@ -633,10 +677,21 @@ export const breakingRootOptions: Array<BreakingOption> = [
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
-  e2e: [],
+  e2e: [
+    {
+      name: 'indexHtmlFile',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
+      isWarning: false,
+    },
+  ],
   component: [
     {
       name: 'baseUrl',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },

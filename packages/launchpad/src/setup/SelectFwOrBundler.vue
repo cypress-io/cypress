@@ -32,6 +32,7 @@
       <span class="text-gray-800 inline-block">
         {{ selectedOptionName }}
       </span>
+      <AlphaLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'alpha'" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -44,6 +45,7 @@
       <span class="text-gray-800 inline-block">
         {{ itemValue.name }}
       </span>
+      <AlphaLabel v-if="itemValue.supportStatus === 'alpha'" />
       <span
         v-if="itemValue.isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -61,18 +63,17 @@
 </template>
 
 <script lang="ts">
-
 interface RootOption {
   name: string
   description?: string
   id: string
-  isSelected?: boolean
   isDetected?: boolean
   disabled?: boolean
 }
 
 interface FrameworkOption extends RootOption {
   type: FrontendFrameworkEnum
+  supportStatus: 'alpha' | 'beta' | 'full'
 }
 
 interface BundlerOption extends RootOption {
@@ -92,6 +93,7 @@ import type {
   SupportedBundlers,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import AlphaLabel from './AlphaLabel.vue'
 
 const { t } = useI18n()
 
@@ -118,6 +120,12 @@ const selectedOptionObject = computed(() => {
   return props.options.find((opt) => opt.type === props.value)
 })
 
+const selectedFrameworkOptionObject = computed(() => {
+  const found = props.options.find((opt) => opt.type === props.value)
+
+  return found ? found as FrameworkOption : undefined
+})
+
 const selectedOptionName = ref(selectedOptionObject.value?.name || '')
 const isDetected = ref(selectedOptionObject.value?.isDetected)
 
@@ -130,5 +138,4 @@ const selectOption = (opt) => {
     emit('selectBundler', opt.type)
   }
 }
-
 </script>

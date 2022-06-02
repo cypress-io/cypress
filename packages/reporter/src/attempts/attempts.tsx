@@ -44,7 +44,7 @@ const StudioError = () => (
   </div>
 )
 
-function renderAttemptContent (model: AttemptModel) {
+function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
   // performance optimization - don't render contents if not open
   return (
     <div className={`attempt-${model.id + 1}`}>
@@ -56,7 +56,7 @@ function renderAttemptContent (model: AttemptModel) {
       </div>
       <div className='attempt-error-region'>
         <TestError model={model} />
-        <StudioError />
+        {studioActive && <StudioError />}
       </div>
     </div>
   )
@@ -65,6 +65,7 @@ function renderAttemptContent (model: AttemptModel) {
 interface AttemptProps {
   model: AttemptModel
   scrollIntoView: Function
+  studioActive: boolean
 }
 
 @observer
@@ -74,7 +75,7 @@ class Attempt extends Component<AttemptProps> {
   }
 
   render () {
-    const { model } = this.props
+    const { model, studioActive } = this.props
 
     // HACK: causes component update when command log is added
     model.commands.length
@@ -90,16 +91,17 @@ class Attempt extends Component<AttemptProps> {
         <Collapsible
           header={<AttemptHeader index={model.id} state={model.state} />}
           headerClass='attempt-name'
+          contentClass='attempt-content'
           isOpen={model.isOpen}
         >
-          {renderAttemptContent(model)}
+          {renderAttemptContent(model, studioActive)}
         </Collapsible>
       </li>
     )
   }
 }
 
-const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
+const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
@@ -108,6 +110,7 @@ const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollInt
         <Attempt
           key={attempt.id}
           scrollIntoView={scrollIntoView}
+          studioActive={studioActive}
           model={attempt}
         />
       )

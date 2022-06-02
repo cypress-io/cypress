@@ -3,18 +3,28 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-    <div class="px-24px pt-86px">
+
+    <MigrationLandingPage
+      v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
+      class="pt-64px"
+      :video-html="videoHtml"
+      @clearLandingPage="wasLandingPageShown = true"
+    />
+    <div
+      v-else
+      class="px-24px pt-86px"
+    >
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="reinitializeCypress"
+        :retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration"
+        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageShown"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -22,13 +32,6 @@
           :gql="query.data.value"
         />
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
-        <template v-else-if="currentProject?.isLoadingNodeEvents">
-          <LaunchpadHeader
-            :title="t('components.loading.config.title')"
-            :description="t('components.loading.config.description')"
-          />
-          <Spinner />
-        </template>
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
@@ -61,10 +64,13 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
-        <ScaffoldLanguageSelect
-          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
-          :gql="query.data.value"
-        />
+        <template v-else-if="!currentProject?.isFullConfigReady">
+          <LaunchpadHeader
+            :title="t('components.loading.config.title')"
+            :description="t('components.loading.config.description')"
+          />
+          <Spinner />
+        </template>
         <OpenBrowser v-else />
       </template>
     </div>
@@ -74,12 +80,11 @@
 
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument } from './generated/graphql'
+import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
-import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
-import BaseError from './error/BaseError.vue'
+import BaseError from '@cy/gql-components/error/BaseError.vue'
 import WarningList from './warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
@@ -87,21 +92,24 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-
+import MigrationLandingPage from './migration/MigrationLandingPage.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
+import { useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
+const wasLandingPageShown = ref(false)
+const online = useOnline()
 
 gql`
 fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
-  ...ScaffoldLanguageSelect
   baseError {
+    id
     ...BaseError
   }
   currentProject {
@@ -110,8 +118,12 @@ fragment MainLaunchpadQueryData on Query {
     isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
+    isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
+  }
+  migration {
+    videoEmbedHtml
   }
   isInGlobalMode
   ...GlobalPage
@@ -127,21 +139,22 @@ query MainLaunchpadQuery {
 `
 
 gql`
-mutation Main_ReinitializeCypress {
-  reinitializeCypress {
+mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
+  resetErrorAndLoadConfig(id: $id) {
     ...MainLaunchpadQueryData
   }
 }
 `
 
-const mutation = useMutation(Main_ReinitializeCypressDocument)
+const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
-const reinitializeCypress = () => {
+const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
-    mutation.executeMutation({})
+    mutation.executeMutation({ id })
   }
 }
-
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const videoHtml = computed(() => query.data.value?.migration?.videoEmbedHtml)
+
 </script>

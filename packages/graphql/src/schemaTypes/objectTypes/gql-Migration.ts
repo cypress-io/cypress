@@ -202,7 +202,7 @@ export const Migration = objectType({
     t.nonNull.string('configFileNameBefore', {
       description: 'the name of the config file to be migrated',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.legacyConfigFile
+        return ctx.migration.legacyConfigFile
       },
     })
 
@@ -224,6 +224,17 @@ export const Migration = objectType({
       description: 'contents of the cypress.json file after conversion',
       resolve: (source, args, ctx) => {
         return ctx.migration.createConfigString()
+      },
+    })
+
+    t.string('videoEmbedHtml', {
+      description: 'Markup for the migration landing page video embed',
+      resolve: (source, args, ctx) => {
+        if (!ctx.lifecycleManager.metaState.needsCypressJsonMigration) {
+          return null
+        }
+
+        return ctx.migration.getVideoEmbedHtml()
       },
     })
 
@@ -273,10 +284,17 @@ export const Migration = objectType({
       },
     })
 
-    t.boolean('hasTypescript', {
+    t.boolean('isUsingTypeScript', {
       description: 'Whether the project has Typescript',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.metaState.hasTypescript
+        return ctx.lifecycleManager.metaState.isUsingTypeScript
+      },
+    })
+
+    t.boolean('shouldMigratePreExtension', {
+      description: 'whether the pre extension info should be displayed',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.shouldMigratePreExtension
       },
     })
   },

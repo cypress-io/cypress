@@ -2,12 +2,16 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../cypress/error_utils'
+import * as cors from '@packages/network/lib/cors'
+import type { ICypress } from '../cypress'
+import type { $Cy } from '../cypress/cy'
+import type { StateFunc } from '../cypress/state'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => ({
-  retry (fn, options, log) {
+export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (...args: any) => any) => ({
+  retry (fn, options, log?) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
@@ -73,6 +77,18 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       }).message
 
       const retryErrProps = modifyErrMsg(error, prependMsg, (msg1, msg2) => {
+        const autOrigin = Cypress.state('autOrigin')
+        const commandOrigin = window.location.origin
+
+        if (!options.isCrossOriginSpecBridge && autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+          const appendMsg = errByPath('miscellaneous.cross_origin_command', {
+            commandOrigin,
+            autOrigin,
+          }).message
+
+          return `${msg2}${msg1}\n\n${appendMsg}`
+        }
+
         return `${msg2}${msg1}`
       })
 

@@ -8,7 +8,19 @@ import assert from 'assert'
 export class FileActions {
   constructor (private ctx: DataContext) {}
 
-  async writeFileInProject (relativePath: string, data: any) {
+  readFileInProject (relativePath: string): string {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot write file in project without active project`)
+    }
+
+    const filePath = path.join(this.ctx.currentProject, relativePath)
+
+    this.ctx.fs.ensureDirSync(path.dirname(filePath))
+
+    return this.ctx.fs.readFileSync(filePath, 'utf-8')
+  }
+
+  writeFileInProject (relativePath: string, data: any) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot write file in project without active project`)
     }
@@ -43,28 +55,6 @@ export class FileActions {
       path.join(this.ctx.currentProject, relativePath),
       path.join(this.ctx.currentProject, toRelativePath),
     )
-  }
-
-  async readFileInProject (relative: string) {
-    if (!this.ctx.currentProject) {
-      throw new Error(`Cannot check file in project exists without active project`)
-    }
-
-    return this.ctx.fs.readFileSync(path.join(this.ctx.currentProject, relative), 'utf-8')
-  }
-
-  async checkIfFileExists (relativePath: string) {
-    if (!this.ctx.currentProject) {
-      throw new Error(`Cannot check file in project exists without active project`)
-    }
-
-    const filePath = path.join(this.ctx.currentProject, relativePath)
-
-    try {
-      return await this.ctx.fs.stat(filePath)
-    } catch {
-      return null
-    }
   }
 
   openFile (filePath: string, line: number = 1, column: number = 1) {

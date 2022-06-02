@@ -1,8 +1,62 @@
-import { BaseStore } from '@packages/runner-shared/src/store'
+import { nanoid } from 'nanoid'
+import { action, observable } from 'mobx'
+import type { AutomationStatus } from '../store'
 
-export class MobxRunnerStore extends BaseStore { }
+const defaults = {
+  url: '',
+  component: {
+    height: 500,
+    width: 500,
+  },
+  e2e: {
+    height: 660,
+    width: 1000,
+  },
+} as const
 
-let mobxRunnerStore: MobxRunnerStore
+export class MobxRunnerStore {
+  @observable spec?: Cypress.Spec
+  @observable specs: Cypress.Spec[] = []
+  @observable specRunId?: string
+  @observable isLoading = true
+  @observable width: number
+  @observable height: number
+  @observable automation?: AutomationStatus
+
+  constructor (testingType: Cypress.TestingType) {
+    this.width = defaults[testingType].width
+    this.height = defaults[testingType].height
+  }
+
+  @action setSpec (spec: Cypress.Spec | undefined) {
+    this.spec = spec
+    this.specRunId = nanoid()
+  }
+
+  @action checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
+    const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
+
+    this.specs.forEach((oldSpec) => {
+      if (!newSpecsAbsolutes.has(oldSpec.absolute) && this.spec?.absolute === oldSpec.absolute) {
+        this.spec = undefined
+      }
+    })
+  }
+
+  @action setSpecs (specs: Cypress.Spec[]) {
+    this.checkCurrentSpecStillExists(specs)
+    this.specs = specs
+  }
+
+  @action setIsLoading (isLoading: boolean) {
+    this.isLoading = isLoading
+  }
+
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
+  }
+}
 
 export function getMobxRunnerStore () {
   if (!mobxRunnerStore) {
@@ -17,3 +71,5 @@ export const initializeMobxStore = (testingType: Cypress.TestingType) => {
 
   return mobxRunnerStore
 }
+
+let mobxRunnerStore: MobxRunnerStore

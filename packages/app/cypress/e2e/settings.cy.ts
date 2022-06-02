@@ -6,7 +6,7 @@ describe('App: Settings', () => {
   })
 
   beforeEach(() => {
-    cy.openProject('todos')
+    cy.openProject('todos', ['--config', 'projectId=fromCli'])
   })
 
   it('visits settings page', () => {
@@ -27,23 +27,10 @@ describe('App: Settings', () => {
     cy.get('button').contains('Log In')
   })
 
-  it('can reconfigure a project', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp('settings')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.project, 'reconfigureProject')
-    })
-
-    cy.findByText('Reconfigure Project').click()
-    cy.withRetryableCtx((ctx) => {
-      expect(ctx.actions.project.reconfigureProject).to.have.been.called
-    })
-  })
-
   describe('Cloud Settings', () => {
-    it('shows the projectId section when there is a projectId', () => {
+    it('shows the projectId section when there is a projectId and shows override from CLI', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
 
       cy.startAppServer('e2e')
@@ -51,10 +38,11 @@ describe('App: Settings', () => {
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
+      cy.get('[data-cy="code-box"]').should('contain', 'fromCli')
       cy.findByText('Copy').click()
       cy.findByText('Copied!').should('be.visible')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('abc123')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
       })
     })
 
@@ -75,9 +63,9 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
-      cy.get('[data-cy="record-key"]').should('contain', '***')
+      cy.get('[data-cy="code-box"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
-      cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      cy.get('[data-cy="code-box"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
     it('opens cloud settings when clicking on "Manage Keys"', () => {
@@ -89,6 +77,57 @@ describe('App: Settings', () => {
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
+    })
+
+    it('shows deferred remote cloud data after navigating from a run', { retries: 0 }, () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        // Simulate a timeout so we don't resolve immediately, previously visiting the test runner
+        // and then leaving would cause this to fail, because it removed the event listeners
+        // for graphql-refetch. By namespacing the socket layer, we avoid the events of the
+        // runner from impacting the cloud behavior
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        return obj.result
+      })
+
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('.spec-list-container').scrollTo('bottom')
+      // Visit the test to trigger the ws.off() for the TR websockets
+      cy.contains('test1.js').click()
+      cy.waitForSpecToFinish()
+      // Wait for the test to pass, so the test is completed
+      cy.get('.passed > .num').should('contain', 1)
+      cy.get('[href="#/settings"]').click()
+      cy.contains('Dashboard Settings').click()
+      // Assert the data is not there before it arrives
+      cy.contains('Record Key').should('not.exist')
+      cy.contains('Record Key')
+    })
+
+    it('clears nested cloud data (record key) upon logging out', () => {
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx.actions.auth, 'logout')
+      })
+
+      cy.get('[href="#/settings"]').click()
+      cy.contains('Dashboard Settings').click()
+      cy.contains('Record Key').should('exist')
+      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('user-avatar-title').click()
+      cy.findByRole('button', { name: 'Log Out' }).click()
+
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx.actions.auth.logout).to.have.been.calledOnce
+      })
+
+      cy.get('[href="#/settings"]').click()
+      cy.contains('Dashboard Settings').click()
+      cy.contains('Record Key').should('not.exist')
     })
   })
 
@@ -166,10 +205,15 @@ describe('App: Settings', () => {
           })
         })
 
-        cy.get('[data-cy="experiment-experimentalSessionSupport"]').within(() => {
+        cy.get('[data-cy="experiment-experimentalSessionAndOrigin"]').within(() => {
           cy.validateExternalLink({
             name: 'cy.session()',
             href: 'https://on.cypress.io/session',
+          })
+
+          cy.validateExternalLink({
+            name: 'cy.origin()',
+            href: 'https://on.cypress.io/origin',
           })
         })
 
@@ -202,19 +246,19 @@ describe('App: Settings', () => {
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
         cy.get('.bg-teal-100').contains('config')
-        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-orange-100').contains('env')
         cy.get('.bg-red-50').contains('cli')
       })
 
       cy.get('[data-cy="config-code"]').within(() => {
-        cy.get('.bg-teal-100').contains('tests/_fixtures')
-        cy.get('.bg-teal-100').contains('abc123')
-        cy.get('.bg-teal-100').contains('tests/**/*')
-        cy.get('.bg-teal-100').contains('tests/_support/spec_helper.js')
-        cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
-        cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
-        cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
-        cy.get('.bg-red-50').contains('4455')
+        cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*')
+        cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('fromCli')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
 
@@ -230,6 +274,35 @@ describe('App: Settings', () => {
       cy.findByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
+      })
+    })
+
+    it('highlights values set via config file, envFile, env, or CLI in the appropriate color with default specPattern', () => {
+      cy.scaffoldProject('config-with-js')
+      cy.openProject('config-with-js')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-legend"]').within(() => {
+        cy.get('.bg-gray-50').contains('default')
+        cy.get('.bg-teal-100').contains('config')
+        cy.get('.bg-orange-100').contains('env')
+        cy.get('.bg-red-50').contains('cli')
+      })
+
+      cy.get('[data-cy="config-code"]').within(() => {
+        cy.get('[data-cy-config="default"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
+        cy.get('[data-cy-config="config"]').contains('500')
+        cy.get('[data-cy-config="config"]').contains('10000')
+        cy.get('[data-cy-config="config"]').contains('false')
+        cy.get('[data-cy-config="config"]').contains('20')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
   })
@@ -249,12 +322,16 @@ describe('App: Settings', () => {
             binary: '/usr/bin/well-known',
             name: 'Well known editor',
           },
+          {
+            id: 'null-binary-editor',
+            name: 'Null binary editor',
+          },
         ]
 
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
       })
 
-      cy.__incorrectlyVisitAppWithIntercept('settings')
+      cy.visitApp('settings')
       cy.contains('Device Settings').click()
     })
 
@@ -306,6 +383,23 @@ describe('App: Settings', () => {
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
+
+    it('handles null binary field in editor', () => {
+      cy.contains('Choose your editor...').click()
+      cy.contains('Null binary editor').click()
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('{"preferredEditorBinary":null')
+      })
+
+      // navigate away and come back
+      // preferred editor selected from dropdown should have been persisted
+      cy.visitApp()
+      cy.get('[href="#/settings"]').click()
+      cy.wait(200)
+      cy.get('[data-cy="Device Settings"]').click()
+
+      cy.get('[data-cy="custom-editor"]').should('not.exist')
+    })
   })
 })
 
@@ -336,7 +430,13 @@ describe('App: Settings without cloud', () => {
 
       expect(browsers).to.have.length.greaterThan(1)
 
-      cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
+      cy.contains(`browsers: [`)
+      cy.contains(`name: 'chrome',`)
+      cy.contains(`family: 'chromium',`)
+      cy.contains(`channel: 'stable',`)
+      cy.contains(`displayName: 'Chrome',`)
+
+      cy.percySnapshot()
     })
   })
 })

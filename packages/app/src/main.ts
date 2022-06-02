@@ -38,9 +38,11 @@ app.use(Toast, {
   closeOnClick: false,
 })
 
-app.use(urql, makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }))
-app.use(createRouter())
-app.use(createI18n())
-app.use(createPinia())
+makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+  app.use(urql, client)
+  app.use(createRouter())
+  app.use(createI18n())
+  app.use(createPinia())
 
-app.mount('#app')
+  app.mount('#app')
+})

@@ -1,6 +1,8 @@
-module.exports = {
-  'integrationFolder': 'cypress/tests',
-  'e2e': {
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  e2e: {
+    specPattern: 'cypress/tests/**/*',
     setupNodeEvents (on, config) {
       const webpackPreprocessor = require('./index')
 
@@ -9,4 +11,4 @@ module.exports = {
       return config
     },
   },
-}
+})

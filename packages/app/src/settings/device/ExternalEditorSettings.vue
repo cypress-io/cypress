@@ -35,7 +35,7 @@ const { t } = useI18n()
 
 const setPreferredBinaryEditor = useMutation(ExternalEditorSettings_SetPreferredEditorBinaryDocument)
 
-function handleChoseEditor (binary: string) {
+function handleChoseEditor (binary: string | null) {
   setPreferredBinaryEditor.executeMutation({ value: JSON.stringify({ preferredEditorBinary: binary }) })
 }
 

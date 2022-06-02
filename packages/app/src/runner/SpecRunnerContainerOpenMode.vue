@@ -12,6 +12,7 @@ import { useSpecStore } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
 import { useUnifiedRunner } from './unifiedRunner'
 import { useRouter, useRoute } from 'vue-router'
+import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
   gql: SpecRunnerFragment
@@ -21,24 +22,23 @@ const specStore = useSpecStore()
 const router = useRouter()
 const route = useRoute()
 
-const { initialized, watchSpec } = useUnifiedRunner()
-
 const specs = computed(() => {
   return props.gql.currentProject?.specs ?? []
 })
 
-watchSpec(specs)
+const { initialized, watchSpecs } = useUnifiedRunner()
+
+watchSpecs(specs)
 
 specStore.$subscribe((mutation, state) => {
-  const file = route.query.file as string
-
-  const shouldRedirect = route.name === 'SpecRunner' && file && state.activeSpec === null
+  const queryFile = getPathForPlatform(route.query.file as string)
+  const shouldRedirect = route.name === 'SpecRunner' && queryFile && state.activeSpec === null
 
   if (shouldRedirect) {
     router.push({
       name: 'Specs',
       params: {
-        unrunnable: file,
+        unrunnable: queryFile,
       },
     })
   }

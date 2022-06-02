@@ -13,11 +13,12 @@
         <Icon
           v-if="value"
           :icon="icons[value.id]"
-          class="text-md"
+          class="text-md text-gray-500"
+          icon-class="icon-dark-gray-500"
         />
         <i-cy-terminal_x16
           v-else
-          class="text-md text-gray-600"
+          class="text-md icon-dark-gray-500"
         />
       </template>
       <template #item-prefix="{ value }">
@@ -31,19 +32,19 @@
 
   <div
     v-if="editorToUse === 'custom'"
-    class="flex py-2 items-center"
+    class="flex py-16px pb-4px items-center"
   >
     <div class="w-400px">
       <Input
         id="customPath"
         v-model="customBinary"
         data-cy="custom-editor"
-        input-classes="text-sm"
+        input-classes="text-sm text-gray-500"
         :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
           <i-cy-technology-command-line_x16
-            class="text-gray-500"
+            class="text-md icon-dark-gray-500"
           />
         </template>
       </Input>
@@ -125,7 +126,7 @@ type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][
 type EditorType = 'found' | 'custom'
 
 const selectedWellKnownEditor: Editor | undefined = props.gql.localSettings.availableEditors.find((editor) => {
-  return editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
+  return editor.binary && editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
 })
 
 const customBinary = ref<string>(
@@ -143,7 +144,7 @@ const selectedEditor = ref<Editor | undefined>(
 )
 
 const emit = defineEmits<{
-  (e: 'choseEditor', binary: string): void
+  (e: 'choseEditor', binary: string | null): void
 }>()
 
 watch(customBinary, (val) => {

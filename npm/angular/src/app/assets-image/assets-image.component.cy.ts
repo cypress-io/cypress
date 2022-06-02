@@ -7,7 +7,7 @@ describe('AssetsImageComponent', () => {
   it.skip('should create', () => {
     initEnv(AssetsImageComponent)
     mount(AssetsImageComponent)
-    // add "fileServerFolder": "src" in cypress.config.{ts|js}
+    // add "fileServerFolder": "src" in cypress.config.{js,ts,mjs,cjs}
     cy.get('img#noSlash')
     .should('be.visible')
     .and(($img) => {
@@ -29,7 +29,7 @@ describe('AssetsImageComponent', () => {
   it.skip('should create with AppModule', () => {
     initEnv({ imports: [AppModule] })
     mount(AssetsImageComponent)
-    // add "fileServerFolder": "src" in cypress.config.{ts|js}
+    // add "fileServerFolder": "src" in cypress.config.{js,ts,mjs,cjs}
     cy.get('img#noSlash')
     .should('be.visible')
     .and(($img) => {

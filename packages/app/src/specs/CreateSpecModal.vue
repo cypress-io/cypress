@@ -18,13 +18,13 @@
       <component
         :is="generator.entry"
         v-if="generator"
-        :key="generator.id"
+        :key="`${generator.id}-${iteration}`"
         v-model:title="title"
-        :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
-        type="e2e"
+        :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
-        @restart="currentGeneratorId = undefined"
+        :other-generators="filteredGenerators.length > 1"
+        @restart="currentGeneratorId = undefined; iteration++"
         @close="close"
       />
       <div
@@ -33,6 +33,7 @@
       >
         <CreateSpecCards
           :gql="props.gql"
+          :generators="filteredGenerators"
           @select="currentGeneratorId = $event"
         />
       </div>
@@ -41,7 +42,7 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators } from './generators'
+import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -64,6 +65,11 @@ const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
+// When restarting the process re-paint the whole dialog
+// on each restart we need to increment the iteration
+// to have a different key for the generator
+const iteration = ref(0)
+
 gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
@@ -72,8 +78,6 @@ fragment CreateSpecModal on Query {
     fileExtensionToUse
     defaultSpecFileName
     ...EmptyGenerator
-    ...ComponentGeneratorStepOne_codeGenGlob
-    ...StoryGeneratorStepOne_codeGenGlob
   }
 }
 `
@@ -86,7 +90,7 @@ const title = ref(t('createSpec.newSpecModalTitle'))
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
-  return null
+  return singleGenerator.value
 })
 
 const helpLink = computed(() => {
@@ -98,20 +102,12 @@ const helpLink = computed(() => {
 })
 
 const specFileName = computed(() => {
-  const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
-
-  const fileName = props.gql.currentProject?.defaultSpecFileName ?? `cypress/e2e/filename.cy.${extension}`
-
-  return getPathForPlatform(fileName)
+  return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const codeGenGlob = computed(() => {
-  if (!generator.value) {
-    return null
-  }
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
 
-  return props.gql.currentProject?.codeGenGlobs[generator.value.id]
-})
+const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')

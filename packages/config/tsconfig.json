@@ -4,8 +4,7 @@
     "src/*.ts"
   ],
   "exclude": [
-    "test",
-    "script"
+    "test"
   ],
   "compilerOptions": {
     "strict": true,

@@ -1,27 +1,31 @@
 <template>
-  <div
-    :class="{
-      'mx-auto border-1 border-gray-100 rounded my-32px flex flex-col': !noContainer
-    }"
-  >
-    <div class="flex-grow">
-      <slot :backFn="backFn" />
-    </div>
-
-    <ButtonBar
-      v-if="!noContainer"
-      :next-fn="props.nextFn"
-      :can-navigate-forward="canNavigateForward"
-      :back-fn="backFn"
-      :alt-fn="altFn"
-      :next="nextLabel"
-      :show-next="showNext"
-      :back="backLabel"
-      :alt="alt"
-      :main-variant="mainButtonVariant"
+  <div class="mx-auto my-32px">
+    <div
+      v-if="$slots.accessory"
+      class="w-full mb-24px"
     >
-      <slot name="button-bar" />
-    </ButtonBar>
+      <slot name="accessory" />
+    </div>
+    <div class="w-full border-1 border-gray-100 rounded flex flex-col">
+      <div class="flex-grow">
+        <slot :backFn="backFn" />
+      </div>
+      <ButtonBar
+        :next-fn="props.nextFn"
+        :can-navigate-forward="canNavigateForward"
+        :back-fn="backFn"
+        :alt-fn="altFn"
+        :next="nextLabel"
+        :show-next="showNext"
+        :back="backLabel"
+        :alt="alt"
+        :main-variant="mainButtonVariant"
+        :skip="skipLabel"
+        :skip-fn="skipFn"
+      >
+        <slot name="button-bar" />
+      </ButtonBar>
+    </div>
   </div>
 </template>
 
@@ -37,29 +41,32 @@ const props = withDefaults(
   defineProps<{
     next?: string
     back?: string
+    skip?: string
     alt?: string
     showNext?: boolean
     canNavigateForward?: boolean
-    noContainer?: boolean
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any
     backFn?: (...args: unknown[]) => any
+    skipFn?: (...args: unknown[]) => any
     mainButtonVariant?: ButtonVariants
   }>(), {
     next: undefined,
     showNext: true,
     back: undefined,
+    skip: undefined,
     alt: undefined,
     canNavigateForward: undefined,
-    noContainer: undefined,
     altFn: undefined,
     nextFn: undefined,
     backFn: undefined,
+    skipFn: undefined,
     mainButtonVariant: 'primary',
   },
 )
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))
+const skipLabel = computed(() => props.skip || t('setupPage.step.skip'))
 
 </script>

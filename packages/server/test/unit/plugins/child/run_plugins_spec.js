@@ -8,7 +8,7 @@ const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
 const util = require(`../../../../lib/plugins/util`)
 const resolve = require(`../../../../lib/util/resolve`)
 const browserUtils = require(`../../../../lib/browsers/utils`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
 
 const colorCodeRe = /\[[0-9;]+m/gm

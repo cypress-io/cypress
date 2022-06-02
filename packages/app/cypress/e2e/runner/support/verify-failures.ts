@@ -3,19 +3,24 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
-const verifyIdeOpen = ({ fileName, action, hasPreferredIde }) => {
+const verifyIdeOpen = ({ fileName, action, hasPreferredIde, ideLine, ideColumn }) => {
   if (hasPreferredIde) {
-    cy.intercept('mutation-SpecRunnerOpenMode_OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+    cy.withCtx((ctx, o) => {
+      // @ts-expect-error - check if we've stubbed it already, only need to stub it once
+      if (!ctx.actions.file.openFile.restore?.sinon) {
+        o.sinon.stub(ctx.actions.file, 'openFile')
+      }
+    })
 
     action()
 
-    cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.filePath).to.include(fileName)
-    })
+    cy.withCtx((ctx, o) => {
+      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`${o.fileName}$`)), o.ideLine, o.ideColumn)
+    }, { fileName, ideLine, ideColumn })
   } else {
     action()
 
-    cy.contains(defaultMessages.globalPage.selectPreferredEditor).should('be.visible')
+    cy.contains(defaultMessages.globalPage.externalEditorPreferences).should('be.visible')
     cy.findByRole('button', { name: defaultMessages.actions.close }).click()
   }
 }
@@ -35,6 +40,8 @@ const verifyFailure = (options) => {
     fileName,
     uncaught = false,
     uncaughtMessage,
+    ideLine,
+    ideColumn,
   } = options
   let { regex, line, codeFrameText } = options
 
@@ -119,6 +126,8 @@ const verifyFailure = (options) => {
         cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
         .click('left')
       },
+      ideLine,
+      ideColumn,
     })
   }
 
@@ -164,6 +173,8 @@ const verifyFailure = (options) => {
         cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', fileName)
         .click()
       },
+      ideLine,
+      ideColumn,
     })
   }
 }

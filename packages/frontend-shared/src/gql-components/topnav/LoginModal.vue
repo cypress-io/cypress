@@ -30,7 +30,7 @@
             keypath="topNav.login.bodyInitial"
           >
             <ExternalLink
-              href="https://on.cypress.io/dashboard"
+              href="https://on.cypress.io/dashboard-introduction"
             >
               {{ t('topNav.login.cloud') }}
             </ExternalLink>

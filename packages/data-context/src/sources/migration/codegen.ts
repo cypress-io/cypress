@@ -2,7 +2,6 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
@@ -12,7 +11,11 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
-import type { LegacyCypressConfigJson } from '..'
+import { isDefaultSupportFile, LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+import _ from 'lodash'
+import { defineConfigAvailable, getBreakingKeys } from '@packages/config'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -39,11 +42,13 @@ export interface CreateConfigOptions {
   hasPluginsFile: boolean
   hasComponentTesting: boolean
   projectRoot: string
-  hasTypescript: boolean
+  isUsingTypeScript: boolean
+  isProjectUsingESModules: boolean
+  shouldAddCustomE2ESpecPattern: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
-  const newConfig = reduceConfig(cfg)
+  const newConfig = reduceConfig(cfg, options)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
   return createCypressConfig(newConfig, relativePluginPath, options)
@@ -76,6 +81,7 @@ export async function initComponentTestingMigration (
   const watcher = chokidar.watch(
     watchPaths, {
       cwd: projectRoot,
+      ignorePermissionErrors: true,
     },
   )
 
@@ -142,24 +148,6 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
-// If they are running an old version of Cypress
-// or running Cypress that isn't installed in their
-// project's node_modules, we don't want to include
-// defineConfig(/***/) in their cypress.config.js,
-// since it won't exist.
-function defineConfigAvailable (projectRoot: string) {
-  try {
-    const cypress = require.resolve('cypress', {
-      paths: [projectRoot],
-    })
-    const api = require(cypress)
-
-    return 'defineConfig' in api
-  } catch (e) {
-    return false
-  }
-}
-
 function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
@@ -168,22 +156,28 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
-    if (options.hasTypescript) {
-      return formatConfig(
-        `import { defineConfig } from 'cypress'
+    if (options.isUsingTypeScript || options.isProjectUsingESModules) {
+      return formatConfig(dedent`
+        import { defineConfig } from 'cypress'
   
-        export default defineConfig({${globalString}${e2eString}${componentString}})`,
-      )
+        export default defineConfig({
+          ${globalString}
+          ${e2eString}
+          ${componentString}
+        })`)
     }
 
-    return formatConfig(
-      `const { defineConfig } = require('cypress')
+    return formatConfig(dedent`
+      const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
-    )
+      module.exports = defineConfig({
+        ${globalString}
+        ${e2eString}
+        ${componentString}
+      })`)
   }
 
-  if (options.hasTypescript) {
+  if (options.isUsingTypeScript || options.isProjectUsingESModules) {
     return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 
@@ -195,11 +189,15 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (createConfigOptions.shouldAddCustomE2ESpecPattern && !options.specPattern) {
+    options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
+  }
+
   if (!createConfigOptions.hasPluginsFile || !pluginPath) {
     return dedent`
       e2e: {
         setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
-      }
+      },
     `
   }
 
@@ -246,7 +244,11 @@ export interface RelativeSpec {
  *
  * NOTE: this is what we use to see if CT/E2E is set up
  */
-export async function hasSpecFile (projectRoot: string, folder: string, glob: string | string[]): Promise<boolean> {
+export async function hasSpecFile (projectRoot: string, folder: string | false, glob: string | string[]): Promise<boolean> {
+  if (!folder) {
+    return false
+  }
+
   return (await globby(glob, {
     cwd: path.join(projectRoot, folder),
     onlyFiles: true,
@@ -285,7 +287,7 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
   const afterParts = formatMigrationFile(
     defaultOldSupportFile,
     new RegExp(supportFileRegexps.e2e.beforeRegexp),
-  ).map(substitute)
+  ).map((part) => substitute(part))
 
   return {
     testingType: 'e2e',
@@ -306,21 +308,25 @@ export interface SpecToMove {
 }
 
 export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
-  await Promise.all(specs.map(async (spec) => {
+  await Promise.all(specs.map((spec) => {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    if (from !== to) {
-      await fs.move(from, to)
+    if (from === to) {
+      return
     }
+
+    return fs.move(from, to)
   }))
 }
 
 export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
+  const e2ePath = path.join(projectRoot, 'cypress', 'e2e')
 
   try {
-    fs.rmSync(integrationPath, { recursive: true })
+    await fs.copy(integrationPath, e2ePath, { recursive: true })
+    await fs.remove(integrationPath)
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
@@ -339,7 +345,7 @@ export function renameSupportFilePath (relative: string) {
   return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
-export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
+export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfigOptions): ConfigOptions {
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     switch (key) {
       case 'pluginsFile':
@@ -357,32 +363,42 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
         const { testFiles, ignoreTestFiles, ...rest } = value
 
         // don't include if it's the default! No need.
-        const specPattern = getSpecPattern(cfg, key)
+        const specPattern = getSpecPattern(cfg, key, options.shouldAddCustomE2ESpecPattern)
         const ext = '**/*.cy.{js,jsx,ts,tsx}'
         const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
         const isDefaultCT = key === 'component' && specPattern === ext
 
+        const breakingKeys = getBreakingKeys()
+        const restWithoutBreakingKeys = _.omit(rest, breakingKeys)
+        const existingWithoutBreakingKeys = _.omit(acc[key], breakingKeys)
+
         if (isDefaultE2E || isDefaultCT) {
           return {
             ...acc, [key]: {
-              ...rest,
-              ...acc[key],
+              ...restWithoutBreakingKeys,
+              ...existingWithoutBreakingKeys,
             },
           }
         }
 
         return {
           ...acc, [key]: {
-            ...rest,
-            ...acc[key],
+            ...restWithoutBreakingKeys,
+            ...existingWithoutBreakingKeys,
             specPattern,
           },
         }
       }
       case 'integrationFolder':
+        // If the integration folder is set, but the value is the same as the default legacy one
+        // we do not want to update the config value, we keep using the new default.
+        if (val === legacyIntegrationFolder) {
+          return acc
+        }
+
         return {
           ...acc,
-          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e', options.shouldAddCustomE2ESpecPattern) },
         }
       case 'componentFolder':
         return {
@@ -392,7 +408,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
       case 'testFiles':
         return {
           ...acc,
-          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e', options.shouldAddCustomE2ESpecPattern) },
           component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
         }
       case 'ignoreTestFiles':
@@ -402,11 +418,19 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
           component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
+        // If the supportFile is set, but is the same value as the default one; where
+        // we migrate it, we do not want to put the legacy value in the migrated config.
+        // It can be .ts or .js
+        if (isDefaultSupportFile(val)) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, supportFile: val },
         }
       case 'baseUrl':
+      case 'experimentalSessionAndOrigin':
         return {
           ...acc,
           e2e: { ...acc.e2e, [key]: val },
@@ -423,18 +447,18 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: TestingType, shouldAddCustomE2ESpecPattern: boolean = false) {
+  const specPattern = cfg[testingType]?.testFiles ?? cfg.testFiles ?? (testingType === 'e2e' && shouldAddCustomE2ESpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
-  if (testType === 'component' && customComponentFolder) {
+  if (testingType === 'component' && customComponentFolder) {
     return `${customComponentFolder}/${specPattern}`
   }
 
-  if (testType === 'e2e') {
+  if (testingType === 'e2e') {
     const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
-    if (customIntegrationFolder) {
+    if (customIntegrationFolder && customIntegrationFolder !== legacyIntegrationFolder) {
       return `${customIntegrationFolder}/${specPattern}`
     }
 
@@ -444,11 +468,81 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
-export function formatConfig (config: string) {
-  return prettier.format(config, {
-    semi: false,
-    singleQuote: true,
-    endOfLine: 'lf',
-    parser: 'babel',
-  })
+function formatWithBundledBabel (config: string) {
+  const ast = parse(config)
+
+  let { code } = generate(ast, {}, config)
+  // By default babel generates imports like this:
+  // const {
+  //   defineConfig
+  // } = require('cypress');
+  // So we replace them with a one-liner, since we know this will never
+  // be more than one import.
+  //
+  // Babel also adds empty lines, for example:
+  //
+  // export default defineConfig({
+  //   component: {
+  //   },
+  //               <===== empty line
+  //   e2e: {
+  //
+  //   }
+  // })
+  // Which we don't want, so we change those to single carriage returns.
+  const replacers = [
+    {
+      from: dedent`
+        const {
+          defineConfig
+        } = require('cypress');
+      `,
+      to: dedent`
+        const { defineConfig } = require('cypress');
+      `,
+    },
+    {
+
+      from: dedent`
+        import {
+          defineConfig
+        } from 'cypress';
+      `,
+      to: dedent`
+        import { defineConfig } from 'cypress';
+      `,
+    },
+    {
+      from: `,\n\n`,
+      to: `,\n`,
+    },
+  ]
+
+  for (const rep of replacers) {
+    if (code.includes(rep.from)) {
+      code = code.replaceAll(rep.from, rep.to)
+    }
+  }
+
+  return code
+}
+
+export function formatConfig (config: string): string {
+  try {
+    const prettier = require('prettier') as typeof import('prettier')
+
+    return prettier.format(config, {
+      semi: false,
+      singleQuote: true,
+      endOfLine: 'lf',
+      parser: 'babel',
+    })
+  } catch (e) {
+    // If they do not have prettier
+    // We do a basic format using babel, which we
+    // bundle as part of the binary.
+    // We don't ship a fully fledged formatter like
+    // prettier, since it's massively bloats the bundle.
+    return formatWithBundledBabel(config)
+  }
 }

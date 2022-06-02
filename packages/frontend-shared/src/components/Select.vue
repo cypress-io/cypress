@@ -19,7 +19,7 @@
         class="relative"
       >
         <ListboxButton
-          class="bg-white border rounded text-left w-full py-2 pr-4 pl-3 text-gray-800 hocus-default group relative sm:text-sm"
+          class="bg-white border rounded text-left w-full py-2 px-4 text-gray-800 hocus-default group relative sm:text-sm"
 
           :class="open ? 'cursor-default default-ring' : 'cursor-pointer border-gray-100'"
         >
@@ -81,7 +81,7 @@
               :disabled="option.disabled || false"
             >
               <li
-                class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-3 block truncate select-none relative "
+                class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
                   'font-medium bg-jade-50': option.isSelected,
                   'bg-gray-50': active,

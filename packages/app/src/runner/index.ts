@@ -100,6 +100,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
+    autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
       recorder: getEventManager().studioRecorder,
@@ -120,16 +121,17 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner (namespace: AutomationElementId) {
+function setupRunner () {
   const mobxRunnerStore = getMobxRunnerStore()
   const runnerUiStore = useRunnerUiStore()
+  const config = getRunnerConfigFromWindow()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
-    element: `${namespace}-string`,
+    element: getAutomationElementId(),
   })
 
-  getEventManager().start(window.UnifiedRunner.config)
+  getEventManager().start(config)
 
   const autStore = useAutStore()
 
@@ -186,13 +188,36 @@ export async function teardown () {
 }
 
 /**
+ * Add a cross origin iframe for cy.origin support
+ */
+export function addCrossOriginIframe (location) {
+  const id = `Spec Bridge: ${location.originPolicy}`
+
+  // if it already exists, don't add another one
+  if (document.getElementById(id)) {
+    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+
+    return
+  }
+
+  addIframe({
+    id,
+    // the cross origin iframe is added to the document body instead of the
+    // container since it needs to match the size of the top window for screenshots
+    $container: document.body,
+    className: 'spec-bridge-iframe',
+    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+  })
+}
+
+/**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
  *
  */
 function runSpecCT (spec: SpecFile) {
   // TODO: UNIFY-1318 - figure out how to manage window.config.
-  const config = window.UnifiedRunner.config
+  const config = getRunnerConfigFromWindow()
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
@@ -228,15 +253,17 @@ function runSpecCT (spec: SpecFile) {
 }
 
 /**
- * Create a Spec IFrame. Used for loading the spec to execute in E2E
+ * Create an IFrame. If the Iframe is the spec iframe,
+ * this function is used for loading the spec to execute in E2E
  */
-function createSpecIFrame (specSrc: string) {
-  const el = document.createElement('iframe')
+function addIframe ({ $container, id, src, className }) {
+  const $addedIframe = document.createElement('iframe')
 
-  el.id = `Your Spec: '${specSrc}'`,
-  el.className = 'spec-iframe'
+  $addedIframe.id = id,
+  $addedIframe.className = className
 
-  return el
+  $container.appendChild($addedIframe)
+  $addedIframe.setAttribute('src', src)
 }
 
 // this is how the Cypress driver knows which spec to run.
@@ -255,7 +282,7 @@ function setSpecForDriver (spec: SpecFile) {
  */
 function runSpecE2E (spec: SpecFile) {
   // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
-  const config = window.UnifiedRunner.config
+  const config = getRunnerConfigFromWindow()
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
@@ -282,20 +309,37 @@ function runSpecE2E (spec: SpecFile) {
 
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  // Remove the spec bridge iframe
+  document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
+    el.remove()
+  })
+
   autIframe.showInitialBlankContentsE2E()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
 
-  const $specIframe = createSpecIFrame(specSrc)
+  // FIXME: BILL Determine where to call client with to force browser repaint
+  /**
+   * call the clientWidth to force the browser to repaint for viewport changes
+   * otherwise firefox may fail when changing the viewport in between origins
+   * this.refs.container.clientWidth
+   */
 
   // append to document, so the iframe will execute the spec
-  $container.appendChild($specIframe)
-
-  $specIframe.src = specSrc
+  addIframe({
+    $container,
+    src: specSrc,
+    id: `Your Spec: '${specSrc}'`,
+    className: 'spec-iframe',
+  })
 
   // initialize Cypress (driver) with the AUT!
   getEventManager().initialize($autIframe, config)
+}
+
+export function getRunnerConfigFromWindow () {
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
 }
 
 /**
@@ -310,7 +354,7 @@ async function initialize () {
 
   isTorndown = false
 
-  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  const config = getRunnerConfigFromWindow()
 
   if (isTorndown) {
     return
@@ -323,21 +367,17 @@ async function initialize () {
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
   autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-  // just stick config on window until we figure out how we are
-  // going to manage it
-  window.UnifiedRunner.config = config
-
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
-    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+    const store = initializeMobxStore(window.__CYPRESS_TESTING_TYPE__)
 
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
 /**
@@ -370,19 +410,24 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
-  if (window.UnifiedRunner.config.testingType === 'e2e') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(spec)
   }
 
-  if (window.UnifiedRunner.config.testingType === 'component') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
     return runSpecCT(spec)
   }
 
-  throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
+  throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
+}
+
+function getAutomationElementId (): AutomationElementId {
+  return `${window.__CYPRESS_CONFIG__.namespace}-string`
 }
 
 export const UnifiedRunnerAPI = {
   initialize,
   executeSpec,
   teardown,
+  getAutomationElementId,
 }

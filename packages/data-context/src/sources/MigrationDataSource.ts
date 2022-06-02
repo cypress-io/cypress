@@ -18,6 +18,7 @@ import _ from 'lodash'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
+import path from 'path'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -31,6 +32,8 @@ export type LegacyCypressConfigJson = Partial<{
   integrationFolder: string
   testFiles: string | string[]
   ignoreTestFiles: string | string[]
+  env: { [key: string]: any }
+  [index: string]: any
 }>
 
 export interface MigrationFile {
@@ -57,6 +60,63 @@ export class MigrationDataSource {
     }
 
     return this.ctx.coreData.migration.legacyConfigForMigration
+  }
+
+  get legacyConfigProjectId () {
+    return this.legacyConfig.projectId || this.legacyConfig.e2e?.projectId
+  }
+
+  get shouldMigratePreExtension () {
+    return !this.legacyConfigProjectId
+  }
+
+  get legacyConfigFile () {
+    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
+      return this.ctx.modeOptions.configFile
+    }
+
+    return 'cypress.json'
+  }
+
+  legacyConfigFileExists (): boolean {
+    // If we aren't in a current project we definitely don't have a legacy config file
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    const configFilePath = path.isAbsolute(this.legacyConfigFile) ? this.legacyConfigFile : path.join(this.ctx.currentProject, this.legacyConfigFile)
+    const legacyConfigFileExists = this.ctx.fs.existsSync(configFilePath)
+
+    return Boolean(legacyConfigFileExists)
+  }
+
+  needsCypressJsonMigration (): boolean {
+    const legacyConfigFileExists = this.legacyConfigFileExists()
+
+    return this.ctx.lifecycleManager.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExists)
+  }
+
+  async getVideoEmbedHtml () {
+    if (this.ctx.coreData.migration.videoEmbedHtml) {
+      return this.ctx.coreData.migration.videoEmbedHtml
+    }
+
+    const versionData = await this.ctx.versions.versionData()
+    const embedOnLink = `https://on.cypress.io/v10-video-embed/${versionData.current.version}`
+
+    try {
+      const response = await this.ctx.util.fetch(embedOnLink, { method: 'GET' })
+      const { videoHtml } = await response.json()
+
+      this.ctx.update((d) => {
+        d.migration.videoEmbedHtml = videoHtml
+      })
+
+      return videoHtml
+    } catch {
+      // fail silently, no user-facing error is needed
+      return null
+    }
   }
 
   async getComponentTestingMigrationStatus () {
@@ -88,7 +148,7 @@ export class MigrationDataSource {
         }
 
         // TODO(lachlan): is this the right place to use the emitter?
-        this.ctx.deref.emitter.toLaunchpad()
+        this.ctx.emitter.toLaunchpad()
       }
 
       const { status, watcher } = await initComponentTestingMigration(
@@ -144,13 +204,19 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
+    const e2eMigrationOptions = {
+      // If the configFile has projectId, we do not want to change the preExtension
+      // so, we can keep the cloud history
+      shouldMigratePreExtension: this.shouldMigratePreExtension,
+    }
+
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map((s) => applyMigrationTransform(s, e2eMigrationOptions)).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(this.legacyConfig, 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
+      canBeAutomaticallyMigrated.push(...specs.component.map((s) => applyMigrationTransform(s)).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return this.checkAndUpdateDuplicatedSpecs(canBeAutomaticallyMigrated)
@@ -161,14 +227,16 @@ export class MigrationDataSource {
       throw Error('Need currentProject!')
     }
 
-    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+    const { isUsingTypeScript } = this.ctx.lifecycleManager.metaState
 
     return createConfigString(this.legacyConfig, {
       hasComponentTesting: this.ctx.coreData.migration.flags.hasComponentTesting,
       hasE2ESpec: this.ctx.coreData.migration.flags.hasE2ESpec,
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
-      hasTypescript,
+      isUsingTypeScript,
+      isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
+      shouldAddCustomE2ESpecPattern: this.ctx.coreData.migration.flags.shouldAddCustomE2ESpecPattern,
     })
   }
 
@@ -188,7 +256,7 @@ export class MigrationDataSource {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
+    return this.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 
   private checkAndUpdateDuplicatedSpecs (specs: MigrationFile[]) {

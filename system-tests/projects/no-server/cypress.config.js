@@ -1,6 +1,7 @@
 module.exports = {
-  'cypress': {
-    'integrationFolder': 'my-tests',
-    'fileServerFolder': 'dev',
+  e2e: {
+    specPattern: 'my-tests/**/*',
+    supportFile: 'helpers/includes.js',
   },
+  fileServerFolder: 'dev',
 }

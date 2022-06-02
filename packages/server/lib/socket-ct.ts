@@ -8,11 +8,7 @@ const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
   constructor (config: Record<string, any>) {
-    super()
-
-    devServer.emitter.on('dev-server:compile:error', (error: string | undefined) => {
-      this.toRunner('dev-server:hmr:error', error)
-    })
+    super(config)
 
     // should we use this option at all for component testing 😕?
     if (config.watchForFileChanges) {

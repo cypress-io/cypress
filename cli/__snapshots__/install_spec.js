@@ -264,11 +264,11 @@ exports['/lib/tasks/install .start non-stable builds logs a warning about instal
 Bugs may be present which do not exist in production builds.
 
 This build was created from:
-  * Commit SHA: abc123
+  * Commit SHA: 3b7f0b5c59def1e9b5f385bd585c9b2836706c29
   * Commit Branch: aBranchName
   * Commit Timestamp: 1996-11-27Txx:xx:xx.000Z
 
-Installing Cypress (version: https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-abc123/cypress.zip)
+Installing Cypress (version: https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-3b7f0b5c59def1e9b5f385bd585c9b2836706c29/cypress.zip)
 
 
 ⠋  Downloaded Cypress

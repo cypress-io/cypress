@@ -1,10 +1,10 @@
-import type { Exchange, Client } from '@urql/core'
 import {
+  Exchange,
+  Client,
   createClient,
   dedupExchange,
   errorExchange,
   fetchExchange,
-  ssrExchange,
   subscriptionExchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
@@ -15,19 +15,40 @@ import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
-
-import { urqlSchema } from '../generated/urql-introspection.gen'
+import { urqlSchema } from '@packages/data-context/src/gen/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { decodeBase64Unicode } from '../utils/decodeBase64'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
+import type { DocumentNode } from 'graphql'
+import { initializeGlobalSubscriptions } from './urqlGlobalSubscriptions'
 
 const toast = useToast()
 
 export function makeCacheExchange (schema: any = urqlSchema) {
-  return graphcacheExchange({ ...urqlCacheKeys, schema })
+  return graphcacheExchange({
+    ...urqlCacheKeys,
+    schema,
+    updates: {
+      Subscription: {
+        pushFragment (parent, args, cache, info) {
+          const { pushFragment } = parent as { pushFragment: { id?: string, fragment: DocumentNode, data: any, typename: string }[] }
+
+          for (const toPush of pushFragment) {
+            cache.writeFragment(toPush.fragment, toPush.data)
+          }
+        },
+      },
+      Mutation: {
+        logout (parent, args, cache, info) {
+          // Invalidate all queries locally upon logging out, to ensure there's no stale cloud data
+          // https://formidable.com/open-source/urql/docs/graphcache/cache-updates/#invalidating-entities
+          cache.invalidate({ __typename: 'Query' })
+        },
+      },
+    },
+  })
 }
 
 declare global {
@@ -38,8 +59,6 @@ declare global {
      * to use cy.intercept in tests that we need it
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
-    __CYPRESS_INITIAL_DATA__: object
-    __CYPRESS_INITIAL_DATA_ENCODED__: string
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
@@ -53,16 +72,6 @@ declare global {
 
 const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
 
-export async function preloadLaunchpadData () {
-  try {
-    const resp = await fetch('/__cypress/launchpad/preload')
-
-    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
-  } catch (e) {
-    //
-  }
-}
-
 interface LaunchpadUrqlClientConfig {
   target: 'launchpad'
 }
@@ -75,21 +84,22 @@ interface AppUrqlClientConfig {
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
-export function makeUrqlClient (config: UrqlClientConfig): Client {
+export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
   let hasError = false
 
   const exchanges: Exchange[] = [dedupExchange]
 
-  const io = window.ws ?? getPubSubSource(config)
+  const io = getPubSubSource(config)
+
+  const connectPromise = new Promise<void>((resolve) => {
+    io.once('connect', resolve)
+  })
 
   const socketClient = getSocketSource(config)
 
   // GraphQL and urql are not used in app + run mode, so we don't add the
   // pub sub exchange.
   if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
-    // If we're in the launchpad, we connect to the known GraphQL Socket port,
-    // otherwise we connect to the /__cypress/socket.io of the current domain, unless we've explicitly
-
     exchanges.push(pubSubExchange(io))
   }
 
@@ -120,13 +130,6 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
-    ssrExchange({
-      isClient: true,
-      // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
-      initialState: (window.__CYPRESS_INITIAL_DATA_ENCODED__
-        ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
-        : window.__CYPRESS_INITIAL_DATA__) || {},
-    }),
     namedRouteExchange,
     fetchExchange,
     subscriptionExchange({
@@ -151,7 +154,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const url = config.target === 'launchpad' ? `/__cypress/launchpad/graphql` : `/${config.namespace}/graphql`
 
-  return createClient({
+  const client = createClient({
     url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
     exchanges,
@@ -161,6 +164,14 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // swap in-and-out during integration tests.
     fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
   })
+
+  await connectPromise
+
+  if (window.__CYPRESS_MODE__ !== 'run') {
+    initializeGlobalSubscriptions(client)
+  }
+
+  return client
 }
 
 interface LaunchpadPubSubConfig {
@@ -174,15 +185,18 @@ interface AppPubSubConfig {
 
 type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 
+// We need a dedicated socket.io namespace, rather than re-use the one provided via the runner
+// at window.ws, because the event-manager calls .off() on its socket instance when Cypress
+// execution is stopped. We need to make sure the events here are long-lived.
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
-    return client({
-      path: '/__cypress/launchpad/socket.io',
+    return client('/data-context', {
+      path: '/__launchpad/socket',
       transports: ['websocket'],
     })
   }
 
-  return client({
+  return client('/data-context', {
     path: config.socketIoRoute,
     transports: ['websocket'],
   })

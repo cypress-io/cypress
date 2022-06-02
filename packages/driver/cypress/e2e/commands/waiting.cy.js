@@ -53,7 +53,7 @@ describe('src/cy/commands/waiting', () => {
     })
 
     describe('alias argument', () => {
-      before(() => {
+      beforeEach(() => {
         cy.visit('/fixtures/jquery.html')
       })
 
@@ -68,7 +68,7 @@ describe('src/cy/commands/waiting', () => {
 
           return null
         })
-        .wait('@fetch').then((xhr) => {
+        .wait('@fetch.response').then((xhr) => {
           expect(xhr.responseBody).to.deep.eq(response)
         })
       })
@@ -302,7 +302,7 @@ describe('src/cy/commands/waiting', () => {
           .wait('getAny').then(() => {})
         })
 
-        it('throws when 2nd alias doesnt match any registered alias', (done) => {
+        it('throws when 2nd alias doesn\'t match any registered alias', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.wait()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`.')
 
@@ -339,7 +339,7 @@ describe('src/cy/commands/waiting', () => {
           .wait(['@foo', 'bar'])
         })
 
-        it('throws when 2nd alias isnt a route alias', (done) => {
+        it('throws when 2nd alias isn\'t a route alias', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` only accepts aliases for routes.\nThe alias: `bar` did not match a route.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
@@ -448,7 +448,7 @@ describe('src/cy/commands/waiting', () => {
           .wait(['@foo', 'bar'])
         })
 
-        it('does not throw again when 2nd alias doesnt reference a route', {
+        it('does not throw again when 2nd alias doesn\'t reference a route', {
           requestTimeout: 100,
         }, (done) => {
           Promise.onPossiblyUnhandledRejection(done)
@@ -750,7 +750,7 @@ describe('src/cy/commands/waiting', () => {
     })
 
     describe('multiple alias arguments', () => {
-      before(() => {
+      beforeEach(() => {
         cy.visit('/fixtures/jquery.html')
       })
 
@@ -776,7 +776,7 @@ describe('src/cy/commands/waiting', () => {
     })
 
     describe('multiple separate alias waits', () => {
-      before(() => {
+      beforeEach(() => {
         cy.visit('/fixtures/jquery.html')
       })
 
@@ -1022,6 +1022,8 @@ describe('src/cy/commands/waiting', () => {
             done()
           })
 
+          cy.visit('/fixtures/empty.html')
+
           cy
           .server()
           .route(/foo/, {}).as('getFoo')
@@ -1042,6 +1044,10 @@ describe('src/cy/commands/waiting', () => {
       })
 
       describe('alias argument', () => {
+        beforeEach(() => {
+          cy.visit('/fixtures/empty.html')
+        })
+
         it('is a parent command', () => {
           cy
           .server()
@@ -1126,13 +1132,17 @@ describe('src/cy/commands/waiting', () => {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': 'getFoo, getBar',
-              Yielded: [xhrs[0], xhrs[1]], // explictly create the array here
+              Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
             })
           })
         })
       })
 
       describe('timeouts', function () {
+        beforeEach(() => {
+          cy.visit('/fixtures/empty.html')
+        })
+
         it('sets default requestTimeout', {
           requestTimeout: 199,
         }, function (done) {

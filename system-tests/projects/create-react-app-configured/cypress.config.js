@@ -1,10 +1,10 @@
-const { devServer } = require('@cypress/react/plugins/react-scripts')
+const { defineConfig } = require('cypress')
 
-module.exports = {
+module.exports = defineConfig({
   component: {
-    devServer,
-    devServerConfig: {
-      indexHtmlFile: 'cypress/support/component-index.html',
-    },
+    devServer: {
+      framework: 'create-react-app',
+      bundler: 'webpack'
+    }
   },
-}
+})

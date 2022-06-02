@@ -7,17 +7,9 @@ import { Queue } from '../util/queue'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
+import type $Command from './command'
 
 const debugErrors = Debug('cypress:driver:errors')
-
-interface Command {
-  get(key: string): any
-  get(): any
-  set(key: string, value: any): any
-  set(options: any): any
-  attributes: object
-  finishLogs(): void
-}
 
 const __stackReplacementMarker = (fn, ctx, args) => {
   return fn.apply(ctx, args)
@@ -60,19 +52,19 @@ const commandRunningFailed = (Cypress, state, err) => {
   })
 }
 
-export class CommandQueue extends Queue<Command> {
+export class CommandQueue extends Queue<$Command> {
   state: any
   timeout: any
-  whenStable: any
+  stability: any
   cleanup: any
   fail: any
   isCy: any
 
-  constructor (state, timeout, whenStable, cleanup, fail, isCy) {
+  constructor (state, timeout, stability, cleanup, fail, isCy) {
     super()
     this.state = state
     this.timeout = timeout
-    this.whenStable = whenStable
+    this.stability = stability
     this.cleanup = cleanup
     this.fail = fail
     this.isCy = isCy
@@ -96,7 +88,7 @@ export class CommandQueue extends Queue<Command> {
     return _.invokeMap(this.get(), 'get', 'name')
   }
 
-  insert (index: number, command: Command) {
+  insert (index: number, command: $Command) {
     super.insert(index, command)
 
     const prev = this.at(index - 1)
@@ -118,12 +110,20 @@ export class CommandQueue extends Queue<Command> {
   find (attrs) {
     const matchesAttrs = _.matches(attrs)
 
-    return _.find(this.get(), (command: Command) => {
+    return _.find(this.get(), (command: $Command) => {
       return matchesAttrs(command.attributes)
     })
   }
 
-  private runCommand (command: Command) {
+  /**
+   * Check if the current command index is the last command in the queue
+   * @returns boolean
+   */
+  isOnLastCommand (): boolean {
+    return this.state('index') === this.length
+  }
+
+  private runCommand (command: $Command) {
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
     // prior to ever making it through our first
@@ -135,11 +135,11 @@ export class CommandQueue extends Queue<Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.whenStable(() => {
+    return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
-    })
+    }, command)
     .then((args) => {
       // store this if we enqueue new commands
       // to check for promise violations
@@ -197,7 +197,7 @@ export class CommandQueue extends Queue<Command> {
         // if we got a return value and we enqueued
         // a new command and we didn't return cy
         // or an undefined value then throw
-        return $errUtils.throwErrByPath(
+        $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
             args: {
               current: command.get('name'),
@@ -260,14 +260,12 @@ export class CommandQueue extends Queue<Command> {
         return
       }
 
-      // start at 0 index if we dont have one
+      // start at 0 index if one is not already set
       let index = this.state('index') || this.state('index', 0)
 
       const command = this.at(index)
 
-      // if the command should be skipped
-      // just bail and increment index
-      // and set the subject
+      // if the command should be skipped, just bail and increment index
       if (command && command.get('skip')) {
         // must set prev + next since other
         // operations depend on this state being correct
@@ -279,6 +277,8 @@ export class CommandQueue extends Queue<Command> {
         this.state('index', index + 1)
         this.state('subject', command.get('subject'))
 
+        Cypress.action('cy:skipped:command:end', command)
+
         return next()
       }
 
@@ -287,11 +287,18 @@ export class CommandQueue extends Queue<Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
+        // If we're enabled experimentalSessionAndOrigin we no longer have to wait for stability at the end of the command queue.
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          Cypress.action('cy:command:queue:end')
+
+          return null
+        }
+
         // we need to wait after all commands have
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.whenStable(() => {
+        return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
           Cypress.action('cy:command:queue:end')
 
           return null
@@ -300,6 +307,12 @@ export class CommandQueue extends Queue<Command> {
 
       // store the previous timeout
       const prevTimeout = this.timeout()
+
+      // If we have created a timeout but are in an unstable state, clear the
+      // timeout in favor of the on load timeout already running.
+      if (!cy.state('isStable')) {
+        cy.clearTimeout()
+      }
 
       // store the current runnable
       const runnable = this.state('runnable')

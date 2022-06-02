@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/index.tsx",
   "scripts": {
-    "build-for-tests": "webpack",
+    "build-for-tests": "node ../../scripts/run-webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rimraf node_modules",
@@ -30,7 +30,6 @@
     "browser-logos": "github:alrra/browser-logos",
     "chai-subset": "1.6.0",
     "classnames": "2.3.1",
-    "cypress-multi-reporters": "1.4.0",
     "file-loader": "4.3.0",
     "lodash": "^4.17.19",
     "mobx": "5.15.4",
@@ -40,6 +39,6 @@
     "react-dom": "16.8.6",
     "rimraf": "3.0.2",
     "webpack": "^4.44.2",
-    "webpack-cli": "3.3.11"
+    "webpack-cli": "3.3.2"
   }
 }

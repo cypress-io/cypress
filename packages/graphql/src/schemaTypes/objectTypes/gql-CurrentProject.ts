@@ -2,14 +2,11 @@ import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
-import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
-import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
-import { Storybook } from './gql-Storybook'
 
 export const PackageManagerEnum = enumType({
   name: 'PackageManagerEnum',
@@ -18,7 +15,7 @@ export const PackageManagerEnum = enumType({
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
-  description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
+  description: 'The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
@@ -36,17 +33,21 @@ export const CurrentProject = objectType({
       description: 'Whether we are currently loading the setupNodeEvents',
     })
 
+    t.boolean('isFullConfigReady', {
+      description: 'Whether or not the full config is ready',
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
-    t.field('currentBrowser', {
+    t.field('activeBrowser', {
       type: Browser,
-      description: 'The currently selected browser for the application',
+      description: 'The currently selected browser for the project',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.chosenBrowser
+        return ctx.coreData.activeBrowser
       },
     })
 
@@ -65,7 +66,12 @@ export const CurrentProject = objectType({
           return null
         }
 
-        return cloudProjectBySlug(projectId, ctx, info)
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudProjectBySlug',
+          args: { slug: projectId },
+          ctx,
+          info,
+        })
       },
     })
 
@@ -103,7 +109,7 @@ export const CurrentProject = objectType({
     t.boolean('needsLegacyConfigMigration', {
       description: 'Whether the project needs to be migrated before proceeding',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.needsCypressJsonMigration()
+        return ctx.migration.needsCypressJsonMigration()
       },
     })
 
@@ -114,10 +120,10 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.boolean('hasTypescript', {
+    t.boolean('isUsingTypeScript', {
       description: 'Whether the project has Typescript',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.metaState.hasTypescript
+        return ctx.lifecycleManager.metaState.isUsingTypeScript
       },
     })
 
@@ -130,7 +136,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('defaultSpecFileName', {
-      description: 'Default spec file name for spec creation',
+      description: 'Default spec file name for spec creation, nullable so we can throw if it can\'t be decided',
       resolve: (source, args, ctx) => {
         return ctx.project.defaultSpecFileName()
       },
@@ -148,6 +154,13 @@ export const CurrentProject = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields()
+      },
+    })
+
+    t.nonNull.json('serveConfig', {
+      description: 'base64 encoded config used on the runner page',
+      resolve: (source, args, ctx) => {
+        return ctx.html.makeServeConfig()
       },
     })
 
@@ -180,16 +193,6 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.field('storybook', {
-      type: Storybook,
-      resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
-    })
-
-    t.nonNull.field('codeGenGlobs', {
-      type: CodeGenGlobs,
-      resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
-    })
-
     t.list.field('codeGenCandidates', {
       type: FileParts,
       description: 'List of all code generation candidates stories',
@@ -204,9 +207,7 @@ export const CurrentProject = objectType({
     t.string('branch', {
       description: 'The current branch of the project',
       resolve: async (source, args, ctx) => {
-        const branchName = await ctx.git.getBranch(source.projectRoot)
-
-        return branchName
+        return source.git?.currentBranch ?? null
       },
     })
 

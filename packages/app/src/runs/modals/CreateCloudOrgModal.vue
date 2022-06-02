@@ -9,17 +9,15 @@
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <div @click="startWaitingOrgToBeCreated()">
-        <ExternalLink
-          class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
-          :href="createOrgUrl"
-          :prefix-icon="OrganizationIcon"
-          :include-graphql-port="true"
-          prefix-icon-class="icon-light-transparent icon-dark-white"
-        >
-          {{ t('runs.connect.modal.createOrg.button') }}
-        </ExternalLink>
-      </div>
+      <ExternalLink
+        class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
+        :href="createOrgUrl"
+        :include-graphql-port="true"
+        @click="startWaitingOrgToBeCreated()"
+      >
+        <i-cy-office-building_x16 class="inline-block icon-dark-white" />
+        {{ t('runs.connect.modal.createOrg.button') }}
+      </ExternalLink>
     </div>
     <template #footer>
       <div class="flex gap-16px">
@@ -56,13 +54,11 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
-import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useDebounceFn } from '@vueuse/core'
 
@@ -76,17 +72,14 @@ gql`
 fragment CreateCloudOrgModal on CloudUser {
   id
   createCloudOrganizationUrl
-  organizationControl: organizations (first: 1) {
-    nodes {
-      id
-    }
-  }
 }
 `
 
 gql`
-query CloudOrganizationsCheck {
-  ...CloudConnectModals
+mutation CreateCloudOrgModal_CloudOrganizationsCheck {
+  refreshOrganizations {
+    ...CloudConnectModals
+  }
 }
 `
 
@@ -94,13 +87,9 @@ const props = defineProps<{
   gql: CreateCloudOrgModalFragment
 }>()
 
-const query = useQuery({
-  query: CloudOrganizationsCheckDocument,
-  requestPolicy: 'network-only',
-  pause: true,
-})
+const refreshOrgs = useMutation(CreateCloudOrgModal_CloudOrganizationsCheckDocument)
 
-const refetch = useDebounceFn(() => query.executeQuery(), 1000)
+const refetch = useDebounceFn(() => refreshOrgs.executeMutation({}), 1000)
 
 const waitingOrgToBeCreated = ref(false)
 

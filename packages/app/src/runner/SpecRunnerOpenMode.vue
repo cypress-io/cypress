@@ -1,14 +1,26 @@
 <template>
-  <RemovePositioningDuringScreenshot
+  <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900 border-l-1"
+    class="flex border-gray-900"
   >
+    <AutomationElement />
+    <AutomationDisconnected
+      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
+    />
+    <AutomationMissing
+      v-else-if="runnerUiStore.automationStatus === 'MISSING'"
+      :gql="props.gql.currentProject"
+    />
     <ResizablePanels
-      :offset-left="64"
-      :max-total-width="windowWidth"
+      v-else
+      :style="{width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)`}"
+      :offset-left="collapsedNavBarWidth"
+      :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
-      :min-panel3-width="340"
+      :min-panel1-width="minWidths.specsList"
+      :min-panel2-width="minWidths.reporter"
+      :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -45,19 +57,18 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3="{width}">
+      <template #panel3>
         <HideDuringScreenshotOrRunMode class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width"
           />
         </HideDuringScreenshotOrRunMode>
 
         <RemoveClassesDuringScreenshotting
-          class="h-full bg-gray-100 p-16px"
+          class="h-0 p-16px"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -66,16 +77,9 @@
           <div
             v-show="!autStore.scriptError"
             :id="RUNNER_ID"
-            class="origin-top-left viewport"
+            class="origin-top viewport"
             :style="viewportStyle"
           />
-          <AutomationElement />
-          <!--
-            TODO: UNIFY-1341 - Figure out bugs in automation lifecycle
-            Put these guys back in.
-            <AutomationMissing v-if="runnerUiStore.automationStatus === 'MISSING'" />
-            <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
-          -->
         </RemoveClassesDuringScreenshotting>
         <SnapshotControls
           :event-manager="eventManager"
@@ -84,7 +88,7 @@
         <ScreenshotHelperPixels />
       </template>
     </ResizablePanels>
-  </RemovePositioningDuringScreenshot>
+  </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -98,7 +102,7 @@ import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
-import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import AdjustRunnerStyleDuringScreenshot from './screenshot/AdjustRunnerStyleDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
@@ -112,6 +116,17 @@ import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRu
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+import AutomationDisconnected from './automation/AutomationDisconnected.vue'
+import AutomationMissing from './automation/AutomationMissing.vue'
+import { runnerConstants } from './runner-constants'
+
+const {
+  preferredMinimumPanelWidth,
+  absoluteAutMinimum,
+  absoluteSpecListMinimum,
+  absoluteReporterMinimum,
+  collapsedNavBarWidth,
+} = runnerConstants
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -128,11 +143,20 @@ fragment SpecRunner_Preferences on Query {
 `
 
 gql`
+fragment SpecRunner_Config on CurrentProject {
+  id
+  config
+}
+`
+
+gql`
 fragment SpecRunner on Query {
   ...Specs_InlineSpecList
   currentProject {
     id
+    ...SpecRunner_Config
     ...SpecRunnerHeader
+    ...AutomationMissing
   }
   ...ChooseExternalEditor
   ...SpecRunner_Preferences
@@ -155,14 +179,6 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
-
-const {
-  viewportStyle,
-  windowWidth,
-  reporterWidth,
-  specListWidth,
-} = useRunnerStyle()
-
 const {
   handlePanelWidthUpdated,
   handleResizeEnd,
@@ -174,6 +190,18 @@ const {
   cleanupRunner,
 } = useEventManager()
 
+const specsListWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
+})
+
+const reporterWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
+})
+
+const isSpecsListOpenPreferences = computed(() => {
+  return props.gql.localSettings.preferences.isSpecsListOpen ?? false
+})
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
@@ -181,18 +209,43 @@ onMounted(() => {
   initializeRunnerLifecycleEvents()
 })
 
-const specsListWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.specListWidth ?? specListWidth.value
-})
-
-const reporterWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.reporterWidth ?? reporterWidth.value
-})
-
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
+preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
+
+// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
+// will be available during the initial calculation that useRunnerStyle does
+
+const {
+  viewportStyle,
+  windowWidth,
+} = useRunnerStyle()
+
+function getMinimum (absoluteMinimum: number, doesContentFit: boolean) {
+  // windowWidth.value / 6 is arbitrary here, it just happens to work nicely to give us
+  // some flexibility in proportion to the window
+  return doesContentFit ? Math.min(absoluteMinimum, windowWidth.value / 6) : preferredMinimumPanelWidth
+}
+
+const minWidths = computed(() => {
+  let smallestIdealWindowSize = preferredMinimumPanelWidth * 2 + collapsedNavBarWidth
+  let contentWidth = reporterWidthPreferences.value + collapsedNavBarWidth + preferredMinimumPanelWidth
+
+  if (isSpecsListOpenPreferences.value) {
+    contentWidth += specsListWidthPreferences.value
+    smallestIdealWindowSize += preferredMinimumPanelWidth
+  }
+
+  const isWindowTooSmall = windowWidth.value < smallestIdealWindowSize
+  const doesContentFit = contentWidth > windowWidth.value || isWindowTooSmall
+
+  return {
+    aut: getMinimum(absoluteAutMinimum, doesContentFit),
+    specsList: getMinimum(absoluteSpecListMinimum, doesContentFit),
+    reporter: getMinimum(absoluteReporterMinimum, doesContentFit),
+  }
+})
 
 let fileToOpen: FileDetails
 
@@ -214,7 +267,6 @@ function openFile () {
     },
   })
 }
-
 onMounted(() => {
   const eventManager = getEventManager()
 

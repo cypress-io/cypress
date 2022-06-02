@@ -2,6 +2,7 @@ import SnapshotControls from './SnapshotControls.vue'
 import { autSnapshot } from '../../cypress/support/fixtures'
 import { useSnapshotStore } from './snapshot-store'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
+import { defaultMessages } from '@cy/i18n'
 
 const snapshotWithSnapshots = { ...autSnapshot }
 const snapshotPinned = { ...autSnapshot, snapshots: [] }
@@ -91,9 +92,7 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
 
     mountSnapshotControls(eventManager, autIframe)
     cy.get('body')
-    .findByText('Highlights')
-    .should('be.visible')
-    .findByLabelText('Toggle highlights')
+    .findByLabelText(defaultMessages.runner.snapshot.highlightsLabel)
     .click({ force: true })
   })
 

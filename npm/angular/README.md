@@ -6,7 +6,7 @@ NOTE: this is not published on npm yet. It's a work in progress. Consider [Cypre
 ](https://github.com/jscutlery/test-utils/tree/main/packages/cypress-angular) by [JS Cutlery](https://github.com/jscutlery) for a version that's currently working and available on npm.
 
 ```shell
-npm install -D cypress @cypress/angular @cypress/webpack-dev-server
+npm install -D cypress @cypress/angular
 ```
 
 Ensure you have a version of Cypress > 7. 
@@ -32,21 +32,21 @@ module.exports = {
 }
 ```
 
-Configure `cypress/plugins/index.js` to transpile Angular code.
+Configure `cypress.config.js` to transpile Angular code.
 
 ```javascript
+import { defineConfig } from 'cypress'
 import * as webpackConfig from './webpack.config';
-const { startDevServer } = require('@cypress/webpack-dev-server');
 
-module.exports = (on, config) => {
-  on('dev-server:start', (options) =>
-    startDevServer({
-      options,
-      webpackConfig,
-    }),
-  );
-  return config;
-};
+export default defineConfig({
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      webpackConfig
+    }
+  }
+})
+
 ```
 
 The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts).

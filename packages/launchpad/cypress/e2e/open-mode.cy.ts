@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
@@ -22,6 +23,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
+    cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
     // e2e testing is configured for the todo project, so we don't expect an error.
     cy.get('h1').should('contain', 'Choose a Browser')
   })
@@ -30,6 +32,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad', ['--component'])
     cy.visitLaunchpad()
+    cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
     // Component testing is not configured for the todo project
     cy.get('h1').should('contain', 'Project Setup')
   })
@@ -41,17 +44,41 @@ describe('Launchpad: Open Mode', () => {
   if (Cypress.platform !== 'win32') {
     it('auto-selects the browser when launched with --browser', () => {
       cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad', ['--browser', 'firefox'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
+      })
+
+      // Need to visit after args have been configured, todo: fix in #18776
+      cy.visitLaunchpad()
+      cy.contains('E2E Testing').click()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    })
+
+    it('auto-launches the browser when launched with --browser --testingType --project', () => {
+      cy.scaffoldProject('launchpad')
       cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
       cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      })
     })
   }
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
+      cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.visitLaunchpad()
 
@@ -65,12 +92,49 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when a user interacts with the header', () => {
     it('the Docs menu opens when clicked', () => {
+      cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.visitLaunchpad()
 
       cy.contains('Projects').should('be.visible')
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
+    })
+
+    it('updates the breadcrumb when navigating forward and back', () => {
+      const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
+        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+      }
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.visitLaunchpad()
+
+      cy.contains('h1', 'Welcome to Cypress!')
+
+      getBreadcrumbLink('Projects', { disabled: true })
+      getBreadcrumbLink('todos', { disabled: true })
+
+      cy.get('[data-cy-testingtype="e2e"]').click()
+
+      cy.contains('h1', 'Choose a Browser')
+
+      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      getBreadcrumbLink('Projects', { disabled: true })
+
+      cy.withCtx((ctx, { sinon }) => {
+        sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
+      })
+
+      getBreadcrumbLink('todos').click()
+
+      cy.contains('h1', 'Welcome to Cypress!')
+      getBreadcrumbLink('Projects', { disabled: true })
+      getBreadcrumbLink('todos', { disabled: true })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
+      })
     })
   })
 
@@ -104,16 +168,22 @@ describe('Launchpad: Open Mode', () => {
 
       cy.get('[data-cy="choose-editor-modal"]').as('modal')
 
+      cy.get('@modal').contains('Cancel').click()
+      cy.get('@modal').should('not.exist')
+
+      cy.findByTestId('project-card')
+      cy.get('[aria-label="Project Actions"]').click()
+      cy.get('button').contains('Open In IDE').click()
+
       cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
-      cy.get('@modal').contains('Done').click()
+      cy.get('@modal').contains('Save Changes').click()
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
     })
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.actions.electron.showItemInFolder = o.sinon.stub()
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 
@@ -128,8 +198,17 @@ describe('Launchpad: Open Mode', () => {
       cy.wait('@OpenInFinder')
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+        expect((ctx.actions.electron.showItemInFolder as SinonStub).lastCall.lastArg).to.eql('/some/project')
       })
     })
+  })
+
+  it('opens an e2e project without a supportFile', () => {
+    cy.scaffoldProject('no-support-file')
+    cy.openProject('no-support-file', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.contains('Your project does not contain a default supportFile.')
+    cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
 })

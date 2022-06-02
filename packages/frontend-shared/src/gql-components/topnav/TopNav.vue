@@ -22,7 +22,7 @@
     >
       <div class="font-medium">
         <ExternalLink
-          :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+          :href="changelogLink(versions.latest.version)"
           class="text-indigo-500"
           data-cy="latest-version"
         >
@@ -53,12 +53,12 @@
     </TopNavListItem>
 
     <TopNavListItem
-      class="bg-yellow-50 py-8px px-16px"
+      class="bg-orange-50 py-8px px-16px"
       data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
-          :href="`${releasesUrl}/tag/v${versions.current.version}`"
+          :href="changelogLink(versions.current.version)"
           class="font-medium text-amber-800"
           data-cy="current-version"
         >
@@ -68,7 +68,7 @@
         <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
       </div>
       <template #suffix>
-        <span class="rounded-md bg-yellow-100">
+        <span class="rounded-md bg-orange-100">
           <span class="p-5px text-amber-800">
             {{ t('topNav.installed') }}
           </span>
@@ -88,7 +88,7 @@
 
   <ExternalLink
     v-else-if="versions"
-    :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+    :href="changelogLink(versions.current.version)"
     class="flex font-medium outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
@@ -97,24 +97,25 @@
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
-      v{{ versions.latest.version }}
+      v{{ versions.current.version }}
     </span>
   </ExternalLink>
 
   <TopNavList
-    v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
+    v-if="props.gql?.currentProject?.activeBrowser && showBrowsers"
   >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
+        :alt="props.gql?.currentProject?.activeBrowser?.displayName"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName] || allBrowsersIcons.generic"
+        :src="allBrowsersIcons[props.gql?.currentProject?.activeBrowser?.displayName] || allBrowsersIcons.generic"
       >
       <span
         data-cy="top-nav-active-browser"
         class="font-medium whitespace-nowrap"
-      >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.activeBrowser?.displayName }} {{ props.gql.currentProject?.activeBrowser?.majorVersion }}</span>
     </template>
     <VerticalBrowserListItems
       :gql="props.gql.currentProject"
@@ -211,8 +212,6 @@ import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 
 const { t } = useI18n()
 
-const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
-
 gql`
 fragment TopNav on Query {
   versions {
@@ -232,7 +231,7 @@ fragment TopNav on Query {
     id
     title
     packageManager
-    currentBrowser {
+    activeBrowser {
       id
       displayName
       majorVersion
@@ -351,5 +350,9 @@ const installCommand = computed(() => {
 onKeyStroke(['Enter', ' ', 'Escape'], (event) => {
   resetPrompt(event)
 })
+
+const changelogLink = (version) => {
+  return `https://on.cypress.io/changelog#${version.replaceAll('.', '-')}`
+}
 
 </script>

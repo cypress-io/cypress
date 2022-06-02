@@ -1,3 +1,5 @@
+import { getPathForPlatform } from '../../src/paths'
+
 describe('App: Spec List (Component)', () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
@@ -10,7 +12,7 @@ describe('App: Spec List (Component)', () => {
     cy.contains('button', 'View spec pattern').click()
 
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
-    cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/**/*')
+    cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/*.spec.js')
 
     cy.contains('button', 'Update Spec Pattern').click()
     cy.get('[data-cy="choose-editor-modal"]').should('be.visible').within(() => {
@@ -23,7 +25,8 @@ describe('App: Spec List (Component)', () => {
 
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
-
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+    cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
   })
@@ -31,10 +34,14 @@ describe('App: Spec List (Component)', () => {
   it('opens the "Create a new spec" modal after clicking the "New Specs" button', () => {
     cy.get('[data-cy="standard-modal"]').should('not.exist')
     cy.get('[data-cy="new-spec-button"]').click()
-    cy.get('[data-cy="standard-modal"]').get('h2').contains('Create a new spec')
-    cy.get('button').contains('Create from component').should('be.visible')
-    cy.get('button').contains('Create from story').should('be.visible')
+    cy.get('[data-cy="standard-modal"]').get('h2').contains('Enter the path for your new spec')
     cy.get('button').get('[aria-label="Close"]').click()
     cy.get('[data-cy="standard-modal"]').should('not.exist')
+  })
+
+  it('has the correct defaultSpecFileName in the "Create a new spec" modal', () => {
+    cy.findByTestId('standard-modal').should('not.exist')
+    cy.findByTestId('new-spec-button').click()
+    cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', getPathForPlatform('cypress/component-tests/ComponentName.spec.js'))
   })
 })

@@ -5,7 +5,7 @@
   "private": false,
   "main": "dist",
   "scripts": {
-    "build": "shx rm -rf dist && tsc || echo 'built, with errors'",
+    "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "secure": "nsp check",
@@ -53,8 +53,8 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-scripts": "3.2",
+    "rimraf": "3.0.2",
     "semantic-release": "17.2.3",
-    "shx": "0.3.3",
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",

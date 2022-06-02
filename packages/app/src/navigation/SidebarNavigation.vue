@@ -1,19 +1,22 @@
 <template>
   <HideDuringScreenshot
+    id="sidebar"
     data-cy="sidebar"
-    :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
-      role="button"
-      aria-label="toggle navigation"
+      type="button"
+      :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
+      data-cy="toggle-sidebar"
+      :aria-expanded="isNavBarExpanded"
+      aria-controls="sidebar"
       @click="toggleNavbarIfAllowed"
     >
       <div
-        data-testid="sidebar-nav-indicator"
+        data-cy="sidebar-nav-indicator"
         class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100"
       >
         <div class="h-full bg-indigo-400 w-3px" />
@@ -31,7 +34,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        aria-label="Sidebar"
+        :aria-label="t('sidebar.nav.ariaLabel')"
       >
         <RouterLink
           v-for="item in navigation"
@@ -40,7 +43,6 @@
           :to="item.href"
         >
           <SidebarNavigationRow
-            :data-e2e-href="item.href"
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
@@ -48,32 +50,38 @@
           />
         </RouterLink>
       </nav>
-      <SidebarTooltip
-        class="border border-transparent rounded
-              cursor-pointer m-16px p-7px
-              transform transition-all right-0
-              bottom-0 w-32px duration-300
-              inline-block absolute hover:border-gray-500"
-        :class="{ '-translate-y-48px': !isNavBarExpanded }"
+      <Tooltip
+        placement="right"
         :disabled="isNavBarExpanded"
-        :popper-top-offset="-4"
-        @click="bindingsOpen = true"
+        :distance="8"
+        :skidding="-16"
       >
-        <i-cy-command-key_x16
-          class="h-16px w-16px icon-dark-gray-500"
-          data-cy="keyboard-shortcuts"
-        />
+        <button
+          data-cy="keyboard-modal-trigger"
+          type="button"
+          class="border border-transparent rounded
+              cursor-pointer h-32px m-16px
+              p-7px transform transition-all
+              right-0 bottom-0 w-32px duration-300
+              inline-block absolute hover:border-gray-500"
+          :class="{ '-translate-y-48px': !isNavBarExpanded }"
+          :aria-label="t('sidebar.keyboardShortcuts.title')"
+          @click="bindingsOpen = true"
+        >
+          <i-cy-command-key_x16 class="h-16px w-16px icon-dark-gray-500" />
+        </button>
         <template #popper>
-          {{ t('sideBar.keyboardShortcuts.title') }}
+          {{ t('sidebar.keyboardShortcuts.title') }}
         </template>
-        <KeyboardBindingsModal
-          :show="bindingsOpen"
-          @close="bindingsOpen = false"
-        />
-      </SidebarTooltip>
+      </Tooltip>
+      <KeyboardBindingsModal
+        :show="bindingsOpen"
+        @close="bindingsOpen = false"
+      />
       <img
         :src="CypressLogo"
         class="h-32px m-16px w-32px"
+        alt="Cypress"
       >
     </div>
   </HideDuringScreenshot>
@@ -87,7 +95,7 @@ import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
-import SidebarTooltip from './SidebarTooltip.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
@@ -131,7 +139,7 @@ query SideBarNavigation {
 }
 `
 
-const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: SideBarNavigationDocument })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 

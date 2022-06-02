@@ -15,9 +15,7 @@
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "@graphql-tools/batch-delegate": "8.1.0",
     "@graphql-tools/delegate": "8.2.1",
-    "@graphql-tools/utils": "8.2.3",
     "@graphql-tools/wrap": "8.1.1",
     "dedent": "^0.7.0",
     "express": "4.17.1",
@@ -35,6 +33,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
+    "@types/micromatch": "4.0.2",
     "@types/server-destroy": "^1.0.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",

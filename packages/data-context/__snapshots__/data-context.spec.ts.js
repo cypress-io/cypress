@@ -26,7 +26,6 @@ exports['@packages/data-context initializeData initializes 1'] = {
     },
     "app": {
       "currentTestingType": null,
-      "refreshingBrowsers": {},
       "browsers": [
         {
           "path": "/dev/chrome"
@@ -57,7 +56,7 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "history": [
         "welcome"
       ],
-      "chosenBrowser": {
+      "activeBrowser": {
         "path": "/dev/chrome"
       }
     },

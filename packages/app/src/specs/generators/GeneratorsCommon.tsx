@@ -1,6 +1,6 @@
-import type { TestingTypeEnum } from '../../generated/graphql'
+import type { TestingType } from '@packages/types'
 
 export const filters = {
-  matchesCT: (testingType: TestingTypeEnum) => testingType === 'component',
-  matchesE2E: (testingType: TestingTypeEnum) => testingType === 'e2e',
+  matchesCT: (testingType?: TestingType | null) => testingType === 'component',
+  matchesE2E: (testingType?: TestingType | null) => testingType === 'e2e',
 }

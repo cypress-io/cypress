@@ -8,23 +8,33 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import type { Log } from '../../../cypress/log'
+
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
+
+interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
+  _log?: Log
+  $el: JQuery
+  ensure?: object
+  verify: boolean
+  interval?: number
+}
+
+interface InternalClearOptions extends Partial<Cypress.ClearOptions> {
+  _log?: Log
+  ensure?: object
+}
 
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  // Note: These "change type of `any` to X" comments are written instead of changing them directly
-  //       because Cypress extends user-given options with Cypress internal options.
-  //       These comments will be removed after removing `// @ts-nocheck` comments in `packages/driver`.
-  // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
-  function type (subject, chars, options: any = {}) {
-    const userOptions = options
+  function type (subject, chars, userOptions: Partial<Cypress.TypeOptions> = {}) {
     let updateTable
 
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    options = _.defaults({}, userOptions, {
+    const options: InternalTypeOptions = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -110,7 +120,7 @@ export default function (Commands, Cypress, cy, state, config) {
         },
       })
 
-      options._log.snapshot('before', { next: 'after' })
+      options._log!.snapshot('before', { next: 'after' })
     }
 
     if (options.$el.length > 1) {
@@ -163,7 +173,15 @@ export default function (Commands, Cypress, cy, state, config) {
     const win = state('window')
 
     const getDefaultButtons = (form) => {
-      return form.find('input, button').filter((__, el) => {
+      const formId = CSS.escape(form.attr('id'))
+      const nestedButtons = form.find('input, button')
+
+      const possibleDefaultButtons: JQuery<any> = formId ? $dom.wrap(_.uniq([
+        ...nestedButtons,
+        ...$dom.query('body', form.prop('ownerDocument')).find(`input[form="${formId}"], button[form="${formId}"]`),
+      ])) : nestedButtons
+
+      return possibleDefaultButtons.filter((__, el) => {
         const $el = $dom.wrap(el)
 
         return (
@@ -174,6 +192,8 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const type = function () {
+      const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
+
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
 
@@ -231,11 +251,11 @@ export default function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // In Firefox, submit event is automatically fired
+        // Before Firefox 98, submit event is automatically fired
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        if (!Cypress.isBrowser('firefox')) {
+        if (!isFirefoxBefore98) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
@@ -334,9 +354,17 @@ export default function (Commands, Cypress, cy, state, config) {
           }
 
           if (
-            // Firefox sends a click event when the Space key is pressed.
-            // We don't want to send it twice.
-            !Cypress.isBrowser('firefox') &&
+            (
+              // Before Firefox 98,
+              // Firefox sends a click event when the Space key is pressed.
+              // We don't want to send it twice.
+              !Cypress.isBrowser('firefox') ||
+              // After Firefox 98,
+              // it sends a click event automatically if the element is a <button>,
+              // but it does not if the element is an <input>.
+              // event.target is null when used with shadow DOM.
+              (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
+            ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
             // When event is prevented, the click event should not be emitted
@@ -352,6 +380,16 @@ export default function (Commands, Cypress, cy, state, config) {
             fireClickEvent(event.target)
 
             keydownEvents = []
+
+            // After Firefox 98,
+            // Firefox doesn't update checkbox automatically even if the click event is sent.
+            if (Cypress.isBrowser('firefox')) {
+              if (event.target.type === 'checkbox') {
+                event.target.checked = !event.target.checked
+              } else if (event.target.type === 'radio') { // when checked is false, here cannot be reached because of the above condition
+                event.target.checked = true
+              }
+            }
           }
         },
 
@@ -404,8 +442,13 @@ export default function (Commands, Cypress, cy, state, config) {
           // https://github.com/cypress-io/cypress/issues/19541
           // Send click event on type('{enter}')
           if (sendClickEvent) {
-            // Firefox sends a click event automatically.
-            if (!Cypress.isBrowser('firefox')) {
+            if (
+              // Before Firefox 98, it sends a click event automatically.
+              !Cypress.isBrowser('firefox') ||
+              // After Firefox 98,
+              // it sends a click event automatically if the element is a <button>
+              // it does not if the element is an <input>
+              (!isFirefoxBefore98 && $elements.isInput(el))) {
               fireClickEvent(el)
             }
           }
@@ -548,11 +591,8 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  // TODO: change the type of `any` to `Partial<ClearOptions>`
-  function clear (subject, options: any = {}) {
-    const userOptions = options
-
-    options = _.defaults({}, userOptions, {
+  function clear (subject, userOptions: Partial<Cypress.ClearOptions> = {}) {
+    const options: InternalClearOptions = _.defaults({}, userOptions, {
       log: true,
       force: false,
       waitForAnimations: config('waitForAnimations'),

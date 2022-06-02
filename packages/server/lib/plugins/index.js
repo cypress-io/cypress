@@ -1,4 +1,4 @@
-const { getCtx } = require('@packages/data-context')
+const { getCtx, registerServerPluginHandler, getServerPluginHandlers: getPluginHandlers } = require('@packages/data-context')
 
 const registerEvent = (event, callback) => {
   getCtx().lifecycleManager.registerEvent(event, callback)
@@ -8,18 +8,12 @@ const getPluginPid = () => {
   return getCtx().lifecycleManager.eventProcessPid
 }
 
-let handlers = []
-
 const registerHandler = (handler) => {
-  handlers.push(handler)
+  registerServerPluginHandler(handler)
 }
 
 const getServerPluginHandlers = () => {
-  return handlers
-}
-
-const init = (config, options) => {
-  // return getCtx().lifecycleManager.ready()
+  return getPluginHandlers()
 }
 
 const has = (event) => {
@@ -31,8 +25,6 @@ const execute = (event, ...args) => {
 }
 
 const _reset = () => {
-  handlers = []
-
   return getCtx().lifecycleManager.reinitializeCypress()
 }
 
@@ -40,7 +32,6 @@ module.exports = {
   getPluginPid,
   execute,
   has,
-  init,
   registerEvent,
   registerHandler,
   getServerPluginHandlers,

@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
+import EventEmitter from 'events'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
@@ -80,11 +81,15 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
+  localBus: EventEmitter
 
-  constructor () {
+  constructor (config: Record<string, any>) {
+    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
+    this.localBus = new EventEmitter()
   }
 
   protected ensureProp = ensureProp
@@ -213,6 +218,8 @@ export class SocketBase {
       const headers = socket.request?.headers ?? {}
 
       socket.on('automation:client:connected', () => {
+        const connectedBrowser = getCtx().coreData.activeBrowser
+
         if (automationClient === socket) {
           return
         }
@@ -221,11 +228,18 @@ export class SocketBase {
 
         debug('automation:client connected')
 
+        // only send the necessary config
+        automationClient.emit('automation:config', {
+          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
+        })
+
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          // if we've stopped then don't do anything
-          if (this.ended) {
+          const activeBrowser = getCtx().coreData.activeBrowser
+
+          // if we've stopped or if we've switched to another browser then don't do anything
+          if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
             return
           }
 
@@ -319,8 +333,6 @@ export class SocketBase {
 
         return socket.join('runner')
       })
-
-      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 
@@ -456,6 +468,12 @@ export class SocketBase {
 
               return
             }
+            case 'cross:origin:bridge:ready':
+              return this.localBus.emit('cross:origin:bridge:ready', args[0])
+            case 'cross:origin:release:html':
+              return this.localBus.emit('cross:origin:release:html')
+            case 'cross:origin:finished':
+              return this.localBus.emit('cross:origin:finished', args[0])
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
@@ -550,6 +568,10 @@ export class SocketBase {
       callbacks.onSocketConnection(socket)
     })
 
+    io.of('/data-context').on('connection', (socket: Socket) => {
+      socket.on('graphql:request', handleGraphQLSocketRequest)
+    })
+
     return io
   }
 
@@ -559,10 +581,6 @@ export class SocketBase {
     // TODO: we need an 'ack' from this end
     // event from the other side
     return this._io?.emit('tests:finished')
-  }
-
-  changeToUrl (url) {
-    return this.toRunner('change:to:url', url)
   }
 
   async closeBrowserTabs () {
@@ -589,9 +607,5 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
-  }
-
-  sendSpecList (specs, testingType: Cypress.TestingType) {
-    this.toRunner('specs:changed', { specs, testingType })
   }
 }

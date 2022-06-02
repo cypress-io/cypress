@@ -1,727 +1,215 @@
-import dedent from 'dedent'
-import type { Bundler } from './types'
-import {
-  CODE_GEN_FRAMEWORKS,
-  FRONTEND_FRAMEWORK_CATEGORIES,
-  CYPRESS_REACT_LATEST,
-  CYPRESS_VUE_2,
-  CYPRESS_VUE_3,
-  STORYBOOK_REACT,
-  STORYBOOK_VUE,
-  BUNDLER_WEBPACK_4,
-} from './constants'
-import { BUNDLER_VITE, BUNDLER_WEBPACK_5 } from '.'
+import path from 'path'
+import fs from 'fs-extra'
+import * as dependencies from './dependencies'
+import componentIndexHtmlGenerator from './component-index-template'
+import semver from 'semver'
 
-const isWebpack = (bundler: Bundler) => ['webpack4', 'webpack5'].includes(bundler)
+export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
-export const FRONTEND_FRAMEWORKS = [
+type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]['type']
+
+export type CodeGenFramework = typeof WIZARD_FRAMEWORKS[number]['codeGenFramework']
+
+export type WizardDependency = typeof dependencies.WIZARD_DEPENDENCIES[number]
+
+export interface DependencyToInstall {
+  dependency: WizardDependency
+  satisfied: boolean
+  loc: string | null
+  detectedVersion: string | null
+}
+
+export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
+
+export function inPkgJson (dependency: WizardDependency, projectPath: string): DependencyToInstall {
+  try {
+    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
+      paths: [projectPath],
+    })
+    const pkg = fs.readJsonSync(loc) as PkgJson
+    const pkgVersion = semver.coerce(pkg.version)
+
+    if (!pkgVersion) {
+      throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
+    }
+
+    return {
+      dependency,
+      detectedVersion: pkg.version,
+      loc,
+      satisfied: Boolean(pkg.version && semver.satisfies(pkgVersion, dependency.minVersion)),
+    }
+  } catch (e) {
+    return {
+      dependency,
+      detectedVersion: null,
+      loc: null,
+      satisfied: false,
+    }
+  }
+}
+
+function getBundlerDependency (bundler: WizardBundler, projectPath: string): DependencyToInstall {
+  switch (bundler) {
+    case 'vite': return inPkgJson(dependencies.WIZARD_DEPENDENCY_VITE, projectPath)
+    case 'webpack': return inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath)
+    default: throw Error(`Unknown bundler ${bundler}`)
+  }
+}
+
+export const WIZARD_FRAMEWORKS = [
   {
-    type: 'crav4',
-    family: 'template',
-    name: 'Create React App (v4)',
-    supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [
-      CYPRESS_REACT_LATEST,
-      BUNDLER_WEBPACK_4,
-    ],
-    defaultPackagePath: '@cypress/react/plugins/react-scripts',
-    glob: '*.{js,jsx,tsx}',
-    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_REACT,
-    detectors: [
-      {
-        dependency: 'react-scripts',
-        version: '^4.0.0',
-      },
-    ],
-    config: {
-      js: () => {
-        return dedent`
-      const { devServer } = require('@cypress/react/plugins/react-scripts')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }`
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/react/plugins/react-scripts'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
+    type: 'reactscripts',
+    configFramework: 'create-react-app',
+    category: 'template',
+    name: 'Create React App',
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+      ]
     },
+    codeGenFramework: 'react',
+    mountModule: 'cypress/react',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
-    type: 'crav5',
-    family: 'template',
-    name: 'Create React App (v5)',
-    supportedBundlers: [BUNDLER_WEBPACK_5],
-    packages: [
-      CYPRESS_REACT_LATEST,
-      BUNDLER_WEBPACK_5,
-    ],
-    defaultPackagePath: '@cypress/react/plugins/react-scripts',
-    glob: '*.{js,jsx,tsx}',
-    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_REACT,
-    detectors: [
-      {
-        dependency: 'react-scripts',
-        version: '^5.0.0',
-      },
-    ],
-    config: {
-      js: () => {
-        return dedent`
-      const { devServer } = require('@cypress/react/plugins/react-scripts')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }`
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/react/plugins/react-scripts'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
+    type: 'vueclivue2',
+    configFramework: 'vue-cli',
+    category: 'template',
+    name: 'Vue CLI (Vue 2)',
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ]
     },
+    codeGenFramework: 'vue',
+    mountModule: 'cypress/vue2',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
-    type: 'vuecli4vue2',
-    name: 'Vue CLI 4 (Vue 2)',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [
-      CYPRESS_VUE_2,
-      BUNDLER_WEBPACK_4,
-    ],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: '@vue/cli-service',
-        version: '^4.0.0',
-      },
-      {
-        dependency: 'vue',
-        version: '^2.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_VUE,
-    config: {
-      js: (bundler: Bundler) => {
-        return dedent`
-      const { devServer } = require('@cypress/webpack-dev-server')
-      const webpackConfig = require('@vue/cli-service/webpack.config')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }
-      `
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/webpack-dev-server'
-      import webpackConfig from '@vue/cli-service/webpack.config'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
+    type: 'vueclivue3',
+    configFramework: 'vue-cli',
+    category: 'template',
+    name: 'Vue CLI (Vue 3)',
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
+      ]
     },
-  },
-  {
-    type: 'vuecli4vue3',
-    name: 'Vue CLI 4 (Vue 3)',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [
-      CYPRESS_VUE_3,
-      BUNDLER_WEBPACK_4,
-    ],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: '@vue/cli-service',
-        version: '^4.0.0',
-      },
-      {
-        dependency: 'vue',
-        version: '^3.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_VUE,
-    config: {
-      js: (bundler: Bundler) => {
-        return dedent`
-      const { devServer } = require('@cypress/webpack-dev-server')
-      const webpackConfig = require('@vue/cli-service/webpack.config')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }
-      `
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/webpack-dev-server'
-      import webpackConfig from '@vue/cli-service/webpack.config'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
-    },
-  },
-  {
-    type: 'vuecli5vue2',
-    name: 'Vue CLI 5 (Vue 2)',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_5],
-    packages: [
-      CYPRESS_VUE_2,
-      BUNDLER_WEBPACK_5,
-    ],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: '@vue/cli-service',
-        version: '^5.0.0',
-      },
-      {
-        dependency: 'vue',
-        version: '^2.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_VUE,
-    config: {
-      js: (bundler: Bundler) => {
-        return dedent`
-      const { devServer } = require('@cypress/webpack-dev-server')
-      const webpackConfig = require('@vue/cli-service/webpack.config')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }
-      `
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/webpack-dev-server'
-      import webpackConfig from '@vue/cli-service/webpack.config'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
-    },
-  },
-  {
-    type: 'vuecli5vue3',
-    name: 'Vue CLI 5 (Vue 3)',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_5],
-    packages: [
-      CYPRESS_VUE_3,
-      BUNDLER_WEBPACK_5,
-    ],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: '@vue/cli-service',
-        version: '^5.0.0',
-      },
-      {
-        dependency: 'vue',
-        version: '^3.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_VUE,
-    config: {
-      js: (bundler: Bundler) => {
-        return dedent`
-      const { devServer } = require('@cypress/webpack-dev-server')
-      const webpackConfig = require('@vue/cli-service/webpack.config')
-
-      module.exports = {
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      }
-      `
-      },
-      ts: () => {
-        return dedent`
-      import { defineConfig } from 'cypress'
-      import { devServer } from '@cypress/webpack-dev-server'
-      import webpackConfig from '@vue/cli-service/webpack.config'
-
-      export default defineConfig({
-        component: {
-          devServer,
-          devServerConfig: {
-            webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
-        },
-      })`
-      },
-    },
-  },
-  {
-    type: 'react',
-    name: 'React.js',
-    family: 'library',
-    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
-    packages: [CYPRESS_REACT_LATEST],
-    defaultPackagePath: null,
-    glob: '*.{js,jsx,tsx}',
-    detectors: [
-      {
-        dependency: 'react',
-        version: '>=16.0.0',
-      },
-      {
-        dependency: 'react-dom',
-        version: '>=16.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_REACT,
-    config: {
-      js: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          const { devServer } = require('@cypress/webpack-dev-server')
-          // NOTE: ensure you are requiring your webpack config from the
-          // correct location.
-          const webpackConfig = require('./webpack.config.js')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
-              },
-            },
-          }`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          const { devServer } = require('@cypress/vite-dev-server')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          }`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-
-      ts: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/webpack-dev-server'
-          // NOTE: ensure you are requiring your webpack config from the
-          // correct location.
-          import webpackConfig from './webpack.config.js'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
-              },
-            },
-          })`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/vite-dev-server'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          })`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-    },
-  },
-
-  {
-    type: 'vue2',
-    name: 'Vue.js (v2)',
-    family: 'library',
-    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
-    packages: [CYPRESS_VUE_2],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: 'vue',
-        version: '^2.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: null,
-    config: {
-      js: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          const { devServer } = require('@cypress/webpack-dev-server')
-          // NOTE: ensure you are requiring your webpack config from the
-          // correct location.
-          const webpackConfig = require('./webpack.config.js')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
-              },
-            },
-          }`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          const { devServer } = require('@cypress/vite-dev-server')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          }`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-
-      ts: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/webpack-dev-server'
-          import webpackConfig from '@vue/cli-service/webpack.config'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
-              },
-            },
-          })`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/vite-dev-server'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          })`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-    },
-  },
-
-  {
-    type: 'vue3',
-    name: 'Vue.js (v3)',
-    family: 'library',
-    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
-    packages: [CYPRESS_VUE_3],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: 'vue',
-        version: '^3.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_VUE,
-    config: {
-      js: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          const { devServer } = require('@cypress/webpack-dev-server')
-          // NOTE: ensure you are requiring your webpack config from the
-          // correct location.
-          const webpackConfig = require('./webpack.config.js')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
-              },
-            },
-          }`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          const { devServer } = require('@cypress/vite-dev-server')
-
-          module.exports = {
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          }`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-
-      ts: (bundler: Bundler) => {
-        if (isWebpack(bundler)) {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/webpack-dev-server'
-          import webpackConfig from '@vue/cli-service/webpack.config'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                webpackConfig,
-              },
-            },
-          })`
-        }
-
-        if (bundler === 'vite') {
-          return dedent`
-          import { defineConfig } from 'cypress'
-          import { devServer } from '@cypress/vite-dev-server'
-
-          export default defineConfig({
-            component: {
-              devServer,
-              devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
-                // optionally provide your Vite config overrides.
-              },
-            },
-          })`
-        }
-
-        throw Error(`No config defined for ${bundler}`)
-      },
-    },
+    codeGenFramework: 'vue',
+    mountModule: 'cypress/vue',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'nextjs',
+    category: 'template',
+    configFramework: 'next',
     name: 'Next.js',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [
-      CYPRESS_REACT_LATEST,
-      BUNDLER_WEBPACK_4,
-    ],
-    defaultPackagePath: '@cypress/react/plugins/next',
-    glob: '*.{js,jsx,tsx}',
-    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-    detectors: [
-      {
-        dependency: 'next',
-        version: '>=10.0.0',
-      },
-    ],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_REACT,
-    config: {
-      js: () => ``,
-      ts: () => ``,
+    detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+      ]
     },
+    codeGenFramework: 'react',
+    mountModule: 'cypress/react',
+    supportStatus: 'alpha',
+    /**
+     * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
+     * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24
+     */
+    componentIndexHtml: componentIndexHtmlGenerator([
+      `<!-- Used by Next.js to inject CSS. -->\n`,
+      `<div id="__next_css__DO_NOT_USE__"></div>`,
+    ].join(' '.repeat(8))),
   },
   {
     type: 'nuxtjs',
+    configFramework: 'nuxt',
+    category: 'template',
     name: 'Nuxt.js (v2)',
-    family: 'template',
-    supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [
-      CYPRESS_VUE_2,
-      BUNDLER_WEBPACK_4,
-    ],
-    defaultPackagePath: null,
-    glob: '*.vue',
-    detectors: [
-      {
-        dependency: 'nuxt',
-        version: '^2.0.0',
-      },
-    ],
-    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-    codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: null,
-    config: {
-      js: () => {
-        return dedent`
-        const { defineConfig } = require("cypress")
-        const { devServer } = require("@cypress/webpack-dev-server")
-        const { getWebpackConfig } = require("nuxt")
-
-        module.exports = defineConfig({
-          component: {
-            async devServer(cypressDevServerConfig, devServerConfig) {
-              const webpackConfig = await getWebpackConfig()
-
-              return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
-            },
-            devServerConfig: {
-              indexHtmlFile: 'cypress/support/component-index.html',
-            },
-          },
-        })`
-      },
-      ts: () => {
-        return dedent`
-        import { defineConfig } from "cypress"
-        import { devServer } from "@cypress/webpack-dev-server"
-        import { getWebpackConfig } from "nuxt"
-
-        export default defineConfig({
-          component: {
-            async devServer(cypressDevServerConfig, devServerConfig) {
-              const webpackConfig = await getWebpackConfig()
-
-              return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
-            },
-            devServerConfig: {
-              indexHtmlFile: 'cypress/support/component-index.html',
-            },
-          },
-        })`
-      },
+    detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ]
     },
+    codeGenFramework: 'vue',
+    mountModule: 'cypress/vue2',
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
+  {
+    type: 'vue2',
+    configFramework: 'vue',
+    category: 'library',
+    name: 'Vue.js 2',
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        getBundlerDependency(bundler, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ]
+    },
+    codeGenFramework: 'vue',
+    mountModule: 'cypress/vue2',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
+  {
+    type: 'vue3',
+    configFramework: 'vue',
+    category: 'library',
+    name: 'Vue.js 3',
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        getBundlerDependency(bundler, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
+      ]
+    },
+    codeGenFramework: 'vue',
+    mountModule: 'cypress/vue',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
+  {
+    type: 'react',
+    configFramework: 'react',
+    category: 'library',
+    name: 'React.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        getBundlerDependency(bundler, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+      ]
+    },
+    codeGenFramework: 'react',
+    mountModule: 'cypress/react',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

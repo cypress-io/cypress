@@ -12,6 +12,7 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
+import type { RemoteStates } from './remote_states'
 
 export interface InitializeRoutes {
   config: Cfg
@@ -19,7 +20,7 @@ export interface InitializeRoutes {
   getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  getRemoteState: () => Cypress.RemoteState
+  remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
@@ -31,7 +32,7 @@ export const createCommonRoutes = ({
   testingType,
   getSpec,
   getCurrentBrowser,
-  getRemoteState,
+  remoteStates,
   nodeProxy,
   exit,
 }: InitializeRoutes) => {
@@ -70,7 +71,7 @@ export const createCommonRoutes = ({
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
-    runner.handle(req, res)
+    runner.handle(testingType, req, res)
   })
 
   router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
@@ -79,7 +80,7 @@ export const createCommonRoutes = ({
 
   router.get(`/${namespace}/iframes/*`, (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
+      iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
     if (testingType === 'component') {
@@ -93,6 +94,12 @@ export const createCommonRoutes = ({
 
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
     const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
+
+    // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // so that we can continue to support tests that visit multiple subdomains in a single spec.
+    // https://github.com/cypress-io/cypress/issues/20147
+    res.setHeader('Origin-Agent-Cluster', '?0')
 
     getCtx().html.appHtml(nonProxied)
     .then((html) => res.send(html))

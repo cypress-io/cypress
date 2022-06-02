@@ -1,22 +1,9 @@
 const helpers = require('../support/helpers')
 
 const { shouldHaveTestResults, getRunState, cleanseRunStateMap } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true } })
+const { runIsolatedCypress, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true } })
 const { sinon } = Cypress
 const match = Cypress.sinon.match
-
-const threeTestsWithRetry = {
-  suites: {
-    'suite 1': {
-      hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-      tests: [
-        'test 1',
-        { name: 'test 2', fail: 2 },
-        'test 3',
-      ],
-    },
-  },
-}
 
 describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   // NOTE: for test-retries
@@ -25,142 +12,6 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
     .then(({ autCypress }) => {
       expect(autCypress.config()).to.has.property('retries', 1)
     })
-  })
-
-  it('simple retry', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          tests: [
-            { name: 'test 1',
-              fail: 1,
-            },
-          ],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('test retry with hooks', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-          tests: [{ name: 'test 1', fail: 1 }],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('test retry with [only]', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-          tests: [
-            { name: 'test 1' },
-            { name: 'test 2', fail: 1, only: true },
-            { name: 'test 3' },
-          ],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('can retry from [beforeEach]', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          hooks: [
-            'before',
-            'beforeEach',
-            { type: 'beforeEach', fail: 1 },
-            'beforeEach',
-            'afterEach',
-            'after',
-          ],
-          tests: [{ name: 'test 1' }],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('can retry from [afterEach]', () => {
-    runIsolatedCypress({
-      hooks: [{ type: 'afterEach', fail: 1 }],
-      suites: {
-        'suite 1': {
-          hooks: [
-            'before',
-            'beforeEach',
-            'beforeEach',
-            'afterEach',
-            'after',
-          ],
-          tests: [{ name: 'test 1' }, 'test 2', 'test 3'],
-        },
-        'suite 2': {
-          hooks: [{ type: 'afterEach', fail: 2 }],
-          tests: ['test 1'],
-        },
-        'suite 3': {
-          tests: ['test 1'],
-        },
-      },
-    }, { config: { retries: 2, isTextTerminal: true } })
-
-    .then(snapshotMochaEvents)
-  })
-
-  it('cant retry from [before]', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          hooks: [
-            { type: 'before', fail: 1 },
-            'beforeEach',
-            'beforeEach',
-            'afterEach',
-            'afterEach',
-            'after',
-          ],
-          tests: [{ name: 'test 1' }],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('cant retry from [after]', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          hooks: [
-            'before',
-            'beforeEach',
-            'beforeEach',
-            'afterEach',
-            'afterEach',
-            { type: 'after', fail: 1 },
-          ],
-          tests: [{ name: 'test 1' }],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(snapshotMochaEvents)
-  })
-
-  it('three tests with retry', () => {
-    runIsolatedCypress(threeTestsWithRetry, {
-      config: {
-        retries: 2,
-      },
-    })
-    .then(snapshotMochaEvents)
   })
 
   describe('screenshots', () => {
@@ -246,20 +97,6 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
         expect(onAfterScreenshot.args[0][0]).matchDeep({ testAttemptIndex: 0 })
         expect(onAfterScreenshot.args[2][0]).matchDeep({ testAttemptIndex: 1 })
       })
-    })
-  })
-
-  // https://github.com/cypress-io/cypress/issues/8363
-  describe('cleanses errors before emitting', () => {
-    it('does not try to serialize error with err.actual as DOM node', () => {
-      runIsolatedCypress(() => {
-        it('visits', () => {
-          cy.visit('/fixtures/dom.html')
-          cy.get('#button').should('not.be.visible')
-        })
-      }, { config: { defaultCommandTimeout: 200 } })
-      // should not have err.actual, expected properties since the subject is a DOM element
-      .then(snapshotMochaEvents)
     })
   })
 

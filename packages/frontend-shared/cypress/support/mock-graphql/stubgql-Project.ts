@@ -7,7 +7,7 @@ import type {
   GlobalProject,
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './clientTestUtils'
-import { CloudProjectStubs } from './stubgql-CloudTypes'
+import { CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { stubBrowsers } from './stubgql-Browser'
 
 export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {
@@ -29,9 +29,11 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ...globalProject,
     __typename: 'CurrentProject',
     isCTConfigured: true,
+    serveConfig: {},
     isE2EConfigured: true,
     currentTestingType: 'e2e',
     projectId: `${globalProject.title}-id`,
+    defaultSpecFileName: 'cypress/e2e/spec.cy.js',
     specs: [
       ...randomComponents(50, 'Spec').map((c) => {
         return {
@@ -42,13 +44,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ],
     config,
     cloudProject: CloudProjectStubs.componentProject,
-    codeGenGlobs: {
-      id: 'super-unique-id',
-      __typename: 'CodeGenGlobs',
-      component: '**/*.vue',
-      story: '**/*.stories.*',
-    },
-    currentBrowser: stubBrowsers[0],
+    activeBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
     browserStatus: 'closed',

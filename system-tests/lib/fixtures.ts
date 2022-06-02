@@ -2,19 +2,28 @@ import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
 import tempDir from 'temp-dir'
+import type { ProjectFixtureDir } from './fixtureDirs'
 
 export const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 
+export { fixtureDirs, ProjectFixtureDir } from './fixtureDirs'
+
 export const projects = _path.join(root, 'projects')
 
+export const projectFixtures = _path.join(root, 'project-fixtures')
+
 export const cyTmpDir = _path.join(tempDir, 'cy-projects')
+
+const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true }).filter((f) => f.isDirectory()).map((f) => f.name)
 
 const safeRemove = (path) => {
   try {
     fs.removeSync(path)
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as NodeJS.ErrnoException
+
     // Windows does not like the en masse deleting of files, since the AV will hold
     // a lock on files when they are written. This skips deleting if the lock is
     // encountered.
@@ -49,12 +58,32 @@ export function scaffold () {
 
 /**
  * Given a project name, copy the project's test files to the temp dir.
+ * Returns the scaffolded directory
  */
-export async function scaffoldProject (project: string): Promise<void> {
+export async function scaffoldProject (project: ProjectFixtureDir): Promise<string> {
   const to = _path.join(cyTmpDir, project)
-  const from = _path.join(projects, project)
+  const from = projectFixturePath(project)
 
   await fs.copy(from, to)
+
+  try {
+    const packageJson = require(`${to}/package.json`)
+    const fixtureDir = packageJson.projectFixtureDirectory
+
+    if (fixtureDir) {
+      if (!projectFixtureDirs.includes(fixtureDir)) {
+        throw new Error(`Invalid project fixture directory: ${fixtureDir}, expected one of ${projectFixtureDirs}`)
+      }
+
+      await fs.copy(_path.join(projectFixtures, fixtureDir), to)
+    }
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') {
+      throw e
+    }
+  }
+
+  return to
 }
 
 export function scaffoldWatch () {
@@ -78,17 +107,27 @@ export function remove () {
   safeRemove(cyTmpDir)
 }
 
-export function removeProject (name) {
+export function removeProject (name: ProjectFixtureDir) {
   safeRemove(projectPath(name))
+}
+
+// Removes node_modules that might have been leftover from an initial "yarn"
+// in the fixture dir
+export function clearFixtureNodeModules (name: ProjectFixtureDir) {
+  try {
+    safeRemove(_path.join(projects, name, 'node_modules'))
+  } catch {
+    //
+  }
 }
 
 // returns the path to project fixture
 // in the cyTmpDir
-export function project (name) {
+export function project (name: ProjectFixtureDir) {
   return projectPath(name)
 }
 
-export function projectPath (name) {
+export function projectPath (name: ProjectFixtureDir) {
   return _path.join(cyTmpDir, name)
 }
 
@@ -96,8 +135,12 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
   return fs.readFileSync(_path.join(serverRoot, 'test', 'support', 'fixtures', fixture), { encoding })
 }
 
-export function path (fixture) {
+export function path (fixture: ProjectFixtureDir) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
+}
+
+export function projectFixturePath (name: ProjectFixtureDir) {
+  return _path.join(projects, name)
 }
 
 export default module.exports

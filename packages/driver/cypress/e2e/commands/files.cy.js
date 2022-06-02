@@ -161,6 +161,8 @@ describe('src/cy/commands/files', () => {
       defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
+        cy.visit('/fixtures/empty.html')
+
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -291,10 +293,10 @@ describe('src/cy/commands/files', () => {
         err.filePath = '/path/to/foo.json'
 
         Cypress.backend.rejects(err)
-        let retries = 0
+        let hasRetried = false
 
         cy.on('command:retry', () => {
-          retries += 1
+          hasRetried = true
         })
 
         cy.on('fail', (err) => {
@@ -310,7 +312,8 @@ describe('src/cy/commands/files', () => {
             \`/path/to/foo.json\``)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
-          expect(retries).to.eq(2)
+
+          expect(hasRetried).to.be.true
 
           done()
         })

@@ -2,10 +2,9 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const config = require(`../../lib/config`)
 const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
-const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const FixturesHelper = require('@tooling/system-tests')
 const { getCtx } = require(`../../lib/makeDataContext`)
 const os = require('os')
 const eol = require('eol')
@@ -28,7 +27,7 @@ describe('lib/fixture', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
@@ -181,7 +180,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
 
-      return config.get(projectPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((result) => {

@@ -19,6 +19,7 @@ import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
+import dedent from 'dedent'
 
 if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
   process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
@@ -43,9 +44,6 @@ gulp.task(
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
-
-    // ... and generate the patsh for the e2e support file watching
-    e2eTestScaffoldWatch,
   ),
 )
 
@@ -63,23 +61,36 @@ gulp.task(
     webpackRunner,
     gulp.series(
       makePathMap,
+      // Before dev, fetch the latest "remote" schema from the Cypress dashboard
+      syncRemoteGraphQL,
       gulp.parallel(
         viteClean,
+        e2eTestScaffoldWatch,
         'codegen',
       ),
-
-      killExistingCypress,
 
       // Now that we have the codegen, we can start the frontend(s)
       gulp.parallel(
         viteApp,
         viteLaunchpad,
-        e2eTestScaffoldWatch,
       ),
-
-      // And we're finally ready for electron, watching for changes in
-      // /graphql to auto-restart the server
     ),
+  ),
+)
+
+gulp.task(
+  'watch',
+  gulp.series(
+    'dev:watch',
+    // And we're finally ready for electron, watching for changes in
+    // /graphql to auto-restart the server
+    async function logInfo () {
+      console.log(dedent`
+        "yarn watch" is complete, and is now watching your files for code-generation updates.
+
+        In a separate terminal, run "yarn cypress:open" to start Cypress
+      `)
+    },
   ),
 )
 
@@ -88,12 +99,11 @@ gulp.task(
   gulp.series(
     'dev:watch',
 
+    killExistingCypress,
+
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
-
-    // Before dev, fetch the latest "remote" schema from the Cypress dashboard
-    syncRemoteGraphQL,
   ),
 )
 
@@ -107,6 +117,7 @@ gulp.task('open', startCypressWatch)
 gulp.task('buildProd',
   gulp.series(
     viteClean,
+    e2eTestScaffold,
 
     nexusCodegen,
     graphqlCodegen,

@@ -1,16 +1,16 @@
 <template>
   <div class="rounded flex font-medium bg-gray-900 py-2px px-12px text-gray-200 text-14px leading-20px gap-8px items-center">
-    <label
-      class="hidden"
-      for="toggle-highlights"
-    >{{ t('runner.snapshot.toggleHighlights') }}</label>
     <Switch
       name="toggle-highlights"
       :value="props.value"
       size="sm"
       @update="emits('toggle')"
     />
-    {{ t('runner.snapshot.highlightsLabel') }}
+    <label
+      for="toggle-highlights"
+      class="cursor-pointer"
+    >{{ t('runner.snapshot.highlightsLabel') }}
+    </label>
   </div>
 </template>
 

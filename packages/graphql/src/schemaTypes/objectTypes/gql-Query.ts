@@ -1,4 +1,4 @@
-import { objectType } from 'nexus'
+import { idArg, nonNull, objectType } from 'nexus'
 import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -8,6 +8,7 @@ import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
+import { CachedUser } from './gql-CachedUser'
 
 export const Query = objectType({
   name: 'Query',
@@ -18,11 +19,16 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.baseError,
     })
 
+    t.field('cachedUser', {
+      type: CachedUser,
+      resolve: (root, args, ctx) => ctx.user,
+    })
+
     t.nonNull.list.nonNull.field('warnings', {
       type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.warnings
+        return ctx.warnings
       },
     })
 
@@ -35,7 +41,7 @@ export const Query = objectType({
     t.field('migration', {
       type: Migration,
       description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: (root, args, ctx) => ctx.coreData.migration,
+      resolve: (root, args, ctx) => ctx.coreData.migration.legacyConfigForMigration ? ctx.coreData.migration : null,
     })
 
     t.nonNull.field('dev', {
@@ -45,6 +51,7 @@ export const Query = objectType({
     })
 
     t.field('versions', {
+      deferIfNotLoaded: true,
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
@@ -99,5 +106,25 @@ export const Query = objectType({
       type: ScaffoldedFile,
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
+
+    t.nonNull.boolean('invokedFromCli', {
+      description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
+    })
+
+    t.field('node', {
+      type: 'Node',
+      args: {
+        id: nonNull(idArg()),
+      },
+      resolve: (root, args, ctx, info) => {
+        // Cast as any, because this is extremely difficult to type correctly
+        return ctx.graphql.resolveNode(args.id, ctx, info) as any
+      },
+    })
+  },
+  sourceType: {
+    module: '@packages/graphql',
+    export: 'RemoteExecutionRoot',
   },
 })

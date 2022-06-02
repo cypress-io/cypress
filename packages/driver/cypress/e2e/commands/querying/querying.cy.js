@@ -1224,6 +1224,22 @@ describe('src/cy/commands/querying', () => {
       cy.contains(/\'/)
     })
 
+    // https://github.com/cypress-io/cypress/issues/19116
+    it('handles backslashes', () => {
+      $('<div id="backslashes">"&lt;OE_D]dQ\\</div>').appendTo(cy.$$('body'))
+      cy.get('#backslashes').contains('"<OE_D]dQ\\')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/21108
+    it('shows correct error message when regex starts with =(equals sign)', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Expected to find content')
+      })
+
+      cy.visit('fixtures/dom.html')
+      cy.contains(/=[0-6]/, { timeout: 100 }).should('have.text', 'a=2')
+    })
+
     describe('should(\'not.exist\')', () => {
       it('returns null when no content exists', () => {
         cy.contains('alksjdflkasjdflkajsdf').should('not.exist').then(($el) => {

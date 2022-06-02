@@ -64,15 +64,25 @@ function run (ipc, file, projectRoot) {
     return true
   }
 
-  const isValidDevServer = (config) => {
+  const getValidDevServer = (config) => {
     const { devServer } = config
 
     if (devServer && typeof devServer === 'function') {
-      return true
+      return { devServer, objApi: false }
+    }
+
+    if (devServer && typeof devServer === 'object') {
+      if (devServer.bundler === 'webpack') {
+        return { devServer: require('@cypress/webpack-dev-server').devServer, objApi: true }
+      }
+
+      if (devServer.bundler === 'vite') {
+        return { devServer: require('@cypress/vite-dev-server').devServer, objApi: true }
+      }
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', file, config),
+      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
     ))
 
     return false
@@ -80,17 +90,19 @@ function run (ipc, file, projectRoot) {
 
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
-  const loadConfig = async (configFile) => {
+  const loadFile = async (file) => {
     // 1. Try loading the configFile
     // 2. Catch the "ERR_REQUIRE_ESM" error
     // 3. Check if esbuild is installed
     //   3a. Yes: Use bundleRequire
     //   3b. No: Continue through to `await import(configFile)`
     // 4. Use node's dynamic import to import the configFile
+    let originalError
 
     try {
-      return require(configFile)
+      return require(file)
     } catch (err) {
+      originalError = err
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }
@@ -101,19 +113,27 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      require.resolve('esbuild', { paths: [process.cwd()] })
 
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
-      return (await bundleRequire({ filepath: configFile })).mod
+      return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find module 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported
-        return await import(configFile)
+        // Certain modules cannot be dynamically imported. If this throws, however, we want
+        // to show the original error that was thrown, because that's ultimately the source of the problem
+        try {
+          return await import(file)
+        } catch (e) {
+          // If we aren't able to import the file at all, throw the original error, since that has more accurate information
+          // of what failed to begin with
+          debug('esbuild fallback for loading config failed, throwing original error. node import error: %o', e)
+          throw originalError
+        }
       }
 
       throw err
@@ -123,7 +143,7 @@ function run (ipc, file, projectRoot) {
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', file)
-      const configFileExport = await loadConfig(file)
+      const configFileExport = await loadFile(file)
 
       debug('loaded config file', file)
       const result = configFileExport.default || configFileExport
@@ -152,16 +172,40 @@ function run (ipc, file, projectRoot) {
         }
 
         if (testingType === 'component') {
-          if (!isValidDevServer((result.component || {}))) {
+          const devServerInfo = getValidDevServer(result.component || {})
+
+          if (!devServerInfo) {
             return
           }
+
+          const { devServer, objApi } = devServerInfo
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
-            const { devServer } = result.component
+            const onConfigNotFound = (devServer, root, searchedFor) => {
+              ipc.send('setupTestingType:error', util.serializeError(
+                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServer, root, searchedFor),
+              ))
+            }
 
-            on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+            on('dev-server:start', (devServerOpts) => {
+              if (objApi) {
+                const { specs, devServerEvents } = devServerOpts
+
+                return devServer({
+                  cypressConfig: config,
+                  onConfigNotFound,
+                  ...result.component.devServer,
+                  specs,
+                  devServerEvents,
+                })
+              }
+
+              devServerOpts.cypressConfig = config
+
+              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+            })
 
             return setupNodeEvents(on, config)
           })
@@ -190,9 +234,17 @@ function run (ipc, file, projectRoot) {
         const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
         const failurePath = tsErrorRegex.exec(cleanMessage)
 
-        err.tsErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
+        err.compilerErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
         err.originalMessage = err.message
         err.message = cleanMessage
+      } else if (Array.isArray(err.errors)) {
+        // The stack trace of the esbuild error, do not give to much information related with the user error,
+        // we have the errors array which includes the users file and information related with the error
+        const firstError = err.errors.filter((e) => Boolean(e.location))[0]
+
+        if (firstError && firstError.location.file) {
+          err.compilerErrorLocation = { filePath: firstError.location.file, line: Number(firstError.location.line), column: Number(firstError.location.column) }
+        }
       }
 
       ipc.send('loadConfig:error', util.serializeError(
@@ -203,7 +255,7 @@ function run (ipc, file, projectRoot) {
 
   ipc.on('loadLegacyPlugins', async (legacyConfig) => {
     try {
-      let legacyPlugins = require(file)
+      let legacyPlugins = await loadFile(file)
 
       if (legacyPlugins && typeof legacyPlugins.default === 'function') {
         legacyPlugins = legacyPlugins.default
@@ -252,9 +304,7 @@ function run (ipc, file, projectRoot) {
 
       ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
     } catch (e) {
-      ipc.send('loadLegacyPlugins:error', util.serializeError(
-        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
-      ))
+      ipc.send('loadLegacyPlugins:error', util.serializeError(e))
     }
   })
 

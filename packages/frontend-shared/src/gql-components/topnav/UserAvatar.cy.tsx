@@ -7,6 +7,11 @@ describe('<UserAvatar />', { viewportWidth: 48, viewportHeight: 48 }, () => {
     cy.percySnapshot()
   })
 
+  it('renders when a null email address is passed', () => {
+    cy.mount(() => <UserAvatar email={null} class="h-50px w-50px"/>)
+    validateUserAvatar()
+  })
+
   it('renders when no email address is passed', () => {
     cy.mount(() => <UserAvatar class="h-50px w-50px"/>)
     validateUserAvatar()

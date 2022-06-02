@@ -1,6 +1,5 @@
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import { useAutStore } from '../store'
-import { createEventManager } from '../../cypress/component/support/ctSupport'
 
 const browser = {
   displayName: 'Chrome',
@@ -13,11 +12,10 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       win.__CYPRESS_BROWSER__ = browser
       win.__CYPRESS_TESTING_TYPE__ = 'e2e'
       const autStore = useAutStore()
-      const eventManager = createEventManager()
 
       autStore.updateUrl('http://localhost:4000')
 
-      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} width={800}/>)
+      cy.mount(<SpecRunnerHeaderRunMode/>)
 
       cy.get('[data-cy="aut-url"]').should('be.visible')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
@@ -41,11 +39,10 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       win.__CYPRESS_BROWSER__ = browser
       win.__CYPRESS_TESTING_TYPE__ = 'component'
       const autStore = useAutStore()
-      const eventManager = createEventManager()
 
       autStore.updateUrl('http://localhost:4000')
 
-      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} width={800} />)
+      cy.mount(<SpecRunnerHeaderRunMode />)
 
       cy.get('[data-cy="aut-url"]').should('not.exist')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
@@ -58,6 +55,23 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       cy.contains('The viewport determines').should('not.exist')
       cy.contains('Chrome 1').click()
       cy.contains('Firefox').should('not.exist')
+
+      cy.percySnapshot()
+    })
+  })
+
+  it('disables browser dropdown button when specs are running', () => {
+    cy.window().then((win) => {
+      win.__CYPRESS_BROWSER__ = browser
+      win.__CYPRESS_TESTING_TYPE__ = 'e2e'
+      const autStore = useAutStore()
+
+      autStore.updateUrl('http://localhost:4000')
+      autStore.setIsRunning(true)
+
+      cy.mount(<SpecRunnerHeaderRunMode />)
+
+      cy.get('[data-cy="select-browser"] > button').should('be.disabled')
 
       cy.percySnapshot()
     })

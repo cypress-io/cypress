@@ -1,4 +1,4 @@
-import PizzaShop from './PizzaShop'
+import PizzaShop from './PizzaShop/index.vue'
 import router from './PizzaShop/router'
 import { mountCallback } from '@cypress/vue'
 

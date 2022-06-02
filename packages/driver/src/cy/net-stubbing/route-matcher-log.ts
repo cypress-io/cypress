@@ -22,8 +22,8 @@ export function getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
   return $utils.stringify(displayMatcher)
 }
 
-export function getRouteMatcherLogConfig (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse): Partial<Cypress.LogConfig> {
-  const obj: Partial<Cypress.LogConfig> = {
+export function getRouteMatcherLogConfig (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse): Partial<Cypress.InternalLogConfig> {
+  const obj: Partial<Cypress.InternalLogConfig> = {
     name: 'route',
     method: String(matcher.method || '*'),
     url: getDisplayUrlMatcher(matcher),

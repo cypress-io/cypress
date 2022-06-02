@@ -1,13 +1,11 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { CODE_LANGUAGES } from '../../../types/src/constants'
-import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}
@@ -24,7 +22,15 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .click()
     .should('have.attr', 'aria-expanded', 'true')
 
-    const frameworkIconName = (frameworkName) => {
+    cy.get('li')
+    .then(($items) => {
+      return $items.map((_idx, html) => Cypress.$(html).text()).get()
+    })
+    // alphabetical order
+    // we should "support is in alpha" for a11y (not shown visually)
+    .should('deep.eq', ['Create React App (v5) Support is in  Alpha', 'Vue.js (v3)'])
+
+    const frameworkIconName = (frameworkName: string) => {
       if (frameworkName.includes('React')) {
         return 'react-logo'
       }
@@ -40,14 +46,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       return `${Cypress._.lowerCase(frameworkName).replace(' ', '')}-logo`
     }
 
-    FRONTEND_FRAMEWORKS.forEach((framework) => {
-      cy.findByRole('option', { name: framework.name })
+    ;['Create React App (v5) Support is in Alpha', 'Vue.js (v3)'].forEach((name) => {
+      cy.findByRole('option', { name })
       .find('svg')
-      .should('have.attr', 'data-cy', frameworkIconName(framework.name))
-    })
-
-    CODE_LANGUAGES.forEach((lang) => {
-      cy.findByRole('button', { name: lang.name })
+      .should('have.attr', 'data-cy', frameworkIconName(name))
     })
 
     cy.findByRole('button', { name: 'Next Step' })
@@ -60,7 +62,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
         res.frameworks[0].isDetected = true
       },
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}
@@ -74,19 +76,19 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v4) (detected)' }).should('be.visible')
+    cy.findByRole('option', { name: 'Create React App (v5) Support is in Alpha (detected)' }).should('be.visible').click()
   })
 
   it('shows the description of bundler as Dev Server', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {
         res.framework = {
-          ...res.frameworks[3],
+          ...res.frameworks[1],
           supportedBundlers: res.allBundlers,
         }
       },
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}

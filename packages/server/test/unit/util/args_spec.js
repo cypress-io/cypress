@@ -186,6 +186,36 @@ describe('lib/util/args', () => {
 
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{a,b,c}/*.js`)
     })
+
+    // https://github.com/cypress-io/cypress/issues/20794
+    it('does not split at filename with glob pattern', function () {
+      const options = this.setup('--spec', 'cypress/integration/foo/bar/[baz]/test.ts,cypress/integration/foo1/bar/[baz]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/[baz]/test.ts`)
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/[baz]/test.ts`)
+      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20794
+    it('correctly splits at comma with glob pattern', function () {
+      const options = this.setup('--spec', 'cypress/integration/foo/bar/baz/test.ts,cypress/integration/foo1/bar/[baz]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/baz/test.ts`)
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/[baz]/test.ts`)
+      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20794
+    it('correctly splits at comma with escaped glob pattern', function () {
+      const options = this.setup('--spec', 'cypress/integration/foo/bar/\[baz\]/test.ts,cypress/integration/foo1/bar/\[baz1\]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/\[baz\]/test.ts`)
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/\[baz1\]/test.ts`)
+      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+    })
   })
 
   context('--tag', () => {

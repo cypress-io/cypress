@@ -2,7 +2,7 @@ import { plugin } from 'nexus'
 import { isPromiseLike, pathToArray } from 'nexus/dist/utils'
 import chalk from 'chalk'
 
-const HANGING_RESOLVER_THRESHOLD = 2000
+const HANGING_RESOLVER_THRESHOLD = 15
 
 export const nexusSlowGuardPlugin = plugin({
   name: 'NexusSlowGuard',
@@ -12,9 +12,12 @@ export const nexusSlowGuardPlugin = plugin({
   onCreateFieldResolver (field) {
     const threshold = (field.fieldConfig.extensions?.nexus?.config.slowLogThreshold ?? HANGING_RESOLVER_THRESHOLD) as number | false
 
-    // For fields, we only want to log if the field takes longer than SLOW_FIELD_THRESHOLD to execute.
-    // Also log if it's hanging for some reason
     return (root, args, ctx, info, next) => {
+      // Don't worry about slowness in Mutations / Subscriptions, these aren't blocking the execution of initial load
+      if (info.operation.operation === 'mutation' || info.operation.operation === 'subscription') {
+        return next(root, args, ctx, info)
+      }
+
       const result = next(root, args, ctx, info)
 
       if (isPromiseLike(result) && threshold !== false) {

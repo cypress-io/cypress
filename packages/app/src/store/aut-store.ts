@@ -15,6 +15,7 @@ interface AutStoreState {
   scriptError: ScriptError
   viewportUpdateCallback: (() => void) | null
   scale: number
+  specRunnerHeaderHeight: number
 }
 
 export const useAutStore = defineStore({
@@ -37,6 +38,7 @@ export const useAutStore = defineStore({
       viewportUpdateCallback: null,
       scriptError: null,
       scale: 1,
+      specRunnerHeaderHeight: 64,
     }
   },
 
@@ -78,8 +80,11 @@ export const useAutStore = defineStore({
     setScriptError (err: ScriptError) {
       this.scriptError = err
     },
-    setScale (scale) {
+    setScale (scale: number) {
       this.scale = scale
+    },
+    setSpecRunnerHeaderHeight (height: number) {
+      this.specRunnerHeaderHeight = height
     },
   },
 

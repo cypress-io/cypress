@@ -6,15 +6,19 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import { mergeConfig } from 'vite'
+import type { InlineConfig } from 'vite'
+import path from 'path'
+
 import { configFiles } from './constants'
+import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressInspect } from './plugins/index'
-import type { StartDevServer } from './types'
+import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
-  const root = options.config.projectRoot || resolve(process.cwd())
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
+  const { specs, cypressConfig, viteConfig: viteOverrides } = config
+  const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
@@ -24,30 +28,68 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
   if (configFile) {
     debug('resolved config file at', configFile, 'using root', root)
   } else if (viteOverrides) {
-    debug('Couldn\'t find a Vite config file, however we received a custom viteConfig', viteOverrides)
+    debug(`Couldn't find a Vite config file, however we received a custom viteConfig`, viteOverrides)
   } else {
-    debug(`
-    Didn\'t resolve a Vite config AND the user didn\'t pass in a custom viteConfig.
-    Falling back to Vite\'s defaults.`)
+    if (config.onConfigNotFound) {
+      config.onConfigNotFound('vite', root, configFiles)
+      // The config process will be killed from the parent, but we want to early exit so we don't get
+      // any additional errors related to not having a config
+      process.exit(0)
+    } else {
+      throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+    }
   }
 
-  const config = {
+  // Vite caches its output in the .vite directory in the node_modules where vite lives.
+  // So we want to find that node_modules path and ensure it's added to the "allow" list
+  const vitePathNodeModules = path.dirname(path.dirname(require.resolve(`vite/package.json`, {
+    paths: [root],
+  })))
+
+  const viteBaseConfig: InlineConfig = {
     root,
-    base: `/${options.config.namespace}/src/`,
+    base: `${cypressConfig.devServerPublicPathRoute}/`,
     configFile,
     optimizeDeps: {
+      esbuildOptions: {
+        incremental: true,
+        plugins: [
+          {
+            name: 'cypress-esbuild-plugin',
+            setup (build) {
+              build.onEnd(function (result) {
+                // We don't want to completely fail the build here on errors so we treat the errors as warnings
+                // which will handle things more gracefully. Vite will 500 on files that have errors when they
+                // are requested later and Cypress will display an error message.
+                // See: https://github.com/cypress-io/cypress/pull/21599
+                result.warnings = [...result.warnings, ...result.errors]
+                result.errors = []
+              })
+            },
+          },
+        ],
+      },
       entries: [
-        ...options.specs.map((s) => relative(root, s.relative)),
-        options.config.supportFile ?? resolve(root, options.config.supportFile),
+        ...specs.map((s) => relative(root, s.relative)),
+        ...(cypressConfig.supportFile ? [resolve(root, cypressConfig.supportFile)] : []),
       ].filter((v) => v != null),
     },
+    server: {
+      fs: {
+        allow: [
+          root,
+          vitePathNodeModules,
+          cypressConfig.cypressBinaryRoot,
+        ],
+      },
+    },
     plugins: [
-      Cypress(options),
-      await CypressInspect(),
+      Cypress(config, vite),
+      CypressInspect(config),
     ],
   }
 
-  const finalConfig = mergeConfig(config, viteOverrides)
+  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 

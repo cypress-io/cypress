@@ -23,7 +23,7 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
-  @observable isSpecsListOpen = true
+  @observable isSpecsListOpen = false
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable isPreferencesMenuOpen = defaults.isPreferencesMenuOpen

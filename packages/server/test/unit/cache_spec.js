@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const { __get } = require('../../lib/cache')
 const cache = require(`../../lib/cache`)
 const { fs } = require(`../../lib/util/fs`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 
 describe('lib/cache', () => {
   beforeEach(() => {

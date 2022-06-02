@@ -18,7 +18,7 @@
       <SelectFwOrBundler
         v-if="props.gql.framework?.type && bundlers.length > 1"
         class="pt-3px"
-        :options="bundlers || []"
+        :options="bundlers"
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
@@ -26,12 +26,6 @@
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
-      />
-      <SelectLanguage
-        :name="t('setupPage.projectSetup.languageLabel')"
-        :options="languages || []"
-        :value="props.gql.language?.type ?? 'js'"
-        @select="val => onWizardSetup('codeLanguage', val)"
       />
     </div>
   </WizardLayout>
@@ -41,7 +35,6 @@
 import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
-import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
 import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
@@ -50,7 +43,6 @@ import {
 } from '../generated/graphql'
 
 import { useI18n } from '@cy/i18n'
-import { sortBy } from 'lodash'
 import { useMutation } from '@urql/vue'
 
 gql`
@@ -59,14 +51,12 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
-    isSelected
     isDetected
   }
   framework {
     type
     id
     name
-    isSelected
     isDetected
     supportedBundlers {
       id
@@ -78,8 +68,8 @@ fragment EnvironmentSetup on Wizard {
   }
   frameworks {
     id
+    supportStatus
     name
-    isSelected
     isDetected
     type
     category
@@ -89,17 +79,6 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isDetected
-  }
-  language {
-    id
-    name
-    isSelected
-    type
-  }
-  allLanguages {
-    id
-    name
-    type
   }
 }
 `
@@ -112,17 +91,13 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const bundlers = computed(() => {
-  const _bundlers = props.gql.framework?.supportedBundlers || []
+  const all = props.gql.framework?.supportedBundlers || []
 
-  return _bundlers.map((b) => {
-    return {
-      disabled: _bundlers.length <= 1,
-      ...b,
-    }
-  })
+  return all.map((b) => ({ disabled: all.length <= 1, ...b })).sort((x, y) => x.name.localeCompare(y.name))
 })
+
 const frameworks = computed(() => {
-  return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
+  return (props.gql.frameworks || []).map((x) => ({ ...x })).sort((x, y) => x.name.localeCompare(y.name))
 })
 
 gql`
@@ -136,10 +111,6 @@ mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
     framework {
       id
       type
-    }
-    packagesToInstall {
-      id
-      package
     }
   }
 }
@@ -174,12 +145,10 @@ const onBack = () => {
   clearTestingTypeMutation.executeMutation({})
 }
 
-const languages = computed(() => props.gql.allLanguages ?? [])
-
 const canNavigateForward = computed(() => {
-  const { bundler, framework, language } = props.gql
+  const { bundler, framework } = props.gql
 
-  return bundler !== null && framework !== null && language !== null
+  return bundler !== null && framework !== null
 })
 
 </script>

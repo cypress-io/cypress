@@ -36,14 +36,14 @@
     </div>
     <hr class="border-gray-100">
     <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-16px leading-24px">
-      {{ t('settingsPage.footer.text') }}
+      {{ footerText }}
     </p>
     <Button
       class="mx-auto group"
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
-      @click="reconfigure"
+      :href="t('settingsPage.footer.buttonLink')"
     >
       {{ t('settingsPage.footer.button') }}
     </Button>
@@ -51,8 +51,10 @@
 </template>
 
 <script lang="ts" setup>
+
+import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
@@ -61,7 +63,6 @@ import ProjectSettings from './project/ProjectSettings.vue'
 import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
-import { SettingsContainer_ReconfigureProjectDocument } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
@@ -69,11 +70,12 @@ import SettingsIcon from '~icons/cy/settings_x16.svg'
 
 const { t } = useI18n()
 
-gql`
-mutation SettingsContainer_ReconfigureProject {
-  reconfigureProject
-}
-`
+const footerText = computed(() => {
+  return t('settingsPage.footer.text',
+    { testingType: props.gql.currentProject?.currentTestingType === 'component'
+      ? 'component'
+      : 'E2E' })
+})
 
 gql`
 fragment SettingsContainer on Query {
@@ -91,9 +93,4 @@ const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
 
-const openElectron = useMutation(SettingsContainer_ReconfigureProjectDocument)
-
-function reconfigure () {
-  openElectron.executeMutation({})
-}
 </script>

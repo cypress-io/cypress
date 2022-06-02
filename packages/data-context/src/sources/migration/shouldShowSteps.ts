@@ -1,8 +1,10 @@
 import globby from 'globby'
 import path from 'path'
 import { MIGRATION_STEPS } from '@packages/types'
-import { applyMigrationTransform, getSpecs, tryGetDefaultLegacySupportFile } from '.'
+import { applyMigrationTransform, getSpecs, isDefaultSupportFile, legacyIntegrationFolder, tryGetDefaultLegacySupportFile } from '.'
 import type { LegacyCypressConfigJson } from '..'
+
+export const defaultTestFilesGlob = '**/*.{js,ts,jsx,tsx,coffee,cjsx}'
 
 function getTestFilesGlobs (config: LegacyCypressConfigJson, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
@@ -15,7 +17,7 @@ function getTestFilesGlobs (config: LegacyCypressConfigJson, type: 'component' |
     return ([] as string[]).concat(glob)
   }
 
-  return ['**/*.{js,ts,jsx,tsx,coffee}']
+  return [defaultTestFilesGlob]
 }
 
 export function getIntegrationTestFilesGlobs (config: LegacyCypressConfigJson): string[] {
@@ -31,7 +33,7 @@ export function isDefaultTestFiles (config: LegacyCypressConfigJson, type: 'comp
     ? getComponentTestFilesGlobs(config)
     : getIntegrationTestFilesGlobs(config)
 
-  return testFiles.length === 1 && testFiles[0] === '**/*.{js,ts,jsx,tsx,coffee}'
+  return testFiles.length === 1 && testFiles[0] === defaultTestFilesGlob
 }
 
 export function getPluginsFile (config: LegacyCypressConfigJson) {
@@ -43,10 +45,10 @@ export function getPluginsFile (config: LegacyCypressConfigJson) {
 }
 
 export function getIntegrationFolder (config: LegacyCypressConfigJson) {
-  return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
+  return config.e2e?.integrationFolder ?? config.integrationFolder ?? legacyIntegrationFolder
 }
 
-export function getComponentFolder (config: LegacyCypressConfigJson) {
+export function getComponentFolder (config: LegacyCypressConfigJson): false | string {
   if (config.component?.componentFolder === false || config.componentFolder === false) {
     return false
   }
@@ -63,8 +65,14 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
 export async function shouldShowAutoRenameStep (projectRoot: string, config: LegacyCypressConfigJson) {
   const specsToAutoMigrate = await getSpecs(projectRoot, config)
 
+  const e2eMigrationOptions = {
+    // If the configFile has projectId, we do not want to change the preExtension
+    // so, we can keep the cloud history
+    shouldMigratePreExtension: !config.projectId && !config.e2e?.projectId,
+  }
+
   const integrationCleaned = specsToAutoMigrate.integration.filter((spec) => {
-    const transformed = applyMigrationTransform(spec)
+    const transformed = applyMigrationTransform(spec, e2eMigrationOptions)
 
     return transformed.before.relative !== transformed.after.relative
   })
@@ -109,7 +117,6 @@ export async function shouldShowRenameSupport (projectRoot: string, config: Lega
     return false
   }
 
-  const defaultSupportFile = 'cypress/support/index.'
   let supportFile = config.e2e?.supportFile ?? config.supportFile
 
   if (supportFile === undefined) {
@@ -128,7 +135,7 @@ export async function shouldShowRenameSupport (projectRoot: string, config: Lega
 
   // if the support file is custom, we don't show the rename step
   // only if the support file matches the default do we show the rename step
-  return supportFile.includes(defaultSupportFile)
+  return isDefaultSupportFile(supportFile)
 }
 
 // if they have component testing configured using the defaults, they will need to

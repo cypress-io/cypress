@@ -7,9 +7,5 @@ export const ProjectPreferences = objectType({
     t.string('testingType', {
       description: 'The preferred testing type to start in',
     })
-
-    t.string('browserPath', {
-      description: 'The preferred browser to launch',
-    })
   },
 })

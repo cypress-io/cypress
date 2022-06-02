@@ -4,10 +4,11 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
+    :overflow="overflow"
+    class="rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
-      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
+      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse, 'overflow-hidden': overflow}]"
     :max-height="maxHeight"
   >
     <template #target="{ open }">
@@ -25,6 +26,8 @@
           :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="props.dismissible ? DeleteIcon : null"
+          :suffix-button-class="classes.suffixButtonClass"
+          :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
           class="rounded min-w-200px p-16px"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
@@ -108,6 +111,7 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   iconClasses?: string
   maxHeight?: string
+  overflow?: boolean
 }>(), {
   title: undefined,
   modelValue: true,
@@ -117,6 +121,7 @@ const props = withDefaults(defineProps<{
   bodyClass: undefined,
   iconClasses: '',
   maxHeight: undefined,
+  overflow: true,
 })
 
 const title = computed(() => props.title ?? 'Alert')

@@ -2,8 +2,7 @@
   "prefix": "/* eslint-disable padding-line-between-statements */",
   "paths": [
     "packages/graphql/src/**/*",
-    "packages/data-context/src/**/*",
-    "packages/scaffold-config/src/**"
+    "packages/data-context/src/**/*"
   ],
   "ignore": [
     "packages/data-context/src/gen",

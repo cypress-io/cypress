@@ -1,8 +1,12 @@
 import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import type { TemplateExecutor } from 'lodash'
 import combineProperties from 'combine-properties'
+
+dayjs.extend(relativeTime)
 
 templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
@@ -141,6 +145,12 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
 
     const name = `${componentName}${d.specPattern}${d.fileExtension}`
 
+    const lastModifiedTimestamp = new Date(faker.random.arrayElement([
+      faker.date.recent(8),
+      faker.date.past(1),
+      faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString()),
+    ]))
+
     return {
       id: faker.datatype.uuid(),
       baseName: name,
@@ -154,13 +164,11 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
       __typename: baseTypename,
       gitInfo: {
         __typename: 'GitInfo' as const,
+        statusType: 'unmodified' as const,
         id: faker.datatype.uuid(),
         author: faker.internet.userName(),
-        lastModifiedTimestamp: new Date(faker.random.arrayElement([
-          faker.date.recent(8),
-          faker.date.past(1),
-          faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString()),
-        ])).toUTCString(),
+        lastModifiedHumanReadable: dayjs(lastModifiedTimestamp).fromNow(),
+        lastModifiedTimestamp: lastModifiedTimestamp.toUTCString(),
       },
     }
   }, n)

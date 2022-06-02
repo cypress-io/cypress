@@ -638,4 +638,32 @@ describe('driver/src/cypress/error_utils', () => {
       })
     })
   })
+
+  context('.getUnsupportedPlugin', () => {
+    it('returns unsupported plugin if the error msg is the expected one', () => {
+      const unsupportedPlugin = $errUtils.getUnsupportedPlugin({
+        invocationDetails: {
+          originalFile: 'node_modules/@cypress/code-coverage',
+        },
+        err: {
+          message: 'glob pattern string required',
+        },
+      })
+
+      expect(unsupportedPlugin).to.eq('@cypress/code-coverage')
+    })
+
+    it('returns null if the error msg is not the expected one', () => {
+      const unsupportedPlugin = $errUtils.getUnsupportedPlugin({
+        invocationDetails: {
+          originalFile: 'node_modules/@cypress/code-coverage',
+        },
+        err: {
+          message: 'random error msg',
+        },
+      })
+
+      expect(unsupportedPlugin).to.eq(null)
+    })
+  })
 })

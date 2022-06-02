@@ -12,7 +12,7 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
-const customProtocolRegex = /^[^:\/]+:\/+/
+const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -313,12 +313,24 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile = path.normalize(relativeFile)
   }
 
+  let absoluteFile
+
+  if (relativeFile && projectRoot) {
+    absoluteFile = path.resolve(projectRoot, relativeFile)
+
+    // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have
+    // to remove the / so the openFileInIDE can find the correct path
+    if (Cypress.config('platform') === 'win32' && absoluteFile.startsWith('/')) {
+      absoluteFile = absoluteFile.substring(1)
+    }
+  }
+
   return {
     function: sourceDetails.function,
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: (relativeFile && projectRoot) ? path.join(projectRoot, relativeFile) : undefined,
+    absoluteFile,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,

@@ -7,7 +7,6 @@ const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 
 const errors = require(`../../lib/errors`)
-const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
@@ -15,7 +14,7 @@ const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
 
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
@@ -26,6 +25,9 @@ let ctx
 describe('lib/socket', () => {
   beforeEach(function () {
     ctx = getCtx()
+    ctx.coreData.activeBrowser = {
+      path: 'path-to-browser-one',
+    }
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
@@ -38,7 +40,7 @@ describe('lib/socket', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       this.cfg = cfg
     })
@@ -58,6 +60,7 @@ describe('lib/socket', () => {
         SocketCtor: SocketE2E,
         createRoutes,
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.options = {
@@ -120,6 +123,8 @@ describe('lib/socket', () => {
         let chrome
 
         before(() => {
+          global.window = {}
+
           chrome = global.chrome = {
             cookies: {
               set () {},
@@ -143,6 +148,11 @@ describe('lib/socket', () => {
             tabs: {
               query () {},
               executeScript () {},
+            },
+            webRequest: {
+              onBeforeSendHeaders: {
+                addListener () {},
+              },
             },
           }
 
@@ -238,6 +248,19 @@ describe('lib/socket', () => {
 
             return done()
           })
+        })
+
+        it('returns early if disconnect event is from another browser', function (done) {
+          const delaySpy = sinon.spy(Promise, 'delay')
+
+          this.extClient.on('disconnect', () => {
+            expect(delaySpy).to.not.have.been.calledWith(2000)
+
+            return done()
+          })
+
+          ctx.coreData.activeBrowser = { path: 'path-to-browser-two' }
+          this.extClient.disconnect()
         })
 
         it('returns true when tab matches magic string', function (done) {
@@ -575,6 +598,43 @@ describe('lib/socket', () => {
         })
       })
     })
+
+    context('on(cross:origin:bridge:ready)', () => {
+      it('emits cross:origin:bridge:ready on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:bridge:ready', ({ originPolicy }) => {
+          expect(originPolicy).to.equal('http://foobar.com')
+
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+      })
+    })
+
+    context('on(cross:origin:release:html)', () => {
+      it('emits cross:origin:release:html on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:release:html', () => {
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:release:html', () => {})
+      })
+    })
+
+    context('on(cross:origin:finished)', () => {
+      it('emits cross:origin:finished on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:finished', (originPolicy) => {
+          expect(originPolicy).to.equal('http://foobar.com')
+
+          done()
+        })
+
+        // add the origin before calling cross:origin:finished (otherwise we'll fail trying to remove the origin)
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+
+        this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
+      })
+    })
   })
 
   context('unit', () => {
@@ -598,6 +658,7 @@ describe('lib/socket', () => {
         SocketCtor: SocketE2E,
         createRoutes,
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)

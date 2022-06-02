@@ -73,6 +73,33 @@ describe('<ConfigCode />', () => {
       })
     })
 
+    it('sorts the config in alphabetical order', () => {
+      let lastEntry = ''
+      let nesting = 0
+      let checkedFieldCount = 0
+      const configFields = config.map((entry) => entry.field)
+
+      cy.get(selector).within(($selector) => {
+        cy.get('span').each(($el: any) => {
+          let configText = $el[0].innerText.split(':')[0]
+
+          if (configText === '{') {
+            nesting++
+          } else if (configText === '}') {
+            nesting--
+          }
+
+          if (nesting === 0 && configFields.includes(configText)) {
+            expect(configText.localeCompare(lastEntry)).to.be.greaterThan(0)
+            lastEntry = configText
+            checkedFieldCount++
+          }
+        })
+      })
+
+      cy.then(() => expect(checkedFieldCount).to.eq(configFields.length))
+    })
+
     it('has an edit button', () => {
       cy.findByText(defaultMessages.file.edit).should('be.visible').click()
     })
@@ -83,9 +110,23 @@ describe('<ConfigCode />', () => {
 
     it('shows browser values properly', () => {
       const browserFieldValue = config.find((c) => c.field === 'browsers')?.value
-      const browserText = Array.isArray(browserFieldValue) ? browserFieldValue.map((b) => b.name).join(', ') : ''
 
-      cy.contains(`browsers:`).should('contain.text', browserText)
+      if (Array.isArray(browserFieldValue) && browserFieldValue.length) {
+        browserFieldValue.forEach((browser) => {
+          browser.name && cy.contains(`name: '${browser.name}',`)
+          browser.family && cy.contains(`family: '${browser.family}',`)
+          browser.channel && cy.contains(`channel: '${browser.channel}',`)
+          browser.displayName && cy.contains(`displayName: '${browser.displayName}',`)
+          browser.version && cy.contains(`version: '${browser.version}',`)
+          browser.path && cy.contains(`path: '${browser.path}',`)
+          browser.minSupportedVersion && cy.contains(`minSupportedVersion: ${browser.minSupportedVersion},`)
+          browser.majorVersion && cy.contains(`majorVersion: ${browser.majorVersion},`)
+        })
+
+        cy.percySnapshot()
+      } else {
+        throw new Error('Missing browsers to render')
+      }
     })
   })
 })

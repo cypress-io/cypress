@@ -10,6 +10,7 @@ describe('lib/plugins/util', () => {
       this.theProcess = {
         send: sinon.spy(),
         on: sinon.stub(),
+        connected: true,
       }
 
       this.ipc = util.wrapIpc(this.theProcess)
@@ -26,6 +27,13 @@ describe('lib/plugins/util', () => {
 
     it('#send does not send if process has been killed', function () {
       this.theProcess.killed = true
+      this.ipc.send('event-name')
+
+      expect(this.theProcess.send).not.to.be.called
+    })
+
+    it('#send does not send if process has been disconnected', function () {
+      this.theProcess.connected = false
       this.ipc.send('event-name')
 
       expect(this.theProcess.send).not.to.be.called

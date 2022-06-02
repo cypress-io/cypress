@@ -4,8 +4,8 @@ const express = require('express')
 const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
-const { shell } = require('electron')
 const url = require('url')
+const { shell } = require('electron')
 
 const machineId = require('../util/machine_id')
 const random = require('../util/random')
@@ -187,7 +187,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmCode, onLoginFlowComplete) => {
+const start = (onMessage, utmCode) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -222,7 +222,6 @@ const start = (onMessage, utmCode, onLoginFlowComplete) => {
   })
   .finally(() => {
     _internal.stopServer()
-    onLoginFlowComplete()
   })
 }
 
