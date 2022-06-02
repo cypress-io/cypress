@@ -86,7 +86,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     plugins: [
       Cypress(config, vite),
       CypressInspect(config),
-    ],
+    ].filter((p) => p != null),
   }
 
   const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
