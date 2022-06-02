@@ -1,7 +1,7 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
-// const { pathToFileURL } = require('url')
+const { pathToFileURL } = require('url')
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
@@ -126,8 +126,7 @@ function run (ipc, file, projectRoot) {
         // Certain modules cannot be dynamically imported.
 
         // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-        // return await import(pathToFileURL(pathToFileURL).href)
-        return await import(file)
+        return await import(pathToFileURL(pathToFileURL).href)
       }
 
       throw err
