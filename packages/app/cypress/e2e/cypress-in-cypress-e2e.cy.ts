@@ -278,7 +278,7 @@ describe('Dom Content', () => {
     it('has no axe violations in specs list panel', () => {
       cy.visitApp()
       cy.contains('withFailure.spec').click()
-      cy.get('[data-cy="spec-duration"]')
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
       cy.injectAxe()
       cy.checkA11y('[data-cy="specs-list-panel"]')
     })
@@ -286,7 +286,7 @@ describe('Dom Content', () => {
     it('has no axe violations in reporter panel', () => {
       cy.visitApp()
       cy.contains('withFailure.spec').click()
-      cy.get('[data-cy="spec-duration"]')
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
       cy.injectAxe()
       cy.checkA11y('[data-cy="reporter-panel"]')
     })
