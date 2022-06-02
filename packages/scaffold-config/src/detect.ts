@@ -123,7 +123,8 @@ export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: {
   // If we can't find an installed TypeScript or ESBuild, there's no way we can assume the project is using TypeScript,
   // because it won't work on the next step of installation anyway
   try {
-    debug('Resolved typescript from %s', require.resolve('typescript', { paths: [projectRoot] }))
+    const typescriptFile = require.resolve('typescript', { paths: [projectRoot] })
+    debug('Resolved typescript from %s', typescriptFile)
   } catch {
     debug('No typescript installed - using js')
 
