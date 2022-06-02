@@ -1,12 +1,11 @@
 <template>
-  <Tooltip
+  <component
+    :is="isInteractive? Menu : Tooltip"
     v-if="!disabled"
     :popper-class="{'no-arrow': hideArrow}"
-    :popper-triggers="['hover']"
-    :hide-triggers="['hover']"
-    :auto-hide="!isInteractive"
     :theme="theme"
     :placement="placement ?? 'auto'"
+    :auto-hide="false /* to prevent the popper from getting focus */"
   >
     <slot />
     <template
@@ -16,13 +15,13 @@
         name="popper"
       />
     </template>
-  </Tooltip>
+  </component>
   <slot v-else />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import FloatingVue, { Tooltip } from 'floating-vue'
+import { Tooltip, Menu } from 'floating-vue'
 
 const props = withDefaults(defineProps<{
   color?: string
@@ -38,12 +37,8 @@ const props = withDefaults(defineProps<{
   placement: undefined,
 })
 
-FloatingVue.options.themes['interactive'] = {
-  $extend: 'tooltip',
-}
-
 const theme = computed(() => {
-  return props.isInteractive ? 'interactive' : 'tooltip'
+  return props.isInteractive ? 'menu' : 'tooltip'
 })
 
 </script>
@@ -111,9 +106,10 @@ const theme = computed(() => {
   }
 }
 
-.v-popper__popper.v-popper--theme-interactive {
+.v-popper__popper.v-popper--theme-menu {
   .v-popper__inner {
-    @apply bg-white border-dark-900 text-black;
+    @apply bg-white text-black;
+    border-color: transparent;
     border-radius: 4px !important;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
     padding: 0;

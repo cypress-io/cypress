@@ -43,7 +43,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex col-span-2 items-center justify-between">
-        <div>{{ t('specPage.lastUpdated.header') }}</div>
+        <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
       <div class="flex items-center justify-between">
         <SpecHeaderCloudDataTooltip
@@ -165,11 +165,12 @@
     :show="isProjectConnectOpen"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
-    @success="isProjectConnectOpen = false; emit('success')"
+    @success="isProjectConnectOpen = false"
   />
 </template>
 
 <script setup lang="ts">
+import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
@@ -209,6 +210,10 @@ const showLogin = () => {
 const showConnectToProject = () => {
   isProjectConnectOpen.value = true
 }
+
+const isGitAvailable = computed(() => {
+  return props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false
+})
 
 gql`
 subscription SpecsList_GitInfoUpdated {

@@ -3,7 +3,10 @@
     placement="top"
     :is-interactive="true"
   >
-    <div class="decoration-dashed underline underline-gray-300 underline-offset-4">
+    <div
+      class="decoration-dashed underline underline-gray-300 underline-offset-4"
+      tabindex="0"
+    >
       {{ headerText }}
     </div>
     <template
