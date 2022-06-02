@@ -1,0 +1,8 @@
+{
+  "name": "react-vite-missing-vite-config",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "vite": "^2.8.0"
+  }
+}
