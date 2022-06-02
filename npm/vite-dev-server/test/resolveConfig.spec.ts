@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import * as vite from 'vite'
-import { scaffoldMigrationProject } from './test-helpers/scaffoldProject'
+import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'
 import type { ViteDevServerConfig } from '../src/devServer'
 
@@ -23,7 +23,7 @@ describe('resolveConfig', function () {
 
   context('inspect plugin', () => {
     it('should not include inspect plugin by default', async () => {
-      const projectRoot = await scaffoldMigrationProject('vite-inspect')
+      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
       const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
@@ -42,7 +42,7 @@ describe('resolveConfig', function () {
       })
 
       it('should add inspect plugin', async () => {
-        const projectRoot = await scaffoldMigrationProject('vite-inspect')
+        const projectRoot = await scaffoldSystemTestProject('vite-inspect')
         const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
@@ -52,7 +52,7 @@ describe('resolveConfig', function () {
       })
 
       it('should not add inspect plugin if not installed', async () => {
-        const projectRoot = await scaffoldMigrationProject('vite2.9.1-react')
+        const projectRoot = await scaffoldSystemTestProject('vite2.9.1-react')
         const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
