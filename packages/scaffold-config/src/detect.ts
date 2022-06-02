@@ -120,7 +120,7 @@ export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: {
     debug('Did not find cypress.config file')
   }
 
-  // If we can't find an installed TypeScript or ESBuild, there's no way we can assume the project is using TypeScript,
+  // If we can't find an installed TypeScript, there's no way we can assume the project is using TypeScript,
   // because it won't work on the next step of installation anyway
   try {
     const typescriptFile = require.resolve('typescript', { paths: [projectRoot] })
