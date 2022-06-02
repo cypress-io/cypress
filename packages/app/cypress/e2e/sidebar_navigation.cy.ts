@@ -235,6 +235,20 @@ describe('Sidebar Navigation', () => {
       cy.get('.router-link-active').findByText('Specs').should('be.visible')
     })
 
+    it('Specs sidebar nav link is not active when a test is running', () => {
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
+
+      cy.findAllByTestId('spec-item').first().click()
+      cy.location('hash').should('contain', '#/specs/runner')
+      cy.contains('.router-link-exact-active', 'Specs').should('not.exist')
+      cy.percySnapshot()
+
+      cy.get('a[href="#/specs"]').click()
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
+    })
+
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
       cy.findByTestId('app-header-bar').findByText('Settings').should('not.exist')
       cy.findByText('Settings').should('be.visible')

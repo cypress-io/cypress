@@ -55,4 +55,9 @@ describe('SidebarNavigation', () => {
     cy.findByTestId('keyboard-modal-trigger').focus().type('{enter}')
     cy.findByTestId('keyboard-modal').should('be.visible')
   })
+
+  it('uses exact match for router link active class', () => {
+    mountComponent()
+    cy.get('[href="#/specs"]').should('have.class', 'router-link-exact-active')
+  })
 })
