@@ -108,6 +108,7 @@ describe('e2e forms', () => {
   context('<form> submissions', () => {
     systemTests.setup({
       settings: {
+        e2e: {},
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,
         },
@@ -149,6 +150,7 @@ describe('e2e forms', () => {
     systemTests.it('passes with http on localhost', {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
+        e2e: {},
       },
       spec: 'form_submission_multipart.cy.js',
       snapshot: true,

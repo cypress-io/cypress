@@ -183,6 +183,7 @@ describe('e2e cookies', () => {
       https: true,
     }],
     settings: {
+      e2e: {},
       hosts: {
         '*.foo.com': '127.0.0.1',
         '*.bar.net': '127.0.0.1',
