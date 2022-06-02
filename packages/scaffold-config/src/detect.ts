@@ -124,6 +124,7 @@ export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: {
   // because it won't work on the next step of installation anyway
   try {
     const typescriptFile = require.resolve('typescript', { paths: [projectRoot] })
+
     debug('Resolved typescript from %s', typescriptFile)
   } catch {
     debug('No typescript installed - using js')
