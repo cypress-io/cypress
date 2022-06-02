@@ -3783,6 +3783,60 @@ describe('Routes', () => {
       })
     })
 
+    // Set custom status message/reason phrase from http response
+    // https://github.com/cypress-io/cypress/issues/16973
+    it('set custom status message when reason phrase is set', function () {
+      nock(this.server.remoteStates.current().origin)
+      .post('/companies/validate', {
+        payload: { name: 'Brian' },
+      })
+      .reply(400, undefined, {
+        'Reason-Phrase': 'Custom Reason Phrase Message',
+      })
+
+      return this.rp({
+        method: 'POST',
+        url: 'http://localhost:8000/companies/validate',
+        json: true,
+        body: {
+          payload: { name: 'Brian' },
+        },
+        headers: {
+          'x-cypress-status': '400',
+        },
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(400)
+        expect(res.statusMessage).to.eq('Custom Reason Phrase Message')
+      })
+    })
+
+    // use default status message/reason phrase correspond to status code, from http response
+    // https://github.com/cypress-io/cypress/issues/16973
+    it('leave default status message when reason phrase is not set', function () {
+      nock(this.server.remoteStates.current().origin)
+      .post('/companies/validate', {
+        payload: { name: 'Brian' },
+      })
+      .reply(400)
+
+      return this.rp({
+        method: 'POST',
+        url: 'http://localhost:8000/companies/validate',
+        json: true,
+        body: {
+          payload: { name: 'Brian' },
+        },
+        headers: {
+          'x-cypress-status': '400',
+        },
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(400)
+        expect(res.statusMessage).to.eq('Bad Request')
+      })
+    })
+
     it('hands back 201 status codes', function () {
       nock(this.server.remoteStates.current().origin)
       .post('/companies/validate', {
