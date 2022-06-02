@@ -32,13 +32,6 @@ describe('cypress config with esm and cjs', function () {
       spec: 'app.cy.js',
       browser: 'chrome',
       expectedExitCode: 1,
-      snapshot: true,
-      onStdout (stdout) {
-        expect(stdout).to.include('nearest parent package.json contains "type": "module" which defines all .ts files in that package scope as ES modules')
-
-        // Need to make this stable b/c of filepaths, and snapshot: true is needed to invoke onStdout
-        return 'STDOUT_ERROR_VALIDATED'
-      },
     })
   })
 
