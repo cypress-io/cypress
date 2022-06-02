@@ -1,3 +1,21 @@
+# [@cypress/webpack-preprocessor-v5.12.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.11.1...@cypress/webpack-preprocessor-v5.12.0) (2022-06-01)
+
+
+### Bug Fixes
+
+* windows build ([#20854](https://github.com/cypress-io/cypress/issues/20854)) ([e6cbc5a](https://github.com/cypress-io/cypress/commit/e6cbc5ae1edef0e7f0474dba6b2d8da3030489db))
+
+
+### Features
+
+* error when updating a 9.X value in 10.X in the pluginsFile ([#20521](https://github.com/cypress-io/cypress/issues/20521)) ([1de1aa5](https://github.com/cypress-io/cypress/commit/1de1aa5ccc2989d9a22e4e6ba88573a2c5c392e1))
+* merging / delegating remote queries to cloud schema ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
+* support specPattern, deprecate integrationFolder and componentFolder ([#19319](https://github.com/cypress-io/cypress/issues/19319)) ([792980a](https://github.com/cypress-io/cypress/commit/792980ac12746ef47b9c944ebe4c6c353a187ab2))
+* Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
+* Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
+* use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
+* validate specPattern root level ([#19980](https://github.com/cypress-io/cypress/issues/19980)) ([5d52758](https://github.com/cypress-io/cypress/commit/5d52758d82c47033803c69c7858fc786a900faaf))
+
 # [@cypress/webpack-preprocessor-v5.11.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.11.0...@cypress/webpack-preprocessor-v5.11.1) (2022-02-08)
 
 

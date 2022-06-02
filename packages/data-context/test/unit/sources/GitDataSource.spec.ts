@@ -47,6 +47,12 @@ describe('GitDataSource', () => {
     const onGitInfoChange = sinon.stub()
     const onError = sinon.stub()
 
+    // create a file and modify a file to express all
+    // git states we are interested in (created, unmodified, modified)
+    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
+    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
+    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
+
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
@@ -55,28 +61,24 @@ describe('GitDataSource', () => {
       onError,
     })
 
-    // create a file and modify a file to express all
-    // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
-
     fs.createFileSync(fooSpec)
     fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
 
-    const dfd = pDefer()
-
-    onGitInfoChange.onSecondCall().callsFake(dfd.resolve)
-
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-    await dfd.promise
+    let result: any[] = []
 
-    const [created, unmodified, modified] = await Promise.all([
-      gitInfo.gitInfoFor(fooSpec),
-      gitInfo.gitInfoFor(aRecordSpec),
-      gitInfo.gitInfoFor(xhrSpec),
-    ])
+    do {
+      result = await Promise.all([
+        gitInfo.gitInfoFor(fooSpec),
+        gitInfo.gitInfoFor(aRecordSpec),
+        gitInfo.gitInfoFor(xhrSpec),
+      ])
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } while (result.some((r) => r == null))
+
+    const [created, unmodified, modified] = result
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
