@@ -83,19 +83,19 @@ export function detectFramework (projectPath: string): DetectFramework {
  *     HAS TYPESCRIPT
  *   ELSE
  *     DOES NOT HAVE TYPESCRIPT
- *   ELSE IF `typescript` dependency in `package.json` OR `tsconfig.json` in `projectRoot/*`
+ *   ELSE IF `typescript` dependency in `package.json` AND `tsconfig.json` in `projectRoot/*`
  *     HAS TYPESCRIPT
  *   ELSE
  *     DOES NOT HAVE TYPESCRIPT
  *   END
  * ELSE IF HAS CYPRESS_JSON
- *   IF cypress/* contains *.ts file
+ *   IF cypress/* contains non-dts *.ts file
  *     USE TYPESCRIPT
  *   ELSE
  *     DO NOT USE TYPESCRIPT
  *   END
  * ELSE IS NEW PROJECT
- *   IF `typescript` dependency in `package.json` OR `tsconfig.json` in `projectRoot/*`
+ *   IF `typescript` dependency in `package.json` AND `tsconfig.json` in `projectRoot/*`
  *     HAS TYPESCRIPT
  *   ELSE
  *     DOES NOT HAVE TYPESCRIPT
@@ -103,7 +103,7 @@ export function detectFramework (projectPath: string): DetectFramework {
  * END
  */
 
-export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | 'ts' {
+export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: { projectRoot: string, pkgJson: PkgJson, isMigrating?: boolean }): 'js' | 'ts' {
   try {
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
       debug('Detected cypress.config.ts - using TS')
@@ -120,7 +120,24 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
     debug('Did not find cypress.config file')
   }
 
-  if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
+  // If we can't find an installed TypeScript, there's no way we can assume the project is using TypeScript,
+  // because it won't work on the next step of installation anyway
+  try {
+    const typescriptFile = require.resolve('typescript', { paths: [projectRoot] })
+
+    debug('Resolved typescript from %s', typescriptFile)
+  } catch {
+    debug('No typescript installed - using js')
+
+    return 'js'
+  }
+
+  const allDeps = {
+    ...(pkgJson.dependencies || {}),
+    ...(pkgJson.devDependencies || {}),
+  }
+
+  if ('typescript' in allDeps) {
     debug('Detected typescript in package.json - using TS')
 
     return 'ts'
@@ -131,13 +148,16 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
   }
 
   const globs = [
-    joinPosix('**/*tsconfig.json'),
     joinPosix('cypress', '**/*.{ts,tsx}'),
   ]
 
+  if (!isMigrating) {
+    globs.push(joinPosix('**/*tsconfig.json'))
+  }
+
   const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true, cwd: projectRoot, ignore: ['node_modules'] })
 
-  if (tsFiles.length > 0) {
+  if (tsFiles.filter((f) => !f.endsWith('.d.ts')).length > 0) {
     debug(`Detected ts file(s) ${tsFiles.join(',')} - using TS`)
 
     return 'ts'
