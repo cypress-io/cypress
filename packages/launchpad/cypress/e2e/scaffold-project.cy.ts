@@ -44,6 +44,7 @@ function scaffoldAndOpenE2EProject (opts: {
   cy.contains('E2E Testing').click()
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
+  cy.contains('Choose a Browser')
 }
 
 function scaffoldAndOpenCTProject (opts: {

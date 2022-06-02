@@ -129,7 +129,8 @@ function run (ipc, file, projectRoot) {
         // to show the original error that was thrown, because that's ultimately the source of the problem
         try {
           // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-          return await import(pathToFileURL(pathToFileURL).href)
+          // return await import(pathToFileURL(pathToFileURL).href)
+          return await import(pathToFileURL)
         } catch (e) {
           // If we aren't able to import the file at all, throw the original error, since that has more accurate information
           // of what failed to begin with
