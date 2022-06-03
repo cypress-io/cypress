@@ -24,22 +24,17 @@
         >
           <ol>
             <li class="inline-block">
-              <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
-              <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
-                class="font-medium"
-                :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
-                  'text-gray-700'"
-                :role="hasLinkToProjects ? undefined : 'link'"
-                :href="hasLinkToProjects ? 'global-mode' : undefined"
-                :ariaDisabled="!hasLinkToProjects"
+                v-if="hasLinkToProjects"
+                class="font-medium text-indigo-500 hocus-link-default"
+                href="global-mode"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
             <li
-              v-if="props.gql?.currentProject"
+              v-if="props.gql?.currentProject && hasLinkToProjects"
               class="mx-2px align-middle inline-block"
               aria-hidden
             >
@@ -265,6 +260,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     branch
     isLoadingNodeEvents
   }
+  isInGlobalMode
   projectRootFromCI
   ...TopNav
   ...Auth
@@ -284,7 +280,7 @@ const cloudProjectId = computed(() => {
 })
 
 const hasLinkToProjects = computed(() => {
-  return props.gql?.currentProject && !props.gql?.projectRootFromCI
+  return props.gql.isInGlobalMode || !props.gql?.currentProject || (props.gql?.currentProject && !props.gql?.projectRootFromCI)
 })
 
 const hasLinkToCurrentProject = computed(() => {

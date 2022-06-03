@@ -61,6 +61,41 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
   })
 
+  it('renders with Projects link if in Global Mode', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.projectRootFromCI = false
+      },
+      render: (gqlVal) => {
+        return (<div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>)
+      },
+    })
+
+    cy.contains('a', 'Projects')
+    .should('be.visible')
+    .should('have.attr', 'href', 'global-mode')
+
+    cy.percySnapshot()
+  })
+
+  it('renders without Projects link if in not in Global Mode', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.projectRootFromCI = true
+      },
+      render: (gqlVal) => {
+        return (<div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>)
+      },
+    })
+
+    cy.contains('Projects').should('not.exist')
+    cy.percySnapshot()
+  })
+
   it('docs menu has expected links with no current project', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
