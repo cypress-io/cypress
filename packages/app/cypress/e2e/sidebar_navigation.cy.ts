@@ -244,7 +244,7 @@ describe('Sidebar Navigation', () => {
       cy.contains('.router-link-exact-active', 'Specs').should('not.exist')
       cy.percySnapshot()
 
-      cy.get('a[href="#/specs"]').click()
+      cy.findByTestId('sidebar-link-specs-page').click()
       cy.location('hash').should('equal', '#/specs')
       cy.contains('.router-link-exact-active', 'Specs')
     })
