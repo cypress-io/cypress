@@ -4,17 +4,53 @@
       v-if="isAlertOpen"
       v-model="isAlertOpen"
       status="error"
-      :title="t('specPage.noSpecErrorTitle')"
+      :title="t('specPage.noSpecError.title')"
       class="mb-16px"
       :icon="WarningIcon"
       dismissible
     >
       <p class="mb-24px">
-        {{ t('specPage.noSpecErrorIntro') }} <InlineCodeFragment variant="error">
+        {{ t('specPage.noSpecError.intro') }} <InlineCodeFragment variant="error">
           {{ route.params.unrunnable }}
         </InlineCodeFragment>
       </p>
-      <p>{{ t('specPage.noSpecErrorExplainer') }}</p>
+      <p>{{ t('specPage.noSpecError.explainer') }}</p>
+    </Alert>
+    <Alert
+      v-if="isOffline"
+      v-model="isOffline"
+      status="warning"
+      :title="t('specPage.offlineWarning.title')"
+      class="mb-16px"
+      :icon="WarningIcon"
+      dismissible
+    >
+      <p class="mb-24px">
+        {{ t('specPage.offlineWarning.explainer') }}
+      </p>
+    </Alert>
+    <Alert
+      v-if="shouldShowFetchError"
+      v-model="shouldShowFetchError"
+      status="warning"
+      :title="t('specPage.fetchFailedWarning.title')"
+      class="mb-16px"
+      :icon="WarningIcon"
+      dismissible
+    >
+      <p>
+        {{ t('specPage.fetchFailedWarning.explainer1') }}
+      </p>
+      <p>
+        {{ t('specPage.fetchFailedWarning.explainer2') }}
+      </p>
+      <Button
+        :prefix-icon="RefreshIcon"
+        class="mt-24px"
+        @click="refetchFailedCloudData"
+      >
+        {{ t('specPage.fetchFailedWarning.refreshButton') }}
+      </Button>
     </Alert>
     <SpecsListHeader
       v-model="search"
@@ -45,7 +81,7 @@
       <div class="flex col-span-2 items-center justify-between">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-end">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.latestRuns.header')"
@@ -55,7 +91,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-end">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.averageDuration.header')"
@@ -134,15 +170,16 @@
             <RunStatusDots
               v-if="row.data.isLeaf && row.data.data"
               :gql="row.data.data"
-              :spec-file="row.data.data?.baseName"
-              :is-project-disconnected="props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'"
+              :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
+              :is-online="isOnline"
             />
           </template>
           <template #average-duration>
             <AverageDuration
               v-if="row.data.isLeaf"
               :gql="row.data.data ?? null"
-              :is-project-disconnected="props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'"
+              :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
+              :is-online="isOnline"
             />
           </template>
         </SpecsListRowItem>
@@ -159,17 +196,18 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
+    @loggedin="refreshPage"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
-    :show="isProjectConnectOpen"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
-    @success="isProjectConnectOpen = false"
+    @success="isProjectConnectOpen = false; refreshPage()"
   />
 </template>
 
 <script setup lang="ts">
+import Button from '@cy/components/Button.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
@@ -179,7 +217,7 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql, useMutation, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -191,14 +229,21 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
-import { useDebounce } from '@vueuse/core'
+import { useDebounce, useOnline } from '@vueuse/core'
 import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
+import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
+import { CloudData_RefetchDocument } from '../generated/graphql-test'
 
 const route = useRoute()
 const { t } = useI18n()
+
+const isOnline = useOnline()
+const isOffline = ref(false)
+
+watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue)
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
@@ -214,6 +259,14 @@ const showConnectToProject = () => {
 const isGitAvailable = computed(() => {
   return props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false
 })
+
+const hasCloudErrors = computed(() => {
+  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.status === 'ERRORED' || s.avgDurationInfo?.status === 'ERRORED') ?? false
+})
+
+const shouldShowFetchError = ref(false)
+
+watch(hasCloudErrors, (wasErrorFound) => shouldShowFetchError.value = wasErrorFound, { immediate: true })
 
 gql`
 subscription SpecsList_GitInfoUpdated {
@@ -336,6 +389,33 @@ function getIdIfDirectory (row) {
   }
 
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
+}
+
+gql`
+mutation CloudData_Refetch ($ids: [ID!]!) {
+  loadRemoteFetchables(ids: $ids){
+    id
+    status
+  }
+}
+`
+
+const refetchMutation = useMutation(CloudData_RefetchDocument)
+
+function refetchFailedCloudData () {
+  const latestRunsIds = props.gql.currentProject?.specs
+  .filter((s) => s.cloudSpec?.status === 'ERRORED')
+  .map((s) => s.cloudSpec?.id as string) ?? []
+
+  const avgInfoIds = props.gql.currentProject?.specs
+  .filter((s) => s.avgDurationInfo?.status === 'ERRORED')
+  .map((s) => s.avgDurationInfo?.id as string) ?? []
+
+  refetchMutation.executeMutation({ ids: [...avgInfoIds, ...latestRunsIds] })
+}
+
+function refreshPage () {
+  location.reload()
 }
 
 </script>

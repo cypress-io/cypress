@@ -26,7 +26,6 @@
             v-if="projectConnectionStatus === 'LOGGED_OUT'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
-            :disabled="false"
             @click="emits('showLogin')"
           >
             {{ t('topNav.login.actionLogin') }}
@@ -35,7 +34,6 @@
             v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
-            :disabled="false"
             @click="emits('showConnectToProject')"
           >
             {{ t("specPage.connectProjectButton") }}
@@ -44,7 +42,6 @@
             v-else-if="projectConnectionStatus === 'NOT_FOUND'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
-            :disabled="false"
             @click="emits('showConnectToProject')"
           >
             {{ t("specPage.reconnectProjectButton") }}
@@ -53,7 +50,6 @@
             v-else-if="projectConnectionStatus === 'UNAUTHORIZED'"
             :prefix-icon="SendIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
-            :disabled="false"
             @click="requestAccess"
           >
             {{ t("specPage.requestAccessButton") }}

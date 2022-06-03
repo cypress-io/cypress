@@ -18,7 +18,6 @@ const FETCHABLE_MEMBERS = {
   FETCHING: 'Currently fetching',
   ERRORED: 'Errored while fetching',
   FETCHED: 'We have loaded the remote data',
-  REFETCHING: 'We have loaded the remote data, and are in the process of reloading',
 }
 
 const RemoteFetchableStatusEnum = enumType({

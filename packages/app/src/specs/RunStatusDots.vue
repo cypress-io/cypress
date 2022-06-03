@@ -1,23 +1,22 @@
 <template>
   <component
     :is="latestRun? ExternalLink : 'div'"
-    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED' || props.gql.cloudSpec?.status === 'ERRORED'"
+    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED'"
     :href="latestRun?.url ?? '#'"
     :use-default-hocus="false"
   >
     <component
       :is="latestRun? Tooltip : 'div'"
       placement="top"
-      :is-interactive="latestRun"
+      :is-interactive="latestRun ? true: false"
     >
       <div
-        class="flex justify-center"
+        class="flex justify-end"
         data-cy="run-status-dots"
         tabindex="0"
       >
         <ol
           class="list-none h-16px mb-0 pl-0 inline-block"
-          q
         >
           <li
             v-for="(dot,i) in dotClasses"
@@ -57,13 +56,12 @@
       </template>
     </component>
   </component>
-  <!-- <div v-else-if="props.gql.cloudSpec?.status === 'ERRORED'">
+  <div v-else-if="props.gql.cloudSpec?.status === 'ERRORED'">
     <div
-      class="flex justify-center"
+      class="flex justify-end"
     >
       <ol
         class="list-none h-16px mb-0 pl-0 inline-block"
-        q
       >
         <li
           v-for="i in [0,1,2]"
@@ -73,21 +71,22 @@
           <i-cy-dot-solid_x4
             width="4"
             height="4"
-            class="icon-light-red-500"
+            class="icon-light-gray-400"
           />
         </li>
         <li class="ml-4px inline-block align-middle">
           <a @click.prevent="refetch">
-            <i-cy-action-restart_x16
+            <component
+              :is="PlaceholderIcon"
               width="16px"
               height="16px"
-              class="icon-light-red-500"
+              class="icon-light-gray-400"
             />
           </a>
         </li>
       </ol>
     </div>
-  </div> -->
+  </div>
   <div
     v-else
     class="bg-gray-50 rounded-[20px]"
@@ -100,9 +99,9 @@
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { RunStatusDotsFragment /*, RunStatusDots_RefetchDocument*/ } from '../generated/graphql'
+import { RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed } from 'vue'
+import { computed, watch, watchEffect } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -110,7 +109,24 @@ import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
-import { gql /*, useMutation*/ } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
+
+gql`
+mutation RunStatusDots_Refetch ($ids: [ID!]!) {
+  loadRemoteFetchables(ids: $ids){
+    id
+    status
+  }
+}
+`
+
+const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
+
+const refetch = () => {
+  if (!props.isProjectDisconnected && props.gql.cloudSpec?.id && !refetchMutation.fetching.value) {
+    refetchMutation.executeMutation({ ids: [props.gql.cloudSpec?.id] })
+  }
+}
 
 gql`
 fragment RunStatusDots on Spec {
@@ -160,9 +176,19 @@ fragment RunStatusDots on Spec {
 const props = withDefaults(defineProps<{
   gql: RunStatusDotsFragment
   isProjectDisconnected: boolean
+  isOnline: boolean
 }>(), {
   isProjectDisconnected: false,
+  isOnline: true,
 })
+
+watchEffect(
+  () => {
+    if (props.isOnline && (props.gql.cloudSpec?.status === 'NOT_FETCHED' || props.gql.cloudSpec?.status === undefined)) {
+      refetch()
+    }
+  },
+)
 
 const runs = computed(() => {
   return props.gql.cloudSpec?.data?.specRuns?.nodes ?? []
@@ -232,25 +258,10 @@ const latestStatus = computed(() => {
   }
 })
 
-// gql`
-// mutation RunStatusDots_Refetch ($ids: [ID!]!) {
-//   loadRemoteFetchables(ids: $ids){
-//     id
-//     status
-//   }
-// }
-// `
-
-// const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
-
-// const refetch = () => {
-//   if (props.gql.cloudSpec?.id && !refetchMutation.fetching.value) {
-//     refetchMutation.executeMutation({ ids: [props.gql.cloudSpec?.id] })
-//   }
-// }
+watch(() => props.isProjectDisconnected, (value, oldValue) => {
+  if (value && !oldValue) {
+    refetch()
+  }
+})
 
 </script>
-
-<style scoped>
-
-</style>

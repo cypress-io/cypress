@@ -150,9 +150,21 @@
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
     "noResultsMessage": "No specs matched your search:",
-    "noSpecErrorTitle": "Spec not found",
-    "noSpecErrorIntro": "There is no spec matching the following location:",
-    "noSpecErrorExplainer": "It is possible that the file has been moved or deleted. Please choose from the list of specs below."
+    "noSpecError": {
+      "title": "Spec not found",
+      "intro": "There is no spec matching the following location:",
+      "explainer": "It is possible that the file has been moved or deleted. Please choose from the list of specs below."
+    },
+    "offlineWarning": {
+      "title": "No internet connection",
+      "explainer": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from the Cypress Dashboard."
+    },
+    "fetchFailedWarning": {
+      "title": "Lost connection",
+      "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
+      "explainer2": "Please refresh the page to try again and visit our Status Page if this behavior continues.",
+      "refreshButton": "Try again"
+    }
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",

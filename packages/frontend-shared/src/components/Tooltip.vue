@@ -5,6 +5,8 @@
     :popper-class="{'no-arrow': hideArrow}"
     :theme="theme"
     :placement="placement ?? 'auto'"
+    :distance="distance"
+    :skidding="skidding"
     :auto-hide="false /* to prevent the popper from getting focus */"
   >
     <slot />
@@ -28,12 +30,16 @@ const props = withDefaults(defineProps<{
   hideArrow?: boolean
   disabled?: boolean
   isInteractive?: boolean
+  distance?: number
+  skidding?: number
   placement?: 'top' | 'right' | 'bottom' | 'left'
 }>(), {
   color: 'dark',
   hideArrow: false,
   disabled: false,
   isInteractive: false,
+  distance: undefined,
+  skidding: undefined,
   placement: undefined,
 })
 

@@ -1496,9 +1496,6 @@ enum RemoteFetchableStatus {
 
   """Has not been fetched yet"""
   NOT_FETCHED
-
-  """We have loaded the remote data, and are in the process of reloading"""
-  REFETCHING
 }
 
 """A file that we just added to the filesystem during project setup"""
