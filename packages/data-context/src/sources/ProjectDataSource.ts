@@ -356,12 +356,12 @@ export class ProjectDataSource {
         // We need stats arg to make the determination of whether to watch it, because we need to watch directories
         // chokidar is extremely inconsistent in whether or not it has the stats arg internally
         if (!stats) {
-          // try {
-          stats = fs.statSync(file)
-          // } catch  {
-          //   // If the file/folder do not exit - ignore it.
-          //   return true
-          // }
+          try {
+            stats = fs.statSync(file)
+          } catch {
+            // If the file/folder do not exit - ignore it.
+            return true
+          }
         }
 
         // don't ignore directories
