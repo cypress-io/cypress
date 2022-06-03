@@ -4,7 +4,12 @@
       v-if="props.gql.totalFlakyTests"
       class="rounded-md font-semibold bg-warning-100 text-sm py-2px px-4px text-warning-600 whitespace-nowrap"
     >{{ props.gql.totalFlakyTests }} Flaky</span>
-    <ResultCounts v-bind="props.gql" />
+    <ResultCounts
+      :total-failed="props.gql.totalFailed"
+      :total-passed="props.gql.totalPassed"
+      :total-pending="props.gql.totalPending"
+      :total-skipped="props.gql.totalSkipped"
+    />
   </div>
 </template>
 

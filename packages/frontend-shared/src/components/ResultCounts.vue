@@ -9,7 +9,7 @@
     >
       <component
         :is="result.icon"
-        class="h-12px mr-1 w-12px"
+        class="mt-px h-12px mr-1 w-12px"
         :class="result.class"
       />
       <span class="sr-only">{{ result.name }}</span>
@@ -20,7 +20,6 @@
 
 <script lang="ts" setup>
 export interface ResultCountsProps {
-  id: string
   totalPassed: number|string|null
   totalFailed: number|string|null
   totalPending: number|string|null
