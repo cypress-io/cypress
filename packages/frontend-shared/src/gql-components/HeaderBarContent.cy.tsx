@@ -58,7 +58,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         ),
       })
 
-      cy.contains('Projects').should('not.exist')
+      cy.contains('a', 'Projects').should('not.exist')
       cy.percySnapshot()
     })
   })
