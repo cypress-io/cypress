@@ -127,7 +127,7 @@ describe('code-generator', () => {
           content: `${dedent`
             describe('empty spec', () => {
               it('passes', () => {
-                expect(true).to.be.true
+                cy.visit('https://example.cypress.io')
               })
             })` }`,
         },
