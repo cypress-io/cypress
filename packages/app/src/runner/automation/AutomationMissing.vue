@@ -27,11 +27,11 @@
           </template>
 
           <template #default>
-            <div class="max-h-50vh overflow-auto">
+            <ul class="max-h-50vh overflow-auto">
               <VerticalBrowserListItems
                 :gql="props.gql"
               />
-            </div>
+            </ul>
           </template>
         </SpecRunnerDropdown>
         <ExternalLink

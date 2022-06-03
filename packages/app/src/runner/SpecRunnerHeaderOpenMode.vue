@@ -57,12 +57,12 @@
         </template>
 
         <template #default>
-          <div class="max-h-50vh overflow-auto">
+          <ul class="max-h-50vh overflow-auto">
             <VerticalBrowserListItems
               :gql="props.gql"
               :spec-path="activeSpecPath"
             />
-          </div>
+          </ul>
         </template>
       </SpecRunnerDropdown>
       <SpecRunnerDropdown
@@ -98,9 +98,9 @@
             >
               <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
+              <InlineCodeFragment class="font-medium text-xs leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium leading-5">cy.viewport()</InlineCodeFragment>
+              <InlineCodeFragment class="font-medium text-xs leading-5">cy.viewport()</InlineCodeFragment>
             </i18n-t>
             <div class="flex justify-center">
               <Button

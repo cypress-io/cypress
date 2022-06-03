@@ -16,6 +16,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .click()
 
+    cy.percySnapshot('after browsers open')
+
     cy.contains('Edge Canary')
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
@@ -24,15 +26,23 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .should('not.exist')
     })
 
+    cy.get('[data-cy="top-nav-browser-list-item"]')
+    .last().should('not.be.visible')
+    .scrollIntoView().should('be.visible')
+
     cy.contains('Version unsupported')
+    .scrollIntoView()
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
       cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('exist')
+      .trigger('mouseenter')
     })
 
-    cy.percySnapshot('after browsers open')
+    cy.contains('Unsupported browser')
+
+    cy.percySnapshot('unsupported browser tooltip')
   }),
 
   it('renders without browser menu by default and other items work', () => {
