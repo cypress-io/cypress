@@ -542,8 +542,8 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (this.ctx.isRunMode && !this.isTestingTypeConfigured(testingType)) {
-      this.ctx.onError(getError('TESTING_TYPE_NOT_CONFIGURED', testingType))
+    if (this.ctx.isRunMode && this.loadedConfigFile && !this.isTestingTypeConfigured(testingType)) {
+      return this.ctx.onError(getError('TESTING_TYPE_NOT_CONFIGURED', testingType))
     }
 
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
