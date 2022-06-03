@@ -340,6 +340,7 @@ describe('cross-origin cookies, set:cookies', () => {
         '*.bar.net': '127.0.0.1',
         '*.cypress.test': '127.0.0.1',
       },
+      e2e: {},
     },
 
   })
