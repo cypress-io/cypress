@@ -58,6 +58,6 @@ describe('SidebarNavigation', () => {
 
   it('uses exact match for router link active class', () => {
     mountComponent()
-    cy.get('[href="#/specs"]').should('have.class', 'router-link-exact-active')
+    cy.findByTestId('sidebar-link-specs-page').should('have.class', 'router-link-exact-active')
   })
 })
