@@ -1,7 +1,7 @@
 <template>
   <component
     :is="latestRun? ExternalLink : 'div'"
-    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED'"
+    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED' || props.gql.cloudSpec?.status === 'ERRORED'"
     :href="latestRun?.url ?? '#'"
     :use-default-hocus="false"
   >
@@ -16,12 +16,12 @@
         tabindex="0"
       >
         <ol
-          class="list-none h-16px mb-0 pl-0 inline-block"
+          class="flex list-none h-16px mt-0 mb-0 pl-0 inline-block"
         >
           <li
             v-for="(dot,i) in dotClasses"
             :key="i"
-            class="ml-4px inline-block align-middle"
+            class="mt-6px ml-4px inline-block"
           >
             <i-cy-dot-solid_x4
               width="4"
@@ -29,7 +29,7 @@
               :class="dot"
             />
           </li>
-          <li class="ml-4px inline-block align-middle">
+          <li class="ml-4px inline-block self-start">
             <component
               :is="latestStatus.icon"
               width="16"
@@ -56,43 +56,11 @@
       </template>
     </component>
   </component>
-  <div v-else-if="props.gql.cloudSpec?.status === 'ERRORED'">
-    <div
-      class="flex justify-end"
-    >
-      <ol
-        class="list-none h-16px mb-0 pl-0 inline-block"
-      >
-        <li
-          v-for="i in [0,1,2]"
-          :key="i"
-          class="ml-4px inline-block align-middle"
-        >
-          <i-cy-dot-solid_x4
-            width="4"
-            height="4"
-            class="icon-light-gray-400"
-          />
-        </li>
-        <li class="ml-4px inline-block align-middle">
-          <a @click.prevent="refetch">
-            <component
-              :is="PlaceholderIcon"
-              width="16px"
-              height="16px"
-              class="icon-light-gray-400"
-            />
-          </a>
-        </li>
-      </ol>
-    </div>
-  </div>
   <div
     v-else
-    class="bg-gray-50 rounded-[20px]"
+    class="bg-gray-50 rounded-[20px] animate-pulse"
   >
     &nbsp;
-  <!-- {{ JSON.stringify(props.gql.cloudSpec?.status) }} -->
   </div>
 </template>
 
