@@ -447,127 +447,173 @@ describe('startSpecWatcher', () => {
 
   let ctx: DataContext
 
-  beforeEach(async () => {
-    ctx = createTestDataContext('run')
-
-    ctx.coreData.currentProject = projectRoot
-  })
-
   afterEach(async () => {
     sinon.restore()
   })
 
-  it('throws if no current project defined', () => {
-    ctx.coreData.currentProject = null
+  describe('run mode', () => {
+    beforeEach(async () => {
+      ctx = createTestDataContext('run')
 
-    expect(() => {
-      return ctx.project.startSpecWatcher({
+      ctx.coreData.currentProject = projectRoot
+    })
+
+    it('early return specWatcher', () => {
+      const onStub = sinon.stub()
+
+      sinon.stub(chokidar, 'watch').callsFake(() => {
+        const mockWatcher = {
+          on: onStub,
+          close: () => ({ catch: () => {} }),
+        } as unknown
+
+        return mockWatcher as chokidar.FSWatcher
+      })
+
+      let handleFsChange
+
+      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+        handleFsChange = (() => funcToDebounce())
+
+        return handleFsChange as _.DebouncedFunc<any>
+      })
+
+      ctx.project.startSpecWatcher({
         projectRoot,
         testingType: 'e2e',
         specPattern: ['**/*.{cy,spec}.{ts,js}'],
         configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
         excludeSpecPattern: ['**/ignore.spec.ts'],
-        additionalIgnorePattern: [],
+        additionalIgnorePattern: ['additional.ignore.cy.js'],
       })
-    }).to.throw()
+
+      expect(_.debounce).to.have.not.been.called
+
+      expect(chokidar.watch).to.have.not.been.called
+
+      expect(onStub).to.have.not.been.called
+    })
   })
 
-  it('creates file watcher based on given config properties', () => {
-    const onStub = sinon.stub()
+  describe('open mode', () => {
+    beforeEach(async () => {
+      ctx = createTestDataContext('open')
 
-    sinon.stub(chokidar, 'watch').callsFake(() => {
-      const mockWatcher = {
-        on: onStub,
-        close: () => ({ catch: () => {} }),
-      } as unknown
-
-      return mockWatcher as chokidar.FSWatcher
+      ctx.coreData.currentProject = projectRoot
     })
 
-    let handleFsChange
+    it('throws if no current project defined', () => {
+      ctx.coreData.currentProject = null
 
-    sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
-      handleFsChange = (() => funcToDebounce())
-
-      return handleFsChange as _.DebouncedFunc<any>
+      expect(() => {
+        return ctx.project.startSpecWatcher({
+          projectRoot,
+          testingType: 'e2e',
+          specPattern: ['**/*.{cy,spec}.{ts,js}'],
+          configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+          excludeSpecPattern: ['**/ignore.spec.ts'],
+          additionalIgnorePattern: [],
+        })
+      }).to.throw()
     })
 
-    ctx.project.startSpecWatcher({
-      projectRoot,
-      testingType: 'e2e',
-      specPattern: ['**/*.{cy,spec}.{ts,js}'],
-      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
-      excludeSpecPattern: ['**/ignore.spec.ts'],
-      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    it('creates file watcher based on given config properties', () => {
+      const onStub = sinon.stub()
+
+      sinon.stub(chokidar, 'watch').callsFake(() => {
+        const mockWatcher = {
+          on: onStub,
+          close: () => ({ catch: () => {} }),
+        } as unknown
+
+        return mockWatcher as chokidar.FSWatcher
+      })
+
+      let handleFsChange
+
+      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+        handleFsChange = (() => funcToDebounce())
+
+        return handleFsChange as _.DebouncedFunc<any>
+      })
+
+      ctx.project.startSpecWatcher({
+        projectRoot,
+        testingType: 'e2e',
+        specPattern: ['**/*.{cy,spec}.{ts,js}'],
+        configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+        excludeSpecPattern: ['**/ignore.spec.ts'],
+        additionalIgnorePattern: ['additional.ignore.cy.js'],
+      })
+
+      expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
+
+      expect(chokidar.watch).to.have.been.calledWith('.', {
+        ignoreInitial: true,
+        cwd: projectRoot,
+        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
+        ignorePermissionErrors: true,
+      })
+
+      expect(onStub).to.have.been.calledWith('all', handleFsChange)
     })
 
-    expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
+    it('implements change handler with duplicate result handling', async () => {
+      const mockFoundSpecs = [
+        { name: 'test-1.cy.js' },
+        { name: 'test-2.cy.js' },
+        { name: 'test-3.cy.js' },
+      ] as FoundSpec[]
 
-    expect(chokidar.watch).to.have.been.calledWith('.', {
-      ignoreInitial: true,
-      cwd: projectRoot,
-      ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
-      ignorePermissionErrors: true,
+      sinon.stub(ctx.project, 'findSpecs').resolves(mockFoundSpecs)
+      sinon.stub(ctx.actions.project, 'setSpecs')
+
+      sinon.stub(chokidar, 'watch').callsFake(() => {
+        const mockWatcher = {
+          on: () => {},
+          close: () => ({ catch: () => {} }),
+        } as unknown
+
+        return mockWatcher as chokidar.FSWatcher
+      })
+
+      let handleFsChange
+
+      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+        handleFsChange = (() => funcToDebounce())
+
+        return handleFsChange as _.DebouncedFunc<any>
+      })
+
+      const watchOptions: FindSpecs<string[]> = {
+        projectRoot,
+        testingType: 'e2e',
+        specPattern: ['**/*.{cy,spec}.{ts,js}'],
+        configSpecPattern: ['**/ignore.spec.ts'],
+        excludeSpecPattern: ['additional.ignore.cy.js'],
+        additionalIgnorePattern: [],
+      }
+
+      ctx.project.startSpecWatcher(watchOptions)
+
+      // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
+      ctx.project.setSpecs(mockFoundSpecs)
+
+      await handleFsChange()
+
+      expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
+      expect(ctx.actions.project.setSpecs).not.to.have.been.called
+
+      // Update internal specs state so that a change will be detected on next FS event
+      const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
+
+      ctx.project.setSpecs(updatedSpecs)
+
+      await handleFsChange()
+
+      expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
+      expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
     })
-
-    expect(onStub).to.have.been.calledWith('all', handleFsChange)
-  })
-
-  it('implements change handler with duplicate result handling', async () => {
-    const mockFoundSpecs = [
-      { name: 'test-1.cy.js' },
-      { name: 'test-2.cy.js' },
-      { name: 'test-3.cy.js' },
-    ] as FoundSpec[]
-
-    sinon.stub(ctx.project, 'findSpecs').resolves(mockFoundSpecs)
-    sinon.stub(ctx.actions.project, 'setSpecs')
-
-    sinon.stub(chokidar, 'watch').callsFake(() => {
-      const mockWatcher = {
-        on: () => {},
-        close: () => ({ catch: () => {} }),
-      } as unknown
-
-      return mockWatcher as chokidar.FSWatcher
-    })
-
-    let handleFsChange
-
-    sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
-      handleFsChange = (() => funcToDebounce())
-
-      return handleFsChange as _.DebouncedFunc<any>
-    })
-
-    const watchOptions: FindSpecs<string[]> = {
-      projectRoot,
-      testingType: 'e2e',
-      specPattern: ['**/*.{cy,spec}.{ts,js}'],
-      configSpecPattern: ['**/ignore.spec.ts'],
-      excludeSpecPattern: ['additional.ignore.cy.js'],
-      additionalIgnorePattern: [],
-    }
-
-    ctx.project.startSpecWatcher(watchOptions)
-
-    // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
-    ctx.project.setSpecs(mockFoundSpecs)
-
-    await handleFsChange()
-
-    expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
-    expect(ctx.actions.project.setSpecs).not.to.have.been.called
-
-    // Update internal specs state so that a change will be detected on next FS event
-    const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
-
-    ctx.project.setSpecs(updatedSpecs)
-
-    await handleFsChange()
-
-    expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
-    expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
   })
 })
 
