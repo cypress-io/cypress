@@ -352,16 +352,16 @@ export class ProjectDataSource {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
-      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string) => {
-        // don't ignore things that look like directories,
-        // using statSync, falling back to whether it has an extension name
-        // if that were to throw
-        try {
-          if (fs.statSync(file).isDirectory()) {
-            return false
-          }
-        } catch {
-          return !path.extname(file)
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
+        // We need stats arg to make the determination of whether to watch it, because we need to watch directories
+        // chokidar is extremely inconsistent in whether or not it has the stats arg internally
+        if (!stats) {
+          stats = fs.statSync(file)
+        }
+
+        // don't ignore directories
+        if (stats.isDirectory()) {
+          return false
         }
 
         // If none of the spec patterns match, we don't need to watch it
