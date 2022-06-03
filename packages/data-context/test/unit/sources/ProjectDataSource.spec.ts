@@ -463,7 +463,7 @@ describe('_makeSpecWatcher', () => {
     ctx.destroy()
   })
 
-  it('watch for changes on files based on the specPatter', async function () {
+  it('watch for changes on files based on the specPattern', async function () {
     function delay (ms) {
       return new Promise((resolve) => {
         setTimeout(resolve, ms)
@@ -484,11 +484,11 @@ describe('_makeSpecWatcher', () => {
 
     ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'support', 'e2e.js'), '// foo')
     await delay(500)
-    expect(onStub).to.have.not.been.called
+    expect(onStub).to.not.have.been.calledWithMatch('change')
 
     ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'e2e', 'foo.cy.js'), '// foo')
     await delay(500)
-    expect(onStub).to.have.been.calledOnce
+    expect(onStub).to.have.been.calledWithMatch('change', 'spec-watcher/cypress/e2e/foo.cy.js')
   })
 })
 
