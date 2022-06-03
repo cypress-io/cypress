@@ -297,6 +297,12 @@ export class ProjectDataSource {
   }: FindSpecs<string[]>) {
     this.stopSpecWatcher()
 
+    // Early return the spec watcher if we're in run mode, we do not want to
+    // init a lot of files watchers that are unneeded
+    if (this.ctx.isRunMode) {
+      return
+    }
+
     const currentProject = this.ctx.currentProject
 
     if (!currentProject) {
@@ -331,6 +337,7 @@ export class ProjectDataSource {
     // ignored by config
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
+      ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
     })

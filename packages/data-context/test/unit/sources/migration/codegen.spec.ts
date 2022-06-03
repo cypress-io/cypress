@@ -529,6 +529,8 @@ describe('reduceConfig', () => {
     expect(reduceConfig({ supportFile: 'cypress/support' }, options).e2e.supportFile).to.not.exist
     expect(reduceConfig({ supportFile: 'cypress/support/index' }, options).e2e.supportFile).to.not.exist
     expect(reduceConfig({ supportFile: 'cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: './cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: '../cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
   })
 
   it('should exclude the pluginsFile', () => {
