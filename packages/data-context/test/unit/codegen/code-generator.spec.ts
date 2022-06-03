@@ -125,9 +125,9 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            context('Navigation', () => {
-              it('cy.visit() - visit a remote url', () => {
-                cy.visit('https://example.cypress.io')
+            context('empty spec', () => {
+              it('passes', () => {
+                expect(true).to.be.true
               })
             })` }\n`,
         },
