@@ -44,6 +44,13 @@ function scaffoldAndOpenE2EProject (opts: {
   cy.contains('E2E Testing').click()
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
+  // Going through the loading of config
+  cy.get('[data-cy="loading-spinner"]')
+  cy.get('[data-cy="loading-spinner"]').should('not.exist')
+  // No errrors were encountered
+  cy.get('[data-testid="error-header"]').should('not.exist')
+  // Asserts that we've made it through the flow
+  cy.contains('Choose a Browser')
 }
 
 function scaffoldAndOpenCTProject (opts: {
@@ -157,5 +164,18 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
 
     scaffoldAndOpenCTProject({ name: 'pristine', framework: 'Create React App', removeFixturesFolder: false })
     assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)', customDirectory: 'without-fixtures' })
+  })
+
+  it('generates valid config file for pristine project without cypress installed', () => {
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine')
+    cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
+      cy.task('uninstallDependenciesInScaffoldedProject', { currentProject })
+    })
+
+    cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.testingType.e2e.name).click()
+    cy.contains('button', cy.i18n.setupPage.step.continue).click()
+    cy.contains('h1', cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')
   })
 })

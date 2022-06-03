@@ -2,4 +2,4 @@
 // babel transforms, etc. into client-side usage of the config code
 export * from './browser'
 
-export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from './ast-utils/addToCypressConfig'
+export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions, defineConfigAvailable } from './ast-utils/addToCypressConfig'
