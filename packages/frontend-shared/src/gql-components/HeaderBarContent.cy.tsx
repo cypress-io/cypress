@@ -33,7 +33,35 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.percySnapshot('after browsers open')
-  }),
+  })
+
+  describe('Projects', () => {
+    it('in global mode, shows link to Projects', () => {
+      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+        render: (gqlVal) => (
+          <div class="border-current border-1 h-700px resize overflow-auto">
+            <HeaderBarContent gql={gqlVal} />
+          </div>
+        ),
+      })
+
+      cy.contains('a', 'Projects').should('be.visible').should('have.attr', 'href', 'global-mode')
+      cy.percySnapshot()
+    })
+
+    it('in non-global mode, does not show link to Projects', () => {
+      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+        render: (gqlVal) => (
+          <div class="border-current border-1 h-700px resize overflow-auto">
+            <HeaderBarContent gql={{ ...gqlVal, projectRootFromCI: true }} />
+          </div>
+        ),
+      })
+
+      cy.contains('Projects').should('not.exist')
+      cy.percySnapshot()
+    })
+  })
 
   it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {

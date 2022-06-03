@@ -23,23 +23,23 @@
           aria-label="Breadcrumbs"
         >
           <ol>
-            <li class="inline-block">
+            <li
+              v-if="hasLinkToProjects"
+              class="inline-block"
+            >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
-                class="font-medium"
-                :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
-                  'text-gray-700'"
-                :role="hasLinkToProjects ? undefined : 'link'"
-                :href="hasLinkToProjects ? 'global-mode' : undefined"
-                :ariaDisabled="!hasLinkToProjects"
+                class="font-medium text-indigo-500 hocus-link-default"
+                role="link"
+                href="global-mode"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
             <li
-              v-if="props.gql?.currentProject"
+              v-if="hasLinkToProjects"
               class="mx-2px align-middle inline-block"
               aria-hidden
             >
