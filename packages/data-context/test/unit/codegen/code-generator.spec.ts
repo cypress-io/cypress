@@ -127,8 +127,7 @@ describe('code-generator', () => {
           content: `${dedent`
             context('Navigation', () => {
               it('cy.visit() - visit a remote url', () => {
-                cy.visit('https://example.cypress.io/commands/navigation')
-                cy.contains('h1', 'Navigation')
+                cy.visit('https://example.cypress.io')
               })
             })` }\n`,
         },
