@@ -382,7 +382,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
 
-        cy.get('[href="#/runs"]').click()
+        cy.findByTestId('sidebar-link-runs-page').click()
         cy.get('@logInButton').click()
 
         cy.findByTestId('app-header-bar').within(() => {
