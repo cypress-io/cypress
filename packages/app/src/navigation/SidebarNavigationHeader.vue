@@ -2,7 +2,6 @@
   <Tooltip
     v-if="testingType"
     placement="right"
-    :disabled="isNavBarExpanded"
     :distance="8"
   >
     <div
@@ -38,11 +37,19 @@
       </div>
     </div>
     <template #popper>
-      <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
-        {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-20px truncate">
-          {{ props.gql.currentProject?.branch }}
-        </p>
+      <div class="flex">
+        <template v-if="!isNavBarExpanded">
+          <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
+            {{ props.gql.currentProject?.title ?? 'Cypress' }}
+            <p class="text-gray-600 text-size-14px leading-20px truncate">
+              {{ props.gql.currentProject?.branch }}
+            </p>
+          </div>
+          <div class="border-r-1 ml-12px mr-12px" />
+        </template>
+        <div class="flex items-center">
+          {{ tooltipText.switchTestingType }}
+        </div>
       </div>
     </template>
   </Tooltip>
@@ -104,6 +111,12 @@ const TESTING_TYPE_MAP = {
 
 const testingType = computed(() => {
   return props.gql.currentProject?.currentTestingType ? TESTING_TYPE_MAP[props.gql.currentProject.currentTestingType] : null
+})
+
+const tooltipText = computed(() => {
+  return {
+    switchTestingType: t('openBrowser.switchTestingType'),
+  }
 })
 
 </script>
