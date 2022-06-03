@@ -125,9 +125,10 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            describe('my-integration-file.js', () => {
-              it('should visit', () => {
-                cy.visit('/')
+            context('Navigation', () => {
+              it('cy.visit() - visit a remote url', () => {
+                cy.visit('https://example.cypress.io/commands/navigation')
+                cy.contains('h1', 'Navigation')
               })
             })` }\n`,
         },
