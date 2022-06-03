@@ -1,6 +1,6 @@
 import chai from 'chai'
 import os from 'os'
-
+import fs from 'fs-extra'
 import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
@@ -149,6 +149,7 @@ describe('findSpecs', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
+    await fs.remove(projectRoot)
     ctx = createTestDataContext('run')
     await ctx.fs.ensureDir(projectRoot)
     await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(projectRoot, element), '')))
@@ -448,6 +449,9 @@ describe('_makeSpecWatcher', () => {
   let specWatcher: chokidar.FSWatcher
 
   beforeEach(function () {
+    this.timeout(20000) // FixturesHelper.remove can take awhile depending on what you've done prior
+    FixturesHelper.remove()
+
     ctx = createTestDataContext('open')
 
     FixturesHelper.scaffold('spec-watcher')
@@ -470,8 +474,6 @@ describe('_makeSpecWatcher', () => {
       })
     }
 
-    const onStub = sinon.stub()
-
     specWatcher = ctx.project._makeSpecWatcher({
       projectRoot: this.specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}'],
@@ -479,16 +481,34 @@ describe('_makeSpecWatcher', () => {
       additionalIgnorePattern: ['additional.ignore.cy.js'],
     })
 
-    specWatcher.on('all', onStub)
-    await delay(500)
+    await new Promise((resolve) => {
+      specWatcher.once('ready', resolve)
+    })
 
-    ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'support', 'e2e.js'), '// foo')
-    await delay(500)
-    expect(onStub).to.not.have.been.calledWithMatch('change')
+    const allFiles = new Set()
 
-    ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'e2e', 'foo.cy.js'), '// foo')
+    specWatcher.on('add', (filePath) => {
+      allFiles.add(filePath)
+    })
+
+    specWatcher.on('change', (filePath) => {
+      allFiles.add(filePath)
+    })
+
+    const SUPPORT_FILE = path.join(this.specWatcherPath, 'cypress', 'support', 'e2e.js')
+    const SPEC_FILE1 = path.join(this.specWatcherPath, 'cypress', 'e2e', 'foo.cy.js')
+    const SPEC_FILE2 = path.join(this.specWatcherPath, 'cypress', 'e2e', 'some', 'new', 'folder', 'foo.cy.js')
+
+    ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo')
+    ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo')
+    ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo')
+
     await delay(500)
-    expect(onStub).to.have.been.calledWithMatch('change', 'spec-watcher/cypress/e2e/foo.cy.js')
+    expect(Array.from(allFiles)).to.eql([
+      SPEC_FILE1,
+      SPEC_FILE2,
+    // Paths don't start with '/' when emitted
+    ].map((p) => p.slice(1)))
   })
 })
 
