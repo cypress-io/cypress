@@ -12,6 +12,7 @@ import { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultSpecPattern } from '@packages/config'
+import FixturesHelper from '@tooling/system-tests'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -439,6 +440,55 @@ describe('getPathFromSpecPattern', () => {
 
       expect(defaultFileName).to.eq('cypress/component-tests/ComponentName.cy.ts')
     })
+  })
+})
+
+describe('_makeSpecWatcher', () => {
+  let ctx: DataContext
+  let specWatcher: chokidar.FSWatcher
+
+  beforeEach(function () {
+    ctx = createTestDataContext('open')
+
+    FixturesHelper.scaffold('spec-watcher')
+
+    this.specWatcherPath = FixturesHelper.projectPath('spec-watcher')
+
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.specWatcherPath)
+  })
+
+  afterEach(async () => {
+    sinon.restore()
+    await specWatcher.close()
+    ctx.destroy()
+  })
+
+  it('watch for changes on files based on the specPatter', async function () {
+    function delay (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+      })
+    }
+
+    const onStub = sinon.stub()
+
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: this.specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    specWatcher.on('all', onStub)
+    await delay(500)
+
+    ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'support', 'e2e.js'), '// foo')
+    await delay(500)
+    expect(onStub).to.have.not.been.called
+
+    ctx.actions.file.writeFileInProject(path.join(this.specWatcherPath, 'cypress', 'e2e', 'foo.cy.js'), '// foo')
+    await delay(500)
+    expect(onStub).to.have.been.calledOnce
   })
 })
 

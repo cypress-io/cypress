@@ -335,22 +335,31 @@ export class ProjectDataSource {
     // We respond to all changes to the project's filesystem when
     // files or directories are added and removed that are not explicitly
     // ignored by config
-    this._specWatcher = chokidar.watch('.', {
+    this._specWatcher = this._makeSpecWatcher({
+      projectRoot,
+      specPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
+    })
+
+    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
+    this._specWatcher.on('all', onProjectFileSystemChange)
+  }
+
+  _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
+    return chokidar.watch('.', {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string) => {
         // don't ignore things that look like directories
-        if (!path.extname(file) || !path.relative(projectRoot, file)) {
+        if (!path.extname(file)) {
           return false
         }
 
         return specPattern.some((s) => !minimatch(path.relative(projectRoot, file), s))
       }],
     })
-
-    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
-    this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
   async defaultSpecFileName (): Promise<string> {
