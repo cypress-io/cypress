@@ -548,6 +548,40 @@ describe('_makeSpecWatcher', () => {
 
     expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
   })
+
+  it('ignore file if it is deleted', async function () {
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: this.specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    await new Promise((resolve) => specWatcher.on('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+
+    writeFiles()
+
+    await ctx.actions.file.removeFileInProject(SPEC_FILE1)
+
+    let attempt = 0
+
+    while (allFiles.size < 3 && attempt++ <= 100) {
+      await delay(10)
+    }
+
+    expect(Array.from(allFiles).sort()).to.eql([
+      SPEC_FILE_ABC,
+      SPEC_FILE2,
+      SPEC_FILE3,
+    ])
+
+    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+  })
 })
 
 describe('startSpecWatcher', () => {
