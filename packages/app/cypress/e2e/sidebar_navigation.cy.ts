@@ -137,17 +137,17 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
-      cy.get('[href="#/runs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.get('[href="#/runs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseout')
 
-      cy.get('[href="#/specs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.get('[href="#/specs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
 
-      cy.get('[href="#/settings"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.get('[href="#/settings"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {

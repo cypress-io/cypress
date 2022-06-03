@@ -43,6 +43,7 @@
           :to="item.href"
         >
           <SidebarNavigationRow
+            :data-cy="`sidebar-link-${item.name}-page`"
             :active="isExactActive"
             :icon="item.icon"
             :name="item.name"
