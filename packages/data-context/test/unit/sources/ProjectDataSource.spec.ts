@@ -507,7 +507,7 @@ describe('_makeSpecWatcher', () => {
       await delay(10)
     }
 
-    expect(Array.from(allFiles)).to.eql([
+    expect(Array.from(allFiles).sort()).to.eql([
       SPEC_FILE1,
       SPEC_FILE2,
       SPEC_FILE3,
@@ -539,11 +539,11 @@ describe('_makeSpecWatcher', () => {
       await delay(10)
     }
 
-    expect(Array.from(allFiles)).to.eql([
+    expect(Array.from(allFiles).sort()).to.eql([
       SPEC_FILE1,
+      SPEC_FILE_ABC,
       SPEC_FILE2,
       SPEC_FILE3,
-      SPEC_FILE_ABC,
     ])
 
     expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
