@@ -11,6 +11,7 @@ import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
+import fs from 'fs'
 
 const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
@@ -352,12 +353,19 @@ export class ProjectDataSource {
       ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string) => {
-        // don't ignore things that look like directories
-        if (!path.extname(file)) {
-          return false
+        // don't ignore things that look like directories,
+        // using statSync, falling back to whether it has an extension name
+        // if that were to throw
+        try {
+          if (fs.statSync(file).isDirectory()) {
+            return false
+          }
+        } catch {
+          return !path.extname(file)
         }
 
-        return specPattern.some((s) => !minimatch(path.relative(projectRoot, file), s))
+        // If none of the spec patterns match, we don't need to watch it
+        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
       }],
     })
   }
