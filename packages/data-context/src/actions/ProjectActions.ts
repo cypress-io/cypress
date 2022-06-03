@@ -43,6 +43,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
+  updateProjectBaseConfigWithFullConfig(fullConfig: FullConfig): Promise<void>
 }
 
 export interface FindSpecs<T> {

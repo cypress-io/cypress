@@ -237,6 +237,8 @@ export class ProjectConfigManager {
       shouldRestartBrowser: result.registrations.some((registration) => registration.event === 'before:browser:launch'),
     }
 
+    await this.options.ctx._apis.projectApi.updateProjectBaseConfigWithFullConfig(finalConfig)
+
     await this.options.onFinalConfigLoaded(finalConfig, onFinalConfigLoadedOptions)
 
     this.watchFiles([

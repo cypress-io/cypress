@@ -68,8 +68,8 @@ export class HtmlDataSource {
 
     try {
       cfg = {
-        ...cfg,
         ...(await this.ctx.project.getConfig()),
+        ...cfg,
       }
     } catch {
       // Error getting config, we will show an error screen when we render the page

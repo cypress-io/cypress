@@ -11,7 +11,7 @@ import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
-import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
+import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, FullConfig } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 
@@ -37,6 +37,10 @@ export class OpenProject {
 
   getConfig () {
     return this.projectBase?.getConfig()
+  }
+
+  async updateProjectBaseConfigWithFullConfig (fullConfig: FullConfig): Promise<void> {
+    await this.projectBase?.updateProjectBaseConfigWithFullConfig(fullConfig)
   }
 
   getRemoteStates () {

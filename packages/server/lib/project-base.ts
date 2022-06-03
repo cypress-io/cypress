@@ -21,7 +21,7 @@ import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
 import system from './util/system'
-import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
+import type { FoundBrowser, FoundSpec, FullConfig, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -448,10 +448,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
-    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
+  async updateProjectBaseConfigWithFullConfig (fullInitialConfig: FullConfig): Promise<Cfg> {
     let theCfg: Cfg = {
-      ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
+      ...fullInitialConfig,
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
 
@@ -470,6 +469,14 @@ export class ProjectBase<TServer extends Server> extends EE {
     this._cfg = cfgWithSaved
 
     return this._cfg
+  }
+
+  async initializeConfig (): Promise<Cfg> {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
+
+    const fullInitialConfig = await this.ctx.lifecycleManager.getFullInitialConfig()
+
+    return this.updateProjectBaseConfigWithFullConfig(fullInitialConfig)
   }
 
   // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs})

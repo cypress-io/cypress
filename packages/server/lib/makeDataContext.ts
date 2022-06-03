@@ -9,6 +9,7 @@ import type {
   AllModeOptions,
   AllowedState,
   FoundBrowser,
+  FullConfig,
   InitializeProjectOptions,
   LaunchOpts,
   OpenProjectLaunchOptions,
@@ -124,6 +125,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getConfig () {
         return openProject.getConfig()
+      },
+      async updateProjectBaseConfigWithFullConfig (fullConfig: FullConfig) {
+        await openProject.updateProjectBaseConfigWithFullConfig(fullConfig)
       },
       getRemoteStates () {
         return openProject.getRemoteStates()
