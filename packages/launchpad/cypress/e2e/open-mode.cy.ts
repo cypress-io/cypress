@@ -96,7 +96,6 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('todos')
       cy.visitLaunchpad()
 
-      cy.contains('Projects').should('be.visible')
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
     })
@@ -112,7 +111,6 @@ describe('Launchpad: Open Mode', () => {
 
       cy.contains('h1', 'Welcome to Cypress!')
 
-      getBreadcrumbLink('Projects', { disabled: true })
       getBreadcrumbLink('todos', { disabled: true })
 
       cy.get('[data-cy-testingtype="e2e"]').click()
@@ -120,7 +118,6 @@ describe('Launchpad: Open Mode', () => {
       cy.contains('h1', 'Choose a Browser')
 
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
-      getBreadcrumbLink('Projects', { disabled: true })
 
       cy.withCtx((ctx, { sinon }) => {
         sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
@@ -129,7 +126,6 @@ describe('Launchpad: Open Mode', () => {
       getBreadcrumbLink('todos').click()
 
       cy.contains('h1', 'Welcome to Cypress!')
-      getBreadcrumbLink('Projects', { disabled: true })
       getBreadcrumbLink('todos', { disabled: true })
 
       cy.withCtx((ctx) => {
@@ -161,7 +157,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.get('a').contains('Projects').click()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project Actions"]').click()
       cy.get('button').contains('Open In IDE').click()
@@ -188,7 +183,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.get('a').contains('Projects').click()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project Actions"]').click()
 

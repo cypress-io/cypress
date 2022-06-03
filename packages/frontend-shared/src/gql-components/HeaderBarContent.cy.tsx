@@ -35,7 +35,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.percySnapshot('after browsers open')
   })
 
-  describe('Projects', () => {
+  describe('breadcrumbs', () => {
     it('in global mode, shows link to Projects', () => {
       cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
         render: (gqlVal) => (
