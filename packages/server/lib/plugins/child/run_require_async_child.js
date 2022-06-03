@@ -1,6 +1,7 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
+const { pathToFileURL } = require('url')
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
@@ -97,12 +98,10 @@ function run (ipc, file, projectRoot) {
     //   3a. Yes: Use bundleRequire
     //   3b. No: Continue through to `await import(configFile)`
     // 4. Use node's dynamic import to import the configFile
-    let originalError
 
     try {
       return require(file)
     } catch (err) {
-      originalError = err
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }
@@ -124,16 +123,10 @@ function run (ipc, file, projectRoot) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported. If this throws, however, we want
-        // to show the original error that was thrown, because that's ultimately the source of the problem
-        try {
-          return await import(file)
-        } catch (e) {
-          // If we aren't able to import the file at all, throw the original error, since that has more accurate information
-          // of what failed to begin with
-          debug('esbuild fallback for loading config failed, throwing original error. node import error: %o', e)
-          throw originalError
-        }
+        // Certain modules cannot be dynamically imported.
+
+        // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
+        return await import(pathToFileURL(file).href)
       }
 
       throw err
