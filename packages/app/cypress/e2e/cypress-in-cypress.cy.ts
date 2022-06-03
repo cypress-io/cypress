@@ -1,3 +1,4 @@
+import { getPathForPlatform } from '../../src/paths'
 import type { DraggablePanel } from '../../src/runner/useRunnerStyle'
 
 const testingTypes = ['component', 'e2e'] as const
@@ -304,5 +305,62 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     cy.withRetryableCtx((ctx) => {
       expect(ctx.actions.project.initializeActiveProject).to.be.called
     })
+  })
+
+  it('responds to baseUrl change in config and reflects the correct url', () => {
+    startAtSpecsPage('e2e')
+
+    cy.withCtx((ctx, o) => {
+      ctx.actions.file.writeFileInProject(o.path, `
+describe('BaseUrl', () => {
+  it('retrieves the base url', () => {
+    expect(Cypress.config('baseUrl')).to.be.null
+  })
+})
+`)
+    }, { path: getPathForPlatform('cypress/e2e/base-url.spec.js') })
+
+    cy.contains('base-url.spec').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+
+    cy.withCtx((ctx, o) => {
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`  e2e: {`, `  e2e: {\n  baseUrl: 'https://example.com',\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      ctx.actions.file.writeFileInProject(o.path, `
+describe('BaseUrl', () => {
+  it('retrieves the base url', () => {
+    expect(Cypress.config('baseUrl')).to.eql('https://example.com')
+  })
+})
+`)
+    }, { path: getPathForPlatform('cypress/e2e/base-url.spec.js') })
+
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+
+    cy.withCtx((ctx, o) => {
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`  e2e: {\n  baseUrl: 'https://example.com',\n`, `  e2e: {\n  baseUrl: 'https://example.cypress.io',\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      ctx.actions.file.writeFileInProject(o.path, `
+describe('BaseUrl', () => {
+  it('retrieves the base url', () => {
+    expect(Cypress.config('baseUrl')).to.eql('https://example.cypress.io')
+  })
+})
+`)
+    }, { path: getPathForPlatform('cypress/e2e/base-url.spec.js') })
+
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
   })
 })
