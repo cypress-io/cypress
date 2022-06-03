@@ -125,7 +125,7 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            context('empty spec', () => {
+            describe('empty spec', () => {
               it('passes', () => {
                 expect(true).to.be.true
               })
