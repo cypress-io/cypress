@@ -26,9 +26,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .should('not.exist')
     })
 
-    cy.get('[data-cy="top-nav-browser-list-item"]')
-    .last().should('not.be.visible')
-    .scrollIntoView().should('be.visible')
+    cy.get('[data-cy="top-nav-browser-list-item"]').parent()
+    .should('have.class', 'overflow-auto')
 
     cy.contains('Version unsupported')
     .scrollIntoView()
@@ -40,7 +39,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .trigger('mouseenter')
     })
 
-    cy.contains('Unsupported browser')
+    cy.contains('Unsupported browser').should('be.visible')
 
     cy.percySnapshot('unsupported browser tooltip')
   }),
