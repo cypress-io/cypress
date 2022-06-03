@@ -41,9 +41,9 @@
           v-slot="{ isExactActive }"
           :key="item.name"
           :to="item.href"
+          :data-cy="`sidebar-link-${item.name.toLowerCase()}-page`"
         >
           <SidebarNavigationRow
-            :data-cy="`sidebar-link-${item.name}-page`"
             :active="isExactActive"
             :icon="item.icon"
             :name="item.name"
