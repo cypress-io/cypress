@@ -418,17 +418,19 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      s.currentProjectGitInfo = new GitDataSource({
-        isRunMode: this.ctx.isRunMode,
-        projectRoot,
-        onError: this.ctx.onError,
-        onBranchChange: () => {
-          this.ctx.emitter.branchChange()
-        },
-        onGitInfoChange: (specPaths) => {
-          this.ctx.emitter.gitInfoChange(specPaths)
-        },
-      })
+      if (!this.ctx.isRunMode) {
+        s.currentProjectGitInfo = new GitDataSource({
+          isRunMode: this.ctx.isRunMode,
+          projectRoot,
+          onError: this.ctx.onError,
+          onBranchChange: () => {
+            this.ctx.emitter.branchChange()
+          },
+          onGitInfoChange: (specPaths) => {
+            this.ctx.emitter.gitInfoChange(specPaths)
+          },
+        })
+      }
 
       s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
       s.packageManager = packageManagerUsed
@@ -617,13 +619,13 @@ export class ProjectLifecycleManager {
     }
 
     try {
-      const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
+      const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
-      if (packageJson.type === 'module') {
+      if (pkgJson.type === 'module') {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage(this.projectRoot, packageJson) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
     } catch {
       // No need to handle
     }

@@ -1162,5 +1162,10 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    DEV_SERVER_CONFIG_FILE_NOT_FOUND: () => {
+      return {
+        default: ['vite', '/dev/project', ['vite.config.js', 'vite.config.ts']],
+      }
+    },
   })
 })

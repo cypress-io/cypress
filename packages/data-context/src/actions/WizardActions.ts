@@ -233,6 +233,7 @@ export class WizardActions {
       isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
       filePath: configFilePath,
       info: testingTypeInfo,
+      projectRoot: this.projectRoot,
     })
 
     const description = (testingType === 'e2e')
