@@ -73,18 +73,25 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import type { Highlighter } from 'shiki'
-import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import type { Highlighter, ILanguageRegistration } from 'shiki'
+import { getHighlighter, setOnigasmWASM } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
+import shikiCyTheme from '../public/shiki/themes/cypress.theme.json'
+const langTmsRaw = import.meta.globEager('../public/shiki/languages/*.tmLanguage.json')
+
+const langTms: ILanguageRegistration[] = Object.values(langTmsRaw).map((grammar: any) => {
+  return {
+    grammar,
+    id: grammar.name,
+    scopeName: grammar.scopeName,
+  }
+})
 
 setOnigasmWASM(onigasm)
-setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
 
 export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
-
-let langs = langsSupported.concat([])
 
 export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
 
@@ -94,8 +101,8 @@ export async function initHighlighter () {
   }
 
   highlighter = await getHighlighter({
-    themes: ['cypress.theme'],
-    langs,
+    theme: shikiCyTheme as any,
+    langs: langTms,
   })
 }
 

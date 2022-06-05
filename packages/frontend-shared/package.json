@@ -61,7 +61,7 @@
     "modern-normalize": "1.1.0",
     "patch-package": "6.4.7",
     "rimraf": "3.0.2",
-    "shiki": "^0.9.12",
+    "shiki": "^0.10.1",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.15.4",
     "vite": "2.9.0-beta.3",
