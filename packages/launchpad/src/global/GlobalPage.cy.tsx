@@ -74,6 +74,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       .invoke('outerHeight')
       .then((parentHeight) => {
         cy.get('[data-cy="project-card"]').invoke('outerHeight').should('be.lt', parentHeight)
+        cy.percySnapshot()
       })
     })
 
