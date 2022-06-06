@@ -240,9 +240,18 @@ export class ProjectConfigIpc extends EventEmitter {
 
     debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
 
-    const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
+    let isProjectUsingESModules = false
 
-    if (pkgJson.type === 'module') {
+    try {
+      const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
+
+      isProjectUsingESModules = pkgJson.type === 'module'
+    } catch (e) {
+      // project does not have `package.json` or it was not found
+      // reasonable to assume not using es modules
+    }
+
+    if (isProjectUsingESModules) {
       if (!childOptions.env) {
         childOptions.env = {}
       }
