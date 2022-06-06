@@ -67,7 +67,9 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
 
-5. [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `production`. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable. Log into AWS SSO with `aws sso login --profile <name_of_profile>`.
+5. [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `prod`.
+    * Log into AWS SSO with `aws sso login --profile <name_of_profile>`.
+    * If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
 6. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
@@ -165,32 +167,15 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 20. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version. Note: we use the base image with the Node version matching the bundled Node version. Instructions for updating `cypress-docker-images` can be found [here](https://github.com/cypress-io/cypress-docker-images/blob/master/CONTRIBUTING.md#add-new-included-image).
 
-21. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+21. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's `master`. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
     - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld/issues/2)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
-    - [angular-pizza-creator](https://github.com/cypress-io/angular-pizza-creator/issues/5)
     - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)
-    - [cypress-documentation](https://github.com/cypress-io/cypress-documentation/issues/1313)
-    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose) - Doesn't have a Renovate issue, but will auto-create and auto-merge non-major Cypress updates as long as the tests pass.
-
-22. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
-
-    **Test Repos**
-
-    - [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny)
-
-    **Example Repos**
-
-    - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc)
-    - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux)
-    - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld)
-    - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes)
     - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose)
-    - [cypress-documentation](https://github.com/cypress-io/cypress-documentation)
 
-Take a break, you deserve it! :sunglasses:
+Take a break, you deserve it! 👉😎👉
 
 [release-automations]: https://github.com/cypress-io/release-automations
 [cypress-example-kitchensink]: https://github.com/cypress-io/cypress-example-kitchensink
