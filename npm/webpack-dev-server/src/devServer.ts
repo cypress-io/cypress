@@ -19,6 +19,7 @@ export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
+  onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack
@@ -39,10 +40,6 @@ type DevServerCreateResult = {
   compiler: Compiler
 }
 
-const normalizeError = (error: Error | string) => {
-  return typeof error === 'string' ? error : error.message
-}
-
 /**
  * import { devServer } from '@cypress/webpack-dev-server'
  *
@@ -54,21 +51,6 @@ const normalizeError = (error: Error | string) => {
 export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   return new Promise(async (resolve, reject) => {
     const result = await devServer.create(devServerConfig) as DevServerCreateResult
-
-    // When compiling in run mode
-    // Stop the clock early, no need to run all the tests on a failed build
-    result.compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
-      if (stats.hasErrors()) {
-        const errors = stats.compilation.errors
-
-        devServerConfig.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-        if (devServerConfig.cypressConfig.isTextTerminal) {
-          process.exit(1)
-        }
-      }
-
-      devServerConfig.devServerEvents.emit('dev-server:compile:done')
-    })
 
     if (result.version === 3) {
       const srv = result.server.listen(0, '127.0.0.1', () => {
@@ -150,7 +132,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Pres
 devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   const { frameworkConfig, sourceWebpackModulesResult } = await getPreset(devServerConfig)
 
-  const { server, compiler } = createWebpackDevServer({
+  const { server, compiler } = await createWebpackDevServer({
     devServerConfig,
     frameworkConfig,
     sourceWebpackModulesResult,

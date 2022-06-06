@@ -126,7 +126,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+        o.sinon.stub(ctx.actions.browser, 'setActiveBrowserById')
         o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
       })
 
@@ -137,10 +137,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       .click()
 
       cy.withCtx((ctx, o) => {
-        const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+        const browserId = (ctx.actions.browser.setActiveBrowserById as SinonStub).args[0][0]
         const genId = ctx.fromId(browserId, 'Browser')
 
-        expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+        expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
         expect(genId).to.eql('firefox-firefox-stable')
         expect(ctx.actions.project.launchProject).to.have.been.calledWith(
           ctx.coreData.currentTestingType, {}, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
@@ -182,10 +182,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-      cy.get('[href="#/specs"]').click()
+      cy.findByTestId('sidebar-link-specs-page').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()

@@ -1,37 +1,34 @@
 /// <reference types="cypress" />
-// ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      /**
+       * Adapter to wait for a spec to finish in a standard way. It
+       *
+       * 1. Waits for the stats to reset which signifies that the test page has loaded
+       * 2. Waits for 'Your tests are loading...' to not be present so that we know the tests themselves have loaded
+       * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
+       *
+       */
+      waitForSpecToFinish()
+    }
+  }
+}
+
+// Here we export the function with no intention to import it
+// This only tells the typescript type checker that this definitely is a module
+// This way, we are allowed to use the global namespace declaration
+export const waitForSpecToFinish = () => {
+  // First ensure the test is loaded
+  cy.get('.passed > .num').should('contain', '--')
+  cy.get('.failed > .num').should('contain', '--')
+
+  // Then ensure the tests are running
+  cy.contains('Your tests are loading...').should('not.exist')
+
+  // Then ensure the tests have finished
+  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
+}
+
+Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)

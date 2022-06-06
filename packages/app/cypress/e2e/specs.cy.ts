@@ -187,7 +187,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.percySnapshot('Generator success')
 
@@ -278,7 +278,7 @@ describe('App: Specs', () => {
 
           cy.percySnapshot('Generator success')
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.ts\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.get('[aria-label="Close"]').click()
 
@@ -412,7 +412,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.percySnapshot('Generator success')
 

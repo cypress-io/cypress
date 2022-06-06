@@ -16,10 +16,10 @@ export const Subscription = subscriptionType({
       },
     })
 
-    t.field('baseErrorChange', {
+    t.field('errorWarningChange', {
       type: Query,
-      description: 'Triggered when the base error state changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('baseErrorChange'),
+      description: 'Triggered when the base error or warning state changes',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('errorWarningChange'),
       resolve: (source, args, ctx) => ({}),
     })
 

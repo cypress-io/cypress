@@ -1,8 +1,7 @@
 import path from 'path'
-import chokidar from 'chokidar'
+import chokidar, { FSWatcher } from 'chokidar'
 
 import type { DataContext } from '..'
-import type { FSWatcher } from 'fs'
 
 export class DevActions {
   private _chokidar?: FSWatcher
@@ -22,6 +21,7 @@ export class DevActions {
     if (!this._chokidar) {
       this._chokidar = chokidar.watch(DevActions.CY_STATE_PATH, {
         ignoreInitial: true,
+        ignorePermissionErrors: true,
       })
 
       this._chokidar.on('change', () => {
@@ -50,7 +50,7 @@ export class DevActions {
   }
 
   dispose () {
-    this._chokidar?.close()
+    this._chokidar?.close().catch(() => {})
     this._chokidar = undefined
   }
 }
