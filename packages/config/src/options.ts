@@ -135,7 +135,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
     canUpdateDuringTestTime: true,
-    requireRestartOnChange: 'server',
+    requireRestartOnChange: 'pingBaseUrl',
   }, {
     name: 'blockHosts',
     defaultValue: null,

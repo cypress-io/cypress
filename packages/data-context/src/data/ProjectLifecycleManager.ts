@@ -246,12 +246,10 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        }
 
-          // Devserver can pick a random port, this solve the edge case where closing
-          // and spawning the devserver can result in a different baseUrl
-          if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
-            restartOnChange.server = true
-          }
+        if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
+          restartOnChange.server = true
         }
 
         this._cachedFullConfig = finalConfig
