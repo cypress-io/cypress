@@ -46,7 +46,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'fix-unit-tests-release', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/UNIFY-1816-prototype', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -58,7 +58,7 @@ fullWindowsWorkflowFilters: &full-windows-workflow-filters
     branches:
       only:
       - develop
-      - 'fix-unit-tests-release'
+      - 'tbiethman/UNIFY-1816-prototype'
       - '*-release'
       - 'win*'
 
@@ -109,7 +109,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-unit-tests-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/UNIFY-1816-prototype" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
