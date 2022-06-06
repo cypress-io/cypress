@@ -27832,6 +27832,13 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
+onigasm@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/onigasm/-/onigasm-2.2.5.tgz#cc4d2a79a0fa0b64caec1f4c7ea367585a676892"
+  integrity sha512-F+th54mPc0l1lp1ZcFMyL/jTs2Tlq4SqIHKIXGZOR/VkHkF9A7Fr5rRr5+ZG/lWeRsyrClLYRq7s/yFQ/XhWCA==
+  dependencies:
+    lru-cache "^5.1.1"
+
 only@~0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/only/-/only-0.0.2.tgz#2afde84d03e50b9a8edc444e30610a70295edfb4"
@@ -33344,13 +33351,13 @@ shellwords@^0.1.1:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
-shiki@^0.10.1:
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/shiki/-/shiki-0.10.1.tgz#6f9a16205a823b56c072d0f1a0bcd0f2646bef14"
-  integrity sha512-VsY7QJVzU51j5o1+DguUd+6vmCmZ5v/6gYu4vyYAhzjuNQU6P/vmSy4uQaOhvje031qQMiW0d2BwgMH52vqMng==
+shiki@^0.9.12:
+  version "0.9.12"
+  resolved "https://registry.yarnpkg.com/shiki/-/shiki-0.9.12.tgz#70cbc8c1bb78ff7b356f84a7eecdb040efddd247"
+  integrity sha512-VXcROdldv0/Qu0w2XvzU4IrvTeBNs/Kj/FCmtcEXGz7Tic/veQzliJj6tEiAgoKianhQstpYmbPDStHU5Opqcw==
   dependencies:
     jsonc-parser "^3.0.0"
-    vscode-oniguruma "^1.6.1"
+    onigasm "^2.2.5"
     vscode-textmate "5.2.0"
 
 shx@0.3.3:
@@ -37445,11 +37452,6 @@ vscode-nls@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/vscode-nls/-/vscode-nls-5.0.0.tgz#99f0da0bd9ea7cda44e565a74c54b1f2bc257840"
   integrity sha512-u0Lw+IYlgbEJFF6/qAqG2d1jQmJl0eyAGJHoAJqr2HT4M2BNuQYSEiSE75f52pXHSJm8AlTjnLLbBFPrdz2hpA==
-
-vscode-oniguruma@^1.6.1:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/vscode-oniguruma/-/vscode-oniguruma-1.6.2.tgz#aeb9771a2f1dbfc9083c8a7fdd9cccaa3f386607"
-  integrity sha512-KH8+KKov5eS/9WhofZR8M8dMHWN2gTxjMsG4jd04YhpbPR91fUj7rYQ2/XjeHCJWbg7X++ApRIU9NUwM2vTvLA==
 
 vscode-pug-languageservice@^0.27.21:
   version "0.27.21"
