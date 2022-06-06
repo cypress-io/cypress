@@ -188,6 +188,7 @@ describe('Launchpad: Global Mode', () => {
       cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()
       getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.clearCurrentProject).to.have.been.called
         expect(ctx.actions.wizard.resetWizard).to.have.been.called
@@ -199,6 +200,7 @@ describe('Launchpad: Global Mode', () => {
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()
       getBreadcrumbLink('todos').click()
+      getBreadcrumbLink('todos', { disabled: true })
       cy.withCtx((ctx) => {
         expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
       })
@@ -207,6 +209,7 @@ describe('Launchpad: Global Mode', () => {
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()
       getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.clearCurrentProject).to.have.been.called
         expect(ctx.actions.wizard.resetWizard).to.have.been.called
