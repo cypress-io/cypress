@@ -53,7 +53,9 @@ const getS3Credentials = async function () {
     return fromEnv()()
   }
 
-  return fromSSO({ profile: process.env.AWS_PROFILE || 'production' })()
+  // use 'prod' by default to align with our internal docs for setting up `awscli`
+  // https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress
+  return fromSSO({ profile: process.env.AWS_PROFILE || 'prod' })()
 }
 
 const getPublisher = async function () {
