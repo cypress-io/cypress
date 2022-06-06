@@ -224,7 +224,7 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it.only('fails when visit times out', {
+    systemTests.it('fails when visit times out', {
       spec: 'visit_http_timeout_failing.cy.js',
       snapshot: true,
       expectedExitCode: 2,
