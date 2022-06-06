@@ -182,7 +182,7 @@ export class VersionsDataSource {
 
   private static async machineId (): Promise<string | undefined> {
     try {
-      return nmi.machineId()
+      return await nmi.machineId()
     } catch (error) {
       return undefined
     }
