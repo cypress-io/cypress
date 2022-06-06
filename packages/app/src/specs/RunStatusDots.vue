@@ -27,6 +27,7 @@
               width="4"
               height="4"
               :class="dot"
+              :data-cy="'run-status-dot-'+i"
             />
           </li>
           <li class="ml-4px inline-block self-start">
@@ -35,6 +36,7 @@
               width="16"
               height="16"
               :class="{'animate-spin': latestStatus.spin}"
+              :data-cy="'run-status-dot-latest'"
             />
           </li>
         </ol>

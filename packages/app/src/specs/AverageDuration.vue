@@ -2,7 +2,7 @@
   <div
     v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo?.data?.averageDuration"
     class="flex justify-end"
-    data-cy="run-status-dots"
+    data-cy="average-duration"
   >
     {{ getDurationString(props.gql?.avgDurationInfo?.data?.averageDuration ?? 0 ) }}
   </div>
@@ -36,7 +36,6 @@ gql`
 fragment AverageDuration on Spec {
   id
   fileName
-  # TODO: change this fragment to be "fragment AverageDuration on CloudProjectSpec" and move the status logic up
   avgDurationInfo: cloudSpec(name: "AverageDuration") {
     id
     status

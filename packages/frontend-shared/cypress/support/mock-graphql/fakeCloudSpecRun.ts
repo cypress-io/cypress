@@ -13,12 +13,14 @@ export const randomRunStatus: () => CloudRunStatus = () => {
   }
 }
 
-export const fakeRuns: (statuses: CloudRunStatus[]) => CloudSpecRun[] = (statuses) => {
+export const fakeRuns: (statuses: CloudRunStatus[]) => Required<CloudSpecRun>[] = (statuses) => {
   return statuses.map((s, idx) => {
     return {
+      __typename: 'CloudSpecRun',
       id: `SpecRun_${idx}`,
       status: s,
       createdAt: new Date('2022-05-08T03:17:00').toISOString(),
+      completedAt: new Date('2022-05-08T05:17:00').toISOString(),
       runNumber: 432,
       groupCount: 2,
       specDuration: {
@@ -34,6 +36,8 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => CloudSpecRun[] = (statuse
         max: 23,
       },
       testsSkipped: {
+        min: null,
+        max: null,
       },
       testsPending: {
         min: 1,
