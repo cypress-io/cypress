@@ -1,22 +1,24 @@
 <template>
-  <component
-    :is="isLeaf ? 'RouterLink' : 'div'"
-    class="h-full outline-none border-gray-50 ring-inset grid group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
-    :class="[isLeaf ? 'grid-cols-2' : 'grid-cols-1']"
-    :to="route"
-    data-cy="specs-list-row"
-    @click="emit('toggleRow')"
-    @click.meta.prevent="handleCtrlClick"
-    @click.ctrl.prevent="handleCtrlClick"
-  >
-    <div>
-      <slot name="file" />
-    </div>
+  <div data-cy="specs-list-row">
+    <component
+      :is="isLeaf ? 'RouterLink' : 'div'"
+      class="h-full outline-none border-gray-50 ring-inset grid group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      :class="[isLeaf ? 'grid-cols-2' : 'grid-cols-1']"
+      :to="route"
+      :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
+      @click="emit('toggleRow')"
+      @click.meta.prevent="handleCtrlClick"
+      @click.ctrl.prevent="handleCtrlClick"
+    >
+      <div>
+        <slot name="file" />
+      </div>
 
-    <div>
-      <slot name="git-info" />
-    </div>
-  </component>
+      <div>
+        <slot name="git-info" />
+      </div>
+    </component>
+  </div>
 </template>
 
 <script setup lang="ts">
