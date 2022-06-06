@@ -90,7 +90,7 @@ describe('VersionsDataSource', () => {
     it('resets telemetry data triggering a new call to get the latest version', async () => {
       const currentCypressVersion = pkg.version
 
-      nmiStub.throws()
+      nmiStub.rejects('Error while obtaining machine id')
       ctx.coreData.currentTestingType = 'component'
 
       fetchStub
