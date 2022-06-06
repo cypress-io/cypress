@@ -3,7 +3,7 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-context:versions-data-source')
+const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -100,8 +100,9 @@ export class VersionsDataSource {
   }
 
   private async getVersionMetadata (): Promise<Record<string, string>> {
+    const now = new Date().toISOString()
     const DEFAULT_RESPONSE = {
-      [pkg.version]: new Date().toISOString(),
+      [pkg.version]: now,
     }
 
     if (this.ctx.isRunMode) {
@@ -112,21 +113,18 @@ export class VersionsDataSource {
 
     try {
       response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+      const responseJson = await response.json() as { time: Record<string, string>}
+
+      debug('NPM release dates received %o', { modified: responseJson.time.modified })
+
+      return responseJson.time ?? now
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
       debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
-    }
 
-    if (!response) {
       return DEFAULT_RESPONSE
     }
-
-    const responseJson = await response.json() as { time: Record<string, string>}
-
-    debug('NPM release dates %o', responseJson.time)
-
-    return responseJson.time
   }
 
   private async getLatestVersion (): Promise<string> {
@@ -153,36 +151,32 @@ export class VersionsDataSource {
       manifestHeaders['x-machine-id'] = id
     }
 
-    let manifestResponse
-
     try {
-      manifestResponse = await this.ctx.util.fetch(url, {
+      const manifestResponse = await this.ctx.util.fetch(url, {
         headers: manifestHeaders,
       })
+
+      debug('retrieving latest version information with headers: %o', manifestHeaders)
+
+      const manifest = await manifestResponse.json() as { version: string }
+
+      debug('latest version information: %o', manifest)
+
+      return manifest.version ?? pkg.version
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
       debug('Error fetching %o', url, e)
-    }
 
-    if (!manifestResponse) {
       return pkg.version
+    } finally {
+      this._initialLaunch = false
     }
-
-    debug('retrieving latest version information with headers: %o', manifestHeaders)
-
-    const manifest = await manifestResponse.json() as { version: string }
-
-    debug('latest version information: %o', manifest)
-
-    this._initialLaunch = false
-
-    return manifest.version
   }
 
   private static async machineId (): Promise<string | undefined> {
     try {
-      return nmi.machineId()
+      return await nmi.machineId()
     } catch (error) {
       return undefined
     }

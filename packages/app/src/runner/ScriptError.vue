@@ -1,6 +1,7 @@
 <template>
   <pre
-    class="text-red-500 bg-white p-24px overflow-auto h-[calc(100%-70px)] whitespace-pre-wrap break-all text-sm"
+    class="bg-white text-sm p-24px text-red-500 overflow-auto whitespace-pre-wrap break-all"
+    :style="style"
     v-html="scriptError"
   />
 </template>
@@ -8,7 +9,9 @@
 <script setup lang="ts">
 import ansiToHtml from 'ansi-to-html'
 import { computed } from 'vue'
+import { useAutStore } from '../store'
 
+const autStore = useAutStore()
 const convert = new ansiToHtml({
   fg: '#000',
   bg: '#fff',
@@ -20,5 +23,6 @@ const convert = new ansiToHtml({
 const props = defineProps<{ error: string }>()
 
 const scriptError = computed(() => convert.toHtml(props.error))
+const style = computed(() => `height: calc(100vh - ${autStore.specRunnerHeaderHeight + 32}px)`)
 
 </script>

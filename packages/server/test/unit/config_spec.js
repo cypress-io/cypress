@@ -25,16 +25,17 @@ describe('lib/config', () => {
   })
 
   context('environment name check', () => {
-    it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
+    it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
       sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
       }
       const options = {}
 
       try {
-        config.mergeDefaults(cfg, options)
+        await config.mergeDefaults(cfg, options)
       } catch {
         //
       }
@@ -42,15 +43,16 @@ describe('lib/config', () => {
       expect(errors.throwErr).have.been.calledOnce
     })
 
-    it('allows production CYPRESS_INTERNAL_ENV', () => {
+    it('allows production CYPRESS_INTERNAL_ENV', async () => {
       sinon.stub(errors, 'throwErr')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
+      await config.mergeDefaults(cfg, options)
 
       expect(errors.throwErr).not.to.be.called
     })

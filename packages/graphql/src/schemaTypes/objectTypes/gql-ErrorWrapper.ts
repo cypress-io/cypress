@@ -8,6 +8,10 @@ export const ErrorWrapper = objectType({
   name: 'ErrorWrapper',
   description: 'Base error',
   definition (t) {
+    t.nonNull.id('id', {
+      description: 'The ID for the error, used to clear the error',
+    })
+
     t.string('title', {
       description: 'Optional title of the error. Used to optionally display a title above the error',
     })

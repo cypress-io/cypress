@@ -97,17 +97,17 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
         cy.withCtx((ctx, o) => {
-          o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+          o.sinon.stub(ctx.actions.browser, 'setActiveBrowserById')
           o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
         })
 
         cy.findAllByTestId('top-nav-browser-list-item').eq(1).click()
 
         cy.withCtx((ctx, o) => {
-          const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+          const browserId = (ctx.actions.browser.setActiveBrowserById as SinonStub).args[0][0]
           const genId = ctx.fromId(browserId, 'Browser')
 
-          expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+          expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
           expect(genId).to.eql('edge-chromium-stable')
           expect(ctx.actions.project.launchProject).to.have.been.calledWith(
             ctx.coreData.currentTestingType, {}, undefined,
@@ -382,7 +382,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
 
-        cy.get('[href="#/runs"]').click()
+        cy.findByTestId('sidebar-link-runs-page').click()
         cy.get('@logInButton').click()
 
         cy.findByTestId('app-header-bar').within(() => {

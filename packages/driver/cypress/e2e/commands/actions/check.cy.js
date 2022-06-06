@@ -71,6 +71,21 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/19098
+    it('removes indeterminate prop when checkbox is checked', () => {
+      const intermediateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      intermediateCheckbox.prop('indeterminate', true)
+
+      $('body').append(intermediateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').check().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
+      })
+    })
+
     it('is a noop if already checked', () => {
       const checkbox = ':checkbox[name=\'colors\'][value=\'blue\']'
 
@@ -836,6 +851,21 @@ describe('src/cy/commands/actions/check', () => {
 
         expect($chk.get(0)).to.eq(cockatoo.get(0))
         expect($chk.get(1)).to.eq(cockatoo.get(1))
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/19098
+    it('removes indeterminate prop when checkbox is unchecked', () => {
+      const indeterminateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      indeterminateCheckbox.prop('indeterminate', true)
+
+      $('body').append(indeterminateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').uncheck().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
       })
     })
 

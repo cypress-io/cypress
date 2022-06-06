@@ -125,7 +125,7 @@ describe('Sidebar Navigation', () => {
 
       cy.percySnapshot()
       cy.get('[aria-label="Close"]').click()
-      cy.findByText('Keyboard Shortcuts').should('not.exist')
+      cy.findAllByTestId('keyboard-modal').should('not.exist')
     })
 
     it('shows a tooltip when hovering over menu item', () => {
@@ -137,17 +137,17 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
-      cy.get('[href="#/runs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.get('[href="#/runs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseout')
 
-      cy.get('[href="#/specs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.get('[href="#/specs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
 
-      cy.get('[href="#/settings"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.get('[href="#/settings"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
@@ -233,6 +233,20 @@ describe('Sidebar Navigation', () => {
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
       cy.get('.router-link-active').findByText('Specs').should('be.visible')
+    })
+
+    it('Specs sidebar nav link is not active when a test is running', () => {
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
+
+      cy.findAllByTestId('spec-item').first().click()
+      cy.location('hash').should('contain', '#/specs/runner')
+      cy.contains('.router-link-exact-active', 'Specs').should('not.exist')
+      cy.percySnapshot()
+
+      cy.findByTestId('sidebar-link-specs-page').click()
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
@@ -321,16 +335,18 @@ describe('Sidebar Navigation', () => {
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
         o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
+        o.sinon.stub(ctx.actions.wizard, 'scaffoldTestingType').resolves()
       })
 
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.withCtx((ctx) => {
+      cy.withRetryableCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(false)
         expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
+        expect(ctx.actions.wizard.scaffoldTestingType).to.have.been.called
       })
     })
   })

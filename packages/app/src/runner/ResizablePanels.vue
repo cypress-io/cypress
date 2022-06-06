@@ -1,9 +1,10 @@
 <template>
   <div
-    class="flex overflow-y-hidden"
+    id="resizable-panels-root"
+    class="flex"
     :class="{
       'select-none': panel1IsDragging || panel2IsDragging,
-      'overflow-x-auto': !isFirefox
+      'overflow-x-hidden': isFirefox
     }"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
@@ -209,4 +210,5 @@ watchEffect(() => {
 
 // TODO: UNIFY-1704 - avoid special case for FF
 const isFirefox = window.__CYPRESS_BROWSER__?.family === 'firefox'
+
 </script>

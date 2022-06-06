@@ -101,6 +101,14 @@ describe('Launchpad: Error System Tests', () => {
     expectStackToBe('open')
   })
 
+  it('Handles a syntax error in the config file', () => {
+    cy.scaffoldProject('plugins-root-syntax-error')
+    cy.openProject('plugins-root-syntax-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    expectStackToBe('open')
+  })
+
   it('Handles an error thrown asynchronously in the root of the config', () => {
     cy.scaffoldProject('plugins-root-async-error')
     cy.openProject('plugins-root-async-error', ['--e2e'])
