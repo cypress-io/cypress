@@ -549,7 +549,7 @@ describe('_makeSpecWatcher', () => {
     expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
   })
 
-  it('ignore file if it is deleted', async function () {
+  it('do not throw if file/folder is deleted while ignoring files', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
       projectRoot: this.specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
@@ -580,6 +580,7 @@ describe('_makeSpecWatcher', () => {
       SPEC_FILE3,
     ])
 
+    expect(Array.from(allFiles)).to.not.include(SPEC_FILE1)
     expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
   })
 })
