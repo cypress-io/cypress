@@ -52,13 +52,13 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick ? () => copyCode() : () => {}"
+      @click="copyOnClick ? () => copyCode() : () => { }"
       v-html="highlightedCode"
     />
     <pre
       v-else
       class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
-      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px']"
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton"
@@ -91,9 +91,9 @@ setOnigasmWASM(onigasm)
 
 let highlighter: Highlighter
 
-export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
+export type CyLangType = 'typescript' | 'javascript' | 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml' | 'html' | 'plaintext' | 'txt' | 'text' | 'vue'
 
-export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
+const langsSupported = langTms.map((lang: ILanguageRegistration) => lang.id)
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -149,12 +149,16 @@ const props = withDefaults(defineProps<{
 })
 
 const resolvedLang = computed(() => {
-  if (props.lang === 'javascript' || props.lang === 'js' || props.lang === 'jsx') return 'jsx'
+  if (!props.lang) {
+    return 'plaintext'
+  }
 
-  if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
+  if (['javascript', 'js', 'jsx'].includes(props.lang)) return 'jsx'
+
+  if (['typescript', 'ts', 'tsx'].includes(props.lang)) return 'tsx'
 
   // if the language is not recognized use plaintext
-  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
+  return langsSupported.includes(props.lang) ? props.lang : 'plaintext'
 })
 
 const trimmedCode = computed(() => props.skipTrim ? props.code : props.code.trim())
@@ -188,7 +192,6 @@ avoid colliding with styles elsewhere in the document.
 -->
 
 <style lang="scss" scoped>
-
 $offset: 1.1em;
 
 .inline:deep(.shiki) {
@@ -206,12 +209,14 @@ $offset: 1.1em;
 
   &.line-numbers:deep(.shiki) {
     @apply py-8px;
+
     code {
       counter-reset: step;
       counter-increment: step calc(v-bind('props.initialLine') - 1);
 
       // Keep bg-gray-50 synced with the box-shadows.
-      .line::before, .line:first-child::before {
+      .line::before,
+      .line:first-child::before {
         @apply bg-gray-50 text-right mr-16px min-w-40px px-8px text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);
