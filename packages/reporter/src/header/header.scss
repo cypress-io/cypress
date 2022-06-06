@@ -67,12 +67,13 @@ $color-transition: color 150ms ease-out;
         }
 
         .toggle-specs-text {
-          color: $gray-600;
+          color: $gray-400;
           transition: $color-transition;
         }
       }
 
       .toggle-specs-text {
+        color: $gray-500;
         transition: $color-transition;
       }
 
