@@ -24,6 +24,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
+import { makeTestingTypeData } from './coreDataShape'
 
 const debug = debugLib('cypress:data-context:project-lifecycle-manager')
 
@@ -308,6 +309,10 @@ export class ProjectLifecycleManager {
             await this.ctx.actions.browser.closeBrowser()
             await this.ctx.actions.browser.relaunchBrowser()
           }
+
+          if (restartOnChange.pingBaseUrl) {
+            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
+          }
         }
 
         await this.setInitialActiveBrowser()
@@ -344,18 +349,26 @@ export class ProjectLifecycleManager {
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
     const browsers = await this.ctx.browser.machineBrowsers()
 
-    if (!browsers[0]) throw new Error('No browsers available in setInitialActiveBrowser, cannot set initial active browser')
+    if (!browsers[0]) {
+      this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
 
-    this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers.find((b) => {
+      return
+    }
+
+    const browser = (prefs?.lastBrowser && browsers.find((b) => {
       return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
     })) || browsers[0]
+
+    this.ctx.actions.browser.setActiveBrowser(browser)
   }
 
   private async setActiveBrowserByNameOrPath (nameOrPath: string) {
     try {
       const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
 
-      this.ctx.coreData.activeBrowser = browser
+      this.ctx.debug('browser found to set', browser.name)
+
+      this.ctx.actions.browser.setActiveBrowser(browser)
     } catch (e) {
       const error = e as CypressError
 
@@ -431,18 +444,21 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      s.currentProjectGitInfo = new GitDataSource({
-        isRunMode: this.ctx.isRunMode,
-        projectRoot,
-        onError: this.ctx.onError,
-        onBranchChange: () => {
-          this.ctx.emitter.branchChange()
-        },
-        onGitInfoChange: (specPaths) => {
-          this.ctx.emitter.gitInfoChange(specPaths)
-        },
-      })
+      if (!this.ctx.isRunMode) {
+        s.currentProjectGitInfo = new GitDataSource({
+          isRunMode: this.ctx.isRunMode,
+          projectRoot,
+          onError: this.ctx.onError,
+          onBranchChange: () => {
+            this.ctx.emitter.branchChange()
+          },
+          onGitInfoChange: (specPaths) => {
+            this.ctx.emitter.gitInfoChange(specPaths)
+          },
+        })
+      }
 
+      s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
       s.packageManager = packageManagerUsed
     })
 
@@ -529,6 +545,9 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
+      if (d.currentProjectData) {
+        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      }
     })
 
     this._currentTestingType = testingType
@@ -547,6 +566,9 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
+      if (d.currentProjectData) {
+        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      }
     })
 
     if (this._currentTestingType === testingType) {
@@ -640,13 +662,13 @@ export class ProjectLifecycleManager {
     }
 
     try {
-      const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
+      const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
-      if (packageJson.type === 'module') {
+      if (pkgJson.type === 'module') {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage(this.projectRoot, packageJson) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
     } catch {
       // No need to handle
     }

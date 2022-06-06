@@ -1,1 +1,3 @@
-module.exports = {}
+module.exports = {
+  watchFiles: ['test/**/*.ts', 'src/**/*.ts'],
+}

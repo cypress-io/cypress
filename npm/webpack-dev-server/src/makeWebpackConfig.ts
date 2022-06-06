@@ -1,10 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
+import { configFiles } from './constants'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -14,14 +16,14 @@ const removeList = [
   // https://github.com/cypress-io/cypress/issues/15865
   'HtmlWebpackPlugin',
 
-  // This plugin is an opitimization for HtmlWebpackPlugin for use in
-  // production environments, not relevent for testing.
+  // This plugin is an optimization for HtmlWebpackPlugin for use in
+  // production environments, not relevant for testing.
   'PreloadPlugin',
 
-  // Another optimization not relevent in a testing environment.
+  // Another optimization not relevant in a testing environment.
   'HtmlPwaPlugin',
 
-  // We already reload when webpack recomplies (via listeners on
+  // We already reload when webpack recompiles (via listeners on
   // devServerEvents). Removing this plugin can prevent double-refreshes
   // in some setups.
   'HotModuleReplacementPlugin',
@@ -74,16 +76,12 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
  */
-export function makeWebpackConfig (
+export async function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  let userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
-  const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
-    merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
-  )
-
   const {
     cypressConfig: {
       projectRoot,
@@ -93,6 +91,42 @@ export function makeWebpackConfig (
     specs: files,
     devServerEvents,
   } = config.devServerConfig
+
+  let configFile: string | undefined = undefined
+
+  if (!userWebpackConfig && !frameworkWebpackConfig) {
+    debug('Not user or framework webpack config received. Trying to automatically source it')
+
+    const { default: findUp } = await importModule('find-up')
+
+    configFile = await findUp(configFiles, { cwd: projectRoot } as { cwd: string })
+
+    if (configFile) {
+      debug('found webpack config %s', configFile)
+      const sourcedConfig = await importModule(configFile)
+
+      debug('config contains %o', sourcedConfig)
+      if (sourcedConfig && typeof sourcedConfig === 'object') {
+        userWebpackConfig = sourcedConfig.default ?? sourcedConfig
+      }
+    }
+
+    if (!userWebpackConfig) {
+      debug('could not find webpack.config!')
+      if (config.devServerConfig?.onConfigNotFound) {
+        config.devServerConfig.onConfigNotFound('webpack', projectRoot, configFiles)
+        // The config process will be killed from the parent, but we want to early exit so we don't get
+        // any additional errors related to not having a config
+        process.exit(0)
+      } else {
+        throw new Error(`Your Cypress devServer config is missing a required webpackConfig property, since we could not automatically detect one.\nPlease add one to your ${config.devServerConfig.cypressConfig.configFile}`)
+      }
+    }
+  }
+
+  const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
+    merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
+  )
 
   debug(`User passed in user and framework webpack config with values %o`, userAndFrameworkWebpackConfig)
   debug(`New webpack entries %o`, files)

@@ -11,8 +11,9 @@
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
-    "test": "yarn cypress:run",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
     "debug": "4.3.3",
@@ -21,6 +22,11 @@
     "pathe": "0.2.0"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
+    "dedent": "^0.7.0",
+    "mocha": "^9.2.2",
+    "sinon": "^13.0.1",
+    "ts-node": "^10.2.1",
     "vite": "2.9.0-beta.3",
     "vite-plugin-inspect": "0.4.3"
   },

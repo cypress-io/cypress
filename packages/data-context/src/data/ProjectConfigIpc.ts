@@ -199,6 +199,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('setupTestingType:error', (err) => {
+        this.onError(err)
         reject(err)
       })
 
@@ -235,7 +236,7 @@ export class ProjectConfigIpc extends EventEmitter {
       .value()
     }
 
-    debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, _.omit(childOptions, 'env'))
+    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 

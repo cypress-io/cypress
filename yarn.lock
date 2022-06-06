@@ -14914,9 +14914,9 @@ cypress-axe@0.14.0:
   resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-0.14.0.tgz#5f5e70fb36b8cb3ba73a8ba01e9262ff1268d5e2"
   integrity sha512-7Rdjnko0MjggCmndc1wECAkvQBIhuy+DRtjF7bd5YPZRFvubfMNvrxfqD8PWQmxm7MZE0ffS4Xr43V6ZmvLopg==
 
-"cypress-example-kitchensink@https://github.com/cypress-io/cypress-example-kitchensink.git#b709bad8f1e29eb018e32383014cfd6f9a192691":
+"cypress-example-kitchensink@https://github.com/cypress-io/cypress-example-kitchensink.git#994a943b76f1186c10ce083f48266cee2f76aeb4":
   version "0.0.0-development"
-  resolved "https://github.com/cypress-io/cypress-example-kitchensink.git#b709bad8f1e29eb018e32383014cfd6f9a192691"
+  resolved "https://github.com/cypress-io/cypress-example-kitchensink.git#994a943b76f1186c10ce083f48266cee2f76aeb4"
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
@@ -17435,7 +17435,12 @@ events@^3.0.0, events@^3.2.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-eventsource@1.0.7, eventsource@^1.0.7:
+eventsource@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-2.0.2.tgz#76dfcc02930fb2ff339520b6d290da573a9e8508"
+  integrity sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==
+
+eventsource@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-1.0.7.tgz#8fbc72c93fcd34088090bc0a4e64f4b5cee6d8d0"
   integrity sha512-4Ln17+vVT0k8aWq+t/bF5arcS3EpT9gYtW66EPacdj/mAFevznsnyoHLPy2BA8gbIQeIHoPsvwmfBftfcG//BQ==
@@ -33733,25 +33738,6 @@ snap-shot-core@10.2.0:
     jsesc "2.5.2"
     lazy-ass "1.6.0"
     mkdirp "0.5.1"
-    pluralize "8.0.0"
-    quote "0.4.0"
-    ramda "0.26.1"
-
-snap-shot-core@10.2.1:
-  version "10.2.1"
-  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.1.tgz#2926c8692acf984095c274b97068456d1a540db7"
-  integrity sha512-fApr6/GQi7kfLyperpF70SxG9mp9L3gQgb3czXH97iuix1QrfThS9kATx43r3wIl0Ik5sWmWvor/Xcb3+2cteQ==
-  dependencies:
-    arg "4.1.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    escape-quotes "1.0.2"
-    folktale "2.3.2"
-    is-ci "2.0.0"
-    jsesc "2.5.2"
-    lazy-ass "1.6.0"
-    mkdirp "1.0.4"
     pluralize "8.0.0"
     quote "0.4.0"
     ramda "0.26.1"

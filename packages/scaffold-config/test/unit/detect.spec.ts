@@ -1,3 +1,4 @@
+import Module from 'module'
 import { expect } from 'chai'
 import fs from 'fs-extra'
 import globby from 'globby'
@@ -6,12 +7,24 @@ import { detectFramework, detectLanguage, PkgJson } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
 
+beforeEach(() => {
+  // @ts-ignore
+  Module._cache = Object.create(null)
+  // @ts-ignore
+  Module._pathCache = Object.create(null)
+  require.cache = Object.create(null)
+})
+
 export async function scaffoldMigrationProject (project: ProjectFixtureDir) {
+  const projectPath = Fixtures.projectPath(project)
+
+  Fixtures.clearFixtureNodeModules(project)
+
   Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)
 
-  return path.join(Fixtures.projectPath(project))
+  return projectPath
 }
 
 interface DepToFake {
@@ -49,6 +62,11 @@ function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFak
     fs.writeJsonSync(
       path.join(cwd, 'node_modules', depName, 'package.json'),
       { main: 'index.js', version: dep.version },
+    )
+
+    fs.writeFileSync(
+      path.join(cwd, 'node_modules', depName, 'index.js'),
+      'export STUB = true',
     )
   }
 }
@@ -204,36 +222,58 @@ describe('detectFramework', () => {
 describe('detectLanguage', () => {
   it('existing project with `cypress.config.ts`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-ts')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
 
   it('existing project with `cypress.config.js`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-js')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('js')
   })
 
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
     const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
-    const actual = detectLanguage(projectRoot, pkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson })
 
     expect(actual).to.eq('ts')
   })
 
   it('pristine project with root level tsconfig.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-npm')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
 
+  it('detects js if typescript is not resolvable when there is a tsconfig.json', async () => {
+    let projectRoot = await scaffoldMigrationProject('pristine-npm')
+
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
+
+    expect(actual).to.eq('js')
+
+    projectRoot = await scaffoldMigrationProject('pristine-npm')
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
+    const actualTypescript = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
+
+    expect(actualTypescript).to.eq('ts')
+  })
+
   it('pre-migration project with tsconfig.json in cypress directory', async () => {
     const projectRoot = await scaffoldMigrationProject('migration')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -252,12 +292,24 @@ describe('detectLanguage', () => {
     }
   }
 
+  it('cypress.json project with only .d.ts files', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-dts-files-only')
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson, isMigrating: true })
+
+    expect(actual).to.eq('js')
+  })
+
   it('cypress.json project with a TypeScript supportFile', async () => {
     const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
     removeAllTsFilesExcept(projectRoot, 'support')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -265,9 +317,11 @@ describe('detectLanguage', () => {
   it('cypress.json project with a TypeScript pluginsFile', async () => {
     const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
     removeAllTsFilesExcept(projectRoot, 'plugins')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -275,10 +329,12 @@ describe('detectLanguage', () => {
   it('cypress.json project with a TypeScript integration specs', async () => {
     const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -286,10 +342,12 @@ describe('detectLanguage', () => {
   it('cypress.json project with a TypeScript integration spec', async () => {
     const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -297,11 +355,27 @@ describe('detectLanguage', () => {
   it('cypress.json project with a TypeScript commponent spec', async () => {
     const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'component')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
+  })
+
+  it('ignores node_modules when checking for tsconfig.json', async () => {
+    const projectRoot = await scaffoldMigrationProject('pristine-cjs-project')
+
+    fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+
+    await fs.mkdirp(path.join(projectRoot, 'node_modules', 'some-node-module'))
+    await fs.writeFile(path.join(projectRoot, 'node_modules', 'some-node-module', 'tsconfig.json'), '')
+    const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
+
+    const actual = detectLanguage({ projectRoot, pkgJson })
+
+    expect(actual).to.eq('js')
   })
 })

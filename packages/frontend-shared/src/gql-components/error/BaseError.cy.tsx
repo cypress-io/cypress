@@ -138,7 +138,7 @@ describe('<BaseError />', () => {
     .and('contain.text', customMessage)
   })
 
-  it('renders the header and message slots', () => {
+  it('renders the header and message slots with codeframe', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = 'Generic title'

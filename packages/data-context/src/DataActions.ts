@@ -11,11 +11,17 @@ import {
   DevActions,
   AuthActions,
 } from './actions'
+import { ErrorActions } from './actions/ErrorActions'
 import { VersionsActions } from './actions/VersionsActions'
 import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
+
+  @cached
+  get error () {
+    return new ErrorActions(this.ctx)
+  }
 
   @cached
   get file () {

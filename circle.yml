@@ -46,7 +46,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'fix-unit-tests-release', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -58,7 +58,7 @@ fullWindowsWorkflowFilters: &full-windows-workflow-filters
     branches:
       only:
       - develop
-      - '10.0-release'
+      - 'fix-unit-tests-release'
       - '*-release'
       - 'win*'
 
@@ -109,7 +109,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/issue-21236" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-unit-tests-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -495,7 +495,7 @@ commands:
       package:
         description: package to target
         type: enum
-        enum: ['frontend-shared', 'launchpad', 'app']
+        enum: ['frontend-shared', 'launchpad', 'app', 'reporter']
       browser:
         description: browser shortname to target
         type: string
@@ -520,11 +520,21 @@ commands:
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+      - run:
+          command: |
+            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
+            else
+              echo "skipping percy screenshots uploading"
+            fi
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1133,6 +1143,7 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
+            run-reporter-component-tests-chrome,
             run-webpack-dev-server-integration-tests,
             run-vite-dev-server-integration-tests
       - run:
@@ -1210,6 +1221,11 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - run:
+          name: Update known_hosts with github.com keys
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: yarn test-npm-package-release-script
 
   lint-types:
@@ -1475,6 +1491,21 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
           experimentalSessionAndOrigin: true
+
+  run-reporter-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: reporter
+          type: ct
 
   reporter-integration-tests:
     <<: *defaults
@@ -2325,6 +2356,11 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
+    - run-reporter-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
+        requires:
+          - build
     - reporter-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
@@ -2414,6 +2450,7 @@ linux-workflow: &linux-workflow
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

@@ -20,10 +20,10 @@ abstract class DataEmitterEvents {
   }
 
   /**
-   * Emitted when we have logged in / logged out of the application
+   * Emitted when an error / warning has been added / removed
    */
-  baseErrorChange () {
-    this._emit('baseErrorChange')
+  errorWarningChange () {
+    this._emit('errorWarningChange')
   }
 
   /**

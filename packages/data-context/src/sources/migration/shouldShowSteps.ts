@@ -1,7 +1,7 @@
 import globby from 'globby'
 import path from 'path'
 import { MIGRATION_STEPS } from '@packages/types'
-import { applyMigrationTransform, getSpecs, tryGetDefaultLegacySupportFile } from '.'
+import { applyMigrationTransform, getSpecs, isDefaultSupportFile, legacyIntegrationFolder, tryGetDefaultLegacySupportFile } from '.'
 import type { LegacyCypressConfigJson } from '..'
 
 export const defaultTestFilesGlob = '**/*.{js,ts,jsx,tsx,coffee,cjsx}'
@@ -45,7 +45,7 @@ export function getPluginsFile (config: LegacyCypressConfigJson) {
 }
 
 export function getIntegrationFolder (config: LegacyCypressConfigJson) {
-  return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
+  return config.e2e?.integrationFolder ?? config.integrationFolder ?? legacyIntegrationFolder
 }
 
 export function getComponentFolder (config: LegacyCypressConfigJson): false | string {
@@ -117,7 +117,6 @@ export async function shouldShowRenameSupport (projectRoot: string, config: Lega
     return false
   }
 
-  const defaultSupportFile = 'cypress/support/index.'
   let supportFile = config.e2e?.supportFile ?? config.supportFile
 
   if (supportFile === undefined) {
@@ -136,7 +135,7 @@ export async function shouldShowRenameSupport (projectRoot: string, config: Lega
 
   // if the support file is custom, we don't show the rename step
   // only if the support file matches the default do we show the rename step
-  return supportFile.includes(defaultSupportFile)
+  return isDefaultSupportFile(supportFile)
 }
 
 // if they have component testing configured using the defaults, they will need to

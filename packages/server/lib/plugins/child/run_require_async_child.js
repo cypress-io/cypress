@@ -1,6 +1,7 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
+const { pathToFileURL } = require('url')
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
@@ -111,19 +112,21 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      require.resolve('esbuild', { paths: [process.cwd()] })
 
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
       return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find module 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported
-        return await import(file)
+        // Certain modules cannot be dynamically imported.
+
+        // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
+        return await import(pathToFileURL(file).href)
       }
 
       throw err
@@ -173,12 +176,19 @@ function run (ipc, file, projectRoot) {
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
+            const onConfigNotFound = (devServer, root, searchedFor) => {
+              ipc.send('setupTestingType:error', util.serializeError(
+                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServer, root, searchedFor),
+              ))
+            }
+
             on('dev-server:start', (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
                 return devServer({
                   cypressConfig: config,
+                  onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,

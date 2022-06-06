@@ -10,6 +10,7 @@ export type ViteDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
+  onConfigNotFound?: (devServer: 'vite', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   viteConfig?: unknown // Derived from the user's webpack

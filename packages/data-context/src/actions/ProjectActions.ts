@@ -12,6 +12,7 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
+import { resetIssuedWarnings } from '@packages/config'
 
 export interface ProjectApiShape {
   /**
@@ -81,16 +82,18 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
+      d.baseError = null
+      d.activeBrowser = null
       d.currentProject = null
+      d.currentProjectData = null
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
-      d.baseError = null
-      d.warnings = []
       d.app.browserStatus = 'closed'
     })
 
     await this.ctx.lifecycleManager.clearCurrentProject()
+    resetIssuedWarnings()
     await this.api.closeActiveProject()
   }
 
@@ -121,6 +124,8 @@ export class ProjectActions {
   }
 
   async setCurrentProject (projectRoot: string) {
+    await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
+
     await this.clearCurrentProject()
     await this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
@@ -137,10 +142,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.projects = [
-      ...this.projects,
-      ...projectRoots.map((projectRoot) => ({ projectRoot })),
-    ]
+    this.projects = projectRoots.map((projectRoot) => ({ projectRoot }))
 
     return this.projects
   }
@@ -176,8 +178,8 @@ export class ProjectActions {
     }
   }
 
-  createProject () {
-    //
+  private async updateProjectList (updater: () => Promise<void>) {
+    return updater().then(() => this.loadProjects())
   }
 
   async addProjectFromElectronNativeFolderSelect () {
@@ -187,7 +189,7 @@ export class ProjectActions {
       return
     }
 
-    await this.addProject({ path })
+    await this.addProject({ path, open: true })
 
     this.ctx.emitter.toLaunchpad()
   }
@@ -195,15 +197,10 @@ export class ProjectActions {
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      this.projects.push({ projectRoot })
-      await this.api.insertProjectToCache(projectRoot)
-    }
-
     if (args.open) {
       this.setCurrentProject(projectRoot).catch(this.ctx.onError)
+    } else {
+      await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
     }
   }
 
@@ -262,15 +259,7 @@ export class ProjectActions {
   }
 
   removeProject (projectRoot: string) {
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
-    }
-
-    this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-
-    return this.api.removeProjectFromCache(projectRoot)
+    return this.updateProjectList(() => this.api.removeProjectFromCache(projectRoot))
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
@@ -331,7 +320,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
-  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+  setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
@@ -496,11 +485,28 @@ export class ProjectActions {
       return
     }
 
-    this.ctx.update((d) => {
-      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
-    })
+    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+
+    if (baseUrlWarning) {
+      this.ctx.actions.error.clearWarning(baseUrlWarning.id)
+      this.ctx.emitter.errorWarningChange()
+    }
 
     return this.api.isListening(baseUrl)
     .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
+  }
+
+  async switchTestingTypesAndRelaunch (testingType: Cypress.TestingType): Promise<void> {
+    const isTestingTypeConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured(testingType)
+
+    this.ctx.project.setRelaunchBrowser(isTestingTypeConfigured)
+    this.setAndLoadCurrentTestingType(testingType)
+
+    await this.reconfigureProject()
+
+    if (testingType === 'e2e' && !isTestingTypeConfigured) {
+      // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+      await this.ctx.actions.wizard.scaffoldTestingType()
+    }
   }
 }

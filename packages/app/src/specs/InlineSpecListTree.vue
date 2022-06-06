@@ -1,7 +1,8 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container overflow-y-auto overflow-x-hidden"
+    class="pt-8px specs-list-container"
+    data-cy="specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
@@ -157,7 +158,7 @@ a::before {
 }
 
 /** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height. */
-/** Header is 64px, padding-bottom is 8px **/
+/** Header is 64px, padding-top is 8px **/
 .specs-list-container {
   height: calc(100vh - 64px - 8px);
 }
