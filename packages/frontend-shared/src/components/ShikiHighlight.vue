@@ -91,9 +91,9 @@ setOnigasmWASM(onigasm)
 
 let highlighter: Highlighter
 
-export type CyLangType = 'typescript' | 'javascript' | 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml' | 'html' | 'plaintext' | 'txt' | 'text' | 'vue'
+export type CyLangType = 'typescript' | 'javascript' | 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml' | 'html' | 'plaintext' | 'txt' | 'text' | 'vue' | string
 
-const langsSupported = langTms.map((lang: ILanguageRegistration) => lang.id)
+export const langsSupported = langTms.map((lang: ILanguageRegistration) => lang.id)
 
 export async function initHighlighter () {
   if (highlighter) {
