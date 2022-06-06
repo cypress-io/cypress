@@ -22,7 +22,6 @@ describe('cypress config with esm and cjs', function () {
     })
   })
 
-  // TODO: add support for ts-node/esm https://github.com/cypress-io/cypress/issues/21939
   ;[
     'config-cjs-and-esm/config-with-ts-module',
   ].forEach((project) => {
@@ -31,7 +30,7 @@ describe('cypress config with esm and cjs', function () {
       testingType: 'e2e',
       spec: 'app.cy.js',
       browser: 'chrome',
-      expectedExitCode: 1,
+      expectedExitCode: 0,
     })
   })
 
