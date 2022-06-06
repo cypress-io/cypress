@@ -1556,7 +1556,7 @@ export const AllCypressErrors = {
     return errTemplate`
       The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
 
-      Please update it, and try running it again.
+      Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
     `
   },
 } as const
