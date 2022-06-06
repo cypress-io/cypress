@@ -10,11 +10,11 @@
       @click.meta.prevent="handleCtrlClick"
       @click.ctrl.prevent="handleCtrlClick"
     >
-      <div>
+      <div data-cy="specs-list-row-file">
         <slot name="file" />
       </div>
 
-      <div>
+      <div data-cy="specs-list-row-git-info">
         <slot name="git-info" />
       </div>
     </component>
