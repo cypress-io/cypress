@@ -316,7 +316,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       let config = ctx.actions.file.readFileInProject('cypress.config.js')
 
-      config = config.replace(`{`, `{\n  baseUrl: 'https://example.cypress.io',\n`)
+      config = config.replace(`  e2e: {`, `  e2e: {\n  baseUrl: 'https://example.cypress.io',\n`)
       ctx.actions.file.writeFileInProject('cypress.config.js', config)
     })
 
