@@ -353,6 +353,12 @@ export class ProjectDataSource {
       ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
+        // Add a extra safe to prevent watching node_modules, in case the glob
+        // pattern is not taken into account by the ignored
+        if (file.includes('node_modules')) {
+          return true
+        }
+
         // We need stats arg to make the determination of whether to watch it, because we need to watch directories
         // chokidar is extremely inconsistent in whether or not it has the stats arg internally
         if (!stats) {
