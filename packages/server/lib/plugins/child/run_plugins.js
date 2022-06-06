@@ -1,4 +1,3 @@
-// @ts-check
 // this module is responsible for loading the plugins file
 // and running the exported function to register event handlers
 // and executing any tasks that the plugin registers
