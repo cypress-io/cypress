@@ -359,8 +359,9 @@ export class ProjectDataSource {
           try {
             stats = fs.statSync(file)
           } catch {
-            // If the file/folder do not exit - ignore it.
-            return true
+            // If the file/folder is removed do not ignore it, in case it is added
+            // again
+            return false
           }
         }
 
