@@ -99,5 +99,9 @@ export const useSelectorPlaygroundStore = defineStore({
 
       return state.numElements === 1 ? '1 matched element' : `${state.numElements} matched elements`
     },
+
+    command (state): string {
+      return `cy.${state.method}('${this.selector}')`
+    },
   },
 })
