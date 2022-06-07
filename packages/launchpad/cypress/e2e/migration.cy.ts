@@ -80,6 +80,27 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
+function stubVideoHtml (): void {
+  // ctx.migration.getVideoEmbedHtml
+  cy.withCtx((ctx, o) => {
+    o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+      return '<span>Stubbed Video Content</span>'
+    })
+  })
+}
+
+function unstubVideoHtml (): void {
+  cy.withCtx((ctx, o) => {
+    const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
+
+    restoreFn && restoreFn()
+  })
+}
+
+beforeEach(() => {
+  stubVideoHtml()
+})
+
 describe('global mode', () => {
   it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
@@ -146,6 +167,8 @@ describe('Opening unmigrated project', () => {
   })
 
   it('migration landing page appears with a video', () => {
+    unstubVideoHtml()
+
     cy.intercept(/vimeo.com/).as('iframeDocRequest')
     cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
     cy.scaffoldProject('migration')
@@ -172,6 +195,8 @@ describe('Opening unmigrated project', () => {
   })
 
   it('landing page does not appear if there is no video embed code', () => {
+    unstubVideoHtml()
+
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.withCtx((ctx, o) => {
@@ -186,6 +211,8 @@ describe('Opening unmigrated project', () => {
   })
 
   it('should only hit the video on link once & cache it', () => {
+    unstubVideoHtml()
+
     cy.scaffoldProject('migration')
     cy.openProject('migration')
 
