@@ -2,6 +2,13 @@
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
+process.nextTick(() => {
+  const { patchFs } = require('./lib/util/patch-fs')
+  const fs = require('fs')
+
+  patchFs(fs)
+})
+
 const electronApp = require('./lib/util/electron-app')
 
 // are we in the main node process or the electron process?
@@ -17,7 +24,6 @@ require('./lib/unhandled_exceptions')
 
 process.env.UV_THREADPOOL_SIZE = 128
 
-require('graceful-fs').gracefulify(require('fs'))
 // if running in production mode (CYPRESS_INTERNAL_ENV)
 // all transpile should have been done already
 // and these calls should do nothing
