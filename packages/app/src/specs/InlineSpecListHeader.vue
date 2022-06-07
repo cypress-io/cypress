@@ -11,7 +11,7 @@
         @mousedown.prevent.stop
       >
         <i-cy-magnifying-glass_x16
-          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-900'"
+          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
           class="icon-light-gray-1000"
         />
       </div>
@@ -40,7 +40,7 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-4px left-24px text-gray-700 select-none absolute"
+        class="cursor-text font-light bottom-4px left-24px text-gray-500 select-none absolute"
         :class="{
           'sr-only': inputFocused || props.search
         }"

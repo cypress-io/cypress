@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import os from 'os'
 import sinon from 'sinon'
+import { Response } from 'cross-fetch'
+
 import { DataContext } from '../../../src'
 import { VersionsDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
@@ -90,7 +92,7 @@ describe('VersionsDataSource', () => {
     it('resets telemetry data triggering a new call to get the latest version', async () => {
       const currentCypressVersion = pkg.version
 
-      nmiStub.throws()
+      nmiStub.rejects('Error while obtaining machine id')
       ctx.coreData.currentTestingType = 'component'
 
       fetchStub
@@ -143,6 +145,40 @@ describe('VersionsDataSource', () => {
       versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
+
+      expect(versionInfo.current.version).to.eql(currentCypressVersion)
+    })
+
+    it('handles invalid response errors', async () => {
+      nmiStub.resolves('abcd123')
+
+      fetchStub
+      .withArgs('https://download.cypress.io/desktop.json', {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': currentCypressVersion,
+          'x-os-name': 'darwin',
+          'x-arch': 'x64',
+          'x-initial-launch': String(true),
+          'x-machine-id': 'abcd123',
+          'x-testing-type': 'e2e',
+        },
+      })
+      .callsFake(async () => new Response('Error'))
+      .withArgs('https://registry.npmjs.org/cypress')
+      .callsFake(async () => new Response('Error'))
+
+      versionsDataSource = new VersionsDataSource(ctx)
+
+      const versionInfo = await versionsDataSource.versionData()
+
+      // Reset the testing type in the class
+      // @ts-ignore
+      versionsDataSource._currentTestingType = null
+
+      versionsDataSource.resetLatestVersionTelemetry()
+
+      await ctx.coreData.versionData.latestVersion
 
       expect(versionInfo.current.version).to.eql(currentCypressVersion)
     })
