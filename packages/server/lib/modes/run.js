@@ -1169,7 +1169,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1251,7 +1251,7 @@ module.exports = {
       //   await openProject.closeBrowser()
       // } else {
       debug('attempting to close the browser tab')
-      await openProject.closeBrowserTabs()
+      await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
       // }
 
       debug('resetting server state')
@@ -1337,7 +1337,7 @@ module.exports = {
         displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
-      return this.runSpec(config, spec, options, estimated, firstSpec)
+      return this.runSpec(config, spec, options, estimated, firstSpec, index === length - 1)
       .tap(() => {
         firstSpec = false
       })
@@ -1435,7 +1435,7 @@ module.exports = {
     })
   },
 
-  runSpec (config, spec = {}, options = {}, estimated, firstSpec) {
+  runSpec (config, spec = {}, options = {}, estimated, firstSpec, lastSpec) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1484,6 +1484,7 @@ module.exports = {
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
           browser,
+          shouldKeepTabOpen: !lastSpec,
         }),
 
         connection: this.waitForBrowserToConnect({
