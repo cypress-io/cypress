@@ -266,10 +266,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     cy.withCtx(async (ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
 
-      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  viewportHeight: 600,\n`)
-      await await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
       o.sinon.stub(ctx.actions.browser, 'closeBrowser')
       o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')

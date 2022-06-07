@@ -87,7 +87,7 @@ describe('experimentalStudio', () => {
     cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', ctx.actions.file.readFileInProject('cypress.config.js'))
+      await ctx.actions.file.writeFileInProject('cypress.config.js', await ctx.actions.file.readFileInProject('cypress.config.js'))
     })
 
     cy.get('[data-cy="loading-spinner"]')
