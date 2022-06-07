@@ -1,5 +1,5 @@
 const minimist = require('minimist')
-const shelljs = require('shelljs')
+const { execSync } = require('child_process')
 
 const args = minimist(process.argv.slice(2))
 
@@ -15,13 +15,13 @@ if (!/^\d+\.\d+\.\d+$/.test(args.version)) {
 const log = (...args) => console.log('🏗', ...args)
 
 const exec = args['dry-run'] ?
-  (...args) => log('Dry run, not executing:', ...args)
-  : (...args) => shelljs.exec(...args)
+  (...args) => log('Dry run, not executing:', args[0])
+  : (...args) => execSync(...args)
 
 log('Running `move-binaries`...')
-exec(`node ./scripts/binary.js move-binaries --sha ${args.sha} --version ${args.version}`)
+exec(`node ./scripts/binary.js move-binaries --sha ${args.sha} --version ${args.version}`, { stdio: 'inherit' })
 
 const prereleaseNpmUrl = `https://cdn.cypress.io/beta/npm/${args.version}/linux-x64/develop-${args.sha}/cypress.tgz`
 
 log('Running `create-stable-npm-package`...')
-exec(`./scripts/create-stable-npm-package.sh ${prereleaseNpmUrl}`)
+exec(`./scripts/create-stable-npm-package.sh ${prereleaseNpmUrl}`, { stdio: 'inherit' })

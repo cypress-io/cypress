@@ -3,6 +3,7 @@
 import chai from 'chai'
 import _ from 'lodash'
 import $dom from '../dom'
+import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
@@ -260,6 +261,8 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
+  onFail?: undefined | Function
+
   constructor (message) {
     super(message)
 
@@ -275,6 +278,7 @@ export class CypressError extends Error {
   docsUrl?: string
   retry?: boolean
   userInvocationStack?: any
+  onFail?: undefined | Function
 
   constructor (message) {
     super(message)
@@ -383,7 +387,7 @@ const errByPath = (msgPath, args?) => {
 const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
-    errMsg: err.message,
+    errMsg: stripAnsi(err.message),
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   }) as CypressError
 
@@ -565,6 +569,24 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
+const getUnsupportedPlugin = (runnable) => {
+  if (!(runnable.invocationDetails && runnable.invocationDetails.originalFile && runnable.err && runnable.err.message)) {
+    return null
+  }
+
+  const pluginsErrors = {
+    '@cypress/code-coverage': 'glob pattern string required',
+  }
+
+  const unsupportedPluginFound = Object.keys(pluginsErrors).find((plugin) => runnable.invocationDetails.originalFile.includes(plugin))
+
+  if (unsupportedPluginFound && pluginsErrors[unsupportedPluginFound] && runnable.err.message.includes(pluginsErrors[unsupportedPluginFound])) {
+    return unsupportedPluginFound
+  }
+
+  return null
+}
+
 export default {
   stackWithReplacedProps,
   appendErrMsg,
@@ -574,6 +596,7 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
+  getUnsupportedPlugin,
   getUserInvocationStack,
   getUserInvocationStackFromError,
   isAssertionErr,

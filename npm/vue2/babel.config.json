@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    "@babel/plugin-transform-modules-commonjs",
+    [
+      "babel-plugin-istanbul",
+      {
+        "extension": [
+          ".js",
+          ".vue"
+        ]
+      }
+    ]
+  ]
+}

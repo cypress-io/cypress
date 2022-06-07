@@ -1,7 +1,7 @@
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 
-interface EventEmitter extends EventEmitter2 {
+interface CyEventEmitter extends Omit<EventEmitter2, 'waitFor'> {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
   emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
@@ -30,4 +30,4 @@ interface NodeEventEmitter {
 
 // We use the Buffer class for dealing with binary data, especially around the
 // selectFile interface.
-type BufferType = import("buffer/").Buffer
+type BufferType = typeof import("buffer/").Buffer

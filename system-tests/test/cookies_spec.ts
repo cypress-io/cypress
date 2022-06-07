@@ -183,6 +183,7 @@ describe('e2e cookies', () => {
       https: true,
     }],
     settings: {
+      e2e: {},
       hosts: {
         '*.foo.com': '127.0.0.1',
         '*.bar.net': '127.0.0.1',
@@ -210,7 +211,7 @@ describe('e2e cookies', () => {
         },
       },
       processEnv: FORCED_SAMESITE_ENV,
-      spec: 'cookies_spec_baseurl.js',
+      spec: 'cookies_spec_baseurl.cy.js',
       snapshot: true,
       onRun: (exec) => {
         return exec({
@@ -262,7 +263,7 @@ describe('e2e cookies', () => {
               otherHttpsUrl,
             },
           },
-          spec: 'cookies_spec_baseurl.js',
+          spec: 'cookies_spec_baseurl.cy.js',
           snapshot: true,
           onRun: (exec) => {
             return exec({
@@ -280,7 +281,7 @@ describe('e2e cookies', () => {
           },
         },
         originalTitle: sharedNoBaseUrlSpecSnapshot,
-        spec: 'cookies_spec_no_baseurl.js',
+        spec: 'cookies_spec_no_baseurl.cy.js',
         snapshot: true,
       })
     })
@@ -339,6 +340,7 @@ describe('cross-origin cookies, set:cookies', () => {
         '*.bar.net': '127.0.0.1',
         '*.cypress.test': '127.0.0.1',
       },
+      e2e: {},
     },
 
   })
@@ -353,6 +355,6 @@ describe('cross-origin cookies, set:cookies', () => {
         HTTPS: httpsPort,
       },
     },
-    spec: 'multi_cookies_spec.js',
+    spec: 'multi_cookies.cy.js',
   })
 })

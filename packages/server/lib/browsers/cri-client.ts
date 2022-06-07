@@ -1,9 +1,7 @@
-import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
-
-const chromeRemoteInterface = require('chrome-remote-interface')
-const errors = require('../errors')
+import CRI from 'chrome-remote-interface'
+import * as errors from '../errors'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -14,16 +12,14 @@ const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-cli
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 
 /**
- * Url returned by the Chrome Remote Interface
-*/
-type websocketUrl = string
-
-/**
  * Enumerations to make programming CDP slightly simpler - provides
  * IntelliSense whenever you use named types.
  */
-namespace CRI {
+export namespace CRIWrapper {
   export type Command =
+    'Page.enable' |
+    'Network.enable' |
+    'Console.enable' |
     'Browser.getVersion' |
     'Page.bringToFront' |
     'Page.captureScreenshot' |
@@ -38,51 +34,31 @@ namespace CRI {
     'Page.downloadWillBegin' |
     'Page.downloadProgress' |
     string
-}
 
-/**
- * Wrapper for Chrome Remote Interface client. Only allows "send" method.
- * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
-*/
-interface CRIWrapper {
   /**
-   * Get the `protocolVersion` supported by the browser.
+   * Wrapper for Chrome Remote Interface client. Only allows "send" method.
+   * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
    */
-  getProtocolVersion (): Bluebird<Version>
-  /**
-   * Rejects if `protocolVersion` is less than the current version.
-   * @param protocolVersion CDP version string (ex: 1.3)
-   */
-  ensureMinimumProtocolVersion(protocolVersion: string): Bluebird<void>
-  /**
-   * Sends a command to the Chrome remote interface.
-   * @example client.send('Page.navigate', { url })
-  */
-  send (command: CRI.Command, params?: object): Bluebird<any>
-  /**
-   * Registers callback for particular event.
-   * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
-   */
-  on (eventName: CRI.EventName, cb: Function): void
-  /**
-   * Calls underlying remote interface client close
-  */
-  close (): Bluebird<void>
-}
-
-interface Version {
-  major: number
-  minor: number
-}
-
-const isVersionGte = (a: Version, b: Version) => {
-  return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
-}
-
-const getMajorMinorVersion = (version: string): Version => {
-  const [major, minor] = version.split('.', 2).map(Number)
-
-  return { major, minor }
+  export interface Client {
+    /**
+     * The target id attached to by this client
+     */
+    targetId: string
+    /**
+     * Sends a command to the Chrome remote interface.
+     * @example client.send('Page.navigate', { url })
+     */
+    send (command: Command, params?: object): Promise<any>
+    /**
+     * Registers callback for particular event.
+     * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
+     */
+    on (eventName: EventName, cb: Function): void
+    /**
+     * Calls underlying remote interface client close
+     */
+    close (): Promise<void>
+  }
 }
 
 const maybeDebugCdpMessages = (cri) => {
@@ -126,39 +102,41 @@ const maybeDebugCdpMessages = (cri) => {
   }
 }
 
-/**
- * Creates a wrapper for Chrome remote interface client
- * that only allows to use low-level "send" method
- * and not via domain objects and commands.
- *
- * @example create('ws://localhost:...').send('Page.bringToFront')
- */
-export { chromeRemoteInterface }
-
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
-  const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
-  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number, onReconnect?: (client: CRIWrapper.Client) => void): Promise<CRIWrapper.Client> => {
+  const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
+  const enableCommands: CRIWrapper.Command[] = []
+  let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
-  let client: CRIWrapper
+  let client: CRIWrapper.Client
 
-  const reconnect = () => {
+  const reconnect = async () => {
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
 
     if (closed) {
+      enqueuedCommands = []
+
       return
     }
 
-    return connect()
-    .then(() => {
-      debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
+    try {
+      await connect()
+
+      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands })
+
+      // '*.enable' commands need to be resent on reconnect or any events in
+      // that namespace will no longer be received
+      await Promise.all(enableCommands.map((cmdName) => {
+        return cri.send(cmdName)
+      }))
+
       subscriptions.forEach((sub) => {
         cri.on(sub.eventName, sub.cb)
       })
@@ -169,98 +147,92 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       })
 
       enqueuedCommands = []
-    })
-    .catch((err) => {
-      onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
-    })
+
+      if (onReconnect) {
+        onReconnect(client)
+      }
+    } catch (err) {
+      const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
+
+      // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
+      cdpError.isFatalApiErr = true
+      onAsynchronousError(cdpError)
+    }
   }
 
-  const connect = () => {
-    cri?.close()
+  const connect = async () => {
+    await cri?.close()
 
     debug('connecting %o', { target })
 
-    return chromeRemoteInterface({
+    cri = await CRI({
+      host,
+      port,
       target,
       local: true,
     })
-    .then((newCri) => {
-      cri = newCri
-      connected = true
 
-      maybeDebugCdpMessages(cri)
+    connected = true
 
-      cri.send = Bluebird.promisify(cri.send, { context: cri })
+    maybeDebugCdpMessages(cri)
 
-      // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-      cri._notifier.on('disconnect', reconnect)
-    })
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
+    cri._notifier.on('disconnect', reconnect)
   }
 
-  return connect()
-  .then(() => {
-    const ensureMinimumProtocolVersion = (protocolVersion: string) => {
-      return getProtocolVersion()
-      .then((actual) => {
-        const minimum = getMajorMinorVersion(protocolVersion)
+  await connect()
 
-        if (!isVersionGte(actual, minimum)) {
-          errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
+  client = {
+    targetId: target,
+    async send (command: CRIWrapper.Command, params?: object) {
+      const enqueue = () => {
+        return new Promise((resolve, reject) => {
+          enqueuedCommands.push({ command, params, p: { resolve, reject } })
+        })
+      }
+
+      // Keep track of '*.enable' commands so they can be resent when
+      // reconnecting
+      if (command.endsWith('.enable')) {
+        enableCommands.push(command)
+      }
+
+      if (connected) {
+        try {
+          return await cri.send(command, params)
+        } catch (err) {
+          // This error occurs when the browser has been left open for a long
+          // time and/or the user's computer has been put to sleep. The
+          // socket disconnects and we need to recreate the socket and
+          // connection
+          if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+            throw err
+          }
+
+          debug('encountered closed websocket on send %o', { command, params, err })
+
+          const p = enqueue()
+
+          await reconnect()
+
+          return p
         }
-      })
-    }
+      }
 
-    const getProtocolVersion = _.memoize(() => {
-      return client.send('Browser.getVersion')
-      // could be any version <= 1.2
-      .catchReturn({ protocolVersion: '0.0' })
-      .then(({ protocolVersion }) => {
-        return getMajorMinorVersion(protocolVersion)
-      })
-    })
+      return enqueue()
+    },
+    on (eventName, cb) {
+      subscriptions.push({ eventName, cb })
+      debug('registering CDP on event %o', { eventName })
 
-    client = {
-      ensureMinimumProtocolVersion,
-      getProtocolVersion,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
-        const enqueue = () => {
-          return new Bluebird((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
-          })
-        }
+      return cri.on(eventName, cb)
+    },
+    close () {
+      closed = true
 
-        if (connected) {
-          return cri.send(command, params)
-          .catch((err) => {
-            if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
-              throw err
-            }
+      return cri.close()
+    },
+  }
 
-            debug('encountered closed websocket on send %o', { command, params, err })
-
-            const p = enqueue()
-
-            reconnect()
-
-            return p
-          })
-        }
-
-        return enqueue()
-      }),
-      on (eventName: CRI.EventName, cb: Function) {
-        subscriptions.push({ eventName, cb })
-        debug('registering CDP on event %o', { eventName })
-
-        return cri.on(eventName, cb)
-      },
-      close () {
-        closed = true
-
-        return cri.close()
-      },
-    }
-
-    return client
-  })
-})
+  return client
+}

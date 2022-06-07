@@ -2,14 +2,20 @@ import _ from 'lodash'
 import utils from './utils'
 
 export class $Command {
-  // `attributes` is initiated at reset(), but ts cannot detect it.
-  // @ts-ignore
-  attributes: Record<string, any>
+  attributes!: Record<string, any>
 
-  constructor (obj = {}) {
+  constructor (attrs: any = {}) {
     this.reset()
 
-    this.set(obj)
+    // if the command came from a secondary origin, it already has an id
+    if (!attrs.id) {
+      // the id prefix needs to be unique per origin, so there are not
+      // collisions when commands created in a secondary origin are passed
+      // to the primary origin for the command log, etc.
+      attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
+    }
+
+    this.set(attrs)
   }
 
   set (key, val?) {
@@ -75,14 +81,14 @@ export class $Command {
     return this.attributes
   }
 
-  _removeNonPrimitives (args) {
+  _removeNonPrimitives (args: Array<any> = []) {
     // if the obj has options and
     // log is false, set it to true
     for (let i = args.length - 1; i >= 0; i--) {
       const arg = args[i]
 
       if (_.isObject(arg)) {
-        // filter out any properties which arent primitives
+        // filter out any properties which aren't primitives
         // to prevent accidental mutations
         const opts = _.omitBy(arg, _.isObject)
 
@@ -128,6 +134,12 @@ export class $Command {
     return this
   }
 
+  pick (...args) {
+    args.unshift(this.attributes)
+
+    return _.pick.apply(_, args as [Record<string, any>, any[]])
+  }
+
   static create (obj) {
     if (utils.isInstanceOf(obj, $Command)) {
       return obj
@@ -136,14 +148,5 @@ export class $Command {
     return new $Command(obj)
   }
 }
-
-// mixin lodash methods
-_.each(['pick'], (method) => {
-  return $Command.prototype[method] = function (...args) {
-    args.unshift(this.attributes)
-
-    return _[method].apply(_, args)
-  }
-})
 
 export default $Command

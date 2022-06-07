@@ -3,8 +3,10 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
-import { cors } from '@packages/network'
+import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
+import { URL } from 'url'
+
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
@@ -161,7 +163,8 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
+type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+type SendCloseCommand = () => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -175,14 +178,21 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, experimentalSessionAndOrigin)
+
+    await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -230,19 +240,34 @@ export class CdpAutomation {
     })
   }
 
-  private getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
+  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
     .then((result: Protocol.Network.GetCookiesResponse) => {
+      const isLocalhost = uri.isLocalhost(new URL(url))
+
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
+        // Chrome returns all cookies for a URL, even if they wouldn't normally
+        // be sent with a request. This standardizes it by filtering out ones
+        // that are secure but not on a secure context
+
+        if (this.experimentalSessionAndOrigin) {
+          // localhost is considered a secure context (even when http:)
+          // and it's required for cross origin support when visiting a secondary
+          // origin so that all its cookies are sent. This may be a
+          // breaking change, so put it behind the flag for now. Need to
+          // investigate further when we remove the experimental flag.
+          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
+        }
+
         return !(url.startsWith('http:') && cookie.secure)
       })
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
@@ -285,15 +310,18 @@ export class CdpAutomation {
 
       case 'clear:cookie':
         return this.getCookie(data)
-        // tap, so we can resolve with the value of the removed cookie
-        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-        // that matches the cookie domain that is really stored
-        .tap((cookieToBeCleared) => {
+        // always resolve with the value of the removed cookie. also, getting
+        // the cookie via CDP first will ensure that we send a cookie `domain`
+        // to CDP that matches the cookie domain that is really stored
+        .then((cookieToBeCleared) => {
           if (!cookieToBeCleared) {
-            return
+            return cookieToBeCleared
           }
 
           return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          .then(() => {
+            return cookieToBeCleared
+          })
         })
 
       case 'clear:cookies':
@@ -322,6 +350,15 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'reset:browser:state':
+        return Promise.all([
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        ])
+      case 'close:browser:tabs':
+        return this.sendCloseCommandFn()
+      case 'focus:browser:window':
+        return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

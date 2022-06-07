@@ -297,6 +297,13 @@ describe('visual error templates', () => {
 
   // testVisualErrors('CANNOT_RECORD_NO_PROJECT_ID', {
   testVisualErrors(errorType, {
+    LEGACY_CONFIG_ERROR_DURING_MIGRATION: () => {
+      const err = makeErr()
+
+      return {
+        default: ['cypress/plugins/index.js', err],
+      }
+    },
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 
@@ -649,45 +656,44 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
-    PLUGINS_FILE_ERROR: () => {
+    DEFAULT_SUPPORT_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/supportFile/**/*.{js,jsx,ts,tsx}'],
+      }
+    },
+    CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/pluginsFile', err],
+        default: ['/path/to/cypress.config.js', err],
       }
     },
-    PLUGINS_FILE_NOT_FOUND: () => {
+    SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile'],
+        default: ['/path/to/cypress.config.js', 'e2e', { some: 'object' }],
+        string: ['/path/to/cypress.config.js', 'component', 'some string'],
+        array: ['/path/to/cypress.config.js', 'component', ['some', 'array']],
       }
     },
-    PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
+    CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {
       return {
-        default: ['/path/to/pluginsFile', { some: 'object' }],
-        string: ['/path/to/pluginsFile', 'some string'],
-        array: ['/path/to/pluginsFile', ['some', 'array']],
+        default: ['/path/to/cypress.config.js', 'e2e', makeErr()],
+        component: ['/path/to/cypress.config.js', 'component', makeErr()],
       }
     },
-    PLUGINS_FUNCTION_ERROR: () => {
+    CONFIG_FILE_UNEXPECTED_ERROR: () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/pluginsFile', err],
+        default: ['/path/to/cypress.config.js', err],
       }
     },
-    PLUGINS_UNEXPECTED_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: ['/path/to/pluginsFile', err],
-      }
-    },
-    PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
+    SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
       return {
         default: [
-          '/path/to/pluginsFile',
+          '/path/to/cypress.config.js',
           'invalid:event',
           ['foo', 'bar', 'baz'],
           err,
@@ -728,11 +734,6 @@ describe('visual error templates', () => {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: [1, 2, 3],
-        }],
-        pluginsFile: ['pluginsFile', 'cypress/plugins/index.js', {
-          key: 'defaultCommandTimeout',
-          type: 'a number',
-          value: false,
         }],
         noFileType: [null, null, {
           key: 'defaultCommandTimeout',
@@ -796,8 +797,7 @@ describe('visual error templates', () => {
       return {
         default: [
           '/path/to/project/root',
-          'cypress.config.js',
-          'cypress.config.ts',
+          ['cypress.config.js', 'cypress.config.ts', 'cypress.config.mjs'],
         ],
       }
     },
@@ -899,16 +899,6 @@ describe('visual error templates', () => {
         default: ['file', ['js', 'ts', 'json']],
       }
     },
-    AUTH_COULD_NOT_LAUNCH_BROWSER: () => {
-      return {
-        default: ['https://dashboard.cypress.io/login'],
-      }
-    },
-    AUTH_BROWSER_LAUNCHED: () => {
-      return {
-        default: [],
-      }
-    },
     BAD_POLICY_WARNING: () => {
       return {
         default: [[
@@ -998,7 +988,12 @@ describe('visual error templates', () => {
     },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
-        default: [{ configFile: '/path/to/configFile.json' }],
+        default: [{ configFile: '/path/to/cypress.config.js' }],
+      }
+    },
+    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+      return {
+        default: [],
       }
     },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
@@ -1012,6 +1007,11 @@ describe('visual error templates', () => {
       }
     },
     EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
       return {
         default: [],
       }
@@ -1036,9 +1036,29 @@ describe('visual error templates', () => {
         default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
       }
     },
-    CT_NO_DEV_START_EVENT: () => {
+    CONFIG_FILE_MIGRATION_NEEDED: () => {
+      return {
+        default: ['/path/to/projectRoot'],
+      }
+    },
+    LEGACY_CONFIG_FILE: () => {
+      return {
+        default: ['cypress.json', '/path/to/projectRoot'],
+      }
+    },
+    SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {
+      return {
+        default: ['/path/to/project/cypress.config.js'],
+      }
+    },
+    CONFIG_FILE_INVALID_DEV_START_EVENT: () => {
       return {
         default: ['/path/to/plugins/file.js'],
+      }
+    },
+    CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
+      return {
+        default: [{}],
       }
     },
     PLUGINS_RUN_EVENT_ERROR: () => {
@@ -1055,6 +1075,101 @@ describe('visual error templates', () => {
     UNSUPPORTED_BROWSER_VERSION: () => {
       return {
         default: [`Cypress does not support running chrome version 64. To use chrome with Cypress, install a version of chrome newer than or equal to 64.`],
+      }
+    },
+    MULTIPLE_SUPPORT_FILES_FOUND: () => {
+      return {
+        default: ['spec.{ts,js}', ['support.ts', 'support.js']],
+      }
+    },
+    PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
+      return {
+        default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
+      return {
+        default: [{ name: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: () => {
+      return {
+        default: ['/path/to/config.ts', {}],
+      }
+    },
+    UNEXPECTED_INTERNAL_ERROR: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
+    UNEXPECTED_MUTATION_ERROR: () => {
+      return {
+        default: ['wizardUpdate', {}, makeErr()],
+      }
+    },
+    DASHBOARD_GRAPHQL_ERROR: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
+    MIGRATION_ALREADY_OCURRED: () => {
+      return {
+        default: ['custom.config.js', 'custom.json'],
+      }
+    },
+    TEST_FILES_RENAMED: () => {
+      return {
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    COMPONENT_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
+      return {
+        default: ['9.6.0'],
+      }
+    },
+    MIGRATION_CYPRESS_NOT_FOUND: () => {
+      return {
+        default: [],
+      }
+    },
+    DEV_SERVER_CONFIG_FILE_NOT_FOUND: () => {
+      return {
+        default: ['vite', '/dev/project', ['vite.config.js', 'vite.config.ts']],
+      }
+    },
+    TESTING_TYPE_NOT_CONFIGURED: () => {
+      return {
+        default: ['component'],
       }
     },
   })

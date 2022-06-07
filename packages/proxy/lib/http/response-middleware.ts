@@ -1,18 +1,20 @@
 import _ from 'lodash'
 import charset from 'charset'
+import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils } from '@packages/network'
+import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import debugModule from 'debug'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
+import { URL } from 'url'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
-export type ResponseMiddleware = HttpMiddleware<{
+interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.
@@ -23,9 +25,14 @@ export type ResponseMiddleware = HttpMiddleware<{
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
-}>
+}
 
-const debug = debugModule('cypress:proxy:http:response-middleware')
+export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
+
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 // https://github.com/cypress-io/cypress/issues/1756
 const zlibOptions = {
@@ -34,7 +41,7 @@ const zlibOptions = {
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
-function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer) {
+function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer, debug: Debug.Debugger) {
   const httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
 
   debug('inferred charset from response %o', { httpCharset })
@@ -129,7 +136,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
-  debug('received response %o', {
+  this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
   })
@@ -139,10 +146,10 @@ const LogResponse: ResponseMiddleware = function () {
 
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
-    debug('ensuring resStream is plaintext')
+    this.debug('ensuring resStream is plaintext')
 
     if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
-      debug('gunzipping response body')
+      this.debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
@@ -189,6 +196,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   let kOutHeaders
 
+  const ctxDebug = this.debug
+
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -205,7 +214,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
         throw err
       }
 
-      debug('setHeader error ignored %o', { name, value, code: err.code, err })
+      ctxDebug('setHeader error ignored %o', { name, value, code: err.code, err })
 
       if (!kOutHeaders) {
         kOutHeaders = getKOutHeadersSymbol()
@@ -225,6 +234,33 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
+  const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
+  const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+  const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isAUTFrame = this.req.isAUTFrame
+
+  // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
+  if (this.config.experimentalSessionAndOrigin && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    this.debug('is cross-origin, delay until cross:origin:release:html event')
+
+    this.serverBus.once('cross:origin:release:html', () => {
+      this.debug(`received cross:origin:release:html, let the response proceed`)
+
+      this.next()
+    })
+
+    this.serverBus.emit('cross:origin:delaying:html', {
+      href: this.req.proxiedUrl,
+    })
+
+    return
+  }
+
+  this.next()
+}
+
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
@@ -236,28 +272,54 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.getRenderedHTMLOrigins()[origin] = true
   }
 
-  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
+  this.debug('determine injection')
+
+  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
+      this.debug('- partial injection (x-cypress-file-server-error)')
+
       return 'partial'
     }
 
-    if (!resContentTypeIs(this.incomingRes, 'text/html') || !isReqMatchOriginPolicy) {
+    const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin(this.req.proxiedUrl)
+    const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+    const isAUTFrame = this.req.isAUTFrame
+
+    if (this.config.experimentalSessionAndOrigin && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+      this.debug('- cross origin injection')
+
+      return 'fullCrossOrigin'
+    }
+
+    if (!isHTML || (!isReqMatchOriginPolicy && !isAUTFrame)) {
+      this.debug('- no injection (not html)')
+
       return false
     }
 
     if (this.res.isInitial) {
+      this.debug('- full injection')
+
       return 'full'
     }
 
     if (!isRenderedHTML) {
+      this.debug('- no injection (not rendered html)')
+
       return false
     }
+
+    this.debug('- partial injection (default)')
 
     return 'partial'
   }
 
-  if (!this.res.wantsInjection) {
+  if (this.res.wantsInjection != null) {
+    this.debug('- already has injection: %s', this.res.wantsInjection)
+  }
+
+  if (this.res.wantsInjection == null) {
     this.res.wantsInjection = getInjectionLevel()
   }
 
@@ -277,7 +339,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     || resContentTypeIsJavaScript(this.incomingRes)
   )
 
-  debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
   this.next()
 }
@@ -331,15 +393,94 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
+
+  // A cookie needs cross origin handling if it's an AUT request and
+  // either the request itself is cross-origin or the origins between
+  // requests don't match, since the browser won't set them in that
+  // case and if it's secondary-origin -> primary-origin, we don't
+  // recognize the request as cross-origin
+  return (
+    !!ctx.req.isAUTFrame &&
+    (
+      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
+      || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
+    )
+  )
+}
+
+interface EnsureSameSiteNoneProps {
+  cookie: string
+  browser: Browser | { family: string | null }
+  isLocalhost: boolean
+  url: URL
+  ctxDebug: Debug.Debugger
+}
+
+const cookieSameSiteRegex = /SameSite=(\w+)/i
+const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
+const cookieSecureSemicolonRegex = /;\s*Secure/i
+
+const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url, ctxDebug }: EnsureSameSiteNoneProps) => {
+  ctxDebug('original cookie: %s', cookie)
+
+  if (cookieSameSiteRegex.test(cookie)) {
+    ctxDebug('change cookie to SameSite=None')
+    cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
+  } else {
+    ctxDebug('add SameSite=None to cookie')
+    cookie += '; SameSite=None'
+  }
+
+  const isFirefox = browser.family === 'firefox'
+
+  // Secure is required for SameSite=None cookies to be set in secure contexts
+  // (https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy),
+  // but will not allow the cookie to be set in an insecure context.
+  // Normally http://localhost is considered a secure context (see
+  // https://w3c.github.io/webappsec-secure-contexts/#localhost), but Firefox
+  // does not consider the Cypress-launched browser to be a secure context (see
+  // https://github.com/cypress-io/cypress/issues/18217). For that reason, we
+  // remove Secure from http://localhost cookies in Firefox.
+  if (cookieSecureRegex.test(cookie)) {
+    if (isFirefox && isLocalhost && url.protocol === 'http:') {
+      ctxDebug('remove Secure from cookie')
+      cookie = cookie.replace(cookieSecureSemicolonRegex, '')
+    }
+  } else if (!isFirefox || url.protocol === 'https:') {
+    ctxDebug('add Secure to cookie')
+    cookie += '; Secure'
+  }
+
+  ctxDebug('resulting cookie: %s', cookie)
+
+  return cookie
+}
+
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (cookies) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
+    const needsCrossOriginHandling = (
+      this.config.experimentalSessionAndOrigin
+      && determineIfNeedsCrossOriginHandling(this)
+    )
+    const browser = this.getCurrentBrowser() || { family: null }
+    const url = new URL(this.req.proxiedUrl)
+    const isLocalhost = uri.isLocalhost(url)
+
+    this.debug('force SameSite=None?', needsCrossOriginHandling)
+
+    ;([] as string[]).concat(cookies).forEach((cookie) => {
+      if (needsCrossOriginHandling) {
+        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url, ctxDebug: this.debug })
+      }
+
       try {
         this.res.append('Set-Cookie', cookie)
       } catch (err) {
-        debug('failed to Set-Cookie, continuing %o', { err, cookie })
+        this.debug('failed to Set-Cookie, continuing %o', { err, cookie })
       }
     })
   }
@@ -358,9 +499,9 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
-  setInitialCookie(this.res, this.getRemoteState(), true)
+  setInitialCookie(this.res, this.remoteStates.current(), true)
 
-  debug('redirecting to new url %o', { statusCode, newUrl })
+  this.debug('redirecting to new url %o', { statusCode, newUrl })
   this.res.redirect(Number(statusCode), newUrl)
 
   return this.end()
@@ -372,7 +513,7 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
 }
 
 const ClearCyInitialCookie: ResponseMiddleware = function () {
-  setInitialCookie(this.res, this.getRemoteState(), false)
+  setInitialCookie(this.res, this.remoteStates.current(), false)
   this.next()
 }
 
@@ -393,15 +534,16 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   this.skipMiddleware('MaybeRemoveSecurity') // we only want to do one or the other
 
-  debug('injecting into HTML')
+  this.debug('injecting into HTML')
 
   this.makeResStreamPlainText()
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
+    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
+
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
-      domainName: this.getRemoteState().domainName,
+      domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isHtml: isHtml(this.incomingRes),
@@ -426,7 +568,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     return this.next()
   }
 
-  debug('removing JS framebusting code')
+  this.debug('removing JS framebusting code')
 
   this.makeResStreamPlainText()
 
@@ -443,7 +585,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = function () {
   if (this.isGunzipped) {
-    debug('regzipping response body')
+    this.debug('regzipping response body')
     this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
   }
 
@@ -451,6 +593,12 @@ const GzipBody: ResponseMiddleware = function () {
 }
 
 const SendResponseBodyToClient: ResponseMiddleware = function () {
+  if (this.req.isAUTFrame) {
+    // track the previous AUT request URL so we know if the next requests
+    // is cross-origin
+    this.setPreviousAUTRequestUrl(this.req.proxiedUrl)
+  }
+
   this.incomingResStream.pipe(this.res).on('error', this.onError)
   this.res.on('end', () => this.end())
 }
@@ -460,6 +608,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
+  MaybeDelayForCrossOrigin,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

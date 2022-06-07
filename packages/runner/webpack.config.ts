@@ -1,11 +1,9 @@
 import _ from 'lodash'
-import { getCommonConfig, getSimpleConfig, HtmlWebpackPlugin, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getSimpleConfig } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
-import cyIcons from '@cypress/icons'
 
 const commonConfig = getCommonConfig()
-const CopyWebpackPlugin = getCopyWebpackPlugin()
 
 // @ts-ignore
 const babelLoader = _.find(commonConfig.module.rules, (rule) => {
@@ -58,19 +56,6 @@ const mainConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
-mainConfig.plugins = [
-  // @ts-ignore
-  ...mainConfig.plugins,
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './static/index.html'),
-    inject: false,
-  }),
-  new CopyWebpackPlugin([{
-    from: cyIcons.getPathToFavicon('favicon.ico'),
-  }]),
-]
-
 mainConfig.resolve = {
   ...mainConfig.resolve,
   alias: {
@@ -84,11 +69,10 @@ mainConfig.resolve = {
 }
 
 // @ts-ignore
-const injectionConfig: webpack.Configuration = {
-  ...getSimpleConfig(),
-  mode: 'production',
+const crossOriginConfig: webpack.Configuration = {
+  ...commonConfig,
   entry: {
-    injection: [path.resolve(__dirname, 'injection/index.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -96,4 +80,35 @@ const injectionConfig: webpack.Configuration = {
   },
 }
 
-export default [mainConfig, injectionConfig]
+// @ts-ignore
+const mainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/main.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const crossOriginInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_cross_origin: [path.resolve(__dirname, 'injection/cross-origin.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [
+  mainConfig,
+  mainInjectionConfig,
+  crossOriginConfig,
+  crossOriginInjectionConfig,
+]

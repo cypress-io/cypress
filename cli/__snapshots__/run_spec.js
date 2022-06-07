@@ -21,13 +21,6 @@ exports['exec run .processRunOptions passes --record option 1'] = [
   "my record id"
 ]
 
-exports['exec run .processRunOptions passes --config-file false option 1'] = [
-  "--run-project",
-  null,
-  "--config-file",
-  false
-]
-
 exports['exec run .processRunOptions defaults to e2e testingType 1'] = [
   "--run-project",
   null

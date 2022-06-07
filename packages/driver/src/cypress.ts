@@ -29,14 +29,16 @@ import $SetterGetter from './cypress/setter_getter'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
-import { $Cookies } from './cypress/cookies'
+import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
 import ProxyLogging from './cypress/proxy-logging'
+import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -72,6 +74,9 @@ interface AutomationError extends Error {
   automation: boolean
 }
 
+// Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
+const isCypressInCypress = document.defaultView !== top
+
 class $Cypress {
   cy: any
   chai: any
@@ -89,20 +94,25 @@ class $Cypress {
   browser: any
   platform: any
   testingType: any
-  state: any
+  state!: StateFunc
   originalConfig: any
   config: any
   env: any
   getTestRetries: any
-  Cookies: any
+  Cookies!: ICookies
   ProxyLogging: any
   _onInitialize: any
   isCy: any
   log: any
   isBrowser: any
+  browserMajorVersion: any
   emit: any
   emitThen: any
   emitMap: any
+  primaryOriginCommunicator: PrimaryOriginCommunicator
+  specBridgeCommunicator: SpecBridgeCommunicator
+  isCrossOriginSpecBridge: boolean
+  on: any
 
   // attach to $Cypress to access
   // all of the constructors
@@ -140,7 +150,7 @@ class $Cypress {
   static $: any
   static utils: any
 
-  constructor (config = {}) {
+  constructor () {
     this.cy = null
     this.chai = null
     this.mocha = null
@@ -149,43 +159,23 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
+    this.specBridgeCommunicator = new SpecBridgeCommunicator()
+    this.isCrossOriginSpecBridge = false
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
     _.extend(this.$, $)
-
-    this.setConfig(config)
   }
 
-  setConfig (config: Record<string, any> = {}) {
-    // config.remote
-    // {
-    //   origin: "http://localhost:2020"
-    //   domainName: "localhost"
-    //   props: null
-    //   strategy: "file"
-    // }
-
-    // -- or --
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   domainName: "google.com"
-    //   strategy: "http"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    let d = config.remote ? config.remote.domainName : undefined
+  configure (config: Cypress.ObjectLike = {}) {
+    const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
     // off this feature in testing
-    if (d) {
-      document.domain = d
+    if (domainName && config.testingType === 'e2e') {
+      document.domain = domainName
     }
 
     // a few static props for the host OS, browser
@@ -206,6 +196,9 @@ class $Cypress {
     // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
+    // true if this Cypress belongs to a cross origin spec bridge
+    this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
+
     // enable long stack traces when
     // we not are running headlessly
     // for debuggability but disable
@@ -220,14 +213,14 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
-    this.state = $SetterGetter.create({})
+    this.state = $SetterGetter.create({}) as unknown as StateFunc
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (!window.top!.__cySkipValidateConfig) {
+      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -237,7 +230,7 @@ class $Cypress {
             errProperty,
           })
 
-          throw new this.state('specWindow').Error(errMsg)
+          throw new (this.state('specWindow').Error)(errMsg)
         })
       }
 
@@ -253,7 +246,7 @@ class $Cypress {
           ? errResult
           : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
-        throw new this.state('specWindow').Error(errMsg)
+        throw new (this.state('specWindow').Error)(errMsg)
       })
     })
 
@@ -272,7 +265,7 @@ class $Cypress {
       return null
     }
 
-    this.Cookies = $Cookies.create(config.namespace, d)
+    this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
@@ -318,7 +311,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow, scripts) {
+  onSpecWindow (specWindow: Window, scripts) {
     // create cy and expose globally
     this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
@@ -372,6 +365,17 @@ class $Cypress {
     })
   }
 
+  maybeEmitCypressInCypress (...args: unknown[]) {
+    // emit an event if we are running a Cypress in Cypress E2E Test.
+    // used to assert the runner (mocha) is emitting the expected
+    // events/payload.
+    if (!isCypressInCypress) {
+      return
+    }
+
+    this.emit('cypress:in:cypress:runner:event', ...args)
+  }
+
   action (eventName, ...args) {
     // normalizes all the various ways
     // other objects communicate intent
@@ -397,6 +401,8 @@ class $Cypress {
           return
         }
 
+        this.maybeEmitCypressInCypress('mocha', 'start', args[0])
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'start', args[0])
         }
@@ -415,6 +421,8 @@ class $Cypress {
         // test:after:run events ourselves
         this.emit('run:end')
 
+        this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'end', args[0])
         }
@@ -423,6 +431,8 @@ class $Cypress {
 
       case 'runner:suite:start':
         // mocha runner started processing a suite
+        this.maybeEmitCypressInCypress('mocha', 'suite', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite', ...args)
         }
@@ -431,6 +441,8 @@ class $Cypress {
 
       case 'runner:suite:end':
         // mocha runner finished processing a suite
+        this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite end', ...args)
         }
@@ -439,6 +451,9 @@ class $Cypress {
 
       case 'runner:hook:start':
         // mocha runner started processing a hook
+
+        this.maybeEmitCypressInCypress('mocha', 'hook', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook', ...args)
         }
@@ -447,6 +462,8 @@ class $Cypress {
 
       case 'runner:hook:end':
         // mocha runner finished processing a hook
+        this.maybeEmitCypressInCypress('mocha', 'hook end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook end', ...args)
         }
@@ -455,6 +472,8 @@ class $Cypress {
 
       case 'runner:test:start':
         // mocha runner started processing a hook
+        this.maybeEmitCypressInCypress('mocha', 'test', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'test', ...args)
         }
@@ -462,6 +481,8 @@ class $Cypress {
         break
 
       case 'runner:test:end':
+        this.maybeEmitCypressInCypress('mocha', 'test end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'test end', ...args)
         }
@@ -472,6 +493,8 @@ class $Cypress {
         // mocha runner calculated a pass
         // this is delayed from when mocha would normally fire it
         // since we fire it after all afterEach hooks have ran
+        this.maybeEmitCypressInCypress('mocha', 'pass', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pass', ...args)
         }
@@ -480,6 +503,8 @@ class $Cypress {
 
       case 'runner:pending':
         // mocha runner calculated a pending test
+        this.maybeEmitCypressInCypress('mocha', 'pending', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pending', ...args)
         }
@@ -487,6 +512,8 @@ class $Cypress {
         break
 
       case 'runner:fail': {
+        this.maybeEmitCypressInCypress('mocha', 'fail', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'fail', ...args)
         }
@@ -497,6 +524,8 @@ class $Cypress {
       // https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
       case 'runner:retry': {
         // mocha runner calculated a pass
+        this.maybeEmitCypressInCypress('mocha', 'retry', ...args)
+
         if (this.config('isTextTerminal')) {
           this.emit('mocha', 'retry', ...args)
         }
@@ -508,6 +537,8 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:run', args[0])
+
         if (this.config('isTextTerminal')) {
           // needed for handling test retries
           this.emit('mocha', 'test:before:run', args[0])
@@ -529,6 +560,7 @@ class $Cypress {
         // this event is how the reporter knows how to display
         // stats and runnable properties such as errors
         this.emit('test:after:run', ...args)
+        this.maybeEmitCypressInCypress('mocha', 'test:after:run', args[0])
 
         if (this.config('isTextTerminal')) {
           // needed for calculating wallClockDuration
@@ -587,6 +619,9 @@ class $Cypress {
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
+      case 'cy:skipped:command:end':
+        return this.emit('skipped:command:end', ...args)
+
       case 'cy:command:retry':
         return this.emit('command:retry', ...args)
 
@@ -598,6 +633,9 @@ class $Cypress {
 
       case 'cy:command:queue:end':
         return this.emit('command:queue:end')
+
+      case 'cy:enqueue:command':
+        return this.emit('enqueue:command', ...args)
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
@@ -641,6 +679,11 @@ class $Cypress {
         return this.emit('form:submitted', args[0])
 
       case 'app:window:load':
+        this.emit('internal:window:load', {
+          type: 'same:origin',
+          window: args[0],
+        })
+
         return this.emit('window:load', args[0])
 
       case 'app:window:before:unload':
@@ -675,7 +718,7 @@ class $Cypress {
           // clone the error object
           // and set stack cleaned
           // to prevent bluebird from
-          // attaching long stace traces
+          // attaching long stack traces
           // which otherwise make this err
           // unusably long
           const err = $errUtils.makeErrFromObj(e) as BackendError
@@ -755,7 +798,11 @@ class $Cypress {
   }
 
   static create (config) {
-    return new $Cypress(config)
+    const cypress = new $Cypress()
+
+    cypress.configure(config)
+
+    return cypress
   }
 }
 
@@ -764,3 +811,5 @@ class $Cypress {
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
+
+export type ICypress = ReturnType<typeof $Cypress.create>

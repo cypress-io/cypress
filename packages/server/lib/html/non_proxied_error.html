@@ -4,9 +4,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cypress</title>
 
-    <link href="/__cypress/runner/favicon.ico" rel="icon">
+    <link href="/__cypress/runner/favicon.ico?v2" rel="icon">
 
-    <link rel="stylesheet" href="/__cypress/runner/cypress_runner.css">
+    <style>
+      * {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
+
+      .runner {
+        bottom: 0;
+        -webkit-box-shadow: inset 0 0 10px #555;
+        box-shadow: inset 0 0 10px #555;
+        left: 33%;
+        overflow: clip;
+        position: absolute;
+        right: 0;
+        top: 0;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+      }
+
+      .automation-failure {
+        background: #f8f8f8;
+        box-shadow: none;
+        left: 0;
+        background: #f8f8f8;
+        box-shadow: none;
+      }
+
+      .automation-message {
+        padding: 100px 50px 20px;
+        text-align: center;
+      }
+
+      p {
+        color: #333;
+        font-size: 200%;
+      }
+
+      .muted {
+        color: #aaa;
+        font-size: 120%;
+      }
+    </style>
   </head>
   <body>
     <div id="app">

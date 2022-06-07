@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -8,9 +7,13 @@ import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
-import TestModel from '../test/test-model'
+import TestModel, { TestState } from '../test/test-model'
 import AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
+
+import CollapseIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
+import ExpandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/expand_x16.svg'
+import StateIcon from '../lib/state-icon'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -20,14 +23,14 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index }: {index: number}) => (
+const AttemptHeader = ({ index, state }: {index: number, state: TestState }) => (
   <span className='attempt-tag'>
     <span className='open-close-indicator'>
-      <i className='fa fa-fw fa-angle-up' />
-      <i className='fa fa-fw fa-angle-down' />
+      <CollapseIcon className='collapse-icon' />
+      <ExpandIcon className='expand-icon' />
     </span>
     Attempt {index + 1}
-    <i className="attempt-state fa fa-fw" />
+    <StateIcon state={state} className="attempt-state" />
   </span>
 )
 
@@ -41,9 +44,8 @@ const StudioError = () => (
   </div>
 )
 
-function renderAttemptContent (model: AttemptModel) {
+function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
   // performance optimization - don't render contents if not open
-
   return (
     <div className={`attempt-${model.id + 1}`}>
       <Sessions model={model.sessions} />
@@ -52,10 +54,9 @@ function renderAttemptContent (model: AttemptModel) {
       <div ref='commands' className='runnable-commands-region'>
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
-
       <div className='attempt-error-region'>
         <TestError model={model} />
-        <StudioError />
+        {studioActive && <StudioError />}
       </div>
     </div>
   )
@@ -64,6 +65,7 @@ function renderAttemptContent (model: AttemptModel) {
 interface AttemptProps {
   model: AttemptModel
   scrollIntoView: Function
+  studioActive: boolean
 }
 
 @observer
@@ -73,7 +75,7 @@ class Attempt extends Component<AttemptProps> {
   }
 
   render () {
-    const { model } = this.props
+    const { model, studioActive } = this.props
 
     // HACK: causes component update when command log is added
     model.commands.length
@@ -87,26 +89,28 @@ class Attempt extends Component<AttemptProps> {
         ref="container"
       >
         <Collapsible
-          header={<AttemptHeader index={model.id}/>}
+          header={<AttemptHeader index={model.id} state={model.state} />}
           headerClass='attempt-name'
+          contentClass='attempt-content'
           isOpen={model.isOpen}
         >
-          {renderAttemptContent(model)}
+          {renderAttemptContent(model, studioActive)}
         </Collapsible>
       </li>
     )
   }
 }
 
-const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
+const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
-    {_.map(test.attempts, (attempt) => {
+    {test.attempts.map((attempt) => {
       return (
         <Attempt
           key={attempt.id}
           scrollIntoView={scrollIntoView}
+          studioActive={studioActive}
           model={attempt}
         />
       )

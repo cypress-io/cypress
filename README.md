@@ -42,7 +42,7 @@
 
 [![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
 
-Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypress.io/guides/getting-started/installing-cypress.html).
+Install Cypress for Mac, Linux, or Windows, then [get started](https://on.cypress.io/install).
 
 ```bash
 npm install cypress --save-dev

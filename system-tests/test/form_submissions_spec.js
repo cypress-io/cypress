@@ -90,12 +90,12 @@ describe('e2e forms', () => {
     systemTests.setup()
 
     systemTests.it('passing', {
-      spec: 'form_submission_passing_spec.js',
+      spec: 'form_submission_passing.cy.js',
       snapshot: true,
     })
 
     systemTests.it('failing', {
-      spec: 'form_submission_failing_spec.js',
+      spec: 'form_submission_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout: (stdout) => {
@@ -108,6 +108,7 @@ describe('e2e forms', () => {
   context('<form> submissions', () => {
     systemTests.setup({
       settings: {
+        e2e: {},
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,
         },
@@ -142,15 +143,16 @@ describe('e2e forms', () => {
       config: {
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
-      spec: 'form_submission_multipart_spec.js',
+      spec: 'form_submission_multipart.cy.js',
       snapshot: true,
     })
 
     systemTests.it('passes with http on localhost', {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
+        e2e: {},
       },
-      spec: 'form_submission_multipart_spec.js',
+      spec: 'form_submission_multipart.cy.js',
       snapshot: true,
     })
   })

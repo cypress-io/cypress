@@ -2,28 +2,37 @@
   <div>
     <h1>Users</h1>
     <ul v-if="users && users.length">
-      <li class="user" v-for="user of users" v-bind:key="user.id">
-        <p><strong>{{user.id}}</strong> - {{user.name}}</p>
+      <li
+        v-for="user of users"
+        :key="user.id"
+        class="user"
+      >
+        <p><strong>{{ user.id }}</strong> - {{ user.name }}</p>
       </li>
     </ul>
-    <p class="loading" v-else>Loading...</p>
+    <p
+      v-else
+      class="loading"
+    >
+      Loading...
+    </p>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
+  data () {
     return {
-      users: []
+      users: [],
     }
   },
 
-  created() {
+  created () {
     fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
-    .then(response => response.json())
-    .then(list => {
+    .then((response) => response.json())
+    .then((list) => {
       this.users = list
     })
-  }
+  },
 }
 </script>

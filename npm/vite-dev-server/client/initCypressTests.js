@@ -1,18 +1,35 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
-import specLoaders from 'cypress:spec-loaders'
-import { hasSupportPath, originAutUrl } from 'cypress:config'
-
-const specPath = window.location.pathname.replace(originAutUrl, '')
-
-const specLoader = specLoaders[specPath]
-const importsToLoad = [specLoader || (() => import(/* @vite-ignore */ specPath))]
-
-if (hasSupportPath) {
-  importsToLoad.unshift(() => import('cypress:support-path'))
-}
 
 const CypressInstance = window.Cypress = parent.Cypress
+
+const importsToLoad = []
+
+/* Support file import logic, this should be removed once we
+ * are able to return relative paths from the supportFile
+ * Jira #UNIFY-1260
+ */
+const supportFile = CypressInstance.config('supportFile')
+const projectRoot = CypressInstance.config('projectRoot')
+const devServerPublicPathRoute = CypressInstance.config('devServerPublicPathRoute')
+
+if (supportFile) {
+  let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
+
+  if (CypressInstance.config('platform') === 'win32') {
+    const platformProjectRoot = projectRoot.replaceAll('/', '\\')
+
+    supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
+  }
+
+  // We need a slash before /cypress/supportFile.js, this happens by default
+  // with the current string replacement logic.
+  importsToLoad.push(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`))
+}
+
+/* Spec file import logic */
+// We need a slash before /src/my-spec.js, this does not happen by default.
+importsToLoad.push(() => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`))
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')

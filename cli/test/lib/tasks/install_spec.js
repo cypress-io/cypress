@@ -74,28 +74,34 @@ describe('/lib/tasks/install', function () {
     })
 
     describe('non-stable builds', () => {
+      const buildInfo = {
+        stable: false,
+        commitSha: '3b7f0b5c59def1e9b5f385bd585c9b2836706c29',
+        commitBranch: 'aBranchName',
+        commitDate: new Date('11-27-1996').toISOString(),
+      }
+
       function runInstall () {
-        return install.start({
-          buildInfo: {
-            stable: false,
-            commitSha: 'abc123',
-            commitBranch: 'aBranchName',
-            commitDate: new Date('11-27-1996').toISOString(),
-          },
-        })
+        return install.start({ buildInfo })
       }
 
       it('install from a constructed CDN URL', async function () {
         await runInstall()
 
         expect(download.start).to.be.calledWithMatch({
-          version: 'https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-abc123/cypress.zip',
+          version: 'https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-3b7f0b5c59def1e9b5f385bd585c9b2836706c29/cypress.zip',
         })
       })
 
       it('logs a warning about installing a pre-release', async function () {
         await runInstall()
         snapshot(normalize(this.stdout.toString()))
+      })
+
+      it('installs to the expected pre-release cache dir', async function () {
+        state.getVersionDir.restore()
+        await runInstall()
+        expect(unzip.start).to.be.calledWithMatch({ installDir: sinon.match(/\/Cypress\/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/) })
       })
     })
 

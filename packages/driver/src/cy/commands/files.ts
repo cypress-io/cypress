@@ -2,19 +2,26 @@ import _ from 'lodash'
 import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
+
+interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  encoding: Cypress.Encodings
+}
+
+interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
+  _log?: Log
+}
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    readFile (file, encoding, options: any = {}) {
-      let userOptions = options
-
+    readFile (file, encoding, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalReadFileOptions = _.defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
         // If no encoding is specified, then Cypress has historically defaulted
         // to `utf8`, because of it's focus on text files. This is in contrast to
@@ -72,10 +79,10 @@ export default (Commands, Cypress, cy, state) => {
           }
         }).then(({ filePath, contents }) => {
           // https://github.com/cypress-io/cypress/issues/1558
+          // https://github.com/cypress-io/cypress/issues/20683
           // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
-          // which socket.io uses to transfer the file over the websocket - into a
-          // `Buffer`, which webpack polyfills in the browser.
-          if (options.encoding === null) {
+          // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
+          if (options.encoding === null && contents !== null) {
             contents = Buffer.from(contents)
           }
 
@@ -109,16 +116,13 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.WriteFileOPtions & Cypress.Timeoutable>`
-    writeFile (fileName, contents, encoding, options: any = {}) {
-      let userOptions = options
-
+    writeFile (fileName, contents, encoding, userOptions: Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalWriteFileOptions = _.defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
         // If no encoding is specified, then Cypress has historically defaulted
         // to `utf8`, because of it's focus on text files. This is in contrast to

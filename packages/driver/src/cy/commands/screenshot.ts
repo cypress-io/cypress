@@ -8,6 +8,7 @@ import $Screenshot from '../../cypress/screenshot'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import type { Log } from '../../cypress/log'
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
@@ -97,6 +98,10 @@ const scrollOverrides = (win, doc) => {
   // hide scrollbars
   doc.documentElement.style.overflow = 'hidden'
 
+  // this body class is used to set some other overflow-related CSS
+  // around the resizable panels in the Runner
+  document.querySelector('body')?.classList.add('screenshot-scrolling')
+
   // in the case that an element might change size on scroll
   // we trigger a scroll event to ensure that all elements are
   // at their final size before we calculate the total height
@@ -110,6 +115,8 @@ const scrollOverrides = (win, doc) => {
     if (doc.body) {
       doc.body.style.overflowY = originalBodyOverflowY
     }
+
+    document.querySelector('body')?.classList.remove('screenshot-scrolling')
 
     return win.scrollTo(originalX, originalY)
   }
@@ -330,7 +337,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     }
   }
 
-  const before = () => {
+  const before = ($el) => {
     return Promise.try(() => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
@@ -339,11 +346,41 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
       return null
     })
     .then(() => {
+      // could fail if iframe is cross-origin, so fail gracefully
+      try {
+        if (disableTimersAndAnimations) {
+          $dom.addCssAnimationDisabler($el)
+        }
+
+        _.each(getBlackout(screenshotConfig), (selector) => {
+          $dom.addBlackouts($el, selector)
+        })
+      } catch (err) {
+        /* eslint-disable no-console */
+        console.error('Failed to modify app dom:')
+        console.error(err)
+        /* eslint-enable no-console */
+      }
+
       return sendAsync('before:screenshot', getOptions(true))
     })
   }
 
-  const after = () => {
+  const after = ($el) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (disableTimersAndAnimations) {
+        $dom.removeCssAnimationDisabler($el)
+      }
+
+      $dom.removeBlackouts($el)
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-enable no-console */
+    }
+
     send('after:screenshot', getOptions(false))
 
     return Promise.try(() => {
@@ -380,7 +417,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     ? subject
     : $dom.wrap(state('document').documentElement)
 
-  return before()
+  return before($el)
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -407,7 +444,11 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
 
     return props
   })
-  .finally(after)
+  .finally(() => after($el))
+}
+
+interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
+  _log?: Log
 }
 
 export default function (Commands, Cypress, cy, state, config) {
@@ -440,10 +481,7 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
-    // TODO: any -> Partial<Loggable & Timeoutable & ScreenshotOptions>
-    screenshot (subject, name, options: any = {}) {
-      let userOptions = options
-
+    screenshot (subject, name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> = {}) {
       if (_.isObject(name)) {
         userOptions = name
         name = null
@@ -452,7 +490,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // make sure when we capture the entire test runner
       // we are not limited to "within" subject
       // https://github.com/cypress-io/cypress/issues/14253
-      if (options.capture !== 'runner') {
+      if (userOptions.capture !== 'runner') {
         const withinSubject = state('withinSubject')
 
         if (withinSubject && $dom.isElement(withinSubject)) {
@@ -463,7 +501,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // TODO: handle hook titles
       const runnable = state('runnable')
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalScreenshotOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })

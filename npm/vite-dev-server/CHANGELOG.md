@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.2...@cypress/vite-dev-server-v2.2.3) (2022-05-10)
+
+
+### Bug Fixes
+
+* handle specs with white space in vite-dev-server ([#21386](https://github.com/cypress-io/cypress/issues/21386)) ([f1c3a9b](https://github.com/cypress-io/cypress/commit/f1c3a9b3186057dd63645fd9e617f343db5c473b))
+
 # [@cypress/vite-dev-server-v2.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.1...@cypress/vite-dev-server-v2.2.2) (2021-12-16)
 
 

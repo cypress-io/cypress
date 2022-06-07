@@ -1,0 +1,45 @@
+@use '@packages/frontend-shared/src/styles/shared.scss';
+
+html {
+  @apply h-screen overflow-hidden;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/**
+ * Utilities
+ * -------------------------
+ */
+
+// Hides the scrollbar when overflow: auto. Use this sparingly -- it's not accessible!
+.hide-scrollbar {
+  scrollbar-width: 0; // Firefox
+
+  // Chrome
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+// used to style the spec bridge needed for cy.origin.
+iframe.spec-bridge-iframe {
+  border: none;
+  height: 100%;
+  position: fixed;
+  visibility: hidden;
+  width: 100%;
+  // NOTE: Please do NOT remove top/left styles from the .spec-bridge-iframe.
+  // This is needed to overlay the spec bridge on top of the AUT/Reporter to avoid performance issues in Electron when the iframe is outside the viewport.
+  // Full size of the iframe is needed for cy.screenshot to work properly
+  top: 0;
+  left: 0;
+}

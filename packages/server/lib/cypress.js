@@ -13,7 +13,6 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const { openProject } = require('../lib/open_project')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -115,12 +114,6 @@ module.exports = {
     })
   },
 
-  openProject (options) {
-    // this code actually starts a project
-    // and is spawned from nodemon
-    openProject.open(options.project, options)
-  },
-
   start (argv = []) {
     debug('starting cypress with argv %o', argv)
 
@@ -175,10 +168,6 @@ module.exports = {
         mode = 'smokeTest'
       } else if (options.returnPkg) {
         mode = 'returnPkg'
-      } else if (options.logs) {
-        mode = 'logs'
-      } else if (options.clearLogs) {
-        mode = 'clearLogs'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -230,18 +219,6 @@ module.exports = {
         }).then(exit0)
         .catch(exitErr)
 
-      case 'logs':
-        // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'clearLogs':
-        // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
-        .catch(exitErr)
-
       case 'exitWithCode':
         return require('./modes/exit')(options)
         .then(exit)
@@ -272,8 +249,7 @@ module.exports = {
         return this.runElectron(mode, options)
 
       case 'openProject':
-        // open + start the project
-        return this.openProject(options)
+        throw new Error('Unused')
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)

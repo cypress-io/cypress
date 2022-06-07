@@ -7,7 +7,8 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
-import * as CriClient from './cri-client'
+import { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
 const errors = require('../errors')
 
@@ -101,11 +102,52 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function setupRemote (remotePort, automation, onError) {
-  const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
-  const criClient = await CriClient.create(wsUrl, onError)
+async function connectMarionetteToNewTab () {
+  // When firefox closes its last tab, it keeps a blank tab open. This will be the only handle
+  // So we will connect to it and navigate it to about:blank to set it up for CDP connection
+  const handles = await sendMarionette({
+    name: 'WebDriver:GetWindowHandles',
+  })
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  await sendMarionette({
+    name: 'WebDriver:SwitchToWindow',
+    parameters: { handle: handles[0] },
+  })
+
+  await navigateToUrl('about:blank')
+}
+
+async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
+  debug('firefox: reconnecting to blank tab')
+
+  await connectMarionetteToNewTab()
+
+  debug('firefox: reconnecting CDP')
+
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
+
+  await options.onInitializeNewBrowserTab()
+
+  debug(`firefox: navigating to ${options.url}`)
+  await navigateToUrl(options.url)
+}
+
+async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
+  const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
+
+  return browserCriClient
+}
+
+async function navigateToUrl (url) {
+  await sendMarionette({
+    name: 'WebDriver:Navigate',
+    parameters: { url },
+  })
 }
 
 const logGcDetails = () => {
@@ -180,13 +222,20 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
-  }) {
+    options,
+  }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError),
-    ])
+      remotePort && setupRemote(remotePort, automation, onError, options),
+    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
+
+  connectToNewSpec,
+
+  navigateToUrl,
+
+  setupRemote,
 
   async setupFoxdriver (port) {
     await protocol._connectAsync({
@@ -303,12 +352,6 @@ export default {
             parameters: { path, temporary: true },
           })
         }))
-      })
-      .then(() => {
-        return sendMarionette({
-          name: 'WebDriver:Navigate',
-          parameters: { url },
-        })
       })
       .then(resolve)
       .catch(_onError('commands'))

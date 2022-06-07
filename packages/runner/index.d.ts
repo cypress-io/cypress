@@ -8,3 +8,5 @@
 
 /// <reference path="../ts/index.d.ts" />
 /// <reference path="../driver/types/internal-types.d.ts" />
+/// <reference path="../driver/types/spec-types.d.ts" />
+/// <reference path="../driver/types/window.d.ts" />

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import send from 'send'
 import os from 'os'
 import { fs } from '../util/fs'
@@ -8,7 +8,7 @@ import Debug from 'debug'
 import pkg from '@packages/root'
 import { getPathToDist, getPathToIndex, RunnerPkg } from '@packages/resolve-dist'
 import type { InitializeRoutes } from '../routes'
-import type { PlatformName } from '@packages/launcher'
+import type { PlatformName } from '@packages/types'
 import type { Cfg } from '../project-base'
 
 const debug = Debug('cypress:server:runner')
@@ -22,7 +22,7 @@ const _serveNonProxiedError = (res: Response) => {
   })
 }
 
-export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore' | 'exit'> {
+export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'remoteStates' | 'exit'> {
   testingType: Cypress.TestingType
 }
 
@@ -42,6 +42,7 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
   return res.render(runnerPath, {
     base64Config,
     projectName: config.projectName,
+    namespace: config.namespace,
   })
 }
 
@@ -53,7 +54,7 @@ export const runner = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore, exit } = options
+    let { config, remoteStates, getCurrentBrowser, getSpec, exit } = options
 
     config = _.clone(config)
     // at any given point, rather than just arbitrarily modifying it.
@@ -69,14 +70,15 @@ export const runner = {
     // }
     // TODO: Find out what the problem.
     if (options.testingType === 'e2e') {
-      config.remote = getRemoteState()
+      config.remote = remoteStates.getPrimary()
     }
+
+    const spec = getSpec()
 
     config.version = pkg.version
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
-    config.spec = getSpec() ?? null
-    config.specs = specsStore.specFiles
+    config.spec = spec ? { ...spec, name: spec.baseName } : null
     config.browser = getCurrentBrowser()
     config.exit = exit ?? true
 
@@ -89,7 +91,8 @@ export const runner = {
     return serveRunner(runnerPkg, config, res)
   },
 
-  handle (testingType, req, res) {
+  handle (testingType, req: Request, res: Response) {
+    // FIXME: Why is runner-ct being used for all injections? Can anyone comment here as to why this changed?
     const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
 
     return send(req, pathToFile)
