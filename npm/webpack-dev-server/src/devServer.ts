@@ -19,6 +19,7 @@ export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
+  onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack
@@ -131,7 +132,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Pres
 devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   const { frameworkConfig, sourceWebpackModulesResult } = await getPreset(devServerConfig)
 
-  const { server, compiler } = createWebpackDevServer({
+  const { server, compiler } = await createWebpackDevServer({
     devServerConfig,
     frameworkConfig,
     sourceWebpackModulesResult,
