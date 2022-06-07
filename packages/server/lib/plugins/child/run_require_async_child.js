@@ -1,9 +1,11 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
+const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
+
+const debug = console.log // debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 
 /**
  * Executes and returns the passed `file` (usually `configFile`) file in the ipc `loadConfig` event
@@ -82,6 +84,7 @@ function run (ipc, file, projectRoot) {
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
     try {
+      debug('Loading file %s', file)
       return require(file)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
@@ -95,7 +98,9 @@ function run (ipc, file, projectRoot) {
       // We cannot replace the initial `require` with `await import` because
       // Certain modules cannot be dynamically imported.
       // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-      return await import(pathToFileURL(file).href)
+      const fileURL = pathToFileURL(file).href
+      debug(`importing esm file %s`, fileURL)
+      return await import(fileURL)
     } catch (err) {
       debug('error loading file via native Node.js module loader %s', err.message)
       throw err
