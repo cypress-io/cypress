@@ -5,6 +5,7 @@ const { specifiedRules } = require('graphql')
 const graphqlOpts = {
   env: 'literal',
   tagName: 'gql',
+  // eslint-disable-next-line no-restricted-properties
   schemaString: fs.readFileSync(
     path.join(__dirname, 'packages/graphql/schemas/schema.graphql'),
     'utf8',
@@ -23,6 +24,8 @@ const validators = specifiedRules
   },
 )
 
+const syncFsKeys = Object.keys(fs).filter((k) => k.endsWith('Sync') && k !== 'existsSync')
+
 module.exports = {
   plugins: [
     '@cypress/dev',
@@ -33,6 +36,14 @@ module.exports = {
     'plugin:@cypress/dev/tests',
   ],
   parser: '@typescript-eslint/parser',
+  overrides: [
+    {
+      files: ['**/scripts/**', '**/test/**', '**/system-tests/**'],
+      rules: {
+        'no-restricted-properties': 'off',
+      },
+    },
+  ],
   rules: {
     'no-duplicate-imports': 'off',
     'import/no-duplicates': 'off',
@@ -54,6 +65,20 @@ module.exports = {
         property: 'userInfo',
         message: 'os.userInfo() will throw when there is not an `/etc/passwd` entry for the current user (like when running with --user 12345 in Docker). Do not use it unless you catch any potential errors.',
       },
+      ...syncFsKeys.map((property) => {
+        return {
+          object: 'fs',
+          property,
+          message: `Synchronous fs calls should not be used in Cypress. Use a Promise-based API instead.`,
+        }
+      }),
+      ...syncFsKeys.map((property) => {
+        return {
+          object: 'this.ctx.fs',
+          property,
+          message: `Synchronous fs calls should not be used in Cypress. Use a Promise-based API instead.`,
+        }
+      }),
     ],
     'graphql/capitalized-type-name': ['warn', graphqlOpts],
     'graphql/no-deprecated-fields': ['error', graphqlOpts],
