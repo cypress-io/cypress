@@ -282,7 +282,7 @@ describe('Choose a Browser Page', () => {
 
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible').click()
 
-      cy.withCtx((ctx, o) => {
+      cy.withCtx((ctx) => {
         ctx.browser.setBrowserStatus('open')
       })
 
