@@ -125,11 +125,11 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            describe('my-integration-file.js', () => {
-              it('should visit', () => {
-                cy.visit('/')
+            describe('empty spec', () => {
+              it('passes', () => {
+                cy.visit('https://example.cypress.io')
               })
-            })` }\n`,
+            })` }`,
         },
       ],
       failed: [],
