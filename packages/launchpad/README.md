@@ -44,7 +44,7 @@ For the best development experience, you will want to use VS Code with the [Vola
 yarn watch
 ```
 
-This starts Vite in watch mode, and any code-generation scripts that need to be running in the background to support our environment. 
+This starts Vite in watch mode, and any code-generation scripts that need to be running in the background to support our environment. While developing, you might want to consider the [CYPRESS_INTERNAL_VITE_DEV](../../npm/vite-dev-server/README.md#internal-options) option.
 
 In a seprate terminal, run:
 
