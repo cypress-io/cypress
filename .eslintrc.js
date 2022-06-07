@@ -77,7 +77,7 @@ module.exports = {
     'no-restricted-syntax': [
       'error',
       {
-        // catch things like fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
+        // match syntax like fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
         selector: `MemberExpression[object.name=/^fse?$/][property.name=/^[A-z]+Sync$/], MemberExpression[property.name=/^[A-z]+Sync$/]:has(MemberExpression[property.name=/^fse?$/])`,
         message: 'Synchronous fs calls should not be used in Cypress. Use a Promise-based API instead.',
       },
