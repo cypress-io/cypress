@@ -476,14 +476,12 @@ describe('_makeSpecWatcher', () => {
   const SPEC_FILE3 = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'foo.spec.ts')
   const SPEC_FILE_ABC = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'abc.ts')
 
-  const writeFiles = () => {
-    return Promise.all([
-      ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo'),
-      ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo'),
-      ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo'),
-      ctx.actions.file.writeFileInProject(SPEC_FILE3, '// foo'),
-      ctx.actions.file.writeFileInProject(SPEC_FILE_ABC, '// foo'),
-    ])
+  const writeFiles = async () => {
+    await ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo')
+    await ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo')
+    await ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo')
+    await ctx.actions.file.writeFileInProject(SPEC_FILE3, '// foo')
+    await ctx.actions.file.writeFileInProject(SPEC_FILE_ABC, '// foo')
   }
 
   it('watch for changes on files based on the specPattern', async function () {
