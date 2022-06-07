@@ -109,6 +109,24 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.percySnapshot()
   })
 
+  it('links to aut url', () => {
+    const autStore = useAutStore()
+
+    autStore.updateUrl('http://localhost:3000/pretty/long/url.spec.jsx')
+
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'e2e'
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="aut-url"]').should('exist').should('have.attr', 'href', 'http://localhost:3000/pretty/long/url.spec.jsx')
+    cy.percySnapshot()
+  })
+
   it('does not show url section if currentTestingType is component', () => {
     const autStore = useAutStore()
 
