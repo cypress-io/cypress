@@ -98,7 +98,7 @@ executors:
   mac-arm64:
     machine: true
     # you may need to add this resource_class to the job itself if it sets a default value for resource_class
-    # resource_class: cypress-io/macstadium
+    # resource_class: cypress-io/latest_m1
 
 commands:
   verify_should_persist_artifacts:
@@ -2582,13 +2582,13 @@ mac-arm64-workflow: &mac-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: mac-arm64
-        resource_class: cypress-io/macstadium
+        resource_class: cypress-io/latest_m1
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
         executor: mac-arm64
-        resource_class: cypress-io/macstadium
+        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-node-modules-install
 
@@ -2599,14 +2599,14 @@ mac-arm64-workflow: &mac-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac-arm64
-        resource_class: cypress-io/macstadium
+        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
     - test-kitchensink:
         name: darwin-arm64-test-kitchensink
         executor: mac-arm64
-        resource_class: cypress-io/macstadium
+        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
