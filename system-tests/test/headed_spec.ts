@@ -11,9 +11,8 @@ describe('e2e headed', function () {
         project: 'cypress-in-cypress',
         headed: true,
         browser,
-        spec: 'dom-content.spec.js,withFailure.spec.js',
-        snapshot: true,
-        expectedExitCode: 1,
+        spec: 'dom-content.spec.js,withWait.spec.js',
+        expectedExitCode: 0,
       })
     })
   })
