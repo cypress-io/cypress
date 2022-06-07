@@ -148,11 +148,11 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
-function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
+async function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): Promise<string> {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = options.hasE2ESpec
-    ? createE2ETemplate(pluginPath, options, config.e2e)
+    ? await createE2ETemplate(pluginPath, options, config.e2e)
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
@@ -188,7 +188,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+async function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
   if (createConfigOptions.shouldAddCustomE2ESpecPattern && !options.specPattern) {
     options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
   }
@@ -201,7 +201,7 @@ function createE2ETemplate (pluginPath: string | undefined, createConfigOptions:
     `
   }
 
-  const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
+  const pluginFile = await fs.readFile(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
   let relPluginsPath
 
   const startsWithDotSlash = new RegExp(/^.\//)

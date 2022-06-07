@@ -38,8 +38,18 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   overrides: [
     {
-      files: ['**/scripts/**', '**/test/**', '**/system-tests/**'],
+      files: [
+        // ignore in tests and scripts
+        '**/scripts/**',
+        '**/test/**',
+        '**/system-tests/**',
+        'packages/{app,launchpad,frontend-shared}/cypress/**',
+        '*.test.ts',
+        // ignore in packages that don't run in the Cypress process
+        'npm/create-cypress-tests/**',
+      ],
       rules: {
+        // ignore fs.*Sync lint errors
         'no-restricted-properties': 'off',
       },
     },

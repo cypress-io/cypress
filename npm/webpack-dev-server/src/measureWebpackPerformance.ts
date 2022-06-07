@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 /* eslint-disable no-console */
 import path from 'path'
 import fs from 'fs'

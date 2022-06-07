@@ -9,7 +9,7 @@ function shouldIgnoreSyncCall () {
   const stack = (new Error).stack!
 
   // @ts
-  const shouldIgnore = false //!global.__DEVELOPMENT_WARN_SYNC_FS_CALL
+  const shouldIgnore = false
     || /(source-map-support|Module\.load)/gm.test(stack)
     || warnedStacks.includes(stack)
 
@@ -19,30 +19,14 @@ function shouldIgnoreSyncCall () {
 }
 
 export function patchFs (_fs: typeof fs) {
-  // if (global.__DEVELOPMENT_WARN_SYNC_FS_CALL) return
-
   // 1. Add gracefulFs for EMFILE queuing.
   gracefulFs.gracefulify(_fs)
 
-  // _fs.__HACK_IGNORE_SYNC_FS = _fs
+  const syncMethods = {}
 
   if (process.env.CYPRESS_INTERNAL_ENV === 'production') return
 
   // 2. Warn on all FS sync calls in development.
-  // const originalModuleLoad = module.__proto__._load
-
-  // global.__DEVELOPMENT_WARN_SYNC_FS_CALL = true
-
-  // module.__proto__._load = function patchedModuleLoad (...args) {
-  //   global.__DEVELOPMENT_WARN_SYNC_FS_CALL = false
-  //   const ret = originalModuleLoad.call(this, ...args)
-
-  //   global.__DEVELOPMENT_WARN_SYNC_FS_CALL = true
-
-  //   return ret
-  // }
-
-  // _fs.__HACK_IGNORE_SYNC_FS = { ...fs }
 
   for (const k in _fs) {
     if (k === 'existsSync' || !k.endsWith('Sync') || typeof _fs[k] !== 'function') continue
@@ -57,5 +41,7 @@ export function patchFs (_fs: typeof fs) {
 
       return originalFn.call(_fs, ...args)
     }
+
+    syncMethods[k] = originalFn
   }
 }

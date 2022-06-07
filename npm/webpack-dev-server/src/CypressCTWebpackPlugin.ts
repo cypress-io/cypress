@@ -99,13 +99,15 @@ export class CypressCTWebpackPlugin {
    * has been "updated on disk", causing a recompliation (and pulling the new specs in as
    * dependencies).
    */
-  private onSpecsChange = (specs: Cypress.Cypress['spec'][]) => {
+  private onSpecsChange = async (specs: Cypress.Cypress['spec'][]) => {
     if (!this.compilation || _.isEqual(specs, this.files)) {
       return
     }
 
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
+    // TODO: don't use a sync fs method here
+    // eslint-disable-next-line no-restricted-properties
     const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
 
     utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())

@@ -701,6 +701,8 @@ export class ProjectLifecycleManager {
 
   private verifyProjectRoot (root: string) {
     try {
+      // TODO: convert to async fs call
+      // eslint-disable-next-line no-restricted-properties
       if (!fs.statSync(root).isDirectory()) {
         throw new Error('NOT DIRECTORY')
       }

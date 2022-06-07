@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 const fs = require('fs')
 const debug = require('debug')('net-profiler')
 
