@@ -1,3 +1,4 @@
+// @ts-check
 const debugLib = require('debug')
 const path = require('path')
 const tsnode = require('ts-node')
