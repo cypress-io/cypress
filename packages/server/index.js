@@ -1,13 +1,11 @@
-//
+const { patchFs } = require('./lib/util/patch-fs')
+const fs = require('fs')
+
+// prevent EMFILE errors
+patchFs(fs)
+
 // override tty if we're being forced to
 require('./lib/util/tty').override()
-
-process.nextTick(() => {
-  const { patchFs } = require('./lib/util/patch-fs')
-  const fs = require('fs')
-
-  patchFs(fs)
-})
 
 const electronApp = require('./lib/util/electron-app')
 
