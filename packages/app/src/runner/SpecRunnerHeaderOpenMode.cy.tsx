@@ -208,4 +208,20 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     cy.percySnapshot()
   })
+
+  it('opens and closes selector playground', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="playground-activator"]').click()
+    cy.get('#selector-playground').should('be.visible')
+
+    cy.percySnapshot()
+
+    cy.get('[data-cy="playground-activator"]').click()
+    cy.get('#selector-playground').should('not.exist')
+  })
 })
