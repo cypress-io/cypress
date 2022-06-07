@@ -111,8 +111,9 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
   it('links to aut url', () => {
     const autStore = useAutStore()
+    const url = 'http://localhost:3000/todo'
 
-    autStore.updateUrl('http://localhost:3000/pretty/long/url.spec.jsx')
+    autStore.updateUrl(url)
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (gql) => {
@@ -123,7 +124,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="aut-url"]').should('exist').should('have.attr', 'href', 'http://localhost:3000/pretty/long/url.spec.jsx')
+    cy.contains(url).should('exist').should('have.attr', 'href', url)
     cy.percySnapshot()
   })
 
