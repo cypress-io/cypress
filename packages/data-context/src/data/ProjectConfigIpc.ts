@@ -111,6 +111,16 @@ export class ProjectConfigIpc extends EventEmitter {
     return super.emit(evt, ...args)
   }
 
+  hasTypeScriptInstalled () {
+    try {
+      require.resolve('typescript', { paths: [this.projectRoot] })
+
+      return true
+    } catch (e) {
+      return false
+    }
+  }
+
   loadConfig (): Promise<LoadConfigReply> {
     return new Promise((resolve, reject) => {
       if (this._childProcess.stdout && this._childProcess.stderr) {
@@ -257,34 +267,42 @@ export class ProjectConfigIpc extends EventEmitter {
       childOptions.env = {}
     }
 
-    if (isProjectUsingESModules) {
-      // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
-      // The loader API is experimental and will change.
-      // The same can be said for the other alternative, esbuild, so this is the
-      // best option that leverages the existing modules we bundle in the binary.
-      // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
-      // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-      const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+    // If they've got TypeScript installed, we can use
+    // ts-node for CommonJS
+    // ts-node/esm for ESM
+    if (this.hasTypeScriptInstalled()) {
+      if (isProjectUsingESModules) {
+        // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
+        // The loader API is experimental and will change.
+        // The same can be said for the other alternative, esbuild, so this is the
+        // best option that leverages the existing modules we bundle in the binary.
+        // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
+        // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
+        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
 
-      if (childOptions.env.NODE_OPTIONS) {
-        childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
+        if (childOptions.env.NODE_OPTIONS) {
+          childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
+        } else {
+          childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
+        }
       } else {
-        childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
+        // Not using ES Modules (via "type": "module"),
+        // so we just register the standard ts-node module
+        // to handle TypeScript that is compiled to CommonJS.
+        // We do NOT use the `--loader` flag because we have some additional
+        // custom logic for ts-node when used with CommonJS that needs to be evaluated
+        // so we need to load and evaluate the hook first using the `--require` module API.
+        const tsNodeLoader = `--require ${tsNode}`
+
+        if (childOptions.env.NODE_OPTIONS) {
+          childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+        } else {
+          childOptions.env.NODE_OPTIONS = tsNodeLoader
+        }
       }
     } else {
-      // Not using ES Modules (via "type": "module"),
-      // so we just register the standard ts-node module
-      // to handle TypeScript that is compiled to CommonJS.
-      // We do NOT use the `--loader` flag because we have some additional
-      // custom logic for ts-node when used with CommonJS that needs to be evaluated
-      // so we need to load and evaluate the hook first using the `--require` module API.
-      const tsNodeLoader = `--require ${tsNode}`
-
-      if (childOptions.env.NODE_OPTIONS) {
-        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
-      } else {
-        childOptions.env.NODE_OPTIONS = tsNodeLoader
-      }
+      // Just use Node's built-in ESM support.
+      // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
     }
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
