@@ -1,5 +1,3 @@
-// TODO: remove usage of async fs methods from this file and remove the eslint-disable
-/* eslint-disable no-restricted-syntax */
 /**
  * The "Project Lifecycle" is the centralized manager for the project,
  * config, browser, and the number of possible states that can occur based
@@ -621,6 +619,8 @@ export class ProjectLifecycleManager {
     }
 
     try {
+      // TODO: convert to async FS method
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
       if (pkgJson.type === 'module') {

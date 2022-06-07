@@ -75,11 +75,13 @@ module.exports = {
       },
     ],
     'no-restricted-syntax': [
+      // esquery tool: https://estools.github.io/esquery/
       'error',
       {
-        // match syntax like fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
-        selector: `MemberExpression[object.name=/^fse?$/][property.name=/^[A-z]+Sync$/], MemberExpression[property.name=/^[A-z]+Sync$/]:has(MemberExpression[property.name=/^fse?$/])`,
-        message: 'Synchronous fs calls should not be used in Cypress. Use a Promise-based API instead.',
+        // match sync FS methods except for `existsSync`
+        // examples: fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
+        selector: `MemberExpression[object.name='fs'][property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']), MemberExpression[property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']):has(MemberExpression[property.name='fs'])`,
+        message: 'Synchronous fs calls should not be used in Cypress. Use an async API instead.',
       },
     ],
     'graphql/capitalized-type-name': ['warn', graphqlOpts],
