@@ -109,7 +109,7 @@ async function makeE2ETasks () {
 
   const cachedCwd = process.cwd()
 
-  clearCtx()
+  await clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const launchpadPort = await makeGraphQLServer()

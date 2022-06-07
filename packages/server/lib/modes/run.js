@@ -1649,6 +1649,7 @@ module.exports = {
   async run (options, loading = Promise.resolve()) {
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
       const app = require('electron').app
+      const { clearCtx } = require('@packages/data-context')
 
       // electron >= 5.0.0 will exit the app if all browserwindows are closed,
       // this is obviously undesirable in run mode
@@ -1656,6 +1657,10 @@ module.exports = {
       app.on('window-all-closed', () => {
         debug('all BrowserWindows closed, not exiting')
       })
+
+      // Though clearCtx is async, we do our best to reset things prior to the
+      // process exiting.
+      process.on('exit', clearCtx)
 
       await app.whenReady()
     }

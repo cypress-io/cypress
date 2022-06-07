@@ -10,7 +10,6 @@ import path from 'path'
 import _ from 'lodash'
 import resolve from 'resolve'
 import fs from 'fs'
-import debugLib from 'debug'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
 import type { DataContext } from '..'
@@ -25,8 +24,6 @@ import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHand
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { makeTestingTypeData } from './coreDataShape'
-
-const debug = debugLib('cypress:data-context:project-lifecycle-manager')
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -100,49 +97,11 @@ export class ProjectLifecycleManager {
       this._setCurrentProject(ctx.coreData.currentProject)
     }
 
-    const { app } = require('electron')
-
-    if (app) {
-      app.once('before-quit', (event: Event) => {
-        // prevent default on the before-quit event to halt
-        // the current quit event
-        event.preventDefault()
-
-        // tslint:disable-next-line:no-floating-promises
-        new Promise((resolve, reject) => {
-          this.onProcessExit().then(resolve, reject)
-        }).finally(() => {
-          debug('async cleanup complete, calling quit')
-
-          // re-quit after we've completed the async clean up
-          app.quit()
-        })
-      })
-    }
-
-    process.on('exit', () => {
-      // Might need to keep the exit handler? I'm not sure if there are paths
-      // that bypass the before-quit event that we'd care about
-      this.onProcessExit().catch(() => {})
-    })
-
     return autoBindDebug(this)
   }
 
   get git () {
     return this.ctx.coreData.currentProjectGitInfo
-  }
-
-  private onProcessExit = async () => {
-    if (this._destroyed) {
-      return
-    }
-
-    this._destroyed = true
-
-    debug('process will exit, performing async cleanup')
-
-    return this.resetInternalState()
   }
 
   async getProjectId (): Promise<string | null> {
@@ -754,8 +713,6 @@ export class ProjectLifecycleManager {
 
   async destroy () {
     await this.resetInternalState()
-    // @ts-ignore
-    process.removeListener('exit', this.onProcessExit)
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
