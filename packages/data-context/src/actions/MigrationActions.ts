@@ -146,7 +146,7 @@ export class MigrationActions {
     }
 
     if (this.ctx.isGlobalMode) {
-      const version = this.locallyInstalledCypressVersion(this.ctx.currentProject)
+      const version = await this.locallyInstalledCypressVersion(this.ctx.currentProject)
 
       if (!version) {
         // Could not resolve Cypress. Unlikely, but they are using a
@@ -177,12 +177,12 @@ export class MigrationActions {
     })
   }
 
-  locallyInstalledCypressVersion (currentProject: string) {
+  async locallyInstalledCypressVersion (currentProject: string) {
     try {
       const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
         paths: [currentProject],
       })
-      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+      const localCypressPkgJson = await fs.readJson(path.join(localCypressPkgJsonPath)) as { version: string }
 
       return localCypressPkgJson?.version ?? undefined
     } catch (e) {
@@ -345,7 +345,7 @@ export class MigrationActions {
       throw new NonStandardMigrationError('support')
     }
 
-    this.ctx.fs.renameSync(
+    await this.ctx.fs.rename(
       path.join(this.ctx.currentProject, beforeRelative),
       path.join(this.ctx.currentProject, afterRelative),
     )

@@ -364,7 +364,7 @@ export class ProjectDataSource {
         if (!stats) {
           try {
             // TODO: find a way to avoid this sync call - might require patching chokidar
-            // eslint-disable-next-line no-restricted-properties
+            // eslint-disable-next-line no-restricted-syntax
             stats = fs.statSync(file)
           } catch {
             // If the file/folder is removed do not ignore it, in case it is added

@@ -85,6 +85,8 @@ export class MigrationDataSource {
     }
 
     const configFilePath = path.isAbsolute(this.legacyConfigFile) ? this.legacyConfigFile : path.join(this.ctx.currentProject, this.legacyConfigFile)
+    // TODO: convert to async FS method
+    // eslint-disable-next-line no-restricted-syntax
     const legacyConfigFileExists = this.ctx.fs.existsSync(configFilePath)
 
     return Boolean(legacyConfigFileExists)

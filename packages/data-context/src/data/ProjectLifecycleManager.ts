@@ -1,3 +1,5 @@
+// TODO: remove usage of async fs methods from this file and remove the eslint-disable
+/* eslint-disable no-restricted-syntax */
 /**
  * The "Project Lifecycle" is the centralized manager for the project,
  * config, browser, and the number of possible states that can occur based
@@ -473,7 +475,7 @@ export class ProjectLifecycleManager {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
-      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPath) as LegacyCypressConfigJson
+      const legacyConfig = await this.ctx.fs.readJson(legacyConfigPath) as LegacyCypressConfigJson
 
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
@@ -702,7 +704,7 @@ export class ProjectLifecycleManager {
   private verifyProjectRoot (root: string) {
     try {
       // TODO: convert to async fs call
-      // eslint-disable-next-line no-restricted-properties
+      // eslint-disable-next-line no-restricted-syntax
       if (!fs.statSync(root).isDirectory()) {
         throw new Error('NOT DIRECTORY')
       }

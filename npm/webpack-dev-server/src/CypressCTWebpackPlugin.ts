@@ -107,7 +107,7 @@ export class CypressCTWebpackPlugin {
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
-    // eslint-disable-next-line no-restricted-properties
+    // eslint-disable-next-line no-restricted-syntax
     const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
 
     utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())

@@ -39,7 +39,7 @@ export const Cypress = (
 
   let specsPathsSet = getSpecsPathsSet(specs)
   // TODO: use async fs methods here
-  // eslint-disable-next-line no-restricted-properties
+  // eslint-disable-next-line no-restricted-syntax
   let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
