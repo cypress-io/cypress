@@ -28,4 +28,30 @@ describe('SidebarNavigationHeader', () => {
     cy.contains('test-project')
     cy.percySnapshot()
   })
+
+  describe('rendering tooltip message', () => {
+    it('nav expanded', () => {
+      cy.mountFragment(SidebarNavigationHeaderFragmentDoc, {
+        render: (gql) => <div style={{ width: '300px' }}><div class="p-16px"><SidebarNavigationHeader gql={gql} isNavBarExpanded /></div></div>,
+      })
+
+      cy.get('[data-cy="sidebar-header"]').realHover()
+      cy.get('[data-cy="project-name-tooltip"]').should('not.exist')
+      cy.get('[data-cy="switch-testing-tooltip"]').should('be.visible')
+
+      cy.percySnapshot()
+    })
+
+    it('nav collapsed', () => {
+      cy.mountFragment(SidebarNavigationHeaderFragmentDoc, {
+        render: (gql) => <div style={{ width: '300px' }}><div class="p-16px"><SidebarNavigationHeader gql={gql} isNavBarExpanded={false} /></div></div>,
+      })
+
+      cy.get('[data-cy="sidebar-header"]').realHover()
+      cy.get('[data-cy="project-name-tooltip"]').should('be.visible')
+      cy.get('[data-cy="switch-testing-tooltip"]').should('be.visible')
+
+      cy.percySnapshot()
+    })
+  })
 })

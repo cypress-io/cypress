@@ -39,7 +39,10 @@
     <template #popper>
       <div class="flex">
         <template v-if="!isNavBarExpanded">
-          <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
+          <div
+            class="text-left text-gray-50 text-size-16px leading-16px truncate"
+            data-cy="project-name-tooltip"
+          >
             {{ props.gql.currentProject?.title ?? 'Cypress' }}
             <p class="text-gray-600 text-size-14px leading-20px truncate">
               {{ props.gql.currentProject?.branch }}
@@ -47,7 +50,10 @@
           </div>
           <div class="border-r-1 ml-12px mr-12px" />
         </template>
-        <div class="flex items-center">
+        <div
+          class="flex items-center"
+          data-cy="switch-testing-tooltip"
+        >
           {{ tooltipText.switchTestingType }}
         </div>
       </div>
