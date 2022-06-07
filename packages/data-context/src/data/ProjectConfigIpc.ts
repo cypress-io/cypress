@@ -14,7 +14,9 @@ const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+
 const tsNodeEsm = require.resolve('ts-node/esm')
+const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -251,11 +253,11 @@ export class ProjectConfigIpc extends EventEmitter {
       // reasonable to assume not using es modules
     }
 
-    if (isProjectUsingESModules) {
-      if (!childOptions.env) {
-        childOptions.env = {}
-      }
+    if (!childOptions.env) {
+      childOptions.env = {}
+    }
 
+    if (isProjectUsingESModules) {
       // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
       // The loader API is experimental and will change.
       // The same can be said for the other alternative, esbuild, so this is the
@@ -268,6 +270,20 @@ export class ProjectConfigIpc extends EventEmitter {
         childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
       } else {
         childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
+      }
+    } else {
+      // Not using ES Modules (via "type": "module"),
+      // so we just register the standard ts-node module
+      // to handle TypeScript that is compiled to CommonJS.
+      // We do NOT use the `--loader` flag because we have some additional
+      // custom logic for ts-node when used with CommonJS that needs to be evaluated
+      // so we need to load and evaluate the hook first using the `--require` module API.
+      const tsNodeLoader = `--require ${tsNode}`
+
+      if (childOptions.env.NODE_OPTIONS) {
+        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+      } else {
+        childOptions.env.NODE_OPTIONS = tsNodeLoader
       }
     }
 
