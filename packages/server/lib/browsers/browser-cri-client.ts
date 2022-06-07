@@ -147,6 +147,7 @@ export class BrowserCriClient {
 
     let target
 
+    // If we are keeping a tab open, we need to first launch a new default tab prior to closing the existing one
     if (shouldKeepTabOpen) {
       target = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
     }
