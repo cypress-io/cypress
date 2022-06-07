@@ -15,7 +15,7 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsNodeEsm = require.resolve('ts-node/esm')
+const tsNodeEsm = require.resolve('ts-node/esm/transpile-only')
 const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
