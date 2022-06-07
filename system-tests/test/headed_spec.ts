@@ -8,10 +8,10 @@ describe('e2e headed', function () {
   browserList.forEach(function (browser) {
     it(`runs multiple specs in headed mode - [${browser}]`, async function () {
       await systemTests.exec(this, {
-        project: 'cypress-in-cypress',
+        project: 'e2e',
         headed: true,
         browser,
-        spec: 'dom-content.spec.js,withWait.spec.js',
+        spec: 'a_record.cy.js,b_record.cy.js,simple_passing.cy.js',
         expectedExitCode: 0,
       })
     })
