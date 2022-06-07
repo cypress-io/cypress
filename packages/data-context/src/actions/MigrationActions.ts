@@ -33,6 +33,8 @@ import {
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 
+const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
+
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
 
@@ -67,6 +69,16 @@ export function getDiff (oldConfig: any, newConfig: any) {
   }, result)
 }
 
+function hasTypeScriptInstalled (projectRoot: string) {
+  try {
+    require.resolve('typescript', { paths: [projectRoot] })
+
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
 
@@ -87,6 +99,23 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+
+    // use ts-node if they've got typescript installed
+    // this matches the 9.x behavior, which is what we want for
+    // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
+    if (hasTypeScriptInstalled(projectRoot)) {
+      const tsNodeLoader = `--require ${tsNode}`
+
+      if (!childOptions.env) {
+        childOptions.env = {}
+      }
+
+      if (childOptions.env.NODE_OPTIONS) {
+        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+      } else {
+        childOptions.env.NODE_OPTIONS = tsNodeLoader
+      }
+    }
 
     const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
     const ipc = new LegacyPluginsIpc(childProcess)
