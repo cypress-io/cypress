@@ -8,7 +8,7 @@ Before sending data through `postMessage`, data must be considered serializable 
 
 The structured clone algorithm is [supported](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone#browser_compatibility) via the native `structuredClone` function from chrome/chromium version 98 and firefox version 94. For browser versions where `structuredClone` is not available, the [core-js-pure](https://github.com/zloirock/core-js/blob/master/packages/core-js/modules/web.structured-clone.js) `structuredClone` ponyfill is used to determine if a value is serializable.
 
-To determine if a given value is serializable, the value is passed as an argument into the structured clone algorithm. If an error is thrown, the value is not serializable. Otherwise, the copied value is returned. This is generally our serialization rule, but there are exceptions as follows:
+To determine if a given value is serializable, the value is passed as an argument into the structured clone algorithm. If an error is thrown, the value is not serializable. Otherwise, the copied value is returned. This is generally how we determine if a value is serializable, but there are exceptions as follows:
 
 #### Errors
 
