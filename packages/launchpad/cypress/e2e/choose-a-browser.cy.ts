@@ -220,7 +220,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.withCtx((ctx, o) => {
+      cy.withCtx((ctx) => {
         ctx.browser.setBrowserStatus('open')
       })
 
