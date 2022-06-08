@@ -326,7 +326,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
  * @param [string] version Could be "3.3.0" or full URL
  * @param [string] downloadDestination Local filename to save as
  */
-const start = (opts) => {
+const start = async (opts) => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
