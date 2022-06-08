@@ -13,7 +13,6 @@
       {{ t('globalPage.recentProjectsHeader') }}
     </h2>
     <div
-      class="pb-24px"
       :class="{ 'md:grid md:grid-cols-2 md:gap-24px mb-0': filteredProjects?.length > 1 }"
     >
       <GlobalProjectCard
