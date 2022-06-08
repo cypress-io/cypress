@@ -26,7 +26,7 @@
         <a
           target="_blank"
           :href="autStore.url"
-          class="mr-12px max-w-100% grid text-indigo-500 hocus-link-default items-center truncate"
+          class="mr-12px max-w-100% text-indigo-500 self-center hocus-link-default truncate"
         >
           {{ autStore.url }}
         </a>
