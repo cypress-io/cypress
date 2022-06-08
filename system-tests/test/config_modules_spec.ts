@@ -53,3 +53,14 @@ describe('compiles config files using the native node import', () => {
     })
   })
 })
+
+describe('invalid configuration', () => {
+  systemTests.it('shows correct error message for ESM only import in CJS environment', {
+    project: `config-cjs-and-esm/ts-cjs-with-invalid-esm-only-import`,
+    testingType: 'e2e',
+    spec: 'app.cy.js',
+    browser: 'chrome',
+    expectedExitCode: 1,
+    snapshot: true,
+  })
+})

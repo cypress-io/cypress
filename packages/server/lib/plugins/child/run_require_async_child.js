@@ -83,29 +83,29 @@ function run (ipc, file, projectRoot) {
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
+    debug('Loading file %s', file)
+
+    // try native Node.js ESM support first!
     try {
-      debug('Loading file %s', file)
-
-      return require(file)
-    } catch (err) {
-      if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
-        throw err
-      }
-    }
-
-    debug('User is loading an ESM config file')
-
-    try {
-      // We cannot replace the initial `require` with `await import` because
-      // Certain modules cannot be dynamically imported.
       // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
       const fileURL = pathToFileURL(file).href
 
       debug(`importing esm file %s`, fileURL)
 
+      // Must use `import` for `.mjs` files - require is only for CommonJS.
       return await import(fileURL)
     } catch (err) {
-      debug('error loading file via native Node.js module loader %s', err.message)
+      debug('error loading file %s via native Node.js ESM module loader %s', file, err.message)
+    }
+
+    try {
+      debug(`require('%s') file`, file)
+
+      return require(file)
+    } catch (err) {
+      // Unknown or unexpected error
+      // Just throw it - it will propogate to launchpad (open mode) or the terminal (run mode)
+      debug('error loading file %s via native Node.js CJS module loader %s', file, err.message)
       throw err
     }
   }
