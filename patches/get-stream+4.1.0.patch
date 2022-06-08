@@ -1,0 +1,15 @@
+diff --git a/node_modules/get-stream/index.js b/node_modules/get-stream/index.js
+index 7e5584a..d664dc5 100644
+--- a/node_modules/get-stream/index.js
++++ b/node_modules/get-stream/index.js
+@@ -37,7 +37,9 @@ function getStream(inputStream, options) {
+ 		});
+ 
+ 		stream.on('data', () => {
+-			if (stream.getBufferedLength() > maxBuffer) {
++			// patch to avoid 'stderr maxBuffer exceeded' error from lerna in CI
++			// https://github.com/lerna/lerna/issues/2690
++			if (stream.getBufferedLength() > maxBuffer && !process.env.__SKIP_GET_STREAM_LENGTH_CHECK) {
+ 				rejectPromise(new MaxBufferError());
+ 			}
+ 		});

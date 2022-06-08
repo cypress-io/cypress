@@ -1210,8 +1210,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --max-buffer `node -p '100*(1024**2)'`
+            - run: __SKIP_GET_STREAM_LENGTH_CHECK=true yarn lerna run build-prod --stream --max-buffer `node -p '100*(1024**2)'`
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
