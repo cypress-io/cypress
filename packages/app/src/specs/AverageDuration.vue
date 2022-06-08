@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo?.data?.averageDuration"
-    class="flex justify-end"
+    class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
     {{ getDurationString(props.gql?.avgDurationInfo?.data?.averageDuration ?? 0 ) }}

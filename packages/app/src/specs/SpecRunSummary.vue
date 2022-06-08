@@ -113,48 +113,56 @@ const statusText = computed(() => {
   }
 })
 
-const highlightColor = computed(() => {
-  if (!props.run?.status) return 'gray-500'
+const statusColor = computed(() => {
+  if (!props.run?.status) return 'gray'
 
   switch (props.run.status) {
     case 'OVERLIMIT':
     case 'ERRORED':
     case 'TIMEDOUT':
-      return 'orange-500'
+      return 'orange'
     case 'FAILED':
-      return 'red-500'
+      return 'red'
     case 'PASSED':
-      return 'jade-500'
+      return 'jade'
     case 'RUNNING':
-      return 'indigo-700'
+      return 'indigo'
     case 'CANCELLED':
     case 'NOTESTS':
-    default: return 'gray-500'
+    default: return 'gray'
   }
 })
 
+const highlightColor = computed(() => {
+  const color = statusColor.value
+
+  if (color === 'gray') return 'gray-500'
+
+  return `${color}-400`
+})
+
 const statusTextColor = computed(() => {
-  const color = highlightColor.value
+  const color = statusColor.value
 
-  if (color === 'gray-500') return 'gray-700'
+  if (color === 'gray') return 'gray-700'
 
-  return color
+  return `${color}-500`
 })
 
 </script>
 
 <style lang="scss" scoped>
-.orange-500 {
-    border-top: 4px solid $orange-500 !important;
+.orange-400 {
+    border-top: 4px solid $orange-400 !important;
 }
-.red-500 {
-    border-top: 4px solid $red-500 !important;
+.red-400 {
+    border-top: 4px solid $red-400 !important;
 }
-.jade-500 {
-    border-top: 4px solid $jade-500 !important;
+.jade-400 {
+    border-top: 4px solid $jade-400 !important;
 }
-.indigo-700 {
-    border-top: 4px solid $indigo-700 !important;
+.indigo-400 {
+    border-top: 4px solid $indigo-400 !important;
 }
 .gray-500 {
     border-top: 4px solid $gray-500 !important;

@@ -4,7 +4,7 @@
     :is-interactive="true"
   >
     <div
-      class="decoration-dashed underline underline-gray-300 underline-offset-4"
+      class="decoration-dotted underline underline-gray-300 underline-offset-4"
       tabindex="0"
       data-cy="last-updated-header"
     >

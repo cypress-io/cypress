@@ -1,19 +1,27 @@
 <template>
   <div
-    class="h-full grid gap-9px git-info-row items-center"
-    :class="{'grid-cols-[16px,auto]': classes.icon}"
+    class="h-full grid grid-col-1 git-info-row justify-start items-center"
     data-cy="git-info-row"
   >
     <Tooltip
       v-if="classes.icon"
       :key="props.gql?.statusType ?? undefined"
       placement="top"
-      class="h-full grid items-center"
+      class="h-full"
     >
-      <component
-        :is="classes.icon"
-        :class="classes.iconClasses"
-      />
+      <div class="flex h-full gap-9px justify-start items-center">
+        <div>
+          <component
+            :is="classes.icon"
+            :class="classes.iconClasses"
+          />
+        </div>
+        <div
+          class="text-gray-700 overflow-hidden truncate"
+        >
+          {{ props.gql?.lastModifiedHumanReadable ?? '' }}
+        </div>
+      </div>
       <template
         #popper
       >
@@ -30,11 +38,6 @@
         </div>
       </template>
     </Tooltip>
-    <div
-      class="text-gray-700 overflow-hidden truncate"
-    >
-      {{ props.gql?.lastModifiedHumanReadable ?? '' }}
-    </div>
   </div>
 </template>
 

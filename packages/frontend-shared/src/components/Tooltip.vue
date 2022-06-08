@@ -8,6 +8,7 @@
     :distance="distance"
     :skidding="skidding"
     :auto-hide="false /* to prevent the popper from getting focus */"
+    :delay="{show: 0, hide: 100 }"
   >
     <slot />
     <template
