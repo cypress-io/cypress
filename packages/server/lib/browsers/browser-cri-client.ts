@@ -67,7 +67,7 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 }
 
 export class BrowserCriClient {
-  private _currentlyAttachedTarget: CRIWrapper.Client | undefined
+  currentlyAttachedTarget: CRIWrapper.Client | undefined
   private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
@@ -88,10 +88,6 @@ export class BrowserCriClient {
 
       return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
     }, browserName, port)
-  }
-
-  get currentlyAttachedTarget (): CRIWrapper.Client | undefined {
-    return this._currentlyAttachedTarget
   }
 
   /**
@@ -129,9 +125,9 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this._currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
 
-      return this._currentlyAttachedTarget
+      return this.currentlyAttachedTarget
     }, this.browserName, this.port)
   }
 
@@ -161,7 +157,7 @@ export class BrowserCriClient {
     ])
 
     if (target) {
-      this._currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
     }
   }
 
