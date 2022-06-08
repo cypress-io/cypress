@@ -80,6 +80,15 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
+  function isExpectedError (file, err) {
+    const cannotFindConfigFileError = err.message.includes('Cannot find module') && err.message.includes(file)
+
+    // Both of ERR_REQUIRE_ESM and ERR_UNKNOWN_FILE_EXTENSION are expected.
+    // We attempt to handle those files with the `require` statement in the next try/catch.
+    // If they fail again, we just throw the error, which propogates to the user.
+    return err.stack.includes('[ERR_REQUIRE_ESM]') || err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') || cannotFindConfigFileError
+  }
+
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
@@ -95,7 +104,13 @@ function run (ipc, file, projectRoot) {
       // Must use `import` for `.mjs` files - require is only for CommonJS.
       return await import(fileURL)
     } catch (err) {
-      debug('error loading file %s via native Node.js ESM module loader %s', file, err.message)
+      if (isExpectedError(file, err)) {
+        debug('error loading file %s via native Node.js ESM module loader %s', file, err.message)
+      } else {
+        // This means it is truly unexpected - such as a syxtar error.
+        // Just throw it - it will propogate to launchpad (open mode) or the terminal (run mode)
+        throw err
+      }
     }
 
     try {
