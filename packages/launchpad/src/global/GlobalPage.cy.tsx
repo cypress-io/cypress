@@ -68,14 +68,6 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
     it('renders projects', () => {
       cy.findByText(testProject).should('be.visible')
       cy.findByText(testProjectPath).should('be.visible')
-      // validate that there is some padding on the bottom
-      cy.get('[data-cy="project-card"]')
-      .parent()
-      .invoke('outerHeight')
-      .then((parentHeight) => {
-        cy.get('[data-cy="project-card"]').invoke('outerHeight').should('be.lt', parentHeight)
-        cy.percySnapshot()
-      })
     })
 
     it('can filter down the projects by name', () => {
