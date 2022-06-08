@@ -126,6 +126,7 @@ describe('e2e sessions', () => {
       hosts: {
         '*.foo.com': '127.0.0.1',
       },
+      e2e: {},
     },
   })
 
