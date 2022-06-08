@@ -81,7 +81,7 @@ executors:
       xcode: "13.0.0"
     resource_class: macos.x86.medium.gen2
     environment:
-      PLATFORM: mac
+      PLATFORM: darwin
 
   # executor to run on Windows - based off of the windows-orb default executor since it is
   # not customizable enough to align with our existing setup.
@@ -97,6 +97,8 @@ executors:
 
   darwin-arm64:
     machine: true
+    environment:
+      PLATFORM: darwin
     # you may need to add this resource_class to the job itself if it sets a default value for resource_class
     # resource_class: cypress-io/latest_m1
 
