@@ -368,6 +368,8 @@ commands:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     steps:
+      # installing NVM will use git+ssh, so update known_hosts
+      - update_known_hosts
       - run:
           name: Install Node
           command: |
@@ -1037,6 +1039,15 @@ commands:
             - cypress/binary-url.json
             - cypress/npm-package-url.json
 
+  update_known_hosts:
+    description: Ensures that we have the latest Git public keys to prevent git+ssh from failing.
+    steps:
+    - run:
+        name: Update known_hosts with github.com keys
+        command: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
@@ -1218,11 +1229,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run:
-          name: Update known_hosts with github.com keys
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - update_known_hosts
       - run: yarn test-npm-package-release-script
 
   lint-types:
