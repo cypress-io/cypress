@@ -32,6 +32,7 @@ import {
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
+import { hasTypeScriptInstalled } from '../util'
 
 const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
@@ -67,16 +68,6 @@ export function getDiff (oldConfig: any, newConfig: any) {
 
     return acc
   }, result)
-}
-
-function hasTypeScriptInstalled (projectRoot: string) {
-  try {
-    require.resolve('typescript', { paths: [projectRoot] })
-
-    return true
-  } catch (e) {
-    return false
-  }
 }
 
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
