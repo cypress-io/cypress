@@ -1083,7 +1083,7 @@ jobs:
           name: Check env canaries on Mac/Linux
           command: |
             # Windows CircleCI does not have a way to pull per-job env
-            [[ $PLATFORM != 'windows' ]] && node ./scripts/circle-env.js --check-canaries
+            [[ $PLATFORM != 'windows' ]] && node ./scripts/circle-env.js --check-canaries || true
       - build-and-persist
       - store-npm-logs
 
