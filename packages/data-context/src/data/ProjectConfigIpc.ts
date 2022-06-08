@@ -3,6 +3,7 @@ import { CypressError, getError } from '@packages/errors'
 import type { FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions } from 'child_process'
 import EventEmitter from 'events'
+import { pathToFileURL } from 'url'
 import fs from 'fs-extra'
 import path from 'path'
 import inspector from 'inspector'
@@ -15,7 +16,8 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsNodeEsm = require.resolve('ts-node/esm/transpile-only')
+// pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
+const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
 const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
@@ -151,6 +153,7 @@ export class ProjectConfigIpc extends EventEmitter {
 
       debug('trigger the load of the file')
       this.once('ready', () => {
+        debug('ready - sending loadConfig to child process')
         this.send('loadConfig')
       })
     })
@@ -240,8 +243,6 @@ export class ProjectConfigIpc extends EventEmitter {
       .value()
     }
 
-    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
-
     let isProjectUsingESModules = false
 
     try {
@@ -270,6 +271,8 @@ export class ProjectConfigIpc extends EventEmitter {
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
         const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
 
+        debug('using tsNodeEsm via env. variable: %s', tsNodeEsmLoader)
+
         if (childOptions.env.NODE_OPTIONS) {
           childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
         } else {
@@ -284,6 +287,8 @@ export class ProjectConfigIpc extends EventEmitter {
         // so we need to load and evaluate the hook first using the `--require` module API.
         const tsNodeLoader = `--require ${tsNode}`
 
+        debug('using tsNode via env. variable: %s', tsNode)
+
         if (childOptions.env.NODE_OPTIONS) {
           childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
         } else {
@@ -294,6 +299,8 @@ export class ProjectConfigIpc extends EventEmitter {
       // Just use Node's built-in ESM support.
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
     }
+
+    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 
