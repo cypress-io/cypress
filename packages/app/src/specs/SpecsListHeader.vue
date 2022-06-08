@@ -14,6 +14,7 @@
     >
       <template #suffix>
         <button
+          v-if="props.modelValue"
           data-cy="clear-search-button"
           class="border-transparent rounded-md flex outline-none h-24px mr-16px w-24px duration-300 items-center justify-center group hocus-default hocus:ring-0 hocus:bg-indigo-50"
           :aria-label="t('specPage.clearSearch')"
@@ -93,9 +94,6 @@ const onInput = (e: Event) => {
 }
 
 const clearInput = (e: Event) => {
-  const button = (e.currentTarget as HTMLButtonElement)
-
-  button?.blur()
   emit('update:modelValue', '')
 }
 </script>

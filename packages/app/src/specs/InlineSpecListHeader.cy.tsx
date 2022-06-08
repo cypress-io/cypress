@@ -10,7 +10,6 @@ describe('InlineSpecListHeader', () => {
     cy.wrap(search).as('search')
 
     const methods = {
-      search: search.value,
       'onUpdate:search': (val: string) => {
         search.value = val
       },
@@ -19,7 +18,7 @@ describe('InlineSpecListHeader', () => {
 
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        <InlineSpecListHeader {...methods} resultCount={resultCount} />
+        <InlineSpecListHeader {...methods} search={search.value} resultCount={resultCount} />
       </div>))
   }
 
@@ -42,6 +41,9 @@ describe('InlineSpecListHeader', () => {
 
   it('clears search field when clear button is clicked', () => {
     mountWithResultCount(0)
+
+    cy.findByTestId('clear-search-button')
+    .should('not.exist')
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
     .type('abcd', { delay: 0, force: true })

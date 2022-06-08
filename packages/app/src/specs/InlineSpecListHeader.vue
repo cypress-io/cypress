@@ -48,6 +48,7 @@
         {{ t('specPage.searchPlaceholder') }}
       </label>
       <button
+        v-if="props.search"
         data-cy="clear-search-button"
         class="border-transparent rounded-md flex outline-none h-24px my-4px inset-y-0 right-0 w-24px duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
         :aria-label="t('specPage.clearSearch')"
@@ -114,12 +115,8 @@ const onInput = (e: Event) => {
 }
 
 const clearInput = (e: Event) => {
-  const button = (e.currentTarget as HTMLButtonElement)
-
-  button?.blur()
   emit('update:search', '')
 }
-
 </script>
 
 <style scoped>
