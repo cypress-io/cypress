@@ -409,6 +409,18 @@ Each package is responsible for building itself and testing itself and can do so
 | `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
 | `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
 
+#### Internal Vite Options
+When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
+###### `CYPRESS_INTERNAL_VITE_DEV`
+Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
+###### `CYPRESS_INTERNAL_VITE_INSPECT` 
+Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly.
+###### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING` 
+Set to `true` when doing internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide.
+###### `CYPRESS_INTERNAL_VITE_APP_PORT` 
+Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
+###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT` 
+Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
 #### Debug Logs
 
 Many Cypress packages print out debugging information to console via the `debug` module. See ["Debug logs"](./guides/debug-logs.md) for more information.
