@@ -2547,30 +2547,30 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
           - system-tests-node-modules-install
 
-mac-workflow: &mac-workflow
+mac-x64-workflow: &mac-x64-workflow
   jobs:
     - node_modules_install:
-        name: darwin-node-modules-install
+        name: darwin-x64-node-modules-install
         executor: mac
         resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
 
     - build:
-        name: darwin-build
+        name: darwin-x64-build
         context: test-runner:env-canary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - darwin-node-modules-install
+          - darwin-x64-node-modules-install
 
     - lint:
-        name: darwin-lint
+        name: darwin-x64-lint
         executor: mac
         requires:
-          - darwin-build
+          - darwin-x64-build
 
     - create-build-artifacts:
-        name: darwin-create-build-artifacts
+        name: darwin-x64-create-build-artifacts
         context:
           - test-runner:sign-mac-binary
           - test-runner:upload
@@ -2578,13 +2578,13 @@ mac-workflow: &mac-workflow
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - darwin-build
+          - darwin-x64-build
 
     - test-kitchensink:
-        name: darwin-test-kitchensink
+        name: darwin-x64-test-kitchensink
         executor: mac
         requires:
-          - darwin-build
+          - darwin-x64-build
 
 mac-arm64-workflow: &mac-arm64-workflow
   jobs:
@@ -2686,8 +2686,8 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
-  mac:
-    <<: *mac-workflow
+  mac-x64:
+    <<: *mac-x64-workflow
     <<: *mac-workflow-filters
   mac-arm64:
     <<: *mac-arm64-workflow
