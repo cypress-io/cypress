@@ -623,7 +623,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.findByText('Learn more.').click()
+      cy.findByText('Learn more').click()
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')
       .should('equal', 'https://on.cypress.io/guides/configuration')
