@@ -4,7 +4,7 @@
       id="spec-filter"
       :input-ref="props.specsListInputRefFn"
       type="search"
-      class="flex-grow h-full min-w-100px"
+      class="flex-grow h-full min-w-200px"
       prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
       :prefix-icon="IconMagnifyingGlass"
       :model-value="props.modelValue"
