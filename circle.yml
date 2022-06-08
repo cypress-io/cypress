@@ -34,7 +34,7 @@ mainBuildFilters: &mainBuildFilters
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
 # so just add your branch to the list here to build and test on Mac
-macWorkflowFilters: &mac-workflow-filters
+macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
@@ -95,7 +95,7 @@ executors:
     environment:
       PLATFORM: windows
 
-  mac-arm64:
+  darwin-arm64:
     machine: true
     # you may need to add this resource_class to the job itself if it sets a default value for resource_class
     # resource_class: cypress-io/latest_m1
@@ -2547,7 +2547,7 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
           - system-tests-node-modules-install
 
-mac-x64-workflow: &mac-x64-workflow
+darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
@@ -2586,17 +2586,17 @@ mac-x64-workflow: &mac-x64-workflow
         requires:
           - darwin-x64-build
 
-mac-arm64-workflow: &mac-arm64-workflow
+darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
     - node_modules_install:
         name: darwin-arm64-node-modules-install
-        executor: mac-arm64
+        executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
-        executor: mac-arm64
+        executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-node-modules-install
@@ -2607,14 +2607,14 @@ mac-arm64-workflow: &mac-arm64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
-        executor: mac-arm64
+        executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
     - test-kitchensink:
         name: darwin-arm64-test-kitchensink
-        executor: mac-arm64
+        executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
@@ -2686,11 +2686,11 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
-  mac-x64:
-    <<: *mac-x64-workflow
-    <<: *mac-workflow-filters
-  mac-arm64:
-    <<: *mac-arm64-workflow
-    <<: *mac-workflow-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+    <<: *darwin-workflow-filters
+  darwin-arm64:
+    <<: *darwin-arm64-workflow
+    <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
