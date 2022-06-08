@@ -80,8 +80,8 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
-  function isEsmRelatedError (file, err) {
-    const cannotFindConfigFileError = err.message.includes('Cannot find module') && err.message.includes(file)
+  function isEsmRelatedError (err) {
+    const cannotFindConfigFileError = err.message.includes('Cannot find module')
     const notSupportedError = err.message.includes('Not supported')
 
     return (
@@ -89,7 +89,7 @@ function run (ipc, file, projectRoot) {
       // We attempt to handle those files with the `require` statement in the next try/catch.
       err.stack.includes('[ERR_REQUIRE_ESM]') ||
       err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') ||
-      // If we have a cypress.config.ts, this gives "cannot find config.ts"
+      // If we have a cypress.config.ts, and they are using commonsjs, it will throw "cannot find cypress.config.ts".
       // We swallow these and try to `require` them later with ts-node which will succeed.
       cannotFindConfigFileError || notSupportedError
     )
@@ -115,7 +115,7 @@ function run (ipc, file, projectRoot) {
       // For those cases, we do not error, and attempt to load the module in the next try/catch.
       // For other errors, eg syntax errors, we throw here and surface them in launchpad (open mode)
       // or the terminal (run mode).
-      if (!isEsmRelatedError(file, err)) {
+      if (!isEsmRelatedError(err)) {
         throw err
       }
 
