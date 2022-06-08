@@ -959,7 +959,7 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
-            [[ $PLATFORM == 'darwin' ]] xcode-select -r || true
+            [[ $PLATFORM == 'darwin' ]] && xcode-select -r || true
             node --version
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
