@@ -10,7 +10,7 @@ const graphqlOpts = {
     'utf8',
   ),
 }
-
+/*hskjcuhaszkcixhxn*/
 const validators = specifiedRules
 .map((rule) => rule.name)
 .filter(
