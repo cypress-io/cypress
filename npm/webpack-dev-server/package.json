@@ -2,7 +2,6 @@
   "name": "@cypress/webpack-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
-  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -18,11 +17,10 @@
     "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
-    "find-up": "6.3.0",
+    "find-up": "5.0.0",
     "fs-extra": "9.1.0",
     "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
-    "local-pkg": "0.4.1",
     "speed-measure-webpack-plugin": "1.4.2",
     "tslib": "^2.3.1",
     "webpack-dev-server": "^4.7.4",

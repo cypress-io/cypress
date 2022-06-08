@@ -1,4 +1,3 @@
-/// <reference types="Cypress" />
 /// <reference path="../support/e2e.ts" />
 
 describe('Config options', () => {
@@ -46,6 +45,17 @@ describe('Config options', () => {
 
     cy.visitApp()
     cy.contains(specWithWhitespace).click()
+    cy.get('.passed > .num').should('contain', 1)
+  })
+
+  it('supports @cypress/vite-dev-server', () => {
+    cy.scaffoldProject('vite2.9.1-react')
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
   })
 })

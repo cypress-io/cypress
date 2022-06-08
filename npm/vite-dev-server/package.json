@@ -2,7 +2,6 @@
   "name": "@cypress/vite-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Vite Dev Server for Component Testing",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
@@ -17,8 +16,7 @@
   },
   "dependencies": {
     "debug": "4.3.3",
-    "find-up": "6.3.0",
-    "local-pkg": "0.4.1",
+    "find-up": "5.0.0",
     "pathe": "0.2.0"
   },
   "devDependencies": {
