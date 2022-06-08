@@ -80,6 +80,15 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
+  function isExpectedError (file, err) {
+    const cannotFindConfigFileError = err.message.includes('Cannot find module') && err.message.includes(file)
+
+    // Both of ERR_REQUIRE_ESM and ERR_UNKNOWN_FILE_EXTENSION are expected.
+    // We attempt to handle those files with the `require` statement in the next try/catch.
+    // If they fail again, we just throw the error, which propogates to the user.
+    return err.stack.includes('[ERR_REQUIRE_ESM]') || err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') || cannotFindConfigFileError
+  }
+
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
@@ -92,9 +101,18 @@ function run (ipc, file, projectRoot) {
 
       debug(`importing esm file %s`, fileURL)
 
-      // Must use `import` for `.mjs` files - require is only for CommonJS.
+      // Must use `import` for ESM only (eg .mjs, `type: module`, etc)
+      // The next try/catch will handle CommonJS with `require`.
       return await import(fileURL)
     } catch (err) {
+      // There are some errors we expect - cypress.config that cannot be loaded via `await import`.
+      // For those cases, we do not error, and attempt to load the module in the next try/catch.
+      // For other errors, eg syntax errors, we throw here and surface them in launchpad (open mode)
+      // or the terminal (run mode).
+      if (!isExpectedError(file, err)) {
+        throw err
+      }
+
       debug('error loading file %s via native Node.js ESM module loader %s', file, err.message)
     }
 
