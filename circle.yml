@@ -958,7 +958,7 @@ commands:
           no_output_timeout: "45m"
           command: |
             node --version
-            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+            DEBUG=* yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
@@ -2612,12 +2612,12 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         requires:
           - darwin-arm64-build
 
-    - test-kitchensink:
-        name: darwin-arm64-test-kitchensink
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        requires:
-          - darwin-arm64-build
+    # - test-kitchensink:
+    #     name: darwin-arm64-test-kitchensink
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     requires:
+    #       - darwin-arm64-build
 
 windows-workflow: &windows-workflow
   jobs:
