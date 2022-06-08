@@ -40,6 +40,17 @@ describe('InlineSpecListHeader', () => {
     .should('have.been.called')
   })
 
+  it('clears search field when clear button is clicked', () => {
+    mountWithResultCount(0)
+
+    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    .type('abcd', { delay: 0, force: true })
+    .get('@search').its('value').should('eq', 'abcd')
+
+    cy.findByTestId('clear-search-button').click()
+    cy.get('@search').its('value').should('eq', '')
+  })
+
   it('exposes the result count correctly to assistive tech', () => {
     mountWithResultCount(0)
     cy.contains('No Matches')

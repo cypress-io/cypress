@@ -3,7 +3,7 @@
     class="border-b-1 border-gray-900 h-64px mx-16px grid gap-8px grid-cols-[minmax(0,1fr),24px] pointer-cursor items-center"
   >
     <div
-      class="relative items-center group"
+      class="relative items-center"
       @click="input?.focus()"
     >
       <div
@@ -23,7 +23,7 @@
           outline-none
           bg-gray-1000
           border-0
-          pl-6
+          px-6
           placeholder-gray-700
           text-gray-500
         "
@@ -47,6 +47,17 @@
       >
         {{ t('specPage.searchPlaceholder') }}
       </label>
+      <button
+        data-cy="clear-search-button"
+        class="border-transparent rounded-md flex outline-none h-24px my-4px inset-y-0 right-0 w-24px duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
+        :aria-label="t('specPage.clearSearch')"
+        @click.stop="clearInput"
+      >
+        <i-cy-delete_x16
+          class="icon-light-gray-1000 group-hocus:icon-dark-indigo-300"
+          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
+        />
+      </button>
     </div>
     <button
       tabindex="-1"
@@ -100,6 +111,13 @@ const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
 
   emit('update:search', value)
+}
+
+const clearInput = (e: Event) => {
+  const button = (e.currentTarget as HTMLButtonElement)
+
+  button?.blur()
+  emit('update:search', '')
 }
 
 </script>
