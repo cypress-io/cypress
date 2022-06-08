@@ -140,6 +140,8 @@ export function mergeDefaults (
 
   const defaultsForRuntime = configUtils.getDefaultValues(options)
 
+  debug('TYLER: defaultsForRuntime', defaultsForRuntime.supportFile)
+
   _.defaultsDeep(config, defaultsForRuntime)
 
   let additionalIgnorePattern = config.additionalIgnorePattern
@@ -419,22 +421,35 @@ export async function setSupportFileAndFolder (obj) {
 
   const ctx = getCtx()
 
-  const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
+  debug('TYLER: supportFile from config', obj.supportFile)
 
-  if (supportFilesByGlob.length > 1) {
-    return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
-  }
+  let sf
 
-  if (supportFilesByGlob.length === 0) {
-    if (obj.resolved.supportFile.from === 'default') {
-      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+  const supportFileRelativeToRoot = relativeToProjectRoot(obj.projectRoot, obj.supportFile)
+
+  if (obj.resolved.supportFile.from === 'default') {
+    const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, supportFileRelativeToRoot)
+
+    if (supportFilesByGlob.length > 1) {
+      return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
     }
 
-    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
-  }
+    if (supportFilesByGlob.length === 0) {
+      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', supportFileRelativeToRoot)
+    }
 
-  // TODO move this logic to find support file into util/path_helpers
-  const sf = supportFilesByGlob[0]
+    debug(`TYLER: globbed supportFile ${supportFilesByGlob[0]}`)
+
+    sf = supportFilesByGlob[0]
+  } else {
+    const fileExists = await ctx.file.checkIfFileExists(supportFileRelativeToRoot)
+
+    if (!fileExists) {
+      return errors.throwErr('SUPPORT_FILE_NOT_FOUND', supportFileRelativeToRoot)
+    }
+
+    sf = obj.supportFile
+  }
 
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)
