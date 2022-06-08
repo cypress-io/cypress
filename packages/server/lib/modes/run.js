@@ -1330,16 +1330,16 @@ module.exports = {
       })
     }
 
-    let firstSpec = true
+    let isFirstSpec = true
 
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
         displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
-      return this.runSpec(config, spec, options, estimated, firstSpec, index === length - 1)
+      return this.runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
       .tap(() => {
-        firstSpec = false
+        isFirstSpec = false
       })
       .get('results')
       .tap((results) => {
@@ -1435,7 +1435,7 @@ module.exports = {
     })
   },
 
-  runSpec (config, spec = {}, options = {}, estimated, firstSpec, lastSpec) {
+  runSpec (config, spec = {}, options = {}, estimated, isFirstSpec, isLastSpec) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1484,7 +1484,7 @@ module.exports = {
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
           browser,
-          shouldKeepTabOpen: !lastSpec,
+          shouldKeepTabOpen: !isLastSpec,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1497,7 +1497,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-          shouldLaunchNewTab: !firstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
+          shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
           // TODO(tim): investigate the socket disconnect
         }),
       })
