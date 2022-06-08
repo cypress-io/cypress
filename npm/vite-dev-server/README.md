@@ -47,7 +47,6 @@ From there, we check the "framework" field to source or define any known vite tr
 
 We then merge the sourced config with the user's vite config, and layer on our own transforms, and provide this to a vite instance. The vite instance used to create a vite-dev-server, which is returned.
 
-
 ## Changelog
 
 [Changelog](./CHANGELOG.md)
