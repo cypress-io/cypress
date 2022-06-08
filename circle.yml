@@ -960,7 +960,7 @@ commands:
           no_output_timeout: "45m"
           command: |
             node --version
-            DEBUG=* yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
