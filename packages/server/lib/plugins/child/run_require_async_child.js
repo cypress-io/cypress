@@ -82,11 +82,17 @@ function run (ipc, file, projectRoot) {
 
   function isExpectedError (file, err) {
     const cannotFindConfigFileError = err.message.includes('Cannot find module') && err.message.includes(file)
+    const notSupportedError = err.message.includes('Not supported')
 
-    // Both of ERR_REQUIRE_ESM and ERR_UNKNOWN_FILE_EXTENSION are expected.
-    // We attempt to handle those files with the `require` statement in the next try/catch.
-    // If they fail again, we just throw the error, which propogates to the user.
-    return err.stack.includes('[ERR_REQUIRE_ESM]') || err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') || cannotFindConfigFileError
+    return (
+      // Both of ERR_REQUIRE_ESM and ERR_UNKNOWN_FILE_EXTENSION are expected.
+      // We attempt to handle those files with the `require` statement in the next try/catch.
+      err.stack.includes('[ERR_REQUIRE_ESM]') ||
+      err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') ||
+      // If we have a cypress.config.ts, this gives "cannot find config.ts"
+      // We swallow these and try to `require` them later with ts-node which will succeed.
+      cannotFindConfigFileError || notSupportedError
+    )
   }
 
   // Config file loading of modules is tested within
