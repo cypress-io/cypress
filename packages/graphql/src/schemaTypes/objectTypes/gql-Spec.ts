@@ -49,7 +49,7 @@ export const Spec = objectType({
     })
 
     t.remoteField('cloudSpec', {
-      type: 'CloudProjectSpec',
+      type: 'CloudProjectSpecResult',
       remoteQueryField: 'cloudSpecByPath',
       shouldEagerFetch: () => false, // defaults to false to be fully lazy and rely on the UI to fetch as needed
       queryArgs: async (source, args, ctx) => {

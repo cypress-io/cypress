@@ -1,5 +1,5 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { list, objectType, subscriptionType } from 'nexus'
+import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
 
@@ -93,10 +93,23 @@ export const Subscription = subscriptionType({
           t.nonNull.string('target')
           t.nonNull.json('fragment')
           t.json('data')
+          t.json('errors')
         },
       })),
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('pushFragment', { sendInitial: false }),
       resolve: (source: PushFragmentData[], args, ctx) => source,
+    })
+
+    t.string('startPollingForSpecs', {
+      args: {
+        projectId: stringArg(),
+        branchName: stringArg(),
+      },
+      description: 'Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates',
+      subscribe: (source, args, ctx) => {
+        return ctx.remotePolling.subscribeAndPoll(args.branchName, args.projectId)
+      },
+      resolve: (o: string | null) => o,
     })
   },
 })

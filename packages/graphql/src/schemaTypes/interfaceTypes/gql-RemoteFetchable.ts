@@ -4,7 +4,7 @@ import type { RemoteFetchableStatus, NexusGenAbstractTypeMembers } from '../../g
 export interface RemoteFetchableShape {
   __typename: NexusGenAbstractTypeMembers['RemoteFetchable']
   id: string
-  status: RemoteFetchableStatus
+  fetchingStatus: RemoteFetchableStatus
   operation: string
   operationHash: string
   operationVariables: any
@@ -18,6 +18,7 @@ const FETCHABLE_MEMBERS = {
   FETCHING: 'Currently fetching',
   ERRORED: 'Errored while fetching',
   FETCHED: 'We have loaded the remote data',
+  OUTDATED: 'We need to re-fetch because we may have newer data',
 }
 
 const RemoteFetchableStatusEnum = enumType({
@@ -35,8 +36,8 @@ export const RemoteFetchable = interfaceType({
   description: 'Represents a container for a piece of remote data stitched into the graph',
   definition (t) {
     t.implements('Node')
-    t.nonNull.field('status', {
-      description: 'The current status of the fetchable data',
+    t.nonNull.field('fetchingStatus', {
+      description: 'The current fetching status of the fetchable data',
       type: RemoteFetchableStatusEnum,
     })
 
@@ -58,10 +59,6 @@ export const RemoteFetchable = interfaceType({
 
     t.nonNull.json('operationVariables', {
       description: 'The variables passed to the operation, for debugging purposes',
-    })
-
-    t.dateTime('latestSuccessfulFetch', {
-      description: 'Latest time the fetch was successful',
     })
   },
   resolveType: (t) => t.__typename,

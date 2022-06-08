@@ -127,11 +127,16 @@ export class GraphQLDataSource {
       isNode,
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
+      // operation: params.info.operation,
     })
+
+    // console.log(print(isNode ? docBuilder.queryNode : docBuilder.query))
+    // debugger
 
     Promise.resolve(execute({
       schema: params.info.schema,
       document: isNode ? docBuilder.queryNode : docBuilder.query,
+      variableValues: params.info.variableValues,
       rootValue: this.#makeRootValue(params, isNode, params.source),
       contextValue: params.ctx,
     })).then((result) => {
@@ -145,6 +150,7 @@ export class GraphQLDataSource {
         target: params.info.parentType.name,
         fragment: print(docBuilder.clientWriteFragment),
         data,
+        errors: result.errors,
       }])
     }).catch((e) => {
       debug(`pushFragment execution error %o`, e)

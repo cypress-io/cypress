@@ -543,7 +543,7 @@ export class ProjectDataSource {
     }
 
     // Get the saved state & resolve the lastProjectId
-    const savedState = await source.savedState()
+    const savedState = await source.savedState?.()
 
     if (savedState?.lastProjectId) {
       return savedState.lastProjectId

@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED' || props.gql.cloudSpec?.status === 'ERRORED'"
+    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.fetchingStatus === 'FETCHED' || props.gql.cloudSpec?.fetchingStatus === 'ERRORED'"
     class="h-full grid justify-items-end items-center"
   >
     <component
@@ -91,7 +91,7 @@ gql`
 mutation RunStatusDots_Refetch ($ids: [ID!]!) {
   loadRemoteFetchables(ids: $ids){
     id
-    status
+    fetchingStatus
   }
 }
 `
@@ -108,40 +108,44 @@ gql`
 fragment RunStatusDots on Spec {
   id
   specFileExtension
-  fileName  
+  fileName
   cloudSpec(name: "RunStatusDots") @include(if: $hasBranch) {
     id
-    status
+    fetchingStatus
     data {
-      id
-      specRuns(first: 4, fromBranch: $fromBranch) {
-        nodes {
-          id
-          runNumber
-          testsFailed{
-            min
-            max
+      __typename
+      ... on CloudProjectSpec {
+        id
+        retrievedAt
+        specRuns(first: 4, fromBranch: $fromBranch) {
+          nodes {
+            id
+            runNumber
+            testsFailed{
+              min
+              max
+            }
+            testsPassed{
+              min
+              max
+            }
+            testsPending{
+              min
+              max
+            }
+            testsSkipped{
+              min
+              max
+            }
+            createdAt
+            groupCount
+            specDuration{
+              min
+              max
+            }
+            status
+            url
           }
-          testsPassed{
-            min
-            max
-          }
-          testsPending{
-            min
-            max
-          }
-          testsSkipped{
-            min
-            max
-          }
-          createdAt
-          groupCount
-          specDuration{
-            min
-            max
-          }
-          status
-          url
         }
       }
     }
@@ -160,14 +164,14 @@ const props = withDefaults(defineProps<{
 
 watchEffect(
   () => {
-    if (props.isOnline && (props.gql.cloudSpec?.status === 'NOT_FETCHED' || props.gql.cloudSpec?.status === undefined)) {
+    if (props.isOnline && (props.gql.cloudSpec?.fetchingStatus === 'NOT_FETCHED' || props.gql.cloudSpec?.fetchingStatus === undefined)) {
       refetch()
     }
   },
 )
 
 const runs = computed(() => {
-  return props.gql.cloudSpec?.data?.specRuns?.nodes ?? []
+  return props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpec' ? props.gql.cloudSpec.data.specRuns?.nodes ?? [] : []
 })
 
 const dotClasses = computed(() => {

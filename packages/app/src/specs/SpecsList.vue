@@ -395,7 +395,7 @@ gql`
 mutation CloudData_Refetch ($ids: [ID!]!) {
   loadRemoteFetchables(ids: $ids){
     id
-    status
+    fetchingStatus
   }
 }
 `

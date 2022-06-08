@@ -26,7 +26,7 @@ import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
 import { pathToArray } from 'graphql/jsutils/Path'
 
-export type CloudDataResponse = ExecutionResult & Partial<OperationResult> & { executing?: Promise<ExecutionResult & Partial<OperationResult>> }
+export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
@@ -75,6 +75,7 @@ export interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
+  #lastCache?: string
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
@@ -105,6 +106,25 @@ export class CloudDataSource {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
                 cache.invalidate(...args)
+              },
+              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
+                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
+                  if (value instanceof Map) {
+                    const reducer = (obj: any, mapKey: any) => {
+                      obj[mapKey] = value.get(mapKey)
+
+                      return obj
+                    }
+
+                    return [...value.keys()].sort().reduce(reducer, {})
+                  }
+
+                  if (value instanceof Set) {
+                    return [...value].sort()
+                  }
+
+                  return value
+                })
               },
             },
           },
@@ -232,7 +252,7 @@ export class CloudDataSource {
    * so we can respond quickly on first-load if we have data. Since this is ultimately being used
    * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
    */
-  executeRemoteGraphQL (config: CloudExecuteRemote): Promise<CloudDataResponse> | CloudDataResponse {
+  executeRemoteGraphQL <T = any> (config: CloudExecuteRemote): Promise<CloudDataResponse<T>> | CloudDataResponse<T> {
     // We do not want unauthenticated requests to hit the remote schema
     if (!this.#user) {
       return { data: null }
@@ -264,6 +284,10 @@ export class CloudDataSource {
     return this.#maybeQueueDeferredExecute(config)
   }
 
+  updateCache () {
+    //
+  }
+
   // Invalidate individual fields in the GraphQL by hitting a "fake"
   // mutation and calling cache.invalidate on the internal cache
   // https://formidable.com/open-source/urql/docs/api/graphcache/#invalidate
@@ -275,10 +299,27 @@ export class CloudDataSource {
     `, { args }, {
       fetchOptions: {
         headers: {
-          // TODO: replace this with an exhange to filter out this request
+          // TODO: replace this with an exchange to filter out this request
           INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
         },
       },
     }).toPromise()
+  }
+
+  async getCache () {
+    await this.#cloudUrqlClient.mutation(`
+      mutation Internal_showUrqlCache { 
+        _showUrqlCache
+      }
+    `, { }, {
+      fetchOptions: {
+        headers: {
+          // TODO: replace this with an exchange to filter out this request
+          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
+        },
+      },
+    }).toPromise()
+
+    return JSON.parse(this.#lastCache ?? '')
   }
 }

@@ -30,7 +30,7 @@ import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
-import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
+import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
 
 const { t } = useI18n()
 
@@ -39,6 +39,7 @@ query SpecsPageContainer_BranchInfo {
   currentProject {
     id
     branch
+    projectId
   }
 }
 `
@@ -67,6 +68,12 @@ subscription SpecsPageContainer_specsChange($fromBranch: String!, $hasBranch: Bo
 }
 `
 
+gql`
+subscription SpecsPageContainer_specListPolling($fromBranch: String, $projectId: String) {
+  startPollingForSpecs(branchName: $fromBranch, projectId: $projectId)
+}
+`
+
 const branchInfo = useQuery({ query: SpecsPageContainer_BranchInfoDocument })
 
 const variables = computed(() => {
@@ -76,9 +83,21 @@ const variables = computed(() => {
   return { hasBranch, fromBranch }
 })
 
+const pollingVariables = computed(() => {
+  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? null
+  const projectId = branchInfo.data.value?.currentProject?.projectId ?? null
+
+  return { fromBranch, projectId }
+})
+
 useSubscription({
   query: SpecsPageContainer_SpecsChangeDocument,
   variables,
+})
+
+useSubscription({
+  query: SpecsPageContainer_SpecListPollingDocument,
+  variables: pollingVariables,
 })
 
 const query = useQuery({
@@ -107,7 +126,6 @@ const closeCreateSpecModal = () => {
   modalIsShown.value = false
   generator.value = null
 }
-
 </script>
 
 <route>

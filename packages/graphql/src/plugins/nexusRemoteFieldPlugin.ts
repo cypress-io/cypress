@@ -91,7 +91,7 @@ export const remoteFieldPlugin = plugin({
       name: 'remoteField',
       typeDescription: dedent`
         Adds a field which is resolved with data from from the Cloud API.
-        The "id" is refetchable via the loadRemoteData() / reloadRemoteData() APIs
+        The "id" is refetchable via the loadRemoteFetchables APIs
       `,
       typeDefinition: dedent`
         <FieldName extends string, RemoteField extends Exclude<keyof CloudQuery, '__typename' | undefined>>(fieldName: FieldName, config: RemoteFieldDefinitionConfig<TypeName, FieldName, RemoteField>): void
@@ -107,6 +107,7 @@ export const remoteFieldPlugin = plugin({
             definition (t) {
               t.implements(RemoteFetchable)
               t.nonNull.id('id', {
+                description: 'This ID is generated based on hashes of the queried data, and should be passed to the loadRemoteFetchables mutation to initiate loading the remote data',
                 resolve: (source, args, ctx) => ctx.remoteRequest.makeRefetchableId(fieldType, source.operationHash, source.operationVariables),
               })
 

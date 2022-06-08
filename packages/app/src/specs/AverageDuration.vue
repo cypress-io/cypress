@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo?.data?.averageDuration"
+    v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo.data?.__typename === 'CloudProjectSpec' && props.gql?.avgDurationInfo?.data?.averageDuration"
     class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
@@ -19,7 +19,7 @@ gql`
 mutation AverageDuration_Refetch ($ids: [ID!]!) {
   loadRemoteFetchables(ids: $ids){
     id
-    status
+    fetchingStatus
   }
 }
 `
@@ -38,10 +38,12 @@ fragment AverageDuration on Spec {
   fileName
   avgDurationInfo: cloudSpec(name: "AverageDuration") {
     id
-    status
+    fetchingStatus
     data {
-      id
-      averageDuration
+      ... on CloudProjectSpec {
+        id
+        averageDuration
+      }
     }
   }
 }

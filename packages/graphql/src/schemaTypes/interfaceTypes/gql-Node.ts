@@ -13,7 +13,9 @@ export const Node = interfaceType({
     })
   },
   resolveType: (t: any) => {
-    assert(t.__typename, `Cannot resolve Node without __typename: saw ${JSON.stringify(t)}`)
+    if (!t.__typename) {
+      assert(t.__typename, `Cannot resolve Node without __typename: saw ${String(t)}`)
+    }
 
     return t.__typename
   },

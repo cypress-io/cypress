@@ -42,6 +42,7 @@ import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
 import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 import { resetIssuedWarnings } from '@packages/config'
+import { RemotePollingDataSource } from './sources/RemotePollingDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -216,6 +217,11 @@ export class DataContext {
   @cached
   get project () {
     return new ProjectDataSource(this)
+  }
+
+  @cached
+  get remotePolling () {
+    return new RemotePollingDataSource(this)
   }
 
   @cached

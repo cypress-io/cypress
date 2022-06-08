@@ -66,6 +66,14 @@ type CachedUser implements Node {
 }
 
 """
+Represents a pollable status for clients to know when refetching data is required.
+"""
+type CloudLatestRunUpdateSpecData {
+  mostRecentUpdate: DateTime
+  pollingInterval: Int
+}
+
+"""
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
 type CloudOrganization implements Node {
@@ -198,6 +206,7 @@ type CloudProjectSpec implements Node {
     """The branch to measure flakiness against"""
     fromBranch: String!
   ): Boolean
+  retrievedAt: DateTime
   specPath: String
   specRuns(
     """Returns the elements in the list that come after the specified cursor"""
@@ -216,6 +225,15 @@ type CloudProjectSpec implements Node {
     last: Int
   ): CloudSpecRunConnection
 }
+
+"""Unable to find cloud spec in project"""
+type CloudProjectSpecNotFound {
+  """an error message"""
+  message: String!
+  retrievedAt: DateTime
+}
+
+union CloudProjectSpecResult = CloudProjectSpec | CloudProjectSpecNotFound | CloudProjectUnauthorized
 
 """Unauthorized access"""
 type CloudProjectUnauthorized {
@@ -345,6 +363,7 @@ type CloudSpecRun implements Node {
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+  retrievalDateTime: DateTime
   runNumber: Int
   specDuration: SpecDataAggregate
   status: CloudRunStatus
@@ -1052,6 +1071,9 @@ type Mutation {
   """Used internally to update the URQL cache in the CloudDataSource"""
   _cloudCacheInvalidate(args: JSON): Boolean
 
+  """Internal use only, clears the cloud cache"""
+  _showUrqlCache: JSON
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1287,6 +1309,7 @@ type ProjectPreferences {
 
 type PushFragmentPayload {
   data: JSON
+  errors: JSON
   fragment: JSON!
   target: String!
 }
@@ -1297,6 +1320,20 @@ type Query {
   authState: AuthState!
   baseError: ErrorWrapper
   cachedUser: CachedUser
+
+  """
+  Poll this query to determine when it's required to refresh run data for a given spec or branch. Returns the recommended time until next fetch. A 0 value means data is available.
+  """
+  cloudLatestRunUpdateSpecData(
+    """Clients active branch to search for builds"""
+    commitBranch: String!
+
+    """A list of Project slugs"""
+    projectSlug: String!
+
+    """Datetime since the fetched data"""
+    sinceDateTime: DateTime
+  ): CloudLatestRunUpdateSpecData
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
@@ -1319,23 +1356,6 @@ type Query {
     slugs: [String!]!
   ): [CloudProjectResult]
 
-  """
-  Poll this query to determine when it's required to refresh run data for a given spec or branch
-  """
-  cloudShouldRequestNewSpecData(
-    """Clients active branch to search for builds"""
-    commitBranch: String!
-
-    """A list of Project slugs"""
-    projectSlug: String!
-
-    """Datetime since the fetched data"""
-    sinceDateTime: DateTime!
-
-    """The spec paths we want to test for"""
-    specPaths: [String!]
-  ): Boolean
-
   """Gets a set of specs on a given project and branch"""
   cloudSpecByPath(
     """Slug of the project to which the set of specs belong"""
@@ -1343,7 +1363,7 @@ type Query {
 
     """The spec path to find"""
     specPath: String!
-  ): CloudProjectSpec
+  ): CloudProjectSpecResult
 
   """Gets a set of specs on a given project and branch"""
   cloudSpecsByPath(
@@ -1407,11 +1427,11 @@ interface RemoteFetchable implements Node {
   """JSON representation of the error response"""
   error: JSON
 
+  """The current fetching status of the fetchable data"""
+  fetchingStatus: RemoteFetchableStatus!
+
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
-
-  """Latest time the fetch was successful"""
-  latestSuccessfulFetch: DateTime
 
   """Prints the full operation sent for this query, for debugging purposes"""
   operation: String!
@@ -1421,9 +1441,6 @@ interface RemoteFetchable implements Node {
 
   """The variables passed to the operation, for debugging purposes"""
   operationVariables: JSON!
-
-  """The current status of the fetchable data"""
-  status: RemoteFetchableStatus!
 }
 
 """
@@ -1438,10 +1455,14 @@ type RemoteFetchableCloudProjectResult implements Node & RemoteFetchable {
 
   """JSON representation of the error response"""
   error: JSON
-  id: ID!
 
-  """Latest time the fetch was successful"""
-  latestSuccessfulFetch: DateTime
+  """The current fetching status of the fetchable data"""
+  fetchingStatus: RemoteFetchableStatus!
+
+  """
+  This ID is generated based on hashes of the queried data, and should be passed to the loadRemoteFetchables mutation to initiate loading the remote data
+  """
+  id: ID!
 
   """Prints the full operation sent for this query, for debugging purposes"""
   operation: String!
@@ -1451,25 +1472,30 @@ type RemoteFetchableCloudProjectResult implements Node & RemoteFetchable {
 
   """The variables passed to the operation, for debugging purposes"""
   operationVariables: JSON!
-
-  """The current status of the fetchable data"""
-  status: RemoteFetchableStatus!
 }
 
-"""Wrapper for the resolution remote RemoteFetchableCloudProjectSpec data"""
-type RemoteFetchableCloudProjectSpec implements Node & RemoteFetchable {
-  """Data resolved for the RemoteFetchableCloudProjectSpec from the cloud"""
-  data: CloudProjectSpec
+"""
+Wrapper for the resolution remote RemoteFetchableCloudProjectSpecResult data
+"""
+type RemoteFetchableCloudProjectSpecResult implements Node & RemoteFetchable {
+  """
+  Data resolved for the RemoteFetchableCloudProjectSpecResult from the cloud
+  """
+  data: CloudProjectSpecResult
 
   """The raw data response when resolving the data"""
   dataRaw: JSON
 
   """JSON representation of the error response"""
   error: JSON
-  id: ID!
 
-  """Latest time the fetch was successful"""
-  latestSuccessfulFetch: DateTime
+  """The current fetching status of the fetchable data"""
+  fetchingStatus: RemoteFetchableStatus!
+
+  """
+  This ID is generated based on hashes of the queried data, and should be passed to the loadRemoteFetchables mutation to initiate loading the remote data
+  """
+  id: ID!
 
   """Prints the full operation sent for this query, for debugging purposes"""
   operation: String!
@@ -1479,9 +1505,6 @@ type RemoteFetchableCloudProjectSpec implements Node & RemoteFetchable {
 
   """The variables passed to the operation, for debugging purposes"""
   operationVariables: JSON!
-
-  """The current status of the fetchable data"""
-  status: RemoteFetchableStatus!
 }
 
 enum RemoteFetchableStatus {
@@ -1496,6 +1519,9 @@ enum RemoteFetchableStatus {
 
   """Has not been fetched yet"""
   NOT_FETCHED
+
+  """We need to re-fetch because we may have newer data"""
+  OUTDATED
 }
 
 """A file that we just added to the filesystem during project setup"""
@@ -1524,7 +1550,7 @@ type Spec implements Node {
   cloudSpec(
     """A globally unique name for this field"""
     name: String!
-  ): RemoteFetchableCloudProjectSpec
+  ): RemoteFetchableCloudProjectSpecResult
 
   """The file extension (e.g. tsx, jsx)"""
   fileExtension: String!
@@ -1603,6 +1629,11 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
+
+  """
+  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
+  """
+  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

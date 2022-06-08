@@ -6,6 +6,7 @@ import {
   errorExchange,
   fetchExchange,
   subscriptionExchange,
+  CombinedError,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
@@ -26,6 +27,31 @@ import { initializeGlobalSubscriptions } from './urqlGlobalSubscriptions'
 
 const toast = useToast()
 
+let hasError = false
+
+export function showError (error: CombinedError) {
+  const message = `
+    GraphQL Field Path: [${error.graphQLErrors?.[0]?.path?.join(', ')}]:
+
+    ${error.message ?? error.graphQLErrors?.[0]?.message}
+
+    ${error.stack ?? error.graphQLErrors?.[0]?.stack ?? ''}
+  `
+
+  if (process.env.NODE_ENV !== 'production' && !hasError) {
+    hasError = true
+    toast.error(message, {
+      timeout: false,
+      onClose () {
+        hasError = false
+      },
+    })
+  }
+
+  // eslint-disable-next-line
+  console.error(error)
+}
+
 export function makeCacheExchange (schema: any = urqlSchema) {
   return graphcacheExchange({
     ...urqlCacheKeys,
@@ -33,10 +59,17 @@ export function makeCacheExchange (schema: any = urqlSchema) {
     updates: {
       Subscription: {
         pushFragment (parent, args, cache, info) {
-          const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string }[] }
+          const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string, errors: any }[] }
 
           for (const toPush of pushFragment) {
             cache.writeFragment(toPush.fragment, toPush.data, toPush.variables ?? undefined)
+
+            if (toPush.errors?.length) {
+              // TODO: clean this up
+              showError({
+                graphQLErrors: toPush.errors,
+              } as CombinedError)
+            }
           }
         },
       },
@@ -85,8 +118,6 @@ interface AppUrqlClientConfig {
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
 export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
-  let hasError = false
-
   const exchanges: Exchange[] = [dedupExchange]
 
   const io = getPubSubSource(config)
@@ -106,26 +137,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   exchanges.push(
     errorExchange({
       onError (error) {
-        const message = `
-        GraphQL Field Path: [${error.graphQLErrors?.[0]?.path?.join(', ')}]:
-
-        ${error.message}
-
-        ${error.stack ?? ''}
-      `
-
-        if (process.env.NODE_ENV !== 'production' && !hasError) {
-          hasError = true
-          toast.error(message, {
-            timeout: false,
-            onClose () {
-              hasError = false
-            },
-          })
-        }
-
-        // eslint-disable-next-line
-        console.error(error)
+        showError(error)
       },
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/

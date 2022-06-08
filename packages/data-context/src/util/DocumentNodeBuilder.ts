@@ -27,6 +27,7 @@ export class DocumentNodeBuilder {
     this.frag = {
       kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'GeneratedFragment' },
+      // variableDefinitions: info.operation?.variableDefinitions ?? [],
       typeCondition: {
         kind: 'NamedType',
         name: { kind: 'Name', value: info.parentType.name },

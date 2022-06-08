@@ -18,7 +18,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
-  savedState: () => Promise<Maybe<SavedStateShape>>
+  savedState?: () => Promise<Maybe<SavedStateShape>>
 }
 
 export interface DevStateShape {

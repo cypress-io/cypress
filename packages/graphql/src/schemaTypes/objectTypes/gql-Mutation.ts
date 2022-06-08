@@ -661,5 +661,14 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.json('_showUrqlCache', {
+      description: 'Internal use only, clears the cloud cache',
+      resolve: async (source, args, ctx) => {
+        const { data } = await ctx.cloud.getCache()
+
+        return data
+      },
+    })
   },
 })

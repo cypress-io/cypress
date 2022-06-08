@@ -8,6 +8,7 @@ gql`
      target
      fragment
      data
+     errors
    }
  }
 `

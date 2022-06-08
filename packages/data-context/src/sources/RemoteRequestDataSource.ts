@@ -72,7 +72,7 @@ export class RemoteRequestDataSource {
     if (ctx.cloud.isResolving(params)) {
       return {
         ...partialResult,
-        status: 'FETCHING',
+        fetchingStatus: 'FETCHING',
       }
     }
 
@@ -86,13 +86,13 @@ export class RemoteRequestDataSource {
 
         return {
           ...partialResult,
-          status: 'FETCHING',
+          fetchingStatus: 'FETCHING',
         }
       }
 
       return {
         ...partialResult,
-        status: 'ERRORED',
+        fetchingStatus: 'ERRORED',
         error: { ...errored },
       }
     }
@@ -106,7 +106,7 @@ export class RemoteRequestDataSource {
 
       return {
         ...partialResult,
-        status: 'FETCHING',
+        fetchingStatus: 'FETCHING',
       }
     }
 
@@ -116,7 +116,7 @@ export class RemoteRequestDataSource {
         // If we're not fetching, say it's not fetched but put the data under dataRaw for debugging
         return {
           ...partialResult,
-          status: 'NOT_FETCHED',
+          fetchingStatus: 'NOT_FETCHED',
           dataRaw: cachedData.data,
         }
       }
@@ -124,7 +124,7 @@ export class RemoteRequestDataSource {
       // Otherwise, mark as fetched
       return {
         ...partialResult,
-        status: 'FETCHED',
+        fetchingStatus: 'FETCHED',
         data: cachedData.data?.[params.remoteQueryField],
         dataRaw: cachedData.data,
       }
@@ -133,7 +133,7 @@ export class RemoteRequestDataSource {
     if (!shouldFetch) {
       return {
         ...partialResult,
-        status: 'NOT_FETCHED',
+        fetchingStatus: 'NOT_FETCHED',
       }
     }
 
@@ -142,7 +142,7 @@ export class RemoteRequestDataSource {
 
     return {
       ...partialResult,
-      status: 'FETCHING',
+      fetchingStatus: 'FETCHING',
     }
   }
 
@@ -185,6 +185,7 @@ export class RemoteRequestDataSource {
             data,
             error,
           },
+          errors: result.errors,
         }])
       }
     })
