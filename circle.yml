@@ -377,7 +377,7 @@ commands:
             [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             if ! which nvm; then
               echo "Installing NVM"
-              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             fi
             echo "Installing Node $node_version"
