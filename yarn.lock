@@ -33742,25 +33742,6 @@ snap-shot-core@10.2.0:
     quote "0.4.0"
     ramda "0.26.1"
 
-snap-shot-core@10.2.1:
-  version "10.2.1"
-  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.1.tgz#2926c8692acf984095c274b97068456d1a540db7"
-  integrity sha512-fApr6/GQi7kfLyperpF70SxG9mp9L3gQgb3czXH97iuix1QrfThS9kATx43r3wIl0Ik5sWmWvor/Xcb3+2cteQ==
-  dependencies:
-    arg "4.1.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    escape-quotes "1.0.2"
-    folktale "2.3.2"
-    is-ci "2.0.0"
-    jsesc "2.5.2"
-    lazy-ass "1.6.0"
-    mkdirp "1.0.4"
-    pluralize "8.0.0"
-    quote "0.4.0"
-    ramda "0.26.1"
-
 snap-shot-core@10.2.4:
   version "10.2.4"
   resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.4.tgz#feacadc77f2e83e9eee52fc4aaff31c25a1790c3"

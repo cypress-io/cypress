@@ -1167,5 +1167,10 @@ describe('visual error templates', () => {
         default: ['vite', '/dev/project', ['vite.config.js', 'vite.config.ts']],
       }
     },
+    TESTING_TYPE_NOT_CONFIGURED: () => {
+      return {
+        default: ['component'],
+      }
+    },
   })
 })
