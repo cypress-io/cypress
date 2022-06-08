@@ -232,7 +232,7 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
     // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
     if ((request === 'webpack' || request.startsWith('webpack/')) && webpack.majorVersion === 4) {
       const resolvePath = require.resolve(request, {
-        paths: [cypressWebpackPath],
+        paths: [cypressWebpackPath(devServerConfig)],
       })
 
       debug('NextWebpack: Module._load for webpack@4 - %s', resolvePath)
