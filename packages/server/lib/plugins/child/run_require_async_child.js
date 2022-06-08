@@ -80,7 +80,7 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
-  function isExpectedError (file, err) {
+  function isEsmRelatedError (file, err) {
     const cannotFindConfigFileError = err.message.includes('Cannot find module') && err.message.includes(file)
     const notSupportedError = err.message.includes('Not supported')
 
@@ -115,7 +115,7 @@ function run (ipc, file, projectRoot) {
       // For those cases, we do not error, and attempt to load the module in the next try/catch.
       // For other errors, eg syntax errors, we throw here and surface them in launchpad (open mode)
       // or the terminal (run mode).
-      if (!isExpectedError(file, err)) {
+      if (!isEsmRelatedError(file, err)) {
         throw err
       }
 
