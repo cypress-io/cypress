@@ -460,18 +460,45 @@ const util = {
   },
 
   getPlatformInfo () {
-    return util.getOsVersionAsync().then((version) => {
-      let osArch = arch()
-
-      if (osArch === 'x86') {
-        osArch = 'ia32'
-      }
+    return util.getOsVersionAsync().then(async (version) => {
+      let osArch = await this.getRealArch()
 
       return stripIndent`
         Platform: ${os.platform()}-${osArch} (${version})
         Cypress Version: ${util.pkgVersion()}
       `
     })
+  },
+
+  cachedArch: undefined,
+
+  /**
+   * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
+   */
+  async getRealArch () {
+    if (this.cachedArch) return this.cachedArch
+
+    async function _getRealArch () {
+      const osPlatform = os.platform()
+      const osArch = os.arch()
+
+      if (osPlatform === 'darwin') {
+        if (osArch === 'arm64') return 'arm64'
+
+        // could possibly be x64 node on arm64 darwin, check uname
+        const unameOutput = await execa('uname', ['-p'])
+
+        if (unameOutput.includes('arm')) return 'arm64'
+      }
+
+      const pkgArch = arch()
+
+      if (pkgArch === 'x86') return 'ia32'
+
+      return pkgArch
+    }
+
+    return (this.cachedArch = await _getRealArch())
   },
 
   // attention:
