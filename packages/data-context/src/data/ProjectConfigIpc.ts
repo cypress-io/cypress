@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
-import { autoBindDebug } from '../util'
+import { autoBindDebug, hasTypeScriptInstalled } from '../util'
 import _ from 'lodash'
 
 const pkg = require('@packages/root')
@@ -109,16 +109,6 @@ export class ProjectConfigIpc extends EventEmitter {
 
   emit (evt: string, ...args: any[]) {
     return super.emit(evt, ...args)
-  }
-
-  hasTypeScriptInstalled () {
-    try {
-      require.resolve('typescript', { paths: [this.projectRoot] })
-
-      return true
-    } catch (e) {
-      return false
-    }
   }
 
   loadConfig (): Promise<LoadConfigReply> {
@@ -270,7 +260,7 @@ export class ProjectConfigIpc extends EventEmitter {
     // If they've got TypeScript installed, we can use
     // ts-node for CommonJS
     // ts-node/esm for ESM
-    if (this.hasTypeScriptInstalled()) {
+    if (hasTypeScriptInstalled(this.projectRoot)) {
       if (isProjectUsingESModules) {
         // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
         // The loader API is experimental and will change.
