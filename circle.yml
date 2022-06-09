@@ -96,7 +96,7 @@ executors:
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:
-      image: windows-server-2019-vs2019:stable
+      image: windows-server-2019-vs2019:previous
       shell: bash.exe -eo pipefail
     resource_class: windows.medium
     environment:
