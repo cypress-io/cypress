@@ -1,5 +1,4 @@
 import { gql } from '@urql/core'
-import assert from 'assert'
 import { print } from 'graphql'
 import debugLib from 'debug'
 
@@ -22,20 +21,17 @@ const LATEST_RUN_UPDATE_OPERATION_DOC = gql`
 `
 const LATEST_RUN_UPDATE_OPERATION = print(LATEST_RUN_UPDATE_OPERATION_DOC)
 
-type ProjectIdBranch = `${string}-${string}`
-
 export class RemotePollingDataSource {
   #subscribedCount = 0
-  #lastUpdated: Record<ProjectIdBranch, string | null> = {}
-  #specPolling?: NodeJS.Timeout | boolean
+  #specPolling?: NodeJS.Timeout
   constructor (private ctx: DataContext) {}
 
   #startPollingForSpecs (branch: string, projectSlug: string) {
-    assert(!this.#specPolling, 'Cannot start polling for specs if we are already polling')
-
-    // Set to true on the initial request, to signal that we have started this fetching process but
-    // have not yet started polling
-    this.#specPolling = true
+    // when the page refreshes, a previously started subscription may be running
+    // this will reset it and start a new one
+    if (this.#specPolling) {
+      clearTimeout(this.#specPolling)
+    }
 
     debug(`Sending initial request for startPollingForSpecs`)
 
@@ -46,9 +42,7 @@ export class RemotePollingDataSource {
   }
 
   #stopPolling () {
-    if (this.#specPolling === true) {
-      this.#specPolling = undefined
-    } else if (this.#specPolling) {
+    if (this.#specPolling) {
       clearTimeout(this.#specPolling)
       this.#specPolling = undefined
     }

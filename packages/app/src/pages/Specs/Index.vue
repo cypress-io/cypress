@@ -11,6 +11,7 @@
     <SpecsList
       v-if="query.data.value.currentProject?.specs.length"
       :gql="query.data.value"
+      :most-recent-update="mostRecentUpdate"
       @showCreateSpecModal="showCreateSpecModal"
     />
     <NoSpecsPage
@@ -25,7 +26,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, useQuery, useSubscription } from '@urql/vue'
+import { gql, SubscriptionHandlerArg, useQuery, useSubscription } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
@@ -95,10 +96,16 @@ useSubscription({
   variables,
 })
 
+const mostRecentUpdate = ref<string|null>(null)
+
+const updateMostRecentUpdate: SubscriptionHandlerArg<any, any> = (_, reportedUpdate) => {
+  mostRecentUpdate.value = reportedUpdate?.startPollingForSpecs ?? null
+}
+
 useSubscription({
   query: SpecsPageContainer_SpecListPollingDocument,
   variables: pollingVariables,
-})
+}, updateMostRecentUpdate)
 
 const query = useQuery({
   query: SpecsPageContainerDocument,

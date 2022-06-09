@@ -74,7 +74,7 @@
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, watch, watchEffect } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -95,9 +95,18 @@ mutation RunStatusDots_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
 
-const refetch = () => {
+const isRefetching = ref(false)
+
+const refetch = async () => {
+  if (isRefetching.value) {
+    return
+  }
+
   if (!props.isProjectDisconnected && props.gql.cloudSpec?.id && !refetchMutation.fetching.value) {
-    refetchMutation.executeMutation({ ids: [props.gql.cloudSpec?.id] })
+    isRefetching.value = true
+
+    await refetchMutation.executeMutation({ ids: [props.gql.cloudSpec.id] })
+    isRefetching.value = false
   }
 }
 
@@ -111,6 +120,9 @@ fragment RunStatusDots on Spec {
     fetchingStatus
     data {
       __typename
+      ... on CloudProjectSpecNotFound {
+        retrievedAt
+      }
       ... on CloudProjectSpec {
         id
         retrievedAt
@@ -154,18 +166,74 @@ const props = withDefaults(defineProps<{
   gql: RunStatusDotsFragment
   isProjectDisconnected: boolean
   isOnline: boolean
+  mostRecentUpdate: string | null
 }>(), {
   isProjectDisconnected: false,
   isOnline: true,
+  mostRecentUpdate: null,
 })
 
-watchEffect(
-  () => {
-    if (props.isOnline && (props.gql.cloudSpec?.fetchingStatus === 'NOT_FETCHED' || props.gql.cloudSpec?.fetchingStatus === undefined)) {
-      refetch()
+function shouldRefetch () {
+  if (isRefetching.value) {
+    // refetch in progress, no need to refetch
+
+    return false
+  }
+
+  if (!props.isOnline) {
+    // Offline, no need to refetch
+
+    return false
+  }
+
+  if (props.gql.cloudSpec?.fetchingStatus === 'NOT_FETCHED' || props.gql.cloudSpec?.fetchingStatus === undefined) {
+    // NOT_FETCHED, refetch
+
+    return true
+  }
+
+  if (props.mostRecentUpdate) {
+    if (
+      (
+        props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpecNotFound' ||
+        props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpec'
+      )
+      && (
+        props.gql.cloudSpec.data.retrievedAt &&
+        props.mostRecentUpdate > props.gql.cloudSpec.data.retrievedAt
+      )
+    ) {
+      // outdated, refetch
+
+      return true
     }
-  },
-)
+  }
+
+  // nothing new, no need to refetch
+
+  return false
+}
+
+watch(() => props.isOnline,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
+
+watch(() => props.isProjectDisconnected,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
+
+watch(() => props.mostRecentUpdate,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
 
 const runs = computed(() => {
   return props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpec' ? props.gql.cloudSpec.data.specRuns?.nodes ?? [] : []
@@ -232,12 +300,6 @@ const latestStatus = computed(() => {
       return { icon: CancelledIcon, spin: false }
     default:
       return { icon: PlaceholderIcon, spin: false }
-  }
-})
-
-watch(() => props.isProjectDisconnected, (value, oldValue) => {
-  if (value && !oldValue) {
-    refetch()
   }
 })
 

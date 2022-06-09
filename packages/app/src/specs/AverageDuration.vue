@@ -13,7 +13,7 @@
 import { AverageDurationFragment, AverageDuration_RefetchDocument } from '../generated/graphql'
 import { gql, useMutation } from '@urql/vue'
 import { getDurationString } from '@packages/frontend-shared/src/utils/time'
-import { watch, watchEffect } from 'vue'
+import { ref, watch } from 'vue'
 
 gql`
 mutation AverageDuration_Refetch ($ids: [ID!]!) {
@@ -26,9 +26,14 @@ mutation AverageDuration_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(AverageDuration_RefetchDocument)
 
-const refetch = () => {
+const isRefetching = ref(false)
+
+const refetch = async () => {
   if (!props.isProjectDisconnected && props.gql?.avgDurationInfo?.id && !refetchMutation.fetching.value) {
-    refetchMutation.executeMutation({ ids: [props.gql?.avgDurationInfo?.id] })
+    isRefetching.value = true
+
+    await refetchMutation.executeMutation({ ids: [props.gql?.avgDurationInfo?.id] })
+    isRefetching.value = false
   }
 }
 
@@ -40,6 +45,9 @@ fragment AverageDuration on Spec {
     id
     fetchingStatus
     data {
+      ... on CloudProjectSpecNotFound {
+        retrievedAt
+      }
       ... on CloudProjectSpec {
         id
         averageDuration(fromBranch: $fromBranch)
@@ -54,25 +62,75 @@ const props = withDefaults(defineProps<{
   gql: AverageDurationFragment | null
   isProjectDisconnected: boolean
   isOnline: boolean
+  mostRecentUpdate: string | null
 }>(), {
   gql: null,
   isProjectDisconnected: false,
   isOnline: true,
+  mostRecentUpdate: null,
 })
 
-watchEffect(
-  () => {
-    if (props.isOnline && (props.gql?.avgDurationInfo?.fetchingStatus === 'NOT_FETCHED' || props.gql?.avgDurationInfo?.fetchingStatus === undefined)) {
-      refetch()
-    }
-  },
-)
+function shouldRefetch () {
+  if (isRefetching.value) {
+    // refetch in progress, no need to refetch
 
-watch(() => props.isProjectDisconnected, (value, oldValue) => {
-  if (value && !oldValue) {
-    refetch()
+    return false
   }
-})
+
+  if (!props.isOnline) {
+    // Offline, no need to refetch
+
+    return false
+  }
+
+  if (props.gql?.avgDurationInfo?.fetchingStatus === 'NOT_FETCHED' || props.gql?.avgDurationInfo?.fetchingStatus === undefined) {
+    // NOT_FETCHED, refetch
+
+    return true
+  }
+
+  if (props.mostRecentUpdate) {
+    if (
+      (
+        props.gql?.avgDurationInfo?.data?.__typename === 'CloudProjectSpecNotFound' ||
+        props.gql?.avgDurationInfo?.data?.__typename === 'CloudProjectSpec'
+      )
+      && (
+        props.gql.avgDurationInfo.data.retrievedAt &&
+        props.mostRecentUpdate > props.gql.avgDurationInfo.data.retrievedAt
+      )
+    ) {
+      // outdated, refetch
+
+      return true
+    }
+  }
+
+  // nothing new, no need to refetch
+
+  return false
+}
+
+watch(() => props.isOnline,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
+
+watch(() => props.isProjectDisconnected,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
+
+watch(() => props.mostRecentUpdate,
+  async () => {
+    if (shouldRefetch()) {
+      await refetch()
+    }
+  }, { immediate: true })
 
 </script>
 

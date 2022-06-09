@@ -69,7 +69,7 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset}px`"
     >
       <div
@@ -167,6 +167,7 @@
               :gql="row.data.data"
               :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
               :is-online="isOnline"
+              :most-recent-update="mostRecentUpdate"
             />
           </template>
           <template #average-duration>
@@ -175,6 +176,7 @@
               :gql="row.data.data ?? null"
               :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
               :is-online="isOnline"
+              :most-recent-update="mostRecentUpdate"
             />
           </template>
         </SpecsListRowItem>
@@ -319,9 +321,12 @@ fragment Specs_SpecsList on Query {
 
 useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
-}>()
+  mostRecentUpdate: string | null
+}>(), {
+  mostRecentUpdate: null,
+})
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
