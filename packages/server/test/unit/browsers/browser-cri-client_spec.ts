@@ -180,7 +180,7 @@ describe('lib/browsers/cri-client', function () {
 
         const browserClient = await getClient() as any
 
-        browserClient._currentlyAttachedTarget = mockCurrentlyAttachedTarget
+        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
 
         await browserClient.resetBrowserTargets(true)
 
@@ -198,7 +198,7 @@ describe('lib/browsers/cri-client', function () {
 
         const browserClient = await getClient() as any
 
-        browserClient._currentlyAttachedTarget = mockCurrentlyAttachedTarget
+        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
 
         await browserClient.resetBrowserTargets(false)
 
@@ -220,7 +220,7 @@ describe('lib/browsers/cri-client', function () {
 
         const browserClient = await getClient() as any
 
-        browserClient._currentlyAttachedTarget = mockCurrentlyAttachedTarget
+        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
 
         await browserClient.close()
 
