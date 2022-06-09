@@ -69,7 +69,10 @@ type CachedUser implements Node {
 Represents a pollable status for clients to know when refetching data is required.
 """
 type CloudLatestRunUpdateSpecData {
+  """DateTime of the latest update in a project."""
   mostRecentUpdate: DateTime
+
+  """Recommended seconds to wait before next poll."""
   pollingInterval: Int
 }
 
@@ -198,7 +201,13 @@ type CloudProjectNotFound {
 union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUnauthorized
 
 type CloudProjectSpec implements Node {
-  averageDuration: Float
+  """Average duration the spec takes to run"""
+  averageDuration(
+    """
+    The branch to measure average duration against. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+  ): Float
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -206,8 +215,16 @@ type CloudProjectSpec implements Node {
     """The branch to measure flakiness against"""
     fromBranch: String!
   ): Boolean
+
+  """
+  Current DateTime on the server. Used in connection with CloudLatestRunUpdateSpecData.
+  """
   retrievedAt: DateTime
+
+  """Shortened spec path"""
   specPath: String
+
+  """Runs this spec has been involved with."""
   specRuns(
     """Returns the elements in the list that come after the specified cursor"""
     after: String
@@ -218,7 +235,9 @@ type CloudProjectSpec implements Node {
     """Returns the first n elements from the list."""
     first: Int
 
-    """The branch to filter on for the specs"""
+    """
+    The branch to filter on for the specs. This will fallback to the closest branch with data.
+    """
     fromBranch: String!
 
     """Returns the last n elements from the list."""
@@ -357,19 +376,39 @@ type CloudRunTag implements Node {
 A Recorded run of a given spec from the Test Runner, typically to the cloud
 """
 type CloudSpecRun implements Node {
+  """When the run was completed"""
   completedAt: DateTime
+
+  """When the run was created"""
   createdAt: DateTime
+
+  """Amount of groups this spec was run in"""
   groupCount: Int
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
-  retrievalDateTime: DateTime
+
+  """Incremental run number assigned"""
   runNumber: Int
+
+  """
+  Aggregate information about how long the spec took to run in the groups
+  """
   specDuration: SpecDataAggregate
+
+  """Most important status for the spec shared between all groups"""
   status: CloudRunStatus
+
+  """Aggregate information about how many tests failed in the groups"""
   testsFailed: SpecDataAggregate
+
+  """Aggregate information about how many tests passed in the groups"""
   testsPassed: SpecDataAggregate
+
+  """Aggregate information about how many tests are pending in the groups"""
   testsPending: SpecDataAggregate
+
+  """Aggregate information about how many tests were skipped in the groups"""
   testsSkipped: SpecDataAggregate
 
   """A link to the run overview page filtered by spec"""
@@ -1322,10 +1361,12 @@ type Query {
   cachedUser: CachedUser
 
   """
-  Poll this query to determine when it's required to refresh run data for a given spec or branch. Returns the recommended time until next fetch. A 0 value means data is available.
+  Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.
   """
   cloudLatestRunUpdateSpecData(
-    """Clients active branch to search for builds"""
+    """
+    Clients active branch to search for builds. This will fallback to the closest branch with data.
+    """
     commitBranch: String!
 
     """A list of Project slugs"""
@@ -1364,15 +1405,6 @@ type Query {
     """The spec path to find"""
     specPath: String!
   ): CloudProjectSpecResult
-
-  """Gets a set of specs on a given project and branch"""
-  cloudSpecsByPath(
-    """Slug of the project to which the set of specs belong"""
-    projectSlug: String!
-
-    """A set of specs to include identified by spec path"""
-    specPaths: [String!]!
-  ): [CloudProjectSpec]
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser

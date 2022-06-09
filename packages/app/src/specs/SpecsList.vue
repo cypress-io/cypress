@@ -261,7 +261,7 @@ const isGitAvailable = computed(() => {
 })
 
 const hasCloudErrors = computed(() => {
-  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.status === 'ERRORED' || s.avgDurationInfo?.status === 'ERRORED') ?? false
+  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.fetchingStatus === 'ERRORED' || s.avgDurationInfo?.fetchingStatus === 'ERRORED') ?? false
 })
 
 const shouldShowFetchError = ref(false)
@@ -404,11 +404,11 @@ const refetchMutation = useMutation(CloudData_RefetchDocument)
 
 function refetchFailedCloudData () {
   const latestRunsIds = props.gql.currentProject?.specs
-  .filter((s) => s.cloudSpec?.status === 'ERRORED')
+  .filter((s) => s.cloudSpec?.fetchingStatus === 'ERRORED')
   .map((s) => s.cloudSpec?.id as string) ?? []
 
   const avgInfoIds = props.gql.currentProject?.specs
-  .filter((s) => s.avgDurationInfo?.status === 'ERRORED')
+  .filter((s) => s.avgDurationInfo?.fetchingStatus === 'ERRORED')
   .map((s) => s.avgDurationInfo?.id as string) ?? []
 
   refetchMutation.executeMutation({ ids: [...avgInfoIds, ...latestRunsIds] })

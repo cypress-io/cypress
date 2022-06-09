@@ -54,6 +54,7 @@ export const Spec = objectType({
       shouldEagerFetch: () => false, // defaults to false to be fully lazy and rely on the UI to fetch as needed
       queryArgs: async (source, args, ctx) => {
         const projectId = await ctx.project.projectId()
+        const fromBranch = ctx.lifecycleManager.git?.currentBranch
 
         if (!projectId) {
           return false
@@ -62,6 +63,7 @@ export const Spec = objectType({
         return {
           projectSlug: projectId,
           specPath: source.relative,
+          fromBranch,
         }
       },
     })

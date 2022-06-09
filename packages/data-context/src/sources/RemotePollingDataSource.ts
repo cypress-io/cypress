@@ -65,7 +65,7 @@ export class RemotePollingDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
-    debug(`Response for startPollingForSpecs %o`, result)
+    debug(`%s Response for startPollingForSpecs %o`, new Date().toISOString(), result)
 
     const secondsToPollNext = (result.data?.cloudLatestRunUpdateSpecData?.pollingInterval ?? 30)
     const mostRecentUpdate = result.data?.cloudLatestRunUpdateSpecData?.mostRecentUpdate ?? null

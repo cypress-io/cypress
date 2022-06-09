@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo.data?.__typename === 'CloudProjectSpec' && props.gql?.avgDurationInfo?.data?.averageDuration"
+    v-if="props.gql?.avgDurationInfo?.fetchingStatus === 'FETCHED' && props.gql?.avgDurationInfo.data?.__typename === 'CloudProjectSpec' && props.gql?.avgDurationInfo?.data?.averageDuration"
     class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
@@ -42,7 +42,8 @@ fragment AverageDuration on Spec {
     data {
       ... on CloudProjectSpec {
         id
-        averageDuration
+        averageDuration(fromBranch: $fromBranch)
+        retrievedAt
       }
     }
   }
@@ -61,7 +62,7 @@ const props = withDefaults(defineProps<{
 
 watchEffect(
   () => {
-    if (props.isOnline && (props.gql?.avgDurationInfo?.status === 'NOT_FETCHED' || props.gql?.avgDurationInfo?.status === undefined)) {
+    if (props.isOnline && (props.gql?.avgDurationInfo?.fetchingStatus === 'NOT_FETCHED' || props.gql?.avgDurationInfo?.fetchingStatus === undefined)) {
       refetch()
     }
   },
