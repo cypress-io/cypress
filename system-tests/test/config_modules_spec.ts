@@ -23,10 +23,10 @@ describe('cypress config with esm and cjs', function () {
     })
   })
 
-  systemTests.it('supports modules and cjs in compoent testing', {
+  systemTests.it('supports modules and cjs in component testing', {
     project: 'config-cjs-and-esm/config-with-ts-module-component',
     testingType: 'component',
-    spec: 'src/app.cy.js',
+    spec: 'src/foo.ts',
     browser: 'chrome',
     expectedExitCode: 0,
   })
