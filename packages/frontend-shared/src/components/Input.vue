@@ -9,7 +9,7 @@
     >
       <div
         v-if="hasPrefix"
-        class="flex flex-none pl-4 items-center"
+        class="flex flex-none -ml-1px pl-4 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="prefix">
@@ -38,7 +38,7 @@
       >
       <div
         v-if="hasSuffix"
-        class="flex flex-none pr-3 items-center"
+        class="flex flex-none -mr-1px pr-3 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="suffix">
