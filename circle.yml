@@ -98,7 +98,7 @@ executors:
     machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
-    resource_class: windows.medium
+    resource_class: windows.large
     environment:
       PLATFORM: windows
 
