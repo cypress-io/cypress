@@ -117,7 +117,7 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied!')
     cy.percySnapshot('Copy to clipboard click tooltip')
 
-    cy.wrap(copyStub).should('have.been.calledWith', '.foo-bar')
+    cy.wrap(copyStub).should('have.been.calledWith', 'cy.get(\'.foo-bar\')')
   })
 
   it('prints elements when selected elements found', () => {

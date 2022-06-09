@@ -835,7 +835,7 @@ commands:
           command: |
             if [[ -f cypress.json ]]; then
               rm -rf cypress.json
-              echo 'module.exports = {}' > cypress.config.js
+              echo 'module.exports = { e2e: {} }' > cypress.config.js
             fi
       - run:
           name: Rename support file
@@ -1080,8 +1080,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          name: Check env canaries on Mac/Linux
+          command: |
+            # Windows CircleCI does not have a way to pull per-job env
+            [[ $PLATFORM != 'windows' ]] && node ./scripts/circle-env.js --check-canaries || true
       - build-and-persist
       - store-npm-logs
 
@@ -2211,7 +2213,7 @@ jobs:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             rm -rf cypress.json
-            echo 'module.exports = {}' > cypress.config.js
+            echo 'module.exports = { e2e: {} }' > cypress.config.js
       - run:
           name: Rename support file
           working_directory: test-binary
