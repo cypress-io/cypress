@@ -28,7 +28,7 @@
         >
           <Tooltip
             v-if="!browser.isVersionSupported"
-            popper-class="max-w-lg"
+            :popper-class="['max-w-lg']"
           >
             <i-cy-circle-bg-question-mark_x16
               data-cy="unsupported-browser-tooltip-trigger"

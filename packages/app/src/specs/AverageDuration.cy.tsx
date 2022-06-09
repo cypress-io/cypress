@@ -10,10 +10,11 @@ function emptyAverageDurationFragment (milliseconds?: number): AverageDurationFr
       data: {
         id: 'id',
         averageDuration: milliseconds ?? 0,
+        retrievedAt: new Date().toISOString(),
         __typename: 'CloudProjectSpec',
       },
-      status: 'FETCHED',
-      __typename: 'RemoteFetchableCloudProjectSpec',
+      fetchingStatus: 'FETCHED',
+      __typename: 'RemoteFetchableCloudProjectSpecResult',
     },
   }
 }

@@ -129,7 +129,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
       const rf: RemoteFetchable & {__typename: string} = {
         id,
-        status: 'FETCHING',
+        fetchingStatus: 'FETCHING',
         operation: '',
         operationHash: hash,
         operationVariables: {},

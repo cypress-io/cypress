@@ -72,8 +72,8 @@ export class RemotePollingDataSource {
 
     this.ctx.emitter.specPollingUpdate(mostRecentUpdate)
 
-    this.#specPolling = setTimeout(() => {
-      this.#sendSpecPollingRequest(commitBranch, projectSlug)
+    this.#specPolling = setTimeout(async () => {
+      await this.#sendSpecPollingRequest(commitBranch, projectSlug)
     }, secondsToPollNext * 1000)
 
     return result

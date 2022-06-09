@@ -13,11 +13,12 @@ describe('<RunStatusDots />', () => {
         fileName: 'spec',
         specFileExtension: '.cy.ts',
         cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpec',
+          __typename: 'RemoteFetchableCloudProjectSpecResult',
           id: 'id',
-          status: 'FETCHED',
+          fetchingStatus: 'FETCHED',
           data: {
             __typename: 'CloudProjectSpec',
+            retrievedAt: new Date().toISOString(),
             id: 'id',
             specRuns: {
               nodes: [
@@ -51,12 +52,13 @@ describe('<RunStatusDots />', () => {
         fileName: 'spec',
         specFileExtension: '.cy.ts',
         cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpec',
+          __typename: 'RemoteFetchableCloudProjectSpecResult',
           id: 'id',
-          status: 'FETCHED',
+          fetchingStatus: 'FETCHED',
           data: {
             __typename: 'CloudProjectSpec',
             id: 'id',
+            retrievedAt: new Date().toISOString(),
             specRuns: {
               nodes: [
                 ...runs as any, // suppress TS compiler
@@ -89,12 +91,13 @@ describe('<RunStatusDots />', () => {
         fileName: 'spec',
         specFileExtension: '.cy.ts',
         cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpec',
+          __typename: 'RemoteFetchableCloudProjectSpecResult',
           id: 'id',
-          status: 'FETCHED',
+          fetchingStatus: 'FETCHED',
           data: {
             __typename: 'CloudProjectSpec',
             id: 'id',
+            retrievedAt: new Date().toISOString(),
             specRuns: {
               nodes: [
                 ...runs as any, // suppress TS compiler
@@ -125,12 +128,13 @@ describe('<RunStatusDots />', () => {
         fileName: 'spec',
         specFileExtension: '.cy.ts',
         cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpec',
+          __typename: 'RemoteFetchableCloudProjectSpecResult',
           id: 'id',
-          status: 'FETCHED',
+          fetchingStatus: 'FETCHED',
           data: {
             __typename: 'CloudProjectSpec',
             id: 'id',
+            retrievedAt: new Date().toISOString(),
             specRuns: {
               nodes: [],
             },
