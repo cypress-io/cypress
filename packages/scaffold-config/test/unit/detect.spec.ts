@@ -18,9 +18,9 @@ beforeEach(() => {
 export async function scaffoldMigrationProject (project: ProjectFixtureDir) {
   const projectPath = Fixtures.projectPath(project)
 
-  Fixtures.clearFixtureNodeModules(project)
+  await Fixtures.clearFixtureNodeModules(project)
 
-  Fixtures.removeProject(project)
+  await Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)
 

@@ -46,7 +46,7 @@ describe('MigrationActions', () => {
     let currentProject: string
 
     beforeEach(async () => {
-      Fixtures.clearFixtureNodeModules('migration')
+      await Fixtures.clearFixtureNodeModules('migration')
       currentProject = await scaffoldMigrationProject('migration')
     })
 

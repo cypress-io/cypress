@@ -41,7 +41,7 @@ const WEBPACK_REACT: Partial<Record<ProjectDirs[number], {
 }
 
 async function sourceModulesForProject (fixture: ProjectDirs[number]) {
-  Fixtures.remove()
+  await Fixtures.remove()
   const projectRoot = await Fixtures.scaffoldProject(fixture)
 
   await FixturesScaffold.scaffoldProjectNodeModules(fixture)

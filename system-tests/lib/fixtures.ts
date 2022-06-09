@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
 import tempDir from 'temp-dir'
+import Bluebird from 'bluebird'
 import type { ProjectFixtureDir } from './fixtureDirs'
 
 export const root = _path.join(__dirname, '..')
@@ -18,9 +19,19 @@ export const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
 const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true }).filter((f) => f.isDirectory()).map((f) => f.name)
 
-const safeRemove = (path) => {
+const safeRemoveDelays = [0, 1000, 10000]
+
+const safeRemove = async (path, remaining = 3) => {
+  remaining--
+  const delay = safeRemoveDelays[remaining]
+
   try {
-    fs.removeSync(path)
+    if (delay) {
+      console.log('Remove failed for', path, 'due to EBUSY, trying again in', delay / 1000, 'seconds')
+      await Bluebird.delay(delay)
+    }
+
+    await fs.remove(path)
   } catch (_err) {
     const err = _err as NodeJS.ErrnoException
 
@@ -28,7 +39,12 @@ const safeRemove = (path) => {
     // a lock on files when they are written. This skips deleting if the lock is
     // encountered.
     if (err.code === 'EBUSY' && process.platform === 'win32') {
-      return console.error(`Remove failed for ${ path } due to EBUSY. Skipping on Windows.`)
+      if (!remaining) {
+        console.log('Ran out of attempts to retry on EBUSY, throwing')
+        throw err
+      }
+
+      return safeRemove(path, remaining)
     }
 
     throw err
@@ -103,19 +119,19 @@ export function scaffoldWatch () {
 
 // removes all of the project fixtures
 // from the cyTmpDir .projects in the root
-export function remove () {
-  safeRemove(cyTmpDir)
+export async function remove () {
+  await safeRemove(cyTmpDir)
 }
 
-export function removeProject (name: ProjectFixtureDir) {
-  safeRemove(projectPath(name))
+export async function removeProject (name: ProjectFixtureDir) {
+  await safeRemove(projectPath(name))
 }
 
 // Removes node_modules that might have been leftover from an initial "yarn"
 // in the fixture dir
-export function clearFixtureNodeModules (name: ProjectFixtureDir) {
+export async function clearFixtureNodeModules (name: ProjectFixtureDir) {
   try {
-    safeRemove(_path.join(projects, name, 'node_modules'))
+    await safeRemove(_path.join(projects, name, 'node_modules'))
   } catch {
     //
   }

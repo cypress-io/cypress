@@ -13,7 +13,7 @@ const log = (...args) => console.log(logTag, ...args)
    * For all system test projects that have a package.json, check and update
    * the node_modules cache using `yarn`.
    */
-  Fixtures.remove()
+  await Fixtures.remove()
 
   const projectsDir = path.join(__dirname, '../projects')
   const packageJsons = await glob('**/package.json', {

@@ -46,8 +46,8 @@ describe('lib/socket', () => {
     })
   })
 
-  afterEach(function () {
-    Fixtures.remove()
+  afterEach(async function () {
+    await Fixtures.remove()
 
     return this.server.close()
   })

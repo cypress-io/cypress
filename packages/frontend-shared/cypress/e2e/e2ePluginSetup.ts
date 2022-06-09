@@ -67,7 +67,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): Promise<void>
-  clearFixtureNodeModules (project: string): void
+  clearFixtureNodeModules (project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -89,7 +89,7 @@ async function makeE2ETasks () {
   const cliOpen = require('../../../../cli/lib/exec/open')
 
   // Remove all the fixtures when the plugin starts
-  Fixtures.remove()
+  await Fixtures.remove()
 
   // const tmpDir = path.join(__dirname, '.projects')
   // await util.promisify(rimraf)(tmpDir)
@@ -116,10 +116,10 @@ async function makeE2ETasks () {
 
   const __internal_scaffoldProject = async (projectName: string, isRetry = false): Promise<string> => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
-      Fixtures.removeProject(projectName)
+      await Fixtures.removeProject(projectName)
     }
 
-    Fixtures.clearFixtureNodeModules(projectName)
+    await Fixtures.clearFixtureNodeModules(projectName)
 
     await Fixtures.scaffoldProject(projectName)
 
@@ -152,7 +152,7 @@ async function makeE2ETasks () {
      * go to http://localhost:5555/graphql and debug the internal state of the application
      */
     async __internal__before () {
-      Fixtures.remove()
+      await Fixtures.remove()
       scaffoldedProjects = new Set()
       process.chdir(cachedCwd)
 

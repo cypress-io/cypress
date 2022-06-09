@@ -31,7 +31,7 @@ export function removeCommonNodeModules () {
 }
 
 export async function scaffoldMigrationProject (project: typeof fixtureDirs[number]): Promise<string> {
-  Fixtures.removeProject(project)
+  await Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)
 

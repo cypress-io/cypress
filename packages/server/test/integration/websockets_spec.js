@@ -60,8 +60,8 @@ describe('Web Sockets', () => {
     })
   })
 
-  afterEach(function () {
-    Fixtures.remove()
+  afterEach(async function () {
+    await Fixtures.remove()
 
     evilDns.clear()
 

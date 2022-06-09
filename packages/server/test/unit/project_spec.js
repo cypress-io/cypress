@@ -55,8 +55,8 @@ describe.skip('lib/project-base', () => {
     })
   })
 
-  afterEach(function () {
-    Fixtures.remove()
+  afterEach(async function () {
+    await Fixtures.remove()
 
     if (this.project) {
       this.project.close()

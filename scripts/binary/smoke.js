@@ -168,7 +168,7 @@ const test = async function (buildAppExecutable) {
   await runSmokeTest(buildAppExecutable)
   await runProjectTest(buildAppExecutable, e2e)
   await runFailingProjectTest(buildAppExecutable, e2e)
-  Fixtures.remove()
+  await Fixtures.remove()
 }
 
 module.exports = {

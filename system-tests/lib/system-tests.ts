@@ -721,7 +721,7 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      Fixtures.remove()
+      await Fixtures.remove()
 
       sinon.stub(process, 'exit')
 

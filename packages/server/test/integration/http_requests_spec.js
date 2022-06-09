@@ -219,7 +219,7 @@ describe('Routes', () => {
       ctx.actions.project.clearCurrentProject(),
     )
     .then(() => {
-      Fixtures.remove()
+      return Fixtures.remove()
     })
   })
 

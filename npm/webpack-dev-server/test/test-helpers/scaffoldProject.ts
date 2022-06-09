@@ -2,7 +2,7 @@ import Fixtures, { ProjectFixtureDir } from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 
 export async function scaffoldMigrationProject (project: ProjectFixtureDir) {
-  Fixtures.removeProject(project)
+  await Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)
 

@@ -177,7 +177,7 @@ describe('lib/cypress', () => {
       // ...
     }
 
-    Fixtures.remove()
+    await Fixtures.remove()
   })
 
   context('test browsers', () => {
