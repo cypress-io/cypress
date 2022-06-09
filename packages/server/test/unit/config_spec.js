@@ -2086,7 +2086,7 @@ describe('lib/config', () => {
       })
     })
 
-    it('sets the supportFile to default *.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
+    it('sets the supportFile to default e2e.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
       const projectRoot = Fixtures.projectPath('no-scaffolding')
 
       const obj = config.setAbsolutePaths({
