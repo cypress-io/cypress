@@ -20,6 +20,8 @@
       :indexes="props.indexes"
       class="font-medium text-gray-600"
       highlight-classes="text-gray-1000"
+      :title-text="props.name"
+      truncate
     />
     <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
   </button>
