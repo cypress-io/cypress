@@ -485,10 +485,11 @@ const util = {
       if (osPlatform === 'darwin') {
         if (osArch === 'arm64') return 'arm64'
 
-        // could possibly be x64 node on arm64 darwin, check uname
-        const unameOutput = await execa('uname', ['-p'])
+        // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
+        // https://stackoverflow.com/a/65347893/3474615
+        const sysctlOutput = await execa('sysctl', ['-n', 'sysctl.proc_translated'])
 
-        if (unameOutput.includes('arm')) return 'arm64'
+        if (sysctlOutput.startsWith('1')) return 'arm64'
       }
 
       const pkgArch = arch()

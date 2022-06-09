@@ -134,7 +134,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
 const validateOS = () => {
   return util.getPlatformInfo().then((platformInfo) => {
-    return platformInfo.match(/(darwin|linux|win32)-x64/)
+    return ['win32-x64', 'linux-x64', 'darwin-x64', 'darwin-arm64'].includes(platformInfo)
   })
 }
 
