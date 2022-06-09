@@ -1,10 +1,10 @@
 <template>
   <div
-    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.fetchingStatus === 'FETCHED' || props.gql.cloudSpec?.fetchingStatus === 'ERRORED'"
     class="h-full grid justify-items-end items-center"
   >
     <component
       :is="latestRun? Tooltip : 'div'"
+      v-if="props.isProjectDisconnected || props.gql.cloudSpec?.fetchingStatus === 'FETCHED' || props.gql.cloudSpec?.fetchingStatus === 'ERRORED'"
       placement="top"
       :is-interactive="true"
       class="h-16px"
@@ -14,38 +14,34 @@
         :is="latestRun? ExternalLink : 'div'"
         :href="latestRun?.url ?? '#'"
         :use-default-hocus="false"
-        class="marker2"
       >
         <div
-          class="flex justify-end marker3"
+          class="flex justify-end items-center"
           data-cy="run-status-dots"
           tabindex="0"
         >
-          <ol
-            class="list-none h-16px mt-0 mb-0 pl-0 inline-block"
+          <div
+            v-for="(dot,i) in dotClasses"
+            :key="i"
+            class="ml-4px"
           >
-            <li
-              v-for="(dot,i) in dotClasses"
-              :key="i"
-              class="mb-6px ml-4px align-middle inline-block"
-            >
-              <i-cy-dot-solid_x4
-                width="4"
-                height="4"
-                :class="dot"
-                :data-cy="'run-status-dot-'+i"
-              />
-            </li>
-            <li class="mb-4px ml-4px inline-block align-middle">
-              <component
-                :is="latestStatus.icon"
-                width="16"
-                height="16"
-                :class="{'animate-spin': latestStatus.spin}"
-                :data-cy="'run-status-dot-latest'"
-              />
-            </li>
-          </ol>
+            <i-cy-dot-solid_x4
+              width="4"
+              height="4"
+              :class="dot"
+              :data-cy="'run-status-dot-'+i"
+            />
+          </div>
+          <div>
+            <component
+              :is="latestStatus.icon"
+              width="16"
+              height="16"
+              :class="{'animate-spin': latestStatus.spin}"
+              :data-cy="'run-status-dot-latest'"
+              class="ml-4px"
+            />
+          </div>
         </div>
       </component>
       <template
@@ -64,12 +60,12 @@
         </ExternalLink>
       </template>
     </component>
-  </div>
-  <div
-    v-else
-    class="bg-gray-50 rounded-[20px] animate-pulse"
-  >
+    <div
+      v-else
+      class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+    >
     &nbsp;
+    </div>
   </div>
 </template>
 
