@@ -11,7 +11,6 @@ describe('MigrationDataSource', () => {
   context('.migration', () => {
     let ctx: DataContext
     let fetchStub: sinon.SinonStub
-    let migrationDataSource: MigrationDataSource
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
@@ -40,7 +39,7 @@ describe('MigrationDataSource', () => {
           json: sinon.stub().resolves(expectedPayload),
         })
 
-        migrationDataSource = new MigrationDataSource(ctx)
+        const migrationDataSource = new MigrationDataSource(ctx)
 
         const videoEmbedHtml = await migrationDataSource.getVideoEmbedHtml()
 
@@ -58,7 +57,7 @@ describe('MigrationDataSource', () => {
           json: jsonStub,
         })
 
-        migrationDataSource = new MigrationDataSource(ctx)
+        const migrationDataSource = new MigrationDataSource(ctx)
 
         const videoEmbedHtml = await migrationDataSource.getVideoEmbedHtml()
 
