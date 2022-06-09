@@ -3,22 +3,16 @@ import { CypressError, getError } from '@packages/errors'
 import type { FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions } from 'child_process'
 import EventEmitter from 'events'
-import { pathToFileURL } from 'url'
-import fs from 'fs-extra'
 import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
-import { autoBindDebug, hasTypeScriptInstalled } from '../util'
+import { autoBindDebug } from '../util'
 import _ from 'lodash'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-
-// pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
-const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -241,63 +235,6 @@ export class ProjectConfigIpc extends EventEmitter {
       .remove('--inspect-brk')
       .push(`--inspect=${process.debugPort + 1}`)
       .value()
-    }
-
-    let isProjectUsingESModules = false
-
-    try {
-      const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
-
-      isProjectUsingESModules = pkgJson.type === 'module'
-    } catch (e) {
-      // project does not have `package.json` or it was not found
-      // reasonable to assume not using es modules
-    }
-
-    if (!childOptions.env) {
-      childOptions.env = {}
-    }
-
-    // If they've got TypeScript installed, we can use
-    // ts-node for CommonJS
-    // ts-node/esm for ESM
-    if (hasTypeScriptInstalled(this.projectRoot)) {
-      if (isProjectUsingESModules) {
-        // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
-        // The loader API is experimental and will change.
-        // The same can be said for the other alternative, esbuild, so this is the
-        // best option that leverages the existing modules we bundle in the binary.
-        // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
-        // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
-
-        debug('using tsNodeEsm via env. variable: %s', tsNodeEsmLoader)
-
-        if (childOptions.env.NODE_OPTIONS) {
-          childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
-        } else {
-          childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
-        }
-      } else {
-        // Not using ES Modules (via "type": "module"),
-        // so we just register the standard ts-node module
-        // to handle TypeScript that is compiled to CommonJS.
-        // We do NOT use the `--loader` flag because we have some additional
-        // custom logic for ts-node when used with CommonJS that needs to be evaluated
-        // so we need to load and evaluate the hook first using the `--require` module API.
-        const tsNodeLoader = `--require ${tsNode}`
-
-        debug('using tsNode via env. variable: %s', tsNode)
-
-        if (childOptions.env.NODE_OPTIONS) {
-          childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
-        } else {
-          childOptions.env.NODE_OPTIONS = tsNodeLoader
-        }
-      }
-    } else {
-      // Just use Node's built-in ESM support.
-      // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
     }
 
     debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })

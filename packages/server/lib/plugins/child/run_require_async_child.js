@@ -1,7 +1,7 @@
 require('graceful-fs').gracefulify(require('fs'))
+const { bundleRequire } = require('bundle-require')
 const stripAnsi = require('strip-ansi')
 const debugLib = require('debug')
-const { pathToFileURL } = require('url')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
 
@@ -80,56 +80,14 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
-  function isEsmRelatedError (err) {
-    const cannotFindConfigFileError = err.message.includes('Cannot find module')
-    const notSupportedError = err.message.includes('Not supported')
-
-    return (
-      // Both of ERR_REQUIRE_ESM and ERR_UNKNOWN_FILE_EXTENSION are expected.
-      // We attempt to handle those files with the `require` statement in the next try/catch.
-      err.stack.includes('[ERR_REQUIRE_ESM]') ||
-      err.stack.includes('[ERR_UNKNOWN_FILE_EXTENSION]') ||
-      // If we have a cypress.config.ts, and they are using commonsjs, it will throw "cannot find cypress.config.ts".
-      // We swallow these and try to `require` them later with ts-node which will succeed.
-      cannotFindConfigFileError || notSupportedError
-    )
-  }
-
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
     debug('Loading file %s', file)
 
-    // try native Node.js ESM support first!
     try {
-      // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-      const fileURL = pathToFileURL(file).href
-
-      debug(`importing esm file %s`, fileURL)
-
-      // Must use `import` for ESM only (eg .mjs, `type: module`, etc)
-      // The next try/catch will handle CommonJS with `require`.
-      return await import(fileURL)
+      return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      // There are some errors we expect - cypress.config that cannot be loaded via `await import`.
-      // For those cases, we do not error, and attempt to load the module in the next try/catch.
-      // For other errors, eg syntax errors, we throw here and surface them in launchpad (open mode)
-      // or the terminal (run mode).
-      if (!isEsmRelatedError(err)) {
-        throw err
-      }
-
-      debug('error loading file %s via native Node.js ESM module loader %s', file, err.message)
-    }
-
-    try {
-      debug(`require('%s') file`, file)
-
-      return require(file)
-    } catch (err) {
-      // Unknown or unexpected error
-      // Just throw it - it will propogate to launchpad (open mode) or the terminal (run mode)
-      debug('error loading file %s via native Node.js CJS module loader %s', file, err.message)
       throw err
     }
   }
