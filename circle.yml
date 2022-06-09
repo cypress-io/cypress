@@ -1080,8 +1080,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          name: Check env canaries on Mac/Linux
+          command: |
+            # Windows CircleCI does not have a way to pull per-job env
+            [[ $PLATFORM != 'windows' ]] && node ./scripts/circle-env.js --check-canaries || true
       - build-and-persist
       - store-npm-logs
 
