@@ -2,7 +2,7 @@
   <component
     :is="isInteractive? Menu : Tooltip"
     v-if="!disabled"
-    :popper-class="{'no-arrow': hideArrow}"
+    :popper-class="[props.popperClass, {'no-arrow': hideArrow}]"
     :theme="theme"
     :placement="placement ?? 'auto'"
     :distance="distance"
@@ -34,6 +34,7 @@ const props = withDefaults(defineProps<{
   distance?: number
   skidding?: number
   placement?: 'top' | 'right' | 'bottom' | 'left'
+  popperClass?: string[]
 }>(), {
   color: 'dark',
   hideArrow: false,
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<{
   distance: undefined,
   skidding: undefined,
   placement: undefined,
+  popperClass: undefined,
 })
 
 const theme = computed(() => {
