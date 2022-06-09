@@ -3,5 +3,6 @@
     "find-up": "6.3.0",
     "typescript": "4.7.3"
   },
-  "type": "module"
+  "type": "module",
+  "projectFixtureDirectory": "simple_passing"
 }
