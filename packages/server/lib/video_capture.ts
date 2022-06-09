@@ -284,7 +284,9 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
     debug('processing video from %s to %s video compression %o',
       name, cname, videoCompression)
 
-    const command = ffmpeg()
+    const command = ffmpeg({
+      priority: 20,
+    })
     .addOptions([
       // These flags all serve to reduce initial buffering, especially important
       // when dealing with very short videos (such as during component tests).

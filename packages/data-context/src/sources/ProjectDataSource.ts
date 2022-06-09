@@ -11,6 +11,7 @@ import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
+import fs from 'fs'
 
 const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
@@ -297,6 +298,12 @@ export class ProjectDataSource {
   }: FindSpecs<string[]>) {
     this.stopSpecWatcher()
 
+    // Early return the spec watcher if we're in run mode, we do not want to
+    // init a lot of files watchers that are unneeded
+    if (this.ctx.isRunMode) {
+      return
+    }
+
     const currentProject = this.ctx.currentProject
 
     if (!currentProject) {
@@ -329,14 +336,50 @@ export class ProjectDataSource {
     // We respond to all changes to the project's filesystem when
     // files or directories are added and removed that are not explicitly
     // ignored by config
-    this._specWatcher = chokidar.watch('.', {
-      ignoreInitial: true,
-      cwd: projectRoot,
-      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
+    this._specWatcher = this._makeSpecWatcher({
+      projectRoot,
+      specPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
     this._specWatcher.on('all', onProjectFileSystemChange)
+  }
+
+  _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
+    return chokidar.watch('.', {
+      ignoreInitial: true,
+      ignorePermissionErrors: true,
+      cwd: projectRoot,
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
+        // Add a extra safe to prevent watching node_modules, in case the glob
+        // pattern is not taken into account by the ignored
+        if (file.includes('node_modules')) {
+          return true
+        }
+
+        // We need stats arg to make the determination of whether to watch it, because we need to watch directories
+        // chokidar is extremely inconsistent in whether or not it has the stats arg internally
+        if (!stats) {
+          try {
+            stats = fs.statSync(file)
+          } catch {
+            // If the file/folder is removed do not ignore it, in case it is added
+            // again
+            return false
+          }
+        }
+
+        // don't ignore directories
+        if (stats.isDirectory()) {
+          return false
+        }
+
+        // If none of the spec patterns match, we don't need to watch it
+        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
+      }],
+    })
   }
 
   async defaultSpecFileName (): Promise<string> {

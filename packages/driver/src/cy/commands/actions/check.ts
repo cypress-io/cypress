@@ -113,6 +113,13 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
           cy.ensureVisibility($el, options._log)
         }
 
+        // if the checkbox is in an indeterminate state, checking or unchecking should set the
+        // prop to false to move it into a "determinate" state
+        // https://github.com/cypress-io/cypress/issues/19098
+        if ($el.prop('indeterminate')) {
+          $el.prop('indeterminate', false)
+        }
+
         if (options._log) {
           const inputType = $el.is(':radio') ? 'radio' : 'checkbox'
 

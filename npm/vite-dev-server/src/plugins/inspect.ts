@@ -16,7 +16,9 @@ export const CypressInspect = (config: ViteDevServerConfig): PluginOption | null
   try {
     const inspectPluginPath = require.resolve('vite-plugin-inspect', { paths: [config.cypressConfig.projectRoot] })
 
-    Inspect = require(inspectPluginPath).default
+    const inspectModule = require(inspectPluginPath)
+
+    Inspect = inspectModule.default ?? inspectModule
     debug('inspect was found', Inspect)
   } catch (err) {
     debug(`Tried to import the inspect plugin 'vite-plugin-inspect'. It's an optional peerDependency so install it if you'd like.`)

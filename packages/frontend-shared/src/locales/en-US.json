@@ -1,6 +1,7 @@
 {
   "links": {
     "learnMore": "Learn more.",
+    "learnMoreButton": "Learn more",
     "needHelp": "Need help"
   },
   "components": {
@@ -605,7 +606,7 @@
       },
       "step4": {
         "title": "Migrate to the new Cypress configuration file",
-        "description": "In this step, we'll automatically migrate your existing cypress configuration to the new Cypress configuration file.",
+        "description": "In this step, we'll automatically migrate your existing Cypress configuration to the new Cypress configuration file.",
         "button": "Migrate the configuration for me"
       },
       "step5": {

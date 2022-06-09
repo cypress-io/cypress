@@ -462,17 +462,16 @@ export class AutIframe {
     const $el = this.getElements(Cypress.dom)
 
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
-    const command = `cy.${selectorPlaygroundStore.method}('${selectorPlaygroundStore.selector}')`
 
     if (!$el) {
       return logger.logFormatted({
-        Command: command,
+        Command: selectorPlaygroundStore.command,
         Yielded: 'Nothing',
       })
     }
 
     logger.logFormatted({
-      Command: command,
+      Command: selectorPlaygroundStore.command,
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
     })
