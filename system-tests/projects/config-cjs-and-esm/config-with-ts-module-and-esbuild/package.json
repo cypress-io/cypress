@@ -1,6 +1,8 @@
 {
   "devDependencies": {
-    "esbuild": "0.14.25"
+    "esbuild": "0.14.25",
+    "typescript": "4.7.3"
   },
-  "type": "module"
+  "type": "module",
+  "projectFixtureDirectory": "simple_passing"
 }
