@@ -2581,7 +2581,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         only-cache-for-root-user: true
 
     - build:
