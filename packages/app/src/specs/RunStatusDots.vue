@@ -8,6 +8,7 @@
       placement="top"
       :is-interactive="true"
       class="h-16px"
+      popper-class="RunStatusDots_Tooltip"
     >
       <component
         :is="latestRun? ExternalLink : 'div'"
@@ -245,3 +246,11 @@ watch(() => props.isProjectDisconnected, (value, oldValue) => {
 })
 
 </script>
+
+<style lang="scss">
+.RunStatusDots_Tooltip {
+  .v-popper__arrow-container {
+    margin-left: 14px;
+  }
+}
+</style>

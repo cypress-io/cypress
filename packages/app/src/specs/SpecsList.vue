@@ -70,6 +70,7 @@
     <div
       v-if="specs.length"
       class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800 "
+      :style="`padding-right: ${scrollbarOffset}px`"
     >
       <div
         class="flex col-span-3 items-center justify-between"
@@ -223,7 +224,7 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
-import { useDebounce, useOnline } from '@vueuse/core'
+import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
 import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
@@ -367,6 +368,24 @@ const collapsible = computed(() => {
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
+
+const scrollbarOffset = ref(0)
+
+// Watch the sizing of the specs list so we can detect when a scrollbar is added/removed
+// We then calculate the width of the scrollbar and add that as padding to the list header
+// so that the columns stay aligned
+useResizeObserver(containerProps.ref, (entries) => {
+  const specListContainer = entries?.[0]
+  const containerElement = specListContainer?.target as HTMLElement
+
+  if (containerElement) {
+    const displayedScrollbarWidth = containerElement.offsetWidth - containerElement.clientWidth
+
+    scrollbarOffset.value = displayedScrollbarWidth
+  } else {
+    scrollbarOffset.value = 0
+  }
+})
 
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list

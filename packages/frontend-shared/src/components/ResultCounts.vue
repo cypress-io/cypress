@@ -3,7 +3,7 @@
     <div
       v-for="(result, i) in results"
       :key="i"
-      class="flex px-2 items-center hover:bg-indigo-50"
+      class="flex px-2 items-center"
       :title="result.name"
       :data-cy="`runResults-${result.name}-count`"
     >
