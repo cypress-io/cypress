@@ -88,7 +88,7 @@ describe('global mode', () => {
     cy.visitLaunchpad()
 
     cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').returns('10.0.0')
+      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves('10.0.0')
     })
 
     cy.contains('migration-e2e-export-default').click()
