@@ -8,7 +8,7 @@
     :distance="distance"
     :skidding="skidding"
     :auto-hide="false /* to prevent the popper from getting focus */"
-    :instant-move="instantMove"
+    :delay="{show: 0, hide: hideDelay }"
     :show-group="showGroup"
   >
     <slot />
@@ -36,6 +36,7 @@ const props = withDefaults(defineProps<{
   skidding?: number
   placement?: 'top' | 'right' | 'bottom' | 'left'
   popperClass?: string
+  hideDelay?: number
   instantMove?: boolean
   showGroup?: string
 }>(), {
@@ -47,6 +48,7 @@ const props = withDefaults(defineProps<{
   skidding: undefined,
   placement: undefined,
   popperClass: undefined,
+  hideDelay: 100,
   instantMove: undefined,
   showGroup: undefined,
 })
