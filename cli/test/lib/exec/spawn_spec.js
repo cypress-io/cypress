@@ -42,6 +42,9 @@ describe('lib/exec/spawn', function () {
         pipe: sinon.stub().returns(undefined),
         on: sinon.stub().returns(undefined),
       },
+      kill: sinon.stub(),
+      // expected by sinon
+      cancel: sinon.stub(),
     }
 
     // process.stdin is both an event emitter and a readable stream

@@ -470,13 +470,13 @@ const util = {
     })
   },
 
-  cachedArch: undefined,
+  _cachedArch: undefined,
 
   /**
    * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
    */
   async getRealArch () {
-    if (this.cachedArch) return this.cachedArch
+    if (this._cachedArch) return this._cachedArch
 
     async function _getRealArch () {
       const osPlatform = os.platform()
@@ -487,9 +487,9 @@ const util = {
 
         // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
         // https://stackoverflow.com/a/65347893/3474615
-        const sysctlOutput = await execa('sysctl', ['-n', 'sysctl.proc_translated'])
+        const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
 
-        if (sysctlOutput.startsWith('1')) return 'arm64'
+        if (stdout && stdout.startsWith('1')) return 'arm64'
       }
 
       const pkgArch = arch()
@@ -499,7 +499,7 @@ const util = {
       return pkgArch
     }
 
-    return (this.cachedArch = await _getRealArch())
+    return (this._cachedArch = await _getRealArch())
   },
 
   // attention:

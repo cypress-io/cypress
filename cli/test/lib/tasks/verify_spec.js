@@ -8,7 +8,7 @@ const cp = require('child_process')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
-const { mockSpawn } = require('spawn-mock')
+const spawnMock = require('spawn-mock')
 const mockfs = require('mock-fs')
 const mockedEnv = require('mocked-env')
 
@@ -32,6 +32,15 @@ let stdout
 let spawnedProcess
 
 /* eslint-disable no-octal */
+
+function mockSpawn (cb) {
+  return spawnMock.mockSpawn((cp) => {
+    // execa expects .cancel to exist
+    cp.cancel = sinon.stub()
+
+    return cb(cp)
+  })
+}
 
 context('lib/tasks/verify', () => {
   require('mocha-banner').register()
@@ -210,7 +219,7 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+    sinon.stub(cp, 'spawn').withArgs('/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress').callsFake(mockSpawn((cp) => {
       cp.stderr.write('some stderr')
       cp.stdout.write('some stdout')
     }))

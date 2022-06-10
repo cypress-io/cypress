@@ -23,12 +23,12 @@ Otherwise, please check network connectivity and try again:
 
 ----------
 
-URL: https://download.cypress.io/desktop?platform=OS&arch=ARCH
+URL: https://download.cypress.io/desktop?platform=OS&arch=x64
 404 - Not Found
 
 ----------
 
-Platform: darwin-x64 (Foo-OsVersion)
+Platform: OS-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -42,17 +42,17 @@ https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
 `
 
 exports['desktop url from template'] = `
-https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
 `
 
 exports['desktop url from template with escaped dollar sign'] = `
-https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
 `
 
 exports['desktop url from template wrapped in quote'] = `
-https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
 `
 
 exports['desktop url from template with escaped dollar sign wrapped in quote'] = `
-https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
 `
