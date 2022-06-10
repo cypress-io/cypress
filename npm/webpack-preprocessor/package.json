@@ -54,7 +54,7 @@
     "react-dom": "16.13.1",
     "react-scripts": "3.2",
     "rimraf": "3.0.2",
-    "semantic-release": "17.2.3",
+    "semantic-release": "19.0.3",
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
