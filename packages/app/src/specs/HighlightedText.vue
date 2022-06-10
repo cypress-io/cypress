@@ -1,7 +1,6 @@
 <template>
   <span
     :title="props.titleText"
-    :class="{'truncate': truncate}"
   >
     <span
       v-for="({char, highlighted}, idx) in characters"
@@ -24,8 +23,8 @@
 import { computed } from 'vue'
 
 const props = withDefaults(
-  defineProps<{text: string, indexes: number[], highlightClasses?: string, titleText?: string, truncate?: boolean}>(),
-  { text: '', indexes: () => [], highlightClasses: 'text-white', titleText: '', truncate: false },
+  defineProps<{text: string, indexes: number[], highlightClasses?: string, titleText?: string}>(),
+  { text: '', indexes: () => [], highlightClasses: 'text-white', titleText: '' },
 )
 
 const characters = computed(() => {
