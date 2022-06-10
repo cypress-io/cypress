@@ -381,19 +381,14 @@ commands:
           name: Install Node
           command: |
             node_version=$(cat .node-version)
-            source ./scripts/load-nvm.sh
-            echo "Installing Node $node_version"
-            nvm install ${node_version}
-            echo "Using Node $node_version"
-            nvm use ${node_version}
-            [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s
+            source ./scripts/ensure-node.sh
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
       - run:
           name: Check Node
           command: |
-            source ./scripts/load-nvm.sh
+            source ./scripts/ensure-node.sh
             yarn check-node-version
 
   install-chrome:
@@ -619,7 +614,7 @@ commands:
       - run: 
           name: 'Verify Mocha Results'
           command: |
-            source ./scripts/load-nvm.sh
+            source ./scripts/ensure-node.sh
             yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-branch:
