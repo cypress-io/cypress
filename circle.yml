@@ -103,6 +103,7 @@ executors:
   linux-arm64:
     machine:
       image: ubuntu-2004:2022.04.1
+      shell: xterm
     resource_class: arm.medium
     environment:
       PLATFORM: linux
