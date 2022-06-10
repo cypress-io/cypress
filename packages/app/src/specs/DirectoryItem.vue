@@ -9,6 +9,7 @@
     <i-cy-folder_x16 class="h-16px mr-8px w-16px group-hocus:icon-light-indigo-300 group-hocus:icon-dark-indigo-400" />
     <HighlightedText
       :text="props.name"
+      :title-text="props.name"
       :indexes="props.indexes"
       class="text-gray-400 group-focus:text-indigo-300"
       highlight-classes="font-bold text-white"
