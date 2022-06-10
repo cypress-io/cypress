@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // @ts-check
-const genMeta = require('../lib/gen-meta');
+const genMeta = require('../lib/gen-meta')
 const config = require('../snapconfig')('prod')
 
 if (process.env.DEBUG == null) {
@@ -13,6 +13,7 @@ const installSnapshot = require('../lib/install-snapshot')
 ;(async () => {
   try {
     const meta = await genMeta(config)
+
     await installSnapshot(config, meta.resolverMap)
   } catch (err) {
     process.exit(err.code ?? 1)

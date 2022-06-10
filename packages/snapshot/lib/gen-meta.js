@@ -32,7 +32,7 @@ async function createMeta ({
  * the modules found inside the snapshot entry.
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
- * @return {Promise<Metadata>} metadata
+ * @return {Promise<import('v8-snapshot').BundlerMetadata>} metadata
  */
 module.exports = async function genMeta ({
   appEntryFile,

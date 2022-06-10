@@ -1,0 +1,17 @@
+{
+  "name": "snapshot-performance-analysis",
+  "version": "0.0.0-development",
+  "scripts": {
+    "start:vanilla": "ASSET_TYPE=vanilla electron app",
+    "start:snapshot": "USE_SNAPSHOT=1 ASSET_TYPE=vanilla electron app"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "gulp-complexity": "^0.3.2",
+    "lodash": "^4.17.20",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "time-require": "^0.1.2",
+    "v8-profiler-next": "^1.8.0"
+  }
+}

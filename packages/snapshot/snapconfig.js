@@ -1,13 +1,16 @@
 // @ts-check
 'use strict'
 
+const resolveFrom = require('resolve-from')
 const path = require('path')
 const platformString = process.platform
 
-const snapshotCacheBaseDir = path.resolve(__dirname, './cache')
+const runAgainstExperimentDirectory = process.env.RUN_AGAINST_EXPERIMENT_DIRECTORY != null
+
+const snapshotCacheBaseDir = runAgainstExperimentDirectory ? path.resolve(__dirname, '../snapshot-performance-analysis/cache') : path.resolve(__dirname, './cache')
 
 const projectBaseDir = path.join(__dirname, '../../')
-const appEntryFile = require.resolve('../server/index.js')
+const appEntryFile = runAgainstExperimentDirectory ? require.resolve('../snapshot-performance-analysis/deps/index.js') : path.resolve('../server/index.js')
 
 // TODO(thlorenz): this is most likely different when creating prod artifacts
 const cypressAppSnapshotDir = (() => {
@@ -49,6 +52,15 @@ const cypressAppSnapshotDir = (() => {
     default: {
       throw new Error(`Unable to determine Cypress App location for '${platformString}' platform.`)
     }
+  }
+
+  if (runAgainstExperimentDirectory) {
+    const electron = path.dirname(resolveFrom(projectBaseDir, 'electron'))
+
+    return path.join(
+      electron,
+      'dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources',
+    )
   }
 
   const cypressAppDir = path.join(electronPackageDir, cypressApp)

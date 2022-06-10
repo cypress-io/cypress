@@ -1,6 +1,8 @@
 'use strict'
 // @ts-check
 
+const runAgainstExperimentDirectory = process.env.RUN_AGAINST_EXPERIMENT_DIRECTORY != null
+
 const path = require('path')
 const fs = require('fs').promises
 
@@ -75,7 +77,7 @@ function getSnapshotGenerator ({
       // defers PassThroughStream which is then not accepted as a constructor
       'get-stream/buffer-stream.js',
 
-      // deferring should be fine as it just rexports `process` which in the
+      // deferring should be fine as it just reexports `process` which in the
       // case of cache is the stub
       'process-nextick-args/index.js',
 
@@ -131,18 +133,24 @@ module.exports = async function installSnapshot (
 
     await snapshotGenerator.createScript()
     const { v8ContextFile } = await snapshotGenerator.makeSnapshot()
-    const cypressAppSnapshotFile = path.join(
-      cypressAppSnapshotDir,
-      v8ContextFile,
-    )
 
-    // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
-    await fs.copyFile(
-      path.join(projectBaseDir, v8ContextFile),
-      cypressAppSnapshotFile,
-    )
+    if (!runAgainstExperimentDirectory) {
+      const cypressAppSnapshotFile = path.join(
+        cypressAppSnapshotDir,
+        v8ContextFile,
+      )
 
-    logDebug('Copied snapshot to "%s"', cypressAppSnapshotFile)
+      // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
+      await fs.copyFile(
+        path.join(projectBaseDir, v8ContextFile),
+        cypressAppSnapshotFile,
+      )
+
+      logDebug('Copied snapshot to "%s"', cypressAppSnapshotFile)
+    } else {
+      snapshotGenerator.installSnapshot()
+    }
+
     logInfo('Done generating snapshot')
   } catch (err) {
     prettyPrintError(err, projectBaseDir)

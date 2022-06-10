@@ -46,3 +46,4 @@ npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 **/.next/**
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
+**/cache/**
