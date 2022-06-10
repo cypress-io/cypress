@@ -99,8 +99,13 @@ executors:
     machine: true
     environment:
       PLATFORM: darwin
-    # you may need to add this resource_class to the job itself if it sets a default value for resource_class
-    # resource_class: cypress-io/latest_m1
+
+  linux-arm64:
+    machine:
+      image: ubuntu-2004:2022.04.1
+    resource_class: arm.medium
+    environment:
+      PLATFORM: linux
 
 commands:
   verify_should_persist_artifacts:
@@ -2240,7 +2245,7 @@ jobs:
           command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
-linux-workflow: &linux-workflow
+linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install
     - build:
@@ -2549,6 +2554,31 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
           - system-tests-node-modules-install
 
+linux-arm64-workflow: &linux-arm64-workflow
+  jobs:
+    - node_modules_install:
+        name: linux-arm64-node-modules-install
+        executor: linux-arm64
+        resource_class: arm.medium
+        only-cache-for-root-user: true
+
+    - build:
+        name: linux-arm64-build
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-node-modules-install
+
+    - create-build-artifacts:
+        name: linux-arm64-create-build-artifacts
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2686,8 +2716,10 @@ windows-workflow: &windows-workflow
           - windows-create-build-artifacts
 
 workflows:
-  linux:
-    <<: *linux-workflow
+  linux-x64:
+    <<: *linux-x64-workflow
+  linux-arm64:
+    <<: *linux-arm64-workflow
   darwin-x64:
     <<: *darwin-x64-workflow
     <<: *darwin-workflow-filters
