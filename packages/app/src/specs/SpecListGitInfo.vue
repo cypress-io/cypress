@@ -38,6 +38,12 @@
         </div>
       </template>
     </Tooltip>
+    <div
+      v-else
+      class="text-gray-700 overflow-hidden truncate"
+    >
+      {{ props.gql?.lastModifiedHumanReadable ?? '' }}
+    </div>
   </div>
 </template>
 
