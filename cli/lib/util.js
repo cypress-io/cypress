@@ -482,14 +482,22 @@ const util = {
       const osPlatform = os.platform()
       const osArch = os.arch()
 
-      if (osPlatform === 'darwin') {
-        if (osArch === 'arm64') return 'arm64'
+      if (osArch === 'arm64') return 'arm64'
 
+      if (osPlatform === 'darwin') {
         // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
         // https://stackoverflow.com/a/65347893/3474615
         const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
 
-        if (stdout && stdout.startsWith('1')) return 'arm64'
+        if (stdout === '1') return 'arm64'
+      }
+
+      if (osPlatform === 'linux') {
+        // could possibly be x64 node on arm64 linux, check the "machine hardware name"
+        // list of names for reference: https://stackoverflow.com/a/45125525/3474615
+        const { stdout } = await execa('uname', ['-m']).catch(() => '')
+
+        if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
       }
 
       const pkgArch = arch()
