@@ -2,6 +2,7 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
+const cp = require('child_process')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
@@ -17,6 +18,7 @@ const download = require(`${lib}/tasks/download`)
 
 const stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
+const { mockSpawn } = require('../../support/spawn-mock')
 
 const downloadDestination = path.join(os.tmpdir(), 'Cypress', 'download', 'cypress.zip')
 const version = '1.2.3'
@@ -468,6 +470,52 @@ describe('lib/tasks/download', function () {
       expect(responseVersion).to.eq('0.13.0')
 
       return fs.statAsync(downloadDestination)
+    })
+  })
+
+  context('architecture detection', () => {
+    beforeEach(() => {
+      sinon.stub(os, 'arch')
+    })
+
+    function nockDarwinArm64 () {
+      return nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query({ arch: 'arm64', platform: 'darwin' })
+      .reply(200, undefined, {
+        'x-version': '1.2.3',
+      })
+    }
+
+    it('downloads darwin-arm64 on M1', async function () {
+      os.platform.returns('darwin')
+      os.arch.returns('arm64')
+      nockDarwinArm64()
+
+      const responseVersion = await download.start(this.options)
+
+      expect(responseVersion).to.eq('1.2.3')
+
+      await fs.statAsync(downloadDestination)
+    })
+
+    it('downloads darwin-arm64 on M1 translated by Rosetta', async function () {
+      os.platform.returns('darwin')
+      os.arch.returns('x64')
+      nockDarwinArm64()
+
+      sinon.stub(cp, 'spawn').withArgs('sysctl', ['-n', 'sysctl.proc_translated'])
+      .callsFake(mockSpawn(((cp) => {
+        cp.stdout.write('1')
+        cp.emit('exit', 0, null)
+        cp.end()
+      })))
+
+      const responseVersion = await download.start(this.options)
+
+      expect(responseVersion).to.eq('1.2.3')
+
+      await fs.statAsync(downloadDestination)
     })
   })
 

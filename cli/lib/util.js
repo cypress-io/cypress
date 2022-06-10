@@ -482,12 +482,16 @@ const util = {
       const osPlatform = os.platform()
       const osArch = os.arch()
 
+      debug('detecting arch %o', { osPlatform, osArch })
+
       if (osPlatform === 'darwin') {
         if (osArch === 'arm64') return 'arm64'
 
         // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
         // https://stackoverflow.com/a/65347893/3474615
         const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
+
+        debug('rosetta check result:', { stdout })
 
         if (stdout && stdout.startsWith('1')) return 'arm64'
       }
