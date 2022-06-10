@@ -211,4 +211,16 @@ describe('Launchpad: Open Mode', () => {
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
+
+  // Assert that we do not glob the absolute projectRoot
+  // and fail supportFile lookups during project initialization.
+  // https://github.com/cypress-io/cypress/issues/22040
+  it('opens projects with paths that contain glob syntax', () => {
+    cy.scaffoldProject('project-with-(glob)-[chars]')
+    cy.openProject('project-with-(glob)-[chars]', ['--e2e'])
+    cy.visitLaunchpad()
+
+    cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
+    cy.get('h1').should('contain', 'Choose a Browser')
+  })
 })
