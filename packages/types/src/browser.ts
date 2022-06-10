@@ -38,6 +38,8 @@ export type Browser = {
   info?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
   minSupportedVersion?: number
+  /** optional additional environment variables set when launching the browser process */
+  env?: NodeJS.ProcessEnv
 }
 
 /**

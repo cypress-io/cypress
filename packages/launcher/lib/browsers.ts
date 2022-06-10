@@ -34,7 +34,7 @@ export function launch (
 
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
-  const env = Object.assign({}, defaultBrowserEnv, process.env)
+  const env = Object.assign({}, defaultBrowserEnv, browser.env, process.env)
 
   const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
