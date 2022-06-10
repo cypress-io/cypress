@@ -409,8 +409,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppSocketServer(io)
   }
 
-  async closeBrowserTabs () {
-    return this.server.socket.closeBrowserTabs()
+  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+    return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {
