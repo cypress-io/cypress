@@ -974,7 +974,7 @@ commands:
       - run:
           name: Zip the binary
           command: |
-            [[ $PLATFORM == 'linux' ]] && apt-get update && apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
+            [[ $PLATFORM == 'linux' ]] && sudo apt-get update && sudo apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
             yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
