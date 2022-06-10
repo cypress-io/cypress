@@ -964,6 +964,11 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+            fi
             node --version
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
