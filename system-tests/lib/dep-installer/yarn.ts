@@ -23,8 +23,6 @@ export function getYarnCommand (opts: {
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
-  if (!opts.updateLockFile) cmd += ' --frozen-lockfile'
-
   // yarn v1 has a bug with integrity checking and local cache/dependencies
   // @see https://github.com/yarnpkg/yarn/issues/6407
   cmd += ' --update-checksums'
