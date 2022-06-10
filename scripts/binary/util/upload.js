@@ -112,7 +112,7 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
 }
 
 // all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'win32-x64']
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
