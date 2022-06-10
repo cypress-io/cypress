@@ -86,19 +86,7 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
 /**
  * Sanitizes any unserializable values to prep for postMessage serialization. All Objects, including Errors, are mapped to an Object literal with
  * whatever serialization properties they have, including their prototype hierarchy.
- * This keeps behavior consistent between browsers without having to worry about the inner workings of structuredClone(). For example:
- *
- * chromium
- * new Error('myError') -> Object literal with message key having value 'myError'. Also, other custom properties on the object are omitted and only name, message, and stack are preserved
- *
- * For instance:
- * var a = new Error('myError')
- * a.foo = 'bar'
- * var b = structuredClone(a)
- * b.foo // is undefined
- *
- * firefox
- * structuredClone(new Error('myError')) -> throws error as native error cannot be serialized
+ * This keeps behavior consistent between browsers without having to worry about the inner workings of structuredClone().
  *
  * This method takes a similar approach as the 'chromium' structuredClone algorithm, except that the prototype chain is walked and ANY serializable value, including getters, is serialized.
  * Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone.
