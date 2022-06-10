@@ -1,0 +1,29 @@
+{
+  "name": "react-webpack-ts",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "webpack server"
+  },
+  "dependencies": {
+    "@babel/core": "^7.17.10",
+    "@babel/preset-env": "^7.17.10",
+    "@babel/preset-react": "^7.16.7",
+    "@babel/preset-typescript": "^7.16.7",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "@types/node": "^17.0.33",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.4",
+    "babel-loader": "^8.2.5",
+    "css-loader": "^6.7.1",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "style-loader": "^3.3.1",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.6.4",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.0"
+  },
+  "license": "MIT"
+}
