@@ -394,7 +394,7 @@ useResizeObserver(containerProps.ref, (entries) => {
 
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
-watch(() => treeSpecList.value, () => scrollTo(0))
+watch(() => hashCode(treeSpecList.value.map((spec) => spec.id)), () => scrollTo(0))
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
@@ -429,6 +429,18 @@ function refetchFailedCloudData () {
 
 function refreshPage () {
   location.reload()
+}
+
+/**
+ * Generate a quasi-hash value to decompose an array of strings into a single numeric value that can be used to
+ * see whether it has changed from previous value(s).
+ */
+function hashCode (values: string[]): number {
+  return values.reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0)
+
+    return a & a
+  }, 0)
 }
 
 </script>

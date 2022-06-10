@@ -2,7 +2,7 @@ import type { Ref, CSSProperties } from 'vue'
 import { watch, ref, computed, shallowRef } from 'vue'
 import type { MaybeRef } from '@vueuse/core'
 import { useElementSize } from '@vueuse/core'
-import { isEqual } from 'lodash'
+import { debounce, isEqual } from 'lodash'
 
 export type UseVirtualListApi = ReturnType<typeof useVirtualList>['api']
 
@@ -161,9 +161,9 @@ export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtua
     scrollTo,
     containerProps: {
       ref: containerRef,
-      onScroll: () => {
+      onScroll: debounce(() => {
         calculateRange()
-      },
+      }, 100),
       style: containerStyle,
     },
     wrapperProps,
