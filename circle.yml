@@ -960,12 +960,12 @@ commands:
           no_output_timeout: "45m"
           command: |
             node --version
-            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+            yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
             [[ $PLATFORM == 'linux' ]] && apt-get update && apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
-            yarn binary-zip --platform $PLATFORM
+            yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
