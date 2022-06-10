@@ -91,7 +91,7 @@ executors:
     machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
-    resource_class: windows.medium
+    resource_class: windows.xlarge
     environment:
       PLATFORM: windows
 
@@ -381,12 +381,7 @@ commands:
           name: Install Node
           command: |
             node_version=$(cat .node-version)
-            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-            if ! type nvm; then
-              echo "Installing NVM"
-              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
-              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-            fi
+            source ./scripts/load-nvm.sh
             echo "Installing Node $node_version"
             nvm install ${node_version}
             echo "Using Node $node_version"
@@ -398,7 +393,7 @@ commands:
       - run:
           name: Check Node
           command: |
-            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            source ./scripts/load-nvm.sh
             yarn check-node-version
 
   install-chrome:
@@ -624,7 +619,7 @@ commands:
       - run: 
           name: 'Verify Mocha Results'
           command: |
-            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            source ./scripts/load-nvm.sh
             yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-branch:
@@ -2668,21 +2663,21 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
         context: test-runner:env-canary
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         requires:
           - windows-node-modules-install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         context: test-runner:launchpad-tests
         requires:
           - windows-build
@@ -2690,7 +2685,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         context: test-runner:launchpad-tests
         requires:
           - windows-build
@@ -2706,7 +2701,7 @@ windows-workflow: &windows-workflow
         <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         requires:
           - windows-build
 
@@ -2714,7 +2709,7 @@ windows-workflow: &windows-workflow
         <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.xlarge
         context:
           - test-runner:sign-windows-binary
           - test-runner:upload
