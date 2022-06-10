@@ -974,7 +974,14 @@ commands:
       - run:
           name: Zip the binary
           command: |
-            [[ $PLATFORM == 'linux' ]] && sudo apt-get update && sudo apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
+            if [[ $PLATFORM == 'linux' ]]; then
+              # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
+              if [[ `whoami` == 'root' ]]; then
+                apt-get update && apt-get install -y zip
+              else
+                sudo apt-get update && sudo apt-get install -y zip
+              fi
+            fi
             yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
