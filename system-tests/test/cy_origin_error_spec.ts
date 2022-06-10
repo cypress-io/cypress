@@ -20,6 +20,7 @@ describe('e2e cy.origin errors', () => {
       onServer,
     }],
     settings: {
+      e2e: {},
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },
