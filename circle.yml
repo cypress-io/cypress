@@ -382,7 +382,7 @@ commands:
           command: |
             node_version=$(cat .node-version)
             [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-            if ! which nvm; then
+            if ! type nvm; then
               echo "Installing NVM"
               curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
@@ -970,12 +970,12 @@ commands:
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
             fi
             node --version
-            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+            yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
             [[ $PLATFORM == 'linux' ]] && apt-get update && apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
-            yarn binary-zip --platform $PLATFORM
+            yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
