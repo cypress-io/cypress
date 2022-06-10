@@ -1,12 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
-import findUp from 'find-up'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -42,6 +42,8 @@ const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
 const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
+
+const dynamicImport = new Function('specifier', 'return import(specifier)')
 
 /**
  * Removes and/or modifies certain plugins known to conflict
@@ -97,11 +99,13 @@ export async function makeWebpackConfig (
   if (!userWebpackConfig && !frameworkWebpackConfig) {
     debug('Not user or framework webpack config received. Trying to automatically source it')
 
+    const { findUp } = await dynamicImport('find-up') as typeof import('find-up')
+
     configFile = await findUp(configFiles, { cwd: projectRoot } as { cwd: string })
 
     if (configFile) {
       debug('found webpack config %s', configFile)
-      const sourcedConfig = configFile.endsWith('.mjs') ? await import(configFile) : require(configFile)
+      const sourcedConfig = await importModule(configFile)
 
       debug('config contains %o', sourcedConfig)
       if (sourcedConfig && typeof sourcedConfig === 'object') {

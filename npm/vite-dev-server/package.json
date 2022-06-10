@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "debug": "4.3.3",
-    "find-up": "5.0.0",
+    "find-up": "6.3.0",
     "pathe": "0.2.0"
   },
   "devDependencies": {

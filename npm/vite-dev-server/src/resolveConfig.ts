@@ -12,13 +12,15 @@ import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressInspect } from './plugins/index'
 import type { Vite } from './getVite'
-import findUp from 'find-up'
+
+const dynamicImport = new Function('specifier', 'return import(specifier)')
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
   const { specs, cypressConfig, viteConfig: viteOverrides } = config
   const root = cypressConfig.projectRoot
+  const { findUp } = await dynamicImport('find-up') as typeof import('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
   // INFO logging, a lot is logged here.
