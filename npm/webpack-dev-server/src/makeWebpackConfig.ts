@@ -1,12 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
-import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
+import { pathToFileURL } from 'url'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -100,12 +100,15 @@ export async function makeWebpackConfig (
     debug('Not user or framework webpack config received. Trying to automatically source it')
 
     const { findUp } = await dynamicImport('find-up') as typeof import('find-up')
+    const { importModule } = await dynamicImport('local-pkg') as typeof import('local-pkg')
 
     configFile = await findUp(configFiles, { cwd: projectRoot } as { cwd: string })
 
     if (configFile) {
+      const configFileURL = pathToFileURL(configFile).href
+
       debug('found webpack config %s', configFile)
-      const sourcedConfig = await importModule(configFile)
+      const sourcedConfig = await importModule(configFileURL)
 
       debug('config contains %o', sourcedConfig)
       if (sourcedConfig && typeof sourcedConfig === 'object') {
