@@ -1,8 +1,9 @@
 import GeneratorSuccess from './GeneratorSuccess.vue'
-import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
+import data from '../../../cypress/fixtures/GeneratorSuccess.json'
+import type { FileListItemFragment } from '../../generated/graphql-test'
 
 const targetSelector = '[data-cy=file-row]'
-const spec = randomComponents(1, 'FileParts')[0]
+const spec = data[0] as FileListItemFragment
 const content = `
 import ${spec.baseName} from './${spec.baseName}'
 import { mount } from '@cypress/react'

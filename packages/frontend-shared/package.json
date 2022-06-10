@@ -13,6 +13,7 @@
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
+    "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package"
   },
   "dependencies": {},
