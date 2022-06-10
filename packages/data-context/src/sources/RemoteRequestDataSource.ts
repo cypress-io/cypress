@@ -99,8 +99,8 @@ export class RemoteRequestDataSource {
 
     const cachedData = ctx.cloud.readFromCache(params)
 
-    // If we have stale data, and we should fetch - fetch the data
-    if (cachedData?.stale && shouldFetch) {
+    // If we have stale data, or we should fetch - fetch the data
+    if (cachedData?.stale || shouldFetch) {
       // Otherwise, fetch it
       this.#executeRemote(params)
 
