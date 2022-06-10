@@ -28,7 +28,7 @@
 
     // Name: Volar
     // Description: Language server for Vue. Required for any syntax highlighting in Vue files.
-    "johnsoncodehk.volar",
+    "vue.volar",
 
     // Name: Code Spell Checker
     // Description: Add spell-checking help to your code.

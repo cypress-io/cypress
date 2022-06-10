@@ -36,7 +36,7 @@ yarn workspace @packages/launchpad build
 
 ## Developing
 
-For the best development experience, you will want to use VS Code with the [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) extension. This will give you type completion inside `vue` files.
+For the best development experience, you will want to use VS Code with the [Volar](https://marketplace.visualstudio.com/items?itemName=vue.volar) extension. This will give you type completion inside `vue` files.
 
 
 ```bash
