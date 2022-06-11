@@ -360,6 +360,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = true
 
+      process.arch()
+
       return this.project.open()
       .then(() => {
         expect(system.info).not.to.be.called

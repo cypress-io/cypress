@@ -504,6 +504,7 @@ const util = {
         if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
       }
 
+      // eslint-disable-next-line no-restricted-syntax
       const pkgArch = arch()
 
       if (pkgArch === 'x86') return 'ia32'
