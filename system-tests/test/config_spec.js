@@ -236,4 +236,13 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('finds supportFiles in projects containing glob syntax', async function () {
+    await Fixtures.scaffoldProject('project-with-(glob)-[chars]')
+
+    return systemTests.exec(this, {
+      project: 'project-with-(glob)-[chars]',
+      snapshot: true,
+    })
+  })
 })
