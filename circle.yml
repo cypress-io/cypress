@@ -43,6 +43,14 @@ macWorkflowFilters: &darwin-workflow-filters
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
+# uncomment & add to the branch conditions below to disable the main linux
+# flow if we don't want to test it for a certain branch
+linuxWorkflowExcludeFilters: &linux-workflow-exclude-filters
+  unless:
+    or:
+    - false
+    # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
+
 # windows is slow in CI, so we only run a certain set of tests on each commit
 # add your branch to this list to run the full Windows build on your PR
 fullWindowsWorkflowFilters: &full-windows-workflow-filters
@@ -99,8 +107,6 @@ executors:
     machine: true
     environment:
       PLATFORM: darwin
-    # you may need to add this resource_class to the job itself if it sets a default value for resource_class
-    # resource_class: cypress-io/latest_m1
 
 commands:
   verify_should_persist_artifacts:
@@ -2604,13 +2610,6 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         requires:
           - darwin-arm64-build
 
-    # - test-kitchensink:
-    #     name: darwin-arm64-test-kitchensink
-    #     executor: darwin-arm64
-    #     resource_class: cypress-io/latest_m1
-    #     requires:
-    #       - darwin-arm64-build
-
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
@@ -2678,6 +2677,7 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
+    <<: *linux-workflow-exclude-filters
   darwin-x64:
     <<: *darwin-x64-workflow
     <<: *darwin-workflow-filters

@@ -493,7 +493,7 @@ const util = {
 
         debug('rosetta check result: %o', { stdout })
 
-        if (stdout && stdout.startsWith('1')) return 'arm64'
+        if (stdout === '1') return 'arm64'
       }
 
       const pkgArch = arch()
