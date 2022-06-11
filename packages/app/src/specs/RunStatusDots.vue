@@ -8,6 +8,8 @@
       placement="top"
       :is-interactive="true"
       class="h-16px"
+      :hide-delay="0"
+      :show-group="props.gql.id"
       popper-class="RunStatusDots_Tooltip"
     >
       <component

@@ -4,7 +4,7 @@
     :is-interactive="true"
   >
     <div
-      class="decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
       tabindex="0"
     >
       {{ headerText }}

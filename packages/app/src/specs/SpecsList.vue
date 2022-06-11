@@ -392,9 +392,9 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
-// If you are scrolled down the virtual list and list changes,
+// If you are scrolled down the virtual list and the search filter changes,
 // reset scroll position to top of list
-watch(() => treeSpecList.value, () => scrollTo(0))
+watch(() => debouncedSearchString.value, () => scrollTo(0))
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
