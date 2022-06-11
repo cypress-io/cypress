@@ -1,82 +1,71 @@
 <template>
-  <div
-    class="h-full grid justify-items-end items-center"
+  <component
+    :is="latestRun? Tooltip : 'div'"
+    placement="top"
+    :is-interactive="true"
+    class="h-16px"
+    :hide-delay="0"
+    :show-group="props.gql.id"
+    popper-class="RunStatusDots_Tooltip"
   >
     <component
-      :is="latestRun? Tooltip : 'div'"
-      v-if="props.isProjectDisconnected || props.gql.cloudSpec?.fetchingStatus === 'FETCHED' || props.gql.cloudSpec?.fetchingStatus === 'ERRORED'"
-      placement="top"
-      :is-interactive="true"
-      class="h-16px"
-      :hide-delay="0"
-      :show-group="props.gql.id"
-      popper-class="RunStatusDots_Tooltip"
+      :is="latestRun? ExternalLink : 'div'"
+      :href="latestRun?.url ?? '#'"
+      :use-default-hocus="false"
     >
-      <component
-        :is="latestRun? ExternalLink : 'div'"
-        :href="latestRun?.url ?? '#'"
-        :use-default-hocus="false"
+      <div
+        class="flex justify-end items-center"
+        data-cy="run-status-dots"
+        tabindex="0"
       >
         <div
-          class="flex justify-end items-center"
-          data-cy="run-status-dots"
-          tabindex="0"
+          v-for="(dot,i) in dotClasses"
+          :key="i"
+          class="ml-4px"
         >
-          <div
-            v-for="(dot,i) in dotClasses"
-            :key="i"
-            class="ml-4px"
-          >
-            <i-cy-dot-solid_x4
-              width="4"
-              height="4"
-              :class="dot"
-              :data-cy="'run-status-dot-'+i"
-            />
-          </div>
-          <div>
-            <component
-              :is="latestStatus.icon"
-              width="16"
-              height="16"
-              :class="{'animate-spin': latestStatus.spin}"
-              :data-cy="'run-status-dot-latest'"
-              class="ml-4px"
-            />
-          </div>
-        </div>
-      </component>
-      <template
-        #popper
-      >
-        <ExternalLink
-          v-if="latestRun"
-          :href="latestRun.url ?? '#'"
-          :use-default-hocus="false"
-        >
-          <SpecRunSummary
-            :run="latestRun"
-            :spec-file-no-extension="props.gql.fileName"
-            :spec-file-extension="props.gql.specFileExtension"
+          <i-cy-dot-solid_x4
+            width="4"
+            height="4"
+            :class="dot"
+            :data-cy="'run-status-dot-'+i"
           />
-        </ExternalLink>
-      </template>
+        </div>
+        <div>
+          <component
+            :is="latestStatus.icon"
+            width="16"
+            height="16"
+            :class="{'animate-spin': latestStatus.spin}"
+            :data-cy="'run-status-dot-latest'"
+            class="ml-4px"
+          />
+        </div>
+      </div>
     </component>
-    <div
-      v-else
-      class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+    <template
+      #popper
     >
-    &nbsp;
-    </div>
-  </div>
+      <ExternalLink
+        v-if="latestRun"
+        :href="latestRun.url ?? '#'"
+        :use-default-hocus="false"
+      >
+        <SpecRunSummary
+          :run="latestRun"
+          :spec-file-no-extension="props.specFileName"
+          :spec-file-extension="props.specFileExtension"
+        />
+      </ExternalLink>
+    </template>
+  </component>
 </template>
 
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
+import type { RunStatusDotsFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -84,161 +73,53 @@ import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 
 gql`
-mutation RunStatusDots_Refetch ($ids: [ID!]!) {
-  loadRemoteFetchables(ids: $ids){
-    id
-    fetchingStatus
-  }
-}
-`
-
-const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
-
-const isRefetching = ref(false)
-
-const refetch = async () => {
-  if (isRefetching.value) {
-    return
-  }
-
-  if (!props.isProjectDisconnected && props.gql.cloudSpec?.id && !refetchMutation.fetching.value) {
-    isRefetching.value = true
-
-    await refetchMutation.executeMutation({ ids: [props.gql.cloudSpec.id] })
-    isRefetching.value = false
-  }
-}
-
-gql`
-fragment RunStatusDots on Spec {
+fragment RunStatusDots on CloudProjectSpec {
   id
-  specFileExtension
-  fileName
-  cloudSpec(name: "RunStatusDots") @include(if: $hasBranch) {
-    id
-    fetchingStatus
-    data {
-      __typename
-      ... on CloudProjectSpecNotFound {
-        retrievedAt
+  retrievedAt
+  specRuns(first: 4, fromBranch: $fromBranch) {
+    nodes {
+      id
+      runNumber
+      testsFailed{
+        min
+        max
       }
-      ... on CloudProjectSpec {
-        id
-        retrievedAt
-        specRuns(first: 4, fromBranch: $fromBranch) {
-          nodes {
-            id
-            runNumber
-            testsFailed{
-              min
-              max
-            }
-            testsPassed{
-              min
-              max
-            }
-            testsPending{
-              min
-              max
-            }
-            testsSkipped{
-              min
-              max
-            }
-            createdAt
-            groupCount
-            specDuration{
-              min
-              max
-            }
-            status
-            url
-          }
-        }
+      testsPassed{
+        min
+        max
       }
+      testsPending{
+        min
+        max
+      }
+      testsSkipped{
+        min
+        max
+      }
+      createdAt
+      groupCount
+      specDuration{
+        min
+        max
+      }
+      status
+      url
     }
   }
 }
 `
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   gql: RunStatusDotsFragment
-  isProjectDisconnected: boolean
-  isOnline: boolean
-  mostRecentUpdate: string | null
-}>(), {
-  isProjectDisconnected: false,
-  isOnline: true,
-  mostRecentUpdate: null,
-})
-
-function shouldRefetch () {
-  if (isRefetching.value) {
-    // refetch in progress, no need to refetch
-
-    return false
-  }
-
-  if (!props.isOnline) {
-    // Offline, no need to refetch
-
-    return false
-  }
-
-  if (props.gql.cloudSpec?.fetchingStatus === 'NOT_FETCHED' || props.gql.cloudSpec?.fetchingStatus === undefined) {
-    // NOT_FETCHED, refetch
-
-    return true
-  }
-
-  if (props.mostRecentUpdate) {
-    if (
-      (
-        props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpecNotFound' ||
-        props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpec'
-      )
-      && (
-        props.gql.cloudSpec.data.retrievedAt &&
-        props.mostRecentUpdate > props.gql.cloudSpec.data.retrievedAt
-      )
-    ) {
-      // outdated, refetch
-
-      return true
-    }
-  }
-
-  // nothing new, no need to refetch
-
-  return false
-}
-
-watch(() => props.isOnline,
-  async () => {
-    if (shouldRefetch()) {
-      await refetch()
-    }
-  }, { immediate: true })
-
-watch(() => props.isProjectDisconnected,
-  async () => {
-    if (shouldRefetch()) {
-      await refetch()
-    }
-  }, { immediate: true })
-
-watch(() => props.mostRecentUpdate,
-  async () => {
-    if (shouldRefetch()) {
-      await refetch()
-    }
-  }, { immediate: true })
+  specFileName: string
+  specFileExtension: string
+}>()
 
 const runs = computed(() => {
-  return props.gql.cloudSpec?.data?.__typename === 'CloudProjectSpec' ? props.gql.cloudSpec.data.specRuns?.nodes ?? [] : []
+  return props.gql?.specRuns?.nodes ?? []
 })
 
 const dotClasses = computed(() => {

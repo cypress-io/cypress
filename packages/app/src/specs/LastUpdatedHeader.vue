@@ -2,6 +2,7 @@
   <Tooltip
     placement="top"
     :is-interactive="true"
+    :hide-delay="0"
   >
     <div
       class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"

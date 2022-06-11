@@ -82,7 +82,7 @@
       <div class="flex col-span-2 items-center justify-between">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
-      <div class="flex items-center justify-end">
+      <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.latestRuns.header')"
@@ -92,7 +92,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex items-center justify-end">
+      <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.averageDuration.header')"
@@ -159,24 +159,27 @@
           </template>
 
           <template #latest-runs>
-            <!-- <div>
-              <pre>{{ JSON.stringify(row.data.data?.cloudSpec?.data?.specRuns?.nodes?.length ?? "null",null,2) }}</pre>
-            </div> -->
-            <RunStatusDots
-              v-if="row.data.isLeaf && row.data.data"
-              :gql="row.data.data"
-              :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
-              :is-online="isOnline"
-              :most-recent-update="mostRecentUpdate"
-            />
+            <div
+              class="h-full grid justify-items-end items-center"
+            >
+              <RunStatusDots
+                v-if="row.data.isLeaf && row.data.data && row.data.data.cloudSpec?.fetchingStatus === 'FETCHED' && row.data.data.cloudSpec.data?.__typename === 'CloudProjectSpec'"
+                :gql="row.data.data.cloudSpec.data"
+                :spec-file-extension="row.data.data.fileExtension"
+                :spec-file-name="row.data.data.fileName"
+              />
+              <div
+                v-else-if="row.data.isLeaf"
+                class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+              >
+                &nbsp;
+              </div>
+            </div>
           </template>
           <template #average-duration>
             <AverageDuration
-              v-if="row.data.isLeaf"
-              :gql="row.data.data ?? null"
-              :is-project-disconnected="props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject')"
-              :is-online="isOnline"
-              :most-recent-update="mostRecentUpdate"
+              v-if="row.data.isLeaf && row.data.data?.cloudSpec?.data?.__typename === 'CloudProjectSpec'"
+              :gql="row.data.data.cloudSpec.data"
             />
           </template>
         </SpecsListRowItem>
@@ -233,6 +236,7 @@ import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { CloudData_RefetchDocument } from '../generated/graphql-test'
+import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -258,7 +262,7 @@ const isGitAvailable = computed(() => {
 })
 
 const hasCloudErrors = computed(() => {
-  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.fetchingStatus === 'ERRORED' || s.avgDurationInfo?.fetchingStatus === 'ERRORED') ?? false
+  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.fetchingStatus === 'ERRORED') ?? false
 })
 
 const shouldShowFetchError = ref(false)
@@ -291,8 +295,22 @@ fragment SpecsList on Spec {
   gitInfo {
     ...SpecListRow
   }
-  ...RunStatusDots
-  ...AverageDuration
+  cloudSpec(name: "cloudSpec") @include(if: $hasBranch) {
+    id
+    fetchingStatus
+    data {
+      ... on CloudProjectSpecNotFound {
+        retrievedAt
+      }
+      ... on CloudProjectSpec {
+        id
+        ...AverageDuration
+        ...RunStatusDots
+        retrievedAt
+      }
+    }
+  }
+  
 }
 `
 
@@ -415,16 +433,109 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(CloudData_RefetchDocument)
 
-function refetchFailedCloudData () {
+const isRefetching = ref(false)
+
+const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'))
+
+const refetch = async (ids: string[]) => {
+  if (isRefetching.value) {
+    return
+  }
+
+  if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
+    isRefetching.value = true
+
+    await refetchMutation.executeMutation({ ids })
+    isRefetching.value = false
+  }
+}
+
+type CloudSpecItem = {
+  fetchingStatus?: RemoteFetchableStatus
+  data?: {
+    __typename?: 'CloudProjectSpec'
+    retrievedAt: string | null
+  } | {
+    __typename?: 'CloudProjectSpecNotFound'
+    retrievedAt: string | null
+  } | {
+    __typename?: 'CloudProjectUnauthorized'
+  } | null
+}
+
+function shouldRefetch (item: CloudSpecItem) {
+  if (isRefetching.value) {
+    // refetch in progress, no need to refetch
+
+    return false
+  }
+
+  if (!isOnline) {
+    // Offline, no need to refetch
+
+    return false
+  }
+
+  if (item.fetchingStatus === 'NOT_FETCHED' || item.fetchingStatus === undefined) {
+    // NOT_FETCHED, refetch
+
+    return true
+  }
+
+  if (props.mostRecentUpdate) {
+    if (
+      (
+        item.data?.__typename === 'CloudProjectSpecNotFound' ||
+        item.data?.__typename === 'CloudProjectSpec'
+      )
+      && (
+        item.data.retrievedAt &&
+        props.mostRecentUpdate > item.data.retrievedAt
+      )
+    ) {
+      // outdated, refetch
+
+      return true
+    }
+  }
+
+  // nothing new, no need to refetch
+
+  return false
+}
+
+function getItemsToRefetch () {
+  return list.value
+  .map((spec) => spec.data.data?.cloudSpec)
+  .filter((cloudSpec) => cloudSpec && shouldRefetch(cloudSpec))
+  ?? []
+}
+async function fetchMissingOrErroneousItems () {
+  const items = getItemsToRefetch()
+
+  if (items.length > 0) {
+    await refetch(items.map((cloudSpec) => cloudSpec?.id ?? ''))
+  }
+}
+
+const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloudSpec?.id).join('|'))
+
+const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
+
+watch(debouncedDisplayedSpecIds, fetchMissingOrErroneousItems, { immediate: true })
+
+watch(isOnline, fetchMissingOrErroneousItems)
+
+watch(isProjectDisconnected, fetchMissingOrErroneousItems)
+
+watch(() => props.mostRecentUpdate, fetchMissingOrErroneousItems)
+
+async function refetchFailedCloudData () {
   const latestRunsIds = props.gql.currentProject?.specs
   .filter((s) => s.cloudSpec?.fetchingStatus === 'ERRORED')
   .map((s) => s.cloudSpec?.id as string) ?? []
 
-  const avgInfoIds = props.gql.currentProject?.specs
-  .filter((s) => s.avgDurationInfo?.fetchingStatus === 'ERRORED')
-  .map((s) => s.avgDurationInfo?.id as string) ?? []
-
-  refetchMutation.executeMutation({ ids: [...avgInfoIds, ...latestRunsIds] })
+  await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
 }
 
 function refreshPage () {
