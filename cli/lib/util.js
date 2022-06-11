@@ -491,7 +491,7 @@ const util = {
         // https://stackoverflow.com/a/65347893/3474615
         const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
 
-        debug('rosetta check result:', { stdout })
+        debug('rosetta check result: %o', { stdout })
 
         if (stdout && stdout.startsWith('1')) return 'arm64'
       }
