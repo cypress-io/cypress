@@ -222,12 +222,11 @@ describe('cli', () => {
         version: 'X.Y.Z',
       })
 
+      this.exec('version')
       process.exit.callsFake(() => {
         snapshot('cli version and binary version 1', logger.print())
         done()
       })
-
-      this.exec('version')
     })
 
     it('reports package and binary message', (done) => {

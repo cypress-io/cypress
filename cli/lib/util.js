@@ -482,6 +482,8 @@ const util = {
       const osPlatform = os.platform()
       const osArch = os.arch()
 
+      debug('detecting arch %o', { osPlatform, osArch })
+
       if (osArch === 'arm64') return 'arm64'
 
       if (osPlatform === 'darwin') {
@@ -489,6 +491,7 @@ const util = {
         // https://stackoverflow.com/a/65347893/3474615
         const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
 
+        debug('rosetta check result: %o', { stdout })
         if (stdout === '1') return 'arm64'
       }
 
@@ -497,6 +500,7 @@ const util = {
         // list of names for reference: https://stackoverflow.com/a/45125525/3474615
         const { stdout } = await execa('uname', ['-m']).catch(() => '')
 
+        debug('arm uname -m result: %o ', { stdout })
         if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
       }
 
