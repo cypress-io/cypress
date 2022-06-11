@@ -22,7 +22,6 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
-# filters and requires for testing binary with Firefox
 mainBuildFilters: &mainBuildFilters
   filters:
     branches:
@@ -35,6 +34,15 @@ mainBuildFilters: &mainBuildFilters
 # but sometimes we want to really confirm we are doing the right thing
 # so just add your branch to the list here to build and test on Mac
 macWorkflowFilters: &darwin-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
@@ -2722,6 +2730,7 @@ workflows:
     <<: *linux-x64-workflow
   linux-arm64:
     <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
   darwin-x64:
     <<: *darwin-x64-workflow
     <<: *darwin-workflow-filters
