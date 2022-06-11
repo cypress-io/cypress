@@ -5,8 +5,7 @@
     :is-interactive="true"
     class="h-16px"
     :hide-delay="0"
-    :show-group="props.gql.id"
-    popper-class="RunStatusDots_Tooltip"
+    :show-group="props.gql?.id"
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
@@ -76,50 +75,58 @@ import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
 
 gql`
-fragment RunStatusDots on CloudProjectSpec {
+fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
   id
-  retrievedAt
-  specRuns(first: 4, fromBranch: $fromBranch) {
-    nodes {
+  data {
+    ... on CloudProjectSpecNotFound {
+      retrievedAt
+    }
+    ... on CloudProjectSpec {
       id
-      runNumber
-      testsFailed{
-        min
-        max
+      retrievedAt
+      specRuns(first: 4, fromBranch: $fromBranch) {
+        nodes {
+          id
+          runNumber
+          testsFailed{
+            min
+            max
+          }
+          testsPassed{
+            min
+            max
+          }
+          testsPending{
+            min
+            max
+          }
+          testsSkipped{
+            min
+            max
+          }
+          createdAt
+          groupCount
+          specDuration{
+            min
+            max
+          }
+          status
+          url
+        }
       }
-      testsPassed{
-        min
-        max
-      }
-      testsPending{
-        min
-        max
-      }
-      testsSkipped{
-        min
-        max
-      }
-      createdAt
-      groupCount
-      specDuration{
-        min
-        max
-      }
-      status
-      url
     }
   }
 }
 `
 
 const props = defineProps<{
-  gql: RunStatusDotsFragment
+  gql: RunStatusDotsFragment | null
   specFileName: string
   specFileExtension: string
 }>()
 
 const runs = computed(() => {
-  return props.gql?.specRuns?.nodes ?? []
+  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
 })
 
 const dotClasses = computed(() => {

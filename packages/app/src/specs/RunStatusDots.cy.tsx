@@ -8,29 +8,21 @@ describe('<RunStatusDots />', () => {
 
     cy.mount(() => {
       const gql: RunStatusDotsFragment = {
-        __typename: 'Spec',
         id: 'id',
-        fileName: 'spec',
-        specFileExtension: '.cy.ts',
-        cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpecResult',
+        data: {
+          __typename: 'CloudProjectSpec',
+          retrievedAt: new Date().toISOString(),
           id: 'id',
-          fetchingStatus: 'FETCHED',
-          data: {
-            __typename: 'CloudProjectSpec',
-            retrievedAt: new Date().toISOString(),
-            id: 'id',
-            specRuns: {
-              nodes: [
-                ...runs as any, // suppress TS compiler
-              ],
-            },
+          specRuns: {
+            nodes: [
+              ...runs as any, // suppress TS compiler
+            ],
           },
         },
       }
 
       return (
-        <RunStatusDots gql={gql}/>
+        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
       )
     })
 
@@ -47,29 +39,21 @@ describe('<RunStatusDots />', () => {
 
     cy.mount(() => {
       const gql: RunStatusDotsFragment = {
-        __typename: 'Spec',
         id: 'id',
-        fileName: 'spec',
-        specFileExtension: '.cy.ts',
-        cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpecResult',
+        data: {
+          __typename: 'CloudProjectSpec',
           id: 'id',
-          fetchingStatus: 'FETCHED',
-          data: {
-            __typename: 'CloudProjectSpec',
-            id: 'id',
-            retrievedAt: new Date().toISOString(),
-            specRuns: {
-              nodes: [
-                ...runs as any, // suppress TS compiler
-              ],
-            },
+          retrievedAt: new Date().toISOString(),
+          specRuns: {
+            nodes: [
+              ...runs as any, // suppress TS compiler
+            ],
           },
         },
       }
 
       return (
-        <RunStatusDots gql={gql}/>
+        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
       )
     })
 
@@ -86,29 +70,21 @@ describe('<RunStatusDots />', () => {
 
     cy.mount(() => {
       const gql: RunStatusDotsFragment = {
-        __typename: 'Spec',
         id: 'id',
-        fileName: 'spec',
-        specFileExtension: '.cy.ts',
-        cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpecResult',
+        data: {
+          __typename: 'CloudProjectSpec',
           id: 'id',
-          fetchingStatus: 'FETCHED',
-          data: {
-            __typename: 'CloudProjectSpec',
-            id: 'id',
-            retrievedAt: new Date().toISOString(),
-            specRuns: {
-              nodes: [
-                ...runs as any, // suppress TS compiler
-              ],
-            },
+          retrievedAt: new Date().toISOString(),
+          specRuns: {
+            nodes: [
+              ...runs as any, // suppress TS compiler
+            ],
           },
         },
       }
 
       return (
-        <RunStatusDots gql={gql}/>
+        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
       )
     })
 
@@ -123,27 +99,19 @@ describe('<RunStatusDots />', () => {
   it('renders placeholder without tooltip or link', () => {
     cy.mount(() => {
       const gql: RunStatusDotsFragment = {
-        __typename: 'Spec',
         id: 'id',
-        fileName: 'spec',
-        specFileExtension: '.cy.ts',
-        cloudSpec: {
-          __typename: 'RemoteFetchableCloudProjectSpecResult',
+        data: {
+          __typename: 'CloudProjectSpec',
           id: 'id',
-          fetchingStatus: 'FETCHED',
-          data: {
-            __typename: 'CloudProjectSpec',
-            id: 'id',
-            retrievedAt: new Date().toISOString(),
-            specRuns: {
-              nodes: [],
-            },
+          retrievedAt: new Date().toISOString(),
+          specRuns: {
+            nodes: [],
           },
         },
       }
 
       return (
-        <RunStatusDots gql={gql}/>
+        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
       )
     })
 

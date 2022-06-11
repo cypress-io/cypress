@@ -163,13 +163,13 @@
               class="h-full grid justify-items-end items-center"
             >
               <RunStatusDots
-                v-if="row.data.isLeaf && row.data.data && row.data.data.cloudSpec?.fetchingStatus === 'FETCHED' && row.data.data.cloudSpec.data?.__typename === 'CloudProjectSpec'"
-                :gql="row.data.data.cloudSpec.data"
+                v-if="row.data.isLeaf && row.data.data && row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING'"
+                :gql="row.data.data.cloudSpec ?? null"
                 :spec-file-extension="row.data.data.fileExtension"
                 :spec-file-name="row.data.data.fileName"
               />
               <div
-                v-else-if="row.data.isLeaf"
+                v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
                 class="bg-gray-50 rounded-[20px] w-full animate-pulse"
               >
                 &nbsp;
@@ -179,7 +179,7 @@
           <template #average-duration>
             <AverageDuration
               v-if="row.data.isLeaf && row.data.data?.cloudSpec?.data?.__typename === 'CloudProjectSpec'"
-              :gql="row.data.data.cloudSpec.data"
+              :gql="row.data.data.cloudSpec"
             />
           </template>
         </SpecsListRowItem>
@@ -298,19 +298,9 @@ fragment SpecsList on Spec {
   cloudSpec(name: "cloudSpec") @include(if: $hasBranch) {
     id
     fetchingStatus
-    data {
-      ... on CloudProjectSpecNotFound {
-        retrievedAt
-      }
-      ... on CloudProjectSpec {
-        id
-        ...AverageDuration
-        ...RunStatusDots
-        retrievedAt
-      }
-    }
+    ...AverageDuration
+    ...RunStatusDots
   }
-  
 }
 `
 

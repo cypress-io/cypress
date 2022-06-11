@@ -1,10 +1,10 @@
 <template>
   <div
-    v-if="props.gql.averageDuration"
+    v-if="props.gql.data?.__typename === 'CloudProjectSpec' && props.gql.data.averageDuration"
     class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
-    {{ getDurationString(props.gql.averageDuration) }}
+    {{ getDurationString(props.gql.data.averageDuration) }}
   </div>
 </template>
 
@@ -15,9 +15,18 @@ import { gql } from '@urql/vue'
 import { getDurationString } from '@packages/frontend-shared/src/utils/time'
 
 gql`
-fragment AverageDuration on CloudProjectSpec {
+fragment AverageDuration on RemoteFetchableCloudProjectSpecResult {
   id
-  averageDuration(fromBranch: $fromBranch)
+  data {
+    ... on CloudProjectSpecNotFound {
+      retrievedAt
+    }
+    ... on CloudProjectSpec {
+      id
+      retrievedAt
+      averageDuration(fromBranch: $fromBranch)
+    }
+  }
 }
 `
 

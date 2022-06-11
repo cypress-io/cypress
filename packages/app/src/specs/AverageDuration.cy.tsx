@@ -4,32 +4,17 @@ import AverageDuration from './AverageDuration.vue'
 function emptyAverageDurationFragment (milliseconds?: number): AverageDurationFragment {
   return {
     id: 'id',
-    fileName: 'spec.cy.ts',
-    avgDurationInfo: {
+    data: {
       id: 'id',
-      data: {
-        id: 'id',
-        averageDuration: milliseconds ?? 0,
-        retrievedAt: new Date().toISOString(),
-        __typename: 'CloudProjectSpec',
-      },
-      fetchingStatus: 'FETCHED',
-      __typename: 'RemoteFetchableCloudProjectSpecResult',
+      averageDuration: milliseconds ?? 0,
+      retrievedAt: new Date().toISOString(),
+      __typename: 'CloudProjectSpec',
     },
+    __typename: 'RemoteFetchableCloudProjectSpecResult',
   }
 }
 
 describe('<AverageDuration />', () => {
-  it('mounts with no data', () => {
-    cy.mount(() => {
-      return (
-        <AverageDuration/>
-      )
-    })
-
-    cy.findByTestId('average-duration').should('not.exist')
-  })
-
   it('shows no time when 0 is passed', () => {
     const gql = emptyAverageDurationFragment(0)
 
