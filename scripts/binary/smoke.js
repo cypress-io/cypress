@@ -94,8 +94,6 @@ const runProjectTest = function (buildAppExecutable, e2e) {
       stdio: 'inherit', env,
     }
 
-    env.DEBUG = 'cypress:*'
-
     console.log('running project test')
     console.log(buildAppExecutable, args.join(' '))
 

@@ -1,7 +1,6 @@
 #!/bin/bash
 # `source ./scripts/ensure-node.sh` to ensure you are running the correct Node version for this repo
 
-
 node_version=$(cat .node-version)
 
 # some environments (like Arm on CircleCI) bring their own nvm
