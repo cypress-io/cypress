@@ -1,6 +1,6 @@
 <template>
   <button
-    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-transparent"
+    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
     :data-cy="`row-directory-depth-${depth}`"
     :aria-expanded="expanded"
   >

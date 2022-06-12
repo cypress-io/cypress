@@ -40,7 +40,7 @@ interface ResolvedConfigOption {
    */
   canUpdateDuringTestTime?: boolean
   specificTestingType?: TestingType
-  requireRestartOnChange?: 'server' | 'browser' | 'pingBaseUrl'
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 interface RuntimeConfigOption {
@@ -52,7 +52,7 @@ interface RuntimeConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
-  requireRestartOnChange?: 'server' | 'browser' | 'pingBaseUrl'
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 export interface BreakingOption {
@@ -135,7 +135,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
     canUpdateDuringTestTime: true,
-    requireRestartOnChange: 'pingBaseUrl',
+    requireRestartOnChange: 'server',
   }, {
     name: 'blockHosts',
     defaultValue: null,
@@ -351,7 +351,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,
-    isFolder: true,
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {

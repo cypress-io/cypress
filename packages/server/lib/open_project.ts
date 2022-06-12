@@ -196,8 +196,8 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async closeBrowserTabs () {
-    return this.projectBase?.closeBrowserTabs()
+  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {
