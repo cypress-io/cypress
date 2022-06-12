@@ -69,20 +69,20 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800"
+      class="mb-4 grid grid-cols-10 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset}px`"
     >
       <div
-        class="flex col-span-3 items-center justify-between"
+        class="flex col-span-4 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex col-span-2 items-center justify-between">
+      <div class="flex items-center justify-between whitespace-nowrap">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
-      <div class="flex items-center justify-end truncate">
+      <div class="flex col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.latestRuns.header')"
@@ -92,7 +92,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex items-center justify-end truncate">
+      <div class="flex col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text="t('specPage.averageDuration.header')"
@@ -102,6 +102,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
+      <div class="flex col-span-1" />
     </div>
     <!--
       The markup around the virtualized list is pretty delicate. We might be tempted to
@@ -170,7 +171,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+                class="bg-gray-50 rounded-[20px] w-80px animate-pulse"
               >
                 &nbsp;
               </div>
