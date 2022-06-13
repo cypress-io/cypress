@@ -139,6 +139,6 @@ function streamBuffer (initialSize = 2048) {
   return writeable
 }
 
-module.exports = {
+export default {
   streamBuffer,
 }

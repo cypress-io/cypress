@@ -83,7 +83,7 @@ module.exports = {
 
         debug('running Electron currently')
 
-        return require('./modes')(mode, options)
+        return require('./modes').default(mode, options)
       }
 
       return new Promise((resolve) => {

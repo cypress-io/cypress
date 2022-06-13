@@ -17,7 +17,7 @@ const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
 }
 
-export = {
+export default {
   isMac () {
     return os.platform() === 'darwin'
   },

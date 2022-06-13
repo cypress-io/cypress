@@ -305,7 +305,7 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-export = {
+export default {
 
   extendLaunchOptionsFromPlugins,
 

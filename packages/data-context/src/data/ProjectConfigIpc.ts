@@ -237,7 +237,7 @@ export class ProjectConfigIpc extends EventEmitter {
 
     debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
 
-    const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const proc = fork(path.join(path.dirname(__filename), 'child.js'), configProcessArgs, childOptions)
 
     return proc
   }

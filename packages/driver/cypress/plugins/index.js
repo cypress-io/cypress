@@ -1,5 +1,4 @@
 // only required to read in webpack config, since it is .ts
-require('@packages/ts/register')
 require('./server')
 const _ = require('lodash')
 const path = require('path')
@@ -9,7 +8,7 @@ const wp = require('@cypress/webpack-preprocessor')
 const Jimp = require('jimp')
 
 process.env.NO_LIVERELOAD = '1'
-const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
+const [webpackOptions] = require('@packages/runner/webpack.config').default
 
 // set mode to development which overrides
 // the 'none' value of the base webpack config

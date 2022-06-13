@@ -99,7 +99,7 @@ function run (ipc, file, projectRoot) {
     // 4. Use node's dynamic import to import the configFile
 
     try {
-      return require(file)
+      return eval('require(file)')
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
@@ -123,7 +123,7 @@ function run (ipc, file, projectRoot) {
 
         // We cannot replace the initial `require` with `await import` because
         // Certain modules cannot be dynamically imported
-        return await import(file)
+        return eval('await import(file)')
       }
 
       throw err

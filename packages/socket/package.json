@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "browser": "lib/browser.ts",
+  "main": "index.js",
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors' && rm lib/browser.js",
     "clean": "rimraf lib/*.js",

@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { makeDataContext } from '../makeDataContext'
 import random from '../util/random'
 
-export = (mode, options) => {
+export default (mode, options) => {
   if (mode === 'record') {
     return require('./record').run(options)
   }
@@ -44,6 +44,6 @@ export = (mode, options) => {
 
   if (mode === 'interactive') {
     // Either launchpad or straight to e2e tests
-    return require('./interactive').run(options, loadingPromise)
+    return require('./interactive').default.run(options, loadingPromise)
   }
 }

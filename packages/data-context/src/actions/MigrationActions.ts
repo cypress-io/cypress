@@ -87,7 +87,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-    const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const childProcess = fork(path.join(path.dirname(__filename), 'child.js'), configProcessArgs, childOptions)
     const ipc = new LegacyPluginsIpc(childProcess)
 
     childProcess.on('error', (error) => {
