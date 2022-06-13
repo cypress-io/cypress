@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { execute, parse } from 'graphql'
+import { execute, parse, print } from 'graphql'
 import chaiAsPromised from 'chai-as-promised'
 import { Response } from 'cross-fetch'
 
@@ -55,8 +55,9 @@ describe('CloudDataSource', () => {
     it('returns immediately with { data: null } when no user is defined', () => {
       getUserStub.returns(null)
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -66,8 +67,9 @@ describe('CloudDataSource', () => {
 
     it('issues a fetch request for the data when the user is defined', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -78,13 +80,15 @@ describe('CloudDataSource', () => {
 
     it('only issues a single fetch if the operation is called twice', async () => {
       const result1 = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
       const result2 = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -98,16 +102,18 @@ describe('CloudDataSource', () => {
 
     it('resolves eagerly with the cached data if the data has already been resolved', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
       await result
 
       const immediateResult = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -117,8 +123,9 @@ describe('CloudDataSource', () => {
 
     it('when there is a nullable field missing, resolves with the eager result & fetches for the rest', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -127,8 +134,9 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE), { status: 200 }))
 
       const immediateResult = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_WITH_OPTIONAL_MISSING,
-        variables: {},
+        operation: print(FAKE_USER_WITH_OPTIONAL_MISSING),
+        operationDoc: FAKE_USER_WITH_OPTIONAL_MISSING,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -144,8 +152,9 @@ describe('CloudDataSource', () => {
 
     it('when there is a non-nullable field missing, issues the remote query immediately', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -154,8 +163,9 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE), { status: 200 }))
 
       const requiredResult = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_WITH_REQUIRED_MISSING,
-        variables: {},
+        operation: print(FAKE_USER_WITH_REQUIRED_MISSING),
+        operationDoc: FAKE_USER_WITH_REQUIRED_MISSING,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -170,8 +180,9 @@ describe('CloudDataSource', () => {
   describe('isResolving', () => {
     it('returns false if we are not currently resolving the request', () => {
       const result = cloudDataSource.isResolving({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })
 
       expect(result).to.eql(false)
@@ -179,14 +190,16 @@ describe('CloudDataSource', () => {
 
     it('returns true if we are currently resolving the request', () => {
       cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
       const result = cloudDataSource.isResolving({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })
 
       expect(result).to.eql(true)
@@ -196,8 +209,9 @@ describe('CloudDataSource', () => {
   describe('hasResolved', () => {
     it('returns false if we have not resolved the data yet', () => {
       const result = cloudDataSource.hasResolved({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })
 
       expect(result).to.eql(false)
@@ -205,14 +219,16 @@ describe('CloudDataSource', () => {
 
     it('returns true if we have resolved the data for the query', async () => {
       await cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
       const result = cloudDataSource.hasResolved({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })
 
       expect(result).to.eql(true)
@@ -222,21 +238,24 @@ describe('CloudDataSource', () => {
   describe('invalidate', () => {
     it('allows us to issue a cache.invalidate on individual fields in the cloud schema', async () => {
       await cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
       expect(cloudDataSource.hasResolved({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })).to.eq(true)
 
       await cloudDataSource.invalidate('Query', 'cloudViewer')
 
       expect(cloudDataSource.hasResolved({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
       })).to.eq(false)
     })
   })

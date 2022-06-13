@@ -101,7 +101,6 @@ export class CloudDataSource {
           // @ts-ignore
           schema: urqlSchema,
           ...urqlCacheKeys,
-          resolvers: {},
           updates: {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
