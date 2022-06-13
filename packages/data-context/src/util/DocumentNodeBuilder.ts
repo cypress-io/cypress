@@ -1,4 +1,4 @@
-import type { DocumentNode, FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, VariableDefinitionNode } from 'graphql'
+import { DocumentNode, FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, VariableDefinitionNode, visit } from 'graphql'
 
 export interface RemoteQueryConfig {
   fieldNodes: FieldNode[]
@@ -14,7 +14,7 @@ export class DocumentNodeBuilder {
   readonly frag: FragmentDefinitionNode
   readonly clientWriteFragment: DocumentNode
 
-  constructor (info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean}) {
+  constructor (private info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType' | 'operation'> & {isNode?: boolean}) {
     let selections = info.fieldNodes
 
     if (info.isNode && !selections.some((s) => s.kind === 'Field' && s.name.value === 'id')) {
@@ -45,6 +45,36 @@ export class DocumentNodeBuilder {
     }
   }
 
+  /**
+   * Finds all of the variables referenced within the field nodes, pulls these definitions
+   * from the outer definition
+   */
+  getVariables (): VariableDefinitionNode[] {
+    const seenVariables = new Set<string>()
+    const variables: VariableDefinitionNode[] = []
+
+    this.info.fieldNodes.map((node) => {
+      visit(node, {
+        Argument: (arg) => {
+          if (arg.value.kind === 'Variable') {
+            const variableName = arg.value.name.value
+
+            if (!seenVariables.has(variableName)) {
+              seenVariables.add(variableName)
+              const def = this.info.operation.variableDefinitions?.find((d) => d.variable.name.value === variableName)
+
+              if (def) {
+                variables.push(def)
+              }
+            }
+          }
+        },
+      })
+    })
+
+    return variables
+  }
+
   get query (): DocumentNode {
     return {
       kind: 'Document',
@@ -62,6 +92,7 @@ export class DocumentNodeBuilder {
               },
             ],
           },
+          variableDefinitions: this.getVariables(),
         },
       ],
     }
