@@ -42,7 +42,17 @@
         {{ t('specPage.fetchFailedWarning.explainer1') }}
       </p>
       <p>
-        {{ t('specPage.fetchFailedWarning.explainer2') }}
+        <i18n-t
+          scope="global"
+          keypath="specPage.fetchFailedWarning.explainer2"
+        >
+          <ExternalLink
+            href="https://www.cypressstatus.com"
+            class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
+          >
+            Status Page
+          </ExternalLink>
+        </i18n-t>
       </p>
       <Button
         :prefix-icon="RefreshIcon"
@@ -85,9 +95,12 @@
       <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text="t('specPage.latestRuns.header')"
-          :connected-text="t('specPage.latestRuns.tooltip.connected')"
-          :not-connected-text="t('specPage.latestRuns.tooltip.notConnected')"
+          :header-text-key-path="'specPage.latestRuns.header'"
+          :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
+          :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
+          :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
+          :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
+          :docs-url="'https://on.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs'"
           @showLogin="showLogin"
           @showConnectToProject="showConnectToProject"
         />
@@ -95,9 +108,12 @@
       <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text="t('specPage.averageDuration.header')"
-          :connected-text="t('specPage.averageDuration.tooltip.connected')"
-          :not-connected-text="t('specPage.averageDuration.tooltip.notConnected')"
+          :header-text-key-path="'specPage.averageDuration.header'"
+          :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
+          :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
+          :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
+          :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
+          :docs-url="'https://on.cypress.io/specs-average-duration?utm_medium=Specs+Average+Duration+Tooltip&utm_campaign=Average+Duration'"
           @showLogin="showLogin"
           @showConnectToProject="showConnectToProject"
         />
@@ -258,7 +274,7 @@ const showConnectToProject = () => {
 }
 
 const isGitAvailable = computed(() => {
-  return props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false
+  return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)
 })
 
 const hasCloudErrors = computed(() => {
