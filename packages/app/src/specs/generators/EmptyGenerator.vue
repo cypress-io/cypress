@@ -207,7 +207,7 @@ onMounted(() => {
 
   if (inputValue && match) {
     const startSelectionIndex = match.index || 0
-    const endSelectionIndex = inputValue.indexOf(match[0]) + match[0].length
+    const endSelectionIndex = startSelectionIndex + match[0].length
 
     inputRef.value?.setSelectionRange(startSelectionIndex, endSelectionIndex)
   }
