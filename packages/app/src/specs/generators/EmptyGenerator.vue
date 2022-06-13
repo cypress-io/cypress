@@ -203,6 +203,8 @@ onMounted(() => {
   // Focus text input and try to pre-select file name
   inputRef.value?.focus()
 
+  // This regex matches a group of word characters, spaces, and '-' characters before a '.' character.
+  // For example 'path/to/spec/spec-name.cy.tsx' ---> 'spec-name'
   const fileNameRegex = /[ \w-]+(?=\.)/
   const inputValue = inputRef.value?.value
   const match = inputValue?.match(fileNameRegex)
