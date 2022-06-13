@@ -65,6 +65,8 @@ Each **secondary driver** has a **SpecBridgeCommunicator** instance that can rec
 
 One of the main responsibilities of the communicators is to prepare/preprocess data for serialization. All data going over the postMessage API gets serialized by the [structured clone algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm). In order to either prevent or catch serialization errors and ensure all relevant data is properly transmitted, we preprocess data such as the subject, logs, snapshots, and errors themselves.
 
+For more information, please see the [Cross-origin Serialization Explainer](./src/util/serialization/README.md)
+
 ## Automation / Proxy
 
 Browser automation APIs and the proxy play a small but critical role in facilitating cross-origin testing.

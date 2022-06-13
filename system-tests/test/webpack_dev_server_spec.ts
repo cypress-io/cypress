@@ -6,7 +6,7 @@ describe('@cypress/webpack-dev-server', function () {
   systemTests.it('successfully loads and runs all specs', {
     project: 'webpack-dev-server',
     testingType: 'component',
-    spec: '**/*',
+    spec: 'src/**/*',
     browser: 'chrome',
     expectedExitCode: 0,
   })

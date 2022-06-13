@@ -8,7 +8,7 @@ exports['e2e issue 6407 throws if mutating read-only config with test configurat
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (issue_6407_spec.js)                                                       │
-  │ Searched:   cypress/integration/issue_6407_spec.js                                             │
+  │ Searched:   cypress/e2e/issue_6407_spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

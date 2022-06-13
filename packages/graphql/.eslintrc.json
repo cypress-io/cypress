@@ -1,0 +1,62 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "plugins": [
+    "cypress"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "./src/entities/**/*.ts"
+      ],
+      "rules": {
+        "no-useless-constructor": "off",
+        "@typescript-eslint/explicit-function-return-type": [
+          "error"
+        ],
+        "no-restricted-imports": [
+          "error",
+          "assert",
+          "buffer",
+          "child_process",
+          "cluster",
+          "crypto",
+          "dgram",
+          "dns",
+          "domain",
+          "events",
+          "freelist",
+          "fs",
+          "http",
+          "https",
+          "module",
+          "net",
+          "os",
+          "path",
+          "punycode",
+          "querystring",
+          "readline",
+          "repl",
+          "smalloc",
+          "stream",
+          "string_decoder",
+          "sys",
+          "timers",
+          "tls",
+          "tracing",
+          "tty",
+          "url",
+          "util",
+          "vm",
+          "zlib"
+        ]
+      }
+    }
+  ]
+}

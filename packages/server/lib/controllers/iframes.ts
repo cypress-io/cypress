@@ -3,6 +3,7 @@ import type httpProxy from 'http-proxy'
 import Debug from 'debug'
 import files from './files'
 import type { Cfg } from '../project-base'
+import type { FoundSpec } from '@packages/types'
 import type { RemoteStates } from '../remote_states'
 
 const debug = Debug('cypress:server:iframes')
@@ -13,7 +14,7 @@ interface IFramesController {
 
 interface E2E extends IFramesController {
   remoteStates: RemoteStates
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
 }
 
 interface CT extends IFramesController {
@@ -23,7 +24,6 @@ interface CT extends IFramesController {
 export const iframesController = {
   e2e: ({ getSpec, remoteStates, config }: E2E, req: Request, res: Response) => {
     const extraOptions = {
-      specFilter: getSpec()?.specFilter,
       specType: 'integration',
     }
 

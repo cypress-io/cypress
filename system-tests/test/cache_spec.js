@@ -48,21 +48,21 @@ describe('e2e cache', () => {
 
   it('passes', function () {
     return systemTests.exec(this, {
-      spec: 'cache_spec.js',
+      spec: 'cache.cy.js',
       snapshot: true,
     })
   })
 
   it('clears cache when browser is spawned', function () {
     return systemTests.exec(this, {
-      spec: 'cache_clearing_spec.js',
+      spec: 'cache_clearing.cy.js',
     })
     .then(() => {
       // only 1 request should have gone out
       expect(requestsForCache).to.eq(1)
 
       return systemTests.exec(this, {
-        spec: 'cache_clearing_spec.js',
+        spec: 'cache_clearing.cy.js',
       })
       .then(() => {
         // and after the cache is cleaned before

@@ -1,3 +1,38 @@
+# [@cypress/schematic-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.7.0...@cypress/schematic-v2.0.0) (2022-06-01)
+
+
+### Bug Fixes
+
+* remove --config-file false references and update types ([#20643](https://github.com/cypress-io/cypress/issues/20643)) ([110f8ae](https://github.com/cypress-io/cypress/commit/110f8ae02dd2b6fd695856aaa77e3b9d96c939dc))
+* remove baseUrl from root-level types for supported fields ([#20589](https://github.com/cypress-io/cypress/issues/20589)) ([54f3b90](https://github.com/cypress-io/cypress/commit/54f3b90b133f5dc15b407625f60a09eb62012214))
+
+
+### chore
+
+* enable @cypress/schematic for npm publishing ([dadfd4b](https://github.com/cypress-io/cypress/commit/dadfd4b716cc206c29eafbedf5a92573345400b9))
+
+
+### Features
+
+* Add graphql to unified-desktop branch ([#17305](https://github.com/cypress-io/cypress/issues/17305)) ([1550733](https://github.com/cypress-io/cypress/commit/1550733c9d68be495628713ce74059f5909e2c2c))
+* update @cypress/schematic to use proper e2e config for 10.0.0 ([#19827](https://github.com/cypress-io/cypress/issues/19827)) ([e629ae0](https://github.com/cypress-io/cypress/commit/e629ae04ce4fb325c4c0480a1df903ecbeec8a1f))
+* update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
+* Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
+* use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
+* validate specPattern root level ([#19980](https://github.com/cypress-io/cypress/issues/19980)) ([5d52758](https://github.com/cypress-io/cypress/commit/5d52758d82c47033803c69c7858fc786a900faaf))
+
+
+### BREAKING CHANGES
+
+* support for Cypress v10 schematics and builders
+
+# [@cypress/schematic-v1.7.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.6.0...@cypress/schematic-v1.7.0) (2022-05-11)
+
+
+### Features
+
+* **cypress/schematic:** add headed option and other fixes ([#21415](https://github.com/cypress-io/cypress/issues/21415)) ([8de7594](https://github.com/cypress-io/cypress/commit/8de7594446e398048a3693066f043d2d7be903f6))
+
 # [@cypress/schematic-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.3...@cypress/schematic-v1.6.0) (2021-11-10)
 
 

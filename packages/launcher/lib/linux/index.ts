@@ -1,5 +1,6 @@
-import { log } from '../log'
-import type { FoundBrowser, Browser, PathData } from '../types'
+import Debug from 'debug'
+import type { FoundBrowser, Browser } from '@packages/types'
+import type { PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -7,6 +8,9 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import Bluebird from 'bluebird'
 import which from 'which'
+
+const debug = Debug('cypress:launcher:linux')
+const debugVerbose = Debug('cypress-verbose:launcher:linux')
 
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
@@ -28,7 +32,7 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
     })())
     .timeout(30000)
   } catch (err) {
-    log('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
+    debug('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
 
     return false
   }
@@ -51,7 +55,7 @@ function getLinuxBrowser (
       return m[1]
     }
 
-    log(
+    debug(
       'Could not extract version from stdout using regex: %o', {
         stdout,
         versionRegex,
@@ -62,7 +66,7 @@ function getLinuxBrowser (
   }
 
   const logAndThrowError = (err: Error) => {
-    log(
+    debugVerbose(
       'Received error detecting browser binary: "%s" with error:',
       binary,
       err.message,
@@ -77,7 +81,7 @@ function getLinuxBrowser (
     if (name === 'chromium' && versionString.endsWith('snap')) {
       // when running as a snap, chromium can only write to certain directories
       // @see https://github.com/cypress-io/cypress/issues/7020
-      log('chromium is running as a snap, changing profile path')
+      debug('chromium is running as a snap, changing profile path')
       foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'chromium', 'current')
 
       return
@@ -86,7 +90,7 @@ function getLinuxBrowser (
     if (name === 'firefox' && (await isFirefoxSnap(binary))) {
       // if the binary in the path points to a script that calls the snap, set a snap-specific profile path
       // @see https://github.com/cypress-io/cypress/issues/19793
-      log('firefox is running as a snap, changing profile path')
+      debug('firefox is running as a snap, changing profile path')
       foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'firefox', 'current')
 
       return
@@ -96,7 +100,7 @@ function getLinuxBrowser (
   return getVersionString(binary)
   .tap(maybeSetSnapProfilePath)
   .then(getVersion)
-  .then((version: string): FoundBrowser => {
+  .then((version?: string): FoundBrowser => {
     foundBrowser.version = version
 
     return foundBrowser
@@ -105,14 +109,14 @@ function getLinuxBrowser (
 }
 
 export function getVersionString (path: string) {
-  log('finding version string using command "%s --version"', path)
+  debugVerbose('finding version string using command "%s --version"', path)
 
   return Bluebird.resolve(utils.getOutput(path, ['--version']))
   .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
   .then((val) => val.stdout)
   .then((val) => val.trim())
   .then((val) => {
-    log('stdout: %s', val)
+    debugVerbose('stdout for "%s --version": %s', path, val)
 
     return val
   })
@@ -121,7 +125,7 @@ export function getVersionString (path: string) {
 export function getVersionNumber (version: string, browser: Browser) {
   const regexExec = browser.versionRegex.exec(version) as Array<string>
 
-  return regexExec ? regexExec[1] : version
+  return (regexExec && regexExec[1]) ?? version
 }
 
 export function getPathData (pathStr: string): PathData {

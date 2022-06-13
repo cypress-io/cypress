@@ -1,18 +1,20 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
-import debugModule from 'debug'
 import type { HttpMiddleware } from './'
 import { getSameSiteContext } from './util/cookies'
+
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
 }>
 
-const debug = debugModule('cypress:proxy:http:request-middleware')
-
 const LogRequest: RequestMiddleware = function () {
-  debug('proxying request %o', {
+  this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
 
@@ -203,13 +205,21 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   const req = this.request.create(requestOptions)
+  const socket = this.req.socket
+
+  const onSocketClose = () => {
+    this.debug('request aborted')
+    req.abort()
+  }
 
   req.on('error', this.onError)
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
-  this.req.socket.on('close', () => {
-    this.debug('request aborted')
-    req.abort()
+
+  this.req.res?.on('finish', () => {
+    socket.removeListener('close', onSocketClose)
   })
+
+  this.req.socket.on('close', onSocketClose)
 
   if (!requestBodyBuffered) {
     // pipe incoming request body, headers to new request

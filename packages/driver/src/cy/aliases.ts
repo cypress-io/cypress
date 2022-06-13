@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import type { $Cy } from '../cypress/cy'
 
 import $errUtils from '../cypress/error_utils'
 
@@ -13,7 +14,7 @@ const aliasDisplayName = (name) => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (cy) => ({
+export const create = (cy: $Cy) => ({
   addAlias (ctx, aliasObj) {
     const { alias, subject } = aliasObj
 
@@ -30,14 +31,14 @@ export const create = (cy) => ({
   getAlias (name, cmd, log) {
     const aliases = cy.state('aliases') || {}
 
-    // bail if the name doesnt reference an alias
+    // bail if the name doesn't reference an alias
     if (!aliasRe.test(name)) {
       return
     }
 
+    // slice off the '@'
     const alias = aliases[name.slice(1)]
 
-    // slice off the '@'
     if (!alias) {
       this.aliasNotFoundFor(name, cmd, log)
     }
