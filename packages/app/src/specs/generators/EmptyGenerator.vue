@@ -195,10 +195,6 @@ const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
 
 const result = ref<GeneratorSuccessFileFragment | null>(null)
 
-function getFileNameIndexes (inputValue: string, match: RegExpMatchArray): number[] {
-  return [match.index || 0, inputValue.indexOf(match[0]) + match[0].length]
-}
-
 onMounted(() => {
   // Focus text input and try to pre-select file name
   inputRef.value?.focus()
@@ -210,7 +206,8 @@ onMounted(() => {
   const match = inputValue?.match(fileNameRegex)
 
   if (inputValue && match) {
-    const [startSelectionIndex, endSelectionIndex] = getFileNameIndexes(inputValue, match)
+    const startSelectionIndex = match.index || 0
+    const endSelectionIndex = inputValue.indexOf(match[0]) + match[0].length
 
     inputRef.value?.setSelectionRange(startSelectionIndex, endSelectionIndex)
   }
