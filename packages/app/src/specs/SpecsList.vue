@@ -101,7 +101,7 @@
           :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
           :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
           :docs-url="'https://on.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs'"
-          @showLogin="showLogin"
+          @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
@@ -114,7 +114,7 @@
           :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
           :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
           :docs-url="'https://on.cypress.io/specs-average-duration?utm_medium=Specs+Average+Duration+Tooltip&utm_campaign=Average+Duration'"
-          @showLogin="showLogin"
+          @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
@@ -212,6 +212,7 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
+    :utm-medium="loginUtmMedium"
     @loggedin="refreshPage"
   />
   <CloudConnectModals
@@ -264,8 +265,10 @@ watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue)
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
+const loginUtmMedium = ref('')
 
-const showLogin = () => {
+const showLogin = (utmMedium: string) => {
+  loginUtmMedium.value = utmMedium
   isLoginOpen.value = true
 }
 
