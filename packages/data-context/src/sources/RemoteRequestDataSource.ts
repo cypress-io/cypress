@@ -239,6 +239,7 @@ export class RemoteRequestDataSource {
             isNode: true,
             parentType: info.schema.getType(fieldType) as GraphQLObjectType,
             fieldNodes: info.fieldNodes[0]?.selectionSet?.selections.filter((f) => f.kind === 'Field' && FIELDS_TO_PUSH.includes(f.name.value)) as FieldNode[],
+            operation: info.operation,
           })
 
           this.#operationRegistry.set(operationDef.operationHash, operationDef)
