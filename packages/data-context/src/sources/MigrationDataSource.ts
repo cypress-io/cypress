@@ -104,8 +104,12 @@ export class MigrationDataSource {
     const versionData = await this.ctx.versions.versionData()
     const embedOnLink = `https://on.cypress.io/v10-video-embed/${versionData.current.version}`
 
+    // Time out request if it takes longer than 3 seconds
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000)
+
     try {
-      const response = await this.ctx.util.fetch(embedOnLink, { method: 'GET' })
+      const response = await this.ctx.util.fetch(embedOnLink, { method: 'GET', signal: controller.signal })
       const { videoHtml } = await response.json()
 
       this.ctx.update((d) => {
@@ -116,6 +120,8 @@ export class MigrationDataSource {
     } catch {
       // fail silently, no user-facing error is needed
       return null
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
