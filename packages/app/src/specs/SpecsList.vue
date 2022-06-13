@@ -102,7 +102,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex col-span-1" />
+      <div />
     </div>
     <!--
       The markup around the virtualized list is pretty delicate. We might be tempted to
