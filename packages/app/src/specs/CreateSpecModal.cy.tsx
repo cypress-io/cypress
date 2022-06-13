@@ -44,7 +44,8 @@ describe('<CreateSpecModal />', () => {
     cy.get(modalSelector).should('be.visible')
 
     cy.percySnapshot()
-  }),
+  })
+
   it('focuses text input and selects file name by default', () => {
     cy.focused().as('specNameInput')
 
