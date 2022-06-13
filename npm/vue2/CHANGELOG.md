@@ -1,3 +1,10 @@
+# [@cypress/vue2-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.0...@cypress/vue2-v1.0.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* remove http npm registry link for vue2 ([0bd3069](https://github.com/cypress-io/cypress/commit/0bd306962bce2a32d7b87fc1811a7b9feeb63ae2))
+
 # @cypress/vue2-v1.0.0 (2022-06-13)
 
 
