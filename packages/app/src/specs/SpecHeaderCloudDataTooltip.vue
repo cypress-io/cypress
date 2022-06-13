@@ -73,7 +73,6 @@
 
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'

@@ -224,7 +224,6 @@
 </template>
 
 <script setup lang="ts">
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Button from '@cy/components/Button.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
