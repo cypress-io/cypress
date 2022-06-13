@@ -44,6 +44,17 @@ describe('<CreateSpecModal />', () => {
     cy.get(modalSelector).should('be.visible')
 
     cy.percySnapshot()
+  }),
+  it('focuses text input and selects file name by default', () => {
+    cy.focused().as('specNameInput')
+
+    // focused should yield the input element since it should be auto-focused
+    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/ComponentName.cy.js')
+
+    // only the file name should be focused, so backspacing should erase the whole file name
+    cy.get('@specNameInput').type('{backspace}')
+
+    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/.cy.js')
   })
 
   describe('dismissing', () => {

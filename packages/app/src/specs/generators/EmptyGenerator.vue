@@ -4,6 +4,7 @@
       <div class="p-24px w-720px">
         <Input
           v-model="specFile"
+          :input-ref="inputRefFn"
           :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
           :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
           :has-error="hasError"
@@ -123,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 import Input from '@packages/frontend-shared/src/components/Input.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
@@ -180,6 +181,10 @@ const emits = defineEmits<{
 
 const { title } = useVModels(props, emits)
 
+const inputRef = ref<HTMLInputElement>()
+
+const inputRefFn = () => inputRef
+
 const specFile = ref(props.specFileName)
 
 const matches = useMutation(EmptyGenerator_MatchSpecFileDocument)
@@ -189,6 +194,25 @@ const isValidSpecFile = ref(true)
 const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
 
 const result = ref<GeneratorSuccessFileFragment | null>(null)
+
+function getFileNameIndexes (inputValue: string, match: RegExpMatchArray): number[] {
+  return [match.index || 0, inputValue.indexOf(match[0]) + match[0].length]
+}
+
+onMounted(() => {
+  // Focus text input and try to pre-select file name
+  inputRef.value?.focus()
+
+  const fileNameRegex = /[ \w-]+(?=\.)/
+  const inputValue = inputRef.value?.value
+  const match = inputValue?.match(fileNameRegex)
+
+  if (inputValue && match) {
+    const [startSelectionIndex, endSelectionIndex] = getFileNameIndexes(inputValue, match)
+
+    inputRef.value?.setSelectionRange(startSelectionIndex, endSelectionIndex)
+  }
+})
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
