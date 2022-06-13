@@ -15,6 +15,14 @@ declare namespace Cypress {
       name?: string
       // additional information to include in the log
       message?: string
+      // session information to associate with the log and be added to the session instrument panel
+      sessionInfo?: {
+        id: string
+        data: {
+          cookies?: Array<Cypress.Cookie> | null
+          localStorage?: Array<LocalStorage> | null
+        }
+      }
       // timeout of the group command - defaults to defaultCommandTimeout
       timeout?: number
       // the type of log
