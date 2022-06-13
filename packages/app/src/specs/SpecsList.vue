@@ -69,17 +69,17 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-10 children:font-medium children:text-gray-800"
+      class="mb-4 grid grid-cols-12 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset}px`"
     >
       <div
-        class="flex col-span-4 items-center justify-between"
+        class="flex col-span-5 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex items-center justify-between whitespace-nowrap">
+      <div class="flex col-span-2 items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
       <div class="flex col-span-2 items-center justify-end truncate">
@@ -171,7 +171,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] w-80px animate-pulse"
+                class="bg-gray-50 rounded-[20px] w-full animate-pulse"
               >
                 &nbsp;
               </div>
