@@ -509,13 +509,9 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
   this.res.status(Number(this.incomingRes.statusCode))
-  this.next()
-}
-
-// Set custom status message/reason phrase from http response
-// https://github.com/cypress-io/cypress/issues/16973
-const SetResponseStatusMessage: ResponseMiddleware = function () {
-  this.res.statusMessage = this.incomingRes.headers['reason-phrase']?.toString() || this.res.statusMessage
+  // Set custom status message/reason phrase from http response
+  // https://github.com/cypress-io/cypress/issues/16973
+  this.res.statusMessage = this.incomingRes.statusMessage || ''
   this.next()
 }
 
@@ -623,7 +619,6 @@ export default {
   CopyCookiesFromIncomingRes,
   MaybeSendRedirectToClient,
   CopyResponseStatusCode,
-  SetResponseStatusMessage,
   ClearCyInitialCookie,
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,

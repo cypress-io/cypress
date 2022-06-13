@@ -3790,8 +3790,13 @@ describe('Routes', () => {
       .post('/companies/validate', {
         payload: { name: 'Brian' },
       })
-      .reply(400, undefined, {
-        'Reason-Phrase': 'Custom Reason Phrase Message',
+      .reply(400, function (uri, requestBody) {
+        this.req.response.statusMessage = 'This is the custom status message'
+
+        return {
+          status: 400,
+          message: 'This is the reply body',
+        }
       })
 
       return this.rp({
@@ -3807,13 +3812,13 @@ describe('Routes', () => {
       })
       .then((res) => {
         expect(res.statusCode).to.eq(400)
-        expect(res.statusMessage).to.eq('Custom Reason Phrase Message')
+        expect(res.statusMessage).to.eq('This is the custom status message')
       })
     })
 
     // use default status message/reason phrase correspond to status code, from http response
     // https://github.com/cypress-io/cypress/issues/16973
-    it('leave default status message when reason phrase is not set', function () {
+    it('uses default status message when reason phrase is not set', function () {
       nock(this.server.remoteStates.current().origin)
       .post('/companies/validate', {
         payload: { name: 'Brian' },
