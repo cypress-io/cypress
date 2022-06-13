@@ -442,20 +442,11 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(CloudData_RefetchDocument)
 
-const isRefetching = ref(false)
-
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'))
 
 const refetch = async (ids: string[]) => {
-  if (isRefetching.value) {
-    return
-  }
-
   if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
-    isRefetching.value = true
-
     await refetchMutation.executeMutation({ ids })
-    isRefetching.value = false
   }
 }
 
@@ -473,12 +464,6 @@ type CloudSpecItem = {
 }
 
 function shouldRefetch (item: CloudSpecItem) {
-  if (isRefetching.value) {
-    // refetch in progress, no need to refetch
-
-    return false
-  }
-
   if (!isOnline) {
     // Offline, no need to refetch
 
