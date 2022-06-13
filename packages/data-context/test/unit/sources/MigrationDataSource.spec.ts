@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import dedent from 'dedent'
 import sinon from 'sinon'
 
 import { DataContext } from '../../../src'
@@ -29,7 +30,15 @@ describe('MigrationDataSource', () => {
 
     describe('getVideoEmbedHtml', () => {
       const expectedPayload = {
-        videoHtml: '<iframe\n  src=\"https://player.vimeo.com/video/668764401?h=0cbc785eef\"\n  class=\"rounded h-full bg-gray-1000 w-full\"\n  frameborder=\"0\"\n  allow=\"autoplay; fullscreen; picture-in-picture\"\n  allowfullscreen\n/>\n',
+        videoHtml: dedent`
+          <iframe
+            src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
+            class="rounded h-full bg-gray-1000 w-full"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+          />
+        `,
       }
 
       it('loads the video embed html', async () => {

@@ -93,7 +93,7 @@ function unstubVideoHtml (): void {
   cy.withCtx((ctx, o) => {
     const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
 
-    restoreFn && restoreFn()
+    restoreFn?.()
   })
 }
 
