@@ -52,7 +52,6 @@
   "unpkg": "dist/cypress-vue2.browser.js",
   "module": "dist/cypress-vue2.esm-bundler.js",
   "publishConfig": {
-    "access": "public",
-    "registry": "http://registry.npmjs.org/"
+    "access": "public"
   }
 }
