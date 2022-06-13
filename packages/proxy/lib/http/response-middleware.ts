@@ -1,7 +1,8 @@
+/* eslint-disable no-console */
 import _ from 'lodash'
 import charset from 'charset'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils, uri } from '@packages/network'
+import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
@@ -12,7 +13,8 @@ import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 import { URL } from 'url'
-import type { Browser } from '@packages/server/lib/browsers/types'
+import { openProject } from '@packages/server/lib/open_project'
+import { CookiesHelper } from './util/cookies'
 
 interface ResponseMiddlewareProps {
   /**
@@ -388,7 +390,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+const checkNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
 
   // A cookie needs cross origin handling if it's an AUT request and
@@ -397,90 +399,97 @@ const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMid
   // case and if it's secondary-origin -> primary-origin, we don't
   // recognize the request as cross-origin
   return (
-    !!ctx.req.isAUTFrame &&
-    (
+    ctx.config.experimentalSessionAndOrigin
+    && ctx.req.isAUTFrame
+    && (
       (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
     )
   )
 }
 
-interface EnsureSameSiteNoneProps {
-  cookie: string
-  browser: Browser | { family: string | null }
-  isLocalhost: boolean
-  url: URL
-}
-
-const cookieSameSiteRegex = /SameSite=(\w+)/i
-const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
-const cookieSecureSemicolonRegex = /;\s*Secure/i
-
-const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
-  debug('original cookie: %s', cookie)
-
-  if (cookieSameSiteRegex.test(cookie)) {
-    debug('change cookie to SameSite=None')
-    cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
-  } else {
-    debug('add SameSite=None to cookie')
-    cookie += '; SameSite=None'
-  }
-
-  const isFirefox = browser.family === 'firefox'
-
-  // Secure is required for SameSite=None cookies to be set in secure contexts
-  // (https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy),
-  // but will not allow the cookie to be set in an insecure context.
-  // Normally http://localhost is considered a secure context (see
-  // https://w3c.github.io/webappsec-secure-contexts/#localhost), but Firefox
-  // does not consider the Cypress-launched browser to be a secure context (see
-  // https://github.com/cypress-io/cypress/issues/18217). For that reason, we
-  // remove Secure from http://localhost cookies in Firefox.
-  if (cookieSecureRegex.test(cookie)) {
-    if (isFirefox && isLocalhost && url.protocol === 'http:') {
-      debug('remove Secure from cookie')
-      cookie = cookie.replace(cookieSecureSemicolonRegex, '')
-    }
-  } else if (!isFirefox || url.protocol === 'https:') {
-    debug('add Secure to cookie')
-    cookie += '; Secure'
-  }
-
-  debug('resulting cookie: %s', cookie)
-
-  return cookie
-}
-
-const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
+const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
-  if (cookies) {
-    const needsCrossOriginHandling = (
-      this.config.experimentalSessionAndOrigin
-      && determineIfNeedsCrossOriginHandling(this)
-    )
-    const browser = this.getCurrentBrowser() || { family: null }
-    const url = new URL(this.req.proxiedUrl)
-    const isLocalhost = uri.isLocalhost(url)
-
-    debug('force SameSite=None?', needsCrossOriginHandling)
-
-    ;([] as string[]).concat(cookies).forEach((cookie) => {
-      if (needsCrossOriginHandling) {
-        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
-      }
-
-      try {
-        this.res.append('Set-Cookie', cookie)
-      } catch (err) {
-        debug('failed to Set-Cookie, continuing %o', { err, cookie })
-      }
-    })
+  if (!cookies || !cookies.length) {
+    return this.next()
   }
 
-  this.next()
+  const needsCrossOriginHandling = checkNeedsCrossOriginHandling(this)
+
+  const appendCookie = (cookie) => {
+    const headerName = needsCrossOriginHandling ? 'X-Set-Cookie' : 'Set-Cookie'
+
+    try {
+      this.res.append(headerName, cookie)
+    } catch (err) {
+      debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
+    }
+  }
+
+  if (!this.config.experimentalSessionAndOrigin) {
+    ([] as string[]).concat(cookies).forEach((cookie) => {
+      appendCookie(cookie)
+    })
+
+    return this.next()
+  }
+
+  // TODO: is it possible currentUrl is not set? if so, validate currentUrl is
+  // set and handle if it's unset properly
+  const cookiesHelper = new CookiesHelper({
+    cookieJar: this.getCookieJar(),
+    currentAUTUrl: this.remoteStates.currentUrl!,
+    request: {
+      url: this.req.proxiedUrl,
+      isAUTFrame: this.req.isAUTFrame,
+      needsCrossOriginHandling,
+    },
+  })
+
+  await cookiesHelper.capturePreviousCookies()
+
+  ;([] as string[]).concat(cookies).forEach((cookie) => {
+    const toughCookie = cookiesHelper.parseCookie(cookie)
+
+    // don't set the cookie in our own cookie jar if the parsed cookie is
+    // undefined (means it's invalid) or if the browser would not set it
+    // because Secure is required for SameSite=None
+    if (!toughCookie || (toughCookie.sameSite === 'none' && !toughCookie.secure)) {
+      appendCookie(cookie)
+
+      return
+    }
+
+    // tracks the cookie in our own cookie jar for cross-origin purposes
+    cookiesHelper.setCookie(cookie)
+
+    appendCookie(cookie)
+  })
+
+  const addedCookies = await cookiesHelper.getAddedCookies()
+
+  if (!needsCrossOriginHandling || !addedCookies.length) {
+    return this.next()
+  }
+
+  try {
+    // FIXME: this is a hack to easily get the automation instance by using
+    // the openProject singleton, but this should be handled differently!
+    // instead, probably need to pass a getAutomation function into the
+    // proxy that gets added to the ctx/this
+    await openProject
+    .getProject()!
+    .getAutomation()
+    .request('set:cookies', addedCookies, () => {})
+  } catch (err) {
+    debug('failed setting cookies via automation: %s', err.message)
+  } finally {
+    this.next()
+  }
 }
+
+// TODO: error if this.next() is called twice in same block if possible
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 

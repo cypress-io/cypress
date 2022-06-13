@@ -1,3 +1,4 @@
+import { CookieJar } from 'tough-cookie'
 import type { CyCookie } from './browsers/cdp_automation'
 
 interface SessionData {
@@ -8,6 +9,17 @@ interface SessionData {
 }
 const state = {
   sessions: {},
+}
+// TODO: should this live here? it doesn't have quite the same lifecycle
+// as this session data
+const cookieJar = new CookieJar(undefined, { allowSpecialUseDomain: true })
+
+export function resetCookieJar () {
+  cookieJar.removeAllCookiesSync()
+}
+
+export function getCookieJar () {
+  return cookieJar
 }
 
 export function saveSession (data: SessionData) {
@@ -30,4 +42,5 @@ export function getState () {
 
 export function clearSessions () {
   state.sessions = {}
+  resetCookieJar()
 }

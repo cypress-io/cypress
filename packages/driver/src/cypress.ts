@@ -264,6 +264,10 @@ class $Cypress {
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
 
+    this.events.on('url:changed', (url) => {
+      this.backend('url:changed', url)
+    })
+
     return this.action('cypress:config', config)
   }
 

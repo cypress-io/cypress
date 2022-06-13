@@ -32,6 +32,7 @@ import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import { RemoteStates } from './remote_states'
+import { getCookieJar } from './session'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -320,6 +321,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getCurrentBrowser,
       remoteStates,
       getFileServerToken,
+      getCookieJar,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,

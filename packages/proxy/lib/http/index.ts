@@ -20,6 +20,7 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
+import type { CookieJar } from 'tough-cookie'
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
@@ -44,6 +45,7 @@ type HttpMiddlewareCtx<T> = {
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
+  getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getPreRequest: (cb: GetPreRequestCb) => void
@@ -62,6 +64,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
+  getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
@@ -210,6 +213,7 @@ export class Http {
   serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   previousAUTRequestUrl?: string
+  getCookieJar: () => CookieJar
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -225,6 +229,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -246,6 +251,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      getCookieJar: this.getCookieJar,
       debug: (formatter, ...args) => {
         debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
       },

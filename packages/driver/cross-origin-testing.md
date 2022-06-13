@@ -119,6 +119,12 @@ Similar to **defaults()** methods needing to be called again, some events may ne
 
 ## Cookies
 
+!!!!
+
+TODO: update this
+
+!!!!
+
 Having the **AUT** on a different origin than **top** causes issues with cookies being set for the origin in the **AUT**. Cookies have a **SameSite** attribute that can be set to **Strict**, **Lax**, ****or **None**. If **Strict** or **Lax**, cookies will not be set when the site is in an iframe on a different origin from the **top frame**.
 
 In order to counteract this, we currently coerce the **SameSite** value of all cross-origin cookies to be **None**. This is not particularly ideal, since it could lead to unexpected behavior if cookies are set even though they should not be.

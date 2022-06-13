@@ -47,6 +47,7 @@ export class RemoteStates {
   private originStack: string[] = []
   private configure: () => { serverPort: number, fileServerPort: number }
   private _config: { serverPort: number, fileServerPort: number } | undefined
+  currentUrl?: string
 
   constructor (configure) {
     this.configure = configure
@@ -165,6 +166,10 @@ export class RemoteStates {
       debug(`received cross:origin:finished, remove ${originPolicy} from origin stack`)
 
       this.removeCurrentOrigin(originPolicy)
+    })
+
+    eventEmitter.on('url:changed', (url) => {
+      this.currentUrl = url
     })
   }
 

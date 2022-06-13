@@ -3,6 +3,7 @@ import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
 import type { HttpMiddleware } from './'
+import { getSameSiteContext } from './util/cookies'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -18,12 +19,36 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const ExtractIsAUTFrameHeader: RequestMiddleware = async function () {
+const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
+
+  this.next()
+}
+
+const CopyCrossOriginCookies: RequestMiddleware = function () {
+  if (!this.remoteStates.currentUrl) {
+    return this.next()
+  }
+
+  const sameSiteContext = getSameSiteContext(
+    this.remoteStates.currentUrl,
+    this.req.proxiedUrl,
+    this.req.isAUTFrame,
+  )
+
+  const cookies = this.getCookieJar().getCookiesSync(this.req.proxiedUrl, {
+    // @ts-ignore
+    sameSiteContext,
+  })
+
+  const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
+  const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+
+  this.req.headers['cookie'] = existingCookies.concat(cookiesToAdd).join('; ')
 
   this.next()
 }
@@ -197,6 +222,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  CopyCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,

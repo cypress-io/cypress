@@ -414,6 +414,9 @@ export class SocketBase {
               resetRenderedHTMLOrigins()
 
               return
+            case 'clear:cross:origin:cookies':
+              return session.resetCookieJar()
+
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
@@ -427,6 +430,8 @@ export class SocketBase {
               return this.localBus.emit('cross:origin:release:html')
             case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
+            case 'url:changed':
+              return this.localBus.emit('url:changed', args[0])
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
