@@ -226,6 +226,7 @@ describe('App Top Nav Workflows', () => {
           const oldFetch = ctx.util.fetch
 
           o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
+            await new Promise((resolve) => setTimeout(resolve, 500))
             if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
               throw new Error(String(url))
             }
@@ -382,7 +383,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
 
-        cy.get('[href="#/runs"]').click()
+        cy.findByTestId('sidebar-link-runs-page').click()
         cy.get('@logInButton').click()
 
         cy.findByTestId('app-header-bar').within(() => {

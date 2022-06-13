@@ -97,7 +97,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
       // make sure duplicate logs are not present
       cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
 
-      cy.get('a[href="#/specs"]').click()
+      cy.findByTestId('sidebar-link-specs-page').click()
       cy.location('hash').should('include', '/specs')
 
       cy.contains('simple_origin.cy').click()
