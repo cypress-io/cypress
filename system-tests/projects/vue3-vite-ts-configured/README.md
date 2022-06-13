@@ -4,7 +4,7 @@ This template should help get you started developing with Vue 3 and Typescript i
 
 ## Recommended IDE Setup
 
-- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
+- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=vue.volar)
 
 ## Type Support For `.vue` Imports in TS
 

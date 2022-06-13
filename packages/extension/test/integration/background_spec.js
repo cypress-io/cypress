@@ -30,6 +30,7 @@ const browser = {
   },
   runtime: {},
   tabs: {
+    create () {},
     query () {},
     executeScript () {},
     captureVisibleTab () {},
@@ -48,6 +49,7 @@ const browser = {
 mockRequire('webextension-polyfill', browser)
 
 const background = require('../../app/background')
+const { expect } = require('chai')
 
 const PORT = 12345
 
@@ -846,8 +848,9 @@ describe('app/background', () => {
       })
     })
 
-    describe('close:browser:tabs', () => {
+    describe('reset:browser:tabs:for:next:test', () => {
       beforeEach(() => {
+        sinon.stub(browser.tabs, 'create').withArgs({ url: 'about:blank' })
         sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
         sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
       })
@@ -857,13 +860,14 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
 
+          expect(browser.tabs.create).to.be.called
           expect(browser.windows.getCurrent).to.be.called
           expect(browser.tabs.remove).to.be.called
 
           done()
         })
 
-        return this.server.emit('automation:request', 123, 'close:browser:tabs')
+        return this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
       })
     })
   })

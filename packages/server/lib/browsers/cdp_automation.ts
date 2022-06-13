@@ -164,7 +164,7 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
-type SendCloseCommand = () => Promise<any>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -355,8 +355,8 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
-      case 'close:browser:tabs':
-        return this.sendCloseCommandFn()
+      case 'reset:browser:tabs:for:next:test':
+        return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
