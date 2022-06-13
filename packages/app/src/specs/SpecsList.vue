@@ -171,7 +171,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] w-80px animate-pulse"
+                class="bg-gray-50 rounded-[20px] w-full animate-pulse"
               >
                 &nbsp;
               </div>
