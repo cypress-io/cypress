@@ -17,7 +17,7 @@ import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
-import { webpackRunner } from './tasks/gulpWebpack'
+import { webpackRunner, webpackRunnerCT } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 import dedent from 'dedent'
 
@@ -59,6 +59,7 @@ gulp.task(
   'dev:watch',
   gulp.parallel(
     webpackRunner,
+    webpackRunnerCT,
     gulp.series(
       makePathMap,
       // Before dev, fetch the latest "remote" schema from the Cypress dashboard

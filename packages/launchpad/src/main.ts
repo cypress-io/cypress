@@ -27,7 +27,7 @@ Promise.all([
     // Loading the Header Bar Query document prior to mounting leads to a better experience
     // when doing things like taking snapshots of the DOM during testing, and it
     // shouldn't be any different to the user
-    launchpadClient
+    return launchpadClient
     .query(HeaderBar_HeaderBarQueryDocument)
     .toPromise()
   }),

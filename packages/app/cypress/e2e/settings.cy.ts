@@ -99,7 +99,7 @@ describe('App: Settings', () => {
       cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.contains('Dashboard Settings').click()
       // Assert the data is not there before it arrives
       cy.contains('Record Key').should('not.exist')
@@ -114,10 +114,10 @@ describe('App: Settings', () => {
         o.sinon.spy(ctx.actions.auth, 'logout')
       })
 
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.contains('Dashboard Settings').click()
       cy.contains('Record Key').should('exist')
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
       cy.findByRole('button', { name: 'Log Out' }).click()
 
@@ -125,7 +125,7 @@ describe('App: Settings', () => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
       })
 
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.contains('Dashboard Settings').click()
       cy.contains('Record Key').should('not.exist')
     })
@@ -345,7 +345,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device Settings"]').click()
 
@@ -366,7 +366,7 @@ describe('App: Settings', () => {
 
       // navigate away and come back
       // preferred editor entered from input should have been persisted
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
 
@@ -394,7 +394,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device Settings"]').click()
 

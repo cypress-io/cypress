@@ -1,11 +1,11 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
-const tsNodeUtil = require('./ts_node')
+const debugLib = require('debug')
+const { pathToFileURL } = require('url')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
 
-let tsRegistered = false
+const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 
 /**
  * Executes and returns the passed `file` (usually `configFile`) file in the ipc `loadConfig` event
@@ -19,14 +19,6 @@ function run (ipc, file, projectRoot) {
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
-  }
-
-  if (!tsRegistered) {
-    debug('register typescript for required file')
-    tsNodeUtil.register(projectRoot, file)
-
-    // ensure typescript is only registered once
-    tsRegistered = true
   }
 
   process.on('uncaughtException', (err) => {
@@ -91,14 +83,9 @@ function run (ipc, file, projectRoot) {
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
-    // 1. Try loading the configFile
-    // 2. Catch the "ERR_REQUIRE_ESM" error
-    // 3. Check if esbuild is installed
-    //   3a. Yes: Use bundleRequire
-    //   3b. No: Continue through to `await import(configFile)`
-    // 4. Use node's dynamic import to import the configFile
-
     try {
+      debug('Loading file %s', file)
+
       return require(file)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
@@ -109,23 +96,16 @@ function run (ipc, file, projectRoot) {
     debug('User is loading an ESM config file')
 
     try {
-      debug('Trying to use esbuild to run their config file.')
-      // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      // We cannot replace the initial `require` with `await import` because
+      // Certain modules cannot be dynamically imported.
+      // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
+      const fileURL = pathToFileURL(file).href
 
-      debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
-      const { bundleRequire } = require('bundle-require')
+      debug(`importing esm file %s`, fileURL)
 
-      return (await bundleRequire({ filepath: file })).mod
+      return await import(fileURL)
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
-        debug(`User doesn't have esbuild. Going to use native node imports.`)
-
-        // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported
-        return await import(file)
-      }
-
+      debug('error loading file via native Node.js module loader %s', err.message)
       throw err
     }
   }
@@ -173,12 +153,19 @@ function run (ipc, file, projectRoot) {
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
+            const onConfigNotFound = (devServer, root, searchedFor) => {
+              ipc.send('setupTestingType:error', util.serializeError(
+                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServer, root, searchedFor),
+              ))
+            }
+
             on('dev-server:start', (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
                 return devServer({
                   cypressConfig: config,
+                  onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,

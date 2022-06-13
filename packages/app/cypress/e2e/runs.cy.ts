@@ -19,7 +19,7 @@ function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') 
 
   cy.visitApp()
 
-  return cy.get('[href="#/runs"]').click()
+  return cy.findByTestId('sidebar-link-runs-page').click()
 }
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
@@ -47,7 +47,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy="runs-loader"]')
       cy.get('[data-cy="runs"]')
     })
@@ -62,13 +62,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('when logged out, shows call to action', () => {
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.contains(defaultMessages.runs.connect.buttonUser).should('exist')
     })
 
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.contains('Log In').click()
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
@@ -79,7 +79,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.contains('a', 'OVERLIMIT').click()
 
       cy.withCtx((ctx) => {
@@ -105,7 +105,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -145,7 +145,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -175,7 +175,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
@@ -217,7 +217,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(config.projectId).to.not.equal('newProjectId')
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
@@ -263,7 +263,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
     })
 
     it('if project Id is specified in config file that does not exist, shows call to action', () => {
@@ -389,7 +389,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
     })
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
@@ -415,7 +415,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
@@ -471,14 +471,14 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a list of recorded runs if a run has been recorded', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy="runs"]')
     })
 
     it('displays each run with correct information', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
         cy.findByText('fix: make gql work CANCELLED')
@@ -515,7 +515,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy^="runCard-"]').first().click()
 
       cy.withCtx((ctx) => {
@@ -540,7 +540,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
       cy.percySnapshot()
 
@@ -571,7 +571,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy="runs"]')
 
       cy.goOffline()
@@ -585,7 +585,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy="runs"]')
 
       cy.goOffline()
@@ -696,10 +696,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
 
       // If we navigate away & back, we should see the same runs
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.remoteGraphQLIntercept((obj) => obj.result)
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('sidebar-link-runs-page').click()
 
       cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible')
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')

@@ -517,10 +517,20 @@ describe('reduceConfig', () => {
   })
 
   it('should nest supportFile under component and e2e', () => {
-    const config = { supportFile: 'cypress/support/index.js' }
+    const config = { supportFile: 'cypress/support/mySupportFile.js' }
     const newConfig = reduceConfig(config, options)
 
     expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
+  })
+
+  it('should not add supportFile if it is the default one', () => {
+    expect(reduceConfig({ supportFile: null }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: undefined }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support/index' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: './cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: '../cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
   })
 
   it('should exclude the pluginsFile', () => {

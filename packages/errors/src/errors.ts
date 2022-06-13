@@ -1076,7 +1076,11 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)} and have learned a lot. Stay tuned for updates on Studio's official release in the future. You can leave feedback here: http://on.cypress.io/studio-beta.
+        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}. 
+        
+        If you don't think you can live without Studio or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-removal
+        
+        Your feedback will help us factor in product decisions that may see Studio return in a future release.
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
@@ -1528,6 +1532,33 @@ export const AllCypressErrors = {
       Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
 
       https://on.cypress.io/migration-guide
+    `
+  },
+
+  DEV_SERVER_CONFIG_FILE_NOT_FOUND: (devServer: 'vite' | 'webpack', root: string, searchedFor: string[]) => {
+    const devServerConfigFile = `${devServer}Config`
+
+    return errTemplate`\
+      You are using ${fmt.highlight(devServer)} for your dev server, but a configuration file was not found. We traversed upwards from:
+      
+      ${fmt.highlightSecondary(root)}
+      
+      looking for a file named:
+
+      ${fmt.listItems(searchedFor, { prefix: ' - ' })}
+
+      Add your ${fmt.highlight(devServer)} config at one of the above paths, or import your configuration file and provide it to 
+      the devServer config as a ${fmt.highlight(devServerConfigFile)} option.
+    `
+  },
+
+  TESTING_TYPE_NOT_CONFIGURED: (testingType: TestingType) => {
+    return errTemplate`
+      The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
+
+      Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
+
+      https://on.cypress.io/configuration
     `
   },
 } as const
