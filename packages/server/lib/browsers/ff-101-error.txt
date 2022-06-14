@@ -1,0 +1,180 @@
+GraphQL server is running at http://localhost:4444/__launchpad/graphql
+GraphQL server is running at http://localhost:5555/__launchpad/graphql
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:137: prefs parse error: unknown keyword
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:152: prefs parse error: unexpected escape sequence character after '\'
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:153: prefs parse error: unexpected escape sequence character after '\'
+1655159211615      RemoteAgent     DEBUG   WebDriver BiDi enabled
+1655159211615      RemoteAgent     DEBUG   CDP enabled
+1655159211616      Marionette      INFO    Marionette enabled
+1655159211616      RemoteAgent     DEBUG   Setting recommended pref datareporting.policy.dataSubmissionPolicyAccepted to false
+1655159211618      RemoteAgent     TRACE   Received observer notification final-ui-startup
+WebDriver BiDi listening on ws://localhost:64256
+Started devtools server on 64257
+1655159211649      CDP     DEBUG   Waiting for initial application window to be loaded
+EMITTING: emit(target-created, [object MainProcessTarget]) from registerTarget() -> chrome://remote/content/cdp/targets/TargetList.jsm:93
+1655159211800      RemoteAgent     DEBUG   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 accepted
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159211815      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":1,"method":"Target.getTargets","params":{}}
+1655159211816      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":1,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212011      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":2,"method":"Target.getTargets","params":{}}
+1655159212011      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":2,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212123      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":3,"method":"Target.getTargets","params":{}}
+1655159212123      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":3,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(featureUpdate:urlbar, pref-updated) from _emitFeatureUpdate() -> resource://nimbus/lib/ExperimentStore.jsm:372
+EMITTING: emit(featureUpdate:urlbar, pref-updated) from _emitFeatureUpdate() -> resource://nimbus/lib/ExperimentStore.jsm:372
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212239      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":4,"method":"Target.getTargets","params":{}}
+1655159212239      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":4,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(ADD_SECTION, topstories, [object Object]) from addSection() -> resource://activity-stream/lib/SectionsManager.jsm:269
+EMITTING: emit(ADD_SECTION, highlights, [object Object]) from addSection() -> resource://activity-stream/lib/SectionsManager.jsm:269
+EMITTING: emit(INIT) from init() -> resource://activity-stream/lib/SectionsManager.jsm:213
+EMITTING: emit(config-set) from _setConfig() -> resource:///modules/UrlbarQuickSuggest.jsm:458
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212359      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":5,"method":"Target.getTargets","params":{}}
+1655159212360      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":5,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212477      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":6,"method":"Target.getTargets","params":{}}
+1655159212477      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":6,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212584      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":7,"method":"Target.getTargets","params":{}}
+1655159212585      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":7,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+1655159212633      Marionette      TRACE   Received observer notification marionette-startup-requested
+1655159212633      Marionette      TRACE   Waiting until startup recorder finished recording startup scripts...
+1655159212636      Marionette      TRACE   All scripts recorded.
+1655159212637      Marionette      INFO    Listening on port 64258
+1655159212637      Marionette      DEBUG   Marionette is listening
+1655159212660      RemoteAgent     TRACE   Received observer notification browser-idle-startup-tasks-finished
+DevTools listening on ws://localhost:64256/devtools/browser/f29dcedd-d498-4489-b952-c448ecd786bc
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212691      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":8,"method":"Target.getTargets","params":{}}
+1655159212691      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":8,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212797      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":9,"method":"Target.getTargets","params":{}}
+1655159212797      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":9,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159212905      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":10,"method":"Target.getTargets","params":{}}
+1655159212905      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":10,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+1655159213002      Marionette      DEBUG   Accepted connection 0 from 127.0.0.1:64317
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+1655159213004      Marionette      DEBUG   Accepted connection 1 from 127.0.0.1:64318
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(close, 2152136706) from close() -> chrome://remote/content/marionette/transport.js:212
+1655159213006      Marionette      DEBUG   Closed connection 0
+EMITTING: emit(packet, 0,1,WebDriver:NewSession,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+1655159213012      Marionette      DEBUG   1 -> [0,1,"WebDriver:NewSession",{"acceptInsecureCerts":true}]
+1655159213013      RemoteAgent     WARN    TLS certificate errors will be ignored for this session
+1655159213016      RemoteAgent     TRACE   [28] Document already finished loading: about:blank
+1655159213017      Marionette      DEBUG   1 <- [1,1,null,{"sessionId":"66da0538-e357-4537-a53b-318dc30ddac7","capabilities":{"browserName":"firefox","browserVersion":"101.0 ... interactive","moz:shutdownTimeout":60000,"moz:useNonSpecCompliantPointerOrigin":false,"moz:webdriverClick":true,"proxy":{}}}]
+EMITTING: emit(send, 1,1,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(packet, 0,2,Addon:Install,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+1655159213020      Marionette      DEBUG   1 -> [0,2,"Addon:Install",{"path":"C:\\Users\\Tyler\\AppData\\Roaming\\Cypress\\cy\\staging\\browsers\\firefox-stable\\interactive\\CypressExtension","temporary":true}]
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+JavaScript warning: moz-extension://9c9dc058-b83d-4487-b3f4-3be7ad74061c/background.js, line 5566: unreachable code after return statement
+1655159213126      Marionette      DEBUG   1 <- [1,2,null,{"value":"automation-extension@cypress.io"}]
+EMITTING: emit(send, 1,2,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159213409      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":11,"method":"Target.getTargets","params":{}}
+1655159213410      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":11,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159213938      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":12,"method":"Target.getTargets","params":{}}
+1655159213938      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":12,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+POST /dns-query 200 658.890 ms - -
+POST /dns-query 200 552.792 ms - -
+POST /dns-query 200 602.616 ms - -
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159214446      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":13,"method":"Target.getTargets","params":{}}
+1655159214446      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":13,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159214961      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":14,"method":"Target.getTargets","params":{}}
+1655159214962      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":14,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+POST /dns-query 200 676.776 ms - -
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159215476      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":15,"method":"Target.getTargets","params":{}}
+1655159215476      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":15,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159215987      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":16,"method":"Target.getTargets","params":{}}
+1655159215987      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":16,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+1655159216061      Marionette      TRACE   Received observer notification domwindowopened
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(open, [object XULElement] (tab.tabbrowser-tab)) from onTabOpen() -> chrome://remote/content/cdp/observers/TargetObserver.jsm:72
+EMITTING: emit(target-created, [object Target 36336335-b213-40a1-89e5-6df2152b4f2c]) from registerTarget() -> chrome://remote/content/cdp/targets/TargetList.jsm:93
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159216497      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 -> {"id":17,"method":"Target.getTargets","params":{}}
+1655159216497      CDP     TRACE   CDPConnection 0128c4ad-d43f-45db-b69b-d311de43c5b4 <- {"id":17,"result":{"targetInfos":[{"targetId":"36336335-b213-40a1-89e5-6df2152b4f2c","type":"page","title":"","url":"about:blank","attached":false,"browserContextId":null}]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+1655159216509      RemoteAgent     DEBUG   CDPConnection ac1e47d0-eb08-4df8-9a1c-8708aeec9296 accepted
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+1655159216513      CDP     TRACE   CDPConnection ac1e47d0-eb08-4df8-9a1c-8708aeec9296 -> {"id":1,"method":"Network.enable","params":{"maxTotalBufferSize":0,"maxResourceBufferSize":0,"maxPostDataSize":0}}
+1655159216514      CDP     TRACE   CDPConnection ac1e47d0-eb08-4df8-9a1c-8708aeec9296 <- {"id":1,"result":{}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, 0,3,WebDriver:Navigate,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+1655159216516      Marionette      DEBUG   1 -> [0,3,"WebDriver:Navigate",{"url":"http://localhost:5555/__/"}]
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+1655159216519      Marionette      TRACE   [28] Received event beforeunload for about:blank
+GET /__/ 200 4.447 ms - -
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+1655159216545      Marionette      TRACE   [28] Received event pagehide for about:blank
+GET /__/assets/index.06eeb313.js 304 0.813 ms - -
+GET /__/assets/index.84553743.css 200 3.114 ms - -
+GET /__cypress/runner/cypress_runner.js 304 0.696 ms - -
+GET /__cypress/runner/cypress_runner.css 200 3.698 ms - -
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+1655159216738      Marionette      TRACE   [28] Received event DOMContentLoaded for http://localhost:5555/__/
+GET /__cypress/runner/favicon.ico?v2 - - ms - -
+JavaScript warning: http://localhost:5555/__cypress/runner/cypress_runner.js, line 205: unreachable code after return statement
+JavaScript warning: http://localhost:5555/__cypress/runner/cypress_runner.js line 1350 > eval, line 205: unreachable code after return statement
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+1655159217056      Marionette      TRACE   [28] Received event pageshow for http://localhost:5555/__/
+1655159217057      Marionette      DEBUG   1 <- [1,3,null,{"value":null}]
+EMITTING: emit(send, 1,3,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+GET /__/assets/Specs.b1b2f7e5.js 200 1.040 ms - 479
+GET /__/assets/Index.c72ac61a.css 200 1.338 ms - -
+GET /__/assets/Index.9ce5b133.js 304 0.590 ms - -
+GET /__/assets/add-large_x16.30cd9ba2.js 200 1.592 ms - 753
+GET /__/assets/CreateSpecModal.11be6ba6.js 304 2.397 ms - -
+GET /__/assets/SpecPatterns.22365d93.js 304 2.254 ms - -
+GET /__/assets/warning_x16.a06224d3.js 304 1.786 ms - -
+GET /__/assets/Index.9ce5b133.js 304 1.820 ms - -
+GET /__/assets/settings_x16.0cf1bc4a.js 304 2.001 ms - -
+GET /__/assets/add-large_x16.30cd9ba2.js 304 1.213 ms - -
+GET /__/assets/CreateSpecModal.11be6ba6.js 304 0.755 ms - -
+GET /__/assets/SpecPatterns.22365d93.js 304 1.837 ms - -
+GET /__/assets/warning_x16.a06224d3.js 304 0.963 ms - -
+GET /__/assets/settings_x16.0cf1bc4a.js 304 1.177 ms - -
+GET /__/assets/cypress_s.29af549a.png 200 0.640 ms - 4425
+GET /__/assets/firefox.9be61e66.svg 200 0.699 ms - -
+GET /__/assets/chrome.1b5cb774.svg 200 1.357 ms - -
+GET /__/assets/edge.e54a3dc2.svg 200 1.391 ms - -
+GET /__/assets/electron.fb07f5cc.svg 200 1.783 ms - -

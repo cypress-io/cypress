@@ -36,15 +36,15 @@ export function launch (
   // but only if it's not already set by the environment
   const env = Object.assign({}, defaultBrowserEnv, process.env)
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
+  const proc = cp.spawn(browser.path, args, { stdio: ['inherit', 'inherit', 'inherit'], env })
 
-  proc.stdout.on('data', (buf) => {
-    debug('%s stdout: %s', browser.name, String(buf).trim())
-  })
+  // proc.stdout.on('data', (buf) => {
+  //   debug('%s stdout: %s', browser.name, String(buf).trim())
+  // })
 
-  proc.stderr.on('data', (buf) => {
-    debug('%s stderr: %s', browser.name, String(buf).trim())
-  })
+  // proc.stderr.on('data', (buf) => {
+  //   debug('%s stderr: %s', browser.name, String(buf).trim())
+  // })
 
   proc.on('exit', (code, signal) => {
     debug('%s exited: %o', browser.name, { code, signal })

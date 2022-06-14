@@ -12,7 +12,7 @@ import type { Automation } from '../automation'
 
 const errors = require('../errors')
 
-const debug = Debug('cypress:server:browsers:firefox-util')
+const debug = Debug('TYLER')
 
 let forceGcCc: () => Promise<void>
 
@@ -135,19 +135,39 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 }
 
 async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
+  // await new Promise((resolve) => { setTimeout(resolve, 5000)})
+
+  debug('12 - setupRemote, port: %', remotePort)
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
+
+  debug('12.5')
+
+  // await new Promise((resolve) => setTimeout(resolve, 5000))
+
+  debug('13')
+
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
+  debug('14')
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  debug('15')
 
   return browserCriClient
 }
 
 async function navigateToUrl (url) {
-  await sendMarionette({
-    name: 'WebDriver:Navigate',
-    parameters: { url },
-  })
+  try {
+    debug('TYLER HERE: Sending navigate to %s', url)
+    debugger
+    await sendMarionette({
+      name: 'WebDriver:Navigate',
+      parameters: { url },
+    })
+    debug('TYLER HERE: Navigated to %s', url)
+  } catch (e) {
+    debug('TYLER HERE: Error in navigate', e)
+  }
 }
 
 const logGcDetails = () => {
@@ -238,13 +258,23 @@ export default {
   setupRemote,
 
   async setupFoxdriver (port) {
+    debug('1')
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
       getDelayMsForRetry,
     })
 
-    const foxdriver = await Foxdriver.attach('127.0.0.1', port)
+    debug('2')
+    let foxdriver
+    // try {
+      foxdriver = await Foxdriver.attach('127.0.0.1', port)
+    // } catch (e) {
+    //   debug('2.25 %s', e.message)
+    //   throw e
+    // }
+
+    debug('2.5')
 
     const { browser } = foxdriver
 
@@ -287,28 +317,34 @@ export default {
 
       debug('forcing GC and CC...')
 
+      debug('3')
       return getPrimaryTab(browser)
       .then((tab) => {
+        debug('4')
         return attachToTabMemory(tab)
         .then(gc(tab))
         .then(cc(tab))
       })
       .then(() => {
+        debug('5')
         debug('forced GC and CC completed %o', { ccDuration, gcDuration })
       })
       .tapCatch((err) => {
+        debug('6')
         debug('firefox RDP error while forcing GC and CC %o', err)
       })
     }
   },
 
   async setupMarionette (extensions, url, port) {
+    debug('7')
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
       getDelayMsForRetry,
     })
 
+    debug('8')
     driver = new Marionette.Drivers.Promises({
       port,
       tries: 1, // marionette-client has its own retry logic which we want to avoid
@@ -329,8 +365,11 @@ export default {
       }
     }
 
+    debug('9')
     await driver.connect()
     .catch(onError('connection'))
+
+    debug('10')
 
     await new Bluebird((resolve, reject) => {
       const _onError = (from) => {
@@ -344,9 +383,11 @@ export default {
 
       sendMarionette({
         name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
+        parameters: { acceptInsecureCerts: true, webSocketURL: true },
       }).then(() => {
         return Bluebird.all(_.map(extensions, (path) => {
+          debug('installing', path)
+
           return sendMarionette({
             name: 'Addon:Install',
             parameters: { path, temporary: true },
@@ -356,6 +397,8 @@ export default {
       .then(resolve)
       .catch(_onError('commands'))
     })
+
+    debug('11')
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.

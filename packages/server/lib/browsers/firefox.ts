@@ -21,7 +21,7 @@ import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 
-const debug = Debug('cypress:server:browsers:firefox')
+const debug = Debug('TYLER')
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -313,6 +313,8 @@ const defaultPreferences = {
   'browser.download.folderList': 2,
   // prevents the download prompt for the specified types of files
   'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
+  'remote.log.level': 'TRACE',
+  'toolkit.dump.emit': true,
 }
 
 const FIREFOX_HEADED_USERCSS = `\
@@ -384,12 +386,14 @@ export async function open (browser: Browser, url, options: any = {}, automation
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
-    args: [
+    args: [   
+      '-allow-downgrade',   
       '-marionette',
       '-new-instance',
-      '-foreground',
+      // '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
+      '-safe-mode',
     ],
   })
 
@@ -521,7 +525,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     profile.path(),
   ])
 
-  debug('launch in firefox', { url, args: launchOptions.args })
+  debug('launch in firefox', { url, args: launchOptions.args, remotePort })
 
   const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
@@ -530,14 +534,22 @@ export async function open (browser: Browser, url, options: any = {}, automation
     MOZ_HEADLESS_HEIGHT: '721',
   }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
+  browserInstance.on('message', (message) => {
+    console.log('HEYOOO: ' + message)
+  })
+
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
+    browserCriClient = await firefoxUtil.setup({ automation, 
+      extensions: launchOptions.extensions, 
+      url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
       // @see https://github.com/cypress-io/cypress/issues/6392
       return _createDetachedInstance(browserInstance, browserCriClient)
     }
+
+    debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = browserInstance.kill

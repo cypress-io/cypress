@@ -1,0 +1,345 @@
+GraphQL server is running at http://localhost:4444/__launchpad/graphql
+GraphQL server is running at http://localhost:5555/__launchpad/graphql
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:137: prefs parse error: unknown keyword
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:152: prefs parse error: unexpected escape sequence character after '\'
+C:\Users\Tyler\AppData\Roaming\Cypress\cy\staging\browsers\firefox-stable\interactive\user.js:153: prefs parse error: unexpected escape sequence character after '\'
+      RemoteAgent     DEBUG   WebDriver BiDi enabled
+      RemoteAgent     DEBUG   CDP enabled
+      Marionette      INFO    Marionette enabled
+      RemoteAgent     DEBUG   Setting recommended pref datareporting.policy.dataSubmissionPolicyAccepted to false
+      RemoteAgent     TRACE   Received observer notification final-ui-startup
+WebDriver BiDi listening on ws://localhost:55062
+      Marionette      TRACE   Received observer notification domwindowopened
+      Marionette      TRACE   Received observer notification toplevel-window-ready
+      CDP     DEBUG   Waiting for initial application window to be loaded
+EMITTING: emit(target-created, [object MainProcessTarget]) from registerTarget() -> chrome://remote/content/cdp/targets/TargetList.jsm:93
+      Marionette      TRACE   Safe mode detected, supressing dialog
+      RemoteAgent     DEBUG   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 accepted
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 -> {"id":1,"method":"Target.getTargets","params":{}}
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 <- {"id":1,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+Started devtools server on 55063
+      Marionette      TRACE   Received observer notification toplevel-window-ready
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 -> {"id":2,"method":"Target.getTargets","params":{}}
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 <- {"id":2,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 -> {"id":3,"method":"Target.getTargets","params":{}}
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 <- {"id":3,"result":{"targetInfos":[]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(featureUpdate:urlbar, pref-updated) from _emitFeatureUpdate() -> resource://nimbus/lib/ExperimentStore.jsm:372
+EMITTING: emit(featureUpdate:urlbar, pref-updated) from _emitFeatureUpdate() -> resource://nimbus/lib/ExperimentStore.jsm:372
+EMITTING: emit(open, [object XULElement] (tab.tabbrowser-tab)) from onTabOpen() -> chrome://remote/content/cdp/observers/TargetObserver.jsm:72
+EMITTING: emit(target-created, [object Target e6fb0024-ec6a-42f6-aa8e-58e5b9eff79a]) from registerTarget() -> chrome://remote/content/cdp/targets/TargetList.jsm:93
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 -> {"id":4,"method":"Target.getTargets","params":{}}
+      CDP     TRACE   CDPConnection 1515421d-138d-43c8-a807-a496ae751fe3 <- {"id":4,"result":{"targetInfos":[{"targetId":"e6fb0024-ec6a-42f6-aa8e-58e5b9eff79a","type":"page","title":"","url":"about:blank","attached":false,"browserContextId":null}]}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(ADD_SECTION, topstories, [object Object]) from addSection() -> resource://activity-stream/lib/SectionsManager.jsm:269
+EMITTING: emit(ADD_SECTION, highlights, [object Object]) from addSection() -> resource://activity-stream/lib/SectionsManager.jsm:269
+EMITTING: emit(INIT) from init() -> resource://activity-stream/lib/SectionsManager.jsm:213
+      RemoteAgent     DEBUG   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a accepted
+EMITTING: emit(packet, [object Object]) from onMessage() -> chrome://remote/content/server/WebSocketTransport.jsm:87
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a -> {"id":1,"method":"Network.enable","params":{"maxTotalBufferSize":0,"maxResourceBufferSize":0,"maxPostDataSize":0}}
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"id":1,"result":{}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(config-set) from _setConfig() -> resource:///modules/UrlbarQuickSuggest.jsm:458
+      Marionette      TRACE   Received observer notification marionette-startup-requested
+      Marionette      TRACE   Waiting until startup recorder finished recording startup scripts...
+      Marionette      TRACE   All scripts recorded.
+      Marionette      INFO    Listening on port 55064
+      Marionette      DEBUG   Marionette is listening
+      RemoteAgent     TRACE   Received observer notification browser-idle-startup-tasks-finished
+DevTools listening on ws://localhost:55062/devtools/browser/cb8d3d3b-f620-47f8-af3b-f937fb2665fe
+      Marionette      DEBUG   Accepted connection 0 from 127.0.0.1:55135
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+      Marionette      DEBUG   Accepted connection 1 from 127.0.0.1:55136
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(close, 2152136706) from close() -> chrome://remote/content/marionette/transport.js:212
+      Marionette      DEBUG   Closed connection 0
+EMITTING: emit(packet, 0,1,WebDriver:NewSession,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+      Marionette      DEBUG   1 -> [0,1,"WebDriver:NewSession",{"acceptInsecureCerts":true,"webSocketURL":true}]
+      RemoteAgent     WARN    TLS certificate errors will be ignored for this session
+      RemoteAgent     TRACE   [34] Document already finished loading: about:blank
+      Marionette      DEBUG   1 <- [1,1,null,{"sessionId":"9689779b-36e1-4703-bbfe-5bd5099cc578","capabilities":{"browserName":"firefox","browserVersion":"101.0 ... utdownTimeout":60000,"moz:useNonSpecCompliantPointerOrigin":false,"moz:webdriverClick":true,"webSocketURL":true,"proxy":{}}}]
+EMITTING: emit(send, 1,1,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(packet, 0,2,Addon:Install,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+      Marionette      DEBUG   1 -> [0,2,"Addon:Install",{"path":"C:\\Users\\Tyler\\AppData\\Roaming\\Cypress\\cy\\staging\\browsers\\firefox-stable\\interactive\\CypressExtension","temporary":true}]
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+JavaScript warning: moz-extension://9c9dc058-b83d-4487-b3f4-3be7ad74061c/background.js, line 5566: unreachable code after return statement
+      Marionette      DEBUG   1 <- [1,2,null,{"value":"automation-extension@cypress.io"}]
+EMITTING: emit(send, 1,2,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+EMITTING: emit(packet, 0,3,WebDriver:Navigate,[object Object]) from _onJSONObjectReady/<() -> chrome://remote/content/marionette/transport.js:499
+      Marionette      DEBUG   1 -> [0,3,"WebDriver:Navigate",{"url":"http://localhost:5555/__/"}]
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"68607807586326","loaderId":"68607807586326","documentURL":"http: ... ction":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.774,"type":"Document","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+      Marionette      TRACE   [34] Received event beforeunload for about:blank
+GET /__/ 200 5.393 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"68607807586326","loaderId":"68607807586326","timestamp": ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+      Marionette      TRACE   [34] Received event pagehide for about:blank
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714436","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.071,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714437","documentURL":"http://localhost:5555/__/","reque ... ion":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.072,"type":"Stylesheet","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/index.06eeb313.js 304 0.779 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714436","timestamp":.081,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714436","timestamp":.081,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714437","timestamp":.085,"type":"Stylesheet","r ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/index.84553743.css 200 1.913 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"68607807586350","documentURL":"http://localhost:5555/__/","reque ... tion":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.193,"type":"Websocket","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714439","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.197,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714440","documentURL":"http://localhost:5555/__/","reque ... ion":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.198,"type":"Stylesheet","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__cypress/runner/cypress_runner.js 304 0.520 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714439","timestamp":.2,"type":"Script","respons ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714439","timestamp":.201,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714440","timestamp":.206,"type":"Stylesheet","r ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__cypress/runner/cypress_runner.css 200 2.328 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+      Marionette      TRACE   [34] Received event DOMContentLoaded for http://localhost:5555/__/
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714438","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.293,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__cypress/runner/favicon.ico?v2 - - ms - -
+JavaScript warning: http://localhost:5555/__cypress/runner/cypress_runner.js, line 205: unreachable code after return statement
+JavaScript warning: http://localhost:5555/__cypress/runner/cypress_runner.js line 1350 > eval, line 205: unreachable code after return statement
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"68607807586350","timestamp":.453,"type":"Websocket","re ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+POST /dns-query 200 628.117 ms - -
+EMITTING: emit(page-load, [object Object]) from receiveMessage() -> chrome://remote/content/marionette/actors/MarionetteEventsParent.jsm:44
+      Marionette      TRACE   [34] Received event pageshow for http://localhost:5555/__/
+      Marionette      DEBUG   1 <- [1,3,null,{"value":null}]
+EMITTING: emit(send, 1,3,,[object Object]) from send() -> chrome://remote/content/marionette/transport.js:137
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"68607807586353","documentURL":"http://localhost:5555/__/","reque ... tion":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.708,"type":"Websocket","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714441","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.72,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714442","documentURL":"http://localhost:5555/__/","reque ... ion":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.721,"type":"Stylesheet","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714443","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.723,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714444","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.724,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/Specs.b1b2f7e5.js 200 2.372 ms - 479
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714445","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.725,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714441","timestamp":.726,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714446","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.728,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714447","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.729,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714448","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.731,"type":"Fetch","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/Index.c72ac61a.css 200 5.338 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714442","timestamp":.732,"type":"Stylesheet","r ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/warning_x16.a06224d3.js 304 0.829 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714447","timestamp":.734,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714447","timestamp":.735,"type":"Fetch","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/CreateSpecModal.11be6ba6.js 304 3.830 ms - -
+GET /__/assets/SpecPatterns.22365d93.js 304 3.281 ms - -
+GET /__/assets/Index.9ce5b133.js 304 3.198 ms - -
+GET /__/assets/settings_x16.0cf1bc4a.js 304 3.054 ms - -
+GET /__/assets/add-large_x16.30cd9ba2.js 200 3.734 ms - 753
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714449","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.742,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714445","timestamp":.743,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714445","timestamp":.744,"type":"Fetch","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714446","timestamp":.744,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714446","timestamp":.745,"type":"Fetch","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714443","timestamp":.745,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714443","timestamp":.746,"type":"Fetch","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714448","timestamp":.747,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714448","timestamp":.748,"type":"Fetch","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714444","timestamp":.748,"type":"Fetch","respon ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/Index.9ce5b133.js 304 1.531 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714449","timestamp":.751,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714449","timestamp":.752,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714450","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.779,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714451","documentURL":"http://localhost:5555/__/","reque ... nnection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.78,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714452","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.781,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714453","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.782,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/add-large_x16.30cd9ba2.js 304 1.243 ms - -
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714454","documentURL":"http://localhost:5555/__/","reque ... nection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.783,"type":"Script","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/CreateSpecModal.11be6ba6.js 304 0.985 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714450","timestamp":.784,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714450","timestamp":.785,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714451","timestamp":.785,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714451","timestamp":.786,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/SpecPatterns.22365d93.js 304 2.448 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/warning_x16.a06224d3.js 304 1.675 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/settings_x16.0cf1bc4a.js 304 1.806 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714452","timestamp":.788,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714452","timestamp":.788,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714453","timestamp":.789,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714453","timestamp":.79,"type":"Script","respon ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714454","timestamp":.797,"type":"Script","respo ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714454","timestamp":.798,"type":"Script","respo ... motePort":55038,"fromDiskCache":true,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714455","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.865,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/cypress_s.29af549a.png 200 1.850 ms - 4425
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714455","timestamp":.871,"type":"Img","response ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714456","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.955,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/firefox.9be61e66.svg 200 0.864 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714456","timestamp":.96,"type":"Img","response" ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714457","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.962,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714458","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.964,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(request, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel)], [object Object]) from _onRequest() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:226
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.requestWillBeSent","params":{"requestId":"66752381714459","documentURL":"http://localhost:5555/__/","reque ... connection":"keep-alive"},"hasPostData":false,"isLinkPreload":false},"timestamp":.965,"type":"Img","frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+POST /dns-query 200 540.502 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714457","timestamp":.973,"type":"Img","response ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/chrome.1b5cb774.svg 200 3.083 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714458","timestamp":.976,"type":"Img","response ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+GET /__/assets/edge.e54a3dc2.svg 200 7.796 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"66752381714459","timestamp":.979,"type":"Img","response ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+GET /__/assets/electron.fb07f5cc.svg 200 7.839 ms - -
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298
+POST /dns-query 200 586.221 ms - -
+POST /dns-query 200 647.439 ms - -
+EMITTING: emit(response, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal)], [object Object]) from _onResponse() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:269
+      CDP     TRACE   CDPConnection 2c79d740-34d2-47b7-8791-c79caa50037a <- {"method":"Network.responseReceived","params":{"requestId":"68607807586353","timestamp":.235,"type":"Websocket","re ... otePort":55038,"fromDiskCache":false,"protocol":"http/1.1","securityDetails":null,"securityState":"unknown"},"frameId":"34"}}
+EMITTING: emit(send, [object Object]) from send() -> chrome://remote/content/server/WebSocketTransport.jsm:40
+EMITTING: emit(requestfinished, [xpconnect wrapped (nsIHttpChannel, nsITraceableChannel, nsIUploadChannel, nsIHttpChannelInternal, nsIChannel, nsIRequest, nsIEncodedChannel)], [object Object]) from _onResponseFinished() -> chrome://remote/content/cdp/observers/NetworkObserver.jsm:298

@@ -6,7 +6,7 @@ import { create, CRIWrapper } from './cri-client'
 
 const HOST = '127.0.0.1'
 
-const debug = Debug('cypress:server:browsers:browser-cri-client')
+const debug = Debug('TYLER')
 
 interface Version {
   major: number
@@ -80,11 +80,30 @@ export class BrowserCriClient {
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
   static async create (port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CRIWrapper.Client) => void): Promise<BrowserCriClient> {
+
+    debug('awaiting live browser')
     await ensureLiveBrowser(port, browserName)
+    debug('got live browser')
 
     return retryWithIncreasingDelay(async () => {
+      debug('getting version')
+
       const versionInfo = await CRI.Version({ host: HOST, port })
+      debug('got version', versionInfo)
+
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
+
+      debug('created', browserClient)
+
+      // await browserClient.send('Target.setDiscoverTargets', { discover: true })
+
+      // browserClient.on('Target.targetCreated', () => {
+      //   debug('HEYOOOOOO target created')
+      // });
+
+      // const createdID = await browserClient.send('Target.createTarget', { url: 'http://www.google.com', newWindow: true })
+
+      // debug('HEYOOOOOO creating target: ' + createdID)
 
       return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
     }, browserName, port)
@@ -117,6 +136,7 @@ export class BrowserCriClient {
     // times until eventually timing out.
     return retryWithIncreasingDelay(async () => {
       debug('Attaching to target url %s', url)
+      
       const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
 
       const target = targets.find((target) => target.url === url)

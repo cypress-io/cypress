@@ -3,7 +3,7 @@ import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
 import * as errors from '../errors'
 
-const debug = debugModule('cypress:server:browsers:cri-client')
+const debug = debugModule('TYLER')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
 const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send:[-->]')
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
@@ -185,6 +185,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
   client = {
     targetId: target,
     async send (command: CRIWrapper.Command, params?: object) {
+      debugger
       const enqueue = () => {
         return new Promise((resolve, reject) => {
           enqueuedCommands.push({ command, params, p: { resolve, reject } })
