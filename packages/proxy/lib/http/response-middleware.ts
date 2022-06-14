@@ -439,11 +439,10 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
-  // TODO: is it possible currentUrl is not set? if so, validate currentUrl is
-  // set and handle if it's unset properly
   const cookiesHelper = new CookiesHelper({
     cookieJar: this.getCookieJar(),
-    currentAUTUrl: this.remoteStates.currentUrl!,
+    currentAUTUrl: this.remoteStates.currentUrl,
+    debug: this.debug,
     request: {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
@@ -454,18 +453,6 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   await cookiesHelper.capturePreviousCookies()
 
   ;([] as string[]).concat(cookies).forEach((cookie) => {
-    const toughCookie = cookiesHelper.parseCookie(cookie)
-
-    // don't set the cookie in our own cookie jar if the parsed cookie is
-    // undefined (means it's invalid) or if the browser would not set it
-    // because Secure is required for SameSite=None
-    if (!toughCookie || (toughCookie.sameSite === 'none' && !toughCookie.secure)) {
-      appendCookie(cookie)
-
-      return
-    }
-
-    // tracks the cookie in our own cookie jar for cross-origin purposes
     cookiesHelper.setCookie(cookie)
 
     appendCookie(cookie)

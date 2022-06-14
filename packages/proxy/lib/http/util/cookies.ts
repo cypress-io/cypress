@@ -1,11 +1,8 @@
 import _ from 'lodash'
 import { Cookie, CookieJar } from 'tough-cookie'
-import dayjs from 'dayjs'
-import debugModule from 'debug'
+import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
-
-const debug = debugModule('cypress:proxy:http:cookies')
 
 interface CookieObject {
   domain: string
@@ -27,10 +24,12 @@ interface RequestDetails {
 
 // Sets SameSite context to match what it would be in the browser
 // see https://github.com/salesforce/tough-cookie#samesite-cookies
-export const getSameSiteContext = (autUrl, requestUrl, isAUTFrameRequest) => {
+export const getSameSiteContext = (autUrl: string | undefined, requestUrl: string, isAUTFrameRequest: boolean) => {
+  // if there's no AUT URL, it's a request for the first URL visited,
+  // so there would be no cross-origin concerns
   // if the request origin matches the AUT origin, cookies can be handled
   // in a strict fashion
-  if (cors.urlOriginsMatch(autUrl, requestUrl)) {
+  if (!autUrl || cors.urlOriginsMatch(autUrl, requestUrl)) {
     return 'strict'
   }
 
@@ -41,7 +40,7 @@ export const getSameSiteContext = (autUrl, requestUrl, isAUTFrameRequest) => {
 
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
 
-export const parseCookie = (cookie, defaultDomain) => {
+export const parseCookie = (cookie) => {
   const toughCookie = Cookie.parse(cookie)
 
   if (!toughCookie) return
@@ -52,21 +51,6 @@ export const parseCookie = (cookie, defaultDomain) => {
 
   if (hasUnspecifiedSameSite) {
     toughCookie.sameSite = 'lax'
-  }
-
-  if (!toughCookie.domain) {
-    toughCookie.domain = defaultDomain
-  }
-
-  // tough-cookie's cookie jar handles maxAge properly and unsets cookies as
-  // needed, but when we set them on automation, it needs the expires set for
-  // it to remove the cookie appropriately
-  if (toughCookie.maxAge === '-Infinity') {
-    toughCookie.expires = dayjs().subtract(1, 'day').toDate()
-  } else if (toughCookie.maxAge === 'Infinity') {
-    toughCookie.expires = 'Infinity'
-  } else if (toughCookie.maxAge != null) {
-    toughCookie.expires = dayjs().add(toughCookie.maxAge, 'second').toDate()
   }
 
   return toughCookie
@@ -121,16 +105,18 @@ const toughCookieToAutomationCookie = (toughCookie, defaultDomain) => {
 
 export class CookiesHelper {
   cookieJar: CookieJar
-  currentAUTUrl: string
+  currentAUTUrl: string | undefined
   request: RequestDetails
+  debug: Debug.Debugger
   defaultDomain: string
   sameSiteContext: 'strict' | 'lax' | 'none'
   previousCookies: Cookie[] = []
 
-  constructor ({ cookieJar, currentAUTUrl, request }) {
+  constructor ({ cookieJar, currentAUTUrl, request, debug }) {
     this.cookieJar = cookieJar
     this.currentAUTUrl = currentAUTUrl
     this.request = request
+    this.debug = debug
     this.sameSiteContext = getSameSiteContext(currentAUTUrl, request.url, request.isAUTFrame)
 
     const parsedRequestUrl = new URL(request.url)
@@ -162,18 +148,23 @@ export class CookiesHelper {
     }, [])
   }
 
-  setCookie (cookie) {
+  setCookie (cookie: string) {
+    const toughCookie = parseCookie(cookie)
+
+    // don't set the cookie in our own cookie jar if the parsed cookie is
+    // undefined (meaning it's invalid) or if the browser would not set it
+    // because Secure is required for SameSite=None
+    if (!toughCookie || (toughCookie.sameSite === 'none' && !toughCookie.secure)) {
+      return
+    }
+
     try {
       this.cookieJar.setCookieSync(cookie, this.request.url, {
         // @ts-ignore
         sameSiteContext: this.sameSiteContext,
       })
     } catch (err) {
-      debug('setting cookie on jar failed: %s', err.message)
+      this.debug('adding cookie to jar failed: %s', err.message)
     }
-  }
-
-  parseCookie (cookie) {
-    return parseCookie(cookie, this.defaultDomain)
   }
 }
