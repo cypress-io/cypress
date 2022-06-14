@@ -32,12 +32,14 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
 }
 
 const CopyCrossOriginCookies: RequestMiddleware = function () {
-  if (!this.remoteStates.currentUrl) {
+  const currentAUTUrl = this.getAUTUrl()
+
+  if (!currentAUTUrl) {
     return this.next()
   }
 
   const sameSiteContext = getSameSiteContext(
-    this.remoteStates.currentUrl,
+    currentAUTUrl,
     this.req.proxiedUrl,
     this.req.isAUTFrame,
   )

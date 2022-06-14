@@ -691,7 +691,7 @@ describe('http/response-middleware', function () {
           experimentalSessionAndOrigin: true,
         },
         getCookieJar () {},
-        getPreviousAUTRequestUrl () {},
+        getAUTUrl () {},
         remoteStates,
         debug () {},
         onError (error) {

@@ -395,7 +395,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 }
 
 const checkNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
-  const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
+  const currentAUTUrl = ctx.getAUTUrl()
 
   // A cookie needs cross origin handling if it's an AUT request and
   // either the request itself is cross-origin or the origins between
@@ -406,7 +406,7 @@ const checkNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewar
     ctx.config.experimentalSessionAndOrigin
     && ctx.req.isAUTFrame
     && (
-      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
+      (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
     )
   )
@@ -459,7 +459,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const cookiesHelper = new CookiesHelper({
     cookieJar: this.getCookieJar(),
-    currentAUTUrl: this.remoteStates.currentUrl,
+    currentAUTUrl: this.getAUTUrl(),
     debug: this.debug,
     request: {
       url: this.req.proxiedUrl,
@@ -601,7 +601,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   if (this.req.isAUTFrame) {
     // track the previous AUT request URL so we know if the next requests
     // is cross-origin
-    this.setPreviousAUTRequestUrl(this.req.proxiedUrl)
+    this.setAUTUrl(this.req.proxiedUrl)
   }
 
   this.incomingResStream.pipe(this.res).on('error', this.onError)

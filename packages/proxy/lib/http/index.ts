@@ -56,8 +56,8 @@ type HttpMiddlewareCtx<T> = {
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getAutomation: () => Automation
   getPreRequest: (cb: GetPreRequestCb) => void
-  getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
-  setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
+  getAUTUrl: Http['getAUTUrl']
+  setAUTUrl: Http['setAUTUrl']
 } & T
 
 export const defaultMiddleware = {
@@ -219,7 +219,7 @@ export class Http {
   socket: CyServer.Socket
   serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
-  previousAUTRequestUrl?: string
+  autUrl?: string
   getCookieJar: () => CookieJar
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
@@ -276,8 +276,8 @@ export class Http {
         })
       },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
-      getPreviousAUTRequestUrl: this.getPreviousAUTRequestUrl,
-      setPreviousAUTRequestUrl: this.setPreviousAUTRequestUrl,
+      getAUTUrl: this.getAUTUrl,
+      setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -311,12 +311,12 @@ export class Http {
     return this.renderedHTMLOrigins
   }
 
-  getPreviousAUTRequestUrl = () => {
-    return this.previousAUTRequestUrl
+  getAUTUrl = () => {
+    return this.autUrl
   }
 
-  setPreviousAUTRequestUrl = (url) => {
-    this.previousAUTRequestUrl = url
+  setAUTUrl = (url) => {
+    this.autUrl = url
   }
 
   async handleSourceMapRequest (req: Request, res: Response) {
@@ -335,7 +335,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.setPreviousAUTRequestUrl(undefined)
+    this.setAUTUrl(undefined)
   }
 
   setBuffer (buffer) {
