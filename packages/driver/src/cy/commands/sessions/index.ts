@@ -166,20 +166,22 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Restore Saved Session',
           message: '',
           type: 'system',
-        }, async () => {
-          await navigateAboutBlank()
+        }, () => {
+          return cy.then(async () => {
+            await navigateAboutBlank()
 
-          _log.set({
-            consoleProps: () => getConsoleProps(existingSession),
-            renderProps: () => {
-              return {
-                indicator: 'pending',
-                message: `(saved) ${_log.get().message}`,
-              }
-            },
+            _log.set({
+              consoleProps: () => getConsoleProps(existingSession),
+              renderProps: () => {
+                return {
+                  indicator: 'pending',
+                  message: `(saved) ${_log.get().message}`,
+                }
+              },
+            })
+
+            await sessions.setSessionData(existingSession)
           })
-
-          await sessions.setSessionData(existingSession)
         })
       }
 
