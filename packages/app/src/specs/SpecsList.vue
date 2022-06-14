@@ -220,7 +220,7 @@
     v-if="isProjectConnectOpen"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
-    @success="isProjectConnectOpen = false; refreshPage()"
+    @success="refreshPage()"
   />
 </template>
 

@@ -130,9 +130,6 @@ export class GraphQLDataSource {
       operation: params.info.operation,
     })
 
-    // console.log(print(isNode ? docBuilder.queryNode : docBuilder.query))
-    // debugger
-
     Promise.resolve(execute({
       schema: params.info.schema,
       document: isNode ? docBuilder.queryNode : docBuilder.query,

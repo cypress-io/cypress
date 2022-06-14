@@ -37,7 +37,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError /*, getError*/ } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
 import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
@@ -230,15 +230,7 @@ export class DataContext {
       fetch: (...args) => this.util.fetch(...args),
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
-      onError: (err) => {
-        // This should never happen in prod, and if it does, it means we've intentionally broken the
-        // remote contract with the test runner. Showing the main overlay is too heavy-handed of an action
-        // to take here, so we only show it in development, when we maybe did something wrong in our e2e
-        // Cypress test mocking and want to know immediately in the UI that things are broken
-        // if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
-        //   return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
-        // }
-      },
+      onError: () => { },
     })
   }
 
