@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { execute, parse, print } from 'graphql'
+import { execute, print } from 'graphql'
 import chaiAsPromised from 'chai-as-promised'
 import { Response } from 'cross-fetch'
 
@@ -8,21 +8,19 @@ import { CloudDataResponse, CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
 import chai, { expect } from 'chai'
 import { ExecutionResult } from '@urql/core'
+import {
+  CLOUD_PROJECT_QUERY,
+  CLOUD_PROJECT_RESPONSE,
+  FAKE_USER_QUERY,
+  FAKE_USER_RESPONSE,
+  FAKE_USER_WITH_OPTIONAL_MISSING,
+  FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE,
+  FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE,
+  FAKE_USER_WITH_REQUIRED_MISSING,
+  FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE,
+} from './fixtures/graphqlFixtures'
 
 chai.use(chaiAsPromised)
-
-const FAKE_USER_QUERY = parse(`{ cloudViewer { __typename id fullName email } }`)
-const FAKE_USER_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com' } } }
-const FAKE_USER_WITH_OPTIONAL_MISSING = parse(`{ cloudViewer { __typename id fullName email cloudProfileUrl } }`)
-const FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', cloudProfileUrl: null } } }
-const FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', cloudProfileUrl: 'https://example.com' } } }
-const FAKE_USER_WITH_REQUIRED_MISSING = parse(`{ cloudViewer { __typename id fullName email userIsViewer } }`)
-const FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', userIsViewer: true } } }
-const CLOUD_PROJECT_QUERY = parse(`{ currentProject { 
-  id 
-  cloudProject { __typename  ... on CloudProject { id } }
-} }`)
-const CLOUD_PROJECT_RESPONSE = { data: { cloudProjectBySlug: { __typename: 'CloudProject', id: '1' } } }
 
 describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource

@@ -2,6 +2,7 @@ import { CombinedError, stringifyVariables } from '@urql/core'
 import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '@packages/graphql/src/gen/nxs.gen'
 import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
+import _ from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import { pathToArray } from 'graphql/jsutils/Path'
@@ -34,8 +35,10 @@ export class RemoteRequestDataSource {
   #operationErrors = new Map<string, CombinedError>()
   /** The remote execution definition for the query */
   #operationRegistry = new Map<string, OperationDefinition>()
-  /** The remote execution definition for the query */
-  #operationRegistryPush = new Map<string, string>()
+  /**
+   * Map<HASH_OF_QUERY, [FRONTEND_QUERY, VARIABLE_NAMES[]]>
+   */
+  #operationRegistryPushToFrontend = new Map<string, [string, string[]]>()
 
   /**
    * Given a RemoteFetchable "id", we look up the operation & resolve and/or
@@ -157,16 +160,18 @@ export class RemoteRequestDataSource {
       requestPolicy: 'network-only',
     }))
     .then((result) => {
-      const toSend = this.#operationRegistryPush.get(operationHash)
+      const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)
 
-      assert(toSend, `Missing fragment for ${operationHash}`)
+      assert(toPushDefinition, `Missing fragment for ${operationHash}`)
+
+      const [toSend, variableNames] = toPushDefinition
 
       let data: any = null
       let error: any = null
-      let status: RemoteFetchableStatus = 'FETCHED'
+      let fetchingStatus: RemoteFetchableStatus = 'FETCHED'
 
       if (result.error) {
-        status = 'ERRORED'
+        fetchingStatus = 'ERRORED'
         error = { ...result.error }
         this.#operationErrors.set(params.id, result.error)
       } else if (result.data) {
@@ -178,10 +183,10 @@ export class RemoteRequestDataSource {
         ctx.emitter.pushFragment([{
           target: params.__typename,
           fragment: toSend,
-          variables: {}, // operationVariables, need this to be stripped down to only the inner variables
+          variables: _.pick(operationVariables, variableNames),
           data: {
             id: params.id,
-            status,
+            fetchingStatus,
             data,
             error,
           },
@@ -237,13 +242,14 @@ export class RemoteRequestDataSource {
 
           const docBuilder = new DocumentNodeBuilder({
             isNode: true,
+            isRemoteFetchable: true,
             parentType: info.schema.getType(fieldType) as GraphQLObjectType,
             fieldNodes: info.fieldNodes[0]?.selectionSet?.selections.filter((f) => f.kind === 'Field' && FIELDS_TO_PUSH.includes(f.name.value)) as FieldNode[],
-            operation: info.operation,
+            variableDefinitions: info.operation.variableDefinitions,
           })
 
           this.#operationRegistry.set(operationDef.operationHash, operationDef)
-          this.#operationRegistryPush.set(operationDef.operationHash, print(docBuilder.clientWriteFragment))
+          this.#operationRegistryPushToFrontend.set(operationDef.operationHash, [print(docBuilder.clientWriteFragment), docBuilder.variableNames])
         }
       }
 

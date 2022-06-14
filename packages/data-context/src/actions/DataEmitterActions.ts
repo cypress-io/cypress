@@ -1,7 +1,6 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
-
-import type { DataContext } from '../DataContext'
+import { DataContext } from '../DataContext'
 
 export interface PushFragmentData {
   data: any
@@ -94,7 +93,28 @@ abstract class DataEmitterEvents {
    * triggering a full refresh, we can send down a specific fragment / data to update
    */
   pushFragment (toPush: PushFragmentData[]) {
-    this._emit('pushFragment', toPush)
+    DataContext.waitForActiveRequestsToFlush().then(() => {
+      this.#queuePushFragment(toPush)
+    }).catch(() => {
+      // This promise can never fail, it only ever resolves
+    })
+  }
+
+  // Batch the "push fragment" in 10ms payloads so remotely fetched data comes in
+  // with less noise to the frontend
+  #timer?: NodeJS.Timer
+  #toPush: PushFragmentData[] = []
+  #queuePushFragment = (toPush: PushFragmentData[]) => {
+    this.#toPush.push(...toPush)
+    if (!this.#timer) {
+      this.#timer = setTimeout(() => {
+        const toPush = this.#toPush
+
+        this.#toPush = []
+        this.#timer = undefined
+        this._emit('pushFragment', toPush)
+      }, 10)
+    }
   }
 
   /**

@@ -2,6 +2,7 @@ import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.
 import debugLib from 'debug'
 import { execute, FieldNode, GraphQLResolveInfo, print, visit } from 'graphql'
 import type { core } from 'nexus'
+import _ from 'lodash'
 import type { DataContext } from '..'
 import { DocumentNodeBuilder } from '../util/DocumentNodeBuilder'
 
@@ -127,7 +128,7 @@ export class GraphQLDataSource {
       isNode,
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
-      operation: params.info.operation,
+      variableDefinitions: params.info.operation.variableDefinitions,
     })
 
     Promise.resolve(execute({
@@ -146,6 +147,7 @@ export class GraphQLDataSource {
       params.ctx.emitter.pushFragment([{
         target: params.info.parentType.name,
         fragment: print(docBuilder.clientWriteFragment),
+        variables: _.pick(params.info.variableValues, docBuilder.variableNames),
         data,
         errors: result.errors,
       }])
@@ -153,6 +155,7 @@ export class GraphQLDataSource {
       params.ctx.emitter.pushFragment([{
         target: params.info.parentType.name,
         fragment: print(docBuilder.clientWriteFragment),
+        variables: _.pick(params.info.variableValues, docBuilder.variableNames),
         data: null,
         errors: [e],
       }])

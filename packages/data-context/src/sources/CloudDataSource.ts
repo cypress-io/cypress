@@ -283,10 +283,6 @@ export class CloudDataSource {
     return this.#maybeQueueDeferredExecute(config)
   }
 
-  updateCache () {
-    //
-  }
-
   // Invalidate individual fields in the GraphQL by hitting a "fake"
   // mutation and calling cache.invalidate on the internal cache
   // https://formidable.com/open-source/urql/docs/api/graphcache/#invalidate

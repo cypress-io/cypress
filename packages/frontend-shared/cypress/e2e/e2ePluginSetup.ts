@@ -174,6 +174,7 @@ async function makeE2ETasks () {
      */
     async __internal__beforeEach () {
       testState = {}
+      await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()

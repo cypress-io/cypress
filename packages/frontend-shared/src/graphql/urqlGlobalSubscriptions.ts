@@ -9,6 +9,7 @@ gql`
      fragment
      data
      errors
+     variables
    }
  }
 `
