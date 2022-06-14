@@ -511,7 +511,10 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
   this.res.status(Number(this.incomingRes.statusCode))
   // Set custom status message/reason phrase from http response
   // https://github.com/cypress-io/cypress/issues/16973
-  this.res.statusMessage = this.incomingRes.statusMessage || ''
+  if (this.incomingRes.statusMessage) {
+    this.res.statusMessage = this.incomingRes.statusMessage
+  }
+
   this.next()
 }
 
