@@ -23,9 +23,13 @@
         >
           <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
-        <div class="mr-12px max-w-100% grid text-gray-600 items-center truncate">
+        <a
+          target="_blank"
+          :href="autStore.url"
+          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
+        >
           {{ autStore.url }}
-        </div>
+        </a>
       </div>
       <div
         v-else

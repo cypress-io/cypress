@@ -8,6 +8,7 @@ describe('cypress config with esm and cjs', function () {
     'config-cjs-and-esm/config-with-mjs',
     'config-cjs-and-esm/config-with-cjs',
     'config-cjs-and-esm/config-with-js-module',
+    'config-cjs-and-esm/config-with-ts-module',
 
     // This covers Vite and SvelteKit e2e projects
     'config-cjs-and-esm/config-with-ts-module-and-esbuild',
@@ -22,30 +23,12 @@ describe('cypress config with esm and cjs', function () {
     })
   })
 
-  // TODO: add support for ts-node/esm https://github.com/cypress-io/cypress/issues/21939
-  ;[
-    'config-cjs-and-esm/config-with-ts-module',
-  ].forEach((project) => {
-    systemTests.it(`does not support modules and ts without esbuild in ${project}`, {
-      project,
-      testingType: 'e2e',
-      spec: 'app.cy.js',
-      browser: 'chrome',
-      expectedExitCode: 1,
-    })
-  })
-
-  ;[
-    'config-cjs-and-esm/config-with-ts-module-component',
-  ].forEach((project) => {
-    // This covers Vite and SvelteKit component testing projects
-    systemTests.it(`supports modules and cjs in ${project}`, {
-      project,
-      testingType: 'component',
-      spec: 'src/app.cy.js',
-      browser: 'chrome',
-      expectedExitCode: 0,
-    })
+  systemTests.it('supports modules and cjs in component testing', {
+    project: 'config-cjs-and-esm/config-with-ts-module-component',
+    testingType: 'component',
+    spec: 'src/foo.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
   })
 })
 

@@ -98,7 +98,7 @@ executors:
     machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
-    resource_class: windows.medium
+    resource_class: windows.large
     environment:
       PLATFORM: windows
 
@@ -1080,8 +1080,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          name: Check env canaries on Mac/Linux
+          command: |
+            # Windows CircleCI does not have a way to pull per-job env
+            [[ $PLATFORM != 'windows' ]] && node ./scripts/circle-env.js --check-canaries || true
       - build-and-persist
       - store-npm-logs
 
@@ -2579,21 +2581,21 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
         context: test-runner:env-canary
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         requires:
           - windows-node-modules-install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         context: test-runner:launchpad-tests
         requires:
           - windows-build
@@ -2601,7 +2603,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         context: test-runner:launchpad-tests
         requires:
           - windows-build
@@ -2617,7 +2619,7 @@ windows-workflow: &windows-workflow
         <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         requires:
           - windows-build
 
@@ -2625,7 +2627,7 @@ windows-workflow: &windows-workflow
         <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
-        resource_class: windows.medium
+        resource_class: windows.large
         context:
           - test-runner:sign-windows-binary
           - test-runner:upload

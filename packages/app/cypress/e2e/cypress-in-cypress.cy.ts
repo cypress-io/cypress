@@ -305,4 +305,26 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       expect(ctx.actions.project.initializeActiveProject).to.be.called
     })
   })
+
+  it('restarts server if baseUrl is updated in the config file', () => {
+    startAtSpecsPage('e2e')
+    cy.get('[data-cy="spec-item"]')
+
+    cy.withCtx((ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+      o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
+
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`  e2e: {`, `  e2e: {\n  baseUrl: 'https://example.cypress.io',\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.initializeActiveProject).to.be.called
+    })
+  })
 })

@@ -236,8 +236,6 @@ export class ProjectLifecycleManager {
           })
         }
 
-        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
-
         if (this._currentTestingType === 'component') {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
@@ -246,13 +244,11 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
-
-          // Devserver can pick a random port, this solve the edge case where closing
-          // and spawning the devserver can result in a different baseUrl
-          if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
-            restartOnChange.server = true
-          }
         }
+
+        const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl
+
+        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
 
         this._cachedFullConfig = finalConfig
 
@@ -271,7 +267,7 @@ export class ProjectLifecycleManager {
             await this.ctx.actions.browser.relaunchBrowser()
           }
 
-          if (restartOnChange.pingBaseUrl) {
+          if (pingBaseUrl) {
             this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
           }
         }
