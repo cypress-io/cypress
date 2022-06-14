@@ -459,15 +459,16 @@ const util = {
     })
   },
 
-  getPlatformInfo () {
-    return util.getOsVersionAsync().then(async (version) => {
-      let osArch = await this.getRealArch()
+  async getPlatformInfo () {
+    const [version, osArch] = await Promise.all([
+      util.getOsVersionAsync(),
+      this.getRealArch(),
+    ])
 
-      return stripIndent`
-        Platform: ${os.platform()}-${osArch} (${version})
-        Cypress Version: ${util.pkgVersion()}
-      `
-    })
+    return stripIndent`
+      Platform: ${os.platform()}-${osArch} (${version})
+      Cypress Version: ${util.pkgVersion()}
+    `
   },
 
   _cachedArch: undefined,
