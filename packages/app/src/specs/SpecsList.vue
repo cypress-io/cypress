@@ -79,17 +79,17 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800"
-      :style="`padding-right: ${scrollbarOffset}px`"
+      class="mb-4 grid grid-cols-5 children:font-medium children:text-gray-800"
+      :style="`padding-right: ${scrollbarOffset + 20}px`"
     >
       <div
-        class="flex col-span-3 items-center justify-between"
+        class="flex col-span-2 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex col-span-2 items-center justify-between">
+      <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
       <div class="flex items-center justify-end truncate">
