@@ -15,13 +15,15 @@
       :is="IconFolder"
       class="icon-dark-white icon-light-gray-200"
     />
-    <div class="text-gray-600 truncate">
+    <div
+      :title="props.name"
+      class="text-gray-600 truncate"
+    >
       <HighlightedText
         :text="props.name"
         :indexes="props.indexes"
         class="font-medium"
         highlight-classes="text-gray-1000"
-        :title-text="props.name"
       />
     </div>
     <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
