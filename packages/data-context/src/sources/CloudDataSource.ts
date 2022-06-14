@@ -12,7 +12,6 @@ import {
   createClient,
   dedupExchange,
   fetchExchange,
-  errorExchange,
   Client,
   OperationResult,
   stringifyVariables,
@@ -65,7 +64,6 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
-  onError(e: Error): void
 }
 
 /**
@@ -128,26 +126,6 @@ export class CloudDataSource {
             },
           },
         }),
-        errorExchange({
-          onError: (err, operation) => {
-            // If we receive a 401 from the dashboard, we need to logout the user
-            if (err.response?.status === 401) {
-              this.params.logout()
-
-              return
-            }
-
-            if (err.networkError) {
-              // TODO: UNIFY-1691 handle the networkError via a GraphQL & UI representation
-              // this.params.onError(err.networkError)
-              return
-            }
-
-            if (err.graphQLErrors[0]) {
-              this.params.onError(err.graphQLErrors[0])
-            }
-          },
-        }),
         fetchExchange,
       ],
       // Set this way so we can intercept the fetch on the context for testing
@@ -200,6 +178,21 @@ export class CloudDataSource {
     return crypto.createHash('sha1').update(str).digest('hex')
   }
 
+  #formatWithErrors = async (data: OperationResult<any, any>) => {
+    // If we receive a 401 from the dashboard, we need to logout the user
+    if (data.error?.response?.status === 401) {
+      await this.params.logout()
+    }
+
+    if (data.error && data.operation.kind === 'mutation') {
+      await this.invalidate({ __typename: 'Query' })
+    }
+
+    return {
+      ...data,
+      errors: data.error?.graphQLErrors,
+    }
+  }
   #maybeQueueDeferredExecute (config: CloudExecuteRemote, initialResult?: OperationResult) {
     const stableKey = this.#hashRemoteRequest(config)
 
@@ -209,7 +202,8 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then((op) => {
+    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
+    .then((op) => {
       this.#pendingPromises.delete(stableKey)
 
       if (initialResult && !_.isEqual(op.data, initialResult.data)) {
@@ -258,7 +252,7 @@ export class CloudDataSource {
     }
 
     if (config.operationType === 'mutation') {
-      return this.#cloudUrqlClient.mutation(config.operationDoc, config.operationVariables).toPromise()
+      return this.#cloudUrqlClient.mutation(config.operationDoc, config.operationVariables).toPromise().then(this.#formatWithErrors)
     }
 
     // First, we check the cache to see if we have the data to fulfill this query

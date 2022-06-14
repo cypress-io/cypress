@@ -40,12 +40,14 @@ export function showError (error: CombinedError) {
 
   if (process.env.NODE_ENV !== 'production' && !hasError) {
     hasError = true
-    toast.error(message, {
-      timeout: false,
-      onClose () {
-        hasError = false
-      },
-    })
+    timeoutId = setTimeout(() => {
+      toast.error(message, {
+        timeout: false,
+        onClose () {
+          hasError = false
+        },
+      })
+    }, 1000)
   }
 
   // eslint-disable-next-line
@@ -116,6 +118,14 @@ interface AppUrqlClientConfig {
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
+
+let timeoutId: NodeJS.Timeout | undefined
+
+export function clearPendingError () {
+  if (timeoutId) {
+    clearTimeout(timeoutId)
+  }
+}
 
 export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
   const exchanges: Exchange[] = [dedupExchange]

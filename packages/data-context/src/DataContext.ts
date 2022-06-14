@@ -230,7 +230,6 @@ export class DataContext {
       fetch: (...args) => this.util.fetch(...args),
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
-      onError: () => { },
     })
   }
 
