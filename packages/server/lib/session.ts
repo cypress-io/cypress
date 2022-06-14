@@ -1,5 +1,4 @@
 import type { CyCookie } from './browsers/cdp_automation'
-import { resetCookieJar } from './cookie-jar'
 
 interface SessionData {
   cookies: CyCookie[]
@@ -31,5 +30,4 @@ export function getState () {
 
 export function clearSessions () {
   state.sessions = {}
-  resetCookieJar()
 }

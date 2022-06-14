@@ -1,10 +1,11 @@
 import _ from 'lodash'
-import { Cookie, CookieJar } from 'tough-cookie'
+import { Cookie } from 'tough-cookie'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
+import type { CookieJar } from '@packages/server/lib/cookie-jar'
 
-interface CookieObject {
+interface AutomationCookie {
   domain: string
   expiry: number | null
   httpOnly: boolean
@@ -54,18 +55,6 @@ export const parseCookie = (cookie) => {
   }
 
   return toughCookie
-}
-
-const getAllCookies = (cookieJar): Promise<Cookie[]> => {
-  return new Promise((resolve, reject) => {
-    cookieJar.store.getAllCookies((err, cookies) => {
-      if (err) {
-        return reject(err)
-      }
-
-      resolve(cookies)
-    })
-  })
 }
 
 const comparableCookieString = (toughCookie) => {
@@ -130,7 +119,7 @@ export class CookiesHelper {
     // is a nooop
     if (!this.request.needsCrossOriginHandling) return
 
-    this.previousCookies = await getAllCookies(this.cookieJar)
+    this.previousCookies = this.cookieJar.getAllCookies()
   }
 
   async getAddedCookies () {
@@ -139,9 +128,9 @@ export class CookiesHelper {
     // is a nooop
     if (!this.request.needsCrossOriginHandling) return []
 
-    const afterCookies = await getAllCookies(this.cookieJar)
+    const afterCookies = this.cookieJar.getAllCookies()
 
-    return afterCookies.reduce<CookieObject[]>((memo, afterCookie) => {
+    return afterCookies.reduce<AutomationCookie[]>((memo, afterCookie) => {
       if (matchesPreviousCookie(this.previousCookies, afterCookie)) return memo
 
       return memo.concat(toughCookieToAutomationCookie(afterCookie, this.defaultDomain))
@@ -159,10 +148,7 @@ export class CookiesHelper {
     }
 
     try {
-      this.cookieJar.setCookieSync(cookie, this.request.url, {
-        // @ts-ignore
-        sameSiteContext: this.sameSiteContext,
-      })
+      this.cookieJar.setCookie(cookie, this.request.url, this.sameSiteContext)
     } catch (err) {
       this.debug('adding cookie to jar failed: %s', err.message)
     }

@@ -10,7 +10,7 @@ import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
-import { resetCookieJar } from './cookie-jar'
+import { cookieJar } from './cookie-jar'
 import { getSpecUrl } from './project_utils'
 import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
@@ -167,7 +167,7 @@ export class OpenProject {
         }
 
         // clear cookies and all session data before each spec
-        resetCookieJar()
+        cookieJar.removeAllCookies()
         session.clearSessions()
       })
       .then(() => {
