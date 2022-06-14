@@ -13,7 +13,6 @@ import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 import { URL } from 'url'
-import { openProject } from '@packages/server/lib/open_project'
 import { CookiesHelper } from './util/cookies'
 
 interface ResponseMiddlewareProps {
@@ -479,16 +478,9 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   }
 
   try {
-    // FIXME: this is a hack to easily get the automation instance by using
-    // the openProject singleton, but this should be handled differently!
-    // instead, probably need to pass a getAutomation function into the
-    // proxy that gets added to the ctx/this
-    await openProject
-    .getProject()!
-    .getAutomation()
-    .request('set:cookies', addedCookies, () => {})
+    await this.getAutomation().request('set:cookies', addedCookies, () => {})
   } catch (err) {
-    debug('failed setting cookies via automation: %s', err.message)
+    this.debug('failed setting cookies via automation: %s', err.message)
   } finally {
     this.next()
   }

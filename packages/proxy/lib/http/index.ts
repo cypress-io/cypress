@@ -19,9 +19,9 @@ import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
-import type { Browser } from '@packages/server/lib/browsers/types'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from 'tough-cookie'
+import type { Automation } from '@packages/server/lib/automation/automation'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -54,7 +54,7 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getPreRequest: (cb: GetPreRequestCb) => void
   getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
   setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
@@ -69,7 +69,7 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getFileServerToken: () => string
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
@@ -209,7 +209,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getFileServerToken: () => string
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -228,7 +228,7 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
-    this.getCurrentBrowser = opts.getCurrentBrowser
+    this.getAutomation = opts.getAutomation
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -255,7 +255,7 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getCurrentBrowser: this.getCurrentBrowser,
+      getAutomation: this.getAutomation,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
