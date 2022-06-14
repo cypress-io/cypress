@@ -419,6 +419,24 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
+  // Cross-origin Cookie Handling
+  // ---------------------------
+  // - We capture cookies sent by responses and add them to our own server-side
+  //   tough-cookie cookie jar. All request cookies are captured, since any
+  //   future request could be cross-origin even if the response that sets them
+  //   is not.
+  // - If we sent the cookie header, it would fail to be set by the browser
+  //   (in most cases). We change the header name to 'X-Set-Cookie' to make it
+  //   clear that it's one we're handling ourselves.
+  // - We also set the cookies through automation so they are available in the
+  //   browser via document.cookie and via Cypress cookie APIs
+  //   (e.g. cy.getCookie). This is only done for cross-origin responses, since
+  //   non-cross-origin responses will be successfully set in the browser
+  //   automatically.
+  // - In the request middleware, we retrieve the cookies for a given URL
+  //   and attach them to the request, like the browser normally would.
+  //   tough-cookie handles retrieving the correct cookies based on domain,
+  //   path, etc. It also removes cookies from the cookie jar if they've expired.
   const needsCrossOriginHandling = checkNeedsCrossOriginHandling(this)
 
   const appendCookie = (cookie) => {
