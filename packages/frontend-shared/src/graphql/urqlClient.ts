@@ -62,7 +62,7 @@ export function makeCacheExchange (schema: any = urqlSchema) {
           const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string, errors: any }[] }
 
           for (const toPush of pushFragment) {
-            cache.writeFragment(toPush.fragment, toPush.data, toPush.variables ?? undefined)
+            cache.writeFragment(toPush.fragment, toPush.data)
 
             if (toPush.errors?.length) {
               // TODO: clean this up
@@ -140,6 +140,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
         showError(error)
       },
     }),
+    // detailedDebugExchange,
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
     namedRouteExchange,

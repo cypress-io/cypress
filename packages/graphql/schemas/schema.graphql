@@ -1352,6 +1352,7 @@ type PushFragmentPayload {
   errors: JSON
   fragment: JSON!
   target: String!
+  variables: JSON
 }
 
 """The root "Query" type containing all entry fields for our querying"""

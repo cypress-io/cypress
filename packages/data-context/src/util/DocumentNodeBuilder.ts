@@ -13,8 +13,10 @@ export interface RemoteQueryConfig {
 export class DocumentNodeBuilder {
   readonly frag: FragmentDefinitionNode
   readonly clientWriteFragment: DocumentNode
+  readonly variables: VariableDefinitionNode[]
+  readonly #variableNames: Set<string>
 
-  constructor (private info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType' | 'operation'> & {isNode?: boolean}) {
+  constructor (private info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined}) {
     let selections = info.fieldNodes
 
     if (info.isNode && !selections.some((s) => s.kind === 'Field' && s.name.value === 'id')) {
@@ -43,36 +45,36 @@ export class DocumentNodeBuilder {
       kind: 'Document',
       definitions: [this.frag],
     }
-  }
 
-  /**
-   * Finds all of the variables referenced within the field nodes, pulls these definitions
-   * from the outer definition
-   */
-  getVariables (): VariableDefinitionNode[] {
-    const seenVariables = new Set<string>()
-    const variables: VariableDefinitionNode[] = []
+    this.#variableNames = new Set<string>()
+    this.variables = []
 
+    /**
+     * Finds all of the variables referenced within the field nodes, pulls these definitions
+     * from the outer definition
+     */
     this.info.fieldNodes.map((node) => {
       visit(node, {
         Argument: (arg) => {
           if (arg.value.kind === 'Variable') {
             const variableName = arg.value.name.value
 
-            if (!seenVariables.has(variableName)) {
-              seenVariables.add(variableName)
-              const def = this.info.operation.variableDefinitions?.find((d) => d.variable.name.value === variableName)
+            if (!this.#variableNames.has(variableName)) {
+              this.#variableNames.add(variableName)
+              const def = this.info.variableDefinitions?.find((d) => d.variable.name.value === variableName)
 
               if (def) {
-                variables.push(def)
+                this.variables.push(def)
               }
             }
           }
         },
       })
     })
+  }
 
-    return variables
+  get variableNames () {
+    return Array.from(this.#variableNames)
   }
 
   get query (): DocumentNode {
@@ -92,7 +94,7 @@ export class DocumentNodeBuilder {
               },
             ],
           },
-          variableDefinitions: this.getVariables(),
+          variableDefinitions: this.variables,
         },
       ],
     }
@@ -142,6 +144,7 @@ export class DocumentNodeBuilder {
               },
             ],
           },
+          variableDefinitions: this.variables,
         },
       ],
     }

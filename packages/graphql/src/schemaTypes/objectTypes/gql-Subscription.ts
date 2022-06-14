@@ -93,6 +93,7 @@ export const Subscription = subscriptionType({
           t.nonNull.string('target')
           t.nonNull.json('fragment')
           t.json('data')
+          t.json('variables')
           t.json('errors')
         },
       })),

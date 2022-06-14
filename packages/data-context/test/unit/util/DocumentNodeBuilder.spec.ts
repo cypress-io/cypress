@@ -37,6 +37,7 @@ describe('DocumentNodeBuilder', () => {
     const docNodeBuilder = new DocumentNodeBuilder({
       fieldNodes: ((CLOUD_VIEWER_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>),
       parentType: graphqlSchema.getQueryType(),
+      variableDefinitions: [],
     })
 
     expect(print(docNodeBuilder.frag)).to.eql(dedent`
@@ -54,6 +55,7 @@ describe('DocumentNodeBuilder', () => {
     const docNodeBuilder = new DocumentNodeBuilder({
       fieldNodes: ((CLOUD_VIEWER_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>),
       parentType: graphqlSchema.getQueryType(),
+      variableDefinitions: [],
     })
 
     expect(print(docNodeBuilder.query).trimEnd()).to.eql(dedent`
@@ -78,6 +80,7 @@ describe('DocumentNodeBuilder', () => {
       isNode: true,
       fieldNodes: (selections[0].selectionSet.selections) as ReadonlyArray<FieldNode>,
       parentType: graphqlSchema.getType('CloudProject') as GraphQLObjectType,
+      variableDefinitions: [],
     })
 
     expect(print(docNodeBuilder.queryNode).trimRight()).to.eql(dedent`

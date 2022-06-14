@@ -81,7 +81,7 @@ const variables = computed(() => {
   const fromBranch = branchInfo.data.value?.currentProject?.branch ?? ''
   const hasBranch = Boolean(fromBranch)
 
-  return { hasBranch, fromBranch }
+  return { fromBranch, hasBranch }
 })
 
 const pollingVariables = computed(() => {

@@ -500,4 +500,28 @@ export class DataContext {
 
     await Promise.all(toAwait)
   }
+
+  static #activeRequestCount = 0
+  static #awaitingEmptyRequestCount: Function[] = []
+
+  static addActiveRequest () {
+    this.#activeRequestCount++
+  }
+
+  static finishActiveRequest () {
+    this.#activeRequestCount--
+    if (this.#activeRequestCount === 0) {
+      this.#awaitingEmptyRequestCount.forEach((fn) => fn())
+    }
+  }
+
+  static async waitForActiveRequestsToFlush () {
+    if (this.#activeRequestCount === 0) {
+      return
+    }
+
+    return new Promise((resolve) => {
+      this.#awaitingEmptyRequestCount.push(resolve)
+    })
+  }
 }
