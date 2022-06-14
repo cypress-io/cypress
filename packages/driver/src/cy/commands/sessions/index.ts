@@ -184,7 +184,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       function validateSession (existingSession, restoreSession = false) {
-        let isValidSession = true
+        const isValidSession = true
 
         if (!existingSession.validate) {
           return isValidSession
