@@ -16,6 +16,7 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
+import { resetCookieJar } from './cookie-jar'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 import path from 'path'
@@ -457,13 +458,13 @@ export class SocketBase {
             case 'get:session':
               return session.getSession(args[0])
             case 'reset:session:state':
+              resetCookieJar()
               session.clearSessions()
               resetRenderedHTMLOrigins()
 
               return
             case 'clear:cross:origin:cookies':
-              return session.resetCookieJar()
-
+              return resetCookieJar()
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
