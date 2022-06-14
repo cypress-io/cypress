@@ -80,6 +80,27 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
+function stubVideoHtml (): void {
+  // ctx.migration.getVideoEmbedHtml
+  cy.withCtx((ctx, o) => {
+    o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+      return '<span>Stubbed Video Content</span>'
+    })
+  })
+}
+
+function unstubVideoHtml (): void {
+  cy.withCtx((ctx, o) => {
+    const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
+
+    restoreFn?.()
+  })
+}
+
+beforeEach(() => {
+  stubVideoHtml()
+})
+
 describe('global mode', () => {
   it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
@@ -146,8 +167,6 @@ describe('Opening unmigrated project', () => {
   })
 
   it('migration landing page appears with a video', () => {
-    cy.intercept(/vimeo.com/).as('iframeDocRequest')
-    cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.visitLaunchpad()
@@ -159,19 +178,18 @@ describe('Opening unmigrated project', () => {
     .should('be.visible')
     .and('have.attr', 'href', 'https://on.cypress.io/changelog')
 
-    // Vimeo's implementation may change, this is just a high level check that
-    // the expected iframe code is being returned and that there is vimeo-related network traffic
-    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
-    cy.wait('@iframeDocRequest')
-
-    // For an unknown reason, recaptcha blocks us from loading Vimeo on CircleCI Windows only
-    // So only wait on the Vimeo CDN request on Linux/Darwin.
-    if (Cypress.platform !== 'win32') cy.wait('@vimeoCdnRequest')
+    // Vimeo's implementation may change and we don't want to have an external dependency in this test,
+    // this is just a high level check that the mocked embed html from the on-link is being included
+    cy.get('[data-cy="video-container"]')
+    .contains('Stubbed Video Content')
+    .and('be.visible')
 
     cy.percySnapshot()
   })
 
   it('landing page does not appear if there is no video embed code', () => {
+    unstubVideoHtml()
+
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.withCtx((ctx, o) => {
@@ -186,6 +204,8 @@ describe('Opening unmigrated project', () => {
   })
 
   it('should only hit the video on link once & cache it', () => {
+    unstubVideoHtml()
+
     cy.scaffoldProject('migration')
     cy.openProject('migration')
 
