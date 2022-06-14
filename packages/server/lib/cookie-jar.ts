@@ -9,3 +9,19 @@ export function getCookieJar () {
 export function resetCookieJar () {
   cookieJar.removeAllCookiesSync()
 }
+
+export function removeCookie (cookieData): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // @ts-ignore
+    cookieJar.store.removeCookie(
+      cookieData.domain,
+      cookieData.path || '/',
+      cookieData.name,
+      resolve,
+    )
+  })
+}
+
+export function removeAllCookies () {
+  return resetCookieJar()
+}

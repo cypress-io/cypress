@@ -111,6 +111,32 @@ describe('cy.origin - cookie login', () => {
 
       cy.document().its('cookie').should('equal', `user=${username}`)
     })
+
+    it('cy.clearCookie() -> logged out', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('[data-cy="cookie-login"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.clearCookie('user')
+      cy.reload()
+      cy.get('h1').invoke('text').should('equal', 'No user found')
+    })
+
+    it('cy.clearCookies() -> logged out', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('[data-cy="cookie-login"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.clearCookies()
+      cy.reload()
+      cy.get('h1').invoke('text').should('equal', 'No user found')
+    })
   })
 
   describe('SameSite', () => {
