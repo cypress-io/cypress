@@ -2,7 +2,7 @@
   <div data-cy="specs-list-row">
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
-      class="h-full outline-none border-gray-50 ring-inset grid grid-cols-12 group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      class="h-full outline-none border-gray-50 ring-inset grid grid-cols-5 group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
       @click="emit('toggleRow')"
@@ -11,23 +11,21 @@
     >
       <div
         data-cy="specs-list-row-file"
-        class="col-span-5"
+        class="col-span-2"
       >
         <slot name="file" />
       </div>
       <div
         data-cy="specs-list-row-git-info"
-        class="col-span-2"
       >
         <slot name="git-info" />
       </div>
-      <div class="col-span-2">
+      <div>
         <slot name="latest-runs" />
       </div>
-      <div class="col-span-2">
+      <div>
         <slot name="average-duration" />
       </div>
-      <div />
     </component>
   </div>
 </template>

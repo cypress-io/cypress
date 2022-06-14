@@ -79,20 +79,20 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-12 children:font-medium children:text-gray-800"
-      :style="`padding-right: ${scrollbarOffset}px`"
+      class="mb-4 grid grid-cols-5 children:font-medium children:text-gray-800"
+      :style="`padding-right: ${scrollbarOffset && scrollbarOffset + 20}px`"
     >
       <div
-        class="flex col-span-5 items-center justify-between"
+        class="flex col-span-2 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex col-span-2 items-center justify-between truncate">
+      <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
-      <div class="flex col-span-2 items-center justify-end truncate">
+      <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text-key-path="'specPage.latestRuns.header'"
@@ -105,7 +105,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex col-span-2 items-center justify-end truncate">
+      <div class="flex items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text-key-path="'specPage.averageDuration.header'"
@@ -118,7 +118,6 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div />
     </div>
     <!--
       The markup around the virtualized list is pretty delicate. We might be tempted to
@@ -145,6 +144,7 @@
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :style="{ paddingRight: `${scrollbarOffset && 20}px` }"
           @toggleRow="row.data.toggle"
         >
           <template #file>
