@@ -45,9 +45,7 @@ export default function (Commands, Cypress, cy) {
 
         return navigateAboutBlank(false)
         .then(() => sessions.clearCurrentSessionData())
-        .then(() => {
-          return Cypress.backend('reset:rendered:html:origins')
-        })
+        .then(() => Cypress.backend('reset:rendered:html:origins'))
       }
 
       return
@@ -138,13 +136,13 @@ export default function (Commands, Cypress, cy) {
           message: '',
           type: 'system',
         }, () => {
-          return cy.then({ name: 'createSession:setup_session' }, async () => {
+          return cy.then(async () => {
             await navigateAboutBlank()
             await sessions.clearCurrentSessionData()
 
             return existingSession.setup()
           })
-          .then({ name: 'createSession:save_session' }, async () => {
+          .then(async () => {
             await navigateAboutBlank()
             const data = await sessions.getCurrentSessionData()
 
@@ -189,10 +187,10 @@ export default function (Commands, Cypress, cy) {
       }
 
       function validateSession (existingSession, restoreSession = false) {
-        let recreateSession = false
+        let isValidSession = true
 
         if (!existingSession.validate) {
-          return cy.wrap(recreateSession)
+          return cy.wrap(isValidSession)
         }
 
         const onRestoreSessionValidationError = (err) => {
@@ -204,9 +202,9 @@ export default function (Commands, Cypress, cy) {
           })
           .error(err)
 
-          recreateSession = true
+          isValidSession = false
 
-          return recreateSession
+          return isValidSession
         }
 
         const throwValidationError = (err) => {
@@ -221,9 +219,11 @@ export default function (Commands, Cypress, cy) {
           message: '',
           type: 'system',
         }, (validatingLog) => {
-          return cy.then({ name: 'validateSession' }, async () => {
+          return cy.then(async () => {
             const onSuccess = () => {
               validatingLog.set({ displayName: 'Validate Session: valid' })
+
+              return cy.wrap(isValidSession)
             }
 
             const onFail = (err) => {
@@ -350,11 +350,9 @@ export default function (Commands, Cypress, cy) {
       const restoreSessionWorkflow = (existingSession) => {
         cy.then(() => restoreSession(existingSession))
         .then(() => validateSession(existingSession, true))
-        .then((shouldRecreateSession: boolean) => {
-          console.log(shouldRecreateSession)
-          if (shouldRecreateSession) {
-            console.log('createSession', shouldRecreateSession)
-            createSessionWorkflow(existingSession, shouldRecreateSession)
+        .then((isValidSession: boolean) => {
+          if (!isValidSession) {
+            createSessionWorkflow(existingSession, true)
           }
         })
       }
@@ -376,7 +374,7 @@ export default function (Commands, Cypress, cy) {
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
         sessionInfo: getSessionDetails(existingSession),
       }, (log) => {
-        return cy.then({ name: 'root_workflow' }, async () => {
+        return cy.then(async () => {
           _log = log
           if (!existingSession.hydrated) {
             const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
@@ -391,7 +389,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(existingSession)
-        }).then({ name: 'root_nav_blank' }, async () => {
+        }).then(async () => {
           await navigateAboutBlank()
         })
       })
