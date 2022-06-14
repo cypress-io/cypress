@@ -112,7 +112,7 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
           const statuses = obj.variables.specPath === 'cypress/e2e/accounts/accounts_list.spec.js' ?
             ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
-            obj.variables.specPath === 'cypress/e2e/001.spec.js' ?
+            obj.variables.specPath === 'cypress/e2e/app.spec.js' ?
               [] :
               ['RUNNING', 'PASSED']
 
@@ -153,7 +153,7 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
 
       // initially, visible specs should be loading
       cy.get('[data-cy-row="accounts_list.spec.js"] [data-cy="run-status-dots-loading"]')
-      cy.get('[data-cy-row="001.spec.js"] [data-cy="run-status-dots-loading"]')
+      cy.get('[data-cy-row="app.spec.js"] [data-cy="run-status-dots-loading"]')
       {
         // TODO: remove code in this scope once the caching issue is resolved
         cy.wait(300)
@@ -167,11 +167,11 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
 
       // all should use placeholder
-      cy.get(dotSelector('001.spec.js', 0)).should('have.class', 'icon-light-gray-300')
-      cy.get(dotSelector('001.spec.js', 1)).should('have.class', 'icon-light-gray-300')
-      cy.get(dotSelector('001.spec.js', 2)).should('have.class', 'icon-light-gray-300')
-      cy.get(dotSelector('001.spec.js', 'latest')).should('not.have.class', 'animate-spin')
-      cy.get(averageDurationSelector('001.spec.js')).contains('2:03')
+      cy.get(dotSelector('app.spec.js', 0)).should('have.class', 'icon-light-gray-300')
+      cy.get(dotSelector('app.spec.js', 1)).should('have.class', 'icon-light-gray-300')
+      cy.get(dotSelector('app.spec.js', 2)).should('have.class', 'icon-light-gray-300')
+      cy.get(dotSelector('app.spec.js', 'latest')).should('not.have.class', 'animate-spin')
+      cy.get(averageDurationSelector('app.spec.js')).contains('2:03')
 
       // oldest 2 status dots will use placeholder
       cy.get(dotSelector('accounts_new.spec.js', 0)).should('have.class', 'icon-light-gray-300')
@@ -180,12 +180,12 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).should('have.class', 'animate-spin')
       cy.get(averageDurationSelector('accounts_new.spec.js')).contains('2:03')
 
-      // make sure the virtualized list didn't load withFailure.spec.js
-      cy.get(specRowSelector('withFailure.spec.js')).should('not.exist')
+      // make sure the virtualized list didn't load z008.spec.js
+      cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
       cy.get('.spec-list-container').scrollTo('bottom')
-      // scrolling down should load withFailure.spec.js with loading status
-      cy.get(dotsSkeletonSelector('withFailure.spec.js'))
+      // scrolling down should load z008.spec.js with loading status
+      cy.get(dotsSkeletonSelector('z008.spec.js'))
       {
         // TODO: remove code in this scope once the caching issue is resolved
         cy.wait(300)
@@ -193,12 +193,12 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
         cy.get('.spec-list-container').scrollTo('bottom')
       }
 
-      // then withFailure.spec.js should show proper data
-      cy.get(dotSelector('withFailure.spec.js', 0)).should('have.class', 'icon-light-gray-300')
-      cy.get(dotSelector('withFailure.spec.js', 1)).should('have.class', 'icon-light-gray-300')
-      cy.get(dotSelector('withFailure.spec.js', 2)).should('have.class', 'icon-light-jade-400')
-      cy.get(dotSelector('withFailure.spec.js', 'latest')).should('have.class', 'animate-spin')
-      cy.get(averageDurationSelector('withFailure.spec.js')).contains('2:03')
+      // then z008.spec.js should show proper data
+      cy.get(dotSelector('z008.spec.js', 0)).should('have.class', 'icon-light-gray-300')
+      cy.get(dotSelector('z008.spec.js', 1)).should('have.class', 'icon-light-gray-300')
+      cy.get(dotSelector('z008.spec.js', 2)).should('have.class', 'icon-light-jade-400')
+      cy.get(dotSelector('z008.spec.js', 'latest')).should('have.class', 'animate-spin')
+      cy.get(averageDurationSelector('z008.spec.js')).contains('2:03')
     })
   })
 })
