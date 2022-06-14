@@ -7,7 +7,38 @@
     help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
-    <div class="w-640px">
+    <NoInternetConnection
+      v-if="!isOnline"
+      class="mt-24px"
+    >
+      {{ t('launchpadErrors.noInternet.message') }}
+    </NoInternetConnection>
+    <div
+      v-else
+      class="w-640px"
+    >
+      <Alert
+        v-if="graphqlError"
+        :v-model="Boolean(graphqlError)"
+        status="error"
+        :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
+        class="mb-16px"
+        :icon="WarningIcon"
+        :dismissible="isInternalServerError"
+      >
+        <p v-if="!isInternalServerError">
+          {{ graphqlError.message }}
+        </p>
+        <i18n-t
+          v-else
+          scope="global"
+          keypath="runs.connect.errors.internalServerError.description"
+        >
+          <ExternalLink href="https://www.cypressstatus.com/">
+            {{ t('runs.connect.errors.internalServerError.link') }}
+          </ExternalLink>
+        </i18n-t>
+      </Alert>
       <Select
         v-model="pickedOrganization"
         :options="organizations"
@@ -120,7 +151,10 @@
         />
       </template>
     </div>
-    <template #footer>
+    <template
+      v-if="isOnline"
+      #footer
+    >
       <div class="flex gap-16px">
         <Button
           size="lg"
@@ -153,6 +187,8 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
+import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
+import Alert from '@cy/components/Alert.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
@@ -161,8 +197,12 @@ import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectM
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
+import { useOnline } from '@vueuse/core'
+import WarningIcon from '~icons/cy/warning_x16.svg'
+import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
 
 const { t } = useI18n()
+const online = useOnline()
 
 gql`
 fragment SelectCloudProjectModal on Query {
@@ -234,6 +274,8 @@ const emit = defineEmits<{
   (event: 'update-projectId-failed', projectId: string): void
 }>()
 
+const isInternalServerError = ref(false)
+const graphqlError = ref<{ extension: string, message: string} | undefined>()
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
@@ -272,11 +314,28 @@ async function createOrConnectProject () {
   const isNewProject = Boolean(newProject.value && pickedOrganization.value)
 
   if (isNewProject) {
-    const { data } = await createCloudProjectMutation.executeMutation({
+    const { data, error } = await createCloudProjectMutation.executeMutation({
       orgId: pickedOrganization.value!.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
     })
+
+    if (error?.graphQLErrors.length) {
+      const err = error.graphQLErrors[0]
+
+      const extension = err.extensions?.code
+
+      isInternalServerError.value = extension === 'INTERNAL_SERVER_ERROR'
+
+      graphqlError.value = {
+        extension,
+        message: err.message,
+      }
+
+      clearPendingError()
+    } else {
+      graphqlError.value = undefined
+    }
 
     projectId = data?.cloudProjectCreate?.slug
   } else {
@@ -295,4 +354,7 @@ async function createOrConnectProject () {
     }
   }
 }
+
+const isOnline = computed(() => online.value)
+
 </script>
