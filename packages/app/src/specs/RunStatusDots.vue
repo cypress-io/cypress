@@ -170,13 +170,7 @@ const latestRun = computed(() => {
 })
 
 const latestStatus = computed(() => {
-  const run = latestRun.value
-
-  if (!run) {
-    return { icon: PlaceholderIcon, spin: false }
-  }
-
-  switch (run.status) {
+  switch (latestRun.value?.status) {
     case 'PASSED':
       return { icon: PassedIcon, spin: false }
     case 'RUNNING':
