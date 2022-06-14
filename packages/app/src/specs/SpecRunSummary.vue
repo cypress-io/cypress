@@ -3,8 +3,12 @@
     v-if="props.run"
     class="flex flex-col p-4 gap-2 items-center"
     :class="highlightColor"
+    data-cy="spec-run-summary"
   >
-    <div class="max-w-60 truncate overflow-hidden">
+    <div
+      class="max-w-60 truncate overflow-hidden"
+      data-cy="spec-run-filename"
+    >
       <span class="font-semibold text-gray-800">{{ props.specFileNoExtension }}</span><span class="text-gray-600">{{ props.specFileExtension }}</span>
     </div>
     <div class="flex flex-row text-gray-700 text-size-14px gap-2 items-center">
@@ -12,6 +16,7 @@
         v-if="statusText"
         :class="'text-'+statusTextColor"
         class="font-medium"
+        data-cy="spec-run-status"
       >
         {{ statusText }}
       </div>
@@ -21,7 +26,10 @@
         height="4px"
         class="icon-light-gray-200"
       />
-      <div v-if="props.run.createdAt">
+      <div
+        v-if="props.run.createdAt"
+        data-cy="spec-run-time-ago"
+      >
         {{ getTimeAgo(props.run.createdAt!) }}
       </div>
       <i-cy-dot-solid_x4
@@ -29,14 +37,19 @@
         height="4px"
         class="icon-light-gray-200"
       />
-      <div>{{ durationText1 }}</div>
+      <div data-cy="spec-run-duration-1">
+        {{ durationText1 }}
+      </div>
       <div
         v-if="durationText2"
         class="m-[-5px] text-gray-200"
       >
         -
       </div>
-      <div v-if="durationText2">
+      <div
+        v-if="durationText2"
+        data-cy="spec-run-duration-2"
+      >
         {{ durationText2 }}
       </div>
     </div>
@@ -44,6 +57,7 @@
       v-if="runResults"
       v-bind="runResults"
       class="my-2"
+      data-cy="spec-run-result-counts"
     />
   </div>
 </template>

@@ -6,6 +6,8 @@
     class="h-16px"
     :hide-delay="0"
     :show-group="props.gql?.id"
+    :distance="7"
+    popper-class="RunStatusDots_Tooltip"
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
@@ -194,7 +196,7 @@ const latestStatus = computed(() => {
 <style lang="scss">
 .RunStatusDots_Tooltip {
   .v-popper__arrow-container {
-    margin-left: 14px;
+    margin-left: 13px;
   }
 }
 </style>

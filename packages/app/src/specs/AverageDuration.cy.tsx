@@ -1,117 +1,116 @@
 import type { AverageDurationFragment } from '../generated/graphql'
 import AverageDuration from './AverageDuration.vue'
 
-function emptyAverageDurationFragment (milliseconds?: number): AverageDurationFragment {
-  return {
-    id: 'id',
-    data: {
-      id: 'id',
-      averageDuration: milliseconds ?? 0,
-      retrievedAt: new Date().toISOString(),
-      __typename: 'CloudProjectSpec',
-    },
-    __typename: 'RemoteFetchableCloudProjectSpecResult',
-  }
-}
-
 describe('<AverageDuration />', () => {
-  it('shows no time when 0 is passed', () => {
-    const gql = emptyAverageDurationFragment(0)
+  function mountWithDurationValue (duration: number) {
+    const gql: AverageDurationFragment = {
+      id: 'id',
+      data: {
+        __typename: 'CloudProjectSpec',
+        id: 'id',
+        averageDuration: duration,
+        retrievedAt: new Date().toISOString(),
+      },
+    }
 
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+    cy.mount(<AverageDuration gql={gql} />)
+  }
+
+  context('zero duration', () => {
+    beforeEach(() => {
+      mountWithDurationValue(0)
     })
 
-    cy.findByTestId('average-duration').should('not.exist')
+    it('renders nothing', () => {
+      cy.findByTestId('average-duration').should('not.exist')
+      cy.percySnapshot()
+    })
   })
 
-  it('shows correct time - small fractions of a second', () => {
-    const gql = emptyAverageDurationFragment(33)
+  context('duration less than 1 second', () => {
+    context('close to zero', () => {
+      beforeEach(() => {
+        mountWithDurationValue(33)
+      })
 
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+      it('renders zero duration', () => {
+        cy.findByTestId('average-duration').contains('0:00')
+        cy.percySnapshot()
+      })
     })
 
-    cy.findByTestId('average-duration').contains('0:00')
+    context('near one second', () => {
+      beforeEach(() => {
+        mountWithDurationValue(850)
+      })
+
+      it('shows correct time', () => {
+        cy.findByTestId('average-duration').contains('0:00')
+        cy.percySnapshot()
+      })
+    })
   })
 
-  it('shows correct time - almost a second', () => {
-    const gql = emptyAverageDurationFragment(850)
-
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+  context('duration more than 1 second but less than 1 minute', () => {
+    beforeEach(() => {
+      mountWithDurationValue(12 * 1000)
     })
 
-    cy.findByTestId('average-duration').contains('0:00')
+    it('shows correct time', () => {
+      cy.findByTestId('average-duration').contains('0:12')
+      cy.percySnapshot()
+    })
   })
 
-  it('shows correct time - seconds only', () => {
-    const gql = emptyAverageDurationFragment(12 * 1000)
+  context('duration more than one minute but less than one hour', () => {
+    context('even number of minutes', () => {
+      beforeEach(() => {
+        mountWithDurationValue(120 * 1000)
+      })
 
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+      it('shows correct time', () => {
+        // 2:00 = 120 seconds
+        cy.findByTestId('average-duration').contains('2:00')
+        cy.percySnapshot()
+      })
     })
 
-    cy.findByTestId('average-duration').contains('0:12')
+    context('mix of minutes and seconds', () => {
+      beforeEach(() => {
+        mountWithDurationValue(154 * 1000)
+      })
+
+      it('shows correct time', () => {
+        // 2:34 = 154 seconds
+        cy.findByTestId('average-duration').contains('2:34')
+        cy.percySnapshot()
+      })
+    })
   })
 
-  it('shows correct time - minutes only', () => {
-    // 2:00 = 120 seconds
-    const gql = emptyAverageDurationFragment(120 * 1000)
+  context('duration more than one hour', () => {
+    context('small number of hours', () => {
+      beforeEach(() => {
+        mountWithDurationValue(7354 * 1000)
+      })
 
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+      it('shows correct time', () => {
+        // 2:02:34 = 7354 seconds
+        cy.findByTestId('average-duration').contains('2:02:34')
+        cy.percySnapshot()
+      })
     })
 
-    cy.findByTestId('average-duration').contains('2:00')
-  })
+    context('large number of hours', () => {
+      beforeEach(() => {
+        mountWithDurationValue(151354 * 1000)
+      })
 
-  it('shows correct time - seconds and minutes', () => {
-    // 2:34 = 154 seconds
-    const gql = emptyAverageDurationFragment(154 * 1000)
-
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
+      it('shows correct time', () => {
+        // 42:02:34 = 151354 seconds
+        cy.findByTestId('average-duration').contains('42:02:34')
+        cy.percySnapshot()
+      })
     })
-
-    cy.findByTestId('average-duration').contains('2:34')
-  })
-
-  it('shows correct time - hours, seconds and minutes', () => {
-    // 2:02:34 = 7354 seconds
-    const gql = emptyAverageDurationFragment(7354 * 1000)
-
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
-    })
-
-    cy.findByTestId('average-duration').contains('2:02:34')
-  })
-
-  it('shows correct time - high number of hours, seconds and minutes', () => {
-    // 42:02:34 = 151354 seconds
-    const gql = emptyAverageDurationFragment(151354 * 1000)
-
-    cy.mount(() => {
-      return (
-        <AverageDuration gql={gql}/>
-      )
-    })
-
-    cy.findByTestId('average-duration').contains('42:02:34')
   })
 })

@@ -2,50 +2,39 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-function mountWithTestingType (testingType: TestingTypeEnum) {
-  cy.mountFragment(Specs_SpecsListFragmentDoc, {
-    variableTypes: {
-      hasBranch: 'Boolean',
-    },
-    variables: {
-      hasBranch: true,
-    },
-    onResult: (ctx) => {
-      if (!ctx.currentProject) throw new Error('need current project')
-
-      ctx.currentProject.currentTestingType = testingType
-
-      return ctx
-    },
-    render: (gqlVal) => {
-      return <SpecsList gql={gqlVal} />
-    },
-  })
-}
-
-let specs: Array<SpecsListFragment> = []
-
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
+  let specs: Array<SpecsListFragment>
+
+  function mountWithTestingType (testingType: TestingTypeEnum | undefined) {
+    specs = []
+    const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
+
+    cy.mountFragment(Specs_SpecsListFragmentDoc, {
+      variableTypes: {
+        hasBranch: 'Boolean',
+      },
+      variables: {
+        hasBranch: true,
+      },
+      onResult: (ctx) => {
+        if (!ctx.currentProject) throw new Error('need current project')
+
+        specs = ctx.currentProject?.specs || []
+        if (testingType) {
+          ctx.currentProject.currentTestingType = testingType
+        }
+
+        return ctx
+      },
+      render: (gqlVal) => {
+        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
+      },
+    })
+  }
+
   context('when testingType is unset', () => {
     beforeEach(() => {
-      const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
-
-      cy.mountFragment(Specs_SpecsListFragmentDoc, {
-        variableTypes: {
-          hasBranch: 'Boolean',
-        },
-        variables: {
-          hasBranch: true,
-        },
-        onResult: (ctx) => {
-          specs = ctx.currentProject?.specs || []
-
-          return ctx
-        },
-        render: (gqlVal) => {
-          return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
-        },
-      })
+      mountWithTestingType(undefined)
     })
 
     it('should filter specs', () => {
@@ -131,6 +120,25 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
     })
+
+    describe('column headers', () => {
+      // Spec name (first) column is handled by type-specific tests below
+
+      it('should display last updated column', () => {
+        cy.findByTestId('last-updated-header').as('header')
+        cy.get('@header').should('be.visible').and('have.text', 'Last updated')
+      })
+
+      it('should display latest runs column', () => {
+        cy.findByTestId('latest-runs-header').as('header')
+        cy.get('@header').should('be.visible').and('have.text', 'Latest runs')
+      })
+
+      it('should display average duration column', () => {
+        cy.findByTestId('average-duration-header').as('header')
+        cy.get('@header').should('be.visible').and('have.text', 'Average duration')
+      })
+    })
   })
 
   context('when testingType is e2e', () => {
@@ -139,7 +147,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the e2e testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'E2E specs')
+      cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
     })
   })
 
@@ -149,7 +157,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the component testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'Component specs')
+      cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
     })
   })
 })
