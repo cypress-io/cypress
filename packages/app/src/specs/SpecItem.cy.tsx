@@ -42,7 +42,7 @@ describe('SpecItem', () => {
     cy.percySnapshot()
   }),
   it('truncates spec name if it exceeds container width and provides title for full spec name', () => {
-    const specFileName = 'VeryLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongSpecName'
+    const specFileName = `${'Long'.repeat(20)}Name`
 
     // Shrink viewport width so spec name is truncated
     cy.viewport(400, 850)
@@ -54,7 +54,7 @@ describe('SpecItem', () => {
 
     // We should be able to see at least the first 20 characters of the spec name
     // It should have a title attribute that is equal to the full file name
-    cy.contains(specFileName.substring(0, 20)).should('be.visible').should('have.attr', 'title', `${specFileName}.cy.tsx`)
+    cy.contains(specFileName.substring(0, 20)).should('be.visible').parent().should('have.attr', 'title', `${specFileName}.cy.tsx`)
 
     // The file extension shouldn't be visible because it is past the truncation point
     cy.contains('.cy.tsx').should('not.be.visible')
