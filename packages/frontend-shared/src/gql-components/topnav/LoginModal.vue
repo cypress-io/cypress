@@ -79,6 +79,7 @@
           <Auth
             :gql="props.gql"
             :show-retry="!!error"
+            :utm-medium="props.utmMedium"
             @continue="continueAuth"
           />
         </div>
@@ -123,6 +124,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
+  utmMedium?: string
 }>()
 
 gql`

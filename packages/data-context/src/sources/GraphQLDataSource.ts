@@ -127,11 +127,8 @@ export class GraphQLDataSource {
       isNode,
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
-      // operation: params.info.operation,
+      operation: params.info.operation,
     })
-
-    // console.log(print(isNode ? docBuilder.queryNode : docBuilder.query))
-    // debugger
 
     Promise.resolve(execute({
       schema: params.info.schema,
@@ -153,6 +150,13 @@ export class GraphQLDataSource {
         errors: result.errors,
       }])
     }).catch((e) => {
+      params.ctx.emitter.pushFragment([{
+        target: params.info.parentType.name,
+        fragment: print(docBuilder.clientWriteFragment),
+        data: null,
+        errors: [e],
+      }])
+
       debug(`pushFragment execution error %o`, e)
     })
   }

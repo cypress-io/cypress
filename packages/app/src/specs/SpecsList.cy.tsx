@@ -4,6 +4,12 @@ import { defaultMessages } from '@cy/i18n'
 
 function mountWithTestingType (testingType: TestingTypeEnum) {
   cy.mountFragment(Specs_SpecsListFragmentDoc, {
+    variableTypes: {
+      hasBranch: 'Boolean',
+    },
+    variables: {
+      hasBranch: true,
+    },
     onResult: (ctx) => {
       if (!ctx.currentProject) throw new Error('need current project')
 
@@ -25,6 +31,12 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
 
       cy.mountFragment(Specs_SpecsListFragmentDoc, {
+        variableTypes: {
+          hasBranch: 'Boolean',
+        },
+        variables: {
+          hasBranch: true,
+        },
         onResult: (ctx) => {
           specs = ctx.currentProject?.specs || []
 

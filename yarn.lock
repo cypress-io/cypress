@@ -18647,10 +18647,10 @@ flex-exec@^1.0.0:
   resolved "https://registry.yarnpkg.com/flex-exec/-/flex-exec-1.0.0.tgz#06974b68532839d2a12c32debcdb12378200fdf0"
   integrity sha1-BpdLaFMoOdKhLDLevNsSN4IA/fA=
 
-floating-vue@2.0.0-beta.16:
-  version "2.0.0-beta.16"
-  resolved "https://registry.yarnpkg.com/floating-vue/-/floating-vue-2.0.0-beta.16.tgz#511d2eca106e67da6ccb4e85bb89c86b96297cbd"
-  integrity sha512-MoVA9pLGMVkuyG9cvlzpSB9//HGynbWnkLr0cxDgnEWORL98kuSa2ph/bcq7sDGNM3l0/3v6HYSqhBMBp9F3/A==
+floating-vue@2.0.0-beta.17:
+  version "2.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/floating-vue/-/floating-vue-2.0.0-beta.17.tgz#f488d992f58d76b41fc3490f3ef969d58a5c8f99"
+  integrity sha512-zgHPIdlILFxMEq2kLpeUpE3SUSd/zHI4pNAO2QYtp2rATkiSOlcLJidTDjG3mcBKzN3ahoAF6t/FhA1VbMTkAg==
   dependencies:
     "@floating-ui/dom" "^0.1.10"
     vue-resize "^2.0.0-alpha.1"

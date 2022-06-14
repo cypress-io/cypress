@@ -42,7 +42,17 @@
         {{ t('specPage.fetchFailedWarning.explainer1') }}
       </p>
       <p>
-        {{ t('specPage.fetchFailedWarning.explainer2') }}
+        <i18n-t
+          scope="global"
+          keypath="specPage.fetchFailedWarning.explainer2"
+        >
+          <ExternalLink
+            href="https://www.cypressstatus.com"
+            class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
+          >
+            Status Page
+          </ExternalLink>
+        </i18n-t>
       </p>
       <Button
         :prefix-icon="RefreshIcon"
@@ -85,20 +95,26 @@
       <div class="flex col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text="t('specPage.latestRuns.header')"
-          :connected-text="t('specPage.latestRuns.tooltip.connected')"
-          :not-connected-text="t('specPage.latestRuns.tooltip.notConnected')"
-          @showLogin="showLogin"
+          :header-text-key-path="'specPage.latestRuns.header'"
+          :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
+          :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
+          :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
+          :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
+          :docs-url="'https://on.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs'"
+          @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
       <div class="flex col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text="t('specPage.averageDuration.header')"
-          :connected-text="t('specPage.averageDuration.tooltip.connected')"
-          :not-connected-text="t('specPage.averageDuration.tooltip.notConnected')"
-          @showLogin="showLogin"
+          :header-text-key-path="'specPage.averageDuration.header'"
+          :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
+          :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
+          :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
+          :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
+          :docs-url="'https://on.cypress.io/specs-average-duration?utm_medium=Specs+Average+Duration+Tooltip&utm_campaign=Average+Duration'"
+          @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
@@ -172,6 +188,7 @@
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
                 class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+                data-cy="run-status-dots-loading"
               >
                 &nbsp;
               </div>
@@ -197,13 +214,14 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
+    :utm-medium="loginUtmMedium"
     @loggedin="refreshPage"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
-    @success="isProjectConnectOpen = false; refreshPage()"
+    @success="refreshPage()"
   />
 </template>
 
@@ -212,6 +230,7 @@ import Button from '@cy/components/Button.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
@@ -249,8 +268,10 @@ watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue)
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
+const loginUtmMedium = ref('')
 
-const showLogin = () => {
+const showLogin = (utmMedium: string) => {
+  loginUtmMedium.value = utmMedium
   isLoginOpen.value = true
 }
 
@@ -259,7 +280,7 @@ const showConnectToProject = () => {
 }
 
 const isGitAvailable = computed(() => {
-  return props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false
+  return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)
 })
 
 const hasCloudErrors = computed(() => {
@@ -424,20 +445,11 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(CloudData_RefetchDocument)
 
-const isRefetching = ref(false)
-
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'))
 
 const refetch = async (ids: string[]) => {
-  if (isRefetching.value) {
-    return
-  }
-
   if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
-    isRefetching.value = true
-
     await refetchMutation.executeMutation({ ids })
-    isRefetching.value = false
   }
 }
 
@@ -455,12 +467,6 @@ type CloudSpecItem = {
 }
 
 function shouldRefetch (item: CloudSpecItem) {
-  if (isRefetching.value) {
-    // refetch in progress, no need to refetch
-
-    return false
-  }
-
   if (!isOnline) {
     // Offline, no need to refetch
 

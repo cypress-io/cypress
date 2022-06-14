@@ -8,7 +8,7 @@
       class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
       tabindex="0"
     >
-      {{ headerText }}
+      {{ t(headerTextKeyPath) }}
     </div>
     <template
       #popper
@@ -20,7 +20,17 @@
           :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"
           class="max-w-210px"
         >
-          {{ projectConnectionStatus === 'CONNECTED' ? connectedText: notConnectedText }}
+          <i18n-t
+            scope="global"
+            :keypath="tooltipTextKey"
+          >
+            <ExternalLink
+              :href="props.docsUrl"
+              class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
+            >
+              {{ t(docsTextKeyPath) }}
+            </ExternalLink>
+          </i18n-t>
         </div>
         <div>
           <Button
@@ -66,6 +76,7 @@ import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { RunsErrorRenderer_RequestAccessDocument, SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
@@ -79,9 +90,12 @@ const emits = defineEmits<{
 
 const props = defineProps<{
   gql: SpecHeaderCloudDataTooltipFragment
-  headerText: string
-  connectedText: string
-  notConnectedText: string
+  headerTextKeyPath: string
+  connectedTextKeyPath: string
+  notConnectedTextKeyPath: string
+  noAccessTextKeyPath: string
+  docsUrl: string
+  docsTextKeyPath: string
 }>()
 
 gql`
@@ -118,5 +132,13 @@ function requestAccess () {
     requestAccessMutation.executeMutation({ projectId })
   }
 }
+
+const tooltipTextKey = computed(() => {
+  if (projectConnectionStatus.value === 'CONNECTED') return props.connectedTextKeyPath
+
+  if (projectConnectionStatus.value === 'UNAUTHORIZED') return props.noAccessTextKeyPath
+
+  return props.notConnectedTextKeyPath
+})
 
 </script>

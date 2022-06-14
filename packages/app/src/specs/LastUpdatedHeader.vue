@@ -23,7 +23,7 @@
           keypath="specPage.lastUpdated.tooltip.gitInfoAvailable"
         >
           <ExternalLink
-            href="https://on.cypress.io/git-status"
+            href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
             class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
             {{ t('specPage.lastUpdated.tooltip.gitStatus') }}
@@ -36,7 +36,7 @@
           keypath="specPage.lastUpdated.tooltip.gitInfoUnavailable"
         >
           <ExternalLink
-            href="https://on.cypress.io/git-info"
+            href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
             class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
             {{ t('specPage.lastUpdated.tooltip.gitInfo') }}

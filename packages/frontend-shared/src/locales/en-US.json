@@ -133,15 +133,19 @@
     "latestRuns": {
       "header": "Latest runs",
       "tooltip": {
-        "connected": "Status of the last 4 runs from the Cypress Dashboard",
-        "notConnected": "View the status of the last 4 runs from the Cypress Dashboard"
+        "connected": "{0} from the Cypress Dashboard",
+        "notConnected": "View the {0} from the Cypress Dashboard",
+        "noAccess": "Request access to view the {0} from the Cypress Dashboard",
+        "linkText": "Status of the latest runs"
       }
     },
     "averageDuration": {
       "header": "Average duration",
       "tooltip": {
-        "connected": "Average spec duration of 4 runs from the Cypress dashboard.",
-        "notConnected": "View the average spec duration of 4 runs from the Cypress dashboard."
+        "connected": "{0} of the latest runs from the Cypress Dashboard",
+        "notConnected": "View the {0} of the latest runs from the Cypress Dashboard",
+        "noAccess": "Request access to view the {0} of the latest runs from the Cypress Dashboard",
+        "linkText": "Average spec duration"
       }
     },
     "connectProjectButton": "Connect your project",
@@ -163,7 +167,7 @@
     "fetchFailedWarning": {
       "title": "Lost connection",
       "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
-      "explainer2": "Please refresh the page to try again and visit our Status Page if this behavior continues.",
+      "explainer2": "Please refresh the page to try again and visit our {0} if this behavior continues.",
       "refreshButton": "Try again"
     }
   },

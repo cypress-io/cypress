@@ -47,7 +47,7 @@ export class AuthActions {
     }
   }
 
-  async login () {
+  async login (utmMedium?: string | null) {
     const onMessage = (authState: AuthStateShape) => {
       this.ctx.update((coreData) => {
         coreData.authState = authState
@@ -65,7 +65,7 @@ export class AuthActions {
       this.#cancelActiveLogin = () => resolve(null)
 
       // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
-      this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
+      this.authApi.logIn(onMessage, utmMedium ?? 'launchpad').then(resolve, reject)
     })
 
     const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()

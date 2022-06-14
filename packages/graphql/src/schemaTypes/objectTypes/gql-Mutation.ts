@@ -259,8 +259,11 @@ export const mutation = mutationType({
     t.field('login', {
       type: Query,
       description: 'Auth with Cypress Dashboard',
+      args: {
+        utmMedium: stringArg(),
+      },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login(args.utmMedium)
 
         return {}
       },
