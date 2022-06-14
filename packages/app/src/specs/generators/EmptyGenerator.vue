@@ -196,20 +196,24 @@ const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
 const result = ref<GeneratorSuccessFileFragment | null>(null)
 
 onMounted(() => {
+  if (!inputRef?.value) {
+    return
+  }
+
   // Focus text input and try to pre-select file name
-  inputRef.value?.focus()
+  inputRef.value.focus()
 
   // This regex matches a group of word characters, spaces, and '-' characters before a '.' character.
   // For example 'path/to/spec/spec-name.cy.tsx' ---> 'spec-name'
   const fileNameRegex = /[ \w-]+(?=\.)/
-  const inputValue = inputRef.value?.value
-  const match = inputValue?.match(fileNameRegex)
+  const inputValue = props.specFileName
+  const match = inputValue.match(fileNameRegex)
 
-  if (inputValue && match) {
+  if (match) {
     const startSelectionIndex = match.index || 0
     const endSelectionIndex = startSelectionIndex + match[0].length
 
-    inputRef.value?.setSelectionRange(startSelectionIndex, endSelectionIndex)
+    inputRef.value.setSelectionRange(startSelectionIndex, endSelectionIndex)
   }
 })
 
