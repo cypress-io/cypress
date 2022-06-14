@@ -19310,6 +19310,11 @@ get-symbol-description@^1.0.0:
     call-bind "^1.0.2"
     get-intrinsic "^1.1.1"
 
+get-them-args@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/get-them-args/-/get-them-args-1.3.2.tgz#74a20ba8a4abece5ae199ad03f2bcc68fdfc9ba5"
+  integrity sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==
+
 get-uri@3:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/get-uri/-/get-uri-3.0.2.tgz#f0ef1356faabc70e1f9404fa3b66b2ba9bfc725c"
@@ -23694,6 +23699,14 @@ keyv@^4.0.0:
   integrity sha512-zdGa2TOpSZPq5mU6iowDARnMBZgtCqJ11dJROFi6tg6kTn4nuUdU09lFyLFSaHrWqpIJ+EBq4E8/Dc0Vx5vLdA==
   dependencies:
     json-buffer "3.0.1"
+
+kill-port@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/kill-port/-/kill-port-2.0.0.tgz#be0db79071886cf86af20baf76d38abf598bb59a"
+  integrity sha512-TWGAJ/SGy52aKhYpPSCw4S/WR0rTYkC2+6oRp5xBlLo4UvJe3Gt0MwROO8hI+Hu4YkTDhe27EPKKeFUtqNNfdA==
+  dependencies:
+    get-them-args "1.3.2"
+    shell-exec "1.0.2"
 
 killable@^1.0.0, killable@^1.0.1:
   version "1.0.1"
@@ -33377,6 +33390,11 @@ shell-env@3.0.1:
     default-shell "^1.0.1"
     execa "^1.0.0"
     strip-ansi "^5.2.0"
+
+shell-exec@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/shell-exec/-/shell-exec-1.0.2.tgz#2e9361b0fde1d73f476c4b6671fa17785f696756"
+  integrity sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==
 
 shell-quote@1.7.2:
   version "1.7.2"

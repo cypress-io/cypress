@@ -1,5 +1,7 @@
 import path from 'path'
 import execa from 'execa'
+// @ts-ignore
+import killPort from 'kill-port'
 
 import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { fixtureDirs } from '@tooling/system-tests'
@@ -178,6 +180,7 @@ async function makeE2ETasks () {
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
+      await killPort(4455)
       await ctx.reinitializeCypress()
       sinon.reset()
       sinon.restore()
