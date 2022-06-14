@@ -18,20 +18,6 @@
         class="flex flex-col text-sm text-center max-w-300px p-4 items-center"
       >
         <i18n-t
-          v-if="props.isGitAvailable"
-          scope="global"
-          keypath="specPage.lastUpdated.tooltip.gitInfoAvailable"
-        >
-          <ExternalLink
-            href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
-            class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
-          >
-            {{ t('specPage.lastUpdated.tooltip.gitStatus') }}
-          </ExternalLink>
-        </i18n-t>
-
-        <i18n-t
-          v-else
           scope="global"
           keypath="specPage.lastUpdated.tooltip.gitInfoUnavailable"
         >
@@ -39,7 +25,7 @@
             href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
             class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
-            {{ t('specPage.lastUpdated.tooltip.gitInfo') }}
+            {{ t(props.isGitAvailable ? 'specPage.lastUpdated.tooltip.gitStatus' : 'specPage.lastUpdated.tooltip.gitInfo') }}
           </ExternalLink>
         </i18n-t>
       </div>

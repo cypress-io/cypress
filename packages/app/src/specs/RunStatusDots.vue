@@ -9,7 +9,7 @@
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
-      :href="latestRun?.url ?? '#'"
+      :href="latestRun?.url || '#'"
       :use-default-hocus="false"
     >
       <div
@@ -133,6 +133,8 @@ const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
 
   if (runs.value && runs.value.length > 0) {
+    // skip the 0th index as it represents the latest run and dotClasses
+    // is meant to represent the 3 prior runs.
     for (let i = 1; i < Math.min(runs.value.length, 4); i++) {
       statuses[i - 1] = runs.value[i]?.status ?? ''
     }
