@@ -1,18 +1,32 @@
 const CRI = require('chrome-remote-interface')
 
+// 1. Launch firefox
+// start 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe' 'about:blank', '--remote-debugging-port=51959'
+//
+// 2. Run script
+
 const run = async () => {
+  const versionInfo = await CRI.Version({ host: '127.0.0.1', port: 51959 })
+
+  console.log('')
+  console.log('version info')
+  console.log(versionInfo)
+
   cri = await CRI({
-    target: 'ws://localhost:63351/devtools/browser/af053c3b-24a7-47b3-9010-0b7c08e21398',
+    target: versionInfo.webSocketDebuggerUrl,
     local: true,
   })
 
-  // console.log(cri)
-  // const browserClient = await CDP({ target: 'ws://localhost:65082/devtools/browser/5cbcd970-5980-4056-824f-f53f780ecf1b' })
-  // console.log(browserClient)
+  console.log('got client: ' + !!cri)
 
   const targets = await cri.send('Target.getTargets')
   
+  console.log('')
+  console.log('targets')
   console.log(targets)
+  console.log('')
+  console.log('//////////////////////')
+
 }
 
 try {
