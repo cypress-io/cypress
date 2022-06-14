@@ -95,6 +95,8 @@ abstract class DataEmitterEvents {
   pushFragment (toPush: PushFragmentData[]) {
     DataContext.waitForActiveRequestsToFlush().then(() => {
       this.#queuePushFragment(toPush)
+    }).catch(() => {
+      // This promise can never fail, it only ever resolves
     })
   }
 

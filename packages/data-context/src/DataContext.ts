@@ -512,6 +512,7 @@ export class DataContext {
     this.#activeRequestCount--
     if (this.#activeRequestCount === 0) {
       this.#awaitingEmptyRequestCount.forEach((fn) => fn())
+      this.#awaitingEmptyRequestCount = []
     }
   }
 

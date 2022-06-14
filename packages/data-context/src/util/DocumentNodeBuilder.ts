@@ -5,6 +5,8 @@ export interface RemoteQueryConfig {
   variableDefinitions: VariableDefinitionNode[]
 }
 
+export type DocumentNodeBuilderParams = Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, isRemoteFetchable?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined}
+
 /**
  * Builds a DocumentNode from a given GraphQLResolveInfo payload
  *
@@ -16,15 +18,8 @@ export class DocumentNodeBuilder {
   readonly variables: VariableDefinitionNode[]
   readonly #variableNames: Set<string>
 
-  constructor (private info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined}) {
-    let selections = info.fieldNodes
-
-    if (info.isNode && !selections.some((s) => s.kind === 'Field' && s.name.value === 'id')) {
-      selections = [{
-        kind: 'Field',
-        name: { kind: 'Name', value: 'id' },
-      }, ...selections]
-    }
+  constructor (private info: DocumentNodeBuilderParams) {
+    const selections = this.#withRequiredFields(info)
 
     this.frag = {
       kind: 'FragmentDefinition',
@@ -71,6 +66,35 @@ export class DocumentNodeBuilder {
         },
       })
     })
+  }
+
+  #withRequiredFields (params: DocumentNodeBuilderParams) {
+    let selections: FieldNode[] = [...params.fieldNodes]
+
+    if ((params.isNode || params.isRemoteFetchable) && !selections.some((s) => s.kind === 'Field' && s.name.value === 'id')) {
+      selections = [{
+        kind: 'Field',
+        name: { kind: 'Name', value: 'id' },
+      }, ...selections]
+    }
+
+    if (params.isRemoteFetchable) {
+      if (!selections.some((s) => s.kind === 'Field' && s.name.value === 'fetchingStatus')) {
+        selections = [{
+          kind: 'Field',
+          name: { kind: 'Name', value: 'fetchingStatus' },
+        }, ...selections]
+      }
+
+      if (!selections.some((s) => s.kind === 'Field' && s.name.value === 'error')) {
+        selections = [{
+          kind: 'Field',
+          name: { kind: 'Name', value: 'error' },
+        }, ...selections]
+      }
+    }
+
+    return selections
   }
 
   get variableNames () {

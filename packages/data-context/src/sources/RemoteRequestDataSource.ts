@@ -168,10 +168,10 @@ export class RemoteRequestDataSource {
 
       let data: any = null
       let error: any = null
-      let status: RemoteFetchableStatus = 'FETCHED'
+      let fetchingStatus: RemoteFetchableStatus = 'FETCHED'
 
       if (result.error) {
-        status = 'ERRORED'
+        fetchingStatus = 'ERRORED'
         error = { ...result.error }
         this.#operationErrors.set(params.id, result.error)
       } else if (result.data) {
@@ -186,7 +186,7 @@ export class RemoteRequestDataSource {
           variables: _.pick(operationVariables, variableNames),
           data: {
             id: params.id,
-            status,
+            fetchingStatus,
             data,
             error,
           },
@@ -242,6 +242,7 @@ export class RemoteRequestDataSource {
 
           const docBuilder = new DocumentNodeBuilder({
             isNode: true,
+            isRemoteFetchable: true,
             parentType: info.schema.getType(fieldType) as GraphQLObjectType,
             fieldNodes: info.fieldNodes[0]?.selectionSet?.selections.filter((f) => f.kind === 'Field' && FIELDS_TO_PUSH.includes(f.name.value)) as FieldNode[],
             variableDefinitions: info.operation.variableDefinitions,
