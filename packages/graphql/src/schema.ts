@@ -7,9 +7,11 @@ import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
 import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDeferIfNotLoadedPlugin, nexusDeferResolveGuard } from './plugins'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
+// @ts-ignore TODO: figure this out. Packherd problem
+const { default: _, ...types } = schemaTypes
 
 export const graphqlSchema = makeSchema({
-  types: schemaTypes,
+  types,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
   outputs: {
