@@ -11,7 +11,7 @@ describe('cy.origin - cookie login', () => {
     cy.getCookie(cookieKey).its('value').should('equal', username)
   }
 
-  const verifyNotLoggedIn = (config = {}) => {
+  const verifyIdpNotLoggedIn = (config = {}) => {
     const { isHttps, cookieKey, expectNullCookie } = _.defaults(config, {
       isHttps: false,
       cookieKey: 'user',
@@ -28,6 +28,10 @@ describe('cy.origin - cookie login', () => {
         cy.getCookie(cookieKey).should('be.null')
       }
     })
+  }
+
+  const verifyLocalhostNotLoggedIn = () => {
+    cy.get('h1').invoke('text').should('equal', 'No user found')
   }
 
   /****************************************************************************
@@ -122,7 +126,7 @@ describe('cy.origin - cookie login', () => {
 
       cy.clearCookie('user')
       cy.reload()
-      cy.get('h1').invoke('text').should('equal', 'No user found')
+      verifyLocalhostNotLoggedIn()
     })
 
     it('cy.clearCookies() -> logged out', () => {
@@ -135,7 +139,7 @@ describe('cy.origin - cookie login', () => {
 
       cy.clearCookies()
       cy.reload()
-      cy.get('h1').invoke('text').should('equal', 'No user found')
+      verifyLocalhostNotLoggedIn()
     })
   })
 
@@ -177,7 +181,7 @@ describe('cy.origin - cookie login', () => {
 
       // SameSite=Strict does not allow any cross-origin requests. cookie still
       // gets set but not applied to request
-      verifyNotLoggedIn({ expectNullCookie: false })
+      verifyIdpNotLoggedIn({ expectNullCookie: false })
     })
 
     it('SameSite=None -> not logged in', () => {
@@ -188,7 +192,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // SameSite=None requires Secure flag
-      verifyNotLoggedIn()
+      verifyIdpNotLoggedIn()
     })
 
     it('invalid SameSite (defaults to Lax) -> logged in', () => {
@@ -234,7 +238,7 @@ describe('cy.origin - cookie login', () => {
 
       // Secure flag requires https. cookie still gets set but not applied to
       // request
-      verifyNotLoggedIn({ expectNullCookie: false })
+      verifyIdpNotLoggedIn({ expectNullCookie: false })
     })
 
     it('no Secure + https -> logged in', () => {
@@ -330,7 +334,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // Domain=subdomain requires request to be on that subdomain
-      verifyNotLoggedIn()
+      verifyIdpNotLoggedIn()
     })
 
     it('subdomain Domain + subdomain -> logged in', () => {
@@ -356,7 +360,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // Domain=subdomain requires request to be on that subdomain
-      verifyNotLoggedIn()
+      verifyIdpNotLoggedIn()
     })
   })
 
@@ -393,7 +397,7 @@ describe('cy.origin - cookie login', () => {
 
       // path of request must match path of cookie. cookie still gets set but
       // not applied to request
-      verifyNotLoggedIn({ expectNullCookie: false })
+      verifyIdpNotLoggedIn({ expectNullCookie: false })
     })
   })
 
@@ -416,9 +420,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.get('h1')
-      .invoke('text')
-      .should('equal', 'No user found')
+      verifyLocalhostNotLoggedIn()
     })
 
     it('expired -> not accessible via cy.getCookie()', () => {
@@ -465,7 +467,7 @@ describe('cy.origin - cookie login', () => {
 
       cy.wait(1000) // give cookie time to expire
       cy.reload()
-      cy.get('h1').invoke('text').should('equal', 'No user found')
+      verifyLocalhostNotLoggedIn()
     })
 
     it('past max-age -> not accessible via cy.getCookie()', () => {
@@ -504,7 +506,7 @@ describe('cy.origin - cookie login', () => {
 
         cy.wait(1000) // give cookie time to expire
         cy.reload()
-        cy.get('h1').invoke('text').should('equal', 'No user found')
+        verifyLocalhostNotLoggedIn()
       })
 
       it('before Max-Age, past Expires -> logged in', () => {
@@ -553,7 +555,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // __Host- prefix must have Secure flag
-      verifyNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
+      verifyIdpNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
     })
 
     it('__Host-, no Path -> logged in', () => {
@@ -576,7 +578,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // __Host- prefix must have Path=/
-      verifyNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
+      verifyIdpNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
     })
 
     it('__Host- + Domain -> not logged in', () => {
@@ -588,7 +590,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // __Host- prefix can't have Domain specified
-      verifyNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
+      verifyIdpNotLoggedIn({ isHttps: true, cookieKey: '__Host-user' })
     })
   })
 
@@ -621,7 +623,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       // __Secure- prefix requires Secure flag
-      verifyNotLoggedIn({ isHttps: true, cookieKey: '__Secure-user' })
+      verifyIdpNotLoggedIn({ isHttps: true, cookieKey: '__Secure-user' })
     })
   })
 })
