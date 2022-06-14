@@ -4,7 +4,6 @@ import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
-// import { validate } from './validate'
 import {
   getSessionDetails,
   getConsoleProps,
@@ -53,9 +52,7 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id, setup?: Function, options: {
-      validate?: Function
-    } = {}) {
+    session (id, setup?: Function, options: { validate?: Function } = {}) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
@@ -190,27 +187,7 @@ export default function (Commands, Cypress, cy) {
         let isValidSession = true
 
         if (!existingSession.validate) {
-          return cy.wrap(isValidSession)
-        }
-
-        const onRestoreSessionValidationError = (err) => {
-          // create error log to show validation error to the user in the reporter
-          Cypress.log({
-            showError: true,
-            type: 'system',
-            name: 'session',
-          })
-          .error(err)
-
-          isValidSession = false
-
           return isValidSession
-        }
-
-        const throwValidationError = (err) => {
-          $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
-
-          cy.fail(err)
         }
 
         return logGroup(Cypress, {
@@ -223,17 +200,27 @@ export default function (Commands, Cypress, cy) {
             const onSuccess = () => {
               validatingLog.set({ displayName: 'Validate Session: valid' })
 
-              return cy.wrap(isValidSession)
+              return isValidSession
             }
 
             const onFail = (err) => {
               validatingLog.set({ displayName: 'Validate Session: invalid' })
 
+              // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
-                return onRestoreSessionValidationError(err)
+                Cypress.log({
+                  showError: true,
+                  type: 'system',
+                  name: 'session',
+                })
+                .error(err)
+
+                return !isValidSession
               }
 
-              throwValidationError(err)
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
+
+              cy.fail(err)
             }
 
             return validate(existingSession, onSuccess, onFail)
@@ -249,9 +236,7 @@ export default function (Commands, Cypress, cy) {
         try {
           returnVal = existingSession.validate()
         } catch (e) {
-          onFail(e)
-
-          return
+          return onFail(e)
         }
 
         // when the validate function returns promise, ensure it does not return false or throws amd error
@@ -265,10 +250,10 @@ export default function (Commands, Cypress, cy) {
               return onFail($errUtils.errByPath('sessions.validate_callback_false', { reason: 'resolved false' }))
             }
 
-            onSuccess()
+            return onSuccess()
           })
           .catch((err) => {
-            onFail(err)
+            return onFail(err)
           })
         }
 
@@ -295,7 +280,7 @@ export default function (Commands, Cypress, cy) {
             projectRoot: Cypress.config('projectRoot'),
           })
 
-          // move to _commandAfterValidate cmd index to ensure failures are handled correctly
+          // move to _commandToRunAfterValidation's index to ensure failures are handled correctly
           cy.state('index', index)
 
           cy.state('onCommandFailed', null)
@@ -325,11 +310,17 @@ export default function (Commands, Cypress, cy) {
             }
           }
 
-          onSuccess()
+          return onSuccess()
         })
 
         return _commandToRunAfterValidation
       }
+
+      // const throwValidationError = (err) => {
+      //   $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
+
+      //   cy.fail(err)
+      // }
 
       /**
        * Creates session flow:
@@ -337,27 +328,25 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        */
       const createSessionWorkflow = (existingSession, recreateSession = false) => {
-        cy.then(() => createSession(existingSession, recreateSession))
+        return cy.then(() => createSession(existingSession, recreateSession))
         .then(() => validateSession(existingSession))
       }
 
       /**
        * Restore session flow:
        *   1. restore session
-       *   2. validation session
+       *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
       const restoreSessionWorkflow = (existingSession) => {
-        cy.then(() => restoreSession(existingSession))
+        return cy.then(() => restoreSession(existingSession))
         .then(() => validateSession(existingSession, true))
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
-            createSessionWorkflow(existingSession, true)
+            return createSessionWorkflow(existingSession, true)
           }
         })
       }
-
-      let _log
 
       /**
        * Session command rules:
@@ -369,17 +358,19 @@ export default function (Commands, Cypress, cy) {
        *      1. run restore session flow
        *      2. clear page
        */
-      return logGroup(Cypress, {
-        name: 'session',
+      let _log
+      const groupDetails = {
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
         sessionInfo: getSessionDetails(existingSession),
-      }, (log) => {
+      }
+
+      return logGroup(Cypress, groupDetails, (log) => {
         return cy.then(async () => {
           _log = log
           if (!existingSession.hydrated) {
             const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
 
-            // we have a saved session on the server AND setup matches
+            // we have a saved session on the server and setup matches
             if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
               _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
               existingSession.hydrated = true
