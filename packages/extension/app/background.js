@@ -127,8 +127,8 @@ const connect = function (host, path, extraOpts) {
         return invoke('takeScreenshot', id)
       case 'reset:browser:state':
         return invoke('resetBrowserState', id)
-      case 'close:browser:tabs':
-        return invoke('closeBrowserTabs', id)
+      case 'reset:browser:tabs:for:next:test':
+        return invoke('resetBrowserTabsForNextTest', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -264,8 +264,10 @@ const automation = {
     return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
   },
 
-  closeBrowserTabs (fn) {
+  resetBrowserTabsForNextTest (fn) {
     return Promise.try(() => {
+      return browser.tabs.create({ url: 'about:blank' })
+    }).then(() => {
       return browser.windows.getCurrent({ populate: true })
     }).then((windowInfo) => {
       return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))
