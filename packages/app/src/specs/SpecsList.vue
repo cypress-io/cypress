@@ -399,9 +399,10 @@ const specs = computed(() => {
   return fuzzySortSpecs(specs2, debouncedSearchString.value)
 })
 
+const expansionCache = ref(new Map<string, boolean>())
 const collapsible = computed(() => {
   return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true },
+    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true, cache: expansionCache.value },
   )
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
