@@ -178,6 +178,8 @@ describe('<BaseError />', () => {
 
   // https://github.com/cypress-io/cypress/issues/22103
   it('wraps the long file path correctly', () => {
+    const longFileName = `${'very'.repeat(20)}long/cypress/e2e/file.cy.js`
+
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.codeFrame = {
@@ -202,7 +204,7 @@ describe('<BaseError />', () => {
           file: {
             id: `FileParts:/absolute/full/path/cypress/e2e/file.cy.js`,
             __typename: 'FileParts',
-            relative: 'veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylong/cypress/e2e/file.cy.js',
+            relative: longFileName,
             absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
           },
         }
@@ -211,6 +213,6 @@ describe('<BaseError />', () => {
         <BaseError gql={gqlVal} />),
     })
 
-    cy.findByText('veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylong/cypress/e2e/file.cy.js:12:25').should('have.css', 'overflow-wrap', 'anywhere')
+    cy.findByText(`${longFileName}:12:25`).should('have.css', 'word-break', 'break-all')
   })
 })
