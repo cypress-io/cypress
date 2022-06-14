@@ -80,7 +80,7 @@
     <div
       v-if="specs.length"
       class="mb-4 grid grid-cols-5 children:font-medium children:text-gray-800"
-      :style="`padding-right: ${scrollbarOffset && scrollbarOffset + 20}px`"
+      :style="`padding-right: ${scrollbarOffset + 20}px`"
     >
       <div
         class="flex col-span-2 items-center justify-between"
@@ -144,7 +144,6 @@
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
-          :style="{ paddingRight: `${scrollbarOffset && 20}px` }"
           @toggleRow="row.data.toggle"
         >
           <template #file>
