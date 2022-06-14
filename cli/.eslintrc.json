@@ -5,11 +5,15 @@
       "error",
       {
         "selector": "CallExpression[callee.name='arch']",
-        "message": "Do not use `arch()` to detect the user's machine architecture. Use utils.getRealArch() instead."
+        "message": "Do not use `arch()` to detect the user's machine architecture. Use util.getRealArch() instead."
       },
       {
-        "selector": "CallExpression[callee.object.name='process'][callee.property.name='arch']",
-        "message": "Do not use `process.arch()` to detect the user's machine architecture. Use utils.getRealArch() instead."
+        "selector": "CallExpression[callee.object.name='os'][callee.property.name='arch']",
+        "message": "Do not use `os.arch()` to detect the user's machine architecture. Use util.getRealArch() instead."
+      },
+      {
+        "selector": "MemberExpression[object.name='process'][property.name='arch']",
+        "message": "Do not use `process.arch` to detect the user's machine architecture. Use util.getRealArch() instead."
       }
     ]
   }

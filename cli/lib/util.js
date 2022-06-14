@@ -481,6 +481,7 @@ const util = {
 
     async function _getRealArch () {
       const osPlatform = os.platform()
+      // eslint-disable-next-line no-restricted-syntax
       const osArch = os.arch()
 
       debug('detecting arch %o', { osPlatform, osArch })
