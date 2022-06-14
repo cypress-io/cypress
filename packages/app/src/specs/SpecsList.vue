@@ -128,6 +128,7 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
+      v-if="!isTyping"
       class="pb-32px spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
@@ -158,7 +159,7 @@
             <RowDirectory
               v-else
               :name="row.data.name"
-              :expanded="treeSpecList[row.index].expanded.value"
+              :expanded="treeSpecList[row.index]?.expanded?.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="getDirIndexes(row.data)"
@@ -201,8 +202,14 @@
         </SpecsListRowItem>
       </div>
     </div>
+    <div
+      v-else
+      class="h-320px relative"
+    >
+      <Spinner />
+    </div>
     <NoResults
-      v-show="!specs.length"
+      v-show="!specs.length && !isTyping"
       :search="search"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
@@ -254,12 +261,14 @@ import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { CloudData_RefetchDocument } from '../generated/graphql-test'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import Spinner from '@cy/components/Spinner.vue'
 
 const route = useRoute()
 const { t } = useI18n()
 
 const isOnline = useOnline()
 const isOffline = ref(false)
+const isTyping = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue)
 
@@ -419,9 +428,21 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
+let isTypingTimeout: any
+
 // If you are scrolled down the virtual list and the search filter changes,
 // reset scroll position to top of list
-watch(() => debouncedSearchString.value, () => scrollTo(0))
+watch(() => debouncedSearchString.value, () => {
+  scrollTo(0)
+  isTyping.value = true
+  if (isTypingTimeout) {
+    clearTimeout(isTypingTimeout)
+  }
+
+  isTypingTimeout = setTimeout(() => {
+    isTyping.value = false
+  }, 1000)
+})
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
@@ -543,11 +564,11 @@ function refreshPage () {
 
 /** Header is 64px */
 .spec-container {
-  height: calc(100vh - 64px);
+  /* height: calc(100vh - 64px); */
 }
 
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
-  height: calc(100% - 112px)
+  /* height: calc(100% - 112px) */
 }
 </style>
