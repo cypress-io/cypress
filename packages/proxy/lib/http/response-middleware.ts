@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash'
 import charset from 'charset'
 import type Debug from 'debug'
