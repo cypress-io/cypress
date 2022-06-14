@@ -7,7 +7,8 @@
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
-    "test": "jest"
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
     "bluebird": "3.5.5",
@@ -21,8 +22,7 @@
     "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "jest": "^24.9.0",
-    "jest-cli": "^24.9.0",
+    "mocha": "^9.2.2",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },

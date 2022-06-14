@@ -173,7 +173,6 @@
     "husky": "7.0.2",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
-    "jest": "24.9.0",
     "js-codemod": "cpojer/js-codemod",
     "jscodemods": "https://github.com/cypress-io/jscodemods.git#01b546e",
     "jscodeshift": "0.7.0",
@@ -254,8 +253,6 @@
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
       "**/webpack-batteries-included-preprocessor/ts-loader",
-      "**/jest",
-      "**/jest*",
       "**/expect"
     ]
   },
