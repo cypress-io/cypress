@@ -31,6 +31,36 @@ describe('http/response-middleware', function () {
     ])
   })
 
+  it('errors if this.next() is called more than once in the same middleware', function (done) {
+    const middleware = function () {
+      this.next()
+      this.next()
+    }
+
+    testMiddleware([middleware], {
+      onError (err) {
+        expect(err.message).to.equal('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+
+        done()
+      },
+    })
+  })
+
+  it('does not error if this.next() is called more than once in different middleware', function () {
+    const middleware1 = function () {
+      this.next()
+    }
+    const middleware2 = function () {
+      this.next()
+    }
+
+    return testMiddleware([middleware1, middleware2], {
+      onError () {
+        throw new Error('onError should not be called')
+      },
+    })
+  })
+
   describe('MaybeStripDocumentDomainFeaturePolicy', function () {
     const { MaybeStripDocumentDomainFeaturePolicy } = ResponseMiddleware
     let ctx

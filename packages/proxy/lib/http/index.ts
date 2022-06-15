@@ -155,6 +155,10 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
 
       const fullCtx = {
         next: () => {
+          fullCtx.next = () => {
+            throw new Error('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+          }
+
           copyChangedCtx()
 
           _end(runMiddlewareStack())

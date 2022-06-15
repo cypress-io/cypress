@@ -490,8 +490,6 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   }
 }
 
-// TODO: error if this.next() is called twice in same block if possible
-
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
