@@ -81,7 +81,7 @@ function simulateRunData () {
 
     if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
       // simulate network latency to allow for caching to register
-      await new Promise((r) => setTimeout(r, 5))
+      await new Promise((r) => setTimeout(r, 20))
 
       const statuses = obj.variables.specPath === 'cypress/e2e/accounts/accounts_list.spec.js' ?
         ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
@@ -121,16 +121,6 @@ function allVisibleSpecsShouldBePlaceholders () {
 
   cy.get('.spec-list-container').scrollTo('bottom')
   cy.get('.spec-list-container').scrollTo('bottom')
-
-  // verifying tooltip doesn't exist
-  // only first item is verified as triggering actions on items further below
-  // will cause a scroll, which will cause the virtualized list to re-render
-  // causing some components to unmount and ending up with detached DOM
-  cy.findAllByTestId('run-status-dot-latest').first().trigger('mouseenter')
-  cy.get('.v-popper__popper--shown').should('not.exist')
-  cy.findAllByTestId('run-status-dot-latest').first().trigger('mouseleave')
-
-  cy.findAllByTestId('average-duration').should('not.exist')
 }
 
 describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
@@ -138,6 +128,11 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
+
+    cy.withCtx((ctx) => {
+      // clear cloud cache
+      ctx.cloud.reset()
+    })
 
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
@@ -211,38 +206,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       })
 
       cy.get('.underline').contains('Average duration').trigger('mouseleave')
-    })
-  })
-
-  context('when offline', () => {
-    beforeEach(() => {
-      cy.loginUser()
-
-      simulateRunData()
-
-      cy.visitApp()
-
-      cy.findByTestId('sidebar-link-specs-page').click()
-      cy.wait(300)
-      cy.goOffline()
-    })
-
-    it('shows placeholders for all visible specs and triggers a fetch after coming online', () => {
-      allVisibleSpecsShouldBePlaceholders()
-      cy.goOnline()
-      // TODO: fix flake caused by caching: sometimes fetch results are not
-      // visible and we're getting a skeleton instead
-      specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
-      cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
-    })
-
-    it('shows offline alert then hides it after coming online', () => {
-      cy.findByTestId('offline-alert')
-      .should('contain.text', defaultMessages.specPage.offlineWarning.title)
-      .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)
-
-      cy.goOnline()
-      cy.findByTestId('offline-alert').should('not.exist')
     })
   })
 
@@ -405,7 +368,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
           // simulate network latency to allow for caching to register
-          await new Promise((r) => setTimeout(r, 5))
+          await new Promise((r) => setTimeout(r, 20))
 
           const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
           const runs = fakeRuns(statuses, obj.variables.specPath)
@@ -511,7 +474,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
           // simulate network latency to allow for caching to register
-          await new Promise((r) => setTimeout(r, 5))
+          await new Promise((r) => setTimeout(r, 20))
 
           const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
           const runs = fakeRuns(statuses, obj.variables.specPath)
@@ -565,6 +528,53 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       // TODO: verify the contents of the tooltip
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
+    })
+  })
+})
+
+describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
+  context('when offline', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.goOffline()
+      cy.wait(300)
+      cy.openProject('cypress-in-cypress')
+      cy.startAppServer()
+
+      cy.withCtx((ctx) => {
+        // clear cloud cache
+        ctx.cloud.reset()
+      })
+
+      cy.loginUser()
+
+      simulateRunData()
+      cy.visitApp()
+
+      cy.findByTestId('sidebar-link-specs-page').click()
+
+      // after navigating to a new page, the browser needs to go offline again
+      cy.goOffline()
+    })
+
+    afterEach(() => {
+      cy.withCtx((ctx) => {
+        // clear cloud cache
+        ctx.cloud.reset()
+      })
+    })
+
+    it('shows placeholders for all visible specs', () => {
+      allVisibleSpecsShouldBePlaceholders()
+    })
+
+    it('shows offline alert then hides it after coming online', () => {
+      cy.findByTestId('offline-alert')
+      .should('contain.text', defaultMessages.specPage.offlineWarning.title)
+      .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)
+
+      cy.goOnline()
+      cy.findByTestId('offline-alert').should('not.exist')
     })
   })
 })

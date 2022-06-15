@@ -285,9 +285,7 @@ const averageDurationDocsUrl = computed(() => {
 })
 
 const isOnline = useOnline()
-// defaulting to isOffline = true helps prevent failed attempts to fetch cloud
-// data when internet is not available at the time of mounting this component
-const isOffline = ref(true)
+const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
