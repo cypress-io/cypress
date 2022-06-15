@@ -1,42 +1,25 @@
-//
-// override tty if we're being forced to
-require('./lib/util/tty').override()
+const run = async (profiler) => {
+  const bench = require('./util/bench').initBenchmark('startup')
 
-const electronApp = require('./lib/util/electron-app')
+  bench.time('start')
+  await profiler.start()
 
-// are we in the main node process or the electron process?
-const isRunningElectron = electronApp.isRunning()
+  if (process.env.TIME_REQUIRE_IND != null) {
+    require('time-require')
+  }
 
-if (process.env.CY_NET_PROFILE && isRunningElectron) {
-  const netProfiler = require('./lib/util/net_profiler')()
+  await require('./server-entry')
 
-  process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
+  // eslint-disable-next-line no-console
+  await profiler.stop()
+
+  bench.timeEnd('start')
+  bench.dumpAverages()
+  bench.save()
+
+  process.exit(0)
 }
 
-require('./lib/unhandled_exceptions')
+const profiler = require('./util/profiler').initProfiler('startup')
 
-process.env.UV_THREADPOOL_SIZE = 128
-
-require('graceful-fs').gracefulify(require('fs'))
-// if running in production mode (CYPRESS_INTERNAL_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
-
-if (isRunningElectron) {
-  require('./lib/util/process_profiler').start()
-}
-
-// warn when deprecated callback apis are used in electron
-// https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
-process.enablePromiseAPIs = process.env.CYPRESS_INTERNAL_ENV !== 'production'
-
-// don't show any electron deprecation warnings in prod
-process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
-
-// always show stack traces for Electron deprecation warnings
-process.traceDeprecation = true
-
-require('./lib/util/suppress_warnings').suppress()
-
-module.exports = require('./lib/cypress').start(process.argv)
+module.exports = run(profiler)
