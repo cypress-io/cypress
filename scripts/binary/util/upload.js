@@ -112,7 +112,7 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
 }
 
 // all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-x64', 'linux-x64', 'win32-x64']
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
@@ -127,6 +127,7 @@ const getUploadNameByOsAndArch = function (platform) {
 
   const uploadNames = {
     darwin: {
+      'arm64': 'darwin-arm64',
       'x64': 'darwin-x64',
     },
     linux: {
