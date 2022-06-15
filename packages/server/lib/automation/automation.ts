@@ -4,7 +4,7 @@ import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
-import { removeAllCookies, removeCookie } from '../cookie-jar'
+import { cookieJar } from '../cookie-jar'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
@@ -113,13 +113,13 @@ export class Automation {
         case 'clear:cookies':
           return Bluebird.all([
             this.cookies.clearCookies(data, automate),
-            removeAllCookies(),
+            cookieJar.removeAllCookies(),
           ])
           .spread((automationResult) => automationResult)
         case 'clear:cookie':
           return Bluebird.all([
             this.cookies.clearCookie(data, automate),
-            removeCookie(data),
+            cookieJar.removeCookie(data),
           ])
           .spread((automationResult) => automationResult)
         case 'change:cookie':
