@@ -70,6 +70,16 @@
           >
             {{ t("specPage.requestAccessButton") }}
           </Button>
+          <Button
+            v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
+            :prefix-icon="SendIcon"
+            prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="access-requested-button"
+            class="bg-gray-800 border-gray-800"
+            disabled
+          >
+            {{ t("specPage.requestSentButton") }}
+          </Button>
         </div>
       </div>
     </template>
@@ -110,6 +120,9 @@ fragment SpecHeaderCloudDataTooltip on Query {
     id
     cloudProject{
       __typename
+      ... on CloudProjectUnauthorized {
+        hasRequestedAccess
+      }
     }
   }
   ...Auth
@@ -124,7 +137,13 @@ const projectConnectionStatus = computed(() => {
 
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
 
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') return 'UNAUTHORIZED'
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    if (props.gql.currentProject.cloudProject.hasRequestedAccess) {
+      return 'ACCESS_REQUESTED'
+    }
+
+    return 'UNAUTHORIZED'
+  }
 
   return 'CONNECTED'
 })
@@ -142,7 +161,7 @@ function requestAccess () {
 const tooltipTextKey = computed(() => {
   if (projectConnectionStatus.value === 'CONNECTED') return props.connectedTextKeyPath
 
-  if (projectConnectionStatus.value === 'UNAUTHORIZED') return props.noAccessTextKeyPath
+  if (['UNAUTHORIZED', 'ACCESS_REQUESTED'].includes(projectConnectionStatus.value)) return props.noAccessTextKeyPath
 
   return props.notConnectedTextKeyPath
 })

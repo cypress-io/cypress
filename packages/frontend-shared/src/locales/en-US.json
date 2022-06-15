@@ -152,6 +152,7 @@
     "dashboardLoginButton": "Log in to Cypress Dashboard",
     "reconnectProjectButton": "Reconnect your project",
     "requestAccessButton": "Request access",
+    "requestSentButton": "Request sent",
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
