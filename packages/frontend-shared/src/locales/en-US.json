@@ -543,7 +543,7 @@
     "after": "After",
     "heresWhy": "here's why:",
     "renameAuto": {
-      "title": "We recommend automatically updating your specs in this step",
+      "title": "We recommend automatically renaming your specs in this step",
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
@@ -597,8 +597,8 @@
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",
       "step1": {
-        "title": "Rename existing specs",
-        "description": "In this step, we'll automatically change existing spec files to match the new convention.",
+        "title": "Migrate existing specs",
+        "description": "In this step, we'll automatically rename and/or move your existing spec files as needed.",
         "button": "Rename these specs for me",
         "buttonSkip": "Skip renaming specs",
         "buttonRenameFolder": "Rename the folder for me"
