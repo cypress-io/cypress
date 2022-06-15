@@ -25,4 +25,28 @@ describe('<ResultCounts />', () => {
 
     cy.percySnapshot()
   })
+
+  it('renders string range values', () => {
+    cy.mount(() => (
+      <ResultCounts
+        totalFailed="1-2"
+        totalPassed="2-20"
+        totalPending="5-5"
+        totalSkipped="10-1"
+      />))
+
+    cy.get(`[data-cy="runResults-${defaultMessages.runs.results.skipped}-count"]`)
+    .should('contain', '10-1')
+
+    cy.get(`[data-cy="runResults-${defaultMessages.runs.results.pending}-count"]`)
+    .should('contain', '5-5')
+
+    cy.get(`[data-cy="runResults-${defaultMessages.runs.results.passed}-count"]`)
+    .should('contain', '2-20')
+
+    cy.get(`[data-cy="runResults-${defaultMessages.runs.results.failed}-count"]`)
+    .should('contain', '1-2')
+
+    cy.percySnapshot()
+  })
 })

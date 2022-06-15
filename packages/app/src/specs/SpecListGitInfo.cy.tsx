@@ -72,7 +72,8 @@ describe('SpecListGitInfo', () => {
       cy.findByTestId('git-info-tooltip').should('not.exist')
       cy.get('.v-popper').trigger('mouseenter')
       cy.findByTestId('git-info-tooltip').should('be.visible')
-      .and('have.text', 'chore: did stuffabc123 by Bob')
+      .and('contain', 'chore: did stuff')
+      .and('contain', 'abc123 by Bob')
 
       cy.percySnapshot()
     })

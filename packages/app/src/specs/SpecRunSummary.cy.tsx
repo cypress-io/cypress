@@ -1,10 +1,11 @@
 import SpecRunSummary from './SpecRunSummary.vue'
 import { exampleRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
+import type { CloudSpecRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
 describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
   const runs = exampleRuns()
 
-  function mountWithRun (run) {
+  function mountWithRun (run: CloudSpecRun) {
     const createdAt = new Date()
 
     createdAt.setFullYear(createdAt.getFullYear() - 1)
@@ -49,13 +50,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Red border at top
       .should('have.css', 'border-top', '4px solid rgb(228, 87, 112)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Red text with expected status text
       .should('have.css', 'color', 'rgb(198, 43, 73)')
       .and('have.text', 'Failed')
 
@@ -78,13 +79,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Gray border at top
       .should('have.css', 'border-top', '4px solid rgb(144, 149, 173)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Gray text with expected status text
       .should('have.css', 'color', 'rgb(90, 95, 122)')
       .and('have.text', 'Canceled')
 
@@ -108,13 +109,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Orange border at top
       .should('have.css', 'border-top', '4px solid rgb(219, 121, 3)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Orange text with expected status text
       .should('have.css', 'color', 'rgb(189, 88, 0)')
       .and('have.text', 'Errored')
 
@@ -138,13 +139,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Gray border at top
       .should('have.css', 'border-top', '4px solid rgb(144, 149, 173)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Gray text with expected status text
       .should('have.css', 'color', 'rgb(90, 95, 122)')
       .and('have.text', 'No tests')
 
@@ -168,13 +169,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Orange border at top
       .should('have.css', 'border-top', '4px solid rgb(219, 121, 3)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Orange text with expected status text
       .should('have.css', 'color', 'rgb(189, 88, 0)')
       .and('have.text', 'Over limit')
 
@@ -198,13 +199,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Blue border at top
       .should('have.css', 'border-top', '4px solid rgb(100, 112, 243)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Blue text with expected status text
       .should('have.css', 'color', 'rgb(73, 86, 227)')
       .and('have.text', 'Running')
 
@@ -228,13 +229,13 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
 
     it('should render expected content', () => {
       cy.findByTestId('spec-run-summary')
-      // Green border at top
+      // Orange border at top
       .should('have.css', 'border-top', '4px solid rgb(219, 121, 3)')
 
       cy.findByTestId('spec-run-filename').should('have.text', 'mySpecFile.spec.ts')
 
       cy.findByTestId('spec-run-status')
-      // Green text with expected status text
+      // Orange text with expected status text
       .should('have.css', 'color', 'rgb(189, 88, 0)')
       .and('have.text', 'Timed out')
 
