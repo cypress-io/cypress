@@ -1,5 +1,7 @@
 import systemTests from '../lib/system-tests'
 
+const FIVE_MINUTES = 1000 * 60 * 100
+
 describe('component testing projects', function () {
   systemTests.setup()
 
@@ -27,27 +29,10 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('react-vite-ts-configured', {
-    project: 'react-vite-ts-configured',
-    testingType: 'component',
-    spec: 'src/App.cy.tsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vue3-vite-ts-configured', {
     project: 'vue3-vite-ts-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.ts',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  // TODO: Figure out correct dependencies to make Next.js, 11-12  work.
-  systemTests.it.skip('nextjs-configured', {
-    project: 'nextjs-configured',
-    testingType: 'component',
-    spec: 'components/button.cy.jsx',
     browser: 'chrome',
     expectedExitCode: 0,
   })
@@ -66,5 +51,23 @@ describe('component testing projects', function () {
     spec: 'src/components/HelloWorld.cy.js',
     browser: 'chrome',
     expectedExitCode: 0,
+  })
+
+  systemTests.it('npm-react: vite', {
+    project: 'npm-react-vite',
+    spec: '**/*.cy.jsx',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+    timeout: FIVE_MINUTES,
+  })
+
+  systemTests.it('npm-react: webpack', {
+    project: 'npm-react-webpack',
+    spec: '**/*.cy.jsx',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+    timeout: FIVE_MINUTES,
   })
 })
