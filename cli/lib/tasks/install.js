@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const arch = require('arch')
 const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
@@ -19,8 +18,8 @@ const verbose = require('../VerboseRenderer')
 
 const { buildInfo, version } = require('../../package.json')
 
-function _getBinaryUrlFromBuildInfo ({ commitSha, commitBranch }) {
-  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch()}/${commitBranch}-${commitSha}/cypress.zip`
+function _getBinaryUrlFromBuildInfo (arch, { commitSha, commitBranch }) {
+  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
@@ -135,7 +134,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
 const validateOS = () => {
   return util.getPlatformInfo().then((platformInfo) => {
-    return platformInfo.match(/(darwin|linux|win32)-x64/)
+    return platformInfo.match(/(win32-x64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
   })
 }
 
@@ -143,7 +142,7 @@ const validateOS = () => {
  * Returns the version to install - either a string like `1.2.3` to be fetched
  * from the download server or a file path or HTTP URL.
  */
-function getVersionOverride ({ envVarVersion, buildInfo }) {
+function getVersionOverride ({ arch, envVarVersion, buildInfo }) {
   // let this environment variable reset the binary version we need
   if (envVarVersion) {
     return envVarVersion
@@ -165,7 +164,7 @@ function getVersionOverride ({ envVarVersion, buildInfo }) {
 
     logger.log()
 
-    return _getBinaryUrlFromBuildInfo(buildInfo)
+    return _getBinaryUrlFromBuildInfo(arch, buildInfo)
   }
 }
 
@@ -219,7 +218,8 @@ const start = async (options = {}) => {
   }
 
   const pkgVersion = util.pkgVersion()
-  const versionOverride = getVersionOverride({ envVarVersion, buildInfo: options.buildInfo })
+  const arch = await util.getRealArch()
+  const versionOverride = getVersionOverride({ arch, envVarVersion, buildInfo: options.buildInfo })
   const versionToInstall = versionOverride || pkgVersion
 
   debug('version in package.json is %s, version to install is %s', pkgVersion, versionToInstall)
