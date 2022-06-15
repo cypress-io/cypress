@@ -13,13 +13,18 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
+  getCookies (url, sameSiteContext) {
+    // @ts-ignore
+    return this._cookieJar.getCookiesSync(url, { sameSiteContext })
+  }
+
   getAllCookies () {
     let cookies: Cookie[] = []
 
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
     // @ts-ignore
-    cookieJar.store.getAllCookies((_err, _cookies: Cookie[]) => {
+    this._cookieJar.store.getAllCookies((_err, _cookies: Cookie[]) => {
       cookies = _cookies
     })
 
@@ -35,7 +40,7 @@ export class CookieJar {
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
     // @ts-ignore
-    cookieJar.store.removeCookie(
+    this._cookieJar.store.removeCookie(
       cookieData.domain,
       cookieData.path || '/',
       cookieData.name,

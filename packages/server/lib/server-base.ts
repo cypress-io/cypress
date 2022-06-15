@@ -32,7 +32,7 @@ import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
-import { getCookieJar } from './cookie-jar'
+import { cookieJar } from './cookie-jar'
 import type { Automation } from './automation/automation'
 
 const debug = Debug('cypress:server:server-base')
@@ -322,7 +322,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getAutomation,
       remoteStates,
       getFileServerToken,
-      getCookieJar,
+      getCookieJar: () => cookieJar,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,

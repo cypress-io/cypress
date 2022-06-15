@@ -34,7 +34,7 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
 const CopyCrossOriginCookies: RequestMiddleware = function () {
   const currentAUTUrl = this.getAUTUrl()
 
-  if (!currentAUTUrl) {
+  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
     return this.next()
   }
 
@@ -44,13 +44,12 @@ const CopyCrossOriginCookies: RequestMiddleware = function () {
     this.req.isAUTFrame,
   )
 
-  const cookies = this.getCookieJar().getCookiesSync(this.req.proxiedUrl, {
-    // @ts-ignore
-    sameSiteContext,
-  })
-
+  const cookies = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
   const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
   const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+
+  this.debug('existing cookies on request: %s', existingCookies.join('; '))
+  this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
 
   this.req.headers['cookie'] = existingCookies.concat(cookiesToAdd).join('; ')
 
