@@ -10,6 +10,7 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
+    :utm-medium="'launchpad'/* TODO: utm_medium is left as is for historical reasons */"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"

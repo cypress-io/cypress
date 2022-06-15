@@ -150,6 +150,7 @@
                 <Auth
                   :gql="props.gql"
                   :show-logout="true"
+                  :utm-medium="'launchpad'/* TODO: utm_medium is left as is for historical reasons */"
                 />
               </div>
             </div>
@@ -170,6 +171,7 @@
       <LoginModal
         v-model="isLoginOpen"
         :gql="props.gql"
+        :utm-medium="'launchpad'/* TODO: utm_medium is left as is for historical reasons */"
       />
     </div>
   </div>

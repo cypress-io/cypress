@@ -65,6 +65,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
@@ -86,7 +87,7 @@ const props = defineProps<{
   gql: AuthFragment
   showRetry?: boolean
   showLogout?: boolean
-  utmMedium?: string
+  utmMedium: string
 }>()
 
 gql`
@@ -113,8 +114,8 @@ mutation Auth_Logout {
 `
 
 gql`
-mutation Auth_Login ($utmMedium: String) {
-  login (utmMedium: $utmMedium) {
+mutation Auth_Login ($utmSource: String!, $utmMedium: String!) {
+  login (utmSource: $utmSource, utmMedium: $utmMedium) {
     ...Auth
   }
 }
@@ -184,7 +185,7 @@ const handleLoginOrContinue = async () => {
 
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium ?? null })
+  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
 }
 
 const handleLogout = () => {
@@ -194,7 +195,7 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium ?? null })
+  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
 }
 
 const handleCancel = () => {
