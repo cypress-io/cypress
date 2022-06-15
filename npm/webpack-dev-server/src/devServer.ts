@@ -12,8 +12,13 @@ import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
+
+type AngularConfigOptions = { jitMode: boolean }
+
+type OptionsConfig = AngularConfigOptions
 
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
@@ -22,10 +27,11 @@ export type WebpackDevServerConfig = {
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
-  webpackConfig?: unknown // Derived from the user's webpack
+  webpackConfig?: unknown // Derived from the user's webpack,
+  options?: OptionsConfig
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
+const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular'] as const
 
 /**
  * @internal
@@ -112,6 +118,9 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Pres
 
     case 'next':
       return await nextHandler(devServerConfig)
+
+    case 'angular':
+      return await angularHandler(devServerConfig)
 
     case 'react':
     case 'vue':
