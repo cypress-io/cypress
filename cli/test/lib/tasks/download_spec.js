@@ -478,44 +478,91 @@ describe('lib/tasks/download', function () {
       sinon.stub(os, 'arch')
     })
 
-    function nockDarwinArm64 () {
-      return nock('https://download.cypress.io')
-      .get('/desktop/1.2.3')
-      .query({ arch: 'arm64', platform: 'darwin' })
-      .reply(200, undefined, {
-        'x-version': '1.2.3',
+    context('Apple Silicon/M1', () => {
+      function nockDarwinArm64 () {
+        return nock('https://download.cypress.io')
+        .get('/desktop/1.2.3')
+        .query({ arch: 'arm64', platform: 'darwin' })
+        .reply(200, undefined, {
+          'x-version': '1.2.3',
+        })
+      }
+
+      it('downloads darwin-arm64 on M1', async function () {
+        os.platform.returns('darwin')
+        os.arch.returns('arm64')
+        nockDarwinArm64()
+
+        const responseVersion = await download.start(this.options)
+
+        expect(responseVersion).to.eq('1.2.3')
+
+        await fs.statAsync(downloadDestination)
       })
-    }
 
-    it('downloads darwin-arm64 on M1', async function () {
-      os.platform.returns('darwin')
-      os.arch.returns('arm64')
-      nockDarwinArm64()
+      it('downloads darwin-arm64 on M1 translated by Rosetta', async function () {
+        os.platform.returns('darwin')
+        os.arch.returns('x64')
+        nockDarwinArm64()
 
-      const responseVersion = await download.start(this.options)
+        sinon.stub(cp, 'spawn').withArgs('sysctl', ['-n', 'sysctl.proc_translated'])
+        .callsFake(mockSpawn(((cp) => {
+          cp.stdout.write('1')
+          cp.emit('exit', 0, null)
+          cp.end()
+        })))
 
-      expect(responseVersion).to.eq('1.2.3')
+        const responseVersion = await download.start(this.options)
 
-      await fs.statAsync(downloadDestination)
+        expect(responseVersion).to.eq('1.2.3')
+
+        await fs.statAsync(downloadDestination)
+      })
     })
 
-    it('downloads darwin-arm64 on M1 translated by Rosetta', async function () {
-      os.platform.returns('darwin')
-      os.arch.returns('x64')
-      nockDarwinArm64()
+    context('Linux arm64/aarch64', () => {
+      function nockLinuxArm64 () {
+        return nock('https://download.cypress.io')
+        .get('/desktop/1.2.3')
+        .query({ arch: 'arm64', platform: 'linux' })
+        .reply(200, undefined, {
+          'x-version': '1.2.3',
+        })
+      }
 
-      sinon.stub(cp, 'spawn').withArgs('sysctl', ['-n', 'sysctl.proc_translated'])
-      .callsFake(mockSpawn(((cp) => {
-        cp.stdout.write('1')
-        cp.emit('exit', 0, null)
-        cp.end()
-      })))
+      it('downloads linux-arm64 on arm64 processor', async function () {
+        os.platform.returns('linux')
+        os.arch.returns('arm64')
+        nockLinuxArm64()
 
-      const responseVersion = await download.start(this.options)
+        const responseVersion = await download.start(this.options)
 
-      expect(responseVersion).to.eq('1.2.3')
+        expect(responseVersion).to.eq('1.2.3')
 
-      await fs.statAsync(downloadDestination)
+        await fs.statAsync(downloadDestination)
+      })
+
+      it('downloads linux-arm64 on non-arm64 node running on arm machine', async function () {
+        os.platform.returns('linux')
+        os.arch.returns('x64')
+        sinon.stub(cp, 'spawn')
+
+        for (const arch of ['aarch64_be', 'aarch64', 'armv8b', 'armv8l']) {
+          nockLinuxArm64()
+          cp.spawn.withArgs('uname', ['-m'])
+          .callsFake(mockSpawn(((cp) => {
+            cp.stdout.write(arch)
+            cp.emit('exit', 0, null)
+            cp.end()
+          })))
+
+          const responseVersion = await download.start(this.options)
+
+          expect(responseVersion).to.eq('1.2.3')
+
+          await fs.statAsync(downloadDestination)
+        }
+      })
     })
   })
 

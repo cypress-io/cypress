@@ -87,6 +87,7 @@ module.exports = {
         'darwin-x64': getUrl('darwin-x64'),
         'darwin-arm64': getUrl('darwin-arm64'),
         'linux-x64': getUrl('linux-x64'),
+        'linux-arm64': getUrl('linux-arm64'),
         'win32-x64': getUrl('win32-x64'),
       },
     }
