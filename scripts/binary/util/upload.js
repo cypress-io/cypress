@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const awspublish = require('gulp-awspublish')
 const human = require('human-interval')
 const la = require('lazy-ass')
@@ -112,7 +111,7 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
 }
 
 // all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'win32-x64']
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
@@ -122,25 +121,12 @@ const getValidPlatformArchs = () => {
 }
 
 const getUploadNameByOsAndArch = function (platform) {
-  // just hard code for now...
   const arch = os.arch()
 
-  const uploadNames = {
-    darwin: {
-      'arm64': 'darwin-arm64',
-      'x64': 'darwin-x64',
-    },
-    linux: {
-      'x64': 'linux-x64',
-    },
-    win32: {
-      'x64': 'win32-x64',
-    },
-  }
-  const name = _.get(uploadNames[platform], arch)
+  const name = [platform, arch].join('-')
 
-  if (!name) {
-    throw new Error(`Cannot find upload name for OS: '${platform}' with arch: '${arch}'`)
+  if (!isValidPlatformArch(name)) {
+    throw new Error(`${name} is not a valid upload destination. Does validPlatformArchs need updating?`)
   }
 
   la(isValidPlatformArch(name), 'formed invalid platform', name, 'from', platform, arch)

@@ -22,14 +22,13 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
-# filters and requires for testing binary with Firefox
 mainBuildFilters: &mainBuildFilters
   filters:
     branches:
       only:
         - develop
         - 10.0-release
-        - use-m1-runners
+        - linux-arm64
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,14 +37,23 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ use-m1-runners, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
-linuxWorkflowExcludeFilters: &linux-workflow-exclude-filters
+linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
     - false
@@ -58,7 +66,7 @@ fullWindowsWorkflowFilters: &full-windows-workflow-filters
     branches:
       only:
       - develop
-      - 'use-m1-runners'
+      - 'linux-arm64'
       - '*-release'
       - 'win*'
 
@@ -108,13 +116,20 @@ executors:
     environment:
       PLATFORM: darwin
 
+  linux-arm64:
+    machine:
+      image: ubuntu-2004:2022.04.1
+    resource_class: arm.medium
+    environment:
+      PLATFORM: linux
+
 commands:
   verify_should_persist_artifacts:
     steps:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "use-m1-runners" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "linux-arm64" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -955,12 +970,24 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+            fi
             node --version
             yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
-            [[ $PLATFORM == 'linux' ]] && apt-get update && apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
+            if [[ $PLATFORM == 'linux' ]]; then
+              # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
+              if [[ `whoami` == 'root' ]]; then
+                apt-get update && apt-get install -y zip
+              else
+                sudo apt-get update && sudo apt-get install -y zip
+              fi
+            fi
             yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
@@ -2236,7 +2263,7 @@ jobs:
           command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
-linux-workflow: &linux-workflow
+linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install
     - build:
@@ -2545,6 +2572,31 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
           - system-tests-node-modules-install
 
+linux-arm64-workflow: &linux-arm64-workflow
+  jobs:
+    - node_modules_install:
+        name: linux-arm64-node-modules-install
+        executor: linux-arm64
+        resource_class: arm.medium
+        only-cache-for-root-user: true
+
+    - build:
+        name: linux-arm64-build
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-node-modules-install
+
+    - create-build-artifacts:
+        name: linux-arm64-create-build-artifacts
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2675,9 +2727,12 @@ windows-workflow: &windows-workflow
           - windows-create-build-artifacts
 
 workflows:
-  linux:
-    <<: *linux-workflow
-    <<: *linux-workflow-exclude-filters
+  linux-x64:
+    <<: *linux-x64-workflow
+    <<: *linux-x64-workflow-exclude-filters
+  linux-arm64:
+    <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
   darwin-x64:
     <<: *darwin-x64-workflow
     <<: *darwin-workflow-filters
