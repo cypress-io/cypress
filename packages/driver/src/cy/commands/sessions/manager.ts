@@ -131,7 +131,6 @@ export default class SessionsManager {
       await Promise.all([
         this.sessions.clearStorage(),
         this.sessions.clearCookies(),
-        this.Cypress.backend('clear:cross:origin:cookies', null),
       ])
     },
 

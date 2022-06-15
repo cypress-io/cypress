@@ -463,8 +463,6 @@ export class SocketBase {
               resetRenderedHTMLOrigins()
 
               return
-            case 'clear:cross:origin:cookies':
-              return cookieJar.removeAllCookies()
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
