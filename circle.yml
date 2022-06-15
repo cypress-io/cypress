@@ -516,14 +516,29 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-            DEBUG=<<parameters.debug>> \
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+            fi
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
