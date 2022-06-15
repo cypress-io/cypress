@@ -34,6 +34,7 @@
     "dev": "gulp dev",
     "dev:vite": "CYPRESS_INTERNAL_VITE_DEV=1 yarn dev",
     "dev:clean": "gulp dev:clean",
+    "dev-binary-open": "CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress",
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
