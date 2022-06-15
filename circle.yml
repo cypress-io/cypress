@@ -532,13 +532,14 @@ commands:
             else
               # external PR
 
-              GLOB="cypress/e2e/**/*cy.*"
+              GLOB="packages/<<parameters.package>>/cypress/e2e/**/*cy.*"
 
               if [[ <<parameters.type>> == 'ct' ]]; then
-                GLOB="cypress/component/**/*cy.*"
+                GLOB="packages/<<parameters.package>>/cypress/component/**/*cy.*"
               fi
 
               echo $GLOB
+              echo $(circleci tests glob $GLOB)
 
               TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
