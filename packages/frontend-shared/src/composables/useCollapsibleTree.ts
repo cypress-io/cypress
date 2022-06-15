@@ -24,6 +24,11 @@ export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
 export interface UseCollapsibleTreeOptions {
   expandInitially?: boolean
   dropRoot?: boolean
+  /**
+   * Provide a long-lived cache to preserve directory collapse state across tree re-builds.
+   * This can be useful when row data is updating but doesn't represent a change to the
+   * structure of the tree.
+   */
   cache?: Map<string, boolean>
 }
 
