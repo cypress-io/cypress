@@ -11,6 +11,7 @@ describe('http/request-middleware', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
       'ExtractIsAUTFrameHeader',
+      'CopyCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'CorrelateBrowserPreRequest',
       'SendToDriver',
