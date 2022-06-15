@@ -15,12 +15,17 @@
       :is="IconFolder"
       class="icon-dark-white icon-light-gray-200"
     />
-    <HighlightedText
-      :text="props.name"
-      :indexes="props.indexes"
-      class="font-medium text-gray-600"
-      highlight-classes="text-gray-1000"
-    />
+    <div
+      :title="props.name"
+      class="text-gray-600 truncate"
+    >
+      <HighlightedText
+        :text="props.name"
+        :indexes="props.indexes"
+        class="font-medium"
+        highlight-classes="text-gray-1000"
+      />
+    </div>
     <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
   </button>
 </template>
