@@ -31,11 +31,12 @@
         </div>
         <div>
           <component
-            :is="latestStatus.icon"
+            :is="latestDot.icon"
             width="16"
             height="16"
-            :class="{'animate-spin': latestStatus.spin}"
+            :class="{'animate-spin': latestDot.spin}"
             :data-cy="'run-status-dot-latest'"
+            :data-cy-run-status="latestDot.status"
             class="ml-4px"
           />
         </div>
@@ -169,23 +170,25 @@ const latestRun = computed(() => {
   return runs.value[0]
 })
 
-const latestStatus = computed(() => {
-  switch (latestRun.value?.status) {
+const latestDot = computed(() => {
+  const status = latestRun.value?.status
+
+  switch (status) {
     case 'PASSED':
-      return { icon: PassedIcon, spin: false }
+      return { icon: PassedIcon, spin: false, status }
     case 'RUNNING':
-      return { icon: RunningIcon, spin: true }
+      return { icon: RunningIcon, spin: true, status }
     case 'FAILED':
-      return { icon: FailedIcon, spin: false }
+      return { icon: FailedIcon, spin: false, status }
     case 'ERRORED':
     case 'OVERLIMIT':
     case 'TIMEDOUT':
-      return { icon: ErroredIcon, spin: false }
+      return { icon: ErroredIcon, spin: false, status }
     case 'NOTESTS':
     case 'CANCELLED':
-      return { icon: CancelledIcon, spin: false }
+      return { icon: CancelledIcon, spin: false, status }
     default:
-      return { icon: PlaceholderIcon, spin: false }
+      return { icon: PlaceholderIcon, spin: false, status: 'PLACEHOLDER' }
   }
 })
 
