@@ -30,8 +30,9 @@ const isRenderWorkerRe = /\.RenderWorker-/
 // https://github.com/cypress-io/cypress/issues/19299
 const isDbusWarning = /Failed to connect to the bus:/
 
-// Electron began logging these on self-signed certs with x.x.x
-// https://github.com/electron/electron/pull/33204
+// Electron began logging these on self-signed certs with 17.0.0-alpha.4.
+// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/34583
+// Sample:
 // [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
 // ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
 // ERROR: No matching issuer found
