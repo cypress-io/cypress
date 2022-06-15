@@ -38,10 +38,10 @@
     "vite-plugin-require-transform": "1.0.3"
   },
   "peerDependencies": {
-    "@types/react": "^16.9.16 || ^17.0.0",
+    "@types/react": "^16.9.16 || ^17.0.0 || ^18.0.0",
     "cypress": "*",
-    "react": "^=16.x || ^=17.x",
-    "react-dom": "^=16.x || ^=17.x"
+    "react": "^=16.x || ^=17.x || ^=18",
+    "react-dom": "^=16.x || ^=17.x || ^=18"
   },
   "files": [
     "dist",
