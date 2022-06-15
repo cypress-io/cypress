@@ -538,13 +538,12 @@ commands:
               TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
-              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
             fi
       - run:
           command: |
