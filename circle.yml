@@ -531,7 +531,7 @@ commands:
 
               FOLDER=e2e
 
-              if [[ <<parameters.type>> == 'ct' ]] then
+              if [[ <<parameters.type>> == 'ct' ]]; then
                 FOLDER=component
               fi
 
