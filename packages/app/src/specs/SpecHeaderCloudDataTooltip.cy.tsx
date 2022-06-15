@@ -1,10 +1,19 @@
 import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import { set } from 'lodash'
+import { get, set } from 'lodash'
 import { defaultMessages } from '@cy/i18n'
 
 describe('SpecHeaderCloudDataTooltip', () => {
-  function mountWithStatus (status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED') {
+  function mountWithStatus (
+    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED',
+    msgKeys: {
+      header: string
+      connected: string
+      notConnected: string
+      noAccess: string
+      docs: string
+    },
+  ) {
     cy.mountFragment(SpecHeaderCloudDataTooltipFragmentDoc, {
       onResult: (ctx) => {
         set(ctx, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
@@ -33,123 +42,147 @@ describe('SpecHeaderCloudDataTooltip', () => {
         const showConnectToProjectSpy = cy.spy().as('showConnectToProjectSpy')
 
         return (
-          <SpecHeaderCloudDataTooltip
-            gql={gql}
-            headerTextKeyPath="specPage.latestRuns.header"
-            connectedTextKeyPath="specPage.latestRuns.tooltip.connected"
-            notConnectedTextKeyPath="specPage.latestRuns.tooltip.notConnected"
-            noAccessTextKeyPath="specPage.latestRuns.tooltip.noAccess"
-            docsTextKeyPath="specPage.latestRuns.tooltip.linkText"
-            docsUrl="https://dummy.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs"
-            data-cy="latest-runs-header"
-            onShowLogin={showLoginSpy}
-            onShowConnectToProject={showConnectToProjectSpy}
-          />)
+          <div class="flex justify-around">
+            <SpecHeaderCloudDataTooltip
+              gql={gql}
+              headerTextKeyPath={msgKeys.header}
+              connectedTextKeyPath={msgKeys.connected}
+              notConnectedTextKeyPath={msgKeys.notConnected}
+              noAccessTextKeyPath={msgKeys.noAccess}
+              docsTextKeyPath={msgKeys.docs}
+              docsUrl="https://dummy.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs"
+              data-cy="latest-runs-header"
+              onShowLogin={showLoginSpy}
+              onShowConnectToProject={showConnectToProjectSpy}
+            />
+          </div>)
       },
     })
   }
 
-  context('connected', () => {
-    beforeEach(() => {
-      mountWithStatus('CONNECTED')
-    })
+  [{
+    contextName: 'Average Duration',
+    msgKeys: {
+      header: 'specPage.averageDuration.header',
+      connected: 'specPage.averageDuration.tooltip.connected',
+      notConnected: 'specPage.averageDuration.tooltip.notConnected',
+      noAccess: 'specPage.averageDuration.tooltip.noAccess',
+      docs: 'specPage.averageDuration.tooltip.linkText',
+    },
+  }, {
+    contextName: 'Latest Runs',
+    msgKeys: {
+      header: 'specPage.latestRuns.header',
+      connected: 'specPage.latestRuns.tooltip.connected',
+      notConnected: 'specPage.latestRuns.tooltip.notConnected',
+      noAccess: 'specPage.latestRuns.tooltip.noAccess',
+      docs: 'specPage.latestRuns.tooltip.linkText',
+    },
+  }].forEach(({ contextName, msgKeys }) => {
+    context(contextName, () => {
+      context('connected', () => {
+        beforeEach(() => {
+          mountWithStatus('CONNECTED', msgKeys)
+        })
 
-    it('should render expected tooltip content', () => {
-      cy.get('.v-popper').trigger('mouseenter')
+        it('should render expected tooltip content', () => {
+          cy.get('.v-popper').trigger('mouseenter')
 
-      cy.findByTestId('cloud-data-tooltip-content')
-      .should('be.visible')
-      .and('contain', defaultMessages.specPage.latestRuns.tooltip.connected.replace('{0}', defaultMessages.specPage.latestRuns.tooltip.linkText))
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-      cy.get('button').should('not.exist')
+          cy.get('button').should('not.exist')
 
-      cy.percySnapshot()
-    })
-  })
+          cy.percySnapshot()
+        })
+      })
 
-  context('not connected', () => {
-    beforeEach(() => {
-      mountWithStatus('NOT_CONNECTED')
-    })
+      context('not connected', () => {
+        beforeEach(() => {
+          mountWithStatus('NOT_CONNECTED', msgKeys)
+        })
 
-    it('should render expected tooltip content', () => {
-      cy.get('.v-popper').trigger('mouseenter')
+        it('should render expected tooltip content', () => {
+          cy.get('.v-popper').trigger('mouseenter')
 
-      cy.findByTestId('cloud-data-tooltip-content')
-      .should('be.visible')
-      .and('contain', defaultMessages.specPage.latestRuns.tooltip.notConnected.replace('{0}', defaultMessages.specPage.latestRuns.tooltip.linkText))
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-      cy.findByTestId('connect-button')
-      .should('be.visible')
-      .click()
+          cy.findByTestId('connect-button')
+          .should('be.visible')
+          .click()
 
-      cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
+          cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
 
-      cy.percySnapshot()
-    })
-  })
+          cy.percySnapshot()
+        })
+      })
 
-  context('unauthorized', () => {
-    beforeEach(() => {
-      mountWithStatus('UNAUTHORIZED')
-    })
+      context('unauthorized', () => {
+        beforeEach(() => {
+          mountWithStatus('UNAUTHORIZED', msgKeys)
+        })
 
-    it('should render expected tooltip content', () => {
-      cy.get('.v-popper').trigger('mouseenter')
+        it('should render expected tooltip content', () => {
+          cy.get('.v-popper').trigger('mouseenter')
 
-      cy.findByTestId('cloud-data-tooltip-content')
-      .should('be.visible')
-      .and('contain', defaultMessages.specPage.latestRuns.tooltip.noAccess.replace('{0}', defaultMessages.specPage.latestRuns.tooltip.linkText))
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-      cy.findByTestId('request-access-button')
-      .should('be.visible')
-      .click()
+          cy.findByTestId('request-access-button')
+          .should('be.visible')
+          .click()
 
-      cy.percySnapshot()
-    })
-  })
+          cy.percySnapshot()
+        })
+      })
 
-  context('logged out', () => {
-    beforeEach(() => {
-      mountWithStatus('LOGGED_OUT')
-    })
+      context('logged out', () => {
+        beforeEach(() => {
+          mountWithStatus('LOGGED_OUT', msgKeys)
+        })
 
-    it('should render expected tooltip content', () => {
-      cy.get('.v-popper').trigger('mouseenter')
+        it('should render expected tooltip content', () => {
+          cy.get('.v-popper').trigger('mouseenter')
 
-      cy.findByTestId('cloud-data-tooltip-content')
-      .should('be.visible')
-      .and('contain', defaultMessages.specPage.latestRuns.tooltip.notConnected.replace('{0}', defaultMessages.specPage.latestRuns.tooltip.linkText))
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-      cy.findByTestId('login-button')
-      .should('be.visible')
-      .click()
+          cy.findByTestId('login-button')
+          .should('be.visible')
+          .click()
 
-      cy.get('@showLoginSpy').should('have.been.calledOnce')
+          cy.get('@showLoginSpy').should('have.been.calledOnce')
 
-      cy.percySnapshot()
-    })
-  })
+          cy.percySnapshot()
+        })
+      })
 
-  context('not found', () => {
-    beforeEach(() => {
-      mountWithStatus('NOT_FOUND')
-    })
+      context('not found', () => {
+        beforeEach(() => {
+          mountWithStatus('NOT_FOUND', msgKeys)
+        })
 
-    it('should render expected tooltip content', () => {
-      cy.get('.v-popper').trigger('mouseenter')
+        it('should render expected tooltip content', () => {
+          cy.get('.v-popper').trigger('mouseenter')
 
-      cy.findByTestId('cloud-data-tooltip-content')
-      .should('be.visible')
-      .and('contain', defaultMessages.specPage.latestRuns.tooltip.notConnected.replace('{0}', defaultMessages.specPage.latestRuns.tooltip.linkText))
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-      cy.findByTestId('reconnect-button')
-      .should('be.visible')
-      .click()
+          cy.findByTestId('reconnect-button')
+          .should('be.visible')
+          .click()
 
-      cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
+          cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
 
-      cy.percySnapshot()
+          cy.percySnapshot()
+        })
+      })
     })
   })
 })

@@ -3,8 +3,13 @@ import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<LastUpdatedHeader />', () => {
+  function mountWithProps (isGitAvailable: boolean) {
+    cy.mount(() => <div class="flex justify-around"><LastUpdatedHeader isGitAvailable={isGitAvailable} /></div>)
+  }
+
   it('mounts correctly with git available', () => {
-    cy.mount(<LastUpdatedHeader isGitAvailable/>)
+    mountWithProps(true)
+
     cy.findByTestId('last-updated-header').trigger('mouseenter')
 
     const expectedTooltipText = defaultMessages.specPage.lastUpdated.tooltip.gitInfoAvailable
@@ -16,7 +21,8 @@ describe('<LastUpdatedHeader />', () => {
   })
 
   it('mounts correctly with git unavailable', () => {
-    cy.mount(<LastUpdatedHeader isGitAvailable={false}/>)
+    mountWithProps(false)
+
     cy.findByTestId('last-updated-header').trigger('mouseenter')
 
     const expectedTooltipText = defaultMessages.specPage.lastUpdated.tooltip.gitInfoUnavailable

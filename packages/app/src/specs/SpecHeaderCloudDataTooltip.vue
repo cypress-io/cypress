@@ -14,7 +14,7 @@
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center p-4 items-center"
+        class="flex flex-col mx-4 text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div
@@ -36,12 +36,12 @@
         <div>
           <Button
             v-if="projectConnectionStatus === 'LOGGED_OUT'"
-            :prefix-icon="ConnectIcon"
+            :prefix-icon="UserOutlineIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="login-button"
             @click="emits('showLogin')"
           >
-            {{ t('topNav.login.actionLogin') }}
+            {{ t('specPage.dashboardLoginButton') }}
           </Button>
           <Button
             v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
@@ -80,6 +80,7 @@
 import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
+import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { RunsErrorRenderer_RequestAccessDocument, SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
