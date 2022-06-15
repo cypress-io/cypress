@@ -1,3 +1,4 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { CloudRunStatus } from '@packages/frontend-shared/src/generated/graphql'
 
 function specRowSelector (specFileName: string) {
@@ -36,6 +37,80 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
   // }
 }
 
+function simulateRunData () {
+  cy.remoteGraphQLIntercept(async (obj) => {
+    const fakeRuns = (statuses: string[], idPrefix: string) => {
+      return statuses.map((s, idx) => {
+        return {
+          __typename: 'CloudSpecRun',
+          id: `SpecRun_${idPrefix}_${idx}`,
+          status: s,
+          createdAt: new Date('2022-05-08T03:17:00').toISOString(),
+          completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+          runNumber: 432,
+          groupCount: 2,
+          specDuration: {
+            min: 143003, // 2:23
+            max: 159120, // 3:40
+            __typename: 'SpecDataAggregate',
+          },
+          testsFailed: {
+            min: 1,
+            max: 2,
+            __typename: 'SpecDataAggregate',
+          },
+          testsPassed: {
+            min: 22,
+            max: 23,
+            __typename: 'SpecDataAggregate',
+          },
+          testsSkipped: {
+            min: null,
+            max: null,
+            __typename: 'SpecDataAggregate',
+          },
+          testsPending: {
+            min: 1,
+            max: 2,
+            __typename: 'SpecDataAggregate',
+          },
+          url: 'https://google.com',
+        }
+      })
+    }
+
+    if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
+      // simulate network latency to allow for caching to register
+      await new Promise((r) => setTimeout(r, 5))
+
+      const statuses = obj.variables.specPath === 'cypress/e2e/accounts/accounts_list.spec.js' ?
+        ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
+        obj.variables.specPath === 'cypress/e2e/app.spec.js' ?
+          [] :
+          ['RUNNING', 'PASSED']
+
+      const runs = fakeRuns(statuses, obj.variables.specPath)
+      const averageDuration = obj.variables.specPath ===
+    'cypress/e2e/accounts/accounts_list.spec.js' ?
+        12000 : // 0:12
+        123000 // 2:03
+
+      obj.result.data.cloudSpecByPath = {
+        __typename: 'CloudProjectSpec',
+        retrievedAt: new Date().toISOString(),
+        id: `id${obj.variables.specPath}`,
+        specRuns: {
+          __typename: 'CloudSpecRunConnection',
+          nodes: runs,
+        },
+        averageDuration,
+      }
+    }
+
+    return obj.result
+  })
+}
+
 function allVisibleSpecsShouldBePlaceholders () {
   cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
   cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
@@ -60,11 +135,6 @@ function allVisibleSpecsShouldBePlaceholders () {
 
 describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
-    cy.withCtx((ctx) => {
-      // clear cloud cache
-      ctx.cloud.reset()
-    })
-
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
@@ -74,13 +144,16 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
     })
   })
 
+  afterEach(() => {
+    cy.withCtx((ctx) => {
+      // clear cloud cache
+      ctx.cloud.reset()
+    })
+  })
+
   context('when no runs are recorded', () => {
     beforeEach(() => {
       cy.loginUser()
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
@@ -110,11 +183,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
   context('when logged out', () => {
     beforeEach(() => {
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
-
       cy.visitApp()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
@@ -146,16 +214,43 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
     })
   })
 
+  context('when offline', () => {
+    beforeEach(() => {
+      cy.loginUser()
+
+      simulateRunData()
+
+      cy.visitApp()
+
+      cy.findByTestId('sidebar-link-specs-page').click()
+      cy.wait(300)
+      cy.goOffline()
+    })
+
+    it('shows placeholders for all visible specs and triggers a fetch after coming online', () => {
+      allVisibleSpecsShouldBePlaceholders()
+      cy.goOnline()
+      // TODO: fix flake caused by caching: sometimes fetch results are not
+      // visible and we're getting a skeleton instead
+      specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
+      cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
+    })
+
+    it('shows offline alert then hides it after coming online', () => {
+      cy.findByTestId('offline-alert')
+      .should('contain.text', defaultMessages.specPage.offlineWarning.title)
+      .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)
+
+      cy.goOnline()
+      cy.findByTestId('offline-alert').should('not.exist')
+    })
+  })
+
   context('when project disconnected', () => {
     beforeEach(() => {
       cy.loginUser()
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.project, 'projectId').resolves(null)
-      })
-
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
       })
 
       cy.visitApp()
@@ -194,10 +289,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       })
 
       cy.loginUser()
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.visitApp()
       cy.findByTestId('sidebar-link-specs-page').click()
@@ -211,82 +302,8 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
   context('when runs are recorded', () => {
     beforeEach(() => {
       cy.loginUser()
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
-      cy.remoteGraphQLIntercept(async (obj) => {
-        const fakeRuns = (statuses: string[], idPrefix: string) => {
-          return statuses.map((s, idx) => {
-            return {
-              __typename: 'CloudSpecRun',
-              id: `SpecRun_${idPrefix}_${idx}`,
-              status: s,
-              createdAt: new Date('2022-05-08T03:17:00').toISOString(),
-              completedAt: new Date('2022-05-08T05:17:00').toISOString(),
-              runNumber: 432,
-              groupCount: 2,
-              specDuration: {
-                min: 143003, // 2:23
-                max: 159120, // 3:40
-                __typename: 'SpecDataAggregate',
-              },
-              testsFailed: {
-                min: 1,
-                max: 2,
-                __typename: 'SpecDataAggregate',
-              },
-              testsPassed: {
-                min: 22,
-                max: 23,
-                __typename: 'SpecDataAggregate',
-              },
-              testsSkipped: {
-                min: null,
-                max: null,
-                __typename: 'SpecDataAggregate',
-              },
-              testsPending: {
-                min: 1,
-                max: 2,
-                __typename: 'SpecDataAggregate',
-              },
-              url: 'https://google.com',
-            }
-          })
-        }
-
-        if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
-          // simulate network latency to allow for caching to register
-          await new Promise((r) => setTimeout(r, 5))
-
-          const statuses = obj.variables.specPath === 'cypress/e2e/accounts/accounts_list.spec.js' ?
-            ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
-            obj.variables.specPath === 'cypress/e2e/app.spec.js' ?
-              [] :
-              ['RUNNING', 'PASSED']
-
-          const runs = fakeRuns(statuses, obj.variables.specPath)
-          const averageDuration = obj.variables.specPath ===
-        'cypress/e2e/accounts/accounts_list.spec.js' ?
-            12000 : // 0:12
-            123000 // 2:03
-
-          obj.result.data.cloudSpecByPath = {
-            __typename: 'CloudProjectSpec',
-            retrievedAt: new Date().toISOString(),
-            id: `id${obj.variables.specPath}`,
-            specRuns: {
-              __typename: 'CloudSpecRunConnection',
-              nodes: runs,
-            },
-            averageDuration,
-          }
-        }
-
-        return obj.result
-      })
+      simulateRunData()
 
       cy.visitApp()
       cy.findByTestId('sidebar-link-specs-page').click()
@@ -342,10 +359,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
   context('polling indicates new data', () => {
     beforeEach(() => {
       cy.loginUser()
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
         const fakeRuns = (statuses: string[], idPrefix: string) => {
@@ -452,10 +465,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
   context('polling indicates no new data', () => {
     beforeEach(() => {
       cy.loginUser()
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
         const fakeRuns = (statuses: string[], idPrefix: string) => {

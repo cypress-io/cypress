@@ -19,6 +19,7 @@
     <Alert
       v-if="isOffline"
       v-model="isOffline"
+      data-cy="offline-alert"
       status="warning"
       :title="t('specPage.offlineWarning.title')"
       class="mb-16px"
@@ -261,9 +262,11 @@ const route = useRoute()
 const { t } = useI18n()
 
 const isOnline = useOnline()
-const isOffline = ref(false)
+// defaulting to isOffline = true helps prevent failed attempts to fetch cloud
+// data when internet is not available at the time of mounting this component
+const isOffline = ref(true)
 
-watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue)
+watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
@@ -466,7 +469,7 @@ type CloudSpecItem = {
 }
 
 function shouldRefetch (item: CloudSpecItem) {
-  if (!isOnline) {
+  if (isOffline.value) {
     // Offline, no need to refetch
 
     return false
@@ -518,7 +521,7 @@ const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloud
 
 const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
 
-watch(debouncedDisplayedSpecIds, fetchMissingOrErroneousItems, { immediate: true })
+watch(debouncedDisplayedSpecIds, fetchMissingOrErroneousItems)
 
 watch(isOnline, fetchMissingOrErroneousItems)
 
