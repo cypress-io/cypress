@@ -8,12 +8,14 @@
       :key="props.gql?.statusType ?? undefined"
       placement="top"
       class="h-full"
+      data-cy="tooltip"
     >
       <div class="flex h-full gap-9px justify-start items-center">
         <div>
           <component
             :is="classes.icon"
             :class="classes.iconClasses"
+            :data-cy="classes.testId"
           />
         </div>
         <div
@@ -25,7 +27,7 @@
       <template
         #popper
       >
-        <div>
+        <div data-cy="git-info-tooltip">
           <p class="max-w-sm text-sm truncate overflow-hidden">
             {{ tooltipMainText }}
           </p>
@@ -79,14 +81,17 @@ const classes = computed(() => {
     created: {
       icon: DocumentIconPlus,
       iconClasses: 'icon-dark-jade-400 icon-light-jade-50',
+      testId: 'created-icon',
     },
     modified: {
       icon: DocumentIconPlusMinus,
       iconClasses: 'icon-dark-orange-400 icon-light-orange-50',
+      testId: 'modified-icon',
     },
     unmodified: {
       icon: CommitIcon,
       iconClasses: 'icon-light-gray-500',
+      testId: 'unmodified-icon',
     },
     noGitInfo: {},
   }[props.gql?.statusType || 'unmodified']

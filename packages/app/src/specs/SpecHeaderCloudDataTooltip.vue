@@ -15,6 +15,7 @@
     >
       <div
         class="flex flex-col text-sm text-center p-4 items-center"
+        data-cy="cloud-data-tooltip-content"
       >
         <div
           :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"
@@ -37,6 +38,7 @@
             v-if="projectConnectionStatus === 'LOGGED_OUT'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="login-button"
             @click="emits('showLogin')"
           >
             {{ t('topNav.login.actionLogin') }}
@@ -45,6 +47,7 @@
             v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="connect-button"
             @click="emits('showConnectToProject')"
           >
             {{ t("specPage.connectProjectButton") }}
@@ -53,6 +56,7 @@
             v-else-if="projectConnectionStatus === 'NOT_FOUND'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="reconnect-button"
             @click="emits('showConnectToProject')"
           >
             {{ t("specPage.reconnectProjectButton") }}
@@ -61,6 +65,7 @@
             v-else-if="projectConnectionStatus === 'UNAUTHORIZED'"
             :prefix-icon="SendIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="request-access-button"
             @click="requestAccess"
           >
             {{ t("specPage.requestAccessButton") }}

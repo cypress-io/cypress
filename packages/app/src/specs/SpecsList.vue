@@ -102,6 +102,7 @@
           :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
           :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
           :docs-url="'https://on.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs'"
+          data-cy="latest-runs-header"
           @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
@@ -115,6 +116,7 @@
           :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
           :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
           :docs-url="'https://on.cypress.io/specs-average-duration?utm_medium=Specs+Average+Duration+Tooltip&utm_campaign=Average+Duration'"
+          data-cy="average-duration-header"
           @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
