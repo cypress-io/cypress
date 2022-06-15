@@ -3,6 +3,7 @@ import type { Exchange } from '@urql/core'
 import { pipe, tap } from 'wonka'
 import jsonStableStringify from 'json-stable-stringify'
 import type { OperationDefinitionNode } from 'graphql'
+import { print } from 'graphql'
 
 declare global {
   interface Window {

@@ -64,7 +64,7 @@ export function makeCacheExchange (schema: any = urqlSchema) {
           const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string, errors: any }[] }
 
           for (const toPush of pushFragment) {
-            cache.writeFragment(toPush.fragment, toPush.data)
+            cache.writeFragment(toPush.fragment, toPush.data, toPush.variables ?? {})
 
             if (toPush.errors?.length) {
               // TODO: clean this up

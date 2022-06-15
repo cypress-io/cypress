@@ -35,6 +35,7 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
 
     it('shows placeholders when no runs are recorded', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100)) // simulate remote request
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
           obj.result.data.cloudSpecByPath = {
             __typename: 'CloudProjectSpecNotFound',
@@ -54,12 +55,6 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
       cy.visitApp()
       cy.findByTestId('sidebar-link-specs-page').click()
 
-      {
-        // TODO: remove code in this scope once the caching issue is resolved
-        cy.wait(300)
-        cy.reload()
-      }
-
       cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
@@ -69,6 +64,7 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
 
     it('shows correct data when runs are recorded', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100)) // simulate remote request
         const fakeRuns = (statuses: string[], idPrefix: string) => {
           return statuses.map((s, idx) => {
             return {
@@ -154,11 +150,6 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
       // initially, visible specs should be loading
       cy.get('[data-cy-row="accounts_list.spec.js"] [data-cy="run-status-dots-loading"]')
       cy.get('[data-cy-row="app.spec.js"] [data-cy="run-status-dots-loading"]')
-      {
-        // TODO: remove code in this scope once the caching issue is resolved
-        cy.wait(300)
-        cy.reload()
-      }
 
       cy.get(dotSelector('accounts_list.spec.js', 0)).should('have.class', 'icon-light-orange-400')
       cy.get(dotSelector('accounts_list.spec.js', 1)).should('have.class', 'icon-light-gray-300')
@@ -186,12 +177,7 @@ describe('ACI - Spec Explorer', { viewportWidth: 1200 }, () => {
       cy.get('.spec-list-container').scrollTo('bottom')
       // scrolling down should load z008.spec.js with loading status
       cy.get(dotsSkeletonSelector('z008.spec.js'))
-      {
-        // TODO: remove code in this scope once the caching issue is resolved
-        cy.wait(300)
-        cy.reload()
-        cy.get('.spec-list-container').scrollTo('bottom')
-      }
+      cy.get('.spec-list-container').scrollTo('bottom')
 
       // then z008.spec.js should show proper data
       cy.get(dotSelector('z008.spec.js', 0)).should('have.class', 'icon-light-gray-300')
