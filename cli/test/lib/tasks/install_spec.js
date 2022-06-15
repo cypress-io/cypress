@@ -498,9 +498,8 @@ describe('/lib/tasks/install', function () {
 
     it('generates the expected URL', () => {
       os.platform.returns('linux')
-      sinon.stub(os, 'arch').returns('x64')
 
-      expect(install._getBinaryUrlFromBuildInfo(buildInfo))
+      expect(install._getBinaryUrlFromBuildInfo('x64', buildInfo))
       .to.eq(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
     })
   })
