@@ -529,10 +529,10 @@ commands:
             else
               # external PR
 
-              GLOB="cypress/e2e/**/*spec.*"
+              GLOB="cypress/e2e/**/*cy.*"
 
               if [[ <<parameters.type>> == 'ct' ]]; then
-                GLOB="cypress/component/**/*spec.*"
+                GLOB="cypress/component/**/*cy.*"
               fi
 
               TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
