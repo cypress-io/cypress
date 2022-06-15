@@ -7,7 +7,7 @@
       v-if="classes.icon"
       :key="props.gql?.statusType ?? undefined"
       placement="top"
-      class="h-full"
+      class="h-full truncate"
       data-cy="tooltip"
     >
       <div class="flex h-full gap-9px justify-start items-center">
