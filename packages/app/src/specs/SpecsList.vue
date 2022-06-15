@@ -198,8 +198,8 @@
           </template>
           <template #average-duration>
             <AverageDuration
-              v-if="row.data.isLeaf && row.data.data?.cloudSpec?.data?.__typename === 'CloudProjectSpec'"
-              :gql="row.data.data.cloudSpec"
+              v-if="row.data.isLeaf"
+              :gql="row.data.data.cloudSpec ?? null"
             />
           </template>
         </SpecsListRowItem>
