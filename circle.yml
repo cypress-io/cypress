@@ -532,7 +532,7 @@ commands:
               GLOB="cypress/e2e/**/*spec.*"
 
               if [[ <<parameters.type>> == 'ct' ]]; then
-                FOLDER="cypress/component/**/*spec.*"
+                GLOB="cypress/component/**/*spec.*"
               fi
 
               TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
