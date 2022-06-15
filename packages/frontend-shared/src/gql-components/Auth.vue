@@ -65,7 +65,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
@@ -185,7 +184,8 @@ const handleLoginOrContinue = async () => {
 
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  //TODO: utm_source is left as is for historical reasons, if to be changed, it should be set to getUtmSource()
+  login.executeMutation({ utmMedium: props.utmMedium, utmSource: 'Test Runner' })
 }
 
 const handleLogout = () => {
@@ -195,7 +195,8 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  //TODO: utm_source is left as is for historical reasons, if to be changed, it should be set to getUtmSource()
+  login.executeMutation({ utmMedium: props.utmMedium, utmSource: 'Test Runner' })
 }
 
 const handleCancel = () => {
