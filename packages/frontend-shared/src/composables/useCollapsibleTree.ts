@@ -40,10 +40,10 @@ function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | n
 }
 
 export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> => {
-  const { cache } = options
+  const { cache, expandInitially } = options
   const treeNode = rawNode as UseCollapsibleTreeNode<T>
   const roots = parent ? collectRoots<T>(parent) : []
-  const [expanded, toggle] = useToggle(cache?.get(rawNode.id) ?? !!options.expandInitially)
+  const [expanded, toggle] = useToggle(cache?.get(rawNode.id) ?? !!expandInitially)
 
   watch(() => expanded.value, (newValue) => cache?.set(rawNode.id, newValue))
 
