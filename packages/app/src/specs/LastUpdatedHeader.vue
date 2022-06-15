@@ -23,7 +23,7 @@
           keypath="specPage.lastUpdated.tooltip.gitInfoAvailable"
         >
           <ExternalLink
-            href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
+            :href="docsUrl"
             class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
             {{ t('specPage.lastUpdated.tooltip.gitStatus') }}
@@ -36,7 +36,7 @@
           keypath="specPage.lastUpdated.tooltip.gitInfoUnavailable"
         >
           <ExternalLink
-            href="https://on.cypress.io/specs-last-updated?utm_medium=Specs+Last+Updated+Tooltip&utm_campaign=Last+Updated"
+            :href="docsUrl"
             class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
             {{ t('specPage.lastUpdated.tooltip.gitInfo') }}
@@ -49,12 +49,24 @@
 
 <script setup lang="ts">
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue'
 const { t } = useI18n()
 
 const props = defineProps<{
   isGitAvailable: boolean
 }>()
+
+const docsUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/specs-last-updated',
+    params: {
+      utm_medium: 'Specs Last Updated Tooltip',
+      utm_campaign: 'Last Updated',
+    },
+  })
+})
 
 </script>
