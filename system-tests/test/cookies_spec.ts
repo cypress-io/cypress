@@ -183,6 +183,7 @@ describe('e2e cookies', () => {
       https: true,
     }],
     settings: {
+      e2e: {},
       hosts: {
         '*.foo.com': '127.0.0.1',
         '*.bar.net': '127.0.0.1',
@@ -339,6 +340,7 @@ describe('cross-origin cookies, set:cookies', () => {
         '*.bar.net': '127.0.0.1',
         '*.cypress.test': '127.0.0.1',
       },
+      e2e: {},
     },
 
   })

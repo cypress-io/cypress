@@ -3,6 +3,7 @@ import { devServer } from '@cypress/vite-dev-server'
 
 export default defineConfig({
   component: {
+    specPattern: 'src/**/*.ts',
     supportFile: false,
     async setupNodeEvents (_, config) {
       await import('find-up')
