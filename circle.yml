@@ -529,13 +529,13 @@ commands:
             else
               # external PR
 
-              FOLDER=e2e
+              GLOB="cypress/e2e/**/*spec.*"
 
               if [[ <<parameters.type>> == 'ct' ]]; then
-                FOLDER=component
+                FOLDER="cypress/component/**/*spec.*"
               fi
 
-              TESTFILES=$(circleci tests glob "cypress/$FOLDER/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
