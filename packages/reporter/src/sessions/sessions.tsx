@@ -28,6 +28,10 @@ class Sessions extends React.Component<SessionsProps> {
   render () {
     const model = this.props.model
 
+    if (!_.size(model)) {
+      return null
+    }
+
     return (
       <div
         className={cs('runnable-agents-region', {
@@ -49,6 +53,7 @@ class Sessions extends React.Component<SessionsProps> {
                     onClick={() => events.emit('clear:session')}
                   ><span><i className="fas fa-ban" /> Clear All Sessions</span></div>}
                 contentClass='instrument-content'
+                showExpander
               >
                 <div>
                   {_.map(model, (sess) => {

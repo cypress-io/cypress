@@ -20,7 +20,8 @@ export interface HookHeaderProps {
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
   <span className='hook-name'>
-    {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+    {model.hookName} {number && `(${number})`}
+    {model.failed && <span className='hook-failed-message'> (failed)</span>}
   </span>
 )
 
@@ -66,7 +67,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
       headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={true}
+      isOpen
+      showExpander
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}

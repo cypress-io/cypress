@@ -10,7 +10,7 @@
     @mousemove="handleMousemove"
   >
     <div
-      v-show="showPanel1"
+      v-if="showPanel1"
       data-cy="specs-list-panel"
       class="h-full flex-shrink-0 z-20 relative"
       :style="{width: `${panel1Width}px`}"

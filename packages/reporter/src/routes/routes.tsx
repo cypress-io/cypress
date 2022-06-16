@@ -44,42 +44,49 @@ export interface RoutesProps {
   model: RouteListModel
 }
 
-const Routes = observer(({ model }: RoutesProps) => (
-  <div
-    className={cs('runnable-routes-region', {
-      'no-routes': !model.routes.length,
-    })}
-  >
-    <div className='instruments-container'>
-      <ul className='hooks-container'>
-        <li className='hook-item'>
-          <Collapsible
-            header={`Routes (${model.routes.length})`}
-            headerClass='hook-header'
-            contentClass='instrument-content'
-          >
-            <table>
-              <thead>
-                <tr>
-                  <th>Method</th>
-                  <th>Route Matcher</th>
-                  <th>Stubbed</th>
-                  <th>Alias</th>
-                  <th>
-                    <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
-                      <span>#</span>
-                    </Tooltip>
-                  </th>
-                </tr>
-              </thead>
-              <RoutesList model={model} />
-            </table>
-          </Collapsible>
-        </li>
-      </ul>
+const Routes = observer(({ model }: RoutesProps) => {
+  if (!model.routes.length) {
+    return null
+  }
+
+  return (
+    <div
+      className={cs('runnable-routes-region', {
+        'no-routes': !model.routes.length,
+      })}
+    >
+      <div className='instruments-container'>
+        <ul className='hooks-container'>
+          <li className='hook-item'>
+            <Collapsible
+              header={`Routes (${model.routes.length})`}
+              headerClass='hook-header'
+              contentClass='instrument-content'
+              showExpander
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Route Matcher</th>
+                    <th>Stubbed</th>
+                    <th>Alias</th>
+                    <th>
+                      <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
+                        <span>#</span>
+                      </Tooltip>
+                    </th>
+                  </tr>
+                </thead>
+                <RoutesList model={model} />
+              </table>
+            </Collapsible>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-))
+  )
+})
 
 export { Route, RoutesList }
 

@@ -134,7 +134,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
   })
 
   describe('when panels are hidden', () => {
-    it('panel 1 can be hidden with a prop', () => {
+    it('panel 1 can be removed with a prop', () => {
       cy.mount(() => (
         <div class="h-screen">
           <ResizablePanels
@@ -144,7 +144,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
           />
         </div>))
 
-      cy.contains('panel1').should('not.be.visible')
+      cy.contains('panel1').should('not.exist')
       assertWidth('panel2', defaultPanel2Width)
       dragHandleToClientX('panel2', 1000)
       assertWidth('panel2', 1000)
@@ -180,8 +180,8 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
           />
         </div>))
 
-      cy.contains('panel1').should('not.be.visible')
-      cy.contains('panel2').should('not.be.visible')
+      cy.contains('panel1').should('not.exist')
+      cy.contains('panel2').should('not.visible')
       assertWidth('panel3', 1500)
     })
   })
