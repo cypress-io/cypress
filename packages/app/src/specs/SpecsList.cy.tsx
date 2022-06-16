@@ -129,14 +129,40 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@header').should('be.visible').and('have.text', 'Last updated')
       })
 
-      it('should display latest runs column', () => {
-        cy.findByTestId('latest-runs-header').as('header')
-        cy.get('@header').should('be.visible').and('have.text', 'Latest runs')
+      context('when screen is wide', { viewportWidth: 1200 }, () => {
+        it('should display latest runs column with full text', () => {
+          cy.findByTestId('latest-runs-header').within(() => {
+            cy.findByTestId('short-header-text').should('not.be.visible')
+            cy.findByTestId('full-header-text').should('be.visible')
+            .and('have.text', 'Latest runs')
+          })
+        })
+
+        it('should display average duration column with full text', () => {
+          cy.findByTestId('average-duration-header').within(() => {
+            cy.findByTestId('short-header-text').should('not.be.visible')
+            cy.findByTestId('full-header-text').should('be.visible')
+            .and('have.text', 'Average duration')
+          })
+        })
       })
 
-      it('should display average duration column', () => {
-        cy.findByTestId('average-duration-header').as('header')
-        cy.get('@header').should('be.visible').and('have.text', 'Average duration')
+      context('when screen is narrow', { viewportWidth: 800 }, () => {
+        it('should display latest runs column with short text', () => {
+          cy.findByTestId('latest-runs-header').within(() => {
+            cy.findByTestId('full-header-text').should('not.be.visible')
+            cy.findByTestId('short-header-text').should('be.visible')
+            .and('have.text', 'Runs')
+          })
+        })
+
+        it('should display average duration column with full text', () => {
+          cy.findByTestId('average-duration-header').within(() => {
+            cy.findByTestId('full-header-text').should('not.be.visible')
+            cy.findByTestId('short-header-text').should('be.visible')
+            .and('have.text', 'Duration')
+          })
+        })
       })
     })
   })

@@ -8,8 +8,14 @@
       class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
       tabindex="0"
     >
-      <span class="hidden lg:flex">{{ t(headerTextKeyPath) }}</span>
-      <span class="lg:hidden">{{ t(headerShortTextKeyPath || headerTextKeyPath) }}</span>
+      <span
+        class="hidden lg:flex"
+        data-cy="full-header-text"
+      >{{ t(headerTextKeyPath) }}</span>
+      <span
+        class="lg:hidden"
+        data-cy="short-header-text"
+      >{{ t(headerShortTextKeyPath || headerTextKeyPath) }}</span>
     </div>
     <template
       #popper
