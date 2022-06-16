@@ -246,6 +246,8 @@ export class ProjectConfigIpc extends EventEmitter {
     let isProjectUsingESModules = false
 
     try {
+      // TODO: convert this to async FS methods
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
 
       isProjectUsingESModules = pkgJson.type === 'module'

@@ -1,4 +1,14 @@
-//
+// if running in production mode (CYPRESS_INTERNAL_ENV)
+// all transpile should have been done already
+// and these calls should do nothing
+require('@packages/ts/register')
+
+const { patchFs } = require('./lib/util/patch-fs')
+const fs = require('fs')
+
+// prevent EMFILE errors
+patchFs(fs)
+
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -16,12 +26,6 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 require('./lib/unhandled_exceptions')
 
 process.env.UV_THREADPOOL_SIZE = 128
-
-require('graceful-fs').gracefulify(require('fs'))
-// if running in production mode (CYPRESS_INTERNAL_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()

@@ -597,8 +597,8 @@
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",
       "step1": {
-        "title": "Rename existing specs",
-        "description": "In this step, we'll automatically rename and move your existing spec files.",
+        "title": "Migrate existing specs",
+        "description": "In this step, we'll automatically rename and/or move your existing spec files as needed.",
         "button": "Rename these specs for me",
         "buttonSkip": "Skip renaming specs",
         "buttonRenameFolder": "Rename the folder for me"
