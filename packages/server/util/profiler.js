@@ -21,8 +21,18 @@ class Profiler {
   async stop () {
     if (useProfiler) {
       const inspectorProf = await inspector.profiler.stop()
+      let suffix = ''
 
-      fs.writeFileSync(`packages/server/results/${this._workflow}${useSnapshot ? '-snapshot' : ''}${snapshotDev ? '-dev' : '-prod'}.cpuprofile`, JSON.stringify(inspectorProf))
+      if (useSnapshot) {
+        suffix += '-snapshot'
+        if (snapshotDev) {
+          suffix += '-dev'
+        } else {
+          suffix += '-prod'
+        }
+      }
+
+      fs.writeFileSync(`packages/server/results/${this._workflow}${suffix}.cpuprofile`, JSON.stringify(inspectorProf))
     }
   }
 }

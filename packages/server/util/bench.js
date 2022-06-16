@@ -24,7 +24,18 @@ class Benchmark {
     this._workflow = workflow
 
     if (!useProfiler) {
-      const filename = `${this._workflow}${useSnapshot ? '-snapshot' : ''}${snapshotDev ? '-dev' : '-prod'}.json`
+      let suffix = ''
+
+      if (useSnapshot) {
+        suffix += '-snapshot'
+        if (snapshotDev) {
+          suffix += '-dev'
+        } else {
+          suffix += '-prod'
+        }
+      }
+
+      const filename = `${this._workflow}${suffix}.json`
 
       this.filePath = path.join(__dirname, '..', 'results', filename)
 
