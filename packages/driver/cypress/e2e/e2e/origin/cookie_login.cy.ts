@@ -116,7 +116,7 @@ describe('cy.origin - cookie login', () => {
       cy.document().its('cookie').should('equal', `user=${username}`)
     })
 
-    it('cy.clearCookie() -> logged out', () => {
+    it('cy.clearCookie() -> not logged in', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
@@ -129,7 +129,7 @@ describe('cy.origin - cookie login', () => {
       verifyLocalhostNotLoggedIn()
     })
 
-    it('cy.clearCookies() -> logged out', () => {
+    it('cy.clearCookies() -> not logged in', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
@@ -411,7 +411,7 @@ describe('cy.origin - cookie login', () => {
       cy.get('[data-cy="cookie-login"]').click()
     })
 
-    it('expired -> logged out', () => {
+    it('expired -> not logged in', () => {
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         const expires = (new Date()).toUTCString()
 
@@ -458,7 +458,7 @@ describe('cy.origin - cookie login', () => {
       cy.get('[data-cy="cookie-login"]').click()
     })
 
-    it('past max-age -> logged out', () => {
+    it('past max-age -> not logged in', () => {
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
@@ -495,7 +495,7 @@ describe('cy.origin - cookie login', () => {
     })
 
     describe('preference over Expires', () => {
-      it('past Max-Age, before Expires -> logged out', () => {
+      it('past Max-Age, before Expires -> not logged in', () => {
         const expires = dayjs().add(1, 'day').toDate().toUTCString()
 
         cy.origin('http://foobar.com:3500', { args: { username, expires } }, ({ username, expires }) => {
