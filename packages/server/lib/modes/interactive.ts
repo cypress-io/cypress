@@ -165,11 +165,18 @@ export = {
   },
 
   async run (options, ctx: DataContext) {
-    const [, port] = await Promise.all([
+    await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
     ])
 
-    return this.ready(options, port)
+    return
+
+    // const [, port] = await Promise.all([
+    //   app.whenReady(),
+    //   makeGraphQLServer(),
+    // ])
+
+    // return this.ready(options, port)
   },
 }
