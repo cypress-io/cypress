@@ -19,8 +19,8 @@ describe('specChange subscription', () => {
       .should('contain', 'dom-content.spec.js')
       .should('contain', 'dom-list.spec.js')
 
-      cy.withCtx((ctx, o) => {
-        ctx.actions.file.writeFileInProject(o.path, '')
+      cy.withCtx(async (ctx, o) => {
+        await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="spec-item-link"]')

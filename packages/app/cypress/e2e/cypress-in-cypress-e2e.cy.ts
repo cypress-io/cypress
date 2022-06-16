@@ -259,8 +259,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       }).invoke('connected').should('be.true')
     })
 
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject(o.path, `
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `
 describe('Dom Content', () => {
   it('renders the new test content', () => {
     cy.visit('cypress/e2e/dom-content.html')

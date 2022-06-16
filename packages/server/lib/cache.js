@@ -191,10 +191,4 @@ module.exports = {
   // for testing purposes
 
   __get: fileUtil.get.bind(fileUtil),
-
-  __removeSync () {
-    fileUtil._cache = {}
-
-    return fs.removeSync(this.path)
-  },
 }
