@@ -188,8 +188,8 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
     it('shows correct tooltips with log in buttons', () => {
       cy.get('.underline').contains('Latest runs').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('View the Status of the latest runs from the Cypress Dashboard')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Log In').click()
+      cy.contains('.v-popper__popper--shown', 'View the status of your latest runs in the Cypress Dashboard')
+      cy.get('.v-popper__popper--shown button').should('have.text', 'Log in to Cypress Dashboard').click()
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
         cy.get('[aria-label="Close"]').click()
@@ -198,8 +198,8 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       cy.get('.underline').contains('Latest runs').trigger('mouseleave')
 
       cy.get('.underline').contains('Average duration').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('View the Average spec duration of the latest runs from the Cypress Dashboard')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Log In').click()
+      cy.contains('.v-popper__popper--shown', 'View the average spec durations of your latest runs in the Cypress Dashboard')
+      cy.get('.v-popper__popper--shown button').should('have.text', 'Log in to Cypress Dashboard').click()
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
         cy.get('[aria-label="Close"]').click()
@@ -226,7 +226,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
     it('shows correct tooltips with log in buttons', () => {
       cy.get('.underline').contains('Latest runs').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('View the Status of the latest runs from the Cypress Dashboard')
+      cy.contains('.v-popper__popper--shown', 'View the status of your latest runs in the Cypress Dashboard')
       cy.get('.v-popper__popper--shown button').should('have.text', 'Connect your project').click()
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
         cy.get('[aria-label="Close"]').click()
@@ -235,7 +235,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       cy.get('.underline').contains('Latest runs').trigger('mouseleave')
 
       cy.get('.underline').contains('Average duration').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('View the Average spec duration of the latest runs from the Cypress Dashboard')
+      cy.contains('.v-popper__popper--shown', 'View the average spec durations of your latest runs in the Cypress Dashboard')
       cy.get('.v-popper__popper--shown button').should('have.text', 'Connect your project').click()
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
         cy.get('[aria-label="Close"]').click()
@@ -274,12 +274,12 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
     it('shows correct tooltips', () => {
       cy.get('.underline').contains('Latest runs').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('Status of the latest runs from the Cypress Dashboard')
+      cy.contains('.v-popper__popper--shown', 'The status of your latest runs in the Cypress Dashboard')
       cy.get('.v-popper__popper--shown button').should('not.exist')
       cy.get('.underline').contains('Latest runs').trigger('mouseleave')
 
       cy.get('.underline').contains('Average duration').trigger('mouseenter')
-      cy.get('.v-popper__popper--shown').contains('Average spec duration of the latest runs from the Cypress Dashboard')
+      cy.contains('.v-popper__popper--shown', 'The average spec durations of your latest runs in the Cypress Dashboard')
       cy.get('.v-popper__popper--shown button').should('not.exist')
       cy.get('.underline').contains('Average duration').trigger('mouseleave')
     })
