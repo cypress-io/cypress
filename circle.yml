@@ -542,9 +542,7 @@ commands:
                 GLOB="src/**/*cy.*"
               fi
 
-              echo $(circleci tests glob "$GLOB")
-
-              TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               # To run the `yarn` command, we need to walk out of the package folder.
