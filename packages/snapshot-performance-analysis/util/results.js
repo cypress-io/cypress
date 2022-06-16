@@ -34,7 +34,7 @@ class ResultsManager {
       }
     }
 
-    const filename = `perf-1-${run}.json`
+    const filename = `${run}.json`
 
     this.filePath = path.join(__dirname, '..', 'results', filename)
 

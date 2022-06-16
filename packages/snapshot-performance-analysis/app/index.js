@@ -21,7 +21,7 @@ const deferred = process.env.DEFERRED != null
 const snapshotDev = process.env.SNAPSHOT_DEV != null
 
 const results = new ResultsManager({
-  run: process.env.RUN || '',
+  run: 'startup',
   assetType,
   profile,
   compileCache,
