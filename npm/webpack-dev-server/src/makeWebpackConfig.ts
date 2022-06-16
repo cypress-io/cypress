@@ -1,4 +1,5 @@
 import { debug as debugFn } from 'debug'
+
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
@@ -7,6 +8,7 @@ import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
+import type { WebpackConfiguration } from 'webpack-dev-server'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -140,7 +142,7 @@ export async function makeWebpackConfig (
     : path.join(devServerPublicPathRoute, posixSeparator)
     .replace(OsSeparatorRE, posixSeparator)
 
-  const dynamicWebpackConfig = {
+  const dynamicWebpackConfig: WebpackConfiguration = {
     output: {
       publicPath,
     },
@@ -153,6 +155,21 @@ export async function makeWebpackConfig (
         webpack,
       }),
     ],
+  }
+
+  try {
+    const reactDom = await import('react-dom/package.json')
+    const version = (reactDom?.default?.version || reactDom?.version)
+    const versionRe = /(\d.+?)\./
+    const match = version.match(versionRe)
+
+    debug('found react-dom version %s', reactDom.version)
+    if (match && parseInt(match[1]) < 18) {
+      debug('detected react-dom %s: marking react-dom/client as external', match[1])
+      dynamicWebpackConfig.externals = ['react-dom/client']
+    }
+  } catch (e) {
+    debug('no react-dom found, or encountered error parsing verion', e)
   }
 
   const mergedConfig = merge(

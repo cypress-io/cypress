@@ -133,10 +133,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 1)
-   38 modules
-
-ERROR in /home/lachlan/code/work/cypress-10.0-release/cli/react/dist/cypress-react.esm-bundler.js
-Module not found: Error: Can't resolve 'react-dom/client' in '/home/lachlan/code/work/cypress-10.0-release/cli/react/dist'
+   39 modules
 
 
   ✓ renders hello world
@@ -196,10 +193,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 1)
-   45 modules
-
-ERROR in /home/lachlan/code/work/cypress-10.0-release/cli/react/dist/cypress-react.esm-bundler.js
-Module not found: Error: Can't resolve 'react-dom/client' in '/home/lachlan/code/work/cypress-10.0-release/cli/react/dist'
+   46 modules
 
 
   ✓ renders hello world
