@@ -1,18 +1,18 @@
 function updateProjectIdInCypressConfig (value: string) {
-  return cy.withCtx((ctx, o) => {
-    let config = ctx.actions.file.readFileInProject('cypress.config.js')
+  return cy.withCtx(async (ctx, o) => {
+    let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
     config = config.replace(`projectId: 'abc123'`, `projectId: '${o.value}'`)
-    ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    await ctx.actions.file.writeFileInProject('cypress.config.js', config)
   }, { value })
 }
 
 function updateViewportHeightInCypressConfig (value: number) {
-  return cy.withCtx((ctx, o) => {
-    let config = ctx.actions.file.readFileInProject('cypress.config.js')
+  return cy.withCtx(async (ctx, o) => {
+    let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
     config = config.replace(`e2e: {`, `e2e: {\n  viewportHeight: ${o.value},\n`)
-    ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    await ctx.actions.file.writeFileInProject('cypress.config.js', config)
   }, { value })
 }
 

@@ -228,6 +228,76 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(config.projectId).to.equal('newProjectId')
       })
     })
+
+    it('displays correct error message if the cloud mutation returns UNAUTHORIZED', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          throw new Error('Unauthorized: You are not member of the organization.')
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+
+      cy.get('[data-cy="alert"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.baseError.title)
+        cy.get('[data-cy="alert-suffix-icon"]').should('not.exist')
+      })
+
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.contains('Unauthorized: You are not member of the organization.')
+      })
+    })
+
+    it('displays correct error message if the cloud mutation returns INTERNAL_SERVER_ERROR', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          throw new Error('Unreachable')
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+
+      cy.get('[data-cy="alert"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
+        cy.get('[data-cy="alert-suffix-icon"]').should('exist')
+      })
+
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.internalServerError.description.replace('{0}', 'Support Page'))
+      })
+    })
   })
 
   context('Runs - Cannot Find Project', () => {
@@ -597,6 +667,73 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.goOnline()
 
       cy.get('[data-cy=warning-alert]').should('not.exist')
+    })
+
+    it('shows correct message on create org modal', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.createOrg.button,
+        href: 'http://dummy.cypress.io/organizations/create',
+      })
+
+      cy.goOffline()
+
+      cy.get('[data-cy=standard-modal]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+    })
+
+    it('shows correct message on connect project modal', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          const nodes = obj.result.data.cloudViewer.organizations.nodes
+
+          nodes.push({ ...nodes[0], name: 'aaa', id: 'aaa-id' })
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.selectProject.manageOrgs,
+        href: 'http://dummy.cypress.io/organizations',
+      })
+
+      cy.goOffline()
+
+      cy.get('[data-cy=standard-modal]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
     })
   })
 

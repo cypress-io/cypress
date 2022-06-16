@@ -29,16 +29,15 @@ export class VersionsDataSource {
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
     this._currentTestingType = this.ctx.coreData.currentTestingType
-    this.#ensureData()
   }
 
-  #ensureData () {
+  #populateVersionMetadata () {
     let versionData = this.ctx.coreData.versionData
 
     if (!versionData) {
       versionData = {
-        latestVersion: this.getLatestVersion().catch((e) => pkg.version),
-        npmMetadata: this.getVersionMetadata().catch((e) => ({})),
+        latestVersion: this.#getLatestVersion().catch((e) => pkg.version),
+        npmMetadata: this.#getVersionMetadata().catch((e) => ({})),
       }
 
       this.ctx.update((d) => {
@@ -65,7 +64,7 @@ export class VersionsDataSource {
    * }
    */
   async versionData (): Promise<VersionData> {
-    const versionData = this.#ensureData()
+    const versionData = this.#populateVersionMetadata()
     const [latestVersion, npmMetadata] = await Promise.all([
       versionData.latestVersion,
       versionData.npmMetadata,
@@ -93,13 +92,13 @@ export class VersionsDataSource {
       this._currentTestingType = this.ctx.coreData.currentTestingType
       this.ctx.update((d) => {
         if (d.versionData) {
-          d.versionData.latestVersion = this.getLatestVersion()
+          d.versionData.latestVersion = this.#getLatestVersion()
         }
       })
     }
   }
 
-  private async getVersionMetadata (): Promise<Record<string, string>> {
+  async #getVersionMetadata (): Promise<Record<string, string>> {
     const now = new Date().toISOString()
     const DEFAULT_RESPONSE = {
       [pkg.version]: now,
@@ -127,12 +126,11 @@ export class VersionsDataSource {
     }
   }
 
-  private async getLatestVersion (): Promise<string> {
+  async #getLatestVersion (): Promise<string> {
     if (this.ctx.isRunMode) {
       return pkg.version
     }
 
-    const url = REMOTE_MANIFEST_URL
     const id = await VersionsDataSource.machineId()
 
     const manifestHeaders: HeadersInit = {
@@ -151,8 +149,20 @@ export class VersionsDataSource {
       manifestHeaders['x-machine-id'] = id
     }
 
+    const devServer = this.ctx.lifecycleManager?.loadedConfigFile?.component?.devServer
+
+    if (typeof devServer === 'object') {
+      if (devServer.bundler) {
+        manifestHeaders['x-dev-server'] = devServer.bundler
+      }
+
+      if (devServer.framework) {
+        manifestHeaders['x-framework'] = devServer.framework
+      }
+    }
+
     try {
-      const manifestResponse = await this.ctx.util.fetch(url, {
+      const manifestResponse = await this.ctx.util.fetch(REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
 
@@ -166,7 +176,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %o', url, e)
+      debug('Error fetching %s: %o', REMOTE_MANIFEST_URL, e)
 
       return pkg.version
     } finally {

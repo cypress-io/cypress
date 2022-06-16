@@ -76,7 +76,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
-    throw new Error('Platform mismatch')
+    throw new Error(`Attempting to cross-build, which is not supported. Local platform: '${os.platform()}' --platform: '${platform}'`)
   }
 
   const DIST_DIR = meta.distDir()
