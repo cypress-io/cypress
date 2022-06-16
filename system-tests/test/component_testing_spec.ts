@@ -69,11 +69,13 @@ describe('component testing projects', function () {
   })
 })
 
-describe(`React major versions`, function () {
+const REACT_MAJOR_VERSIONS = ['17', '18'] as const
+
+describe(`React major versions with Vite`, function () {
   systemTests.setup()
 
-  ;['17', '18'].forEach((majorVersion) => {
-    it(`executes all of the tests for React v${majorVersion}`, function () {
+  for (const majorVersion of REACT_MAJOR_VERSIONS) {
+    it(`executes all of the tests for React v${majorVersion} with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite.config.ts',
@@ -84,5 +86,27 @@ describe(`React major versions`, function () {
         expectedExitCode: 0,
       })
     })
-  })
+  }
+})
+
+// TODO: Get these to pass.
+// React 18 works fine, but the module resolution is messy due to
+// how we use symlinks in system-tests, causing the `import('react-dom/client')
+// to incorrectly resolve to `cypress/cli/react/dist`
+describe(`React major versions with Webpack`, function () {
+  systemTests.setup()
+
+  for (const majorVersion of REACT_MAJOR_VERSIONS) {
+    it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
+      return systemTests.exec(this, {
+        project: `react${majorVersion}`,
+        configFile: 'cypress-webpack.config.ts',
+        spec: 'src/App.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
+      })
+    })
+  }
 })

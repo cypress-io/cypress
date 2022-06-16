@@ -4,6 +4,10 @@
 module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
+    alias: {
+      react: require.resolve('react'),
+      'react-dom': require.resolve('react-dom'),
+    }
   },
   module: {
     rules: [

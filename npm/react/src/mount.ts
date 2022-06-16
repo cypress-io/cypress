@@ -96,42 +96,66 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       children: React.ReactNode
     }).children
 
-    reactDomToUse.render(reactComponent, el)
+    function wrapAndRender () {
+      if (options.log !== false) {
+        Cypress.log({
+          name: type,
+          type: 'parent',
+          message: [message],
+          // @ts-ignore
+          $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+          consoleProps: () => {
+            return {
+              // @ts-ignore protect the use of jsx functional components use ReactNode
+              props: jsx.props,
+              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
+              home: 'https://github.com/cypress-io/cypress',
+            }
+          },
+        }).snapshot('mounted').end()
+      }
 
-    if (options.log !== false) {
-      Cypress.log({
-        name: type,
-        type: 'parent',
-        message: [message],
-        // @ts-ignore
-        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-        consoleProps: () => {
-          return {
-            // @ts-ignore protect the use of jsx functional components use ReactNode
-            props: jsx.props,
-            description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-            home: 'https://github.com/cypress-io/cypress',
-          }
-        },
-      }).snapshot('mounted').end()
+      return (
+        // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
+        cy.wrap<React.ReactNode>(userComponent, { log: false })
+        .as(displayName)
+        .then(() => {
+          return cy.wrap<MountReturn>({
+            component: userComponent,
+            rerender: (newComponent) => _mount('rerender', newComponent, options, key),
+            unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+          }, { log: false })
+        })
+        // by waiting, we delaying test execution for the next tick of event loop
+        // and letting hooks and component lifecycle methods to execute mount
+        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+        .wait(0, { log: false })
+      )
     }
 
-    return (
-      // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-      cy.wrap<React.ReactNode>(userComponent, { log: false })
-      .as(displayName)
-      .then(() => {
-        return cy.wrap<MountReturn>({
-          component: userComponent,
-          rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
-        }, { log: false })
+    const isUsingReact18 = React.version.startsWith('18.') && (reactDomToUse ?? ReactDOM).version.startsWith('18.')
+
+    if (isUsingReact18) {
+      // @ts-ignore this will exist if React 18 is installed, but
+      // we are still on React 17 in the monorepo, so we do not have the
+      // correct types.
+      return import('react-dom/client')
+      .then((mod) => {
+        const root = mod.createRoot(el)
+
+        root.render(reactComponent)
+
+        return wrapAndRender()
       })
-      // by waiting, we delaying test execution for the next tick of event loop
-      // and letting hooks and component lifecycle methods to execute mount
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(0, { log: false })
-    )
+      .catch((err) => {
+        // TODO: resolve modules correctly under system tests
+        // Just fail silently for now
+      })
+    }
+
+    reactDomToUse.render(reactComponent, el)
+
+    return wrapAndRender()
   // Bluebird types are terrible. I don't think the return type can be carried without this cast
   }) as unknown as globalThis.Cypress.Chainable<MountReturn>
 }

@@ -24,6 +24,7 @@ function createEntry (options) {
     external: [
       'react',
       'react-dom',
+      'react-dom/client',
     ],
     plugins: [
       resolve(), commonjs(),
@@ -36,6 +37,7 @@ function createEntry (options) {
       globals: {
         react: 'React',
         'react-dom': 'ReactDOM',
+        'react-dom/client': 'ReactDOMClient',
       },
     },
   }
