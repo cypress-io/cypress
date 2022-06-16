@@ -22,13 +22,14 @@ const generateTsConfigContent = (specPattern: SpecPattern, projectRoot: string):
 
     return []
   }
+  // removed types due to system tests complaining
+  // "types": ["${getFilePath('node_modules/cypress')}"],
 
   return `
 {
   "extends": "${getFilePath('tsconfig.json')}",
   "compilerOptions": {
     "outDir": "${getFilePath('out-tsc/cy')}",
-    "types": ["${getFilePath('node_modules/cypress')}"],
     "allowSyntheticDefaultImports": true
   },
   "include": [${getIncludePaths().map((x: string) => `"${x}"`)}]
@@ -55,7 +56,9 @@ export async function getWebpackConfig (tmpDir: string, jitMode = true, projectR
 
     const IvyLinkerPath = require.resolve('@angular/compiler-cli/linker/babel', { paths: [projectRoot] })
 
-    IvyLinker = await dynamicImport(IvyLinkerPath)
+    const IvyLinkerModule = await dynamicImport(IvyLinkerPath)
+
+    IvyLinker = IvyLinkerModule.default
   } catch (e) {
     throw new Error(`@ngtools/webpack is not installed. Please run "npm install @ngtools/webpack".${ e}`)
   }
