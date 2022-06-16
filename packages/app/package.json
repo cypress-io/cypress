@@ -72,9 +72,7 @@
     "wonka": "^4.0.15"
   },
   "files": [
-    "dist",
-    "lib",
-    "src"
+    "dist"
   ],
   "vite": {
     "optimizeDeps": {

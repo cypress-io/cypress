@@ -28,7 +28,7 @@ describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
   let fetchStub: sinon.SinonStub
   let getUserStub: sinon.SinonStub
-  let onErrorStub: sinon.SinonStub
+  let logoutStub: sinon.SinonStub
   let ctx: DataContext
 
   beforeEach(() => {
@@ -37,13 +37,12 @@ describe('CloudDataSource', () => {
     fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
     getUserStub = sinon.stub()
     getUserStub.returns({ authToken: '1234' })
-    onErrorStub = sinon.stub()
+    logoutStub = sinon.stub()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
-      logout: sinon.stub(),
-      onError: onErrorStub,
+      logout: logoutStub,
     })
   })
 
@@ -164,6 +163,40 @@ describe('CloudDataSource', () => {
       expect((await requiredResult).data).to.eql(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE.data)
 
       expect(fetchStub).to.have.been.calledTwice
+    })
+
+    it('returns error property on response', async () => {
+      fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
+
+      const result = cloudDataSource.executeRemoteGraphQL({
+        document: FAKE_USER_QUERY,
+        variables: {},
+        operationType: 'query',
+      })
+
+      const resolved = await result
+
+      expect(resolved.data).to.eql(undefined)
+      expect(resolved.errors).to.exist
+      expect(resolved.error.networkError.message).to.eql('No Content')
+    })
+
+    it('logout user on 401 response', async () => {
+      fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
+
+      const result = cloudDataSource.executeRemoteGraphQL({
+        document: FAKE_USER_QUERY,
+        variables: {},
+        operationType: 'query',
+      })
+
+      const resolved = await result
+
+      expect(resolved.data).to.eql(undefined)
+      expect(resolved.errors).to.exist
+      expect(resolved.error.networkError.message).to.eql('Unauthorized')
+
+      expect(logoutStub).to.have.been.calledOnce
     })
   })
 

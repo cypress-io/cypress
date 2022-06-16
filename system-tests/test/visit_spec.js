@@ -121,6 +121,7 @@ describe('e2e visit', () => {
       settings: {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
+        e2e: {},
       },
       servers: {
         port: 3434,
@@ -194,6 +195,7 @@ describe('e2e visit', () => {
     systemTests.setup({
       settings: {
         responseTimeout: 2000,
+        e2e: {},
       },
       servers: {
         port: 3434,
@@ -213,6 +215,7 @@ describe('e2e visit', () => {
     systemTests.setup({
       settings: {
         pageLoadTimeout: 1000,
+        e2e: {},
       },
       servers: {
         port: 3434,

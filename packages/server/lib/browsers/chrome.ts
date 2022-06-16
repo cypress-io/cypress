@@ -433,8 +433,8 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, closeCurrentTarget: () => Promise<void>, options: CypressConfiguration = {}) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
+const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: CypressConfiguration = {}) => {
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
 
   return automation.use(cdpAutomation)
 }
@@ -555,9 +555,9 @@ export = {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
-    const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
+    const pageCriClient = browserCriClient.currentlyAttachedTarget
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     // make sure page events are re enabled or else frame tree updates will NOT work as well as other items listening for page events
     await pageCriClient.send('Page.enable')
@@ -584,7 +584,7 @@ export = {
     const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError, onReconnect)
     const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser> {
@@ -679,7 +679,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     await pageCriClient.send('Page.enable')
 

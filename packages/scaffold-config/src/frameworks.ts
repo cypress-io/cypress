@@ -26,6 +26,8 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
     const loc = require.resolve(path.join(dependency.package, 'package.json'), {
       paths: [projectPath],
     })
+    // TODO: convert to async FS method
+    // eslint-disable-next-line no-restricted-syntax
     const pkg = fs.readJsonSync(loc) as PkgJson
     const pkgVersion = semver.coerce(pkg.version)
 
