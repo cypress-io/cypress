@@ -50,6 +50,8 @@ export const parseCookie = (cookie) => {
   // https://github.com/salesforce/tough-cookie/issues/191
   const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
 
+  // not all browsers currently default to lax, but they're heading in that
+  // direction since it's now the standard, so this is more future-proof
   if (hasUnspecifiedSameSite) {
     toughCookie.sameSite = 'lax'
   }
@@ -116,7 +118,7 @@ export class CookiesHelper {
   async capturePreviousCookies () {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
-    // is a nooop
+    // is a noop
     if (!this.request.needsCrossOriginHandling) return
 
     this.previousCookies = this.cookieJar.getAllCookies()
@@ -125,7 +127,7 @@ export class CookiesHelper {
   async getAddedCookies () {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
-    // is a nooop
+    // is a noop
     if (!this.request.needsCrossOriginHandling) return []
 
     const afterCookies = this.cookieJar.getAllCookies()
@@ -142,7 +144,9 @@ export class CookiesHelper {
 
     // don't set the cookie in our own cookie jar if the parsed cookie is
     // undefined (meaning it's invalid) or if the browser would not set it
-    // because Secure is required for SameSite=None
+    // because Secure is required for SameSite=None. not all browsers currently
+    // currently enforce this, but they're heading in that direction since
+    // it's now the standard, so this is more future-proof
     if (!toughCookie || (toughCookie.sameSite === 'none' && !toughCookie.secure)) {
       return
     }
