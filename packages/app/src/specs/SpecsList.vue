@@ -95,9 +95,9 @@
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
         <SpecHeaderCloudDataTooltip
-          class="hidden lg:flex"
           :gql="props.gql"
           :header-text-key-path="'specPage.latestRuns.header'"
+          :header-short-text-key-path="'specPage.latestRuns.headerShort'"
           :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
           :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
           :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
@@ -107,44 +107,18 @@
           @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
-        <SpecHeaderCloudDataTooltip
-          class="lg:hidden"
-          :gql="props.gql"
-          :header-text-key-path="'specPage.latestRuns.headerShort'"
-          :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
-          :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
-          :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
-          :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
-          :docs-url="'https://on.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs'"
-          data-cy="latest-runs-header-short"
-          @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
-          @showConnectToProject="showConnectToProject"
-        />
       </div>
       <div class="hidden md:flex md:col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
-          class="hidden lg:flex"
           :gql="props.gql"
           :header-text-key-path="'specPage.averageDuration.header'"
+          :header-short-text-key-path="'specPage.averageDuration.headerShort'"
           :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
           :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
           :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
           :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
           :docs-url="averageDurationDocsUrl"
           data-cy="average-duration-header"
-          @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
-          @showConnectToProject="showConnectToProject"
-        />
-        <SpecHeaderCloudDataTooltip
-          class="lg:hidden"
-          :gql="props.gql"
-          :header-text-key-path="'specPage.averageDuration.headerShort'"
-          :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
-          :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
-          :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
-          :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
-          :docs-url="'https://on.cypress.io/specs-average-duration?utm_medium=Specs+Average+Duration+Tooltip&utm_campaign=Average+Duration'"
-          data-cy="average-duration-header-short"
           @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
