@@ -4,6 +4,10 @@ const babelConfig = require('./babel.config.js')
 module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
+    alias: {
+      react: require.resolve('react'),
+      'react-dom': require.resolve('react-dom'),
+    },
   },
   mode: 'development',
   devtool: false,
