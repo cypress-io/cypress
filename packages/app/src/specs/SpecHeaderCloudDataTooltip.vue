@@ -14,7 +14,7 @@
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center p-4 items-center"
+        class="flex flex-col mx-4 text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div
@@ -36,12 +36,12 @@
         <div>
           <Button
             v-if="projectConnectionStatus === 'LOGGED_OUT'"
-            :prefix-icon="ConnectIcon"
+            :prefix-icon="UserOutlineIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="login-button"
             @click="emits('showLogin')"
           >
-            {{ t('topNav.login.actionLogin') }}
+            {{ t('specPage.dashboardLoginButton') }}
           </Button>
           <Button
             v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
@@ -70,6 +70,16 @@
           >
             {{ t("specPage.requestAccessButton") }}
           </Button>
+          <Button
+            v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
+            :prefix-icon="SendIcon"
+            prefix-icon-class="icon-dark-white icon-light-transparent"
+            data-cy="access-requested-button"
+            class="bg-gray-800 border-gray-800"
+            disabled
+          >
+            {{ t("specPage.requestSentButton") }}
+          </Button>
         </div>
       </div>
     </template>
@@ -80,6 +90,7 @@
 import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
+import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { RunsErrorRenderer_RequestAccessDocument, SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
@@ -109,6 +120,9 @@ fragment SpecHeaderCloudDataTooltip on Query {
     id
     cloudProject{
       __typename
+      ... on CloudProjectUnauthorized {
+        hasRequestedAccess
+      }
     }
   }
   ...Auth
@@ -123,7 +137,13 @@ const projectConnectionStatus = computed(() => {
 
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
 
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') return 'UNAUTHORIZED'
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    if (props.gql.currentProject.cloudProject.hasRequestedAccess) {
+      return 'ACCESS_REQUESTED'
+    }
+
+    return 'UNAUTHORIZED'
+  }
 
   return 'CONNECTED'
 })
@@ -141,7 +161,7 @@ function requestAccess () {
 const tooltipTextKey = computed(() => {
   if (projectConnectionStatus.value === 'CONNECTED') return props.connectedTextKeyPath
 
-  if (projectConnectionStatus.value === 'UNAUTHORIZED') return props.noAccessTextKeyPath
+  if (['UNAUTHORIZED', 'ACCESS_REQUESTED'].includes(projectConnectionStatus.value)) return props.noAccessTextKeyPath
 
   return props.notConnectedTextKeyPath
 })

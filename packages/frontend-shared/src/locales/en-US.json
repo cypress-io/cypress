@@ -133,24 +133,26 @@
     "latestRuns": {
       "header": "Latest runs",
       "tooltip": {
-        "connected": "{0} from the Cypress Dashboard",
-        "notConnected": "View the {0} from the Cypress Dashboard",
-        "noAccess": "Request access to view the {0} from the Cypress Dashboard",
-        "linkText": "Status of the latest runs"
+        "connected": "The {0} in the Cypress Dashboard",
+        "notConnected": "View the {0} in the Cypress Dashboard",
+        "noAccess": "Request access to view the {0} in the Cypress Dashboard",
+        "linkText": "status of your latest runs"
       }
     },
     "averageDuration": {
       "header": "Average duration",
       "tooltip": {
-        "connected": "{0} of the latest runs from the Cypress Dashboard",
-        "notConnected": "View the {0} of the latest runs from the Cypress Dashboard",
-        "noAccess": "Request access to view the {0} of the latest runs from the Cypress Dashboard",
-        "linkText": "Average spec duration"
+        "connected": "The {0} of your latest runs in the Cypress Dashboard",
+        "notConnected": "View the {0} of your latest runs in the Cypress Dashboard",
+        "noAccess": "Request access to view the {0} of your latest runs in the Cypress Dashboard",
+        "linkText": "average spec durations"
       }
     },
     "connectProjectButton": "Connect your project",
+    "dashboardLoginButton": "Log in to Cypress Dashboard",
     "reconnectProjectButton": "Reconnect your project",
     "requestAccessButton": "Request access",
+    "requestSentButton": "Request sent",
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
