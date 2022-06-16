@@ -18,6 +18,7 @@ const useSnapshot = process.env.USE_SNAPSHOT != null
 const slowExecution = process.env.SLOW_EXECUTION != null
 const healthy = process.env.HEALTHY != null
 const deferred = process.env.DEFERRED != null
+const snapshotDev = process.env.SNAPSHOT_DEV != null
 
 const results = new ResultsManager({
   run: process.env.RUN || '',
@@ -28,6 +29,7 @@ const results = new ResultsManager({
   slowExecution,
   healthy,
   deferred,
+  snapshotDev,
 })
 
 if (compileCache && useSnapshot) {
@@ -149,13 +151,19 @@ async function run () {
 
       if (compileCache) profileFileName += '_cached'
 
-      if (useSnapshot)profileFileName += '_snapshot'
-
       if (slowExecution) profileFileName += '_slow-execution'
 
       if (healthy) profileFileName += '_healthy'
 
       if (deferred) profileFileName += '_deferred'
+
+      if (useSnapshot) {
+        if (snapshotDev) {
+          profileFileName += '_snapshot-dev'
+        } else {
+          profileFileName += '_snapshot-prod'
+        }
+      }
 
       fs.writeFileSync(`results/${profileFileName}.cpuprofile`, JSON.stringify(inspectorProf))
     } else {
