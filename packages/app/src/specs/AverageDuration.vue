@@ -1,10 +1,16 @@
 <template>
   <div
-    v-if="props.gql.data?.__typename === 'CloudProjectSpec' && props.gql.data.averageDuration"
+    v-if="props.gql?.data?.__typename === 'CloudProjectSpec' && props.gql?.data?.averageDuration"
     class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
     {{ getDurationString(props.gql.data.averageDuration) }}
+  </div>
+  <div
+    v-else
+    class="h-full grid text-gray-400 justify-end items-center"
+  >
+    --
   </div>
 </template>
 
@@ -31,7 +37,7 @@ fragment AverageDuration on RemoteFetchableCloudProjectSpecResult {
 `
 
 const props = defineProps<{
-  gql: AverageDurationFragment
+  gql: AverageDurationFragment | null
 }>()
 
 </script>

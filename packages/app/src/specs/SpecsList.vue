@@ -80,23 +80,24 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-5 children:font-medium children:text-gray-800"
+      class="mb-4 grid grid-cols-7 md:grid-cols-9 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
     >
       <div
-        class="flex col-span-2 items-center justify-between"
+        class="flex col-span-4 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex items-center justify-between truncate">
+      <div class="flex col-span-2 items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
-      <div class="flex items-center justify-end truncate">
+      <div class="flex items-center justify-end whitespace-nowrap">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text-key-path="'specPage.latestRuns.header'"
+          :header-short-text-key-path="'specPage.latestRuns.headerShort'"
           :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
           :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
           :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
@@ -107,10 +108,11 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="flex items-center justify-end truncate">
+      <div class="hidden md:flex md:col-span-2 items-center justify-end truncate">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           :header-text-key-path="'specPage.averageDuration.header'"
+          :header-short-text-key-path="'specPage.averageDuration.headerShort'"
           :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
           :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
           :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
@@ -198,8 +200,8 @@
           </template>
           <template #average-duration>
             <AverageDuration
-              v-if="row.data.isLeaf && row.data.data?.cloudSpec?.data?.__typename === 'CloudProjectSpec'"
-              :gql="row.data.data.cloudSpec"
+              v-if="row.data.isLeaf"
+              :gql="row.data.data?.cloudSpec ?? null"
             />
           </template>
         </SpecsListRowItem>
