@@ -3,6 +3,12 @@
 
 node_version=$(cat .node-version)
 
+if [[ $PLATFORM == 'windows' ]]; then
+  nvm off
+  choco install --yes --force --pre nodejs --version ${node_version}
+  exit
+fi
+
 # some environments (like Arm on CircleCI) bring their own nvm
 if type nvm &>/dev/null; then
   echo 'nvm found with cache dir' `nvm cache dir`
@@ -20,4 +26,4 @@ echo "Installing Node $node_version"
 nvm install ${node_version}
 echo "Using Node $node_version"
 nvm use ${node_version}
-[[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s
+nvm alias default ${node_version}
