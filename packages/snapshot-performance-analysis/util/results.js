@@ -14,13 +14,19 @@ function avgArray (els) {
 }
 
 class ResultsManager {
-  constructor (run, assetType, profile, compileCache, useSnapshot) {
+  constructor ({ run, assetType, profile, compileCache, useSnapshot, slowExecution, healthy, deferred }) {
     this.label = assetType
     if (profile) this.label += '_profiling'
 
     if (compileCache) this.label += '_cached'
 
     if (useSnapshot) this.label += '_snapshot'
+
+    if (slowExecution) this.label += '_slow-execution'
+
+    if (healthy) this.label += '_healthy'
+
+    if (deferred) this.label += '_deferred'
 
     const filename = `perf-1-${run}.json`
 

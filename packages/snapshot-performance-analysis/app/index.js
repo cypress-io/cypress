@@ -1,27 +1,34 @@
 /* eslint-disable no-console */
 
 const now = require('performance-now')
-// const fs = require('fs')
+const fs = require('fs')
 const path = require('path')
-// const inspector = require('inspector')
 const { app, BrowserWindow } = require('electron')
 const { ResultsManager } = require('../util/results')
-// const v8Profiler = require('v8-profiler-next')
 
-// const title = 'electron-snapshot-experiments'
+const Inspector = require('inspector-api')
+const inspector = new Inspector()
+
 const assetType = process.env.ASSET_TYPE || 'vanilla'
 const profile = process.env.PROFILE != null
 const compileCache = process.env.COMPILE_CACHE != null
 const clearData = process.env.CLEAR_DATA != null
 const dumpResults = process.env.DUMP_RESULTS != null
 const useSnapshot = process.env.USE_SNAPSHOT != null
-const results = new ResultsManager(
-  process.env.RUN || '',
+const slowExecution = process.env.SLOW_EXECUTION != null
+const healthy = process.env.HEALTHY != null
+const deferred = process.env.DEFERRED != null
+
+const results = new ResultsManager({
+  run: process.env.RUN || '',
   assetType,
   profile,
   compileCache,
   useSnapshot,
-)
+  slowExecution,
+  healthy,
+  deferred,
+})
 
 if (compileCache && useSnapshot) {
   throw new Error(
@@ -51,7 +58,7 @@ if (compileCache) {
 if (useSnapshot) {
   runWithSnapshot()
 } else {
-  runWithoutSnapshot()
+  // runWithoutSnapshot()
 }
 
 function runWithSnapshot () {
@@ -75,24 +82,24 @@ function runWithSnapshot () {
   })
 }
 
-function runWithoutSnapshot () {
-  const { DirtSimpleFileCache } = require('dirt-simple-file-cache')
-  const { packherdRequire } = require('packherd/dist/src/require.js')
-  const projectBaseDir = path.resolve(__dirname, '..', '..', '..')
+// function runWithoutSnapshot () {
+//   const { DirtSimpleFileCache } = require('dirt-simple-file-cache')
+//   const { packherdRequire } = require('packherd/dist/src/require.js')
+//   const projectBaseDir = path.resolve(__dirname, '..', '..', '..')
 
-  packherdRequire(projectBaseDir, {
-    transpileOpts: {
-      supportTS: true,
-      initTranspileCache: DirtSimpleFileCache.initSync,
-      tsconfig: {
-        compilerOptions: {
-          useDefineForClassFields: false, // default
-          importsNotUsedAsValues: 'remove', // default
-        },
-      },
-    },
-  })
-}
+//   packherdRequire(projectBaseDir, {
+//     transpileOpts: {
+//       supportTS: true,
+//       initTranspileCache: DirtSimpleFileCache.initSync,
+//       tsconfig: {
+//         compilerOptions: {
+//           useDefineForClassFields: false, // default
+//           importsNotUsedAsValues: 'remove', // default
+//         },
+//       },
+//     },
+//   })
+// }
 
 function loadDep () {
   let reactPath
@@ -119,52 +126,49 @@ function loadDep () {
   return require(reactPath)
 }
 
-function run () {
+async function run () {
   let startLoad
   let endLoad
 
-  return new Promise((resolve, reject) => {
-    try {
-      // if (profile) {
-      //   v8Profiler.setGenerateType(1)
-
-      //   v8Profiler.startProfiling(title, true)
-      // }
-
-      // require('time-require')
-
-      // console.time('init')
-
+  try {
+    if (profile) {
+      await inspector.profiler.enable()
+      await inspector.profiler.start()
+    } else {
       startLoad = now()
-      const react = loadDep()
+    }
 
+    loadDep()
+
+    if (profile) {
+      const inspectorProf = await inspector.profiler.stop()
+
+      let profileFileName = 'inspector-profile'
+
+      if (profile) profileFileName += '_profiling'
+
+      if (compileCache) profileFileName += '_cached'
+
+      if (useSnapshot)profileFileName += '_snapshot'
+
+      if (slowExecution) profileFileName += '_slow-execution'
+
+      if (healthy) profileFileName += '_healthy'
+
+      if (deferred) profileFileName += '_deferred'
+
+      fs.writeFileSync(`results/${profileFileName}.cpuprofile`, JSON.stringify(inspectorProf))
+    } else {
       endLoad = now()
-
-      process.emit('exit')
-      // console.timeEnd('init')
-
-      console.log({ version: react.version })
-      // if (profile) {
-      //   const profile = v8Profiler.stopProfiling(title)
-
-      //   profile.export((err, result) => {
-      //     fs.writeFileSync(`${title}.cpuprofile`, result)
-      //     profile.delete()
-      //   })
-      // }
-
-      resolve()
-    } catch (err) {
-      console.error(err)
-      reject(err)
-    } finally {
       if (clearData) results.clear()
 
       results.append(endLoad - startLoad)
       results.save()
       if (dumpResults) results.dump()
     }
-  })
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 async function createWindow () {
@@ -178,11 +182,6 @@ async function createWindow () {
 
   win.loadFile('index.html')
   win.toggleDevTools()
-
-  // if (profile) {
-  //   console.log('waiting for debugger')
-  //   inspector.waitForDebugger()
-  // }
 
   await run()
   win.close()

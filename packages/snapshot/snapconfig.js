@@ -10,7 +10,7 @@ const runAgainstExperimentDirectory = process.env.RUN_AGAINST_EXPERIMENT_DIRECTO
 const snapshotCacheBaseDir = runAgainstExperimentDirectory ? path.resolve(__dirname, '../snapshot-performance-analysis/cache') : path.resolve(__dirname, './cache')
 
 const projectBaseDir = path.join(__dirname, '../../')
-const appEntryFile = runAgainstExperimentDirectory ? require.resolve('../snapshot-performance-analysis/deps/index.js') : path.resolve('../server/index.js')
+const appEntryFile = runAgainstExperimentDirectory ? require.resolve('../snapshot-performance-analysis/deps/index.js') : require.resolve('../server/index.js')
 
 // TODO(thlorenz): this is most likely different when creating prod artifacts
 const cypressAppSnapshotDir = (() => {

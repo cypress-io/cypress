@@ -8,10 +8,12 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "gulp-complexity": "^0.3.2",
+    "inspector-api": "^1.4.3",
     "lodash": "^4.17.20",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "time-require": "^0.1.2",
-    "v8-profiler-next": "^1.8.0"
+    "v8-profiler-next": "^1.8.0",
+    "yeoman-generator": "^5.6.1"
   }
 }
