@@ -15,13 +15,18 @@ const setupSeeds = () => {
   const seed = 2
 
   faker.seed(seed)
-  jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))
+  if (JustMyLuck.default) {
+    jml = new JustMyLuck.default(JustMyLuck.MersenneTwister(seed))
+  } else {
+    jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))
+  }
+  
 }
 
 setupSeeds()
 
 // TODO BEFORE MERGE, REMOVE
-beforeEach(() => setupSeeds)
+// beforeEach(() => setupSeeds)
 
 /**
  * Component Naming Fixtures

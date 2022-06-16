@@ -8,11 +8,8 @@
       :gql="query.data.value"
       @close="closeCreateSpecModal"
     />
-    <SpecsList
+    <SpecsList2
       v-if="query.data.value.currentProject?.specs.length"
-      :gql="query.data.value"
-      :most-recent-update="mostRecentUpdate"
-      @showCreateSpecModal="showCreateSpecModal"
     />
     <NoSpecsPage
       v-else
@@ -29,6 +26,7 @@ import { computed, ref } from 'vue'
 import { gql, SubscriptionHandlerArg, useQuery, useSubscription } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
+import SpecsList2 from '../../specs/SpecsList2.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
 import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
