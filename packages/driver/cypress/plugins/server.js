@@ -228,7 +228,6 @@ const createApp = (port) => {
         <body>
           <h1>Redirecting ${username}...</h1>
           <script>
-            console.log('href:', location.href)
             setTimeout(() => {
               window.location.href = '${redirect}?username=${username}&cookie=${cookie}'
             }, 500)
