@@ -175,4 +175,44 @@ describe('<BaseError />', () => {
 
     cy.findByText('cypress/e2e/file.cy.js:12:25').should('be.visible')
   })
+
+  // https://github.com/cypress-io/cypress/issues/22103
+  it('wraps the long file path correctly', () => {
+    const longFileName = `${'very'.repeat(20)}long/cypress/e2e/file.cy.js`
+
+    cy.mountFragment(BaseErrorFragmentDoc, {
+      onResult: (result) => {
+        result.codeFrame = {
+          __typename: 'CodeFrame',
+          line: 12,
+          column: 25,
+          codeBlock: codeFrameColumns(dedent`
+            const x = 1;
+            
+            throw new Error('Some Error');
+
+            const y = 2;
+          `, {
+            start: {
+              line: 3,
+              column: 5,
+            },
+          }, {
+            linesAbove: 2,
+            linesBelow: 4,
+          }),
+          file: {
+            id: `FileParts:/absolute/full/path/cypress/e2e/file.cy.js`,
+            __typename: 'FileParts',
+            relative: longFileName,
+            absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
+          },
+        }
+      },
+      render: (gqlVal) => (
+        <BaseError gql={gqlVal} />),
+    })
+
+    cy.findByText(`${longFileName}:12:25`).should('have.css', 'word-break', 'break-all')
+  })
 })
