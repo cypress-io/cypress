@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from 'cypress/react'
-import Counter from './counter'
+import Counter from './counter.jsx'
 
 describe('Counter using hooks', () => {
   it('works', () => {
