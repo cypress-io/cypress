@@ -542,6 +542,8 @@ commands:
                 GLOB="src/**/*cy.*"
               fi
 
+              echo $(circleci tests glob $GLOB)
+
               TESTFILES=$(circleci tests glob $GLOB | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
