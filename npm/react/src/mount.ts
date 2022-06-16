@@ -141,7 +141,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       // correct types.
       return import('react-dom/client')
       .then((mod) => {
-        const root = mod.createRoot(el)
+        const root = (mod.default || mod).createRoot(el)
 
         root.render(reactComponent)
 
