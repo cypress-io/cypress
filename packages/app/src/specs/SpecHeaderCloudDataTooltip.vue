@@ -8,7 +8,8 @@
       class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
       tabindex="0"
     >
-      {{ t(headerTextKeyPath) }}
+      <span class="hidden lg:flex">{{ t(headerTextKeyPath) }}</span>
+      <span class="lg:hidden">{{ t(headerShortTextKeyPath || headerTextKeyPath) }}</span>
     </div>
     <template
       #popper
@@ -96,6 +97,7 @@ const emits = defineEmits<{
 const props = defineProps<{
   gql: SpecHeaderCloudDataTooltipFragment
   headerTextKeyPath: string
+  headerShortTextKeyPath?: string
   connectedTextKeyPath: string
   notConnectedTextKeyPath: string
   noAccessTextKeyPath: string
