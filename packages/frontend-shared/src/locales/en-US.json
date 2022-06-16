@@ -132,6 +132,7 @@
     },
     "latestRuns": {
       "header": "Latest runs",
+      "headerShort": "Runs",
       "tooltip": {
         "connected": "{0} from the Cypress Dashboard",
         "notConnected": "View the {0} from the Cypress Dashboard",
@@ -141,6 +142,7 @@
     },
     "averageDuration": {
       "header": "Average duration",
+      "headerShort": "Duration",
       "tooltip": {
         "connected": "{0} of the latest runs from the Cypress Dashboard",
         "notConnected": "View the {0} of the latest runs from the Cypress Dashboard",
