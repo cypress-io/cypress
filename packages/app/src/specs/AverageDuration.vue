@@ -37,7 +37,7 @@ fragment AverageDuration on RemoteFetchableCloudProjectSpecResult {
 `
 
 const props = defineProps<{
-  gql: AverageDurationFragment
+  gql: AverageDurationFragment | null
 }>()
 
 </script>
