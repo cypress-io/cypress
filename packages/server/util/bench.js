@@ -7,6 +7,7 @@ const getTime = require('performance-now')
 
 const useSnapshot = process.env.USE_SNAPSHOT != null
 const useProfiler = process.env.PROFILE_IND != null
+const snapshotDev = process.env.SNAPSHOT_DEV != null
 
 function threeDecimals (n) {
   return Math.round(n * 1000) / 1000
@@ -23,7 +24,7 @@ class Benchmark {
     this._workflow = workflow
 
     if (!useProfiler) {
-      const filename = `${this._workflow}${useSnapshot ? '-snapshot' : ''}.json`
+      const filename = `${this._workflow}${useSnapshot ? '-snapshot' : ''}${snapshotDev ? '-dev' : '-prod'}.json`
 
       this.filePath = path.join(__dirname, '..', 'results', filename)
 

@@ -4,6 +4,7 @@ const fs = require('fs')
 
 const useSnapshot = process.env.USE_SNAPSHOT != null
 const useProfiler = process.env.PROFILE_IND != null
+const snapshotDev = process.env.SNAPSHOT_DEV != null
 
 class Profiler {
   constructor (workflow) {
@@ -21,7 +22,7 @@ class Profiler {
     if (useProfiler) {
       const inspectorProf = await inspector.profiler.stop()
 
-      fs.writeFileSync(`packages/server/results/${this._workflow}${useSnapshot ? '-snapshot' : ''}.cpuprofile`, JSON.stringify(inspectorProf))
+      fs.writeFileSync(`packages/server/results/${this._workflow}${useSnapshot ? '-snapshot' : ''}${snapshotDev ? '-dev' : '-prod'}.cpuprofile`, JSON.stringify(inspectorProf))
     }
   }
 }
