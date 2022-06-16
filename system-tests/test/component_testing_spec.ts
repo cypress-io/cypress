@@ -67,15 +67,22 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+})
 
-  ;['17', '18'].forEach((reactMajorVersion) => {
-    systemTests.it.only(`cypress/react works with React ${reactMajorVersion}`, {
-      project: `react${reactMajorVersion}`,
-      testingType: 'component',
-      spec: 'src/App.cy.jsx',
-      configFile: 'cypress-vite.config.ts',
-      browser: 'chrome',
-      expectedExitCode: 0,
+describe(`React major versions`, function () {
+  systemTests.setup()
+
+  ;['17', '18'].forEach((majorVersion) => {
+    it(`executes all of the tests for React v${majorVersion}`, function () {
+      return systemTests.exec(this, {
+        project: `react${majorVersion}`,
+        configFile: 'cypress-vite.config.ts',
+        spec: 'src/App.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
+      })
     })
   })
 })
