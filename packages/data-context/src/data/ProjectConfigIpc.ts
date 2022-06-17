@@ -9,13 +9,14 @@ import inspector from 'inspector'
 import debugLib from 'debug'
 import { autoBindDebug, hasTypeScriptInstalled } from '../util'
 import _ from 'lodash'
+import { pathToFileURL } from 'url'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsNodeEsm = require.resolve('ts-node/esm/transpile-only')
+const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
 const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
@@ -245,6 +246,8 @@ export class ProjectConfigIpc extends EventEmitter {
     let isProjectUsingESModules = false
 
     try {
+      // TODO: convert this to async FS methods
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
 
       isProjectUsingESModules = pkgJson.type === 'module'

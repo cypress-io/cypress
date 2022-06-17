@@ -7,6 +7,7 @@ async function build () {
   const distPath = path.join(__dirname, '../dist')
   const assetsPath = path.join(__dirname, '../assets')
   const iconsPath = path.join(distPath, 'icons')
+
   const iconsetPath = path.join(distPath, 'cypress.iconset')
 
   await fs.remove(distPath)
