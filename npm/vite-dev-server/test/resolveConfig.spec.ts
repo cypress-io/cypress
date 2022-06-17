@@ -29,7 +29,7 @@ describe('resolveConfig', function () {
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
       expect(viteConfig.plugins).to.have.lengthOf(2)
-      expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+      expect(viteConfig.plugins[0].name).to.equal('cypress:missing-react-dom-client')
       expect(viteConfig.plugins[1].name).to.equal('cypress:main')
     })
 
@@ -49,7 +49,7 @@ describe('resolveConfig', function () {
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
         expect(viteConfig.plugins).to.have.lengthOf(3)
-        expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+        expect(viteConfig.plugins[0].name).to.equal('cypress:missing-react-dom-client')
         expect(viteConfig.plugins[1].name).to.equal('cypress:main')
         expect(viteConfig.plugins[2].name).to.equal('cypress:inspect')
       })
@@ -61,7 +61,7 @@ describe('resolveConfig', function () {
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
         expect(viteConfig.plugins).to.have.lengthOf(2)
-        expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+        expect(viteConfig.plugins[0].name).to.equal('cypress:missing-react-dom-client')
         expect(viteConfig.plugins[1].name).to.equal('cypress:main')
       })
     })
