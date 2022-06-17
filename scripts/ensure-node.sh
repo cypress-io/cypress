@@ -4,6 +4,12 @@
 node_version=$(cat .node-version)
 
 if [[ $PLATFORM == 'windows' ]]; then
+  echo "Current env"
+  env | grep PATH=          
+  echo "Current node location"
+  which node
+  echo "Current npm location"
+  which npm
   echo "Disabling nvm-windows"
   nvm off
   echo "Installing Node $node_version for Windows"
