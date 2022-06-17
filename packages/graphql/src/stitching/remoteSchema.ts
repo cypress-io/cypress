@@ -21,6 +21,8 @@ extend type Mutation {
 
 // Get the Remote schema we've sync'ed locally
 export const remoteSchema = buildSchema(
+  // ignoring since this happens on the first tick
+  // eslint-disable-next-line no-restricted-syntax
   fs.readFileSync(path.join(__dirname, '../../schemas', 'cloud.graphql'), 'utf-8') + LOCAL_SCHEMA_EXTENSIONS,
   { assumeValid: true },
 )

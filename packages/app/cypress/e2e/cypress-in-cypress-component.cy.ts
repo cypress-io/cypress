@@ -208,8 +208,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
         }).invoke('connected').should('be.true')
       })
 
-      cy.withCtx((ctx, o) => {
-        ctx.actions.file.writeFileInProject(o.path, `
+      cy.withCtx(async (ctx, o) => {
+        await ctx.actions.file.writeFileInProject(o.path, `
   import React from 'react'
   import { mount } from '@cypress/react'
 
