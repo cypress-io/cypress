@@ -28,6 +28,7 @@
     "@angular/compiler-cli": "^14.0.0",
     "cypress-angular-component-testing": "1.0.2",
     "raw-loader": "^4.0.2",
+    "style-loader": "^3.3.1",
     "typescript": "~4.7.2"
   },
   "projectFixtureDirectory": "angular"

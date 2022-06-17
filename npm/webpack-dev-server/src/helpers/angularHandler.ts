@@ -9,7 +9,7 @@ type SpecPattern = string | string[];
 
 const generateTsConfigContent = (specPattern: SpecPattern, projectRoot: string): string => {
   const getFilePath = (fileName: string): string => join(projectRoot, fileName)
-  const getCySupportFile: string = join(projectRoot, 'cypress', 'support', 'component.ts')
+  const getCySupportFile = join(projectRoot, 'cypress', 'support', 'component.ts')
 
   const getIncludePaths = (): string[] => {
     if (Array.isArray(specPattern)) {
@@ -74,13 +74,18 @@ export async function getWebpackConfig (tmpDir: string, jitMode = true, projectR
         {
           test: /(\.scss|\.sass)$/,
           use: ['raw-loader', 'sass-loader'],
+          exclude: /(styles\.scss)$/,
+        },
+        {
+          test: /(styles\.scss)$/,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
         },
         {
           test: /\.css$/,
           loader: 'raw-loader',
         },
         {
-          test: /\.html$/,
+          test: /(\.html|\.svg)$/,
           loader: 'raw-loader',
         },
         { // Angular linker needed to link partial-ivy code

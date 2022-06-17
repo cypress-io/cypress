@@ -7,3 +7,4 @@ import "zone.js";
 global.Mocha["__zone_patch__"] = false;
 
 import "zone.js/testing";
+import '../../src/styles.scss'
