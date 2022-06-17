@@ -16,7 +16,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   48 modules
+   46 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -246,7 +246,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   48 modules
+   46 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -476,7 +476,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   48 modules
+   46 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -706,7 +706,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   48 modules
+   46 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
