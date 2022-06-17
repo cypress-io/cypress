@@ -9,6 +9,10 @@ _test-output
 cypress.zip
 .babel-cache
 
+# cypress test artifacts
+**/cypress/screenshots
+**/cypress/videos
+
 # from config, compiled .js files
 packages/config/src/*.js
 
@@ -21,9 +25,11 @@ packages/data-context/src/**/*.js
 packages/errors/src/**/*.js
 packages/errors/test/**/*.js
 
-# from driver
-packages/driver/cypress/videos
-packages/driver/cypress/screenshots
+# from graphql, compiled .js files
+/packages/graphql/src/**/*.js
+
+# from https-proxy
+packages/https-proxy/ca/
 
 # from launcher, compiled .js files
 packages/launcher/index.js
@@ -35,15 +41,8 @@ packages/network/lib/**/*.js
 # from net-stubbing, compiled .js files
 packages/net-stubbing/lib/**/*.js
 
-# from runner
-packages/runner/cypress/videos
-packages/runner/cypress/screenshots
-
 # from proxy, compiled .js files
 packages/proxy/lib/**/*.js
-
-# npm packages
-npm/**/cypress/screenshots
 
 # from example
 packages/example/app
@@ -64,6 +63,9 @@ packages/server/test/support/fixtures/server/libs
 # from socket, dist built files
 packages/socket/lib/*.js
 
+# from types, compiles .js files
+packages/types/src/**/*.js
+
 # from system-tests
 system-tests/.projects
 system-tests/.http-mitm-proxy
@@ -74,12 +76,6 @@ system-tests/lib/fixtureDirs.ts
 /npm/react/bin/*
 /npm/react/cypress/videos
 /npm/react/.babel-cache
-
-# from npm/webpack-dev-server
-/npm/webpack-dev-server/cypress/videos
-
-# from runner-ct
-/packages/runner-ct/cypress/screenshots
 
 # from errors
 /packages/errors/__snapshot-images__
