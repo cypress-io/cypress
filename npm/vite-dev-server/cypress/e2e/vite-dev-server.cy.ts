@@ -38,7 +38,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, { specWithWhitespace }) => {
-      ctx.actions.file.writeFileInProject(
+      await ctx.actions.file.writeFileInProject(
         ctx.path.join('src', specWithWhitespace),
         await ctx.file.readFileInProject(ctx.path.join('src', 'App.cy.jsx')),
       )

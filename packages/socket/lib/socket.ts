@@ -1,4 +1,3 @@
-import fs from 'fs'
 import buffer from 'buffer'
 import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions, Socket, Namespace } from 'socket.io'
@@ -39,8 +38,4 @@ export const getPathToClientSource = () => {
 
 export const getClientVersion = () => {
   return version
-}
-
-export const getClientSource = () => {
-  return fs.readFileSync(getPathToClientSource(), 'utf8')
 }
