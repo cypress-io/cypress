@@ -10,7 +10,7 @@ function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') 
 
   // make sure there are no runs found for the project ID
   cy.remoteGraphQLIntercept(async (obj) => {
-    if (obj.result.data?.cloudProjectBySlug) {
+    if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
       obj.result.data.cloudProjectBySlug.runs.nodes = []
     }
 
@@ -146,6 +146,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.findByTestId('sidebar-link-runs-page').click()
+
+      // TODO: investigate the scenario for this test
+      cy.withCtx((ctx) => {
+        // clear cloud cache
+        ctx.cloud.reset()
+      })
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -611,6 +617,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.findByTestId('sidebar-link-runs-page').click()
+      // TODO: investigate the scenario for this test
+      cy.withCtx((ctx) => {
+        // clear cloud cache
+        ctx.cloud.reset()
+      })
+
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
       cy.percySnapshot()
 
