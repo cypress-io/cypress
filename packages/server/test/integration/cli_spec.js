@@ -46,7 +46,7 @@ describe('CLI Interface', () => {
 
   // This fails on MacOS due to an apparent limit on the buffer size of stdout
   it('writes out package.json and exits', (done) => {
-    return cp.spawn('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
+    return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)
       }
