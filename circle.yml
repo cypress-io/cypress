@@ -402,11 +402,20 @@ commands:
           name: Install yarn
           command: |
             echo "Installing Yarn"
+            which node
+            node -v
+            which npm
+            npm -v
             npm install yarn -g # ensure yarn is installed with the correct node engine
       - run:
           name: Check Node
           command: |
-            source ./scripts/ensure-node.sh
+            [[ $PLATFORM != 'windows' ]] && source ./scripts/ensure-node.sh
+            which node
+            node -v
+            which npm
+            npm -v
+            which yarn
             yarn check-node-version
 
   install-chrome:
