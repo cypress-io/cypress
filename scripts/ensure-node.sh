@@ -3,21 +3,28 @@
 
 node_version=$(cat .node-version)
 
-# some environments (like Arm on CircleCI) bring their own nvm
-if type nvm &>/dev/null; then
-  echo 'nvm found with cache dir' `nvm cache dir`
+if [[ $PLATFORM == 'windows' ]]; then
+  echo "Disabling nvm-windows"
+  nvm off
+  echo "Installing Node $node_version for Windows"
+  choco install --yes --force --pre nodejs --version ${node_version}
 else
-  if [ -s "${HOME}/.nvm/nvm.sh" ]; then
-    echo 'nvm found in home, sourcing...'
+  # some environments (like Arm on CircleCI) bring their own nvm
+  if type nvm &>/dev/null; then
+    echo 'nvm found with cache dir' `nvm cache dir`
   else
-    echo "nvm not found. Installing nvm..."
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
-  fi
+    if [ -s "${HOME}/.nvm/nvm.sh" ]; then
+      echo 'nvm found in home, sourcing...'
+    else
+      echo "nvm not found. Installing nvm..."
+      curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | bash
+    fi
 
-  source "${HOME}/.nvm/nvm.sh"
+    source "${HOME}/.nvm/nvm.sh"
+  fi
+  echo "Installing Node $node_version"
+  nvm install ${node_version}
+  echo "Using Node $node_version"
+  nvm use ${node_version}
+  nvm alias default ${node_version}
 fi
-echo "Installing Node $node_version"
-nvm install ${node_version}
-echo "Using Node $node_version"
-nvm use ${node_version}
-[[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s

@@ -398,9 +398,11 @@ commands:
           command: |
             node_version=$(cat .node-version)
             source ./scripts/ensure-node.sh
+      - run:
+          name: Install yarn
+          command: |
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
-            yarn check-node-version
       - run:
           name: Check Node
           command: |
