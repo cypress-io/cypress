@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-properties */
 require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
@@ -105,12 +104,12 @@ let ctx
 describe('lib/cypress', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     process.chdir(previousCwd)
     this.timeout(8000)
 
-    cache.__removeSync()
+    await cache.remove()
 
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
