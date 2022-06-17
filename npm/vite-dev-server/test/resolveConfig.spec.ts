@@ -28,8 +28,9 @@ describe('resolveConfig', function () {
 
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-      expect(viteConfig.plugins).to.have.lengthOf(1)
-      expect(viteConfig.plugins[0].name).to.equal('cypress:main')
+      expect(viteConfig.plugins).to.have.lengthOf(2)
+      expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+      expect(viteConfig.plugins[1].name).to.equal('cypress:main')
     })
 
     context('with CYPRESS_INTERNAL_VITE_INSPECT provided', () => {
@@ -47,8 +48,10 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-        expect(viteConfig.plugins).to.have.lengthOf(2)
-        expect(viteConfig.plugins[1].name).to.equal('cypress:inspect')
+        expect(viteConfig.plugins).to.have.lengthOf(3)
+        expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+        expect(viteConfig.plugins[1].name).to.equal('cypress:main')
+        expect(viteConfig.plugins[2].name).to.equal('cypress:inspect')
       })
 
       it('should not add inspect plugin if not installed', async () => {
@@ -57,8 +60,9 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-        expect(viteConfig.plugins).to.have.lengthOf(1)
-        expect(viteConfig.plugins[0].name).to.equal('cypress:main')
+        expect(viteConfig.plugins).to.have.lengthOf(2)
+        expect(viteConfig.plugins[0].name).to.equal('missing-react-dom-client')
+        expect(viteConfig.plugins[1].name).to.equal('cypress:main')
       })
     })
   })

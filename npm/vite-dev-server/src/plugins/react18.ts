@@ -16,7 +16,7 @@ import path from 'path'
  */
 export const React18 = (projectRoot: string): Plugin => {
   return {
-    name: 'missing-react-dom-client',
+    name: 'cypress:missing-react-dom-client',
     resolveId (source: string) {
       if (source === 'react-dom/client') {
         try {
