@@ -313,7 +313,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
                   responseBufferStream.end(responseBuffer)
 
-                  this._networkProxy?.setHttpBuffer({
+                  if (!this._networkProxy) throw new Error('wtf doesnt this exist')
+
+                  this._networkProxy.setHttpBuffer({
                     url: newUrl,
                     stream: responseBufferStream,
                     details,
