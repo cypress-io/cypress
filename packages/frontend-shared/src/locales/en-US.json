@@ -245,7 +245,8 @@
     },
     "noInternet": {
       "header": "You have no internet connection",
-      "message": "Check your internet connection to pull the latest data from the dashboard."
+      "message": "Check your internet connection to pull the latest data from the dashboard.",
+      "connectProject": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project."
     }
   },
   "setupPage": {
@@ -471,6 +472,16 @@
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
         }
+      },
+      "errors": {
+        "baseError": {
+          "title": "Cypress Dashboard Error"
+        },
+        "internalServerError": {
+          "title": "Cannot connect to the Cypress Dashboard",
+          "description": "The request times out when trying to retrieve the info from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+          "link": "Support Page"
+        }
       }
     },
     "connectSuccessAlert": {
@@ -586,8 +597,8 @@
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",
       "step1": {
-        "title": "Rename existing specs",
-        "description": "In this step, we'll automatically rename and move your existing spec files.",
+        "title": "Migrate existing specs",
+        "description": "In this step, we'll automatically rename and/or move your existing spec files as needed.",
         "button": "Rename these specs for me",
         "buttonSkip": "Skip renaming specs",
         "buttonRenameFolder": "Rename the folder for me"

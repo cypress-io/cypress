@@ -228,13 +228,13 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     startAtSpecsPage('e2e')
     cy.get('[data-cy="spec-item"]')
 
-    cy.withCtx((ctx, o) => {
+    cy.withCtx(async (ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
 
-      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
-      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
       o.sinon.stub(ctx.actions.browser, 'closeBrowser')
       o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
@@ -252,24 +252,24 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
   it('restarts browser if there is a before:browser:launch task and there is a change on the config', () => {
     startAtSpecsPage('e2e')
 
-    cy.withCtx((ctx, o) => {
+    cy.withCtx(async (ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
 
-      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  setupNodeEvents(on) {\n on('before:browser:launch', () => {})\n},\n`)
-      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
     })
 
     cy.get('[data-cy="spec-item"]')
 
-    cy.withCtx((ctx, o) => {
+    cy.withCtx(async (ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
 
-      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  viewportHeight: 600,\n`)
-      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
       o.sinon.stub(ctx.actions.browser, 'closeBrowser')
       o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
@@ -288,14 +288,36 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     startAtSpecsPage('e2e')
     cy.get('[data-cy="spec-item"]')
 
-    cy.withCtx((ctx, o) => {
+    cy.withCtx(async (ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
       o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
-      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`{`, `{\n  watchForFileChanges: false,\n`)
-      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.initializeActiveProject).to.be.called
+    })
+  })
+
+  it('restarts server if baseUrl is updated in the config file', () => {
+    startAtSpecsPage('e2e')
+    cy.get('[data-cy="spec-item"]')
+
+    cy.withCtx(async (ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+      o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
+
+      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`  e2e: {`, `  e2e: {\n  baseUrl: 'https://example.cypress.io',\n`)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', config)
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')

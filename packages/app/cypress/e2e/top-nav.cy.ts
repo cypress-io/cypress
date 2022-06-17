@@ -226,6 +226,7 @@ describe('App Top Nav Workflows', () => {
           const oldFetch = ctx.util.fetch
 
           o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
+            await new Promise((resolve) => setTimeout(resolve, 500))
             if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
               throw new Error(String(url))
             }
