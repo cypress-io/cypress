@@ -107,6 +107,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
+      // TODO: investigate the scenario for this test
       cy.withCtx((ctx) => {
         // clear cloud cache
         ctx.cloud.reset()

@@ -177,8 +177,9 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -186,15 +187,16 @@ describe('CloudDataSource', () => {
 
       expect(resolved.data).to.eql(undefined)
       expect(resolved.errors).to.exist
-      expect(resolved.error.networkError.message).to.eql('No Content')
+      expect(resolved.error?.networkError?.message).to.eql('No Content')
     })
 
     it('logout user on 401 response', async () => {
       fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
-        document: FAKE_USER_QUERY,
-        variables: {},
+        operation: print(FAKE_USER_QUERY),
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
         operationType: 'query',
       })
 
@@ -202,7 +204,7 @@ describe('CloudDataSource', () => {
 
       expect(resolved.data).to.eql(undefined)
       expect(resolved.errors).to.exist
-      expect(resolved.error.networkError.message).to.eql('Unauthorized')
+      expect(resolved.error?.networkError?.message).to.eql('Unauthorized')
 
       expect(logoutStub).to.have.been.calledOnce
     })
