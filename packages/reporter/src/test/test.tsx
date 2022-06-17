@@ -184,7 +184,7 @@ class Test extends Component<TestProps> {
 
     if (this.props.model.state) {
       controls.push(
-        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+        <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
             <WarningIcon className="runnable-controls-status" />
           </span>
@@ -194,7 +194,7 @@ class Test extends Component<TestProps> {
 
     if (appState.studioActive) {
       controls.push(
-        <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
+        <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>
             <WandIcon />
           </a>
