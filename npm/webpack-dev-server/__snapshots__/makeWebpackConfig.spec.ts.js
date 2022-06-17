@@ -19,6 +19,9 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"
+  ],
+  "externals": [
+    "react-dom/client"
   ]
 }
 
@@ -40,5 +43,8 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"
+  ],
+  "externals": [
+    "react-dom/client"
   ]
 }
