@@ -29,7 +29,7 @@ const formattedMessage = (message: string) => {
   if (!message) return ''
 
   const searchText = ['to match', 'to equal']
-  const regex = new RegExp(`${searchText.join('|')}`)
+  const regex = new RegExp(searchText.join('|'))
   const split = message.split(regex)
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0], ...(matchingText ? [matchingText] : [])].join(' ')
