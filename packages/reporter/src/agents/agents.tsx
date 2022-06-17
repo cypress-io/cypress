@@ -48,7 +48,6 @@ const Agents = observer(({ model }: AgentsProps) => {
               header={`Spies / Stubs (${model.agents.length})`}
               headerClass='hook-header'
               contentClass='instrument-content'
-              showExpander
             >
               <table>
                 <thead>

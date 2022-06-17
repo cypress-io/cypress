@@ -62,7 +62,6 @@ const Routes = observer(({ model }: RoutesProps) => {
               header={`Routes (${model.routes.length})`}
               headerClass='hook-header'
               contentClass='instrument-content'
-              showExpander
             >
               <table>
                 <thead>

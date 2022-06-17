@@ -53,7 +53,6 @@ class Sessions extends React.Component<SessionsProps> {
                     onClick={() => events.emit('clear:session')}
                   ><span><i className="fas fa-ban" /> Clear All Sessions</span></div>}
                 contentClass='instrument-content'
-                showExpander
               >
                 <div>
                   {_.map(model, (sess) => {

@@ -13,7 +13,7 @@ interface Props {
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
-  showExpander: boolean
+  hideExpander: boolean
 }
 
 interface State {
@@ -26,7 +26,7 @@ class Collapsible extends Component<Props, State> {
     headerClass: '',
     headerStyle: {},
     contentClass: '',
-    showExpander: false,
+    hideExpander: false,
   }
 
   constructor (props: Props) {
@@ -58,7 +58,7 @@ class Collapsible extends Component<Props, State> {
               style={this.props.headerStyle}
               tabIndex={-1}
             >
-              {this.props.showExpander && <ChevronIcon className='collapsible-indicator' />}
+              {!this.props.hideExpander && <ChevronIcon className='collapsible-indicator' />}
               <span className='collapsible-header-text'>
                 {this.props.header}
               </span>

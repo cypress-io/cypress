@@ -68,7 +68,6 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       headerClass='hook-header'
       headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen
-      showExpander
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}

@@ -159,7 +159,7 @@ class Test extends Component<TestProps> {
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
-        showExpander
+        hideExpander
       >
         {this._contents()}
       </Collapsible>

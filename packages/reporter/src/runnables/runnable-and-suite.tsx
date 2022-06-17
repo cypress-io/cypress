@@ -52,7 +52,6 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
       headerStyle={{ paddingLeft: indent(model.level) }}
       contentClass='runnables-region'
       isOpen
-      showExpander
     >
       <ul className='runnables'>
         {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}

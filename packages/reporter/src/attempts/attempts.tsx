@@ -93,7 +93,6 @@ class Attempt extends Component<AttemptProps> {
           headerClass='attempt-name'
           contentClass='attempt-content'
           isOpen={model.isOpen}
-          showExpander
         >
           {renderAttemptContent(model, studioActive)}
         </Collapsible>

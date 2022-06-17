@@ -345,10 +345,6 @@
     display: flex;
   }
 
-  .test > .collapsible > .runnable-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
-    display: none;
-  }
-
   .runnable-header {
     @include inner-header;
 
