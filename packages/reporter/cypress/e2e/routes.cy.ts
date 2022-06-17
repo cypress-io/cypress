@@ -36,10 +36,10 @@ describe('routes', () => {
     }
   })
 
-  it('does not display if there are no routes', () => {
+  it('does not render if there are no routes', () => {
     runnables.tests![0].routes = []
     start()
-    cy.get('.runnable-routes-region').should('not.be.visible')
+    cy.get('.runnable-routes-region').should('not.exist')
   })
 
   describe('when there are routes', () => {
