@@ -107,6 +107,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
+      cy.withCtx((ctx) => {
+        // clear cloud cache
+        ctx.cloud.reset()
+      })
+
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
