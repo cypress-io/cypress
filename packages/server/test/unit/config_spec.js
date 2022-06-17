@@ -157,18 +157,10 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      // NOTE: Validated in real use
-      it.skip('validates cypress.config.js', function () {
+      it('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.config.{js,ts,mjs,cjs}')
-      })
-
-      // NOTE: Validated in real use
-      it.skip('validates cypress.env.json', function () {
-        this.setup({}, { reporter: 5 })
-
-        return this.expectValidationFails('cypress.env.json')
+        return this.expectValidationFails('Expected reporter to be a string')
       })
 
       it('only validates known values', function () {
@@ -578,27 +570,27 @@ describe('lib/config', () => {
       })
 
       // TODO:(lachlan): after mega PR
-      context.skip('specPattern', () => {
+      context('specPattern', () => {
         it('passes if a string', function () {
-          this.setup({ e2e: { specPattern: '**/*.coffee' } })
+          this.setup({ e2e: { supportFile: false, specPattern: '**/*.coffee' } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ e2e: { specPattern: ['**/*.coffee'] } })
+          this.setup({ e2e: { supportFile: false, specPattern: ['**/*.coffee'] } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ e2e: { specPattern: 42 } })
+          this.setup({ e2e: { supportFile: false, specPattern: 42 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ e2e: { specPattern: [5] } })
+          this.setup({ e2e: { supportFile: false, specPattern: [5] } })
 
           return this.expectValidationFails('be a string or an array of strings')
           .then(() => {
@@ -1466,8 +1458,7 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
     })
 
-    // TODO:(lachlan) after mega PR
-    describe.skip('.resolved', () => {
+    describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
@@ -1481,6 +1472,11 @@ describe('lib/config', () => {
 
         return config.mergeDefaults(obj, options)
         .then((cfg) => {
+          ['platform', 'arch'].forEach((x) => {
+            expect(cfg.resolved[x]).to.exist
+            delete cfg.resolved[x]
+          })
+
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
             baseUrl: { value: null, from: 'default' },
@@ -1488,17 +1484,14 @@ describe('lib/config', () => {
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
             clientCertificates: { value: [], from: 'default' },
-            component: { from: 'default', value: {} },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1525,7 +1518,6 @@ describe('lib/config', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            specPattern: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1569,23 +1561,25 @@ describe('lib/config', () => {
 
         return config.mergeDefaults(obj, options)
         .then((cfg) => {
+          ['platform', 'arch'].forEach((x) => {
+            expect(cfg.resolved[x]).to.exist
+            delete cfg.resolved[x]
+          })
+
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
             baseUrl: { value: 'http://localhost:8080', from: 'config' },
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            component: { from: 'default', value: {} },
             clientCertificates: { value: [], from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalStudio: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1634,7 +1628,6 @@ describe('lib/config', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            specPattern: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1861,9 +1854,7 @@ describe('lib/config', () => {
       })
     })
 
-    // TODO: Figure out the behavior on updateWithPluginValues, should we check
-    // the config from cfg, or get it from the data-context?
-    it.skip('catches browsers=null returned from plugins', () => {
+    it('catches browsers=null returned from plugins', () => {
       const browser = {
         name: 'fake browser name',
         family: 'chromium',

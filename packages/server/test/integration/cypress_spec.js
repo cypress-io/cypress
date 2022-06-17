@@ -1700,41 +1700,6 @@ describe('lib/cypress', () => {
         })
       })
     })
-
-    describe('--config-file', () => {
-      beforeEach(function () {
-        this.filename = 'foo.bar.baz.asdf.quux.json'
-        this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
-      })
-
-      // TODO: (tgriesser) needs a system test, the mocking here no longer is correct
-      it.skip('reads config from a custom config file', function () {
-        const bus = new EE()
-
-        return fs.writeJson(path.join(this.pristinePath, this.filename), {
-          env: { foo: 'bar' },
-          port: 2020,
-        }).then(() => {
-          return cypress.start([
-          `--config-file=${this.filename}`,
-          ])
-          .then(() => {
-            const options = Events.start.firstCall.args[0]
-
-            return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
-          })
-          .then(() => {
-            expect(this.open).to.be.called
-
-            const cfg = this.open.getCall(0).args[0]
-
-            expect(cfg.env.foo).to.equal('bar')
-
-            expect(cfg.port).to.equal(2020)
-          })
-        })
-      })
-    })
   })
 
   context('--cwd', () => {
