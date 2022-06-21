@@ -373,7 +373,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       Cypress.backend('cross:origin:automation:cookies:received')
     })
 
-    Cypress.on('before:stability:notification', (stable) => {
+    Cypress.on('before:stability:release', (stable) => {
       const cookies = state('cross:origin:automation:cookies')
 
       if (!stable || !cookies) return
