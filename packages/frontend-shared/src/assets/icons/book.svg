@@ -1,0 +1,4 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 2H4C3.44772 2 3 2.44772 3 3V11H4H13V2Z" fill="#D0D2E0" class="icon-light background" style="" />
+<path d="M13 11V2H4M13 11H4M13 11V14H4M3 11V13C3 13.5523 3.44772 14 4 14V14M3 11V3C3 2.44772 3.44772 2 4 2V2M3 11H4M4 2V11M4 11V14M10 5H7" stroke="#1B1E2E" class="border icon-dark" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

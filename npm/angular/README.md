@@ -6,7 +6,7 @@ NOTE: this is not published on npm yet. It's a work in progress. Consider [Cypre
 ](https://github.com/jscutlery/test-utils/tree/main/packages/cypress-angular) by [JS Cutlery](https://github.com/jscutlery) for a version that's currently working and available on npm.
 
 ```shell
-npm install -D cypress @cypress/angular @cypress/webpack-dev-server
+npm install -D cypress @cypress/angular
 ```
 
 Ensure you have a version of Cypress > 7. 
@@ -14,7 +14,7 @@ Ensure you have a version of Cypress > 7.
 Add the following to your support file:
 
 ```js
-// cypress/support/index.js
+// cypress/support/component.js
 // core-js 3.*
 require('core-js/es/reflect');
 // core-js 2.*
@@ -22,32 +22,31 @@ require('core-js/es7/reflect');
 require('@cypress/angular/support');
 ```
 
-Enable component testing in `cypress.json`.
+Enable component testing in `cypress.config.js`.
 
-```json
-{
+```js
+module.exports = {
   "component": {
-    "componentFolder": "src/app",
-    "testFiles": "**/*cy-spec.ts"
+    "specPattern": "src/**/*.cy.ts"
   }
 }
 ```
 
-Configure `cypress/plugins/index.js` to transpile Angular code.
+Configure `cypress.config.js` to transpile Angular code.
 
 ```javascript
+import { defineConfig } from 'cypress'
 import * as webpackConfig from './webpack.config';
-const { startDevServer } = require('@cypress/webpack-dev-server');
 
-module.exports = (on, config) => {
-  on('dev-server:start', (options) =>
-    startDevServer({
-      options,
-      webpackConfig,
-    }),
-  );
-  return config;
-};
+export default defineConfig({
+  component: {
+    devServer: {
+      bundler: 'webpack',
+      webpackConfig
+    }
+  }
+})
+
 ```
 
 The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts).
@@ -156,15 +155,21 @@ module.exports = {
 
 `npm install -D @cypress/code-coverage`
 
-- Then add the code below to your supportFile and pluginsFile
+- Then add the code below to your component support file
 
 ```javascript
-// cypress/support/index.js
 import '@cypress/code-coverage/support';
-// cypress/plugins/index.js
-module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config);
-  return config;
+```
+- Then add the code below to your cypress configuration
+```js
+{
+  ...
+  component: {
+    setupNodeEvents(on, config) {
+      require('@cypress/code-coverage/task')(on, config);
+      return config;
+    }
+  }
 };
 ```
 

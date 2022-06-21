@@ -86,7 +86,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "version": "72",
     "findAppParams": {
       "appName": "Firefox.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefox",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -106,7 +106,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "version": "73",
     "findAppParams": {
       "appName": "Firefox Developer Edition.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefoxdeveloperedition",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -126,7 +126,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "version": "74",
     "findAppParams": {
       "appName": "Firefox Nightly.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.nightly",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -232,7 +232,7 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     "version": "100",
     "findAppParams": {
       "appName": "Firefox.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefox",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -252,7 +252,7 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     "version": "300",
     "findAppParams": {
       "appName": "Firefox Developer Edition.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefoxdeveloperedition",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -272,7 +272,7 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     "version": "200",
     "findAppParams": {
       "appName": "Firefox Nightly.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.nightly",
       "versionProperty": "CFBundleShortVersionString"
     }

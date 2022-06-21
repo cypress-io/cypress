@@ -36,7 +36,7 @@ const packageGlobs = workspacePaths.filter((s) => s.endsWith('/*'))
 async function cacheKey () {
   const yarnLocks = [p('yarn.lock')]
   const patchFiles = glob.sync(p('**/*.patch'), {
-    ignore: ['**/node_modules/**', '**/*_node_modules/**'],
+    ignore: ['**/node_modules/**', '**/*_node_modules/**', '**/dist-{app,launchpad}/**'],
   })
 
   const packageJsons = glob.sync(`${BASE_DIR}/{.,${workspacePaths.join(',')}}/package.json`)
@@ -66,12 +66,13 @@ async function prepareCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      await fsExtra.move(
-        src,
-        src
-        .replace(/(.*?)\/node_modules/, '$1_node_modules')
-        .replace(BASE_DIR, CACHE_DIR),
-      )
+      const dest = src
+      .replace(/(.*?)\/node_modules/, '$1_node_modules')
+      .replace(BASE_DIR, CACHE_DIR)
+
+      // self-hosted M1 doesn't always clear this directory between runs, so remove it
+      await fsExtra.remove(dest)
+      await fsExtra.move(src, dest)
     }),
   )
 

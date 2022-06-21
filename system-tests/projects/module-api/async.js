@@ -10,6 +10,6 @@ async function testSpec (spec) {
   console.log(result)
 }
 (async () => {
-  await testSpec('./cypress/integration/a-spec.js')
-  await testSpec('./cypress/integration/b-spec.js')
+  await testSpec('./cypress/e2e/a-spec.cy.js')
+  await testSpec('./cypress/e2e/b-spec.cy.js')
 })()

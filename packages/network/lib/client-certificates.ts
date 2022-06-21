@@ -1,9 +1,10 @@
-import type { Url } from 'url'
+import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import Forge from 'node-forge'
 import fs from 'fs-extra'
 import { clientCertificateStore } from './agent'
+
 const { pki, asn1, pkcs12, util } = Forge
 
 const debug = debugModule('cypress:network:client-certificates')
@@ -271,7 +272,7 @@ export function loadClientCertificateConfig (config) {
               if (passphrase) {
                 if (!pki.decryptRsaPrivateKey(pemKeyRaw, passphrase)) {
                   throw new Error(
-                    'Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn\'t have unexpected whitespace at the end)',
+                    `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
                   )
                 }
               } else {
@@ -346,12 +347,16 @@ export function loadClientCertificateConfig (config) {
 function loadBinaryFromFile (filepath: string): Buffer {
   debug(`loadCertificateFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath)
 }
 
 function loadTextFromFile (filepath: string): string {
   debug(`loadPassphraseFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath, 'utf8').toString()
 }
 

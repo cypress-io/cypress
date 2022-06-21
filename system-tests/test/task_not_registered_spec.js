@@ -6,7 +6,7 @@ describe('e2e task', () => {
   it('fails', function () {
     return systemTests.exec(this, {
       project: 'task-not-registered',
-      spec: 'task_not_registered_spec.js',
+      spec: 'task_not_registered.cy.js',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,

@@ -5,7 +5,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import { Studio } from './studio'
 import { StudioInstructionsModal } from './studio-modals'
-import { eventManager } from '../event-manager'
+import { createEventManager } from '../../test/utils'
 
 const createModel = (props) => {
   return {
@@ -18,6 +18,12 @@ const createModel = (props) => {
 }
 
 describe('<Studio />', () => {
+  let eventManager
+
+  beforeEach(() => {
+    eventManager = createEventManager()
+  })
+
   context('icon', () => {
     it('is not active when studio is not active', () => {
       const component = shallow(<Studio model={createModel({ isActive: false })} />)
@@ -95,7 +101,7 @@ describe('<Studio />', () => {
     })
 
     it('renders tooltips', () => {
-      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+      const component = shallow(<Studio model={createModel({ isActive: true })} eventManager={eventManager} />)
 
       expect(component.find(Tooltip).at(0)).to.have.prop('title', 'Close Studio')
       expect(component.find(Tooltip).at(1)).to.have.prop('title', 'Restart')
@@ -104,7 +110,7 @@ describe('<Studio />', () => {
     })
 
     it('hides all tooltips while studio is loading', () => {
-      const component = shallow(<Studio model={createModel({ isLoading: true })} />)
+      const component = shallow(<Studio model={createModel({ isLoading: true })} eventManager={eventManager} />)
 
       expect(component.find(Tooltip).at(0)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(1)).to.have.prop('visible', false)
@@ -113,7 +119,7 @@ describe('<Studio />', () => {
     })
 
     it('emits studio:cancel when close button is clicked', () => {
-      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+      const component = shallow(<Studio model={createModel({ isActive: true })} eventManager={eventManager} />)
 
       component.find('.button-studio-close').simulate('click')
 
@@ -122,7 +128,7 @@ describe('<Studio />', () => {
 
     it('resets studio recorder and emits restart when restart button is clicked', () => {
       const model = createModel({ isActive: true })
-      const component = shallow(<Studio model={model} />)
+      const component = shallow(<Studio model={model} eventManager={eventManager} />)
 
       component.find('.button-studio-restart').simulate('click')
 
@@ -131,7 +137,7 @@ describe('<Studio />', () => {
     })
 
     it('starts copy to clipboard process when copy button is clicked', () => {
-      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+      const component = shallow(<Studio model={createModel({ isActive: true })} eventManager={eventManager} />)
 
       component.find('.button-studio-copy').simulate('click')
 
@@ -140,7 +146,7 @@ describe('<Studio />', () => {
 
     it('starts studio recorder saving when save button is clicked', () => {
       const model = createModel({ isActive: true })
-      const component = shallow(<Studio model={model} />)
+      const component = shallow(<Studio model={model} eventManager={eventManager} />)
 
       component.find('.button-studio-save').simulate('click')
 

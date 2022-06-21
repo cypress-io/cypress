@@ -125,6 +125,10 @@ const connect = function (host, path, extraOpts) {
         return invoke('focus', id)
       case 'take:screenshot':
         return invoke('takeScreenshot', id)
+      case 'reset:browser:state':
+        return invoke('resetBrowserState', id)
+      case 'reset:browser:tabs:for:next:test':
+        return invoke('resetBrowserTabsForNextTest', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -253,6 +257,23 @@ const automation = {
     }).then(fn)
   },
 
+  resetBrowserState (fn) {
+    // We remove browser data. Firefox goes through this path, while chrome goes through cdp automation
+    // Note that firefox does not support fileSystems or serverBoundCertificates
+    // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/DataTypeSet).
+    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
+  },
+
+  resetBrowserTabsForNextTest (fn) {
+    return Promise.try(() => {
+      return browser.tabs.create({ url: 'about:blank' })
+    }).then(() => {
+      return browser.windows.getCurrent({ populate: true })
+    }).then((windowInfo) => {
+      return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))
+    }).then(fn)
+  },
+
   query (data) {
     const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
 
@@ -260,7 +281,7 @@ const automation = {
       return Promise.try(() => {
         return browser.tabs.executeScript(tab.id, { code })
       }).then((results) => {
-        if (!results || (results[0] !== data.string)) {
+        if (!results || (results[0] !== data.randomString)) {
           throw new Error('Executed script did not return result')
         }
       })

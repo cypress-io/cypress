@@ -32,6 +32,20 @@ export const getStackLines = (stack: string) => {
 }
 
 /**
+ * Captures & returns the absolute path, line, and column from a stack trace line
+ */
+export const parseStackLine = (line: string): null | { absolute: string, line: number, column: number } => {
+  const stackLineCapture = /^\s*(?:at )?.*@?\((.*?)\:(\d+)\:(\d+)\)?$/
+  const result = stackLineCapture.exec(line)
+
+  if (!result?.[1]) {
+    return null
+  }
+
+  return { absolute: result[1], line: Number(result[2]), column: Number(result[3]) }
+}
+
+/**
  * Takes the stack and returns only the lines that contain stack-frame like entries,
  * matching the `stackLineRegex` above
  */

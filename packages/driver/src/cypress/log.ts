@@ -8,12 +8,14 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
+import type { StateFunc } from './state'
+
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -112,7 +114,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state: Cypress.State, config, obj) {
+const defaults = function (state: StateFunc, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -210,6 +212,7 @@ const defaults = function (state: Cypress.State, config, obj) {
 
   if (logGroupIds.length) {
     obj.group = _.last(logGroupIds)
+    obj.groupLevel = logGroupIds.length
   }
 
   if (obj.groupEnd) {
@@ -225,7 +228,7 @@ const defaults = function (state: Cypress.State, config, obj) {
 
 export class Log {
   cy: any
-  state: Cypress.State
+  state: StateFunc
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any

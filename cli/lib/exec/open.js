@@ -2,9 +2,19 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
-const { processTestingType } = require('./shared')
+const { processTestingType, checkConfigFile } = require('./shared')
+const { exitWithError } = require('../errors')
 
-const processOpenOptions = (options) => {
+/**
+ * Maps options collected by the CLI
+ * and forms list of CLI arguments to the server.
+ *
+ * Note: there is lightweight validation, with errors
+ * thrown synchronously.
+ *
+ * @returns {string[]} list of CLI arguments
+ */
+const processOpenOptions = (options = {}) => {
   if (!util.isInstalledGlobally() && !options.global && !options.project) {
     options.project = process.cwd()
   }
@@ -16,6 +26,7 @@ const processOpenOptions = (options) => {
   }
 
   if (options.configFile !== undefined) {
+    checkConfigFile(options)
     args.push('--config-file', options.configFile)
   }
 
@@ -35,7 +46,19 @@ const processOpenOptions = (options) => {
     args.push('--project', options.project)
   }
 
-  args.push(...processTestingType(options.testingType))
+  if (options.global) {
+    args.push('--global', options.global)
+  }
+
+  if (options.inspect) {
+    args.push('--inspect')
+  }
+
+  if (options.inspectBrk) {
+    args.push('--inspectBrk')
+  }
+
+  args.push(...processTestingType(options))
 
   debug('opening from options %j', options)
   debug('command line arguments %j', args)
@@ -46,14 +69,22 @@ const processOpenOptions = (options) => {
 module.exports = {
   processOpenOptions,
   start (options = {}) {
-    const args = processOpenOptions(options)
-
     function open () {
-      return spawn.start(args, {
-        dev: options.dev,
-        detached: Boolean(options.detached),
-        stdio: 'inherit',
-      })
+      try {
+        const args = processOpenOptions(options)
+
+        return spawn.start(args, {
+          dev: options.dev,
+          detached: Boolean(options.detached),
+          stdio: 'inherit',
+        })
+      } catch (err) {
+        if (err.details) {
+          return exitWithError(err.details)()
+        }
+
+        throw err
+      }
     }
 
     if (options.dev) {

@@ -25,12 +25,19 @@ const browser = {
   },
   windows: {
     getLastFocused () {},
+    getCurrent () {},
+    update () {},
   },
   runtime: {},
   tabs: {
+    create () {},
     query () {},
     executeScript () {},
     captureVisibleTab () {},
+    remove () {},
+  },
+  browsingData: {
+    remove () {},
   },
   webRequest: {
     onBeforeSendHeaders: {
@@ -42,6 +49,7 @@ const browser = {
 mockRequire('webextension-polyfill', browser)
 
 const background = require('../../app/background')
+const { expect } = require('chai')
 
 const PORT = 12345
 
@@ -113,7 +121,7 @@ describe('app/background', () => {
     global.window = {}
 
     this.httpSrv = http.createServer()
-    this.server = socket.server(this.httpSrv, { path: '/__socket.io' })
+    this.server = socket.server(this.httpSrv, { path: '/__socket' })
 
     const ws = {
       on: sinon.stub(),
@@ -410,7 +418,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })
@@ -427,7 +435,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })
@@ -502,7 +510,7 @@ describe('app/background', () => {
         return done()
       })
 
-      this.client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+      this.client = background.connect(`http://localhost:${PORT}`, '/__socket')
     })
 
     describe('get:cookies', () => {
@@ -762,6 +770,27 @@ describe('app/background', () => {
       })
     })
 
+    describe('focus:browser:window', () => {
+      beforeEach(() => {
+        sinon.stub(browser.windows, 'getCurrent').resolves({ id: '10' })
+        sinon.stub(browser.windows, 'update').withArgs('10', { focused: true }).resolves()
+      })
+
+      it('focuses the current window', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.windows.update).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'focus:browser:window')
+      })
+    })
+
     describe('take:screenshot', () => {
       beforeEach(() => {
         return sinon.stub(browser.windows, 'getLastFocused').resolves({ id: 1 })
@@ -797,6 +826,48 @@ describe('app/background', () => {
         })
 
         return this.server.emit('automation:request', 123, 'take:screenshot')
+      })
+    })
+
+    describe('reset:browser:state', () => {
+      beforeEach(() => {
+        sinon.stub(browser.browsingData, 'remove').withArgs({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).resolves()
+      })
+
+      it('resets the browser state', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.browsingData.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'reset:browser:state')
+      })
+    })
+
+    describe('reset:browser:tabs:for:next:test', () => {
+      beforeEach(() => {
+        sinon.stub(browser.tabs, 'create').withArgs({ url: 'about:blank' })
+        sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
+        sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
+      })
+
+      it('closes the tabs in the current browser window', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.tabs.create).to.be.called
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.tabs.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
       })
     })
   })

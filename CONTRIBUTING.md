@@ -4,7 +4,7 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Gitter chat](https://on.cypress.io/chat) or [Discord](https://on.cypress.io/discord) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Join the [Cypress Discord](https://on.cypress.io/discord) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
 - Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
 - Write some documentation or improve our existing docs. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
@@ -14,7 +14,7 @@ Thanks for taking the time to contribute! :smile:
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Help triage existing issues](#triaging-issues).
-- Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are a good place to start. Please thoroughly read our [Writing Code guide](#writing-code).
+- Write code to address an issue. We have some issues labeled as [`good first issue`](https://github.com/cypress-io/cypress/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) that are a good place to start. Please thoroughly read our [Writing Code guide](#writing-code).
 
 ## Table of Contents
 
@@ -259,7 +259,6 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
@@ -311,9 +310,9 @@ The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspac
 
 > **⚠ Running on Windows?**
 >
-> Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
+> If you are running a Windows operating system, you may encounter some commands that are not working. In order to resolve paths correctly during the development build process, you may need to explicitly set your default `yarn` shell script to Command Prompt by using the following command:
 >```bash
-> yarn config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
+> yarn config set script-shell "C:\\Windows\\system32\\cmd.exe"
 >```
 
 **Install all dependencies:**
@@ -330,9 +329,7 @@ This will install all the dependencies for the repo and perform a preliminary bu
 yarn start
 ```
 
-If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details.
-
-This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher` for instance.
+If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details. This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher:*` for instance. See ["Debug logs"](./guides/debug-logs.md) for more info.
 
 When running `yarn start` this routes through the CLI and eventually calls `yarn dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
@@ -412,30 +409,21 @@ Each package is responsible for building itself and testing itself and can do so
 | `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
 | `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
 
-#### Debugging
+#### Internal Vite Options
+When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
+###### `CYPRESS_INTERNAL_VITE_DEV`
+Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
+###### `CYPRESS_INTERNAL_VITE_INSPECT` 
+Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly. Set to `1` to enable.
+###### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING` 
+Leveraged only for internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide. Set to `true` when doing
+###### `CYPRESS_INTERNAL_VITE_APP_PORT` 
+Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
+###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT` 
+Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
+#### Debug Logs
 
-Some packages use [debug](https://github.com/visionmedia/debug#readme) to
-log debug messages to the console. The naming scheme should be
-`cypress:<package name>`; where package name is without the `@packages` scope. For example to see launcher messages during unit
-tests start it using
-
-```bash
-$ DEBUG=cypress:launcher yarn test --scope @packages/launcher
-```
-
-If you want to see log messages from all Cypress projects use wild card
-
-```bash
-$ DEBUG=cypress:*
-```
-
-Or for an individual package:
-
-```bash
-DEBUG=cypress:cli
-DEBUG=cypress:server
-DEBUG=cypress:launcher
-```
+Many Cypress packages print out debugging information to console via the `debug` module. See ["Debug logs"](./guides/debug-logs.md) for more information.
 
 ### Coding Style
 

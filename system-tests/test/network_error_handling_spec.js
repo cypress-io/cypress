@@ -239,7 +239,9 @@ describe('e2e network error handling', function () {
       },
     ],
     settings: {
-      baseUrl: `http://localhost:${PORT}/`,
+      e2e: {
+        baseUrl: `http://localhost:${PORT}/`,
+      },
     },
   })
 
@@ -373,7 +375,7 @@ describe('e2e network error handling', function () {
 
     it('tests run as expected', function () {
       return systemTests.exec(this, {
-        spec: 'network_error_handling_spec.js',
+        spec: 'network_error_handling.cy.js',
         video: false,
         expectedExitCode: 2,
         snapshot: true,
@@ -423,7 +425,7 @@ describe('e2e network error handling', function () {
         process.env.NO_PROXY = '<-loopback>,localhost:13373' // proxy everything except for the irrelevant test
 
         return systemTests.exec(this, {
-          spec: 'https_passthru_spec.js',
+          spec: 'https_passthru.cy.js',
           snapshot: true,
           config: {
             baseUrl: `https://localhost:${HTTPS_PORT}`,
@@ -451,11 +453,11 @@ describe('e2e network error handling', function () {
     context('does not delay a 304 Not Modified', () => {
       it('in normal network conditions', function () {
         return systemTests.exec(this, {
-          spec: 'network_error_304_handling_spec.js',
+          spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })
@@ -471,11 +473,11 @@ describe('e2e network error handling', function () {
           process.env.NO_PROXY = ''
         }).then(() => {
           return systemTests.exec(this, {
-            spec: 'network_error_304_handling_spec.js',
+            spec: 'network_error_304_handling.cy.js',
             video: false,
             config: {
-              baseUrl: `http://localhost:${PORT}`,
               pageLoadTimeout: 4000,
+              baseUrl: `http://localhost:${PORT}`,
             },
             snapshot: true,
           })
@@ -498,11 +500,11 @@ describe('e2e network error handling', function () {
         await debugProxy.start(PROXY_PORT)
 
         await systemTests.exec(this, {
-          spec: 'network_error_304_handling_spec.js',
+          spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })

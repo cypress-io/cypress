@@ -9,7 +9,7 @@
     </a>
 </p>
 
- Add this schematic to quickly get up and running with [Cypress](https://cypress.io) in your Angular project.
+ Add this schematic to quickly get up and running with [Cypress](https://cypress.io) in your Angular project. 
 
  ___
 
@@ -27,6 +27,10 @@
 
 ✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
 
+## Requirements
+
+- Angular 12+
+
 ## Usage ⏯
 
 Install the schematic:
@@ -34,6 +38,7 @@ Install the schematic:
 ```shell
 ng add @cypress/schematic
 ```
+
 To run Cypress in `open` mode within your project: 
 
 ```shell script
@@ -84,7 +89,7 @@ Read our docs to learn more about [launching browsers](https://on.cypress.io/lau
 
 ### Recording test results to the Cypress Dashboard
 
-We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction) recording key as an environment variable and NOT as a builder option when running it in CI.
+We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
 
 ```json
 "cypress-run": {
@@ -102,7 +107,7 @@ We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/das
 }
 ```
 
-Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
 
 ### Specifying a custom `cypress.json` config file
 
@@ -171,6 +176,40 @@ You may want to specify a custom reporter. Cypress works with any reporters buil
 
 Read our docs to learn more about working with [reporters](https://on.cypress.io/reporters).
 
+### Running the builder with a different baseUrl
+
+You can specify a `baseUrl` that is different than the one in `cypress.json`. To do this, add `baseUrl` to `configurations` like the following: 
+
+```json
+"cypress-open": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "devServerTarget": "{project-name}:serve",
+    "watch": true,
+    "headless": false
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:serve:production"
+    },
+    "local-dev": {
+      "devServerTarget": "{project-name}:serve:development",
+      "baseUrl": "http://localhost:4002"
+    },
+    "another-env": {
+      "devServerTarget": "{project-name}:serve:development",
+      "baseUrl": "http://localhost:4004"
+    }
+  }
+}
+```
+
+In order to prevent the application from building, add the following to the end of your command:
+
+```shell
+--dev-server-target=''
+```
+
 ## Generator Options
 
 ### Specify Filename (bypassing CLI prompt)
@@ -181,8 +220,7 @@ In order to bypass the prompt asking for your e2e spec name, simply add a `--nam
 ng generate @cypress/schematic:e2e --name=login
 ```
 
-This will create a new spec file named `login.spec.ts` in the default Cypress folder location.
-
+This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
 
 ### Specify Project
 

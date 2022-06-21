@@ -30,7 +30,15 @@ const isRenderWorkerRe = /\.RenderWorker-/
 // https://github.com/cypress-io/cypress/issues/19299
 const isDbusWarning = /Failed to connect to the bus:/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning]
+// Electron began logging these on self-signed certs with 17.0.0-alpha.4.
+// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/34583
+// Sample:
+// [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
+// ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
+// ERROR: No matching issuer found
+const isCertVerifyProcBuiltin = /(^\[.*ERROR:cert_verify_proc_builtin\.cc|^----- Certificate i=0 \(OU=Cypress Proxy|^ERROR: No matching issuer found$)/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -171,8 +179,13 @@ module.exports = {
           args.unshift(startScriptPath)
         }
 
+        if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+          args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
+        }
+
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
         debug('spawning Cypress with executable: %s', executable)
+
         const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {

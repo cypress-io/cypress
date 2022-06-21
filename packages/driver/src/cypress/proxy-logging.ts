@@ -324,13 +324,7 @@ export default class ProxyLogging {
     return proxyRequest
   }
 
-  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
-
-    if (!proxyRequest) {
-      return debug('unmatched responseReceived event %o', responseReceived)
-    }
-
+  private updateProxyRequestWithResponse (proxyRequest, responseReceived) {
     proxyRequest.responseReceived = responseReceived
 
     proxyRequest.updateConsoleProps()
@@ -341,6 +335,22 @@ export default class ProxyLogging {
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
 
     proxyRequest.log?.end()
+  }
+
+  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
+
+    if (!proxyRequest) {
+      return debug('unmatched responseReceived event %o', responseReceived)
+    }
+
+    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== XMLHttpRequest.DONE) {
+      proxyRequest.xhr.xhr.addEventListener('load', () => {
+        this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+      })
+    } else {
+      this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+    }
   }
 
   private updateRequestWithError (error: RequestError): void {
@@ -392,7 +402,11 @@ export default class ProxyLogging {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
-    proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
+    // TODO: Figure out what is causing the race condition here
+    //       Follow up on latest log regression fix to see if this is resolved.
+    if (this.Cypress.log) {
+      proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
+    }
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
 

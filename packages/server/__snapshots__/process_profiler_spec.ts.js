@@ -50,7 +50,7 @@ exports['lib/util/process_profiler ._aggregateGroups aggregates groups as expect
     "maxMemRssMb": 10
   },
   {
-    "group": "desktop-gui",
+    "group": "launchpad",
     "processCount": 1,
     "pids": "77777",
     "cpuPercent": 20,
