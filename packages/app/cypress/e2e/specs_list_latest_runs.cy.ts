@@ -317,6 +317,42 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
       specShouldShow('z008.spec.js', ['gray-300', 'gray-300', 'jade-400'], 'RUNNING')
       cy.get(averageDurationSelector('z008.spec.js')).contains('2:03')
     })
+
+    describe('preserving tree expansion state', () => {
+      it('should preserve state when row data is updated without additions/deletions', () => {
+        // Collapse a directory
+        cy.get('button[data-cy="row-directory-depth-1"]').first()
+        .should('have.attr', 'aria-expanded', 'true')
+        .click()
+        .should('have.attr', 'aria-expanded', 'false')
+
+        // Trigger cloud specs list change by scrolling
+        cy.get('.spec-list-container')
+        .scrollTo('bottom', { duration: 500 })
+        .wait(100)
+        .scrollTo('top', { duration: 500 })
+
+        // Directory should still be collapsed
+        cy.get('button[data-cy="row-directory-depth-1"]').first()
+        .should('have.attr', 'aria-expanded', 'false')
+      })
+
+      it('should expand all directories when search is performed', () => {
+        // Collapse a directory
+        cy.get('button[data-cy="row-directory-depth-0"]').first()
+        .should('have.attr', 'aria-expanded', 'true')
+        .click()
+        .should('have.attr', 'aria-expanded', 'false')
+        .then((dir) => {
+          // Perform a search/filter operation
+          cy.findByLabelText('Search Specs').type(dir.text()[0])
+        })
+
+        // Previously-collapsed directory should automatically expand
+        cy.get('button[data-cy="row-directory-depth-0"]').first()
+        .should('have.attr', 'aria-expanded', 'true')
+      })
+    })
   })
 
   context('polling indicates new data', () => {

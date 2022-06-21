@@ -420,9 +420,18 @@ const specs = computed(() => {
   return fuzzySortSpecs(specs2, debouncedSearchString.value)
 })
 
+// Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved
+// when specs list data is updated on scroll (e.g., latest-runs & average-duration data loading async)
+const treeExpansionCache = ref(new Map<string, boolean>())
+
+// When search value changes reset the tree expansion cache so that any collapsed directories re-expand
+watch(() => search.value, () => treeExpansionCache.value.clear())
+// When specs are added or removed reset the tree expansion cache so that any collapsed directories re-expand
+watch(() => specs.value.length, () => treeExpansionCache.value.clear())
+
 const collapsible = computed(() => {
   return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true },
+    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true, cache: treeExpansionCache.value },
   )
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
