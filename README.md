@@ -1,7 +1,10 @@
 <p align="center">
   <a href="https://www.cypress.io">
-    ![Cypress Logo](./assets/cypress-logo-dark.png#gh-dark-mode-only)
-    ![Cypress Logo](./assets/cypress-logo-light.png#gh-light-mode-only)
+    <picture>
+      <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
+      <img style="width: 400px" alt="Cypress Logo" src="./assets/cypress-logo-light.png">
+    </picture>    
   </a>
 </p>
 <p align="center">
