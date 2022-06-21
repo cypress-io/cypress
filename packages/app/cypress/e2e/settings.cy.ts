@@ -413,7 +413,7 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Settings').click()
     cy.findByText('Dashboard Settings').click()
     cy.findByText('Project ID').should('exist')
-    cy.contains('button', 'Log in to the Dashboard').should('be.visible')
+    cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
   })
 
   it('have returned browsers', () => {
