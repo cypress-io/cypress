@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 import { mount } from './mount'
 
 type MountHookResult<T> = {
@@ -77,11 +75,13 @@ function TestHook ({ callback, onError, children }: TestHookProps) {
 export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
   const { result, setValue, setError } = resultContainer<T>()
 
-  const componentTest: React.ReactElement = React.createElement(TestHook, {
-    callback: hookFn,
-    onError: setError,
-    children: setValue,
-  })
+  import('react').then((reactMod) => {
+    const componentTest = reactMod.createElement(TestHook, {
+      callback: hookFn,
+      onError: setError,
+      children: setValue,
+    })
 
-  return mount(componentTest).then(() => result)
+    return mount(componentTest).then(() => result)
+  })
 }

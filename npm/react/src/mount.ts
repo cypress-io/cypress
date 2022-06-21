@@ -1,7 +1,5 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-// @ts-expect-error
-import * as ReactDOMClient from 'react-dom/client'
+import type React from 'react'
+import type ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
@@ -78,7 +76,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   return cy
   .then(injectStyles(options))
   .then(() => {
-    const reactDomToUse = options.ReactDom || ReactDOM
+    const reactDomToUse = options.ReactDom
 
     lastMountedReactDom = reactDomToUse
 
@@ -99,60 +97,78 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       key,
     }
 
-    const reactComponent = React.createElement(
-      options.strict ? React.StrictMode : React.Fragment,
-      props,
-      jsx,
-    )
+    let reactComponent: ReturnType<typeof React.createElement>
+
     // since we always surround the component with a fragment
     // let's get back the original component
-    const userComponent = (reactComponent.props as {
-      key: string
-      children: React.ReactNode
-    }).children
+    let userComponent: React.ReactNode
 
-    if (getMajorVersion(React.version) <= 17) {
-      reactDomToUse.render(reactComponent, el)
-    } else {
-      const root = ReactDOMClient.createRoot(el)
+    // major version of userland React
+    let majorVersion: number
 
-      root.render(reactComponent)
-    }
+    import('react')
+    .then(async (reactMod) => {
+      majorVersion = getMajorVersion(reactMod.version)
 
-    if (options.log !== false) {
-      Cypress.log({
-        name: type,
-        type: 'parent',
-        message: [message],
-        // @ts-ignore
-        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-        consoleProps: () => {
-          return {
-            // @ts-ignore protect the use of jsx functional components use ReactNode
-            props: jsx.props,
-            description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-            home: 'https://github.com/cypress-io/cypress',
-          }
-        },
-      }).snapshot('mounted').end()
-    }
+      reactComponent = reactMod.createElement(
+        options.strict ? reactMod.StrictMode : reactMod.Fragment,
+        props,
+        jsx,
+      )
 
-    return (
-      // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-      cy.wrap<React.ReactNode>(userComponent, { log: false })
-      .as(displayName)
-      .then(() => {
-        return cy.wrap<MountReturn>({
-          component: userComponent,
-          rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
-        }, { log: false })
-      })
-      // by waiting, we delaying test execution for the next tick of event loop
-      // and letting hooks and component lifecycle methods to execute mount
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(0, { log: false })
-    )
+      userComponent = (reactComponent.props as {
+        key: string
+        children: React.ReactNode
+      }).children
+
+      // @ts-expect-error - react-dom/client does not exist until React 18.
+      return majorVersion <= 17 ? import('react-dom') : import('react-dom/client')
+    })
+    .then((reactDom) => {
+      if (majorVersion <= 17) {
+        reactDom.render(reactComponent, el)
+      } else {
+        const root = reactDom.createRoot(el)
+
+        root.render(reactComponent)
+      }
+
+      if (options.log !== false) {
+        Cypress.log({
+          name: type,
+          type: 'parent',
+          message: [message],
+          // @ts-ignore
+          $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+          consoleProps: () => {
+            return {
+              // @ts-ignore protect the use of jsx functional components use ReactNode
+              props: jsx.props,
+              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
+              home: 'https://github.com/cypress-io/cypress',
+            }
+          },
+        }).snapshot('mounted').end()
+      }
+
+      return (
+        // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
+        cy.wrap<React.ReactNode>(userComponent, { log: false })
+        .as(displayName)
+        .then(() => {
+          return cy.wrap<MountReturn>({
+            component: userComponent,
+            rerender: (newComponent) => _mount('rerender', newComponent, options, key),
+            unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+          }, { log: false })
+        })
+        // by waiting, we delaying test execution for the next tick of event loop
+        // and letting hooks and component lifecycle methods to execute mount
+        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+        .wait(0, { log: false })
+      )
+    })
+
   // Bluebird types are terrible. I don't think the return type can be carried without this cast
   }) as unknown as globalThis.Cypress.Chainable<MountReturn>
 }

@@ -4,12 +4,13 @@ import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
-import { IgnorePlugin } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
 import type { WebpackConfiguration } from 'webpack-dev-server'
+import { sourceDefaultWebpackDependencies } from './helpers/sourceRelativeWebpackModules'
+import type { WebpackDevServerConfig } from './devServer'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -89,6 +90,41 @@ function getMajorVersion (semver: string) {
 }
 
 /**
+ * We ignore `react-dom/client` if the React is present and
+ * we the version is <= 17.
+ * We support webpack v4 and v5, and the `IgnorePlugin` is slightly
+ * different between the two, so we check which version of webpack
+ * we are using and match the API.
+ */
+function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
+  const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
+
+  debug(`import user's webpack from %s. It is version %s`,
+    sourceWebpackModulesResult.webpack.importPath,
+    sourceWebpackModulesResult.webpack.majorVersion)
+
+  const webpackModule = require(sourceWebpackModulesResult.webpack.importPath)
+
+  // https://webpack.js.org/plugins/ignore-plugin/
+  if (sourceWebpackModulesResult.webpack.majorVersion === 5) {
+    return new webpackModule.IgnorePlugin({
+      resourceRegExp: /react-dom\/client$/,
+      contextRegExp: /(cypress\/react)/,
+    })
+  }
+
+  // https://v4.webpack.js.org/plugins/ignore-plugin/
+  if (sourceWebpackModulesResult.webpack.majorVersion === 4) {
+    return new webpackModule.IgnorePlugin({
+      resourceRegExp: /react-dom\/client$/,
+      contextRegExp: /(cypress\/react)/,
+    })
+  }
+
+  throw new Error(`Found webpack ${sourceWebpackModulesResult.webpack.majorVersion}. Only v4 and v5 are supported`)
+}
+
+/**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
  */
@@ -160,15 +196,7 @@ export async function makeWebpackConfig (
     output: {
       publicPath,
     },
-    plugins: [
-      new CypressCTWebpackPlugin({
-        files,
-        projectRoot,
-        devServerEvents,
-        supportFile,
-        webpack,
-      }),
-    ],
+    plugins: [],
   }
 
   try {
@@ -180,12 +208,7 @@ export async function makeWebpackConfig (
     debug('found react-dom version %s', reactDom.version)
     if (majorVersion < 18) {
       debug('ignoring react-dom/client ', majorVersion)
-      dynamicWebpackConfig.plugins?.push(
-        new IgnorePlugin({
-          resourceRegExp: /react-dom\/client$/,
-          contextRegExp: /(cypress\/react)/,
-        }),
-      )
+      dynamicWebpackConfig.plugins?.push(makeIgnorePlugin(config.devServerConfig))
     }
   } catch (e) {
     const err = e as Error
@@ -193,9 +216,19 @@ export async function makeWebpackConfig (
     if (err.name === 'MODULE_NOT_FOUND') {
       debug('no react-dom found')
     } else {
-      debug('error when adding IngorePlugin for react-dom/client %s', e)
+      debug('error when adding IgnorePlugin for react-dom/client %s', e)
     }
   }
+
+  dynamicWebpackConfig.plugins?.push(
+    new CypressCTWebpackPlugin({
+      files,
+      projectRoot,
+      devServerEvents,
+      supportFile,
+      webpack,
+    }),
+  )
 
   const mergedConfig = merge(
     userAndFrameworkWebpackConfig,
