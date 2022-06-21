@@ -26,7 +26,7 @@
       >
         <div
           :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"
-          class="max-w-210px"
+          class="max-w-235px"
         >
           <i18n-t
             scope="global"

@@ -135,8 +135,8 @@
       "headerShort": "Runs",
       "tooltip": {
         "connected": "The {0} in the Cypress Dashboard",
-        "notConnected": "View the {0} in the Cypress Dashboard",
-        "noAccess": "Request access to view the {0} in the Cypress Dashboard",
+        "notConnected": "Connect to the Cypress Dashboard to see the {0}",
+        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0}",
         "linkText": "status of your latest runs"
       }
     },
@@ -145,13 +145,13 @@
       "headerShort": "Duration",
       "tooltip": {
         "connected": "The {0} of your latest runs in the Cypress Dashboard",
-        "notConnected": "View the {0} of your latest runs in the Cypress Dashboard",
-        "noAccess": "Request access to view the {0} of your latest runs in the Cypress Dashboard",
+        "notConnected": "Connect to the Cypress Dashboard to see the {0} of your latest runs",
+        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0} of your latest runs",
         "linkText": "average spec durations"
       }
     },
     "connectProjectButton": "Connect your project",
-    "dashboardLoginButton": "Log in to Cypress Dashboard",
+    "dashboardLoginButton": "Log in to the Dashboard",
     "reconnectProjectButton": "Reconnect your project",
     "requestAccessButton": "Request access",
     "requestSentButton": "Request sent",
@@ -426,7 +426,7 @@
       "errorNotFound": "Project not found",
       "errorNotFoundButton": "Connect it again",
       "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
-      "errorNotLoggedInButton": "Log in to Cypress Dashboard"
+      "errorNotLoggedInButton": "Log in to the Cypress Dashboard"
     },
     "project": {
       "title": "Project Settings",
