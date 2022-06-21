@@ -27,8 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - 10.0-release
-        - linux-arm64
+        - issue-22147-nohoist
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -129,7 +128,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "linux-arm64" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-22147-nohoist" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
