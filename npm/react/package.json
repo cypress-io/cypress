@@ -2,7 +2,6 @@
   "name": "@cypress/react",
   "version": "0.0.0-development",
   "description": "Test React components using Cypress",
-  "private": true,
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.js",
@@ -44,8 +43,7 @@
     "react-dom": "^=16.x || ^=17.x"
   },
   "files": [
-    "dist",
-    "support"
+    "dist"
   ],
   "types": "dist/index.d.ts",
   "license": "MIT",
