@@ -2867,20 +2867,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-9.0.1.tgz#c27b391d8457d1e893f1eddeaf5e5412d12ffbb5"
   integrity sha512-6It2EVfGskxZCQhuykrfnALg7oVeiI6KclWSmGDqB0AiInVrTGB9Jp9i4/Ad21u9Jde/voVQz6eFX/eSg/UsPA==
 
-"@cypress-design/css@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.1.0.tgz#fc27a1888fd80cdad2afa03806a4e592f7c46834"
-  integrity sha512-FIx5C1C/RE5EIphTi2dCN/IVml2rpBFoTJakP/VKSqIK6PY6EDitXATU9mmpYUvULYJVpjLTScQ5htq/ujn/og==
-  dependencies:
-    "@windicss/plugin-interaction-variants" "^1.0.0"
-    vite-plugin-windicss "^1.8.4"
-    windicss "^3.5.1"
-    windicss-webpack-plugin "^1.6.10"
-
-"@cypress-design/css@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.3.0.tgz#dc5da1552c0e99cb2b3752c392b9ddf3a46302fa"
-  integrity sha512-JaEgcfJVoedb2yL+sE2XJf1Cx/NWHQBnuhXaHkOX+cByUM1h2s/M7S5HoLnnIBsFXpA7CI4fX9YdFpLW+Kt6bA==
+"@cypress-design/css@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.4.1.tgz#40c73462a1b8a04a2d045cef43d5e2480c3bbf2f"
+  integrity sha512-ycyrNcqm9Cy0+IrhVa7Ef9dSv+B/p69T0Sw6zhLDxHwq4S0YxtFgE4zf8R7O4SbR8vlU/YpV5GSQhaXCFLsQXg==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
     vite-plugin-windicss "^1.8.4"
