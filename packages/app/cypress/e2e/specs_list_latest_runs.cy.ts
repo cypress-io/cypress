@@ -83,15 +83,14 @@ function simulateRunData () {
       // simulate network latency to allow for caching to register
       await new Promise((r) => setTimeout(r, 20))
 
-      const statuses = obj.variables.specPath === 'cypress/e2e/accounts/accounts_list.spec.js' ?
+      const statuses = obj.variables.specPath?.includes('accounts_list.spec.js') ?
         ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
-        obj.variables.specPath === 'cypress/e2e/app.spec.js' ?
+        obj.variables.specPath?.includes('app.spec.js') ?
           [] :
           ['RUNNING', 'PASSED']
 
       const runs = fakeRuns(statuses, obj.variables.specPath)
-      const averageDuration = obj.variables.specPath ===
-    'cypress/e2e/accounts/accounts_list.spec.js' ?
+      const averageDuration = obj.variables.specPath?.includes('accounts_list.spec.js') ?
         12000 : // 0:12
         123000 // 2:03
 
