@@ -4,6 +4,7 @@ import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
+import { IgnorePlugin } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -72,6 +73,19 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   }
 
   return webpackConfig
+}
+
+const versionRe = /(\d.+?)\./
+
+function getMajorVersion (semver: string) {
+  const match = semver.match(versionRe)
+  const toNum = match?.[1] && parseInt(match?.[1])
+
+  if (!toNum) {
+    throw Error(`Could not extract major version from ${semver}`)
+  }
+
+  return toNum
 }
 
 /**
@@ -158,18 +172,29 @@ export async function makeWebpackConfig (
   }
 
   try {
-    const reactDom = await import('react-dom/package.json')
-    const version = (reactDom?.default?.version || reactDom?.version)
-    const versionRe = /(\d.+?)\./
-    const match = version.match(versionRe)
+    const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
+    const majorVersion = getMajorVersion(reactDom?.default?.version || reactDom?.version)
+
+    debug('detected react-dom version %s', majorVersion)
 
     debug('found react-dom version %s', reactDom.version)
-    if (match && parseInt(match[1]) < 18) {
-      debug('detected react-dom %s: marking react-dom/client as external', match[1])
-      dynamicWebpackConfig.externals = ['react-dom/client']
+    if (majorVersion < 18) {
+      debug('ignoring react-dom/client ', majorVersion)
+      dynamicWebpackConfig.plugins?.push(
+        new IgnorePlugin({
+          resourceRegExp: /react-dom\/client$/,
+          contextRegExp: /(cypress\/react)/,
+        }),
+      )
     }
   } catch (e) {
-    debug('no react-dom found, or encountered error parsing verion', e)
+    const err = e as Error
+
+    if (err.name === 'MODULE_NOT_FOUND') {
+      debug('no react-dom found')
+    } else {
+      debug('error when adding IngorePlugin for react-dom/client %s', e)
+    }
   }
 
   const mergedConfig = merge(
