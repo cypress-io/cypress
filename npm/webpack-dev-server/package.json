@@ -2,7 +2,6 @@
   "name": "@cypress/webpack-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
-  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -45,5 +44,15 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
+  }
 }
