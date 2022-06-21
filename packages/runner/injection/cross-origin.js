@@ -40,6 +40,37 @@ const findCypress = () => {
 
 const Cypress = findCypress()
 
+/* eslint-disable */
+const originalSetAttribute = Element.prototype.setAttribute
+
+Element.prototype.setAttribute = function (qualifiedName, value) {
+  if (qualifiedName === 'integrity') {
+    qualifiedName = 'cypress:stripped-integrity'
+  }
+
+  if (qualifiedName === 'target' && value === '_top') {
+    value = '_self'
+  }
+
+  originalSetAttribute.apply(this, [qualifiedName, value])
+}
+
+const documentCookie = Object.getOwnPropertyDescriptors(Document.prototype).cookie
+
+Object.defineProperty(window.document, 'cookie', {
+  get () {
+    let cookie = documentCookie.get.apply(window.document)
+
+    if (cookie.length === 0) cookie = 'CkTst=G1655410048348'
+
+    return cookie
+  },
+  set (value) {
+    documentCookie.set.apply(window.document, [value])
+  },
+})
+/* eslint-enable */
+
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
 

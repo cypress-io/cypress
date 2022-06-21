@@ -16,6 +16,33 @@ if (!Cypress) {
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
 
+/* eslint-disable */
+const originalSetAttribute = Element.prototype.setAttribute
+
+Element.prototype.setAttribute = function (qualifiedName, value) {
+  if (qualifiedName === 'integrity') {
+    qualifiedName = 'cypress:stripped-integrity'
+  }
+
+  originalSetAttribute.apply(this, [qualifiedName, value])
+}
+
+const documentCookie = Object.getOwnPropertyDescriptors(Document.prototype).cookie
+
+Object.defineProperty(window.document, 'cookie', {
+  get () {
+    let cookie = documentCookie.get.apply(window.document)
+
+    if (cookie.length === 0) cookie = 'CkTst=G1655410048348'
+
+    return cookie
+  },
+  set (value) {
+    documentCookie.set.apply(window.document, [value])
+  },
+})
+/* eslint-enable */
+
 // We wrap timers in the injection code because if we do it in the driver (like
 // we used to do), any uncaught errors thrown in the timer callbacks would
 // get picked up by the top frame's 'error' handler instead of the AUT's.

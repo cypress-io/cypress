@@ -334,10 +334,8 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.setHeader('Origin-Agent-Cluster', '?0')
   }
 
-  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && isReqMatchOriginPolicy && (
-    (this.res.wantsInjection === 'full')
-    || resContentTypeIsJavaScript(this.incomingRes)
-  )
+  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode &&
+    (this.res.wantsInjection === 'full' || this.res.wantsInjection === 'fullCrossOrigin' || resContentTypeIsJavaScript(this.incomingRes))
 
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
