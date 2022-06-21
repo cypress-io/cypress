@@ -81,8 +81,10 @@ gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
   id
   data {
+    __typename
     ... on CloudProjectSpecNotFound {
       retrievedAt
+      message
     }
     ... on CloudProjectSpec {
       id
