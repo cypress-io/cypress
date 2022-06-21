@@ -2,12 +2,12 @@ import { SettingsContainerFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 import SettingsContainer from './SettingsContainer.vue'
 
+const mountSettingsContainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
+
+beforeEach(() => mountSettingsContainer())
+
 describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, () => {
-  const mountSettingsContainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
-
   it('renders sections collapsed by default', () => {
-    mountSettingsContainer()
-
     cy.get('[data-cy="settings"]').should('be.visible')
     cy.get('[data-cy="setting-expanded-container"]').should('not.exist')
 
@@ -15,8 +15,6 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('expands and collapses project settings', () => {
-    mountSettingsContainer()
-
     cy.contains('Project Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.experiments.title).scrollIntoView().should('be.visible')
@@ -29,8 +27,6 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('expands and collapses device settings', () => {
-    mountSettingsContainer()
-
     cy.contains('Device Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.editor.title).should('be.visible')
@@ -44,8 +40,6 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('expands and collapses cloud settings', () => {
-    mountSettingsContainer()
-
     cy.contains('Dashboard Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).scrollIntoView().should('be.visible')
@@ -56,7 +50,6 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('renders footer with CTA button', () => {
-    mountSettingsContainer()
     cy.contains('p', defaultMessages.settingsPage.footer.text.replace('{testingType}', 'E2E'))
     cy.contains('a', defaultMessages.settingsPage.footer.button)
     .should('have.attr', 'href', defaultMessages.settingsPage.footer.buttonLink)
