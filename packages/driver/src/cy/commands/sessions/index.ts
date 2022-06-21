@@ -318,12 +318,6 @@ export default function (Commands, Cypress, cy) {
         return _commandToRunAfterValidation
       }
 
-      // const throwValidationError = (err) => {
-      //   $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
-
-      //   cy.fail(err)
-      // }
-
       /**
        * Creates session flow:
        *   1. create session
