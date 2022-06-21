@@ -173,7 +173,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.percySnapshot()
 
-    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
   })
 })
 

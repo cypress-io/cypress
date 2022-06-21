@@ -46,7 +46,7 @@
         class="whitespace-nowrap"
         href="https://on.cypress.io/guides/configuration"
       >
-        {{ t('links.learnMore') }}
+        {{ t('links.learnMoreButton') }}
       </Button>
     </div>
     <ShikiHighlight

@@ -32,6 +32,9 @@ import {
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
+import { hasTypeScriptInstalled } from '../util'
+
+const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -87,6 +90,23 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+
+    // use ts-node if they've got typescript installed
+    // this matches the 9.x behavior, which is what we want for
+    // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
+    if (hasTypeScriptInstalled(projectRoot)) {
+      const tsNodeLoader = `--require ${tsNode}`
+
+      if (!childOptions.env) {
+        childOptions.env = {}
+      }
+
+      if (childOptions.env.NODE_OPTIONS) {
+        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+      } else {
+        childOptions.env.NODE_OPTIONS = tsNodeLoader
+      }
+    }
 
     const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
     const ipc = new LegacyPluginsIpc(childProcess)
@@ -146,7 +166,7 @@ export class MigrationActions {
     }
 
     if (this.ctx.isGlobalMode) {
-      const version = this.locallyInstalledCypressVersion(this.ctx.currentProject)
+      const version = await this.locallyInstalledCypressVersion(this.ctx.currentProject)
 
       if (!version) {
         // Could not resolve Cypress. Unlikely, but they are using a
@@ -177,12 +197,12 @@ export class MigrationActions {
     })
   }
 
-  locallyInstalledCypressVersion (currentProject: string) {
+  async locallyInstalledCypressVersion (currentProject: string) {
     try {
       const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
         paths: [currentProject],
       })
-      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+      const localCypressPkgJson = await fs.readJson(path.join(localCypressPkgJsonPath)) as { version: string }
 
       return localCypressPkgJson?.version ?? undefined
     } catch (e) {
@@ -345,7 +365,7 @@ export class MigrationActions {
       throw new NonStandardMigrationError('support')
     }
 
-    this.ctx.fs.renameSync(
+    await this.ctx.fs.rename(
       path.join(this.ctx.currentProject, beforeRelative),
       path.join(this.ctx.currentProject, afterRelative),
     )

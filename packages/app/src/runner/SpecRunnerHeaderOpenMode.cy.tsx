@@ -109,6 +109,25 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.percySnapshot()
   })
 
+  it('links to aut url', () => {
+    const autStore = useAutStore()
+    const url = 'http://localhost:3000/todo'
+
+    autStore.updateUrl(url)
+
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'e2e'
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.contains(url).should('exist').should('have.attr', 'href', url)
+    cy.percySnapshot()
+  })
+
   it('does not show url section if currentTestingType is component', () => {
     const autStore = useAutStore()
 
@@ -207,5 +226,21 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     cy.percySnapshot()
+  })
+
+  it('opens and closes selector playground', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="playground-activator"]').click()
+    cy.get('#selector-playground').should('be.visible')
+
+    cy.percySnapshot()
+
+    cy.get('[data-cy="playground-activator"]').click()
+    cy.get('#selector-playground').should('not.exist')
   })
 })
