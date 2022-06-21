@@ -241,7 +241,7 @@ export default function (Commands, Cypress, cy) {
           return onFail(e)
         }
 
-        // when the validate function returns promise, ensure it does not return false or throws amd error
+        // when the validate function returns a promise, ensure it does not return false or throw an error
         if (typeof returnVal === 'object' && typeof returnVal.catch === 'function' && typeof returnVal.then === 'function') {
           return returnVal
           .then((val) => {
