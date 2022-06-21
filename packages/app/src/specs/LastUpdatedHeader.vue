@@ -2,7 +2,6 @@
   <Tooltip
     placement="top"
     :is-interactive="true"
-    :hide-delay="0"
     show-group="last-updated-header"
   >
     <div

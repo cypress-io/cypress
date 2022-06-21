@@ -84,7 +84,8 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
     __typename
     ... on CloudProjectSpecNotFound {
       retrievedAt
-      message
+      # We query for message even though we don't use it so GQL can discriminate these two types properly
+      message 
     }
     ... on CloudProjectSpec {
       id
