@@ -93,6 +93,13 @@ const toughCookieToAutomationCookie = (toughCookie, defaultDomain) => {
   }
 }
 
+/**
+ * Utility for dealing with cross-origin cookies
+ * - Tracks which cookies were added to our server-side cookie jar during
+ *   a request, so they can be added to the browser via automation
+ * - Provides utility cookie-handling methods that rely on aspects of the
+ *   request (url, previous request url, etc)
+ */
 export class CookiesHelper {
   cookieJar: CookieJar
   currentAUTUrl: string | undefined

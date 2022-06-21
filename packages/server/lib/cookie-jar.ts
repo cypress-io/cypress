@@ -8,6 +8,11 @@ interface CookieData {
   path?: string
 }
 
+/**
+ * An adapter for tough-cookie's CookieJar
+ * Holds onto cookies captured via the proxy, so they can be applied to
+ * requests as needed for the sake of cross-origin testing
+ */
 export class CookieJar {
   _cookieJar: ToughCookieJar
 

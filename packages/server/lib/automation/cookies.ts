@@ -56,6 +56,10 @@ export const normalizeGetCookieProps = (props) => {
   return normalizeCookieProps(props)
 }
 
+/**
+ * Utility for getting/setting/clearing cookies via automation
+ * Normalizes the API for different automation mechanisms (CDP, extension, etc)
+ */
 export class Cookies {
   static normalizeCookies = normalizeCookies
   static normalizeCookieProps = normalizeCookieProps
