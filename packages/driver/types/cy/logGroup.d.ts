@@ -13,7 +13,7 @@ declare namespace Cypress {
       log?: boolean
       // name of the group - defaults to current command's name
       name?: string
-      // name of the group - override for display purposes only
+      // display name of the group - override for display purposes only
       displayName?: string
       // additional information to include in the log
       message?: string
