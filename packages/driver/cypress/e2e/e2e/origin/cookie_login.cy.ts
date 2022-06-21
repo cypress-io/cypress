@@ -92,7 +92,6 @@ describe('cy.origin - cookie login', () => {
       verifyLoggedIn(username)
     })
 
-    // https://github.com/cypress-io/cypress/issues/21201
     it('works with aliased localhost', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login-alias"]').click()
@@ -113,7 +112,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.document().its('cookie').should('equal', `user=${username}`)
+      cy.document().its('cookie').should('include', `user=${username}`)
     })
 
     it('cy.clearCookie() -> not logged in', () => {
@@ -444,7 +443,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.document().its('cookie').should('be.empty')
+      cy.document().its('cookie').should('not.include', 'user=')
     })
   })
 
@@ -470,7 +469,10 @@ describe('cy.origin - cookie login', () => {
       verifyLocalhostNotLoggedIn()
     })
 
-    it('past max-age -> not accessible via cy.getCookie()', () => {
+    // expiring cookies set by automatoin don't seem to get unset appropriately
+    // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
+    // as it happens even using cy.setCookie()
+    it('past max-age -> not accessible via cy.getCookie()', { browser: '!firefox' }, () => {
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
@@ -491,7 +493,7 @@ describe('cy.origin - cookie login', () => {
 
       cy.wait(1000) // give cookie time to expire
       cy.reload()
-      cy.document().its('cookie').should('be.empty')
+      cy.document().its('cookie').should('not.include', 'user=')
     })
 
     describe('preference over Expires', () => {

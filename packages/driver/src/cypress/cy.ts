@@ -364,6 +364,30 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
       this.enqueue(attrs)
     })
+
+    Cypress.on('cross:origin:automation:cookies', (cookies) => {
+      const existingCookies = state('cross:origin:automation:cookies') || []
+
+      this.state('cross:origin:automation:cookies', existingCookies.concat(cookies))
+
+      Cypress.backend('cross:origin:automation:cookies:received')
+    })
+
+    Cypress.on('before:stability:notification', (stable) => {
+      const cookies = state('cross:origin:automation:cookies')
+
+      if (!stable || !cookies) return
+
+      // reset the state cookies before setting them via automation in case
+      // any more get set in the interim
+      state('cross:origin:automation:cookies', [])
+
+      // this will be awaited before any stability-reliant actions
+      return Cypress.automation('add:cookies', cookies)
+      .catch(() => {
+        // errors here can be ignored as they're not user-actionable
+      })
+    })
   }
 
   isCy (val) {

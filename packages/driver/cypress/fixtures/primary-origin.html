@@ -21,7 +21,7 @@
   </ul>
   <script>
     document.querySelector('[data-cy=cookie-login]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login')}`
-    document.querySelector('[data-cy=cookie-login-https]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
+    document.querySelector('[data-cy=cookie-login-https]').href = `https://localhost:3502/prelogin?redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
     document.querySelector('[data-cy=cookie-login-subdomain]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&subdomain=true')}`
     document.querySelector('[data-cy=cookie-login-alias]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&alias=true')}`
   </script>

@@ -481,13 +481,11 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
-  try {
-    await this.getAutomation().request('set:cookies', addedCookies, () => {})
-  } catch (err) {
-    this.debug('failed setting cookies via automation: %s', err.message)
-  } finally {
+  this.serverBus.once('cross:origin:automation:cookies:received', () => {
     this.next()
-  }
+  })
+
+  this.serverBus.emit('cross:origin:automation:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]

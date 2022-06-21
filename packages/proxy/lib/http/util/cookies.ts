@@ -1,9 +1,8 @@
 import _ from 'lodash'
-import { Cookie } from 'tough-cookie'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
-import type { CookieJar } from '@packages/server/lib/cookie-jar'
+import { Cookie, CookieJar } from '@packages/server/lib/cookie-jar'
 
 interface AutomationCookie {
   domain: string
@@ -42,7 +41,7 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
 
 export const parseCookie = (cookie) => {
-  const toughCookie = Cookie.parse(cookie)
+  const toughCookie = CookieJar.parse(cookie)
 
   if (!toughCookie) return
 
@@ -88,7 +87,7 @@ const toughCookieToAutomationCookie = (toughCookie, defaultDomain) => {
     maxAge: toughCookie.maxAge,
     name: toughCookie.key,
     path: toughCookie.path,
-    sameSite: toughCookie.sameSite,
+    sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
     secure: toughCookie.secure,
     value: toughCookie.value,
   }
@@ -152,7 +151,7 @@ export class CookiesHelper {
     }
 
     try {
-      this.cookieJar.setCookie(cookie, this.request.url, this.sameSiteContext)
+      this.cookieJar.setCookie(toughCookie, this.request.url, this.sameSiteContext)
     } catch (err) {
       this.debug('adding cookie to jar failed: %s', err.message)
     }

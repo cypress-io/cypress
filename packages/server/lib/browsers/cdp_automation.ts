@@ -300,6 +300,11 @@ export class CdpAutomation {
           return this.getCookie(data)
         })
 
+      case 'add:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+
+        return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+
       case 'set:cookies':
         setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
 

@@ -130,7 +130,7 @@ export class Cookies {
     })
   }
 
-  setCookies (cookies, automate) {
+  setCookies (cookies, automate, eventName = 'set:cookies') {
     cookies = cookies.map((data) => {
       this.throwIfNamespaced(data)
       const cookie = normalizeCookieProps(data)
@@ -142,11 +142,17 @@ export class Cookies {
       return cookie
     })
 
-    debug('set:cookies %o', cookies)
+    debug(`${eventName} %o`, cookies)
 
-    return automate('set:cookies', cookies)
-    // .tap(console.log)
+    return automate(eventName, cookies)
     .return(cookies)
+  }
+
+  // set:cookies will clear cookies first in browsers that use CDP. this is the
+  // same as set:cookies in Firefox, but will only add cookies and not clear
+  // them in Chrome, etc.
+  addCookies (cookies, automate) {
+    return this.setCookies(cookies, automate, 'add:cookies')
   }
 
   clearCookie (data, automate) {

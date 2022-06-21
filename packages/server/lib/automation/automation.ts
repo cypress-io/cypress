@@ -110,6 +110,8 @@ export class Automation {
           return this.cookies.setCookie(data, automate)
         case 'set:cookies':
           return this.cookies.setCookies(data, automate)
+        case 'add:cookies':
+          return this.cookies.addCookies(data, automate)
         case 'clear:cookies':
           return Bluebird.all([
             this.cookies.clearCookies(data, automate),

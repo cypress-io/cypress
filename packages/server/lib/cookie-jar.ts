@@ -1,5 +1,7 @@
 import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
 
+export { Cookie }
+
 interface CookieData {
   name: string
   domain: string
@@ -8,6 +10,10 @@ interface CookieData {
 
 export class CookieJar {
   _cookieJar: ToughCookieJar
+
+  static parse (cookie) {
+    return Cookie.parse(cookie)
+  }
 
   constructor () {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
@@ -31,7 +37,7 @@ export class CookieJar {
     return cookies
   }
 
-  setCookie (cookie: string, url: string, sameSiteContext: 'strict' | 'lax' | 'none') {
+  setCookie (cookie: string | Cookie, url: string, sameSiteContext: 'strict' | 'lax' | 'none') {
     // @ts-ignore
     this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
   }
