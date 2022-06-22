@@ -399,7 +399,7 @@ export default class ProxyLogging {
       }
     }
 
-    if (!shouldLog(preRequest)) {
+    if (!this.filterFn(preRequest)) {
       this.unloggedPreRequests.push(preRequest)
 
       return

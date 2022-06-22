@@ -1,4 +1,3 @@
-/* globals Cypress */
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -105,8 +104,19 @@ type XHRConsoleProps = {
   groups?: () => Array<object>
 }
 
-const startXhrServer = (cy, state, config) => {
+const startXhrServer = (Cypress, cy, state, config) => {
   const logs = {}
+
+  function shouldLogXhr (xhr) {
+    return Cypress.ProxyLogging.filterFn({
+      requestId: xhr.id,
+      method: xhr.method,
+      url: xhr.url,
+      headers: xhr.request.headers,
+      resourceType: 'xhr',
+      originalResourceType: undefined,
+    })
+  }
 
   server = new Server({
     xhrUrl: config('xhrUrl'),
@@ -128,6 +138,8 @@ const startXhrServer = (cy, state, config) => {
       }
 
       const isStubbed = route && !_.isNil(route.response)
+
+      if (!shouldLogXhr(xhr)) return
 
       const log = logs[xhr.id] = Cypress.log({
         message: '',
@@ -358,7 +370,7 @@ export default (Commands, Cypress, cy, state, config) => {
     // window such as if the last test ended
     // with a cross origin window
     try {
-      server = startXhrServer(cy, state, config)
+      server = startXhrServer(Cypress, cy, state, config)
     } catch (err) {
       // in this case, just don't bind to the server
       server = null
@@ -373,7 +385,7 @@ export default (Commands, Cypress, cy, state, config) => {
       return server.bindTo(contentWindow)
     }
 
-    server = startXhrServer(cy, state, config)
+    server = startXhrServer(Cypress, cy, state, config)
   })
 
   return Commands.addAll({

@@ -137,8 +137,9 @@ describe('Proxy Logging', () => {
           }
         })
 
-        const oldUpdateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
+        const oldUpdateRequestWithResponse = Cypress.ProxyLogging['updateRequestWithResponse']
 
+        // @ts-expect-error stubbing private method
         cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
           setTimeout(() => {
             oldUpdateRequestWithResponse.call(this, ...args)
@@ -186,11 +187,12 @@ describe('Proxy Logging', () => {
 
         const xhr = new win.XMLHttpRequest()
 
-        const logIncomingRequest = Cypress.ProxyLogging.logIncomingRequest
-        const updateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
+        const logIncomingRequest = Cypress.ProxyLogging['logIncomingRequest']
+        const updateRequestWithResponse = Cypress.ProxyLogging['updateRequestWithResponse']
 
         // To simulate the xhr call landing second, we send updateRequestWithResponse immediately after
         // the call is intercepted
+        // @ts-expect-error stubbing private method
         cy.stub(Cypress.ProxyLogging, 'logIncomingRequest').log(false).callsFake(function (...args) {
           logIncomingRequest.call(this, ...args)
           updateRequestWithResponse.call(this, {
@@ -199,6 +201,7 @@ describe('Proxy Logging', () => {
           })
         })
 
+        // @ts-expect-error stubbing private method
         cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function () {})
 
         xhr.open('GET', '/some-url')
@@ -514,6 +517,66 @@ describe('Proxy Logging', () => {
         ))
       })
     })
+
+    context('filtering', () => {
+      let logs: Cypress.Log[] = []
+
+      beforeEach(() => {
+        Cypress.ProxyLogging.filter()
+
+        logs = []
+        cy.on('log:added', (log) => {
+          if (!['request', 'xhr', 'route'].includes(log.name)) return
+
+          logs.push(log)
+        })
+      })
+
+      function sendXhr () {
+        return cy.window().then(({ XMLHttpRequest }) => {
+          const xhr = new XMLHttpRequest()
+
+          xhr.open('GET', '/foo-xhr')
+          xhr.send()
+
+          return new Promise<void>((resolve) => {
+            xhr.addEventListener('loadend', () => resolve())
+          })
+        })
+      }
+
+      function sendFetch () {
+        return cy.window().then(({ fetch }) => {
+          return fetch('/foo-fetch')
+        })
+      }
+
+      it('can filter out XHR', () => {
+        Cypress.ProxyLogging.filter((req) => req.resourceType !== 'xhr')
+        sendXhr()
+        .then(() => {
+          expect(logs).to.have.length(0)
+        })
+      })
+
+      it('can filter out fetch', () => {
+        Cypress.ProxyLogging.filter((req) => req.resourceType !== 'fetch')
+        sendFetch()
+        .then(() => {
+          expect(logs).to.have.length(0)
+        })
+      })
+
+      it('can not filter out intercept', () => {
+        Cypress.ProxyLogging.filter((req) => false)
+
+        cy.intercept('/foo-fetch', 'boo')
+        .then(sendFetch)
+        .should(() => {
+          expect(logs).to.have.length(1)
+        })
+      })
+    })
   })
 
   context('Cypress.ProxyLogging', () => {
@@ -530,7 +593,7 @@ describe('Proxy Logging', () => {
 
         const route = {}
 
-        const ret = Cypress.ProxyLogging.logInterception(interception, route)
+        const ret = Cypress.ProxyLogging['logInterception'](interception, route)
 
         expect(ret.preRequest).to.deep.eq({
           requestId: 'request123',
