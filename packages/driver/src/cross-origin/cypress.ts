@@ -22,6 +22,7 @@ import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
+import { handleInvalidEventTarget } from '../cy/top_attr_guards'
 
 const createCypress = () => {
   // @ts-ignore
@@ -181,6 +182,12 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return ret
     },
   })
+
+  // Handling the situation where "_top" is set on the <form> / <a> element, either in
+  // html or dynamically, by tapping in at the capture phase of the events
+  autWindow.addEventListener('submit', handleInvalidEventTarget as any, true)
+
+  autWindow.addEventListener('click', handleInvalidEventTarget as any, true)
 }
 
 // only bind the message handler one time when the spec bridge is created
