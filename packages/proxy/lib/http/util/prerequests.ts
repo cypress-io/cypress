@@ -24,7 +24,7 @@ export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
 type PendingRequest = {
   ctxDebug
   callback: GetPreRequestCb
-  timeout: number
+  timeout: ReturnType<typeof setTimeout>
 }
 
 export class PreRequests {
