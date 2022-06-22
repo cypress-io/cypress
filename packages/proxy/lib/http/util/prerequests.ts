@@ -40,7 +40,7 @@ export class PreRequests {
 
       Object.entries(this.prerequestTimeouts).forEach(([key, timeout]) => {
         if (timeout < now) {
-          debugVerbose('timed out unmatched pre-request %o', this.pendingPreRequests[key])
+          debugVerbose('timed out unmatched pre-request %s: %o', key, this.pendingPreRequests[key])
           metrics.unmatchedPreRequests++
           delete this.pendingPreRequests[key]
           delete this.prerequestTimeouts[key]
@@ -54,13 +54,13 @@ export class PreRequests {
     const key = `${browserPreRequest.method}-${browserPreRequest.url}`
 
     if (this.pendingRequests[key]) {
-      debugVerbose('immediately matched pre-request %o', browserPreRequest)
+      debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
       clearTimeout(this.pendingRequests[key].timeout)
       this.pendingRequests[key].callback(browserPreRequest)
       delete this.pendingRequests[key]
     }
 
-    debugVerbose('queuing pre-request to be matched later: %o', browserPreRequest)
+    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests[key] = browserPreRequest
     this.prerequestTimeouts[key] = Date.now() + 10000
   }
@@ -71,7 +71,7 @@ export class PreRequests {
 
     if (this.pendingPreRequests[key]) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('matches pending pre-request %o', this.pendingPreRequests[key])
+      ctxDebug('Incoming request %s matches known pre-request: %o', key, this.pendingPreRequests[key])
       callback(this.pendingPreRequests[key])
 
       delete this.pendingPreRequests[key]
@@ -82,7 +82,7 @@ export class PreRequests {
 
     const timeout = setTimeout(() => {
       callback()
-      ctxDebug(`Continuing request ${key} without pre-request`)
+      ctxDebug('Never received pre-request for request %s. Continuing without one.', key)
       metrics.unmatchedRequests++
       delete this.pendingRequests[key]
     }, this.requestTimeout)
