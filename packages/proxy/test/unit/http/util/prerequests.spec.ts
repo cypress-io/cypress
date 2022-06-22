@@ -55,7 +55,7 @@ describe('http/util/prerequests', () => {
         done()
       }
 
-      proxiedRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+      preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     }, 50)
   })
 })
