@@ -66,6 +66,17 @@ type CachedUser implements Node {
 }
 
 """
+Represents a pollable status for clients to know when refetching data is required.
+"""
+type CloudLatestRunUpdateSpecData {
+  """DateTime of the latest update in a project."""
+  mostRecentUpdate: DateTime
+
+  """Recommended seconds to wait before next poll."""
+  pollingInterval: Int
+}
+
+"""
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
 type CloudOrganization implements Node {
@@ -189,6 +200,60 @@ type CloudProjectNotFound {
 
 union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUnauthorized
 
+type CloudProjectSpec implements Node {
+  """Average duration the spec takes to run"""
+  averageDuration(
+    """
+    The branch to measure average duration against. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+  ): Float
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  isConsideredFlaky(
+    """The branch to measure flakiness against"""
+    fromBranch: String!
+  ): Boolean
+
+  """
+  Current DateTime on the server. Used in connection with CloudLatestRunUpdateSpecData.
+  """
+  retrievedAt: DateTime
+
+  """Shortened spec path"""
+  specPath: String
+
+  """Runs this spec has been involved with."""
+  specRuns(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """
+    The branch to filter on for the specs. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudSpecRunConnection
+}
+
+"""Unable to find cloud spec in project"""
+type CloudProjectSpecNotFound {
+  """an error message"""
+  message: String!
+  retrievedAt: DateTime
+}
+
+union CloudProjectSpecResult = CloudProjectSpec | CloudProjectSpecNotFound | CloudProjectUnauthorized
+
 """Unauthorized access"""
 type CloudProjectUnauthorized {
   """does the user have a requested access pending"""
@@ -212,10 +277,12 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
+  completedAt: DateTime
   createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+  runNumber: Int
   status: CloudRunStatus
   tags: [CloudRunTag]
 
@@ -303,6 +370,72 @@ type CloudRunTag implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   name: String
+}
+
+"""
+A Recorded run of a given spec from the Test Runner, typically to the cloud
+"""
+type CloudSpecRun implements Node {
+  """When the run was completed"""
+  completedAt: DateTime
+
+  """When the run was created"""
+  createdAt: DateTime
+
+  """Amount of groups this spec was run in"""
+  groupCount: Int
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """Incremental run number assigned"""
+  runNumber: Int
+
+  """
+  Aggregate information about how long the spec took to run in the groups
+  """
+  specDuration: SpecDataAggregate
+
+  """Most important status for the spec shared between all groups"""
+  status: CloudRunStatus
+
+  """Aggregate information about how many tests failed in the groups"""
+  testsFailed: SpecDataAggregate
+
+  """Aggregate information about how many tests passed in the groups"""
+  testsPassed: SpecDataAggregate
+
+  """Aggregate information about how many tests are pending in the groups"""
+  testsPending: SpecDataAggregate
+
+  """Aggregate information about how many tests were skipped in the groups"""
+  testsSkipped: SpecDataAggregate
+
+  """A link to the run overview page filtered by spec"""
+  url: String
+}
+
+type CloudSpecRunConnection {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [CloudSpecRunEdge!]!
+
+  """Flattened list of CloudSpecRun type"""
+  nodes: [CloudSpecRun!]!
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+type CloudSpecRunEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: CloudSpecRun!
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -1191,6 +1324,22 @@ type Query {
   baseError: ErrorWrapper
   cachedUser: CachedUser
 
+  """
+  Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.
+  """
+  cloudLatestRunUpdateSpecData(
+    """
+    Clients active branch to search for builds. This will fallback to the closest branch with data.
+    """
+    commitBranch: String!
+
+    """A list of Project slugs"""
+    projectSlug: String!
+
+    """Datetime since the fetched data"""
+    sinceDateTime: DateTime
+  ): CloudLatestRunUpdateSpecData
+
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
@@ -1211,6 +1360,15 @@ type Query {
     """A list of Project slugs"""
     slugs: [String!]!
   ): [CloudProjectResult]
+
+  """Gets a set of specs on a given project and branch"""
+  cloudSpecByPath(
+    """Slug of the project to which the set of specs belong"""
+    projectSlug: String!
+
+    """The spec path to find"""
+    specPath: String!
+  ): CloudProjectSpecResult
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
@@ -1302,6 +1460,15 @@ type Spec implements Node {
 
   """Type of spec (e.g. component | integration)"""
   specType: SpecType!
+}
+
+"""Aggregate data from multiple groups for a spec run"""
+type SpecDataAggregate {
+  """Maximum value in the groups"""
+  max: Int
+
+  """Minimum value in the groups"""
+  min: Int
 }
 
 enum SpecType {

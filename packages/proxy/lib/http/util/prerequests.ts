@@ -31,7 +31,7 @@ export class PreRequests {
   requestTimeout: number
   pendingPreRequests: Record<string, BrowserPreRequest> = {}
   pendingRequests: Record<string, PendingRequest> = {}
-  prerequestTimeouts: Record<string, Timeout> = {}
+  prerequestTimeouts: Record<string, number> = {}
 
   constructor (requestTimeout = 500) {
     this.requestTimeout = requestTimeout
