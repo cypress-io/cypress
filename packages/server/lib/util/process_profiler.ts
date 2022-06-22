@@ -64,16 +64,16 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
 
   // is this the renderer for the launchpad?
   const isDesktopGuiProcess = (proc: Process): boolean => {
-    return proc.params.includes('--type=renderer')
+    return proc.params?.includes('--type=renderer')
       && !isBrowserProcess(proc)
   }
 
-  // these processes may be shared between the AUT and launchpad
+  // these processes may be shared between the AUT and launchpad.
   // rather than treat them as part of the `browser` in `run` mode and have
   // their usage in `open` mode be ambiguous, just put them in their own group
   const isElectronSharedProcess = (proc: Process): boolean => {
     const isType = (type) => {
-      return proc.params.includes(`--type=${type}`)
+      return proc.params?.includes(`--type=${type}`)
     }
 
     return isType('broker')
@@ -208,7 +208,7 @@ export const _aggregateGroups = (processes: Process[]) => {
 export const _printGroupedProcesses = (groupTotals) => {
   const consoleBuffer = concatStream((buf) => {
     // get rid of trailing newline
-    debugVerbose(String(buf).trim())
+    debug(String(buf).trim())
   })
 
   // eslint-disable-next-line no-console
