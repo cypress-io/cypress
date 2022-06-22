@@ -61,7 +61,6 @@
       </button>
     </div>
     <button
-      tabindex="-1"
       class="
         rounded-md flex
         outline-none
