@@ -23,7 +23,7 @@ export const React18 = (projectRoot: string): Plugin => {
           return require.resolve('react-dom/client', { paths: [projectRoot] })
         } catch (e) {
           // This is not a react 18 project, need to stub out to avoid error
-          return path.resolve(__dirname, '..', '..', 'client', 'react-dom-client-placeholder.js')
+          return path.resolve(__dirname, '..', '..', 'client', 'reactDomClientPlaceholder.js')
         }
       }
     },
