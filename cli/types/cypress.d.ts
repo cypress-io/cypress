@@ -600,6 +600,25 @@ declare namespace Cypress {
       defaults(options: Partial<KeyboardDefaultsOptions>): void
     }
 
+    ProxyLogging: {
+      /**
+       * Reset the filter rules for proxy logs to the default (all XHRs and fetches are logged)
+       */
+      filter(): void
+      /**
+       * Set custom filtering rules for proxy logs.
+       * @param filterFn a function that returns true if the request should be logged and false otherwise
+       */
+      filter(filterFn: (req: {
+        requestId: string
+        method: HttpMethod
+        url: string
+        headers: { [key: string]: string | string[] }
+        resourceType: 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+        originalResourceType: string | undefined
+      }) => boolean): void
+    }
+
     /**
      * @see https://on.cypress.io/api/api-server
      */

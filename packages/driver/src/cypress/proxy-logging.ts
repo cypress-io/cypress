@@ -132,10 +132,6 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
   }
 }
 
-function shouldLog (preRequest: BrowserPreRequest) {
-  return ['xhr', 'fetch'].includes(preRequest.resourceType)
-}
-
 class ProxyRequest {
   log?: Cypress.Log
   preRequest: BrowserPreRequest
@@ -251,10 +247,15 @@ type UnmatchedXhrLog = {
   stack?: string
 }
 
+function defaultFilterFn (preRequest: BrowserPreRequest) {
+  return ['xhr', 'fetch'].includes(preRequest.resourceType)
+}
+
 export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
+  filterFn: (preRequest: BrowserPreRequest) => boolean = defaultFilterFn
 
   constructor (private Cypress: Cypress.Cypress) {
     Cypress.on('request:event', (eventName, data) => {
@@ -280,6 +281,15 @@ export default class ProxyLogging {
       this.proxyRequests = []
       this.unmatchedXhrLogs = []
     })
+  }
+
+  filter (filterFn?: typeof this.filterFn): void {
+    if (filterFn !== undefined && typeof filterFn !== 'function') {
+      // TODO: move to error_messages once API is finalized
+      throw new Error(`ProxyLogging.filter() accepts a function as the first argument, but a ${typeof filterFn} was passed.`)
+    }
+
+    this.filterFn = filterFn || defaultFilterFn
   }
 
   /**
