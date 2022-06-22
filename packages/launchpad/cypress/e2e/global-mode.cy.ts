@@ -88,14 +88,14 @@ describe('Launchpad: Global Mode', () => {
         expect(card).to.contain(projectList[index])
         expect(card).to.contain(`cy-projects${sep}${projectList[index]}`)
       })
-
-      cy.percySnapshot()
     }
 
     it('shows the recent projects list sorted by most-recently opened', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
+
+      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {
