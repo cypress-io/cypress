@@ -203,7 +203,7 @@ export class CdpAutomation {
     if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
 
     // Filter out "data:" urls from being cached - should fix: https://github.com/cypress-io/cypress/issues/17853
-    // Chrome sends `Network.requestWillBeSent` events with data: urls which it won't actually fetch
+    // Chrome sends `Network.requestWillBeSent` events with data urls which that won't actually be fetched
     // Example data url: "data:font/woff;base64,<base64 encoded string>"
     if (url.startsWith('data:')) {
       debugVerbose('skipping `data:` url %s', url)
