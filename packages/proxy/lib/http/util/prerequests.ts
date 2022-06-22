@@ -82,7 +82,7 @@ export class PreRequests {
 
     const timeout = setTimeout(() => {
       callback()
-      ctxDebug('Never received pre-request for request %s. Continuing without one.', key)
+      ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.timeout)
       metrics.unmatchedRequests++
       delete this.pendingRequests[key]
     }, this.requestTimeout)
