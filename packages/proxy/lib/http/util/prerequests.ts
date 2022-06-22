@@ -27,26 +27,42 @@ type PendingRequest = {
   timeout: ReturnType<typeof setTimeout>
 }
 
+// This class' purpose is to match up incoming "requests" (requests from the browser received by the http proxy)
+// with "pre-requests" (events received by our browser extension indicating that the browser is about to make a request).
+// Because these come from different sources, they can be out of sync, arriving in either order.
+
+// Basically, when requests come in, we want to provide additional data read from the pre-request. but if no pre-request
+// ever comes in, we don't want to block proxied requests indefinately.
 export class PreRequests {
   requestTimeout: number
   pendingPreRequests: Record<string, BrowserPreRequest> = {}
   pendingRequests: Record<string, PendingRequest> = {}
-  prerequestTimeouts: Record<string, number> = {}
+  prerequestTimestamps: Record<string, number> = {}
 
   constructor (requestTimeout = 500) {
+    // If a request comes in and we don't have a matching pre-request after this timeout,
+    // we invoke the request callback to tell the server to proceed (we don't want to block
+    // user requests indefinately).
     this.requestTimeout = requestTimeout
+
+    // Discarding prerequests on the other hand is not urgent, so we do it on a regular interval
+    // rather than with a separate timer for each one.
+    // 2 times the requestTimeout is arbitrary, chosen to give plenty of time and
+    // make surewe don't discard any pre-requests prematurely but that we don't leak memory over time
+    // if a large number of pre-requests don't match up (as seen in https://github.com/cypress-io/cypress/issues/17853,
+    // for example)
     setInterval(() => {
       const now = Date.now()
 
-      Object.entries(this.prerequestTimeouts).forEach(([key, timeout]) => {
-        if (timeout < now) {
+      Object.entries(this.prerequestTimestamps).forEach(([key, timestamp]) => {
+        if (timestamp + requestTimeout * 2 < now) {
           debugVerbose('timed out unmatched pre-request %s: %o', key, this.pendingPreRequests[key])
           metrics.unmatchedPreRequests++
           delete this.pendingPreRequests[key]
-          delete this.prerequestTimeouts[key]
+          delete this.prerequestTimestamps[key]
         }
       })
-    }, 2000)
+    }, this.requestTimeout * 2)
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
@@ -62,7 +78,7 @@ export class PreRequests {
 
     debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests[key] = browserPreRequest
-    this.prerequestTimeouts[key] = Date.now() + 10000
+    this.prerequestTimestamps[key] = Date.now()
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
@@ -75,7 +91,7 @@ export class PreRequests {
       callback(this.pendingPreRequests[key])
 
       delete this.pendingPreRequests[key]
-      delete this.prerequestTimeouts[key]
+      delete this.prerequestTimestamps[key]
 
       return
     }
