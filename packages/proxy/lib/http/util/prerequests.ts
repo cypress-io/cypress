@@ -19,6 +19,8 @@ process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
+export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
+
 type PendingRequest = {
   ctxDebug
   callback: GetPreRequestCb
@@ -27,16 +29,16 @@ type PendingRequest = {
 
 export class PreRequests {
   requestTimeout: number
-  pendingPreRequests: Record<string, BrowserPreRequest & Timestamp> = {}
+  pendingPreRequests: Record<string, BrowserPreRequest> = {}
   pendingRequests: Record<string, PendingRequest> = {}
-  prerequestTimeouts: Record<string, number> = {}
+  prerequestTimeouts: Record<string, Timeout> = {}
 
   constructor (requestTimeout = 500) {
     this.requestTimeout = requestTimeout
     setInterval(() => {
       const now = Date.now()
 
-      Object.entries(this.prerequestTimeouts).foreach(([key, timeout]) => {
+      Object.entries(this.prerequestTimeouts).forEach(([key, timeout]) => {
         if (timeout < now) {
           debugVerbose('timed out unmatched pre-request %o', this.pendingPreRequests[key])
           metrics.unmatchedPreRequests++
