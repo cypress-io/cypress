@@ -352,6 +352,26 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
         .should('have.attr', 'aria-expanded', 'true')
       })
     })
+
+    it('should retain data after app navigation', () => {
+      // ACI data should load and render to start
+      specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
+      cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
+
+      // Move to Settings page and wait for render
+      cy.get('a[href="#/settings"]').click()
+      cy.location('hash').should('include', '/settings')
+      cy.findByText('Project Settings').should('be.visible')
+
+      // Move back to Specs page and wait for render
+      cy.get('a[href="#/specs"]').click()
+      cy.location('hash').should('include', '/specs')
+      cy.findByText('E2E specs').should('be.visible')
+
+      // ACI data should still be loaded and rendered
+      specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
+      cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
+    })
   })
 
   context('polling indicates new data', () => {
