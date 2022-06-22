@@ -109,7 +109,7 @@ function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
   if (sourceWebpackModulesResult.webpack.majorVersion === 5) {
     return new webpackModule.IgnorePlugin({
       resourceRegExp: /react-dom\/client$/,
-      contextRegExp: /(cypress\/react)/,
+      contextRegExp: /cypress/,
     })
   }
 
@@ -117,7 +117,7 @@ function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
   if (sourceWebpackModulesResult.webpack.majorVersion === 4) {
     return new webpackModule.IgnorePlugin({
       resourceRegExp: /react-dom\/client$/,
-      contextRegExp: /(cypress\/react)/,
+      contextRegExp: /cypress/,
     })
   }
 
