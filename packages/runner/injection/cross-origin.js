@@ -60,12 +60,14 @@ const documentCookie = Object.getOwnPropertyDescriptors(Document.prototype).cook
 Object.defineProperty(window.document, 'cookie', {
   get () {
     let cookie = documentCookie.get.apply(window.document)
-
+    
     if (cookie.length === 0) cookie = 'CkTst=G1655410048348'
+    console.log('getting cookie', cookie)
 
     return cookie
   },
   set (value) {
+    console.log('setting cookie', value)
     documentCookie.set.apply(window.document, [value])
   },
 })

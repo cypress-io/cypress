@@ -48,6 +48,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
     // This typically happens during a redirect where the user does
     // not have a cy.origin for the intermediary origin.
     timeoutId = setTimeout(() => {
+      console.log('timeout for:', request.href) // eslint-disable-line
       Cypress.backend('cross:origin:release:html')
     }, 300)
   })
