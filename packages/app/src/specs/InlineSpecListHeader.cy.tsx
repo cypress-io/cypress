@@ -27,6 +27,7 @@ describe('InlineSpecListHeader', () => {
     const searchString = 'my/component.cy.tsx'
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    // `force` necessary due to the field label being overlaid on top of the input
     .type(searchString, { delay: 0, force: true })
     .get('@search').its('value').should('eq', searchString)
   })
@@ -46,6 +47,7 @@ describe('InlineSpecListHeader', () => {
     .should('not.exist')
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    // `force` necessary due to the field label being overlaid on top of the input
     .type('abcd', { delay: 0, force: true })
     .get('@search').its('value').should('eq', 'abcd')
 
