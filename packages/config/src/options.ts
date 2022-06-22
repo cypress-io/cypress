@@ -421,6 +421,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   },
   {
     name: 'specPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: false,
   },
