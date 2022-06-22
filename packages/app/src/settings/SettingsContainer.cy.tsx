@@ -8,8 +8,8 @@ beforeEach(() => mountSettingsContainer())
 
 describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, () => {
   it('renders sections collapsed by default', () => {
-    cy.get('[data-cy="settings"]').should('be.visible')
-    cy.get('[data-cy="setting-expanded-container"]').should('not.exist')
+    cy.findByTestId('settings').should('be.visible')
+    cy.findByTestId('setting-expanded-container').should('not.exist')
 
     cy.percySnapshot()
   })
