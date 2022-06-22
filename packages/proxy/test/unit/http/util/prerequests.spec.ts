@@ -7,7 +7,7 @@ describe('http/util/prerequests', () => {
   let preRequests: PreRequests
 
   beforeEach(() => {
-    preRequests = new PreRequests()
+    preRequests = new PreRequests(25)
   })
 
   it('synchronously matches a pre-request that existed at the time of the request', () => {
@@ -32,5 +32,14 @@ describe('http/util/prerequests', () => {
 
     preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+  })
+
+  it('invokes a request callback after a timeout if no pre-request occurs', (done) => {
+    const cb = (preRequest) => {
+      expect(preRequest).to.be.undefined
+      done()
+    }
+
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
   })
 })

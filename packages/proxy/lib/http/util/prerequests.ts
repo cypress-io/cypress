@@ -3,7 +3,6 @@ import type {
   BrowserPreRequest,
 } from '@packages/proxy'
 import Debug from 'debug'
-import _ from 'lodash'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
 const debugVerbose = Debug('cypress-verbose:proxy:http:util:prerequests')
@@ -12,101 +11,84 @@ const metrics: any = {
   browserPreRequestsReceived: 0,
   proxyRequestsReceived: 0,
   immediatelyMatchedRequests: 0,
-  eventuallyReceivedPreRequest: [],
-  neverReceivedPreRequest: [],
+  unmatchedRequests: 0,
+  unmatchedPreRequests: 0,
 }
 
 process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
-function removeOne<T> (a: Array<T>, predicate: (v: T) => boolean): T | void {
-  for (let i = a.length - 1; i >= 0; i--) {
-    const v = a[i]
-
-    if (predicate(v)) {
-      a.splice(i, 1)
-
-      return v
-    }
-  }
+type PendingRequest = {
+  ctxDebug
+  callback: GetPreRequestCb
+  timeout: number
 }
-
-function matches (preRequest: BrowserPreRequest, req: Pick<CypressIncomingRequest, 'proxiedUrl' | 'method'>) {
-  return preRequest.method === req.method && preRequest.url === req.proxiedUrl
-}
-
-export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
 
 export class PreRequests {
-  pendingBrowserPreRequests: Array<BrowserPreRequest> = []
-  requestsPendingPreRequestCbs: Array<{
-    cb: (browserPreRequest: BrowserPreRequest) => void
-    method: string
-    proxiedUrl: string
-  }> = []
+  requestTimeout: number
+  pendingPreRequests: Record<string, BrowserPreRequest & Timestamp> = {}
+  pendingRequests: Record<string, PendingRequest> = {}
+  prerequestTimeouts: Record<string, number> = {}
 
-  get (req: CypressIncomingRequest, ctxDebug, cb: GetPreRequestCb) {
-    metrics.proxyRequestsReceived++
+  constructor (requestTimeout = 500) {
+    this.requestTimeout = requestTimeout
+    setInterval(() => {
+      const now = Date.now()
 
-    const pendingBrowserPreRequest = removeOne(this.pendingBrowserPreRequests, (browserPreRequest) => {
-      return matches(browserPreRequest, req)
-    })
-
-    if (pendingBrowserPreRequest) {
-      metrics.immediatelyMatchedRequests++
-
-      ctxDebug('matches pending pre-request %o', pendingBrowserPreRequest)
-
-      return cb(pendingBrowserPreRequest)
-    }
-
-    const timeout = setTimeout(() => {
-      metrics.neverReceivedPreRequest.push({ url: req.proxiedUrl })
-      ctxDebug('500ms passed without a pre-request, continuing request with an empty pre-request field!')
-
-      remove()
-      cb()
-    }, 500)
-
-    const startedMs = Date.now()
-    const remove = _.once(() => removeOne(this.requestsPendingPreRequestCbs, (v) => v === requestPendingPreRequestCb))
-
-    const requestPendingPreRequestCb = {
-      cb: (browserPreRequest) => {
-        const afterMs = Date.now() - startedMs
-
-        metrics.eventuallyReceivedPreRequest.push({ url: browserPreRequest.url, afterMs })
-        ctxDebug('received pre-request after %dms %o', afterMs, browserPreRequest)
-        clearTimeout(timeout)
-        remove()
-        cb(browserPreRequest)
-      },
-      proxiedUrl: req.proxiedUrl,
-      method: req.method,
-    }
-
-    this.requestsPendingPreRequestCbs.push(requestPendingPreRequestCb)
+      Object.entries(this.prerequestTimeouts).foreach(([key, timeout]) => {
+        if (timeout < now) {
+          debugVerbose('timed out unmatched pre-request %o', this.pendingPreRequests[key])
+          metrics.unmatchedPreRequests++
+          delete this.pendingPreRequests[key]
+          delete this.prerequestTimeouts[key]
+        }
+      })
+    }, 2000)
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
-    if (this.pendingBrowserPreRequests.indexOf(browserPreRequest) !== -1) {
+    metrics.browserPreRequestsReceived++
+    const key = `${browserPreRequest.method}-${browserPreRequest.url}`
+
+    if (this.pendingRequests[key]) {
+      debugVerbose('immediately matched pre-request %o', browserPreRequest)
+      clearTimeout(this.pendingRequests[key].timeout)
+      this.pendingRequests[key].callback(browserPreRequest)
+      delete this.pendingRequests[key]
+    }
+
+    debugVerbose('queuing pre-request to be matched later: %o', browserPreRequest)
+    this.pendingPreRequests[key] = browserPreRequest
+    this.prerequestTimeouts[key] = Date.now() + 10000
+  }
+
+  get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
+    metrics.proxyRequestsReceived++
+    const key = `${req.method}-${req.proxiedUrl}`
+
+    if (this.pendingPreRequests[key]) {
+      metrics.immediatelyMatchedRequests++
+      ctxDebug('matches pending pre-request %o', this.pendingPreRequests[key])
+      callback(this.pendingPreRequests[key])
+
+      delete this.pendingPreRequests[key]
+      delete this.prerequestTimeouts[key]
+
       return
     }
 
-    metrics.browserPreRequestsReceived++
+    const timeout = setTimeout(() => {
+      callback()
+      ctxDebug(`Continuing request ${key} without pre-request`)
+      metrics.unmatchedRequests++
+      delete this.pendingRequests[key]
+    }, this.requestTimeout)
 
-    const requestPendingPreRequestCb = removeOne(this.requestsPendingPreRequestCbs, (req) => {
-      return matches(browserPreRequest, req)
-    })
-
-    if (requestPendingPreRequestCb) {
-      debugVerbose('immediately matched pre-request %o', browserPreRequest)
-
-      return requestPendingPreRequestCb.cb(browserPreRequest)
+    this.pendingRequests[key] = {
+      ctxDebug,
+      callback,
+      timeout,
     }
-
-    debugVerbose('queuing pre-request to be matched later %o %o', browserPreRequest, this.pendingBrowserPreRequests)
-    this.pendingBrowserPreRequests.push(browserPreRequest)
   }
 }
