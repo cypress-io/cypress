@@ -92,7 +92,10 @@ describe('cy.origin - cookie login', () => {
       verifyLoggedIn(username)
     })
 
-    it('works with aliased localhost', () => {
+    // need to fix the following issues for this to work in Firefox:
+    // https://github.com/cypress-io/cypress/issues/363
+    // https://github.com/cypress-io/cypress/issues/17527
+    it('works with aliased localhost', { browser: '!firefox' }, () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login-alias"]').click()
 
