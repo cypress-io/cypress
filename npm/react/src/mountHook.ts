@@ -75,7 +75,7 @@ function TestHook ({ callback, onError, children }: TestHookProps) {
 export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
   const { result, setValue, setError } = resultContainer<T>()
 
-  import('react').then((reactMod) => {
+  return import('react').then((reactMod) => {
     const componentTest = reactMod.createElement(TestHook, {
       callback: hookFn,
       onError: setError,
