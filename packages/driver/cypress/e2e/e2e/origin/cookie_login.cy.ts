@@ -472,7 +472,7 @@ describe('cy.origin - cookie login', () => {
       verifyLocalhostNotLoggedIn()
     })
 
-    // expiring cookies set by automatoin don't seem to get unset appropriately
+    // expiring cookies set by automation don't seem to get unset appropriately
     // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
     // as it happens even using cy.setCookie()
     it('past max-age -> not accessible via cy.getCookie()', { browser: '!firefox' }, () => {

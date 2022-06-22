@@ -31,7 +31,7 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.next()
 }
 
-const CopyCrossOriginCookies: RequestMiddleware = function () {
+const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const currentAUTUrl = this.getAUTUrl()
 
   if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
@@ -233,7 +233,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
-  CopyCrossOriginCookies,
+  MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,

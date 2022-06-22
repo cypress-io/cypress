@@ -393,7 +393,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const checkNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const currentAUTUrl = ctx.getAUTUrl()
 
   // A cookie needs cross origin handling if it's an AUT request and
@@ -436,7 +436,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   and attach them to the request, like the browser normally would.
   //   tough-cookie handles retrieving the correct cookies based on domain,
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
-  const needsCrossOriginHandling = checkNeedsCrossOriginHandling(this)
+  const needsCrossOriginHandling = checkIfNeedsCrossOriginHandling(this)
 
   const appendCookie = (cookie: string) => {
     const headerName = needsCrossOriginHandling ? 'X-Set-Cookie' : 'Set-Cookie'
