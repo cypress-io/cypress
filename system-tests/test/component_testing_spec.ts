@@ -99,9 +99,7 @@ describe(`React major versions with Webpack`, function () {
   for (const majorVersion of REACT_MAJOR_VERSIONS) {
     // TODO: Test for React 18 fails with "react was not found" error when running
     // in system test, but works as expected with binary.
-    const itFn = majorVersion === '18' ? it.skip : it
-
-    itFn(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
+    it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
