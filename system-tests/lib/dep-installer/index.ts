@@ -294,8 +294,6 @@ export async function scaffoldCommonNodeModules () {
     'lazy-ass',
     'lodash',
     'proxyquire',
-    'react',
-    'react-dom',
     'semver',
     'systeminformation',
     'tslib',
