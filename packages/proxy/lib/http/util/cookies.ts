@@ -11,19 +11,24 @@ interface RequestDetails {
   needsCrossOriginHandling: boolean
 }
 
-// Sets SameSite context to match what it would be in the browser
+// sameSiteContext is a concept for tough-cookie's cookie jar that helps it
+// simulate what a browser would do when determining whether or not it should
+// be set from a response or a attached to a response. it shouldn't be confused
+// with a cookie's SameSite property, though that also plays a role when
+// setting/getting a cookie from the tough-cookie cookie jar. see tough-cookie's
+// own explanation of sameSiteContext for more information:
 // see https://github.com/salesforce/tough-cookie#samesite-cookies
 export const getSameSiteContext = (autUrl: string | undefined, requestUrl: string, isAUTFrameRequest: boolean) => {
-  // if there's no AUT URL, it's a request for the first URL visited,
-  // so there would be no cross-origin concerns
-  // if the request origin matches the AUT origin, cookies can be handled
-  // in a strict fashion
+  // if there's no AUT URL, it's a request for the first URL visited, or if
+  // the request origin matches the AUT origin; both indicate that it's not
+  // a cross-origin request
   if (!autUrl || cors.urlOriginsMatch(autUrl, requestUrl)) {
     return 'strict'
   }
 
-  // being an AUT frame request means it's from navigation, so the context is
-  // 'lax'. otherwise, 'none' indicates a non-navigation cross-origin request
+  // being an AUT frame request means it's via top-level navigation, and we've
+  // ruled out same-origin navigation, so the context is 'lax'.
+  // anything else is a non-navigation, cross-origin request
   return isAUTFrameRequest ? 'lax' : 'none'
 }
 
