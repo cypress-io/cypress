@@ -1,3 +1,3 @@
-exports.cypressServer = function () {
-  require('./entry')
+exports.cypressServer = async function () {
+  await require('./entry')
 }

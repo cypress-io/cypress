@@ -2,11 +2,12 @@ import fs from 'fs'
 import buffer from 'buffer'
 import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions, Socket, Namespace } from 'socket.io'
+import path from 'path'
 
 export type { Socket, Namespace as SocketIONamespace }
 
 const { version } = require('socket.io-client/package.json')
-const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
+let clientSource: string
 
 export { ServerOptions }
 
@@ -34,6 +35,10 @@ export {
 }
 
 export const getPathToClientSource = () => {
+  if (!clientSource) {
+    clientSource = path.join(__dirname, '..', 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
+  }
+
   return clientSource
 }
 

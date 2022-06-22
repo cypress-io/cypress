@@ -1,7 +1,27 @@
-const srv = require('../../.bundle/server')
+const run = async (profiler) => {
+  const bench = require('./util/bench').initBenchmark('startup')
 
-const i = process.hrtime.bigint()
+  bench.time('start')
+  await profiler.start()
 
-srv.server.cypressServer()
+  if (process.env.TIME_REQUIRE_IND != null) {
+    require('time-require')
+  }
 
-console.log(process.hrtime.bigint() - i)
+  const srv = require('../../.bundle/server')
+
+  await srv.server.cypressServer()
+
+  // eslint-disable-next-line no-console
+  await profiler.stop()
+
+  bench.timeEnd('start')
+  bench.dumpAverages()
+  bench.save()
+
+  process.exit(0)
+}
+
+const profiler = require('./util/profiler').initProfiler('startup')
+
+module.exports = run(profiler)

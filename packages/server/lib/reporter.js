@@ -16,7 +16,7 @@ const { overrideRequire } = require('./override_require')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
-const customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
+const customReporterMochaPath = path.dirname(path.join(__dirname, '..', '..', '..', 'node_modules', 'mocha-7.0.1'))
 
 overrideRequire((depPath, _load) => {
   if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {

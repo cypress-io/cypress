@@ -2,8 +2,8 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "browser": "lib/browser.ts",
   "main": "index.js",
+  "browser": "lib/browser.ts",
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors' && rm lib/browser.js",
     "clean": "rimraf lib/*.js",

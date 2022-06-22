@@ -1,8 +1,8 @@
-const fs = require('fs')
-const json5 = require('json5')
+// const fs = require('fs')
+// const json5 = require('json5')
 const StartServerWebpackPlugin = require('razzle-start-server-webpack-plugin')
 const path = require('path')
-const webpackNodeExternals = require('webpack-node-externals')
+// const webpackNodeExternals = require('webpack-node-externals')
 
 /**
  * @return {import('webpack').Configuration}
@@ -29,7 +29,7 @@ module.exports = (opts, config) => {
    * @type {import('webpack').Configuration}
    */
   return {
-    mode: 'development',
+    mode: process.env.MINIFY_IND != null ? 'production' : 'development',
     devtool: false,
     node: {
       global: true,
@@ -112,6 +112,9 @@ module.exports = (opts, config) => {
       // chunkLoading: 'require',
       // libraryExport: 'devmonster',
       // libraryTarget: 'commonjs',
+    },
+    optimization: {
+      usedExports: true,
     },
     // optimization: {
     //   splitChunks: {
