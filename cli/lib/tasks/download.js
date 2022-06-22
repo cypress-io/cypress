@@ -1,4 +1,3 @@
-const arch = require('arch')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
@@ -61,7 +60,7 @@ const getCA = () => {
   })
 }
 
-const prepend = (urlPath) => {
+const prepend = (arch, urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
@@ -71,19 +70,19 @@ const prepend = (urlPath) => {
       pathTemplate
       .replace(/\\?\$\{endpoint\}/, endpoint)
       .replace(/\\?\$\{platform\}/, platform)
-      .replace(/\\?\$\{arch\}/, arch())
+      .replace(/\\?\$\{arch\}/, arch)
     )
-    : `${endpoint}?platform=${platform}&arch=${arch()}`
+    : `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
-const getUrl = (version) => {
+const getUrl = (arch, version) => {
   if (is.url(version)) {
     debug('version is already an url', version)
 
     return version
   }
 
-  return version ? prepend(`desktop/${version}`) : prepend('desktop')
+  return version ? prepend(arch, `desktop/${version}`) : prepend(arch, 'desktop')
 }
 
 const statusMessage = (err) => {
@@ -92,9 +91,9 @@ const statusMessage = (err) => {
     : err.toString())
 }
 
-const prettyDownloadErr = (err, version) => {
+const prettyDownloadErr = (err, url) => {
   const msg = stripIndent`
-    URL: ${getUrl(version)}
+    URL: ${url}
     ${statusMessage(err)}
   `
 
@@ -327,7 +326,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
  * @param [string] version Could be "3.3.0" or full URL
  * @param [string] downloadDestination Local filename to save as
  */
-const start = (opts) => {
+const start = async (opts) => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
@@ -340,7 +339,8 @@ const start = (opts) => {
     } }
   }
 
-  const versionUrl = getUrl(version)
+  const arch = await util.getRealArch()
+  const versionUrl = getUrl(arch, version)
 
   progress.throttle = 100
 
@@ -358,7 +358,7 @@ const start = (opts) => {
       ...(redirectTTL ? { redirectTTL } : {}) })
   })
   .catch((err) => {
-    return prettyDownloadErr(err, version)
+    return prettyDownloadErr(err, versionUrl)
   })
 }
 

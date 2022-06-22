@@ -1,6 +1,9 @@
 const execa = require('execa')
-const pkg = require('./package.json')
+const path = require('path')
+const pkg = require('../package.json')
 const fs = require('fs')
+
+const pkgJsonPath = path.join(__dirname, '..', 'package.json')
 
 /**
  * This file installs Webpack 5 and runs the unit and e2e tests for the preprocessor.
@@ -17,7 +20,7 @@ const main = async () => {
   const install = () => execa('yarn', ['install', '--ignore-scripts'], { stdio: 'inherit' })
 
   const resetPkg = async () => {
-    fs.writeFileSync('package.json', originalPkg, 'utf8')
+    fs.writeFileSync(pkgJsonPath, originalPkg, 'utf8')
     await install()
   }
 
@@ -38,7 +41,7 @@ const main = async () => {
   delete pkg.devDependencies['webpack']
   // eslint-disable-next-line no-console
   console.log('[@cypress/webpack-preprocessor]: updating package.json...')
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
+  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkg, null, 2))
 
   // eslint-disable-next-line no-console
   console.log('[@cypress/webpack-preprocessor]: install dependencies...')

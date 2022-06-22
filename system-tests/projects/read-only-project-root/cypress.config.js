@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-properties */
+/* eslint-disable no-restricted-syntax */
 const fs = require('fs')
 const { expect } = require('chai')
 
