@@ -34,6 +34,7 @@ import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar } from './cookie-jar'
 import type { Automation } from './automation/automation'
+import type { AutomationCookie } from './automation/cookies'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -180,7 +181,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.socket.toDriver('cross:origin:delaying:html', request)
     })
 
-    this._eventBus.on('cross:origin:automation:cookies', (cookies) => {
+    this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
         this._eventBus.emit('cross:origin:automation:cookies:received')
       })

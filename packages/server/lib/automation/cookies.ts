@@ -3,6 +3,19 @@ import Debug from 'debug'
 import extension from '@packages/extension'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
 
+export interface AutomationCookie {
+  domain: string
+  expiry: number | null
+  httpOnly: boolean
+  maxAge: 'Infinity' | '-Infinity' | number | null
+  name: string
+  path: string | null
+  sameSite: string
+  secure: boolean
+  url?: string
+  value: string
+}
+
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
 const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly sameSite'.split(' ')
@@ -134,7 +147,11 @@ export class Cookies {
     })
   }
 
-  setCookies (cookies, automate, eventName = 'set:cookies') {
+  setCookies (
+    cookies: AutomationCookie[],
+    automate: (eventName: string, cookies: AutomationCookie[]) => Bluebird.Promise<AutomationCookie[]>,
+    eventName: 'set:cookies' | 'add:cookies' = 'set:cookies',
+  ) {
     cookies = cookies.map((data) => {
       this.throwIfNamespaced(data)
       const cookie = normalizeCookieProps(data)
@@ -155,7 +172,10 @@ export class Cookies {
   // set:cookies will clear cookies first in browsers that use CDP. this is the
   // same as set:cookies in Firefox, but will only add cookies and not clear
   // them in Chrome, etc.
-  addCookies (cookies, automate) {
+  addCookies (
+    cookies: AutomationCookie[],
+    automate: (eventName: string, cookies: AutomationCookie[]) => Bluebird.Promise<AutomationCookie[]>,
+  ) {
     return this.setCookies(cookies, automate, 'add:cookies')
   }
 

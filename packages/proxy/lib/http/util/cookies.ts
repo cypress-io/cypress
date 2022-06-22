@@ -3,18 +3,7 @@ import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
 import { Cookie, CookieJar } from '@packages/server/lib/cookie-jar'
-
-interface AutomationCookie {
-  domain: string
-  expiry: number | null
-  httpOnly: boolean
-  maxAge: number | null
-  name: string
-  path: string | null
-  sameSite: string
-  secure: boolean
-  value: string
-}
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 interface RequestDetails {
   url: string
@@ -40,7 +29,7 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
 
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
 
-export const parseCookie = (cookie) => {
+export const parseCookie = (cookie: string) => {
   const toughCookie = CookieJar.parse(cookie)
 
   if (!toughCookie) return
@@ -58,7 +47,7 @@ export const parseCookie = (cookie) => {
   return toughCookie
 }
 
-const comparableCookieString = (toughCookie) => {
+const comparableCookieString = (toughCookie: Cookie): string => {
   return _(toughCookie)
   .pick('key', 'value', 'domain', 'path')
   .toPairs()
@@ -67,17 +56,17 @@ const comparableCookieString = (toughCookie) => {
   .join('; ')
 }
 
-const areCookiesEqual = (cookieA, cookieB) => {
+const areCookiesEqual = (cookieA: Cookie, cookieB: Cookie) => {
   return comparableCookieString(cookieA) === comparableCookieString(cookieB)
 }
 
-const matchesPreviousCookie = (previousCookies, cookie) => {
+const matchesPreviousCookie = (previousCookies: Cookie[], cookie: Cookie) => {
   return !!previousCookies.find((previousCookie) => {
     return areCookiesEqual(previousCookie, cookie)
   })
 }
 
-const toughCookieToAutomationCookie = (toughCookie, defaultDomain) => {
+const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
   const expiry = toughCookie.expiryTime()
 
   return {
@@ -121,7 +110,7 @@ export class CookiesHelper {
     this.defaultDomain = parsedRequestUrl.hostname
   }
 
-  async capturePreviousCookies () {
+  capturePreviousCookies () {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
     // is a noop
@@ -130,7 +119,7 @@ export class CookiesHelper {
     this.previousCookies = this.cookieJar.getAllCookies()
   }
 
-  async getAddedCookies () {
+  getAddedCookies () {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
     // is a noop

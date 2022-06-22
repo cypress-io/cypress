@@ -37,6 +37,7 @@ import { EventEmitter2 } from 'eventemitter2'
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
 import type { StateFunc } from './state'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -365,18 +366,18 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    Cypress.on('cross:origin:automation:cookies', (cookies) => {
-      const existingCookies = state('cross:origin:automation:cookies') || []
+    Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
+      const existingCookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
 
       this.state('cross:origin:automation:cookies', existingCookies.concat(cookies))
 
       Cypress.backend('cross:origin:automation:cookies:received')
     })
 
-    Cypress.on('before:stability:release', (stable) => {
-      const cookies = state('cross:origin:automation:cookies')
+    Cypress.on('before:stability:release', (stable: boolean) => {
+      const cookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
 
-      if (!stable || !cookies) return
+      if (!stable || !cookies.length) return
 
       // reset the state cookies before setting them via automation in case
       // any more get set in the interim

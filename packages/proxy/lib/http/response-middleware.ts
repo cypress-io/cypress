@@ -438,7 +438,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
   const needsCrossOriginHandling = checkNeedsCrossOriginHandling(this)
 
-  const appendCookie = (cookie) => {
+  const appendCookie = (cookie: string) => {
     const headerName = needsCrossOriginHandling ? 'X-Set-Cookie' : 'Set-Cookie'
 
     try {
