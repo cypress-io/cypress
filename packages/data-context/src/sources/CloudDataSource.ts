@@ -1,13 +1,15 @@
 // @ts-ignore
 import pkg from '@packages/root'
 import debugLib from 'debug'
+import DataLoader from 'dataloader'
+import { createBatchingExecutor } from '@graphql-tools/batch-execute'
 import { cacheExchange, Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -81,9 +83,21 @@ export interface CloudDataSourceParams {
 export class CloudDataSource {
   #cloudUrqlClient: Client
   #lastCache?: string
+  #batchExecutor: ReturnType<typeof createBatchingExecutor>
+  #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
+    this.#batchExecutor = createBatchingExecutor(({ document, variables }) => {
+      debug(`Executing remote dashboard request %s, %j`, print(document), variables)
+
+      return this.#cloudUrqlClient.query(document, variables ?? {}, {
+        ...this.#additionalHeaders,
+        requestPolicy: 'network-only',
+      }).toPromise()
+    })
+
+    this.#batchExecutorBatcher = this.#makeBatchExecutionBatcher()
   }
 
   get #user () {
@@ -206,7 +220,7 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
+    loading = this.#batchExecutorBatcher.load(config).then(this.#formatWithErrors)
     .then(async (op) => {
       this.#pendingPromises.delete(stableKey)
 
@@ -331,5 +345,40 @@ export class CloudDataSource {
     }).toPromise()
 
     return JSON.parse(this.#lastCache ?? '')
+  }
+
+  /**
+   * Creates a non-caching batch-loader, used to aggregate multiple remote GraphQL
+   * requests and rewrite them into a single query issued against the remote server.
+   * https://www.graphql-tools.com/docs/batch-execution
+   */
+  #makeBatchExecutionBatcher () {
+    return new DataLoader<CloudExecuteRemote, any>(async (toBatch) => {
+      const first = toBatch[0]
+
+      // If we only have a single entry, we can just hit the query directly,
+      // without rewriting anything - this makes the queries simpler in most cases in the app
+      if (toBatch.length === 1 && first) {
+        return [this.#cloudUrqlClient.query(first.operation, first.operationVariables ?? {}, {
+          ...this.#additionalHeaders,
+          requestPolicy: 'network-only',
+        }).toPromise()]
+      }
+
+      // Otherwise run this through batchExecutor:
+      return Promise.allSettled(toBatch.map((b) => {
+        return this.#batchExecutor({
+          operationType: 'query',
+          document: b.operationDoc,
+          variables: b.operationVariables,
+        })
+      })).then((val) => val.map((v) => v.status === 'fulfilled' ? v.value : this.#ensureError(v.reason)))
+    }, {
+      cache: false,
+    })
+  }
+
+  #ensureError (val: any): Error {
+    return val instanceof Error ? val : new Error(val)
   }
 }
