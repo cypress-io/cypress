@@ -119,6 +119,7 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
+    "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
     "lastUpdated": {
