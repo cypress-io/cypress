@@ -58,6 +58,57 @@ describe('http/request-middleware', () => {
     })
   })
 
+  describe('MaybeAttachCrossOriginCookies', () => {
+    const { MaybeAttachCrossOriginCookies } = RequestMiddleware
+
+    it('is a noop if experimental flag is off', async () => {
+      const ctx = getContext()
+
+      ctx.config.experimentalSessionAndOrigin = false
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+    })
+
+    it('is a noop if no current AUT URL', async () => {
+      const ctx = getContext()
+
+      ctx.getAUTUrl = () => ''
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+    })
+
+    it('is adds cookie jar cookies to request', async () => {
+      const ctx = getContext()
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('exist=ing; new=one')
+    })
+
+    function getContext () {
+      const cookieJar = {
+        getCookies: () => [{ key: 'new', value: 'one' }],
+      }
+
+      return {
+        getAUTUrl: () => 'http://foobar.com',
+        getCookieJar: () => cookieJar,
+        config: { experimentalSessionAndOrigin: true },
+        req: {
+          proxiedUrl: 'http://foobar.com',
+          isAUTFrame: true,
+          headers: {
+            cookie: 'exist=ing',
+          },
+        },
+      }
+    }
+  })
+
   describe('MaybeEndRequestWithBufferedResponse', () => {
     const { MaybeEndRequestWithBufferedResponse } = RequestMiddleware
 

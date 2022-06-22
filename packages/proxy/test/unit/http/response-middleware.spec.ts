@@ -633,15 +633,11 @@ describe('http/response-middleware', function () {
     const { CopyCookiesFromIncomingRes } = ResponseMiddleware
 
     it('appends cookies on the response when an array', async function () {
-      const appendStub = sinon.stub()
-      const ctx = prepareContext({
+      const { appendStub, ctx } = prepareSameOriginContext({
         incomingRes: {
           headers: {
             'set-cookie': ['cookie1=value1', 'cookie2=value2'],
           },
-        },
-        res: {
-          append: appendStub,
         },
       })
 
@@ -653,17 +649,7 @@ describe('http/response-middleware', function () {
     })
 
     it('appends cookies on the response when a string', async function () {
-      const appendStub = sinon.stub()
-      const ctx = prepareContext({
-        incomingRes: {
-          headers: {
-            'set-cookie': 'cookie=value',
-          },
-        },
-        res: {
-          append: appendStub,
-        },
-      })
+      const { appendStub, ctx } = prepareSameOriginContext()
 
       await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
@@ -684,6 +670,95 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.to.be.called
     })
 
+    it('uses X-Set-Cookie when experimental flag is on and request needs cross-origin handling', async () => {
+      const appendStub = sinon.stub()
+      const ctx = prepareContext({
+        req: {
+          isAUTFrame: true,
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+        },
+        res: {
+          append: appendStub,
+        },
+      })
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(appendStub).to.be.calledOnce
+      expect(appendStub).to.be.calledWith('X-Set-Cookie', 'cookie=value')
+    })
+
+    it('uses Set-Cookie when experimental flag is on but request does not need cross-origin handling', async () => {
+      const { appendStub, ctx } = prepareSameOriginContext()
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(appendStub).to.be.calledOnce
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    it('does not send cross:origin:automation:cookies if request does not need cross-origin handling', async () => {
+      const { ctx } = prepareSameOriginContext()
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.serverBus.emit).not.to.be.called
+    })
+
+    it('does not send cross:origin:automation:cookies if there are no added cookies', async () => {
+      const cookieJar = {
+        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
+      }
+
+      const ctx = prepareContext({
+        cookieJar,
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+        },
+      })
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.serverBus.emit).not.to.be.called
+    })
+
+    it('sends cross:origin:automation:cookies if there are added cookies and resolves on cross:origin:automation:cookies:received', async () => {
+      const cookieJar = {
+        getAllCookies: sinon.stub(),
+      }
+
+      cookieJar.getAllCookies.onCall(0).returns([])
+      cookieJar.getAllCookies.onCall(1).returns([cookieStub({ key: 'cookie', value: 'value' })])
+
+      const ctx = prepareContext({
+        cookieJar,
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+        },
+      })
+
+      // test will hang if this.next() is not called, so this also tests
+      // that we move on once receiving this event
+      ctx.serverBus.once.withArgs('cross:origin:automation:cookies:received').yields()
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:automation:cookies')
+
+      const cookies = ctx.serverBus.emit.withArgs('cross:origin:automation:cookies').args[0][1]
+
+      expect(cookies[0].name).to.equal('cookie')
+      expect(cookies[0].value).to.equal('value')
+    })
+
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
       const eventEmitter = new EventEmitter()
@@ -697,6 +772,12 @@ describe('http/response-middleware', function () {
         eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
       })
 
+      remoteStates.isPrimaryOrigin = () => false
+
+      const cookieJar = props.cookieJar || {
+        getAllCookies: () => [],
+      }
+
       return {
         incomingRes: {
           headers: {},
@@ -708,8 +789,9 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
+          proxiedUrl: 'http://www.foobar.com/login',
           headers: {},
+          isAUTFrame: true,
           ...props.req,
         },
         incomingResStream: {
@@ -720,14 +802,50 @@ describe('http/response-middleware', function () {
         config: {
           experimentalSessionAndOrigin: true,
         },
-        getCookieJar () {},
-        getAUTUrl () {},
+        getCookieJar: () => cookieJar,
+        getAUTUrl: () => 'http://www.foobar.com/primary-origin.html',
         remoteStates,
         debug () {},
         onError (error) {
           throw error
         },
+        serverBus: {
+          emit: sinon.stub(),
+          once: sinon.stub(),
+        },
         ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+
+    function prepareSameOriginContext (props = {}) {
+      const appendStub = sinon.stub()
+
+      const ctx = prepareContext({
+        req: {
+          isAUTFrame: true,
+          ...props.req,
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+          ...props.incomingRes,
+        },
+        res: {
+          append: appendStub,
+          ...props.res,
+        },
+      })
+
+      ctx.remoteStates.isPrimaryOrigin = () => true
+
+      return { appendStub, ctx }
+    }
+
+    function cookieStub (props) {
+      return {
+        expiryTime: () => 0,
+        ...props,
       }
     }
   })
