@@ -136,24 +136,6 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
     })
   })
 
-  context('over limit', () => {
-    beforeEach(() => {
-      mountWithRun(runs[5])
-    })
-
-    it('should render expected content', () => {
-      // Orange border
-      validateTopBorder('rgb(219, 121, 3)')
-      validateFilename('mySpecFile.spec.ts')
-      // Orange text
-      validateStatus('Over limit', 'rgb(189, 88, 0)')
-      validateTimeAgo('1 year ago')
-      validateDuration1('2:23')
-      validateDuration2('2:39')
-      validateResultCountsVisible()
-    })
-  })
-
   context('running', () => {
     beforeEach(() => {
       mountWithRun(runs[6])
