@@ -48,9 +48,9 @@ export class PreRequests {
     // Discarding prerequests on the other hand is not urgent, so we do it on a regular interval
     // rather than with a separate timer for each one.
     // 2 times the requestTimeout is arbitrary, chosen to give plenty of time and
-    // make surewe don't discard any pre-requests prematurely but that we don't leak memory over time
-    // if a large number of pre-requests don't match up (as seen in https://github.com/cypress-io/cypress/issues/17853,
-    // for example)
+    // make sure we don't discard any pre-requests prematurely but that we don't leak memory over time
+    // if a large number of pre-requests don't match up
+    // fixes: https://github.com/cypress-io/cypress/issues/17853
     setInterval(() => {
       const now = Date.now()
 
