@@ -50,6 +50,7 @@ export class RemotePollingDataSource {
 
   async #sendSpecPollingRequest (commitBranch: string, projectSlug: string) {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudLatestRunUpdateSpecData'>>({
+      fieldName: 'cloudLatestRunUpdateSpecData',
       operationDoc: LATEST_RUN_UPDATE_OPERATION_DOC,
       operation: LATEST_RUN_UPDATE_OPERATION,
       operationVariables: {
@@ -57,6 +58,7 @@ export class RemotePollingDataSource {
         projectSlug,
       },
       requestPolicy: 'network-only', // we never want to hit local cache for this request
+      invalidateCache: () => this.ctx.graphql.invalidateCache(this.ctx),
     })
 
     debug(`%s Response for startPollingForSpecs %o`, new Date().toISOString(), result)
