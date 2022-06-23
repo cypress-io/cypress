@@ -134,6 +134,10 @@ declare global {
        */
       remoteGraphQLIntercept: typeof remoteGraphQLIntercept
       /**
+       * Gives the ability to intercept the remote GraphQL request & respond accordingly
+       */
+      remoteGraphQLInterceptBatched: typeof remoteGraphQLInterceptBatched
+      /**
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
       disableRemoteGraphQLFakes(): void
@@ -441,6 +445,12 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
 function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   return logInternal('remoteGraphQLIntercept', () => {
     return taskInternal('__internal_remoteGraphQLIntercept', fn.toString())
+  })
+}
+
+function remoteGraphQLInterceptBatched (fn: RemoteGraphQLInterceptor) {
+  return logInternal('remoteGraphQLInterceptBatched', () => {
+    return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })
 }
 

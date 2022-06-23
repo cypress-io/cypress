@@ -137,7 +137,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     beforeEach(() => {
       cy.loginUser()
 
-      cy.remoteGraphQLIntercept(async (obj) => {
+      cy.remoteGraphQLInterceptBatched(async (obj) => {
         if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
           obj.result.data.cloudSpecByPath = {
             __typename: 'CloudProjectSpecNotFound',

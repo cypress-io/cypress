@@ -19,6 +19,7 @@ interface MaybeLoadRemoteFetchable extends CloudExecuteQuery {
   shouldFetch?: boolean
   remoteQueryField: string
   isMutation: boolean
+  shouldBatch?: boolean
 }
 
 interface OperationDefinition {
@@ -65,6 +66,7 @@ export class RemoteRequestDataSource {
       remoteQueryField,
       shouldFetch: true,
       isMutation: true,
+      shouldBatch: true,
     })
   }
 
@@ -158,6 +160,7 @@ export class RemoteRequestDataSource {
       operationHash,
       operationVariables,
       requestPolicy: 'network-only',
+      shouldBatch: params.shouldBatch,
     }))
     .then((result) => {
       const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)
@@ -294,6 +297,7 @@ export class RemoteRequestDataSource {
         shouldFetch: shouldEagerFetch,
         remoteQueryField: fieldConfig.remoteQueryField,
         isMutation: false,
+        shouldBatch: true,
       })
     })
   }

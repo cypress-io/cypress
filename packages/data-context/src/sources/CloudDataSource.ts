@@ -9,7 +9,7 @@ import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -51,6 +51,7 @@ export interface CloudExecuteQuery {
 
 export interface CloudExecuteRemote extends CloudExecuteQuery {
   fieldName: string
+  shouldBatch?: boolean
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
@@ -88,14 +89,9 @@ export class CloudDataSource {
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
-    this.#batchExecutor = createBatchingExecutor(({ document, variables }) => {
-      debug(`Executing remote dashboard request %s, %j`, print(document), variables)
-
-      return this.#cloudUrqlClient.query(document, variables ?? {}, {
-        ...this.#additionalHeaders,
-        requestPolicy: 'network-only',
-      }).toPromise()
-    })
+    this.#batchExecutor = createBatchingExecutor((config) => {
+      return this.#executeQuery(namedExecutionDocument(config.document), config.variables)
+    }, { maxBatchSize: 20 })
 
     this.#batchExecutorBatcher = this.#makeBatchExecutionBatcher()
   }
@@ -220,7 +216,11 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#batchExecutorBatcher.load(config).then(this.#formatWithErrors)
+    const query = config.shouldBatch
+      ? this.#batchExecutorBatcher.load(config)
+      : this.#executeQuery(config.operationDoc, config.operationVariables)
+
+    loading = query.then(this.#formatWithErrors)
     .then(async (op) => {
       this.#pendingPromises.delete(stableKey)
 
@@ -255,6 +255,12 @@ export class CloudDataSource {
     this.#pendingPromises.set(stableKey, loading)
 
     return loading
+  }
+
+  #executeQuery (operationDoc: DocumentNode, operationVariables: object = {}) {
+    debug(`Executing remote dashboard request %s, %j`, print(operationDoc), operationVariables)
+
+    return this.#cloudUrqlClient.query(operationDoc, operationVariables, { requestPolicy: 'network-only' }).toPromise()
   }
 
   isResolving (config: CloudExecuteQuery) {
@@ -354,18 +360,6 @@ export class CloudDataSource {
    */
   #makeBatchExecutionBatcher () {
     return new DataLoader<CloudExecuteRemote, any>(async (toBatch) => {
-      const first = toBatch[0]
-
-      // If we only have a single entry, we can just hit the query directly,
-      // without rewriting anything - this makes the queries simpler in most cases in the app
-      if (toBatch.length === 1 && first) {
-        return [this.#cloudUrqlClient.query(first.operation, first.operationVariables ?? {}, {
-          ...this.#additionalHeaders,
-          requestPolicy: 'network-only',
-        }).toPromise()]
-      }
-
-      // Otherwise run this through batchExecutor:
       return Promise.allSettled(toBatch.map((b) => {
         return this.#batchExecutor({
           operationType: 'query',
@@ -381,4 +375,38 @@ export class CloudDataSource {
   #ensureError (val: any): Error {
     return val instanceof Error ? val : new Error(val)
   }
+}
+
+/**
+ * Adds "batchExecutionQuery" to the query that we generate from the batch loader,
+ * useful to key off of in the tests.
+ */
+function namedExecutionDocument (document: DocumentNode) {
+  let hasReplaced = false
+
+  return visit(document, {
+    enter () {
+      if (hasReplaced) {
+        return false
+      }
+
+      return
+    },
+    OperationDefinition (op) {
+      if (op.name) {
+        return op
+      }
+
+      hasReplaced = true
+      const namedOperationNode: OperationDefinitionNode = {
+        ...op,
+        name: {
+          kind: 'Name',
+          value: 'batchTestRunnerExecutionQuery',
+        },
+      }
+
+      return namedOperationNode
+    },
+  })
 }
