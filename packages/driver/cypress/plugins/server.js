@@ -200,7 +200,7 @@ const createApp = (port) => {
     let cookie = 'prelogin=true'
 
     // if testing overridden cookies, need to make it cross-origin so it's
-    // included with a cross-origin request
+    // included in the cross-origin `/login` request
     if (override) {
       cookie += '; SameSite=None; Secure'
     }

@@ -119,9 +119,9 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('handles browser-sent cookies being overridden by server-kept cookies', () => {
-      cy.visit('/fixtures/primary-origin.html')
+      cy.visit('https://localhost:3502/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login-override"]').click()
-      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+      cy.origin('https://foobar.com:3502', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="login"]').click()
       })
