@@ -47,6 +47,7 @@ describe('http/util/prerequests', () => {
     preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
   })
 
+  // https://github.com/cypress-io/cypress/issues/17853
   it('eventually discards pre-requests that don\'t match requests', (done) => {
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
 
