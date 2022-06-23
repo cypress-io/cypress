@@ -41,7 +41,7 @@ export class AuthActions {
       operationDoc: parse(operation),
       operationVariables: {},
       invalidateCache: () => {
-        this.ctx.cloud.invalidate({ __typename: 'Query' })
+        this.ctx.graphql.invalidateCache(this.ctx)
       },
     })
 

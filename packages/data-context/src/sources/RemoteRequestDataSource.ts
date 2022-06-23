@@ -160,7 +160,7 @@ export class RemoteRequestDataSource {
       operationVariables,
       requestPolicy: 'network-only',
       invalidateCache: () => {
-        ctx.cloud.invalidate({ __typename: 'Query' })
+        ctx.graphql.invalidateCache(ctx)
       },
     }))
     .then((result) => {
