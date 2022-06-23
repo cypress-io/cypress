@@ -49,7 +49,7 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => Required<CloudSpecRun>[] 
 }
 
 export const exampleRuns = () => {
-  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED', 'NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT'])
+  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED', 'NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT', 'UNCLAIMED'])
 
   const now = new Date()
   const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate())

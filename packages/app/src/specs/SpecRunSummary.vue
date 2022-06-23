@@ -121,6 +121,7 @@ const statusText = computed(() => {
     case 'NOTESTS': return 'No tests'
     case 'OVERLIMIT': return 'Over limit'
     case 'PASSED': return 'Passed'
+    case 'UNCLAIMED': return 'Queued'
     case 'RUNNING': return 'Running'
     case 'TIMEDOUT': return 'Timed out'
     default: return null
@@ -143,6 +144,7 @@ const statusColor = computed(() => {
       return 'indigo'
     case 'CANCELLED':
     case 'NOTESTS':
+    case 'UNCLAIMED':
     default: return 'gray'
   }
 })
