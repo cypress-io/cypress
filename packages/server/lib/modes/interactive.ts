@@ -8,7 +8,7 @@ import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { DataContext, globalPubSub, getCtx, clearAppCtx } from '@packages/data-context'
 import type { LaunchArgs, PlatformName } from '@packages/types'
 import { EventEmitter } from 'events'
 import debugLib from 'debug'
@@ -175,7 +175,7 @@ export = {
 
     const clearCtxAndQuit = async () => {
       try {
-        await clearCtx()
+        await clearAppCtx()
       } catch (e) {
         // Silently handle clearCtx errors, we still need to quit the app
         debug(`DataContext cleared with error: ${e?.message}`)
