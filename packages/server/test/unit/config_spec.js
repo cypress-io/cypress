@@ -11,6 +11,8 @@ const config = require(`../../lib/config`)
 const errors = require(`../../lib/errors`)
 const configUtil = require(`../../lib/util/config`)
 
+const os = require('node:os')
+
 describe('lib/config', () => {
   before(function () {
     this.env = process.env
@@ -1472,13 +1474,9 @@ describe('lib/config', () => {
 
         return config.mergeDefaults(obj, options)
         .then((cfg) => {
-          ['platform', 'arch'].forEach((x) => {
-            expect(cfg.resolved[x]).to.exist
-            delete cfg.resolved[x]
-          })
-
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
+            arch: { value: os.arch(), from: 'default' },
             baseUrl: { value: null, from: 'default' },
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
@@ -1502,6 +1500,7 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
             port: { value: 1234, from: 'cli' },
             projectId: { value: null, from: 'default' },
             redirectionLimit: { value: 20, from: 'default' },
@@ -1561,12 +1560,8 @@ describe('lib/config', () => {
 
         return config.mergeDefaults(obj, options)
         .then((cfg) => {
-          ['platform', 'arch'].forEach((x) => {
-            expect(cfg.resolved[x]).to.exist
-            delete cfg.resolved[x]
-          })
-
           expect(cfg.resolved).to.deep.eq({
+            arch: { value: os.arch(), from: 'default' },
             animationDistanceThreshold: { value: 5, from: 'default' },
             baseUrl: { value: 'http://localhost:8080', from: 'config' },
             blockHosts: { value: null, from: 'default' },
@@ -1612,6 +1607,7 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
             port: { value: 2020, from: 'config' },
             projectId: { value: 'projectId123', from: 'env' },
             redirectionLimit: { value: 20, from: 'default' },
