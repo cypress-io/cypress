@@ -69,7 +69,7 @@ describe('DocumentNodeBuilder', () => {
         }
       }
 
-      {
+      query CLOUD_VIEWER_QUERY {
         ...GeneratedFragment
       }
     `)
@@ -101,7 +101,7 @@ describe('DocumentNodeBuilder', () => {
         }
       }
 
-      {
+      query CLOUD_PROJECT_QUERY {
         node(id: "PUSH_FRAGMENT_PLACEHOLDER") {
           __typename
           id
