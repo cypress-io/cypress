@@ -119,95 +119,11 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     CypressError: \`cy.then()\` timed out after waiting \`1000ms\`.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
-Your callback function returned a promise that never resolved.
+  > React is not defined
 
-The callback function was:
-
-function () {
-    var _a, _b, _c;
-
-    var el = getContainerEl();
-
-    if (!el) {
-      throw new Error(["[@cypress/react] \\uD83D\\uDD25 Hmm, cannot find root element to mount the component. Searched for " + ROOT_SELECTOR].join(' '));
-    }
-
-    var key = rerenderKey !== null && rerenderKey !== void 0 ? rerenderKey : // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
-    (((_c = (_b = (_a = Cypress === null || Cypress === void 0 ? void 0 : Cypress.mocha) === null || _a === void 0 ? void 0 : _a.getRunner()) === null || _b === void 0 ? void 0 : _b.test) === null || _c === void 0 ? void 0 : _c.title) || '') + Math.random();
-    var props = {
-      key: key
-    };
-
-    var logMount = function () {
-      if (options.log !== false) {
-        Cypress.log({
-          name: type,
-          type: 'parent',
-          message: [message],
-          // @ts-ignore
-          $el: el.children.item(0),
-          consoleProps: function () {
-            return {
-              // @ts-ignore protect the use of jsx functional components use ReactNode
-              props: jsx.props,
-              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-              home: 'https://github.com/cypress-io/cypress'
-            };
-          }
-        }).snapshot('mounted').end();
-      }
-    };
-
-    return importReactModules().then(function (_a) {
-      var react = _a.react,
-          reactDom = _a.reactDom,
-          majorVersion = _a.majorVersion;
-      var reactDomToUse = options.ReactDom || reactDom;
-      lastMountedReactDom = reactDomToUse;
-      var reactComponent = react.createElement(options.strict ? react.StrictMode : react.Fragment, props, jsx); // since we always surround the component with a fragment
-      // let's get back the original component
-
-      var userComponent = reactComponent.props.children;
-
-      if (majorVersion <= 17) {
-        reactDom.render(reactComponent, el);
-      } else {
-        var root = reactDom.createRoot(el);
-        root.render(reactComponent);
-      }
-
-      logMount();
-      return (// Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-        cy.wrap(userComponent, {
-          log: false
-        }).as(displayName).then(function () {
-          return cy.wrap({
-            component: userComponent,
-            rerender: function (newComponent) {
-              return _mount('rerender', newComponent, options, key);
-            },
-            unmount: function () {
-              return _unmount({
-                boundComponentMessage: jsxComponentName,
-                log: true
-              });
-            }
-          }, {
-            log: false
-          });
-        }) // by waiting, we delaying test execution for the next tick of event loop
-        // and letting hooks and component lifecycle methods to execute mount
-        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-        .wait(0, {
-          log: false
-        })
-      );
-    }); // Bluebird types are terrible. I don't think the return type can be carried without this cast
-  }
-
-https://on.cypress.io/then
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
 
@@ -322,7 +238,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   49 modules
+   42 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -655,95 +571,11 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     CypressError: \`cy.then()\` timed out after waiting \`1000ms\`.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
-Your callback function returned a promise that never resolved.
+  > React is not defined
 
-The callback function was:
-
-function () {
-    var _a, _b, _c;
-
-    var el = getContainerEl();
-
-    if (!el) {
-      throw new Error(["[@cypress/react] \\uD83D\\uDD25 Hmm, cannot find root element to mount the component. Searched for " + ROOT_SELECTOR].join(' '));
-    }
-
-    var key = rerenderKey !== null && rerenderKey !== void 0 ? rerenderKey : // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
-    (((_c = (_b = (_a = Cypress === null || Cypress === void 0 ? void 0 : Cypress.mocha) === null || _a === void 0 ? void 0 : _a.getRunner()) === null || _b === void 0 ? void 0 : _b.test) === null || _c === void 0 ? void 0 : _c.title) || '') + Math.random();
-    var props = {
-      key: key
-    };
-
-    var logMount = function () {
-      if (options.log !== false) {
-        Cypress.log({
-          name: type,
-          type: 'parent',
-          message: [message],
-          // @ts-ignore
-          $el: el.children.item(0),
-          consoleProps: function () {
-            return {
-              // @ts-ignore protect the use of jsx functional components use ReactNode
-              props: jsx.props,
-              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-              home: 'https://github.com/cypress-io/cypress'
-            };
-          }
-        }).snapshot('mounted').end();
-      }
-    };
-
-    return importReactModules().then(function (_a) {
-      var react = _a.react,
-          reactDom = _a.reactDom,
-          majorVersion = _a.majorVersion;
-      var reactDomToUse = options.ReactDom || reactDom;
-      lastMountedReactDom = reactDomToUse;
-      var reactComponent = react.createElement(options.strict ? react.StrictMode : react.Fragment, props, jsx); // since we always surround the component with a fragment
-      // let's get back the original component
-
-      var userComponent = reactComponent.props.children;
-
-      if (majorVersion <= 17) {
-        reactDom.render(reactComponent, el);
-      } else {
-        var root = reactDom.createRoot(el);
-        root.render(reactComponent);
-      }
-
-      logMount();
-      return (// Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-        cy.wrap(userComponent, {
-          log: false
-        }).as(displayName).then(function () {
-          return cy.wrap({
-            component: userComponent,
-            rerender: function (newComponent) {
-              return _mount('rerender', newComponent, options, key);
-            },
-            unmount: function () {
-              return _unmount({
-                boundComponentMessage: jsxComponentName,
-                log: true
-              });
-            }
-          }, {
-            log: false
-          });
-        }) // by waiting, we delaying test execution for the next tick of event loop
-        // and letting hooks and component lifecycle methods to execute mount
-        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-        .wait(0, {
-          log: false
-        })
-      );
-    }); // Bluebird types are terrible. I don't think the return type can be carried without this cast
-  }
-
-https://on.cypress.io/then
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
 
@@ -858,8 +690,8 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-12 assets
-59 modules
+11 assets
+52 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -872,7 +704,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   10 |
       [stack trace lines]
 
-XXXX error in 3208 ms
+XXXX error in 1485 ms
 
 
   ✓ renders hello world
