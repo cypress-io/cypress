@@ -107,12 +107,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
-      // TODO: investigate the scenario for this test
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
-
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
@@ -142,7 +136,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer')) {
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
           }
@@ -152,12 +146,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.findByTestId('sidebar-link-runs-page').click()
-
-      // TODO: investigate the scenario for this test
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -609,8 +597,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       let cloudData: any
 
       cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
           cloudData = obj.result
@@ -622,12 +608,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
+      cy.visitApp()
+
       cy.findByTestId('sidebar-link-runs-page').click()
-      // TODO: investigate the scenario for this test
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
 
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
       cy.percySnapshot()

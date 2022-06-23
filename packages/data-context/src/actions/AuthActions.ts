@@ -35,6 +35,7 @@ export class AuthActions {
   async checkAuth () {
     const operation = `query Cypress_CheckAuth { cloudViewer { id email fullName } }`
     const result = await this.ctx.cloud.executeRemoteGraphQL({
+      fieldName: 'cloudViewer',
       operationType: 'query',
       operation,
       operationDoc: parse(operation),

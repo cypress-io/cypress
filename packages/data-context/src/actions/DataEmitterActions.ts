@@ -8,6 +8,7 @@ export interface PushFragmentData {
   target: string
   fragment: string
   variables?: any
+  invalidateCache?: boolean
 }
 
 abstract class DataEmitterEvents {
