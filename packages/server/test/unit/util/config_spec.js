@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const configUtil = require(`${root}../lib/util/config`)
+const configUtil = require(`../../../lib/util/config`)
 
 describe('lib/util/config', () => {
   context('.isDefault', () => {

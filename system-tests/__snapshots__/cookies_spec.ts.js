@@ -7,14 +7,14 @@ exports['e2e cookies with baseurl'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec_baseurl.js)                                                  │
-  │ Searched:   cypress/integration/cookies_spec_baseurl.js                                        │
+  │ Specs:      1 found (cookies_spec_baseurl.cy.js)                                               │
+  │ Searched:   cypress/e2e/cookies_spec_baseurl.cy.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cookies_spec_baseurl.js                                                         (1 of 1)
+  Running:  cookies_spec_baseurl.cy.js                                                      (1 of 1)
 
 
   cookies
@@ -78,14 +78,14 @@ exports['e2e cookies with baseurl'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cookies_spec_baseurl.js                                                          │
+  │ Spec Ran:     cookies_spec_baseurl.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_baseurl.js.mp4         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_baseurl.cy.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -95,7 +95,7 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.js                  XX:XX       32       32        -        -        - │
+  │ ✔  cookies_spec_baseurl.cy.js               XX:XX       32       32        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       32       32        -        -        -  
 
@@ -111,14 +111,14 @@ exports['e2e cookies with no baseurl'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec_no_baseurl.js)                                               │
-  │ Searched:   cypress/integration/cookies_spec_no_baseurl.js                                     │
+  │ Specs:      1 found (cookies_spec_no_baseurl.cy.js)                                            │
+  │ Searched:   cypress/e2e/cookies_spec_no_baseurl.cy.js                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cookies_spec_no_baseurl.js                                                      (1 of 1)
+  Running:  cookies_spec_no_baseurl.cy.js                                                   (1 of 1)
 
 
   cookies
@@ -149,14 +149,15 @@ exports['e2e cookies with no baseurl'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cookies_spec_no_baseurl.js                                                       │
+  │ Spec Ran:     cookies_spec_no_baseurl.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_no_baseurl.js.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_no_baseurl.cy.js.m     (X second)
+                          p4                                                                        
 
 
 ====================================================================================================
@@ -166,7 +167,7 @@ exports['e2e cookies with no baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_no_baseurl.js               XX:XX        9        9        -        -        - │
+  │ ✔  cookies_spec_no_baseurl.cy.js            XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 

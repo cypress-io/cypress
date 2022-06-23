@@ -5,11 +5,12 @@ describe('e2e viewport', () => {
     settings: {
       viewportWidth: 800,
       viewportHeight: 600,
+      e2e: {},
     },
   })
 
   systemTests.it('passes', {
-    spec: 'viewport_spec.js',
+    spec: 'viewport.cy.js',
     snapshot: true,
   })
 })

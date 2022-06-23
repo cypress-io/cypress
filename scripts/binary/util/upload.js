@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const awspublish = require('gulp-awspublish')
 const human = require('human-interval')
 const la = require('lazy-ass')
@@ -53,7 +52,9 @@ const getS3Credentials = async function () {
     return fromEnv()()
   }
 
-  return fromSSO({ profile: process.env.AWS_PROFILE || 'production' })()
+  // use 'prod' by default to align with our internal docs for setting up `awscli`
+  // https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress
+  return fromSSO({ profile: process.env.AWS_PROFILE || 'prod' })()
 }
 
 const getPublisher = async function () {
@@ -110,7 +111,7 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
 }
 
 // all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-x64', 'linux-x64', 'win32-x64']
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
@@ -120,24 +121,12 @@ const getValidPlatformArchs = () => {
 }
 
 const getUploadNameByOsAndArch = function (platform) {
-  // just hard code for now...
   const arch = os.arch()
 
-  const uploadNames = {
-    darwin: {
-      'x64': 'darwin-x64',
-    },
-    linux: {
-      'x64': 'linux-x64',
-    },
-    win32: {
-      'x64': 'win32-x64',
-    },
-  }
-  const name = _.get(uploadNames[platform], arch)
+  const name = [platform, arch].join('-')
 
-  if (!name) {
-    throw new Error(`Cannot find upload name for OS: '${platform}' with arch: '${arch}'`)
+  if (!isValidPlatformArch(name)) {
+    throw new Error(`${name} is not a valid upload destination. Does validPlatformArchs need updating?`)
   }
 
   la(isValidPlatformArch(name), 'formed invalid platform', name, 'from', platform, arch)

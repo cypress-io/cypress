@@ -1,0 +1,30 @@
+diff --git a/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.js b/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.js
+index 3148bdf..45eea4c 100644
+--- a/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.js
++++ b/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.js
+@@ -158,6 +158,10 @@ exports.relayPagination = function relayPagination(r) {
+       if (null === N) {
+         continue;
+       }
++      // https://github.com/FormidableLabs/urql/issues/2430
++      if (!N.nodes.length && !N.edges.length && l) {
++        continue;
++      }
+       if ("inwards" === n && "number" == typeof _.last && "number" == typeof _.first) {
+         var C = N.edges.slice(0, _.first + 1);
+         var b = N.edges.slice(-_.last);
+diff --git a/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.mjs b/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.mjs
+index 61d3c2d..452a115 100644
+--- a/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.mjs
++++ b/node_modules/@urql/exchange-graphcache/dist/urql-exchange-graphcache-extras.mjs
+@@ -158,6 +158,10 @@ function relayPagination(r) {
+       if (null === N) {
+         continue;
+       }
++      // https://github.com/FormidableLabs/urql/issues/2430
++      if (!N.nodes.length && !N.edges.length && l) {
++        continue;
++      }
+       if ("inwards" === n && "number" == typeof _.last && "number" == typeof _.first) {
+         var C = N.edges.slice(0, _.first + 1);
+         var I = N.edges.slice(-_.last);

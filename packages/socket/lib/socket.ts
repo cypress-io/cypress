@@ -1,8 +1,8 @@
-import fs from 'fs'
 import buffer from 'buffer'
 import type http from 'http'
-import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
-import { client } from './browser'
+import server, { Server as SocketIOBaseServer, ServerOptions, Socket, Namespace } from 'socket.io'
+
+export type { Socket, Namespace as SocketIONamespace }
 
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
@@ -28,7 +28,6 @@ class SocketIOServer extends SocketIOBaseServer {
 }
 
 export {
-  client,
   server,
   SocketIOServer,
 }
@@ -39,8 +38,4 @@ export const getPathToClientSource = () => {
 
 export const getClientVersion = () => {
   return version
-}
-
-export const getClientSource = () => {
-  return fs.readFileSync(getPathToClientSource(), 'utf8')
 }

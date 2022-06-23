@@ -77,25 +77,7 @@ const deploy = {
       opts.runTests = false
     }
 
-    if (!opts.platform && (os.platform() === meta.platforms.linux)) {
-      // only can build Linux on Linux
-      opts.platform = meta.platforms.linux
-    }
-
-    // windows aliases
-    if ((opts.platform === 'win32') || (opts.platform === 'win') || (opts.platform === 'windows')) {
-      opts.platform = meta.platforms.windows
-    }
-
-    if (!opts.platform && (os.platform() === meta.platforms.windows)) {
-      // only can build Windows binary on Windows platform
-      opts.platform = meta.platforms.windows
-    }
-
-    // be a little bit user-friendly and allow aliased values
-    if (opts.platform === 'mac') {
-      opts.platform = meta.platforms.darwin
-    }
+    if (!opts.platform) opts.platform = os.platform()
 
     debug('parsed command line options')
     debug(opts)
@@ -131,7 +113,9 @@ const deploy = {
   checkDownloads ({ version }) {
     const systems = [
       { platform: 'linux', arch: 'x64' },
+      { platform: 'linux', arch: 'arm64' },
       { platform: 'darwin', arch: 'x64' },
+      { platform: 'darwin', arch: 'arm64' },
       { platform: 'win32', arch: 'x64' },
     ]
 

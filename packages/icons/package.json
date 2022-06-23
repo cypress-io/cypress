@@ -1,0 +1,28 @@
+{
+  "name": "@packages/icons",
+  "version": "0.0.0-development",
+  "description": "Cypress Icons",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build-prod": "yarn build",
+    "build": "ts-node ./scripts/build.ts && ts-node ./scripts/ico.ts",
+    "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
+    "test": "yarn test-unit"
+  },
+  "devDependencies": {
+    "@types/mocha": "^8.0.3",
+    "@types/to-ico": "^1.1.1",
+    "chai": "^4.2.0",
+    "fs-extra": "9.1.0",
+    "mocha": "^8.1.3",
+    "to-ico": "^1.1.5"
+  },
+  "files": [
+    "dist",
+    "index.js",
+    "index.d.ts"
+  ],
+  "license": "MIT",
+  "author": "Brian Mann"
+}

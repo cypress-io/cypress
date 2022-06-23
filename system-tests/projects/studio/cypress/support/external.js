@@ -1,4 +1,4 @@
-import { saveStudio, verifyCommandLog } from './index'
+import { saveStudio, verifyCommandLog } from './e2e'
 
 const isTextTerminal = Cypress.config('isTextTerminal')
 

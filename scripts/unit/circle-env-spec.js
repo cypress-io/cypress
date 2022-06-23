@@ -12,22 +12,49 @@ describe('circle-env', () => {
   })
 
   beforeEach(() => {
+    delete process.env.CACHE_VERSION
     process.env.CI = 'true'
     process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
   })
 
-  it('fails with missing canaries', async () => {
-    sinon.stub(fs, 'readFile')
-    .withArgs('/foo.json').resolves(JSON.stringify({
-      Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
-    }))
+  context('with missing canaries', () => {
+    it('fails', async () => {
+      sinon.stub(fs, 'readFile')
+      .withArgs('/foo.json').resolves(JSON.stringify({
+        Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
+      }))
 
-    try {
-      await _checkCanaries()
-      throw new Error('should not reach')
-    } catch (err) {
-      expect(err.message).to.include('Missing MAIN_CANARY')
-    }
+      try {
+        await _checkCanaries()
+        throw new Error('should not reach')
+      } catch (err) {
+        expect(err.message).to.include('Missing MAIN_CANARY')
+      }
+    })
+
+    context('with no circleEnv', () => {
+      beforeEach(() => {
+        sinon.stub(fs, 'readFile')
+        .withArgs('/foo.json').resolves(JSON.stringify({
+          Dispatched: { TaskInfo: { Environment: {} } },
+        }))
+      })
+
+      it('passes', async () => {
+        await _checkCanaries()
+      })
+
+      it('fails if CACHE_VERSION does exist', async () => {
+        process.env.CACHE_VERSION = 'foo'
+
+        try {
+          await _checkCanaries()
+          throw new Error('should not reach')
+        } catch (err) {
+          expect(err.message).to.include('CACHE_VERSION is set, but circleEnv is empty')
+        }
+      })
+    })
   })
 
   it('passes with canaries', async () => {

@@ -7,14 +7,14 @@ exports['e2e screenshot viewport capture / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshot_viewport_capture_spec.js)                                      │
-  │ Searched:   cypress/integration/screenshot_viewport_capture_spec.js                            │
+  │ Specs:      1 found (screenshot_viewport_capture.cy.js)                                        │
+  │ Searched:   cypress/e2e/screenshot_viewport_capture.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  screenshot_viewport_capture_spec.js                                             (1 of 1)
+  Running:  screenshot_viewport_capture.cy.js                                               (1 of 1)
 
 
   ✓ takes consistent viewport captures
@@ -33,71 +33,71 @@ exports['e2e screenshot viewport capture / passes'] = `
   │ Screenshots:  26                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     screenshot_viewport_capture_spec.js                                              │
+  │ Spec Ran:     screenshot_viewport_capture.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-or     (1000x660)
-     iginal.png                                                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare.png                                                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (1).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (2).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (3).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (4).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (5).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (6).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (7).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (8).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (9).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (10).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (11).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (12).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (13).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (14).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (15).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (16).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (17).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (18).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (19).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (20).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (21).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (22).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (23).png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.js/viewport-co     (1000x660)
-     mpare (24).png                                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-orig     (1000x660)
+     inal.png                                                                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are.png                                                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (1).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (2).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (3).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (4).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (5).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (6).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (7).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (8).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (9).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (10).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (11).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (12).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (13).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (14).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (15).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (16).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (17).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (18).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (19).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (20).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (21).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (22).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (23).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
+     are (24).png                                                                                   
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture.cy.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -107,7 +107,7 @@ exports['e2e screenshot viewport capture / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  screenshot_viewport_capture_spec.js      XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_viewport_capture.cy.js        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

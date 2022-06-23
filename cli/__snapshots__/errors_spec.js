@@ -26,31 +26,6 @@ Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
 
-exports['errors individual has the following errors 1'] = [
-  "CYPRESS_RUN_BINARY",
-  "binaryNotExecutable",
-  "childProcessKilled",
-  "failedDownload",
-  "failedUnzip",
-  "failedUnzipWindowsMaxPathLength",
-  "incompatibleHeadlessFlags",
-  "invalidCacheDirectory",
-  "invalidCypressEnv",
-  "invalidOS",
-  "invalidRunProjectPath",
-  "invalidSmokeTestDisplayError",
-  "invalidTestingType",
-  "missingApp",
-  "missingDependency",
-  "missingXvfb",
-  "nonZeroExitCodeXvfb",
-  "notInstalledCI",
-  "smokeTestFailure",
-  "unexpected",
-  "unknownError",
-  "versionMismatch"
-]
-
 exports['invalid display error'] = `
 Cypress verification failed.
 
@@ -97,3 +72,31 @@ Consider opening a new issue.
 Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
+
+exports['errors individual has the following errors 1'] = [
+  "CYPRESS_RUN_BINARY",
+  "binaryNotExecutable",
+  "childProcessKilled",
+  "failedDownload",
+  "failedUnzip",
+  "failedUnzipWindowsMaxPathLength",
+  "incompatibleHeadlessFlags",
+  "incompatibleTestTypeFlags",
+  "incompatibleTestingTypeAndFlag",
+  "invalidCacheDirectory",
+  "invalidConfigFile",
+  "invalidCypressEnv",
+  "invalidOS",
+  "invalidRunProjectPath",
+  "invalidSmokeTestDisplayError",
+  "invalidTestingType",
+  "missingApp",
+  "missingDependency",
+  "missingXvfb",
+  "nonZeroExitCodeXvfb",
+  "notInstalledCI",
+  "smokeTestFailure",
+  "unexpected",
+  "unknownError",
+  "versionMismatch"
+]

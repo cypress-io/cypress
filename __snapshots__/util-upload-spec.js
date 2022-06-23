@@ -2,11 +2,19 @@ exports['upload util isValidPlatformArch checks given strings second 1'] = {
   "name": "second",
   "behavior": [
     {
+      "given": "darwin-arm64",
+      "expect": true
+    },
+    {
       "given": "darwin-x64",
       "expect": true
     },
     {
       "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-arm64",
       "expect": true
     },
     {

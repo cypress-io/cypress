@@ -8,7 +8,7 @@ describe('e2e issue 149', () => {
   // https://github.com/cypress-io/cypress/issues/149
   it('failing', function () {
     return systemTests.exec(this, {
-      spec: 'issue_149_spec.js',
+      spec: 'issue_149.cy.js',
       snapshot: true,
       expectedExitCode: 1,
     })

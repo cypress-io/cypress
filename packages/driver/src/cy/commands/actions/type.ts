@@ -173,7 +173,15 @@ export default function (Commands, Cypress, cy, state, config) {
     const win = state('window')
 
     const getDefaultButtons = (form) => {
-      return form.find('input, button').filter((__, el) => {
+      const formId = CSS.escape(form.attr('id'))
+      const nestedButtons = form.find('input, button')
+
+      const possibleDefaultButtons: JQuery<any> = formId ? $dom.wrap(_.uniq([
+        ...nestedButtons,
+        ...$dom.query('body', form.prop('ownerDocument')).find(`input[form="${formId}"], button[form="${formId}"]`),
+      ])) : nestedButtons
+
+      return possibleDefaultButtons.filter((__, el) => {
         const $el = $dom.wrap(el)
 
         return (
@@ -352,9 +360,10 @@ export default function (Commands, Cypress, cy, state, config) {
               // We don't want to send it twice.
               !Cypress.isBrowser('firefox') ||
               // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>
-              // it does not if the element is an <input>
-              (!isFirefoxBefore98 && $elements.isInput(event.target))
+              // it sends a click event automatically if the element is a <button>,
+              // but it does not if the element is an <input>.
+              // event.target is null when used with shadow DOM.
+              (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
