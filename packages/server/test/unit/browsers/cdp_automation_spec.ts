@@ -71,15 +71,103 @@ context('lib/browsers/cdp_automation', () => {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
+      this.automation = {
+        onBrowserPreRequest: sinon.stub(),
+        onRequestEvent: sinon.stub(),
+      }
 
-      this.automation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null, false)
+      this.cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
       .withArgs('Browser.getVersion')
       .resolves()
 
-      this.onRequest = this.automation.onRequest
+      this.onRequest = this.cdpAutomation.onRequest
+    })
+
+    describe('.onNetworkRequestWillBeSent', function () {
+      it('triggers onBrowserPreRequest', function () {
+        const browserPreRequest = {
+          requestId: '0',
+          type: 'other',
+          request: {
+            method: 'GET',
+            url: 'https://www.google.com',
+            headers: {},
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.requestWillBeSent')
+        .yield(browserPreRequest)
+
+        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
+          requestId: browserPreRequest.requestId,
+          method: browserPreRequest.request.method,
+          url: browserPreRequest.request.url,
+          headers: browserPreRequest.request.headers,
+          resourceType: browserPreRequest.type,
+          originalResourceType: browserPreRequest.type,
+        })
+      })
+
+      it('removes # from a url', function () {
+        const browserPreRequest = {
+          requestId: '0',
+          type: 'other',
+          request: {
+            method: 'GET',
+            url: 'https://www.google.com/foo#',
+            headers: {},
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.requestWillBeSent')
+        .yield(browserPreRequest)
+
+        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
+          requestId: browserPreRequest.requestId,
+          method: browserPreRequest.request.method,
+          url: 'https://www.google.com/foo', // we only care about the url
+          headers: browserPreRequest.request.headers,
+          resourceType: browserPreRequest.type,
+          originalResourceType: browserPreRequest.type,
+        })
+      })
+
+      it('ignore events with data urls', function () {
+        this.onFn
+        .withArgs('Network.requestWillBeSent')
+        .yield({ request: { url: 'data:font;base64' } })
+
+        expect(this.automation.onBrowserPreRequest).to.not.be.called
+      })
+    })
+
+    describe('.onResponseReceived', function () {
+      it('triggers onRequestEvent', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).to.have.been.calledWith(
+          'response:received', {
+            requestId: browserResponseReceived.requestId,
+            status: browserResponseReceived.response.status,
+            headers: browserResponseReceived.response.headers,
+          },
+        )
+      })
     })
 
     describe('get:cookies', () => {
@@ -232,13 +320,13 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('close:browser:tabs', function () {
+    describe('reset:browser:tabs:for:next:test', function () {
       it('sends the close target message for the attached target tabs', async function () {
         this.sendCloseTargetCommand.resolves()
 
-        await this.onRequest('close:browser:tabs')
+        await this.onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
 
-        expect(this.sendCloseTargetCommand).to.be.called
+        expect(this.sendCloseTargetCommand).to.be.calledWith(true)
       })
     })
 

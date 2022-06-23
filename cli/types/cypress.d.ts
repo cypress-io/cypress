@@ -5500,7 +5500,7 @@ declare namespace Cypress {
 
   interface DevServerConfig {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions
+    cypressConfig: PluginConfigOptions
     devServerEvents: NodeJS.EventEmitter
   }
 

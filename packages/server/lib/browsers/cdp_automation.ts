@@ -164,7 +164,7 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
-type SendCloseCommand = () => Promise<any>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -201,6 +201,15 @@ export class CdpAutomation {
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
     if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
+
+    // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
+    // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
+    // Example data url: "data:font/woff;base64,<base64 encoded string>"
+    if (url.startsWith('data:')) {
+      debugVerbose('skipping `data:` url %s', url)
+
+      return
+    }
 
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
@@ -300,6 +309,11 @@ export class CdpAutomation {
           return this.getCookie(data)
         })
 
+      case 'add:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+
+        return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+
       case 'set:cookies':
         setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
 
@@ -355,8 +369,8 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
-      case 'close:browser:tabs':
-        return this.sendCloseCommandFn()
+      case 'reset:browser:tabs:for:next:test':
+        return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:

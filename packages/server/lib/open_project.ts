@@ -10,6 +10,7 @@ import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
+import { cookieJar } from './cookie-jar'
 import { getSpecUrl } from './project_utils'
 import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
@@ -165,7 +166,8 @@ export class OpenProject {
           return runEvents.execute('before:spec', cfg, spec)
         }
 
-        // clear all session data before each spec
+        // clear cookies and all session data before each spec
+        cookieJar.removeAllCookies()
         session.clearSessions()
       })
       .then(() => {
@@ -196,8 +198,8 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async closeBrowserTabs () {
-    return this.projectBase?.closeBrowserTabs()
+  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {

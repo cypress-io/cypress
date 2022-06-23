@@ -190,7 +190,7 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.withCtx((ctx, o) => {
-        o.sinon.spy(ctx.actions.project, 'launchProject')
+        o.sinon.stub(ctx.actions.project, 'launchProject')
       })
 
       cy.intercept('mutation-OpenBrowser_LaunchProject', cy.stub().as('launchProject'))
@@ -233,7 +233,7 @@ describe('Choose a Browser Page', () => {
       cy.intercept('mutation-OpenBrowser_FocusActiveBrowserWindow').as('focusBrowser')
 
       cy.withCtx((ctx, o) => {
-        o.sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
+        o.sinon.stub(ctx.actions.browser, 'focusActiveBrowserWindow')
       })
 
       cy.get('@focusButton').click()
@@ -275,6 +275,10 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'launchProject')
+      })
 
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible').click()
 

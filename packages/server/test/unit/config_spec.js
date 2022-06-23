@@ -2086,8 +2086,26 @@ describe('lib/config', () => {
       })
     })
 
-    it('sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
+    it('sets the supportFile to default e2e.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
       const projectRoot = Fixtures.projectPath('no-scaffolding')
+
+      const obj = config.setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      return config.setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
+          supportFolder: `${projectRoot}/cypress/support`,
+        })
+      })
+    })
+
+    it('finds support file in project path that contains glob syntax', () => {
+      const projectRoot = Fixtures.projectPath('project-with-(glob)-[chars]')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2218,7 +2236,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'supportFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',

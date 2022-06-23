@@ -1987,7 +1987,7 @@ describe('src/cy/commands/navigation', () => {
             // on 2nd retry add the DOM element
             const win = cy.state('window')
 
-            $('<div id=\'does-not-exist\'>does not exist<div>')
+            $('<div id=\'did-not-exist\'>did not exist<div>')
             .appendTo(win.document.body)
 
             break
@@ -1996,7 +1996,7 @@ describe('src/cy/commands/navigation', () => {
             // and on the 3rd retry add the class
             cy.state('window')
 
-            $('#does-not-exist').addClass('foo')
+            $('#did-not-exist').addClass('foo')
 
             break
           }
@@ -2011,7 +2011,7 @@ describe('src/cy/commands/navigation', () => {
       // make get timeout after 300ms
       // but even though our page does not load for 500ms
       // this does not time out
-      .get('#does-not-exist', { timeout: 300 }).should('have.class', 'foo')
+      .get('#did-not-exist', { timeout: 300 }).should('have.class', 'foo')
     })
 
     describe('errors', () => {

@@ -11,7 +11,7 @@ describe('baseUrl', () => {
       sinon.stub(ctx._apis.projectApi, 'isListening').resolves(undefined)
     })
 
-    cy.contains('button', 'Retry').click()
+    cy.contains('button', 'Try again').click()
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 
@@ -23,8 +23,8 @@ describe('baseUrl', () => {
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
 
-    cy.withCtx((ctx) => {
-      ctx.actions.file.writeFileInProject('cypress.config.js', `
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
         module.exports = {
           e2e: {
             supportFile: false,
@@ -47,8 +47,8 @@ describe('baseUrl', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('not.exist')
 
-    cy.withCtx((ctx) => {
-      ctx.actions.file.writeFileInProject('cypress.config.js', `
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
         module.exports = {
           pageLoadTimeout: 10000,
           e2e: {
@@ -86,8 +86,8 @@ describe('experimentalStudio', () => {
     cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
     cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.withCtx((ctx) => {
-      ctx.actions.file.writeFileInProject('cypress.config.js', ctx.actions.file.readFileInProject('cypress.config.js'))
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', await ctx.actions.file.readFileInProject('cypress.config.js'))
     })
 
     cy.get('[data-cy="loading-spinner"]')

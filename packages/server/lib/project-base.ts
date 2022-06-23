@@ -19,7 +19,6 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
-import { fs } from './util/fs'
 import system from './util/system'
 import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
@@ -161,6 +160,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
+      getAutomation: () => this.automation,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
       onError: this.options.onError,
@@ -409,8 +409,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppSocketServer(io)
   }
 
-  async closeBrowserTabs () {
-    return this.server.socket.closeBrowserTabs()
+  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+    return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {
@@ -519,10 +519,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     cfg.state = await state.get()
 
     return cfg
-  }
-
-  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
-    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
 
   // These methods are not related to start server/sockets/runners

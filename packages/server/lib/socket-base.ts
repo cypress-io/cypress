@@ -16,6 +16,7 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
+import { cookieJar } from './cookie-jar'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 import path from 'path'
@@ -76,7 +77,7 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
-  private _sendCloseBrowserTabsMessage
+  private _sendResetBrowserTabsForNextTestMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
@@ -294,8 +295,8 @@ export class SocketBase {
         })
       })
 
-      this._sendCloseBrowserTabsMessage = async () => {
-        await automationRequest('close:browser:tabs', {})
+      this._sendResetBrowserTabsForNextTestMessage = async (shouldKeepTabOpen: boolean) => {
+        await automationRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen })
       }
 
       this._sendResetBrowserStateMessage = async () => {
@@ -457,6 +458,7 @@ export class SocketBase {
             case 'get:session':
               return session.getSession(args[0])
             case 'reset:session:state':
+              cookieJar.removeAllCookies()
               session.clearSessions()
               resetRenderedHTMLOrigins()
 
@@ -474,6 +476,8 @@ export class SocketBase {
               return this.localBus.emit('cross:origin:release:html')
             case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
+            case 'cross:origin:automation:cookies:received':
+              return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
@@ -583,9 +587,9 @@ export class SocketBase {
     return this._io?.emit('tests:finished')
   }
 
-  async closeBrowserTabs () {
-    if (this._sendCloseBrowserTabsMessage) {
-      await this._sendCloseBrowserTabsMessage()
+  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+    if (this._sendResetBrowserTabsForNextTestMessage) {
+      await this._sendResetBrowserTabsForNextTestMessage(shouldKeepTabOpen)
     }
   }
 
