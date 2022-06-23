@@ -80,7 +80,7 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
     return consoleProps.Command === consolePropCommand && props.id.includes(matchingOrigin)
   })
 
-  const logAttrs = matchedLogs.map((log) => log.get())
+  const logAttrs = matchedLogs.map((log) => log.get()).sort()
 
   return logAttrs.length === 1 ? logAttrs[0] : logAttrs
 }
