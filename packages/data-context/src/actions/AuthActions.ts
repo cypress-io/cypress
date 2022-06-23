@@ -40,6 +40,9 @@ export class AuthActions {
       operation,
       operationDoc: parse(operation),
       operationVariables: {},
+      invalidateCache: () => {
+        this.ctx.cloud.invalidate({ __typename: 'Query' })
+      },
     })
 
     if (!result.data?.cloudViewer && !result.error?.networkError) {

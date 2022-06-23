@@ -159,6 +159,9 @@ export class RemoteRequestDataSource {
       operationHash,
       operationVariables,
       requestPolicy: 'network-only',
+      invalidateCache: () => {
+        ctx.cloud.invalidate({ __typename: 'Query' })
+      },
     }))
     .then((result) => {
       const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)
