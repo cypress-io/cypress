@@ -87,7 +87,7 @@ export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
   return indexNode(cloudRecordKey)
 }
 
-const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
+const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT', 'UNCLAIMED']
 
 export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
   const cloudProject = {

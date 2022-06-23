@@ -207,4 +207,25 @@ describe('<SpecRunSummary />', { keystrokeDelay: 0 }, () => {
       validateResultCountsVisible()
     })
   })
+
+  context('unhandled status', () => {
+    beforeEach(() => {
+      mountWithRun(runs[9])
+    })
+
+    it('should render expected content', () => {
+      // Gray border
+      validateTopBorder('rgb(144, 149, 173)')
+      validateFilename('mySpecFile.spec.ts')
+
+      // Should not render any status text
+      cy.findByTestId('spec-run-status')
+      .should('not.exist')
+
+      validateTimeAgo('1 year ago')
+      validateDuration1('2:23')
+      validateDuration2('2:39')
+      validateResultCountsVisible()
+    })
+  })
 })
