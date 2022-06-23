@@ -5,6 +5,7 @@ This is the front-end for the Cypress App.
 ## Development
 
 1. `yarn watch` (inside of root)
+    * While developing, you might want to consider the [CYPRESS_INTERNAL_VITE_DEV](../../CONTRIBUTING.md#internal-vite-options) option.
 2. `yarn cypress:open` (inside of `packages/app`)
 3. It will open launchpad
 4. Select Component or E2E Testing

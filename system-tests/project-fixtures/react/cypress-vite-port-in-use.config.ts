@@ -10,7 +10,6 @@ export default defineConfig({
       framework: 'react',
       bundler: 'vite',
       viteConfig: {
-        logLevel: 'silent',
         server: {
           port: 3000
         }

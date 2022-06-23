@@ -273,7 +273,7 @@ export class GitDataSource {
 
         let toSet: GitInfo | null = null
 
-        const stat = fs.statSync(file)
+        const stat = await fs.promises.stat(file)
         const ctime = dayjs(stat.ctime)
         const birthtime = dayjs(stat.birthtime)
 

@@ -39,19 +39,6 @@ describe('Socket', function () {
     })
   })
 
-  context('.getClientSource', function () {
-    it('returns client source as a string', function (done) {
-      const clientPath = path.join(resolvePkg('socket.io-client'), 'dist', 'socket.io.js')
-
-      fs.readFile(clientPath, 'utf8', function (err, str) {
-        if (err) done(err)
-
-        expect(lib.getClientSource()).to.eq(str)
-        done()
-      })
-    })
-  })
-
   context('blob encoding + decoding', () => {
     it('correctly encodes and decodes binary blob data', (done) => {
       const encoder = new parser.Encoder()

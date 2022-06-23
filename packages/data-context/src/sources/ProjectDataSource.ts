@@ -363,6 +363,8 @@ export class ProjectDataSource {
         // chokidar is extremely inconsistent in whether or not it has the stats arg internally
         if (!stats) {
           try {
+            // TODO: find a way to avoid this sync call - might require patching chokidar
+            // eslint-disable-next-line no-restricted-syntax
             stats = fs.statSync(file)
           } catch {
             // If the file/folder is removed do not ignore it, in case it is added

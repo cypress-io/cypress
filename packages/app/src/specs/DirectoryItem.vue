@@ -1,5 +1,6 @@
 <template>
   <div
+    :title="props.name"
     class="flex text-sm py-4px items-center"
   >
     <i-cy-chevron-down-small_x16

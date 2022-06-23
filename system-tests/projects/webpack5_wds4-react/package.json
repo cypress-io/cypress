@@ -3,6 +3,7 @@
     "@babel/core": "^7.17.8",
     "@babel/preset-env": "^7",
     "@babel/preset-react": "^7",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "babel-loader": "^8.2.4",
     "webpack": "^5",
     "webpack-dev-server": "^4"

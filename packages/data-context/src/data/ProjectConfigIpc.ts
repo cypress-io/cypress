@@ -70,6 +70,10 @@ export class ProjectConfigIpc extends EventEmitter {
     return autoBindDebug(this)
   }
 
+  get childProcessPid () {
+    return this._childProcess?.pid
+  }
+
   // TODO: options => Cypress.TestingTypeOptions
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
@@ -246,6 +250,8 @@ export class ProjectConfigIpc extends EventEmitter {
     let isProjectUsingESModules = false
 
     try {
+      // TODO: convert this to async FS methods
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
 
       isProjectUsingESModules = pkgJson.type === 'module'

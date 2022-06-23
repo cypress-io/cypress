@@ -81,6 +81,10 @@ export class ProjectConfigManager {
     return this._configFilePath
   }
 
+  get eventProcessPid () {
+    return this._eventsIpc?.childProcessPid
+  }
+
   set configFilePath (configFilePath) {
     this._configFilePath = configFilePath
   }
