@@ -2,9 +2,9 @@ import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import WindiCSS from 'vite-plugin-windicss'
 import VueI18n from '@intlify/vite-plugin-vue-i18n'
 import VueSvgLoader from 'vite-svg-loader'
+import { CyCSSVitePlugin } from '@cypress-design/css'
 import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
@@ -71,7 +71,19 @@ const makePlugins = (plugins) => {
       }),
       ...plugins?.componentsOptions,
     }),
-    WindiCSS(),
+    CyCSSVitePlugin({
+      scan: {
+        // accepts globs and file paths relative to project root
+        include: [
+          'index.html',
+          '**/*.{vue,html,tsx}',
+          path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
+          path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
+          path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
+        ],
+        exclude: ['node_modules/**/*', '.git/**/*'],
+      },
+    }),
     VueSvgLoader(),
 
     // package.json is modified and auto-updated when new cjs dependencies

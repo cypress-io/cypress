@@ -67,7 +67,7 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 }
 
 export class BrowserCriClient {
-  private currentlyAttachedTarget: CRIWrapper.Client | undefined
+  currentlyAttachedTarget: CRIWrapper.Client | undefined
   private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
@@ -132,26 +132,20 @@ export class BrowserCriClient {
   }
 
   /**
-   * Creates a new target with the given url and then attaches to it
+   * Resets the browser's targets optionally keeping a tab open
    *
-   * @param url the url to create and attach to
-   * @returns the chrome remote interface wrapper for the target
+   * @param shouldKeepTabOpen whether or not to keep the tab open
    */
-  attachToNewUrl = async (url: string): Promise<CRIWrapper.Client> => {
-    debug('Attaching to new url %s', url)
-    const target = await this.browserClient.send('Target.createTarget', { url })
-
-    this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
-
-    return this.currentlyAttachedTarget
-  }
-
-  /**
-   * Closes the currently attached page target
-   */
-  closeCurrentTarget = async (): Promise<void> => {
+  resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
+    }
+
+    let target
+
+    // If we are keeping a tab open, we need to first launch a new default tab prior to closing the existing one
+    if (shouldKeepTabOpen) {
+      target = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
     }
 
     debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
@@ -162,7 +156,9 @@ export class BrowserCriClient {
       this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId }),
     ])
 
-    this.currentlyAttachedTarget = undefined
+    if (target) {
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+    }
   }
 
   /**
