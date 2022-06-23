@@ -17,6 +17,7 @@
     <li><a data-cy="cookie-login-https">Login with Social (https)</a></li>
     <li><a data-cy="cookie-login-subdomain">Login with Social (subdomain)</a></li>
     <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
+    <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
     <li><a data-cy="welcome" href="http://localhost:3500/welcome">Go to Welcome</a></li>
   </ul>
   <script>
@@ -24,6 +25,7 @@
     document.querySelector('[data-cy=cookie-login-https]').href = `https://localhost:3502/prelogin?redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
     document.querySelector('[data-cy=cookie-login-subdomain]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&subdomain=true')}`
     document.querySelector('[data-cy=cookie-login-alias]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&alias=true')}`
+    document.querySelector('[data-cy=cookie-login-override]').href = `http://localhost:3500/prelogin?override=true&redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login')}`
   </script>
 </body>
 </html>

@@ -196,10 +196,17 @@ const createApp = (port) => {
   })
 
   app.get('/prelogin', (req, res) => {
-    const { redirect } = req.query
+    const { redirect, override } = req.query
+    let cookie = 'prelogin=true'
+
+    // if testing overridden cookies, need to make it cross-origin so it's
+    // included with a cross-origin request
+    if (override) {
+      cookie += '; SameSite=None; Secure'
+    }
 
     res
-    .header('Set-Cookie', 'prelogin=true')
+    .header('Set-Cookie', cookie)
     .redirect(302, redirect)
   })
 
@@ -250,10 +257,9 @@ const createApp = (port) => {
 
     const decodedCookie = decodeURIComponent(cookie)
 
-    // can't use res.cookie() because it won't allow setting an invalid
-    // SameSite value, which we want to test
     res
-    .header('Set-Cookie', decodedCookie)
+    .append('Set-Cookie', decodedCookie)
+    .append('Set-Cookie', 'prelogin=verified')
     .redirect(302, '/welcome')
   })
 
@@ -268,6 +274,10 @@ const createApp = (port) => {
 
     if (!user) {
       return res.send('<html><body><h1>No user found</h1></body></html>')
+    }
+
+    if (req.cookies.prelogin !== 'verified') {
+      return res.send('<html><body><h1>Login not verified</h1></body></html>')
     }
 
     res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)

@@ -118,6 +118,17 @@ describe('cy.origin - cookie login', () => {
       cy.document().its('cookie').should('include', `user=${username}`)
     })
 
+    it('handles browser-sent cookies being overridden by server-kept cookies', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('[data-cy="cookie-login-override"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      verifyLoggedIn(username)
+    })
+
     it('cy.clearCookie() -> not logged in', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login"]').click()

@@ -51,7 +51,9 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   this.debug('existing cookies on request: %s', existingCookies.join('; '))
   this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
 
-  this.req.headers['cookie'] = existingCookies.concat(cookiesToAdd).join('; ')
+  // if two or more cookies have the same key, the first one found is preferred,
+  // so we prepend the added cookies so they take preference
+  this.req.headers['cookie'] = cookiesToAdd.concat(existingCookies).join('; ')
 
   this.next()
 }
