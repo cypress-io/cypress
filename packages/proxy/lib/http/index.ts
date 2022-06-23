@@ -19,8 +19,9 @@ import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
-import type { Browser } from '@packages/server/lib/browsers/types'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
+import type { CookieJar } from '@packages/server/lib/cookie-jar'
+import type { Automation } from '@packages/server/lib/automation/automation'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -51,11 +52,12 @@ type HttpMiddlewareCtx<T> = {
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
+  getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getPreRequest: (cb: GetPreRequestCb) => void
-  getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
-  setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
+  getAUTUrl: Http['getAUTUrl']
+  setAUTUrl: Http['setAUTUrl']
 } & T
 
 export const defaultMiddleware = {
@@ -67,8 +69,9 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getFileServerToken: () => string
+  getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
@@ -152,6 +155,10 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
 
       const fullCtx = {
         next: () => {
+          fullCtx.next = () => {
+            throw new Error('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+          }
+
           copyChangedCtx()
 
           _end(runMiddlewareStack())
@@ -206,7 +213,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
+  getAutomation: () => Automation
   getFileServerToken: () => string
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -216,7 +223,8 @@ export class Http {
   socket: CyServer.Socket
   serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
-  previousAUTRequestUrl?: string
+  autUrl?: string
+  getCookieJar: () => CookieJar
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -224,7 +232,7 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
-    this.getCurrentBrowser = opts.getCurrentBrowser
+    this.getAutomation = opts.getAutomation
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -232,6 +240,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -250,7 +259,7 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getCurrentBrowser: this.getCurrentBrowser,
+      getAutomation: this.getAutomation,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
@@ -258,6 +267,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      getCookieJar: this.getCookieJar,
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return
 
@@ -270,8 +280,8 @@ export class Http {
         })
       },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
-      getPreviousAUTRequestUrl: this.getPreviousAUTRequestUrl,
-      setPreviousAUTRequestUrl: this.setPreviousAUTRequestUrl,
+      getAUTUrl: this.getAUTUrl,
+      setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -305,12 +315,12 @@ export class Http {
     return this.renderedHTMLOrigins
   }
 
-  getPreviousAUTRequestUrl = () => {
-    return this.previousAUTRequestUrl
+  getAUTUrl = () => {
+    return this.autUrl
   }
 
-  setPreviousAUTRequestUrl = (url) => {
-    this.previousAUTRequestUrl = url
+  setAUTUrl = (url) => {
+    this.autUrl = url
   }
 
   async handleSourceMapRequest (req: Request, res: Response) {
@@ -329,7 +339,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.setPreviousAUTRequestUrl(undefined)
+    this.setAUTUrl(undefined)
   }
 
   setBuffer (buffer) {
