@@ -24,13 +24,7 @@ describe('Reporter Header', () => {
       cy.get('[data-cy="spec-file-item"]').should('have.length', 3)
       .should('contain', 'dom-content.spec')
 
-      cy.get('body').type('f')
-
-      cy.get('input').clear()
-
-      cy.get('[data-cy="spec-file-item"]').should('have.length', '3')
-
-      cy.get('input').type('asdf', { force: true })
+      cy.get('input').clear().type('asdf', { force: true })
 
       cy.get('[data-cy="spec-file-item"]').should('have.length', 0)
     })

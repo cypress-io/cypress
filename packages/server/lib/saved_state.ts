@@ -7,6 +7,7 @@ import cwd from './cwd'
 import FileUtil from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
+import { globalPubSub } from '@packages/data-context'
 
 const debug = Debug('cypress:server:saved_state')
 
@@ -113,6 +114,10 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
     debug('making new state file around %s', fullStatePath)
     const stateFile = new FileUtil({
       path: fullStatePath,
+    })
+
+    globalPubSub.on('test:cleanup', () => {
+      stateFile.__resetForTest()
     })
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
