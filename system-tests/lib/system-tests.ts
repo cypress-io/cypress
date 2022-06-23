@@ -492,9 +492,9 @@ const normalizeStdout = function (str, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
   // Replaces port in "Project is running at http://localhost:58845/webpack-dev-server/"
-  .replace(/Project is running at http:\/\/localhost:(\d{1,5})\/webpack-dev-server\//, 'XXXX')
-  /// Replaces ms in "webpack 5.70.0 compiled with 1 error in 3102 ms"
-  .replace(/webpack .*\scompiled with \S| errors? in (.+?)\sms/, 'XXXX')
+  .replace(/(Project is running at http:\/\/localhost:).*(\/webpack-dev-server\/)/, '$1XXXX$2')
+  /// Replaces (YYYY) ms in "webpack 5.70.0 compiled with 1 error in 3102 ms"
+  .replace(/(webpack \d\.\d\d\.\d compiled with 1 error in ).*( ms)/, '$1XXXX$2')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions

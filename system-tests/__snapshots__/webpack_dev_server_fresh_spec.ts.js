@@ -1,5 +1,5 @@
 exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds3-react 1'] = `
-ℹ ｢wds｣: XXXX
+ℹ ｢wds｣: Project is running at http://localhost:XXXX/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
 
@@ -451,7 +451,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 `
 
 exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds3-react 1'] = `
-ℹ ｢wds｣: XXXX
+ℹ ｢wds｣: Project is running at http://localhost:XXXX/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
 
@@ -704,7 +704,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   10 |
       [stack trace lines]
 
-XXXX error in 1485 ms
+webpack 5.70.0 compiled with 1 error in XXXX ms
 
 
   ✓ renders hello world
