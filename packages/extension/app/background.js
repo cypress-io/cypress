@@ -114,6 +114,7 @@ const connect = function (host, path, extraOpts) {
       case 'set:cookie':
         return invoke('setCookie', id, data)
       case 'set:cookies':
+      case 'add:cookies':
         return invoke('setCookies', id, data)
       case 'clear:cookies':
         return invoke('clearCookies', id, data)
