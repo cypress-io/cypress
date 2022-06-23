@@ -85,18 +85,30 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
-    t.field('pushFragment', {
+    t.nonNull.field('pushFragment', {
       description: 'When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache',
-      type: list(objectType({
+      type: list(nonNull(objectType({
         name: 'PushFragmentPayload',
         definition (t) {
           t.nonNull.string('target')
           t.nonNull.json('fragment')
-          t.json('data')
-          t.json('variables')
-          t.json('errors')
+          t.json('data', {
+            description: 'Raw data associated with the fragment to be written into the cache',
+          })
+
+          t.json('variables', {
+            description: 'Variables associated with the fragment',
+          })
+
+          t.json('errors', {
+            description: 'Any errors encountered when executing the operation',
+          })
+
+          t.boolean('invalidateCache', {
+            description: 'If present, indicates we need to invalidate the client-side cache',
+          })
         },
-      })),
+      }))),
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('pushFragment', { sendInitial: false }),
       resolve: (source: PushFragmentData[], args, ctx) => source,
     })

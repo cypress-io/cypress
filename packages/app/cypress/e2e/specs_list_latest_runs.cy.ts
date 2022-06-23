@@ -128,20 +128,8 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
 
-    cy.withCtx((ctx) => {
-      // clear cloud cache
-      ctx.cloud.reset()
-    })
-
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-    })
-  })
-
-  afterEach(() => {
-    cy.withCtx((ctx) => {
-      // clear cloud cache
-      ctx.cloud.reset()
     })
   })
 
@@ -596,11 +584,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
 
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
-
       cy.loginUser()
 
       simulateRunData()
@@ -610,13 +593,6 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () =
 
       // after navigating to a new page, the browser needs to go offline again
       cy.goOffline()
-    })
-
-    afterEach(() => {
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
     })
 
     it('shows placeholders for all visible specs', () => {

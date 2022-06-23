@@ -15,11 +15,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.loginUser()
-      cy.visitApp()
 
       // Simulate no orgs
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer')) {
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
           }
@@ -28,13 +27,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.findByTestId('sidebar-link-runs-page').click()
+      cy.visitApp()
 
-      // TODO: investigate the scenario for this test
-      cy.withCtx((ctx) => {
-        // clear cloud cache
-        ctx.cloud.reset()
-      })
+      cy.findByTestId('sidebar-link-runs-page').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')

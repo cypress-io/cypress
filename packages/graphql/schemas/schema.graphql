@@ -1360,10 +1360,18 @@ type ProjectPreferences {
 }
 
 type PushFragmentPayload {
+  """Raw data associated with the fragment to be written into the cache"""
   data: JSON
+
+  """Any errors encountered when executing the operation"""
   errors: JSON
   fragment: JSON!
+
+  """If present, indicates we need to invalidate the client-side cache"""
+  invalidateCache: Boolean
   target: String!
+
+  """Variables associated with the fragment"""
   variables: JSON
 }
 
@@ -1668,7 +1676,7 @@ type Subscription {
   """
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
-  pushFragment: [PushFragmentPayload]
+  pushFragment: [PushFragmentPayload!]!
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

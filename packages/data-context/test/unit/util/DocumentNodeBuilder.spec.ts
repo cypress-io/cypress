@@ -36,8 +36,9 @@ describe('DocumentNodeBuilder', () => {
   it('frag: should generate a fragment', () => {
     const docNodeBuilder = new DocumentNodeBuilder({
       fieldNodes: ((CLOUD_VIEWER_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>),
-      parentType: graphqlSchema.getQueryType(),
+      parentType: graphqlSchema.getQueryType()!,
       variableDefinitions: [],
+      operationName: 'CLOUD_VIEWER_QUERY',
     })
 
     expect(print(docNodeBuilder.frag)).to.eql(dedent`
@@ -54,8 +55,9 @@ describe('DocumentNodeBuilder', () => {
   it('query: should create a query + fragment', () => {
     const docNodeBuilder = new DocumentNodeBuilder({
       fieldNodes: ((CLOUD_VIEWER_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>),
-      parentType: graphqlSchema.getQueryType(),
+      parentType: graphqlSchema.getQueryType()!,
       variableDefinitions: [],
+      operationName: 'CLOUD_VIEWER_QUERY',
     })
 
     expect(print(docNodeBuilder.query).trimEnd()).to.eql(dedent`
@@ -67,7 +69,7 @@ describe('DocumentNodeBuilder', () => {
         }
       }
 
-      {
+      query CLOUD_VIEWER_QUERY {
         ...GeneratedFragment
       }
     `)
@@ -78,9 +80,10 @@ describe('DocumentNodeBuilder', () => {
 
     const docNodeBuilder = new DocumentNodeBuilder({
       isNode: true,
-      fieldNodes: (selections[0].selectionSet.selections) as ReadonlyArray<FieldNode>,
+      fieldNodes: (selections[0].selectionSet!.selections) as ReadonlyArray<FieldNode>,
       parentType: graphqlSchema.getType('CloudProject') as GraphQLObjectType,
       variableDefinitions: [],
+      operationName: 'CLOUD_PROJECT_QUERY',
     })
 
     expect(print(docNodeBuilder.queryNode).trimRight()).to.eql(dedent`
@@ -98,7 +101,7 @@ describe('DocumentNodeBuilder', () => {
         }
       }
 
-      {
+      query CLOUD_PROJECT_QUERY {
         node(id: "PUSH_FRAGMENT_PLACEHOLDER") {
           __typename
           id

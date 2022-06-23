@@ -5,7 +5,7 @@ export interface RemoteQueryConfig {
   variableDefinitions: VariableDefinitionNode[]
 }
 
-export type DocumentNodeBuilderParams = Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, isRemoteFetchable?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined}
+export type DocumentNodeBuilderParams = Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, isRemoteFetchable?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined, operationName: string}
 
 /**
  * Builds a DocumentNode from a given GraphQLResolveInfo payload
@@ -109,6 +109,10 @@ export class DocumentNodeBuilder {
         {
           kind: 'OperationDefinition',
           operation: 'query',
+          name: {
+            kind: 'Name',
+            value: this.info.operationName,
+          },
           selectionSet: {
             kind: 'SelectionSet',
             selections: [
@@ -132,6 +136,10 @@ export class DocumentNodeBuilder {
         {
           kind: 'OperationDefinition',
           operation: 'query',
+          name: {
+            kind: 'Name',
+            value: this.info.operationName,
+          },
           selectionSet: {
             kind: 'SelectionSet',
             selections: [

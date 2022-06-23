@@ -27,6 +27,7 @@ describe('CloudDataSource', () => {
   let fetchStub: sinon.SinonStub
   let getUserStub: sinon.SinonStub
   let logoutStub: sinon.SinonStub
+  let invalidateCacheStub: sinon.SinonStub
   let ctx: DataContext
 
   beforeEach(() => {
@@ -36,11 +37,13 @@ describe('CloudDataSource', () => {
     getUserStub = sinon.stub()
     getUserStub.returns({ authToken: '1234' })
     logoutStub = sinon.stub()
+    invalidateCacheStub = sinon.stub()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
       logout: logoutStub,
+      invalidateClientUrqlCache: invalidateCacheStub,
     })
   })
 
@@ -52,6 +55,7 @@ describe('CloudDataSource', () => {
     it('returns immediately with { data: null } when no user is defined', () => {
       getUserStub.returns(null)
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -64,6 +68,7 @@ describe('CloudDataSource', () => {
 
     it('issues a fetch request for the data when the user is defined', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -77,12 +82,14 @@ describe('CloudDataSource', () => {
 
     it('only issues a single fetch if the operation is called twice', async () => {
       const result1 = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
       })
       const result2 = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -99,6 +106,7 @@ describe('CloudDataSource', () => {
 
     it('resolves eagerly with the cached data if the data has already been resolved', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -108,6 +116,7 @@ describe('CloudDataSource', () => {
       await result
 
       const immediateResult = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -120,6 +129,7 @@ describe('CloudDataSource', () => {
 
     it('when there is a nullable field missing, resolves with the eager result & fetches for the rest', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -131,6 +141,7 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE), { status: 200 }))
 
       const immediateResult = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_WITH_OPTIONAL_MISSING),
         operationDoc: FAKE_USER_WITH_OPTIONAL_MISSING,
         operationVariables: {},
@@ -149,6 +160,7 @@ describe('CloudDataSource', () => {
 
     it('when there is a non-nullable field missing, issues the remote query immediately', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -160,6 +172,7 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE), { status: 200 }))
 
       const requiredResult = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_WITH_REQUIRED_MISSING),
         operationDoc: FAKE_USER_WITH_REQUIRED_MISSING,
         operationVariables: {},
@@ -177,6 +190,7 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -194,6 +208,7 @@ describe('CloudDataSource', () => {
       fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -223,6 +238,7 @@ describe('CloudDataSource', () => {
 
     it('returns true if we are currently resolving the request', () => {
       cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -252,6 +268,7 @@ describe('CloudDataSource', () => {
 
     it('returns true if we have resolved the data for the query', async () => {
       await cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
@@ -271,6 +288,7 @@ describe('CloudDataSource', () => {
   describe('invalidate', () => {
     it('allows us to issue a cache.invalidate on individual fields in the cloud schema', async () => {
       await cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
         operation: print(FAKE_USER_QUERY),
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},

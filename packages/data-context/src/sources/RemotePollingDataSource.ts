@@ -50,6 +50,7 @@ export class RemotePollingDataSource {
 
   async #sendSpecPollingRequest (commitBranch: string, projectSlug: string) {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudLatestRunUpdateSpecData'>>({
+      fieldName: 'cloudLatestRunUpdateSpecData',
       operationDoc: LATEST_RUN_UPDATE_OPERATION_DOC,
       operation: LATEST_RUN_UPDATE_OPERATION,
       operationVariables: {

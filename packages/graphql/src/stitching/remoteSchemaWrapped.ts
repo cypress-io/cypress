@@ -56,7 +56,10 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
       },
     })
 
-    return obj.context.cloud.executeRemoteGraphQL({
+    const context = obj.context
+
+    return context.cloud.executeRemoteGraphQL({
+      fieldName: info.fieldName,
       requestPolicy,
       operationType: obj.operationType ?? 'query',
       operation: print(operationDoc),
@@ -65,11 +68,11 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
       // When we respond eagerly with a result, but receive an updated value
       // for the query, we can "push" the data down using the pushFragment subscription
       onUpdatedResult (result) {
-        obj.context?.graphql.pushResult({
+        context.graphql.pushResult({
           result: result?.[info.fieldName] ?? null,
           source: obj.rootValue,
           info,
-          ctx: obj.context,
+          ctx: context,
         })
       },
     }) as any
