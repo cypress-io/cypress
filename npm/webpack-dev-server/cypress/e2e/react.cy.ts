@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 /// <reference path="../support/e2e.ts" />
 import type { fixtureDirs } from '@tooling/system-tests'
 import dedent from 'dedent'
