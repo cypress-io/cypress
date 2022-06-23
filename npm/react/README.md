@@ -94,6 +94,18 @@ See [Recipes](./docs/recipes.md) for more examples.
 }
 ```
 
+## Run
+
+Open cypress test runner
+```
+npx cypress open-ct
+```
+
+If you need to run test in CI
+```
+npx cypress run-ct
+```
+
 ## API
 
 - `mount` is the most important function, allows to mount a given React component as a mini web application and interact with it using Cypress commands
