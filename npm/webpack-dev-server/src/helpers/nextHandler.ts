@@ -166,7 +166,7 @@ function getRunWebpackSpan (devServerConfig: WebpackDevServerConfig): { runWebpa
 
 const originalModuleLoad = (Module as ModuleClass)._load
 
-function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
+export function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
   const framework = sourceFramework(devServerConfig)!
   const webpack = sourceNextWebpack(devServerConfig, framework)
   const webpackDevServer = sourceWebpackDevServer(devServerConfig, framework)
