@@ -190,7 +190,6 @@ const latestDot = computed(() => {
     case 'FAILED':
       return { icon: FailedIcon, spin: false, status }
     case 'ERRORED':
-    case 'OVERLIMIT':
     case 'TIMEDOUT':
       return { icon: ErroredIcon, spin: false, status }
     case 'NOTESTS':

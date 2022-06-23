@@ -48,7 +48,7 @@ describe('<RunStatusDots />', () => {
 
   context('runs scenario 2', () => {
     beforeEach(() => {
-      const runs = fakeRuns(['NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT'])
+      const runs = fakeRuns(['NOTESTS', 'UNCLAIMED', 'RUNNING', 'TIMEDOUT'])
 
       mountWithRuns(runs)
     })
