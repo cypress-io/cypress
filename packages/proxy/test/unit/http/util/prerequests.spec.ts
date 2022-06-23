@@ -10,6 +10,10 @@ describe('http/util/prerequests', () => {
     preRequests = new PreRequests(10)
   })
 
+  afterEach(() => {
+    clearInterval(preRequests.sweepInterval)
+  })
+
   it('synchronously matches a pre-request that existed at the time of the request', () => {
     // should match in reverse order
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'WRONGMETHOD' } as BrowserPreRequest)

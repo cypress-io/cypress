@@ -38,6 +38,7 @@ export class PreRequests {
   pendingPreRequests: Record<string, BrowserPreRequest> = {}
   pendingRequests: Record<string, PendingRequest> = {}
   prerequestTimestamps: Record<string, number> = {}
+  sweepInterval: ReturnType<typeof setInterval>
 
   constructor (requestTimeout = 500) {
     // If a request comes in and we don't have a matching pre-request after this timeout,
@@ -51,7 +52,7 @@ export class PreRequests {
     // make surewe don't discard any pre-requests prematurely but that we don't leak memory over time
     // if a large number of pre-requests don't match up (as seen in https://github.com/cypress-io/cypress/issues/17853,
     // for example)
-    setInterval(() => {
+    this.sweepInterval = setInterval(() => {
       const now = Date.now()
 
       Object.entries(this.prerequestTimestamps).forEach(([key, timestamp]) => {
