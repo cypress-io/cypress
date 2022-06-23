@@ -10,6 +10,7 @@ gql`
      data
      errors
      variables
+     invalidateCache
    }
  }
 `

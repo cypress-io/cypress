@@ -108,6 +108,16 @@ export class GraphQLDataSource {
     return Buffer.from(str, 'base64').toString('utf8')
   }
 
+  invalidateClientUrqlCache (ctx: DataContext) {
+    ctx.emitter.pushFragment([{
+      data: null,
+      errors: [],
+      target: 'Query',
+      fragment: '{}',
+      invalidateCache: true,
+    }])
+  }
+
   pushResult ({ source, info, ctx, result }: PushResultParams) {
     if (info.parentType.name === 'Query') {
       this.#pushFragment({ result, ctx, info })
@@ -129,6 +139,7 @@ export class GraphQLDataSource {
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
       variableDefinitions: params.info.operation.variableDefinitions,
+      operationName: params.info.operation.name?.value ?? params.info.fieldNodes.map((n) => n.name.value).sort().join('_'),
     })
 
     Promise.resolve(execute({

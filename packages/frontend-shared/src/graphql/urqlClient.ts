@@ -22,8 +22,8 @@ import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
-import type { DocumentNode } from 'graphql'
 import { initializeGlobalSubscriptions } from './urqlGlobalSubscriptions'
+import type { GlobalSubscriptions_PushFragmentSubscription } from '../generated/graphql'
 
 const toast = useToast()
 
@@ -61,9 +61,14 @@ export function makeCacheExchange (schema: any = urqlSchema) {
     updates: {
       Subscription: {
         pushFragment (parent, args, cache, info) {
-          const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string, errors: any }[] }
+          const { pushFragment } = parent as GlobalSubscriptions_PushFragmentSubscription
 
           for (const toPush of pushFragment) {
+            if (toPush.invalidateCache) {
+              cache.invalidate({ __typename: 'Query' })
+              continue
+            }
+
             cache.writeFragment(toPush.fragment, toPush.data, toPush.variables ?? {})
 
             if (toPush.errors?.length) {

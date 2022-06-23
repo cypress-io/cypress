@@ -150,9 +150,10 @@ export class RemoteRequestDataSource {
   }
 
   #executeRemote (params: MaybeLoadRemoteFetchable) {
-    const { ctx, operation, operationDoc, operationHash, operationVariables } = params
+    const { ctx, operation, operationDoc, operationHash, operationVariables, remoteQueryField } = params
 
     Promise.resolve(ctx.cloud.executeRemoteGraphQL({
+      fieldName: remoteQueryField,
       operation,
       operationDoc,
       operationHash,
@@ -246,6 +247,7 @@ export class RemoteRequestDataSource {
             parentType: info.schema.getType(fieldType) as GraphQLObjectType,
             fieldNodes: info.fieldNodes[0]?.selectionSet?.selections.filter((f) => f.kind === 'Field' && FIELDS_TO_PUSH.includes(f.name.value)) as FieldNode[],
             variableDefinitions: info.operation.variableDefinitions,
+            operationName: info.operation.name?.value ?? info.fieldNodes.map((n) => n.name.value).sort().join('_'),
           })
 
           this.#operationRegistry.set(operationDef.operationHash, operationDef)
