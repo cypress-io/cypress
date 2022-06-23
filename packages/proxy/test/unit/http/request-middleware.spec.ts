@@ -81,12 +81,12 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('exist=ing')
     })
 
-    it('is adds cookie jar cookies to request', async () => {
+    it('is prepends cookie jar cookies to request', async () => {
       const ctx = getContext()
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('exist=ing; new=one')
+      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
     })
 
     function getContext () {
