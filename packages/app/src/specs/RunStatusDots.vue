@@ -156,7 +156,6 @@ const dotClasses = computed(() => {
       case 'FAILED':
         return 'icon-light-red-400'
       case 'ERRORED':
-      case 'OVERLIMIT':
       case 'TIMEDOUT':
         return 'icon-light-orange-400'
       case 'UNCLAIMED':
