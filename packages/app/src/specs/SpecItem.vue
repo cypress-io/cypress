@@ -7,7 +7,10 @@
       class="icon-light-gray-50 icon-dark-gray-200 group-hocus:icon-light-indigo-200 group-hocus:icon-dark-indigo-400"
     />
 
-    <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-600">
+    <div
+      :title="fileName + extension"
+      class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
+    >
       <HighlightedText
         :text="fileName"
         :indexes="indexes.filter((idx) => idx < fileName.length)"

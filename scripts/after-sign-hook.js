@@ -8,9 +8,15 @@ let electron_notarize = require('electron-notarize')
 /* eslint-disable no-console */
 
 module.exports = async function (params) {
-  // Only notarize the app on Mac OS only.
+  // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {
     console.log('not Mac, skipping after sign hook')
+
+    return
+  }
+
+  if (process.env.SKIP_NOTARIZATION) {
+    console.log('SKIP_NOTARIZATION set, skipping after sign hook')
 
     return
   }
