@@ -98,13 +98,15 @@ See [Recipes](./docs/recipes.md) for more examples.
 
 Open cypress test runner
 ```
-npx cypress open-ct
+npx cypress open --component
 ```
 
 If you need to run test in CI
 ```
-npx cypress run-ct
+npx cypress run --component
 ```
+
+For more information, please check the official docs for [running Cypress](https://on.cypress.io/guides/getting-started/opening-the-app#Quick-Configuration) and for [component testing](https://on.cypress.io/guides/component-testing/writing-your-first-component-test).
 
 ## API
 
