@@ -20,4 +20,12 @@ const root = argv.includes('--app')
   ? path.join(__dirname, '../../app')
   : path.join(__dirname, '..')
 
-fs.writeFileSync(path.join(root, 'cypress/fixtures', `${argv[2]}.json`), JSON.stringify(components, null, 2))
+fs.writeFile(path.join(root, 'cypress/fixtures', `${argv[2]}.json`), JSON.stringify(components, null, 2), (err) => {
+  if (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('fixture generation succeeded.')
+  }
+})
