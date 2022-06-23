@@ -491,6 +491,10 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Replaces port in "Project is running at http://localhost:58845/webpack-dev-server/"
+  .replace(/Project is running at http:\/\/localhost:(\d{1,5})\/webpack-dev-server\//, 'XXXX')
+  /// Replaces ms in "webpack 5.70.0 compiled with 1 error in 3102 ms"
+  .replace(/webpack .*\scompiled with \S| errors? in (.+?)\sms/, 'XXXX')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
