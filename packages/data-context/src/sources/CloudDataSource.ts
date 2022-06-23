@@ -52,12 +52,6 @@ export interface CloudExecuteRemote extends CloudExecuteQuery {
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
-  /**
-   * Triggered when we have an initial stale response that is not fulfilled
-   * by an additional fetch to the server. This means we've gotten into a bad state
-   * and we need to clear both the server & client side cache
-   */
-  invalidateCache: () => any
 }
 
 export interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
@@ -71,6 +65,12 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
+  /**
+   * Triggered when we have an initial stale response that is not fulfilled
+   * by an additional fetch to the server. This means we've gotten into a bad state
+   * and we need to clear both the server & client side cache
+   */
+  invalidateClientUrqlCache(): void
 }
 
 /**
@@ -217,9 +217,9 @@ export class CloudDataSource {
       if (initialResult) {
         const eagerResult = this.readFromCache(config)
 
-        if (eagerResult && eagerResult.stale) {
+        if (eagerResult?.stale) {
           await this.invalidate({ __typename: 'Query' })
-          config.invalidateCache()
+          this.params.invalidateClientUrqlCache()
 
           return op
         }

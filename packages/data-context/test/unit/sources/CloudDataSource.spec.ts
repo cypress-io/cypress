@@ -27,7 +27,7 @@ describe('CloudDataSource', () => {
   let fetchStub: sinon.SinonStub
   let getUserStub: sinon.SinonStub
   let logoutStub: sinon.SinonStub
-  let invalidateCache: sinon.SinonStub
+  let invalidateCacheStub: sinon.SinonStub
   let ctx: DataContext
 
   beforeEach(() => {
@@ -37,12 +37,13 @@ describe('CloudDataSource', () => {
     getUserStub = sinon.stub()
     getUserStub.returns({ authToken: '1234' })
     logoutStub = sinon.stub()
-    invalidateCache = sinon.stub()
+    invalidateCacheStub = sinon.stub()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
       logout: logoutStub,
+      invalidateClientUrqlCache: invalidateCacheStub,
     })
   })
 
@@ -59,7 +60,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect(result).to.eql({ data: null })
@@ -73,7 +73,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       const resolved = await result
@@ -88,7 +87,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
       const result2 = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
@@ -96,7 +94,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect(result1).to.eq(result2)
@@ -114,7 +111,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       await result
@@ -125,7 +121,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect((immediateResult as ExecutionResult).data).to.eql(FAKE_USER_RESPONSE.data)
@@ -139,7 +134,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       await result
@@ -152,7 +146,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_WITH_OPTIONAL_MISSING,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect((immediateResult as CloudDataResponse).data).to.eql(FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE.data)
@@ -172,7 +165,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       await result
@@ -185,7 +177,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_WITH_REQUIRED_MISSING,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect(requiredResult).to.be.instanceOf(Promise)
@@ -204,7 +195,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       const resolved = await result
@@ -223,7 +213,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       const resolved = await result
@@ -254,7 +243,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       const result = cloudDataSource.isResolving({
@@ -285,7 +273,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       const result = cloudDataSource.hasResolved({
@@ -306,7 +293,6 @@ describe('CloudDataSource', () => {
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
         operationType: 'query',
-        invalidateCache,
       })
 
       expect(cloudDataSource.hasResolved({

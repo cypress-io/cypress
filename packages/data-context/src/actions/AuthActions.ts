@@ -40,9 +40,6 @@ export class AuthActions {
       operation,
       operationDoc: parse(operation),
       operationVariables: {},
-      invalidateCache: () => {
-        this.ctx.graphql.invalidateCache(this.ctx)
-      },
     })
 
     if (!result.data?.cloudViewer && !result.error?.networkError) {

@@ -75,9 +75,6 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
           ctx: context,
         })
       },
-      invalidateCache () {
-        context.graphql.invalidateCache(context)
-      },
     }) as any
   },
 })

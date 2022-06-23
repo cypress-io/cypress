@@ -159,9 +159,6 @@ export class RemoteRequestDataSource {
       operationHash,
       operationVariables,
       requestPolicy: 'network-only',
-      invalidateCache: () => {
-        ctx.graphql.invalidateCache(ctx)
-      },
     }))
     .then((result) => {
       const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)

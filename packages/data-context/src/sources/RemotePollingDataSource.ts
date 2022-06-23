@@ -58,7 +58,6 @@ export class RemotePollingDataSource {
         projectSlug,
       },
       requestPolicy: 'network-only', // we never want to hit local cache for this request
-      invalidateCache: () => this.ctx.graphql.invalidateCache(this.ctx),
     })
 
     debug(`%s Response for startPollingForSpecs %o`, new Date().toISOString(), result)

@@ -108,7 +108,7 @@ export class GraphQLDataSource {
     return Buffer.from(str, 'base64').toString('utf8')
   }
 
-  invalidateCache (ctx: DataContext) {
+  invalidateClientUrqlCache (ctx: DataContext) {
     ctx.emitter.pushFragment([{
       data: null,
       errors: [],
