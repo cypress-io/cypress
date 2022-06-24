@@ -51,7 +51,17 @@ export interface RemoteGraphQLInterceptPayload {
   Response: typeof Response
 }
 
+export interface RemoteGraphQLBatchInterceptPayload {
+  key: string
+  index: number
+  field: string
+  variables: Record<string, any>
+  result: ExecutionResult
+}
+
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
+
+export type RemoteGraphQLBatchInterceptor = (obj: RemoteGraphQLBatchInterceptPayload, testState: Record<string, any>) => any | Promise<any>
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -448,7 +458,7 @@ function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   })
 }
 
-function remoteGraphQLInterceptBatched (fn: RemoteGraphQLInterceptor) {
+function remoteGraphQLInterceptBatched (fn: RemoteGraphQLBatchInterceptor) {
   return logInternal('remoteGraphQLInterceptBatched', () => {
     return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })
@@ -544,6 +554,7 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+Cypress.Commands.add('remoteGraphQLInterceptBatched', remoteGraphQLInterceptBatched)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)

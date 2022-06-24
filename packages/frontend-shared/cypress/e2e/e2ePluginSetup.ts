@@ -1,7 +1,8 @@
 import path from 'path'
 import execa from 'execa'
+import _ from 'lodash'
 
-import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -105,7 +106,7 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
-  let remoteGraphQLInterceptBatchHandler: RemoteGraphQLInterceptor | undefined
+  let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
   const cachedCwd = process.cwd()
@@ -183,7 +184,7 @@ async function makeE2ETasks () {
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
-      remoteGraphQLInterceptBatchHandler = undefined
+      remoteGraphQLInterceptBatched = undefined
 
       const fetchApi = ctx.util.fetch
 
@@ -215,10 +216,41 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          if (operationName === 'batchTestRunnerExecutionQuery' && remoteGraphQLInterceptBatchHandler) {
-            // const toSettle = _.mapValues(result.data, (key, val) => {
-            //   /^_(?:\d+)_(.*?)%/.test(key)
-            // })
+          if (operationName === 'batchTestRunnerExecutionQuery' && remoteGraphQLInterceptBatched) {
+            const fn = remoteGraphQLInterceptBatched
+            const keys: string[] = []
+            const values: Promise<any>[] = []
+            const finalVal: Record<string, any> = {}
+
+            for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
+              const re = /^_(\d+)_(.*?)$/.exec(key)
+
+              if (!re) {
+                finalVal[key] = val
+                continue
+              }
+
+              const [, capture1, capture2] = re
+              const subqueryVariables = _.transform(_.pickBy(variables, (val, key) => key.startsWith(`_${capture1}_`)), (acc, val, k) => {
+                acc[k.replace(`_${capture1}_`, '')] = val
+              }, {})
+
+              keys.push(key)
+              values.push(Promise.resolve().then(() => {
+                return fn({
+                  key,
+                  index: Number(capture1),
+                  field: capture2,
+                  variables: subqueryVariables,
+                  result: result[key],
+                }, testState)
+              }))
+            }
+            result = {
+              data: _.zipObject(keys, (await Promise.allSettled(values)).map((v) => v.status === 'fulfilled' ? v.value : v.reason)),
+              errors: result.errors,
+              extensions: result.extensions,
+            }
           } else if (remoteGraphQLIntercept) {
             try {
               result = await Promise.resolve(remoteGraphQLIntercept({
@@ -285,7 +317,7 @@ async function makeE2ETasks () {
       return null
     },
     __internal_remoteGraphQLInterceptBatched (fn: string) {
-      remoteGraphQLInterceptBatchHandler = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
+      remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
 
       return null
     },
