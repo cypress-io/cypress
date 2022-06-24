@@ -39,8 +39,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .trigger('mouseenter')
     })
 
-    cy.percySnapshot('after browsers open')
-
     cy.contains('Unsupported browser').should('be.visible')
 
     cy.percySnapshot('unsupported browser tooltip')
