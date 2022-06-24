@@ -3,9 +3,16 @@ import path from 'path'
 import type { SinonSpy } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
-const sep = Cypress.platform === 'win32' ? '\\' : '/'
+const isWindows = Cypress.platform === 'win32'
+const sep = isWindows ? '\\' : '/'
 
-describe('Launchpad: Global Mode', () => {
+describe('Launchpad: Global Mode', {
+  // increasing the default timeout on Windows only,
+  // since the config loads slower on our Windows boxes in CI,
+  // but these past consistently on Linux so a 4000ms timeout
+  // is still good to catch performance regressions there
+  defaultCommandTimeout: isWindows ? 8000 : 4000,
+}, () => {
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
