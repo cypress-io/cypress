@@ -397,7 +397,7 @@ type CloudSpecRun implements Node {
   specDuration: SpecDataAggregate
 
   """Most important status for the spec shared between all groups"""
-  status: CloudRunStatus
+  status: CloudSpecStatus
 
   """Aggregate information about how many tests failed in the groups"""
   testsFailed: SpecDataAggregate
@@ -436,6 +436,18 @@ type CloudSpecRunEdge {
 
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudSpecRun!
+}
+
+"""Possible check status of the spec within a run"""
+enum CloudSpecStatus {
+  CANCELLED
+  ERRORED
+  FAILED
+  NOTESTS
+  PASSED
+  RUNNING
+  TIMEDOUT
+  UNCLAIMED
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""

@@ -1,7 +1,7 @@
 import type { CloudSpecRun } from '../../../../graphql/src/gen/cloud-source-types.gen'
-import type { CloudRunStatus } from '@packages/app/src/generated/graphql'
+import type { CloudSpecStatus } from '@packages/app/src/generated/graphql'
 
-export const randomRunStatus: () => CloudRunStatus = () => {
+export const randomRunStatus = (): CloudSpecStatus => {
   const r = Math.floor(Math.random() * 5)
 
   switch (r) {
@@ -13,7 +13,7 @@ export const randomRunStatus: () => CloudRunStatus = () => {
   }
 }
 
-export const fakeRuns: (statuses: CloudRunStatus[]) => Required<CloudSpecRun>[] = (statuses) => {
+export const fakeRuns = (statuses: CloudSpecStatus[]): Required<CloudSpecRun>[] => {
   return statuses.map((s, idx) => {
     return {
       __typename: 'CloudSpecRun',
@@ -49,7 +49,7 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => Required<CloudSpecRun>[] 
 }
 
 export const exampleRuns = () => {
-  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED', 'NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT'])
+  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED', 'NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT', 'UNCLAIMED', 'FAKE_UNKNOWN_STATUS' as any])
 
   const now = new Date()
   const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate())

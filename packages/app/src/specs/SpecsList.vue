@@ -184,7 +184,7 @@
               class="h-full grid justify-items-end items-center"
             >
               <RunStatusDots
-                v-if="row.data.isLeaf && row.data.data && row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING'"
+                v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
                 :gql="row.data.data.cloudSpec ?? null"
                 :spec-file-extension="row.data.data.fileExtension"
                 :spec-file-name="row.data.data.fileName"

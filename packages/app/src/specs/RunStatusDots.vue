@@ -73,6 +73,7 @@ import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
 import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
+import QueuedIcon from '~icons/cy/queued-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
@@ -155,9 +156,9 @@ const dotClasses = computed(() => {
       case 'FAILED':
         return 'icon-light-red-400'
       case 'ERRORED':
-      case 'OVERLIMIT':
       case 'TIMEDOUT':
         return 'icon-light-orange-400'
+      case 'UNCLAIMED':
       case 'NOTESTS':
         return 'icon-light-gray-400'
       case 'CANCELLED':
@@ -183,10 +184,11 @@ const latestDot = computed(() => {
       return { icon: PassedIcon, spin: false, status }
     case 'RUNNING':
       return { icon: RunningIcon, spin: true, status }
+    case 'UNCLAIMED':
+      return { icon: QueuedIcon, spin: false, status }
     case 'FAILED':
       return { icon: FailedIcon, spin: false, status }
     case 'ERRORED':
-    case 'OVERLIMIT':
     case 'TIMEDOUT':
       return { icon: ErroredIcon, spin: false, status }
     case 'NOTESTS':

@@ -1,122 +1,128 @@
 import type { RunStatusDotsFragment } from '../generated/graphql'
 import RunStatusDots from './RunStatusDots.vue'
 import { fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
+import { fill } from 'lodash'
+import type { CloudSpecRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
+
+function mountWithRuns (runs: Required<CloudSpecRun>[]) {
+  const gql: RunStatusDotsFragment = {
+    id: 'id',
+    data: {
+      __typename: 'CloudProjectSpec',
+      retrievedAt: new Date().toISOString(),
+      id: 'id',
+      specRuns: {
+        nodes: [
+          ...runs as any, // suppress TS compiler
+        ],
+      },
+    },
+  }
+
+  cy.mount(() => {
+    return (
+      <div class="flex justify-center">
+        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
+      </div>
+    )
+  })
+}
 
 describe('<RunStatusDots />', () => {
-  it('mounts correctly for example scenario 1', () => {
-    const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'])
+  context('runs scenario 1', () => {
+    beforeEach(() => {
+      const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'])
 
-    cy.mount(() => {
-      const gql: RunStatusDotsFragment = {
-        id: 'id',
-        data: {
-          __typename: 'CloudProjectSpec',
-          retrievedAt: new Date().toISOString(),
-          id: 'id',
-          specRuns: {
-            nodes: [
-              ...runs as any, // suppress TS compiler
-            ],
-          },
-        },
-      }
-
-      return (
-        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
-      )
+      mountWithRuns(runs)
     })
 
-    cy.findByTestId('run-status-dots').trigger('mouseenter')
-    cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
-    cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
-    cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
-    cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-red-400')
-    cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    it('renders as expected', () => {
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
+      cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
+      cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-red-400')
+      cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    })
   })
 
-  it('mounts correctly for example scenario 2', () => {
-    const runs = fakeRuns(['NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT'])
+  context('runs scenario 2', () => {
+    beforeEach(() => {
+      const runs = fakeRuns(['NOTESTS', 'UNCLAIMED', 'RUNNING', 'TIMEDOUT'])
 
-    cy.mount(() => {
-      const gql: RunStatusDotsFragment = {
-        id: 'id',
-        data: {
-          __typename: 'CloudProjectSpec',
-          id: 'id',
-          retrievedAt: new Date().toISOString(),
-          specRuns: {
-            nodes: [
-              ...runs as any, // suppress TS compiler
-            ],
-          },
-        },
-      }
-
-      return (
-        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
-      )
+      mountWithRuns(runs)
     })
 
-    cy.findByTestId('run-status-dots').trigger('mouseenter')
-    cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
-    cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
-    cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-indigo-400')
-    cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-orange-400')
-    cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    it('renders as expected', () => {
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
+      cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
+      cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-indigo-400')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-400')
+      cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    })
   })
 
-  it('mounts correctly for example scenario 3', () => {
-    const runs = fakeRuns(['RUNNING'])
+  context('single RUNNING status', () => {
+    beforeEach(() => {
+      const runs = fakeRuns(['RUNNING'])
 
-    cy.mount(() => {
-      const gql: RunStatusDotsFragment = {
-        id: 'id',
-        data: {
-          __typename: 'CloudProjectSpec',
-          id: 'id',
-          retrievedAt: new Date().toISOString(),
-          specRuns: {
-            nodes: [
-              ...runs as any, // suppress TS compiler
-            ],
-          },
-        },
-      }
-
-      return (
-        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
-      )
+      mountWithRuns(runs)
     })
 
-    cy.findByTestId('run-status-dots').trigger('mouseenter')
-    cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
-    cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
-    cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
-    cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
-    cy.findAllByTestId('run-status-dot-latest').should('have.class', 'animate-spin')
+    it('renders as expected', () => {
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
+      cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-latest').should('have.class', 'animate-spin')
+    })
   })
 
-  it('renders placeholder without tooltip or link', () => {
-    cy.mount(() => {
-      const gql: RunStatusDotsFragment = {
-        id: 'id',
-        data: {
-          __typename: 'CloudProjectSpec',
-          id: 'id',
-          retrievedAt: new Date().toISOString(),
-          specRuns: {
-            nodes: [],
-          },
-        },
-      }
+  context('single UNCLAIMED status', () => {
+    beforeEach(() => {
+      const runs = fakeRuns(['UNCLAIMED'])
 
-      return (
-        <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
-      )
+      mountWithRuns(runs)
     })
 
-    cy.findByTestId('external').should('not.exist')
-    cy.findByTestId('run-status-dots').trigger('mouseenter')
-    cy.get('.v-popper__popper--shown').should('not.exist')
+    it('renders as expected', () => {
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
+      cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    })
+  })
+
+  context('no runs', () => {
+    beforeEach(() => {
+      mountWithRuns([])
+    })
+
+    it('renders placeholder without tooltip or link', () => {
+      cy.findByTestId('external').should('not.exist')
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').should('not.exist')
+    })
+  })
+
+  context('unknown/unhandled statuses', () => {
+    beforeEach(() => {
+      const runs = fakeRuns(fill(['', '', '', ''], 'FAKE_UNKNOWN_STATUS' as any))
+
+      mountWithRuns(runs)
+    })
+
+    it('renders as expected', () => {
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
+      cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
+      cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
+    })
   })
 })
