@@ -571,7 +571,6 @@ describe('lib/config', () => {
         })
       })
 
-      // TODO:(lachlan): after mega PR
       context('specPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { supportFile: false, specPattern: '**/*.coffee' } })
