@@ -54,7 +54,7 @@
       :code="content"
       line-numbers
       copy-on-click
-      copy-button
+      :copy-button="copyButton"
     />
   </Collapsible>
 </template>
@@ -97,6 +97,7 @@ const props = defineProps<{
   content: string
   description?: string
   fileExtension: string
+  copyButton?: boolean
 }>()
 
 const language = computed(() => {

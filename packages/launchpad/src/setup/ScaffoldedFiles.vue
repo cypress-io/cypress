@@ -12,6 +12,7 @@
       :file-path="file.file.relative"
       :file-extension="file.file.fileExtension"
       :description="file.description || undefined"
+      :copy-button="false"
     />
     <hr class="my-4">
     <div class="flex gap-2">
