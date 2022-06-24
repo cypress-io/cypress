@@ -25,7 +25,7 @@
             :prefix-icon="RestartIcon"
             :prefix-icon-class="`${retrying && 'animate-spin'} icon-dark-indigo-500`"
             :disabled="retrying"
-            @click="retryFn()"
+            @click="onRetry()"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -149,11 +149,12 @@ const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
 
-let retrying = false
-const retryFn = async () => {
-  retrying = true
+const retrying = ref(false)
+
+const onRetry = async () => {
+  retrying.value = true
   await props.retry?.(baseError.value.id)
-  retrying = false
+  retrying.value = false
 }
 
 const getDocsType = (): string => {
