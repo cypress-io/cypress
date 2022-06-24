@@ -62,7 +62,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
         render: (gqlVal) => (
           <div class="border-current border-1 h-700px resize overflow-auto">
-            <HeaderBarContent gql={{ ...gqlVal, projectRootFromCI: true }} />
+            <HeaderBarContent gql={{ ...gqlVal, isInGlobalMode: true }} />
           </div>
         ),
       })

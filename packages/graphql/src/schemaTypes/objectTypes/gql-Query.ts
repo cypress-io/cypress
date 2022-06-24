@@ -82,11 +82,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => !ctx.currentProject,
     })
 
-    t.nonNull.boolean('projectRootFromCI', {
-      description: 'Whether the project was specified from the --project flag',
-      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
-    })
-
     t.nonNull.field('authState', {
       type: AuthState,
       description: 'The latest state of the auth process',
