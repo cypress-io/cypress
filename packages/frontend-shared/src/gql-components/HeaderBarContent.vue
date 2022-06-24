@@ -20,10 +20,8 @@
         >
         <nav>
           <ol>
-            <!-- In Main.vue, <GlobalPage/> is rendered in global mode or if there is no current project -->
-            <!-- We match that logic for the "Projects" breadcrumb -->
             <li
-              v-if="props.gql.isInGlobalMode || !currentProject"
+              v-if="props.gql.isInGlobalMode"
               class="inline-block"
             >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->

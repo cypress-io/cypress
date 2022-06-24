@@ -113,12 +113,9 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         .should('not.have.attr', 'href')
       })
 
-      it('in non-global mode, shows link to Projects', () => {
+      it('in non-global mode, does not show link to Projects', () => {
         mountFragmentWithData({ isInGlobalMode: false, currentProject: undefined })
-        cy.contains('a', 'Projects').should('exist')
-        .should('have.attr', 'aria-disabled', 'true')
-        .should('have.attr', 'role', 'link')
-        .should('not.have.attr', 'href')
+        cy.contains('a', 'Projects').should('not.exist')
       })
     })
   })
