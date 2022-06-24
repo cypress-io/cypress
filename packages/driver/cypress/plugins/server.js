@@ -195,32 +195,40 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
-  const getCookieAdditions = ({ sameSite, secure }) => {
-    let additions = ''
+  app.get('/prelogin', (req, res) => {
+    const { redirect, override } = req.query
+    let cookie = 'prelogin=true'
 
-    if (sameSite) additions += `; SameSite=${sameSite}`
-
-    if (secure) additions += '; Secure'
-
-    return additions
-  }
-
-  app.get('/cookie-login', (req, res) => {
-    const { username, redirect } = req.query
+    // if testing overridden cookies, need to make it cross-origin so it's
+    // included in the cross-origin `/login` request
+    if (override) {
+      cookie += '; SameSite=None; Secure'
+    }
 
     res
-    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
-    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}`)
+    .header('Set-Cookie', cookie)
+    .redirect(302, redirect)
   })
 
+  app.get('/cookie-login', (req, res) => {
+    const { cookie, localhostCookie, username, redirect } = req.query
+
+    res
+    .header('Set-Cookie', decodeURIComponent(cookie))
+    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}&cookie=${localhostCookie}`)
+  })
+
+  const getUserCookie = (req) => {
+    return req.cookies.user || req.cookies['__Host-user'] || req.cookies['__Secure-user']
+  }
+
   app.get('/verify-cookie-login', (req, res) => {
-    if (!req.cookies.user) {
+    if (!getUserCookie(req)) {
       return res
-      .status(403)
       .send('<html><body><h1>Not logged in</h1></body></html>')
     }
 
-    const { username, redirect } = req.query
+    const { cookie, username, redirect } = req.query
 
     res.send(`
       <html>
@@ -228,8 +236,8 @@ const createApp = (port) => {
           <h1>Redirecting ${username}...</h1>
           <script>
             setTimeout(() => {
-              window.location.href = '${redirect}?username=${username}'
-            }, 1000)
+              window.location.href = '${redirect}?username=${username}&cookie=${cookie}'
+            }, 500)
           </script>
         </body>
       </html>
@@ -237,25 +245,42 @@ const createApp = (port) => {
   })
 
   app.get('/login', (req, res) => {
-    const { username } = req.query
+    const { cookie, username } = req.query
 
     if (!username) {
       return res.send('<html><body><h1>Must specify username to log in</h1></body></html>')
     }
 
-    // can't use res.cookie() because it won't allow setting an invalid
-    // SameSite value, which we want to test
+    if (!req.cookies.prelogin) {
+      return res.send('<html><body><h1>Social login failed</h1></body></html>')
+    }
+
+    const decodedCookie = decodeURIComponent(cookie)
+
     res
-    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
+    .append('Set-Cookie', decodedCookie)
+    .append('Set-Cookie', 'prelogin=verified')
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/logout', (req, res) => {
+    res
+    .header('Set-Cookie', 'user=')
     .redirect(302, '/welcome')
   })
 
   app.get('/welcome', (req, res) => {
-    if (!req.cookies.user) {
+    const user = getUserCookie(req)
+
+    if (!user) {
       return res.send('<html><body><h1>No user found</h1></body></html>')
     }
 
-    res.send(`<html><body><h1>Welcome, ${req.cookies.user}!</h1></body></html>`)
+    if (req.cookies.prelogin !== 'verified') {
+      return res.send('<html><body><h1>Login not verified</h1></body></html>')
+    }
+
+    res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
   })
 
   let _var = ''
