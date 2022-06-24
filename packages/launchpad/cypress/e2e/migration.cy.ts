@@ -1714,7 +1714,7 @@ describe('Migrate custom config files', () => {
   it('shows error if plugins file do not exist', () => {
     scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
 
-    const err = `Looked for pluginsFile at ${getPathForPlatform('foo/bar')}, but it was not found.`
+    const err = `Looked for pluginsFile at foo/bar, but it was not found.`
 
     cy.contains(err)
   })
