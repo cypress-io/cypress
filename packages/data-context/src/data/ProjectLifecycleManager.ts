@@ -181,6 +181,10 @@ export class ProjectLifecycleManager {
     return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
+  get eventProcessPid () {
+    return this._configManager?.eventProcessPid
+  }
+
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
@@ -236,8 +240,6 @@ export class ProjectLifecycleManager {
           })
         }
 
-        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
-
         if (this._currentTestingType === 'component') {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
@@ -246,13 +248,11 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
-
-          // Devserver can pick a random port, this solve the edge case where closing
-          // and spawning the devserver can result in a different baseUrl
-          if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
-            restartOnChange.server = true
-          }
         }
+
+        const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl
+
+        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
 
         this._cachedFullConfig = finalConfig
 
@@ -271,7 +271,7 @@ export class ProjectLifecycleManager {
             await this.ctx.actions.browser.relaunchBrowser()
           }
 
-          if (restartOnChange.pingBaseUrl) {
+          if (pingBaseUrl) {
             this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
           }
         }
@@ -473,7 +473,7 @@ export class ProjectLifecycleManager {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
-      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPath) as LegacyCypressConfigJson
+      const legacyConfig = await this.ctx.fs.readJson(legacyConfigPath) as LegacyCypressConfigJson
 
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
@@ -540,6 +540,10 @@ export class ProjectLifecycleManager {
 
     if (!testingType) {
       return
+    }
+
+    if (this.ctx.isRunMode && this.loadedConfigFile && !this.isTestingTypeConfigured(testingType)) {
+      return this.ctx.onError(getError('TESTING_TYPE_NOT_CONFIGURED', testingType))
     }
 
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
@@ -619,6 +623,8 @@ export class ProjectLifecycleManager {
     }
 
     try {
+      // TODO: convert to async FS method
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
       if (pkgJson.type === 'module') {
@@ -701,6 +707,8 @@ export class ProjectLifecycleManager {
 
   private verifyProjectRoot (root: string) {
     try {
+      // TODO: convert to async fs call
+      // eslint-disable-next-line no-restricted-syntax
       if (!fs.statSync(root).isDirectory()) {
         throw new Error('NOT DIRECTORY')
       }

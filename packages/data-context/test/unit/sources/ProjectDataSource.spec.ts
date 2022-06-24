@@ -1,5 +1,6 @@
 import chai from 'chai'
 import os from 'os'
+import fs from 'fs-extra'
 
 import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
 import path from 'path'
@@ -12,9 +13,16 @@ import { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultSpecPattern } from '@packages/config'
+import FixturesHelper from '@tooling/system-tests'
 
 chai.use(sinonChai)
 const { expect } = chai
+
+function delay (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
 
 describe('matchedSpecs', () => {
   context('got a single spec pattern from --spec via cli', () => {
@@ -148,6 +156,7 @@ describe('findSpecs', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
+    await fs.remove(projectRoot)
     ctx = createTestDataContext('run')
     await ctx.fs.ensureDir(projectRoot)
     await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(projectRoot, element), '')))
@@ -442,6 +451,137 @@ describe('getPathFromSpecPattern', () => {
   })
 })
 
+describe('_makeSpecWatcher', () => {
+  let ctx: DataContext
+  let specWatcher: chokidar.FSWatcher
+
+  beforeEach(async function () {
+    this.timeout(20000) // fixture cleanup can take awhile
+    FixturesHelper.remove()
+
+    this.specWatcherPath = await FixturesHelper.scaffoldProject('spec-watcher')
+
+    ctx = createTestDataContext('open', { projectRoot: this.specWatcherPath })
+  })
+
+  afterEach(async () => {
+    sinon.restore()
+    await specWatcher.close()
+    ctx.destroy()
+  })
+
+  const SUPPORT_FILE = path.join('cypress', 'support', 'e2e.js')
+  const SPEC_FILE1 = path.join('cypress', 'e2e', 'foo.cy.js')
+  const SPEC_FILE2 = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'foo.cy.js')
+  const SPEC_FILE3 = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'foo.spec.ts')
+  const SPEC_FILE_ABC = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'abc.ts')
+
+  const writeFiles = () => {
+    return Promise.all([
+      ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE3, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE_ABC, '// foo'),
+    ])
+  }
+
+  it('watch for changes on files based on the specPattern', async function () {
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: this.specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    await new Promise((resolve) => specWatcher.once('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+
+    await writeFiles()
+
+    let attempt = 0
+
+    while (allFiles.size < 3 && attempt++ <= 100) {
+      await delay(10)
+    }
+
+    expect(Array.from(allFiles).sort()).to.eql([
+      SPEC_FILE1,
+      SPEC_FILE2,
+      SPEC_FILE3,
+    ])
+
+    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+  })
+
+  it('watch for changes on files with multiple specPatterns', async function () {
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: this.specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    await new Promise((resolve) => specWatcher.on('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+
+    await writeFiles()
+
+    let attempt = 0
+
+    while (allFiles.size < 3 && attempt++ <= 100) {
+      await delay(10)
+    }
+
+    expect(Array.from(allFiles).sort()).to.eql([
+      SPEC_FILE1,
+      SPEC_FILE_ABC,
+      SPEC_FILE2,
+      SPEC_FILE3,
+    ])
+
+    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+  })
+
+  it('do not throw if file/folder is deleted while ignoring files', async function () {
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: this.specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    await new Promise((resolve) => specWatcher.on('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+    specWatcher.on('unlink', (filePath) => allFiles.delete(filePath))
+
+    await writeFiles()
+    await ctx.actions.file.removeFileInProject(SPEC_FILE1)
+    await delay(1000)
+
+    expect(Array.from(allFiles).sort()).to.eql([
+      SPEC_FILE_ABC,
+      SPEC_FILE2,
+      SPEC_FILE3,
+    ])
+
+    expect(Array.from(allFiles)).to.not.include(SPEC_FILE1)
+    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+  })
+})
+
 describe('startSpecWatcher', () => {
   const projectRoot = 'tmp'
 
@@ -551,7 +691,7 @@ describe('startSpecWatcher', () => {
       expect(chokidar.watch).to.have.been.calledWith('.', {
         ignoreInitial: true,
         cwd: projectRoot,
-        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
+        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', sinon.match.func],
         ignorePermissionErrors: true,
       })
 

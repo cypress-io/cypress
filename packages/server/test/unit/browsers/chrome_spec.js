@@ -499,7 +499,7 @@ describe('lib/browsers/chrome', () => {
       }
 
       const browserCriClient = {
-        attachToNewUrl: sinon.stub().withArgs('about:blank').resolves(pageCriClient),
+        currentlyAttachedTarget: pageCriClient,
       }
 
       const automation = {
@@ -522,7 +522,6 @@ describe('lib/browsers/chrome', () => {
 
       await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
 
-      expect(browserCriClient.attachToNewUrl).to.be.called
       expect(automation.use).to.be.called
       expect(chrome._getBrowserCriClient).to.be.called
       expect(chrome._maybeRecordVideo).to.be.called

@@ -459,19 +459,62 @@ const util = {
     })
   },
 
-  getPlatformInfo () {
-    return util.getOsVersionAsync().then((version) => {
-      let osArch = arch()
+  async getPlatformInfo () {
+    const [version, osArch] = await Promise.all([
+      util.getOsVersionAsync(),
+      this.getRealArch(),
+    ])
 
-      if (osArch === 'x86') {
-        osArch = 'ia32'
+    return stripIndent`
+      Platform: ${os.platform()}-${osArch} (${version})
+      Cypress Version: ${util.pkgVersion()}
+    `
+  },
+
+  _cachedArch: undefined,
+
+  /**
+   * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
+   */
+  async getRealArch () {
+    if (this._cachedArch) return this._cachedArch
+
+    async function _getRealArch () {
+      const osPlatform = os.platform()
+      // eslint-disable-next-line no-restricted-syntax
+      const osArch = os.arch()
+
+      debug('detecting arch %o', { osPlatform, osArch })
+
+      if (osArch === 'arm64') return 'arm64'
+
+      if (osPlatform === 'darwin') {
+        // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
+        // https://stackoverflow.com/a/65347893/3474615
+        const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
+
+        debug('rosetta check result: %o', { stdout })
+        if (stdout === '1') return 'arm64'
       }
 
-      return stripIndent`
-        Platform: ${os.platform()}-${osArch} (${version})
-        Cypress Version: ${util.pkgVersion()}
-      `
-    })
+      if (osPlatform === 'linux') {
+        // could possibly be x64 node on arm64 linux, check the "machine hardware name"
+        // list of names for reference: https://stackoverflow.com/a/45125525/3474615
+        const { stdout } = await execa('uname', ['-m']).catch(() => '')
+
+        debug('arm uname -m result: %o ', { stdout })
+        if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      const pkgArch = arch()
+
+      if (pkgArch === 'x86') return 'ia32'
+
+      return pkgArch
+    }
+
+    return (this._cachedArch = await _getRealArch())
   },
 
   // attention:

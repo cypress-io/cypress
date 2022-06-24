@@ -28,6 +28,25 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
   })
 
+  it('includes x-framework and x-dev-server in request to Cypress manifest, even when launched in e2e mode', () => {
+    cy.withCtx((ctx, o) => {
+      o.sinon.spy(ctx.util.fetch)
+    })
+
+    cy.scaffoldProject('todos')
+    cy.openProject('todos', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.withCtx((ctx, o) => {
+      expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+        headers: {
+          'x-framework': 'react',
+          'x-dev-server': 'webpack',
+        },
+      })
+    })
+  })
+
   it('goes to component test onboarding when launched with --component and not configured', () => {
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad', ['--component'])
@@ -204,5 +223,17 @@ describe('Launchpad: Open Mode', () => {
     cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
+  })
+
+  // Assert that we do not glob the absolute projectRoot
+  // and fail supportFile lookups during project initialization.
+  // https://github.com/cypress-io/cypress/issues/22040
+  it('opens projects with paths that contain glob syntax', () => {
+    cy.scaffoldProject('project-with-(glob)-[chars]')
+    cy.openProject('project-with-(glob)-[chars]', ['--e2e'])
+    cy.visitLaunchpad()
+
+    cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 })

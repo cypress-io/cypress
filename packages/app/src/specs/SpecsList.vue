@@ -69,24 +69,18 @@
           :key="row.index"
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
+          :is-leaf="row.data.isLeaf"
+          :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          @toggleRow="row.data.toggle"
         >
           <template #file>
-            <RouterLink
-              v-if="row.data.isLeaf && row.data"
-              :key="row.data.data?.absolute"
-              class="focus:outline-transparent"
-              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
-              data-cy="spec-item-link"
-              @click.meta.prevent="handleCtrlClick"
-              @click.ctrl.prevent="handleCtrlClick"
-            >
-              <SpecItem
-                :file-name="row.data.data?.fileName || row.data.name"
-                :extension="row.data.data?.specFileExtension || ''"
-                :indexes="row.data.data?.fileIndexes"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
-              />
-            </RouterLink>
+            <SpecItem
+              v-if="row.data.isLeaf"
+              :file-name="row.data.data?.fileName || row.data.name"
+              :extension="row.data.data?.specFileExtension || ''"
+              :indexes="row.data.data?.fileIndexes"
+              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
+            />
 
             <RowDirectory
               v-else
@@ -96,7 +90,7 @@
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="getDirIndexes(row.data)"
               :aria-controls="getIdIfDirectory(row)"
-              @click="row.data.toggle"
+              @click.stop="row.data.toggle"
             />
           </template>
 
@@ -240,11 +234,6 @@ const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpec
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
 watch(() => treeSpecList.value, () => scrollTo(0))
-
-function handleCtrlClick () {
-  // noop intended to reduce the chances of opening tests multiple tabs
-  // which is not a supported state in Cypress
-}
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {

@@ -5,7 +5,16 @@
     help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
-    <div class="border border-dashed rounded border-gray-100 text-center p-24px w-592px">
+    <NoInternetConnection
+      v-if="!isOnline"
+      class="mt-24px"
+    >
+      {{ t('launchpadErrors.noInternet.message') }}
+    </NoInternetConnection>
+    <div
+      v-else
+      class="border border-dashed rounded border-gray-100 text-center p-24px w-592px"
+    >
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
@@ -19,7 +28,10 @@
         {{ t('runs.connect.modal.createOrg.button') }}
       </ExternalLink>
     </div>
-    <template #footer>
+    <template
+      v-if="isOnline"
+      #footer
+    >
       <div class="flex gap-16px">
         <Button
           v-if="waitingOrgToBeCreated"
@@ -58,11 +70,14 @@ import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
+
 import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
+const online = useOnline()
 
 const emit = defineEmits<{
   (event: 'cancel'): void
@@ -108,4 +123,6 @@ onBeforeUnmount(() => {
 })
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
+const isOnline = computed(() => online.value)
+
 </script>

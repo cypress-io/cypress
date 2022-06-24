@@ -2,7 +2,6 @@
   "name": "@cypress/vue2",
   "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js@2 with Cypress.io ✌️🌲",
-  "private": true,
   "main": "dist/cypress-vue2.cjs.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -53,7 +52,6 @@
   "unpkg": "dist/cypress-vue2.browser.js",
   "module": "dist/cypress-vue2.esm-bundler.js",
   "publishConfig": {
-    "access": "public",
-    "registry": "http://registry.npmjs.org/"
+    "access": "public"
   }
 }

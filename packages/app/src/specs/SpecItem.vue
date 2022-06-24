@@ -4,14 +4,17 @@
     data-cy="spec-item"
   >
     <i-cy-document-blank_x16
-      class="icon-light-gray-50 icon-dark-gray-200"
+      class="icon-light-gray-50 icon-dark-gray-200 group-hocus:icon-light-indigo-200 group-hocus:icon-dark-indigo-400"
     />
 
-    <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-600">
+    <div
+      :title="fileName + extension"
+      class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
+    >
       <HighlightedText
         :text="fileName"
         :indexes="indexes.filter((idx) => idx < fileName.length)"
-        class="font-medium text-indigo-500 group-hocus:text-indigo-600"
+        class="font-medium text-indigo-500 group-hocus:text-indigo-700"
         highlight-classes="text-gray-1000"
       />
       <HighlightedText

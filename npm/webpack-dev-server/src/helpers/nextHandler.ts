@@ -69,7 +69,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       buildId: `@cypress/react-${Math.random().toString()}`,
       config: nextConfig,
       dev: true,
-      pagesDir: findPagesDir(devServerConfig.cypressConfig.projectRoot),
+      pagesDir: await findPagesDir(devServerConfig.cypressConfig.projectRoot),
       entrypoints: {},
       rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
       ...runWebpackSpan,
@@ -106,9 +106,9 @@ function checkSWC (
   return false
 }
 
-const existsSync = (file: string) => {
+const exists = async (file: string) => {
   try {
-    fs.accessSync(file, fs.constants.F_OK)
+    await fs.promises.access(file, fs.constants.F_OK)
 
     return true
   } catch (_) {
@@ -121,16 +121,16 @@ const existsSync = (file: string) => {
  * `${projectRoot}/pages` or `${projectRoot}/src/pages`.
  * If neither is found, return projectRoot
  */
-function findPagesDir (projectRoot: string) {
+async function findPagesDir (projectRoot: string) {
   // prioritize ./pages over ./src/pages
   let pagesDir = path.join(projectRoot, 'pages')
 
-  if (existsSync(pagesDir)) {
+  if (await exists(pagesDir)) {
     return pagesDir
   }
 
   pagesDir = path.join(projectRoot, 'src', 'pages')
-  if (existsSync(pagesDir)) {
+  if (await exists(pagesDir)) {
     return pagesDir
   }
 
@@ -232,7 +232,7 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
     // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
     if ((request === 'webpack' || request.startsWith('webpack/')) && webpack.majorVersion === 4) {
       const resolvePath = require.resolve(request, {
-        paths: [cypressWebpackPath],
+        paths: [cypressWebpackPath(devServerConfig)],
       })
 
       debug('NextWebpack: Module._load for webpack@4 - %s', resolvePath)
