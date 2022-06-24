@@ -1714,7 +1714,8 @@ describe('Migrate custom config files', () => {
   it('shows error if plugins file do not exist', () => {
     scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
 
-    cy.contains(`${getPathForPlatform('foo/bar')} file threw an error.`)
-    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
+    const err = `Looked for pluginsFile at ${getPathForPlatform('foo/bar')}, but it was not found.`
+
+    cy.contains(err)
   })
 })

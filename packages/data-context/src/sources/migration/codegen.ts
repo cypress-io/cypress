@@ -210,7 +210,13 @@ export async function getLegacyPluginsCustomFilePath (projectRoot: string, plugi
 
   debug('fs.stats on %s', pluginLoc)
 
-  const stats = await fs.stat(pluginLoc)
+  let stats: fs.Stats
+
+  try {
+    stats = await fs.stat(pluginLoc)
+  } catch (e) {
+    throw Error(`Looked for pluginsFile at ${pluginPath}, but it was not found.`)
+  }
 
   if (stats.isFile()) {
     debug('found pluginsFile %s', pluginLoc)
