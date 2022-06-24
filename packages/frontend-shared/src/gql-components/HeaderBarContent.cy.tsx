@@ -78,7 +78,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
       it('truncates the branch name if it is long', () => {
         mountFragmentWithData({ currentProject: {
-          ...currentProject,
+          title: 'app',
           branch: 'application-program/hard-drive-parse',
         } })
 

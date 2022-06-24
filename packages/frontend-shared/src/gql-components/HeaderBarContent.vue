@@ -23,18 +23,18 @@
             <!-- In Main.vue, <GlobalPage/> is rendered in global mode or if there is no current project -->
             <!-- We match that logic for the "Projects" breadcrumb -->
             <li
-              v-if="props.gql.isInGlobalMode || !props.gql.currentProject"
+              v-if="props.gql.isInGlobalMode || !currentProject"
               class="inline-block"
             >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
                 class="font-medium"
-                :class="props.gql.currentProject ? 'text-indigo-500 hocus-link-default' :
+                :class="currentProject ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                :role="props.gql.currentProject ? undefined : 'link'"
-                :href="props.gql.currentProject ? 'select-project' : undefined"
-                :ariaDisabled="!props.gql.currentProject"
+                :role="currentProject ? undefined : 'link'"
+                :href="currentProject ? 'select-project' : undefined"
+                :ariaDisabled="!currentProject"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
@@ -42,7 +42,7 @@
             </li>
             <!-- Once we have a current project, only show "Projects" in global mode -->
             <li
-              v-if="props.gql.isInGlobalMode && props.gql.currentProject?.title"
+              v-if="props.gql.isInGlobalMode && currentProject?.title"
               class="mx-2px align-middle inline-block"
               aria-hidden
             >
@@ -60,10 +60,10 @@
                 :ariaDisabled="!canClearTestingType"
                 @click.prevent="clearTestingType"
               >
-                {{ props.gql?.currentProject?.title }}
+                {{ currentProject?.title }}
               </a>
               <template
-                v-if="props.gql?.currentProject?.branch"
+                v-if="currentProject?.branch"
               >
                 <!-- Using a margin here causes different overflow problems.
                         See PR #21325. Using a space for now. -->
@@ -75,10 +75,10 @@
                   <span
                     class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
                   >
-                    ({{ props.gql.currentProject.branch }})
+                    ({{ currentProject.branch }})
                   </span>
                   <template #popper>
-                    {{ props.gql.currentProject.branch }}
+                    {{ currentProject.branch }}
                   </template>
                 </Tooltip>
               </template>
@@ -93,10 +93,10 @@
               />
             </li>
             <li
-              v-if="props.gql?.currentProject?.currentTestingType"
+              v-if="currentProject?.currentTestingType"
               class="inline-block"
             >
-              {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
+              {{ t(`testingType.${currentProject?.currentTestingType}.name`) }}
             </li>
           </ol>
         </nav>
@@ -283,9 +283,11 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
+const currentProject = computed(() => props.gql.currentProject)
+
 const canClearTestingType = computed(() => {
   return props.gql.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
-})?.value
+})
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
@@ -296,11 +298,15 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  clearCurrentProjectMutation.executeMutation({})
+  if (currentProject.value) {
+    clearCurrentProjectMutation.executeMutation({})
+  }
 }
 
 const clearTestingType = () => {
-  clearCurrentTestingTypeMutation.executeMutation({})
+  if (canClearTestingType.value) {
+    clearCurrentTestingTypeMutation.executeMutation({})
+  }
 }
 
 const props = defineProps<{
