@@ -133,13 +133,16 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
+      v-bind="containerProps"
       class="pb-32px spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
-      v-bind="containerProps"
     >
       <div
         v-bind="wrapperProps"
         class="divide-y-1 children:h-40px"
+        :class="{
+          'pointer-events-none': isScrolling
+        }"
       >
         <SpecsListRowItem
           v-for="row in list"
@@ -154,14 +157,15 @@
           <template #file>
             <SpecItem
               v-if="row.data.isLeaf"
+              :highlight-text="!!search.length"
               :file-name="row.data.data?.fileName || row.data.name"
               :extension="row.data.data?.specFileExtension || ''"
               :indexes="row.data.data?.fileIndexes"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
             />
-
             <RowDirectory
               v-else
+              :highlight-text="!!search.length"
               :name="row.data.name"
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
@@ -174,7 +178,7 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.isLeaf && row.data.data?.gitInfo"
+              v-if=" row.data.isLeaf && row.data.data?.gitInfo"
               :gql="row.data.data?.gitInfo"
             />
           </template>
@@ -199,10 +203,19 @@
             </div>
           </template>
           <template #average-duration>
-            <AverageDuration
-              v-if="row.data.isLeaf"
-              :gql="row.data.data?.cloudSpec ?? null"
-            />
+            <div
+              v-if="row?.data?.data?.cloudSpec?.data?.__typename === 'CloudProjectSpec' && row?.data?.data?.cloudSpec?.data?.averageDuration"
+              class="h-full grid text-gray-700 justify-end items-center"
+              data-cy="average-duration"
+            >
+              {{ getDurationString(row?.data?.data?.cloudSpec?.data?.averageDuration) }}
+            </div>
+            <div
+              v-else
+              class="h-full grid text-gray-400 justify-end items-center"
+            >
+              --
+            </div>
           </template>
         </SpecsListRowItem>
       </div>
@@ -240,7 +253,6 @@ import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
-import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
@@ -254,7 +266,7 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
-import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
+import { useDebounce, useOnline, useResizeObserver, useScroll } from '@vueuse/core'
 import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
@@ -262,6 +274,7 @@ import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { CloudData_RefetchDocument } from '../generated/graphql-test'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import { getDurationString } from '@packages/frontend-shared/src/utils/time'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -345,7 +358,18 @@ fragment SpecsList on Spec {
   cloudSpec(name: "cloudSpec") @include(if: $hasBranch) {
     id
     fetchingStatus
-    ...AverageDuration
+    data {
+      __typename
+      ... on CloudProjectSpecNotFound {
+      retrievedAt
+    }
+      ... on CloudProjectSpec {
+      id
+      retrievedAt
+      averageDuration(fromBranch: $fromBranch)
+    }
+    }
+    
     ...RunStatusDots
   }
 }
@@ -436,7 +460,9 @@ const collapsible = computed(() => {
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
-const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
+const { containerProps, list, wrapperProps, scrollTo, api } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
+
+const { isScrolling } = useScroll(api.containerRef)
 
 const scrollbarOffset = ref(0)
 
