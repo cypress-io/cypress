@@ -532,14 +532,14 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
@@ -1182,7 +1182,7 @@ jobs:
             run-vite-dev-server-integration-tests
       - run:
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             yarn percy build:finalize
 
   cli-visual-tests:
@@ -1204,7 +1204,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1549,7 +1549,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1572,7 +1572,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1594,7 +1594,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
