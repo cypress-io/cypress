@@ -40,6 +40,7 @@
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
+            <!-- Once we have a current project, only show "Projects" in global mode -->
             <li
               v-if="props.gql.isInGlobalMode && props.gql.currentProject?.title"
               class="mx-2px align-middle inline-block"
