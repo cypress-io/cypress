@@ -45,6 +45,7 @@
     "cookie-parser": "1.4.5",
     "core-js-pure": "3.21.0",
     "cors": "2.8.5",
+    "crypto-js": "4.1.1",
     "cypress-multi-reporters": "1.4.0",
     "dayjs": "^1.10.3",
     "debug": "^4.3.2",
