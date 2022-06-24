@@ -5,6 +5,20 @@ import { defaultMessages } from '@cy/i18n'
 const text = defaultMessages.topNav
 
 describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
+  const mountFragmentWithData = (data = {}) => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={{ ...gqlVal, ...data }} />
+        </div>
+      ),
+    })
+  }
+
+  afterEach(() => {
+    cy.percySnapshot()
+  })
+
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
@@ -12,7 +26,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.percySnapshot('before browsers open')
 
-    cy.get('[data-cy="top-nav-active-browser"]')
+    cy.findByTestId('top-nav-active-browser')
     .should('be.visible')
     .click()
 
@@ -22,11 +36,11 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
+      cy.findByTestId('unsupported-browser-tooltip-trigger')
       .should('not.exist')
     })
 
-    cy.get('[data-cy="top-nav-browser-list-item"]').parent()
+    cy.findByTestId('top-nav-browser-list-item').parent()
     .should('have.class', 'overflow-auto')
 
     cy.contains('Version unsupported')
@@ -34,7 +48,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
+      cy.findByTestId('unsupported-browser-tooltip-trigger')
       .should('exist')
       .trigger('mouseenter')
     })
@@ -45,43 +59,42 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   describe('breadcrumbs', () => {
-    it('in global mode, shows link to Projects', () => {
-      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-        render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
-            <HeaderBarContent gql={{ ...gqlVal, isInGlobalMode: true }} />
-          </div>
-        ),
+    const currentProject = {
+      title: 'app',
+      branch: 'chore: update tests',
+    }
+
+    context('global mode', () => {
+      it('shows links to Projects and branch name when currentProject is defined', () => {
+        mountFragmentWithData({ isInGlobalMode: true, currentProject })
+        cy.contains('a', 'Projects')
+        .should('have.attr', 'href', 'select-project')
+        .should('have.attr', 'aria-disabled', 'false')
+        .should('not.have.attr', 'role')
       })
 
-      cy.contains('a', 'Projects').should('be.visible').should('have.attr', 'href', 'global-mode')
-      cy.percySnapshot()
+      it('shows disabled link to Projects when currentProject is NOT defined', () => {
+        mountFragmentWithData({ isInGlobalMode: true, currentProject: undefined })
+        cy.contains('a', 'Projects')
+        .should('have.attr', 'aria-disabled', 'true')
+        .should('have.attr', 'role', 'link')
+        .should('not.have.attr', 'href')
+      })
     })
 
-    it('in non-global mode, does NOT show link to Projects when currentProject is defined', () => {
-      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-        render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
-            <HeaderBarContent gql={gqlVal} />
-          </div>
-        ),
+    context('non-global mode', () => {
+      it('does not show link to Projects when currentProject is defined', () => {
+        mountFragmentWithData({ isInGlobalMode: false, currentProject })
+        cy.contains('a', 'Projects').should('not.exist')
       })
 
-      cy.contains('a', 'Projects').should('not.exist')
-      cy.percySnapshot()
-    })
-
-    it('in non-global mode, shows link to Projects when currentProject is undefined', () => {
-      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-        render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
-            <HeaderBarContent gql={{ ...gqlVal, currentProject: undefined }} />
-          </div>
-        ),
+      it('shows link to Projects when currentProject is NOT defined', () => {
+        mountFragmentWithData({ isInGlobalMode: false, currentProject: undefined })
+        cy.contains('a', 'Projects').should('exist')
+        .should('have.attr', 'aria-disabled', 'true')
+        .should('have.attr', 'role', 'link')
+        .should('not.have.attr', 'href')
       })
-
-      cy.contains('a', 'Projects').should('be.visible').should('have.attr', 'href', 'global-mode')
-      cy.percySnapshot()
     })
   })
 
@@ -96,7 +109,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('Projects').should('be.visible')
-    cy.get('[data-cy="top-nav-active-browser"]').should('not.exist')
+    cy.findByTestId('top-nav-active-browser').should('not.exist')
     cy.percySnapshot()
     cy.contains('button', text.docsMenu.docsHeading).click()
 
@@ -171,7 +184,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
-    cy.percySnapshot()
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
@@ -215,9 +227,9 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('v8.6.0 • Upgrade').should('be.visible')
     cy.percySnapshot('before upgrade click')
     cy.contains('v8.6.0 • Upgrade').click()
-    cy.get('[data-cy="latest-version"]').contains('8.7.0')
-    cy.get('[data-cy="current-version"]').contains('8.6.0')
-    cy.get('[data-cy="update-hint"]').should('be.visible')
+    cy.findByTestId('latest-version').contains('8.7.0')
+    cy.findByTestId('current-version').contains('8.6.0')
+    cy.findByTestId('update-hint').should('be.visible')
     cy.percySnapshot('after upgrade click')
     cy.contains('button', 'Update to').click()
 
@@ -323,7 +335,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
     cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
-    cy.percySnapshot()
   })
 
   it('Shows a page name instead of project when a page name is provided', () => {
