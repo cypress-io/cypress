@@ -100,9 +100,10 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { RunsErrorRenderer_RequestAccessDocument, SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
+import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
+import { SpecHeaderCloudDataTooltip_RequestAccessDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 const { t } = useI18n()
 
@@ -138,6 +139,26 @@ fragment SpecHeaderCloudDataTooltip on Query {
 }
 `
 
+gql`
+mutation SpecHeaderCloudDataTooltip_RequestAccess( $projectId: String! ) {
+  cloudProjectRequestAccess(projectSlug: $projectId) {
+    __typename
+    ... on CloudProjectUnauthorized {
+      message
+      hasRequestedAccess
+    }
+  }
+}
+`
+
+const hasRequestedAccess = ref(false)
+
+onMounted(() => {
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    hasRequestedAccess.value = props.gql.currentProject.cloudProject.hasRequestedAccess ?? false
+  }
+})
+
 const projectConnectionStatus = computed(() => {
   if (!props.gql.cloudViewer) return 'LOGGED_OUT'
 
@@ -146,7 +167,7 @@ const projectConnectionStatus = computed(() => {
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
 
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    if (props.gql.currentProject.cloudProject.hasRequestedAccess) {
+    if (hasRequestedAccess.value) {
       return 'ACCESS_REQUESTED'
     }
 
@@ -156,13 +177,19 @@ const projectConnectionStatus = computed(() => {
   return 'CONNECTED'
 })
 
-const requestAccessMutation = useMutation(RunsErrorRenderer_RequestAccessDocument)
+const requestAccessMutation = useMutation(SpecHeaderCloudDataTooltip_RequestAccessDocument)
 
-function requestAccess () {
+async function requestAccess () {
   const projectId = props.gql.currentProject?.projectId
 
   if (projectId) {
-    requestAccessMutation.executeMutation({ projectId })
+    const result = await requestAccessMutation.executeMutation({ projectId })
+
+    if (result.data?.cloudProjectRequestAccess?.__typename === 'CloudProjectUnauthorized') {
+      hasRequestedAccess.value = result.data.cloudProjectRequestAccess.hasRequestedAccess ?? false
+    } else {
+      hasRequestedAccess.value = false
+    }
   }
 }
 

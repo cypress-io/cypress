@@ -1,4 +1,4 @@
-import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
+import { SpecHeaderCloudDataTooltipFragmentDoc, SpecHeaderCloudDataTooltip_RequestAccessDocument } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import { get, set } from 'lodash'
 import { defaultMessages } from '@cy/i18n'
@@ -136,11 +136,29 @@ describe('SpecHeaderCloudDataTooltip', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
+          cy.percySnapshot()
+        })
+
+        it('should update to "Request Sent" when button is triggered', () => {
+          cy.stubMutationResolver(SpecHeaderCloudDataTooltip_RequestAccessDocument, (defineResult) => {
+            return defineResult({
+              cloudProjectRequestAccess: {
+                __typename: 'CloudProjectUnauthorized',
+                message: 'msg',
+                hasRequestedAccess: true,
+              },
+            })
+          })
+
+          cy.get('.v-popper').trigger('mouseenter')
+
           cy.findByTestId('request-access-button')
           .should('be.visible')
           .click()
 
-          cy.percySnapshot()
+          cy.findByTestId('access-requested-button')
+          .should('be.visible')
+          .should('be.disabled')
         })
       })
 
