@@ -150,8 +150,10 @@ const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
 const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
-    mutation.executeMutation({ id })
+    return mutation.executeMutation({ id })
   }
+
+  return
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)

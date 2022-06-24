@@ -23,8 +23,9 @@
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
-            prefix-icon-class="icon-dark-indigo-500"
-            @click="retry?.(baseError.id)"
+            :prefix-icon-class="`${retrying && 'animate-spin'} icon-dark-indigo-500`"
+            :disabled="retrying"
+            @click="retryFn()"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -147,6 +148,13 @@ const props = defineProps<{
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
+
+let retrying = false
+const retryFn = async () => {
+  retrying = true
+  await props.retry?.(baseError.value.id)
+  retrying = false
+}
 
 const getDocsType = (): string => {
   const { errorType, errorStack } = baseError.value
