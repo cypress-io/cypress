@@ -18,46 +18,45 @@
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
         >
-        <nav
-          role="navigation"
-          aria-label="Breadcrumbs"
-        >
+        <nav>
           <ol>
+            <!-- In Main.vue, <GlobalPage/> is rendered in global mode or if there is no current project -->
+            <!-- We match that logic for the "Projects" breadcrumb -->
             <li
-              v-if="hasLinkToProjects"
+              v-if="props.gql.isInGlobalMode || !props.gql.currentProject"
               class="inline-block"
             >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
-                class="font-medium text-indigo-500 hocus-link-default"
-                role="link"
-                href="global-mode"
+                class="font-medium"
+                :class="props.gql.currentProject ? 'text-indigo-500 hocus-link-default' :
+                  'text-gray-700'"
+                :role="props.gql.currentProject ? undefined : 'link'"
+                :href="props.gql.currentProject ? 'select-project' : undefined"
+                :ariaDisabled="!props.gql.currentProject"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
             <li
-              v-if="hasLinkToProjects"
+              v-if="props.gql.isInGlobalMode && props.gql.currentProject?.title"
               class="mx-2px align-middle inline-block"
               aria-hidden
             >
-              <i-cy-chevron-right_x16
-
-                class="icon-dark-gray-200"
-              />
+              <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
             </li>
             <li class="inline-block">
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
                 class="font-medium"
-                :role="hasLinkToCurrentProject ? undefined : 'link'"
-                :href="hasLinkToCurrentProject ? 'choose-testing-type' : undefined"
-                :class="hasLinkToCurrentProject ? 'text-indigo-500 hocus-link-default' :
+                :role="canClearTestingType ? undefined : 'link'"
+                :href="canClearTestingType ? 'choose-testing-type' : undefined"
+                :class="canClearTestingType ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                :ariaDisabled="!hasLinkToCurrentProject"
+                :ariaDisabled="!canClearTestingType"
                 @click.prevent="clearTestingType"
               >
                 {{ props.gql?.currentProject?.title }}
@@ -265,7 +264,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     branch
     isLoadingNodeEvents
   }
-  projectRootFromCI
+  isInGlobalMode,
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth
@@ -283,13 +282,9 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const hasLinkToProjects = computed(() => {
-  return props.gql?.currentProject && !props.gql?.projectRootFromCI
-})
-
-const hasLinkToCurrentProject = computed(() => {
-  return props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
-})
+const canClearTestingType = computed(() => {
+  return props.gql.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
+})?.value
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
@@ -300,15 +295,11 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (hasLinkToProjects.value) {
-    clearCurrentProjectMutation.executeMutation({})
-  }
+  clearCurrentProjectMutation.executeMutation({})
 }
 
 const clearTestingType = () => {
-  if (hasLinkToCurrentProject.value) {
-    clearCurrentTestingTypeMutation.executeMutation({})
-  }
+  clearCurrentTestingTypeMutation.executeMutation({})
 }
 
 const props = defineProps<{

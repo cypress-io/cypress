@@ -43,7 +43,4 @@ export const stubQuery: MaybeResolver<Query> = {
   scaffoldedFiles () {
     return null
   },
-  projectRootFromCI () {
-    return false
-  },
 }
