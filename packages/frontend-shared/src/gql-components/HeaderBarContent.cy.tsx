@@ -40,7 +40,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .should('not.exist')
     })
 
-    cy.findByTestId('top-nav-browser-list-item').parent()
+    cy.get('[data-cy="top-nav-browser-list-item"]').parent()
     .should('have.class', 'overflow-auto')
 
     cy.contains('Version unsupported')
@@ -59,13 +59,38 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   describe('breadcrumbs', () => {
-    const currentProject = {
-      title: 'app',
-      branch: 'chore: update tests',
-    }
+    context('with current project', () => {
+      const currentProject = {
+        title: 'app',
+        branch: 'chore: update tests',
+      }
 
-    context('global mode', () => {
-      it('shows links to Projects and branch name when currentProject is defined', () => {
+      it('displays the active project name and testing type', () => {
+        mountFragmentWithData()
+        cy.contains('test-project').should('be.visible')
+        cy.contains('e2e testing', { matchCase: false }).should('be.visible')
+      })
+
+      it('displays the branch name', () => {
+        mountFragmentWithData({ currentProject })
+        cy.contains(`${currentProject.title} (${currentProject.branch})`).should('be.visible')
+      })
+
+      it('truncates the branch name if it is long', () => {
+        mountFragmentWithData({ currentProject: {
+          ...currentProject,
+          branch: 'application-program/hard-drive-parse',
+        } })
+
+        cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
+
+        cy.percySnapshot()
+
+        cy.get('.truncate').realHover()
+        cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
+      })
+
+      it('in global mode, show links to Projects and branch name', () => {
         mountFragmentWithData({ isInGlobalMode: true, currentProject })
         cy.contains('a', 'Projects')
         .should('have.attr', 'href', 'select-project')
@@ -73,22 +98,22 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         .should('not.have.attr', 'role')
       })
 
-      it('shows disabled link to Projects when currentProject is NOT defined', () => {
+      it('in non-global mode, does not show link to Projects', () => {
+        mountFragmentWithData({ isInGlobalMode: false, currentProject })
+        cy.contains('a', 'Projects').should('not.exist')
+      })
+    })
+
+    context('without current project', () => {
+      it('in global mode, shows disabled link to Projects', () => {
         mountFragmentWithData({ isInGlobalMode: true, currentProject: undefined })
         cy.contains('a', 'Projects')
         .should('have.attr', 'aria-disabled', 'true')
         .should('have.attr', 'role', 'link')
         .should('not.have.attr', 'href')
       })
-    })
 
-    context('non-global mode', () => {
-      it('does not show link to Projects when currentProject is defined', () => {
-        mountFragmentWithData({ isInGlobalMode: false, currentProject })
-        cy.contains('a', 'Projects').should('not.exist')
-      })
-
-      it('shows link to Projects when currentProject is NOT defined', () => {
+      it('in non-global mode, shows link to Projects', () => {
         mountFragmentWithData({ isInGlobalMode: false, currentProject: undefined })
         cy.contains('a', 'Projects').should('exist')
         .should('have.attr', 'aria-disabled', 'true')
@@ -99,16 +124,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('renders without browser menu by default and other items work', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+    mountFragmentWithData()
 
-      render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
-          <HeaderBarContent gql={gqlVal} />
-        </div>
-      ),
-    })
-
-    cy.contains('Projects').should('be.visible')
     cy.findByTestId('top-nav-active-browser').should('not.exist')
     cy.percySnapshot()
     cy.contains('button', text.docsMenu.docsHeading).click()
@@ -125,16 +142,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('docs menu has expected links with no current project', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      onResult: (result) => {
-        result.currentProject = null
-      },
-      render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
-          <HeaderBarContent gql={gqlVal} />
-        </div>
-      ),
-    })
+    mountFragmentWithData({ currentProject: null })
 
     // we render without a current project to validate ciSetup and fasterTests links
     // because outside of global mode, those are buttons that trigger popups
@@ -158,29 +166,22 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('does not show hint when on latest version of Cypress', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      onResult: (result) => {
-        result.versions = {
-          __typename: 'VersionData',
-          latest: {
-            __typename: 'Version',
-            id: '8.7.0',
-            version: '8.7.0',
-            released: '2021-10-25T21:00:00.000Z',
-          },
-          current: {
-            __typename: 'Version',
-            id: '8.7.0',
-            version: '8.7.0',
-            released: '2021-10-25T21:00:00.000Z',
-          },
-        }
+    mountFragmentWithData({
+      versions: {
+        __typename: 'VersionData',
+        latest: {
+          __typename: 'Version',
+          id: '8.7.0',
+          version: '8.7.0',
+          released: '2021-10-25T21:00:00.000Z',
+        },
+        current: {
+          __typename: 'Version',
+          id: '8.7.0',
+          version: '8.7.0',
+          released: '2021-10-25T21:00:00.000Z',
+        },
       },
-      render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
-          <HeaderBarContent gql={gqlVal} />
-        </div>
-      ),
     })
 
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
@@ -242,62 +243,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('displays the active project name and testing type', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
-    })
-
-    cy.contains('test-project').should('be.visible')
-    cy.contains('e2e testing', { matchCase: false }).should('be.visible')
-  })
-
-  it('displays the branch name', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      onResult: (result) => {
-        if (!result.currentProject) {
-          return
-        }
-
-        result.currentProject.branch = 'develop'
-      },
-      render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
-          <HeaderBarContent gql={gqlVal} />
-        </div>
-      ),
-    })
-
-    cy.contains('develop').should('be.visible')
-  })
-
-  it('truncates the branch name if it is long', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      onResult: (result) => {
-        if (!result.currentProject) {
-          return
-        }
-
-        result.currentProject.branch = 'application-program/hard-drive-parse'
-      },
-      render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
-          <HeaderBarContent gql={gqlVal} />
-        </div>
-      ),
-    })
-
-    cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
-
-    cy.percySnapshot()
-
-    cy.get('.truncate').realHover()
-    cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
-  })
-
   it('the login modal reaches "opening browser" status', () => {
-    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
-    })
+    mountFragmentWithData()
 
     cy.findByRole('button', { name: text.login.actionLogin })
     .click()
