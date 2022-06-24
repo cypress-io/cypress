@@ -27,10 +27,6 @@ let ctx: DataContext | null = null
  * Shouldn't ever be called from runtime code, primarily for test situations where we need to
  */
 export async function clearCtx () {
-  ctx = null
-}
-
-export async function clearAppCtx () {
   if (ctx) {
     await ctx.destroy()
     ctx = null

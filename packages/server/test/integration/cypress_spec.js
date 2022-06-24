@@ -42,7 +42,7 @@ const system = require(`../../lib/util/system`)
 const appData = require(`../../lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
-const { getCtx } = require(`../../lib/makeDataContext`)
+const { getCtx, clearCtx } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 
 const TYPICAL_BROWSERS = [
@@ -1810,7 +1810,8 @@ describe('lib/cypress', () => {
   })
 
   context('no args', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await clearCtx()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(interactiveMode, 'ready').resolves()
     })
