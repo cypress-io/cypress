@@ -24,12 +24,23 @@
           :key="i"
           class="ml-4px"
         >
-          <i-cy-dot-solid_x4
+          <svg
             width="4"
             height="4"
+            viewBox="0 0 4 4"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
             :class="dot"
             :data-cy="'run-status-dot-'+i"
-          />
+          >
+            <circle
+              cx="2"
+              cy="2"
+              r="2"
+              fill="#1FA971"
+              class="icon-light"
+            />
+          </svg>
         </div>
         <div>
           <component
