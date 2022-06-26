@@ -50,11 +50,14 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
   const roots = parent ? collectRoots<T>(parent) : []
   const [expanded, toggle] = useToggle(cache?.get(rawNode.id) ?? !!expandInitially)
 
-  watch(() => expanded.value, (newValue) => cache?.set(rawNode.id, newValue))
-
   const hidden = computed(() => {
     return !!roots.find((r) => r.expanded.value === false)
   })
+
+  // If this is a non-hidden directory then watch for expansion changes and register them into the cache if one was provided
+  if (!hidden.value && treeNode.children?.length) {
+    watch(() => expanded.value, (newValue) => cache?.set(rawNode.id, newValue))
+  }
 
   return {
     ...treeNode,

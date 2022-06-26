@@ -129,7 +129,9 @@ mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
 const hasRequestedAccess = ref(false)
 
 onMounted(() => {
-  hasRequestedAccess.value = (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject.cloudProject.hasRequestedAccess) ?? false
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    hasRequestedAccess.value = props.gql.currentProject.cloudProject.hasRequestedAccess ?? false
+  }
 })
 
 const requestAccessMutation = useMutation(RunsErrorRenderer_RequestAccessDocument)
@@ -140,7 +142,11 @@ async function requestAccess () {
   if (projectId) {
     const result = await requestAccessMutation.executeMutation({ projectId })
 
-    hasRequestedAccess.value = result.data?.cloudProjectRequestAccess?.__typename === 'CloudProjectUnauthorized' ? result.data.cloudProjectRequestAccess.hasRequestedAccess ?? false : false
+    if (result.data?.cloudProjectRequestAccess?.__typename === 'CloudProjectUnauthorized') {
+      hasRequestedAccess.value = result.data.cloudProjectRequestAccess.hasRequestedAccess ?? false
+    } else {
+      hasRequestedAccess.value = false
+    }
   }
 }
 

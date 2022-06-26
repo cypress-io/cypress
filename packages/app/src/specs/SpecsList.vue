@@ -96,30 +96,30 @@
       <div class="flex items-center justify-end whitespace-nowrap">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text-key-path="'specPage.latestRuns.header'"
-          :header-short-text-key-path="'specPage.latestRuns.headerShort'"
-          :connected-text-key-path="'specPage.latestRuns.tooltip.connected'"
-          :not-connected-text-key-path="'specPage.latestRuns.tooltip.notConnected'"
-          :no-access-text-key-path="'specPage.latestRuns.tooltip.noAccess'"
-          :docs-text-key-path="'specPage.latestRuns.tooltip.linkText'"
+          header-text-key-path="specPage.latestRuns.header"
+          header-short-text-key-path="specPage.latestRuns.headerShort"
+          connected-text-key-path="specPage.latestRuns.tooltip.connected"
+          not-connected-text-key-path="specPage.latestRuns.tooltip.notConnected"
+          no-access-text-key-path="specPage.latestRuns.tooltip.noAccess"
+          docs-text-key-path="specPage.latestRuns.tooltip.linkText"
           :docs-url="latestRunsDocsUrl"
           data-cy="latest-runs-header"
-          @showLogin="()=>showLogin('Specs Latest Runs Tooltip')"
+          @showLogin="showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="hidden md:flex md:col-span-2 items-center justify-end truncate">
+      <div class="hidden items-center justify-end truncate md:flex md:col-span-2">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          :header-text-key-path="'specPage.averageDuration.header'"
-          :header-short-text-key-path="'specPage.averageDuration.headerShort'"
-          :connected-text-key-path="'specPage.averageDuration.tooltip.connected'"
-          :not-connected-text-key-path="'specPage.averageDuration.tooltip.notConnected'"
-          :no-access-text-key-path="'specPage.averageDuration.tooltip.noAccess'"
-          :docs-text-key-path="'specPage.averageDuration.tooltip.linkText'"
+          header-text-key-path="specPage.averageDuration.header"
+          header-short-text-key-path="specPage.averageDuration.headerShort"
+          connected-text-key-path="specPage.averageDuration.tooltip.connected"
+          not-connected-text-key-path="specPage.averageDuration.tooltip.notConnected"
+          no-access-text-key-path="specPage.averageDuration.tooltip.noAccess"
+          docs-text-key-path="specPage.averageDuration.tooltip.linkText"
           :docs-url="averageDurationDocsUrl"
           data-cy="average-duration-header"
-          @showLogin="()=>showLogin('Specs Average Duration Tooltip')"
+          @showLogin="showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
         />
       </div>
@@ -191,11 +191,9 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] w-full animate-pulse"
+                class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
                 data-cy="run-status-dots-loading"
-              >
-                &nbsp;
-              </div>
+              />
             </div>
           </template>
           <template #average-duration>
@@ -225,7 +223,7 @@
     v-if="isProjectConnectOpen"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
-    @success="refreshPage()"
+    @success="refreshPage"
   />
 </template>
 
@@ -244,7 +242,7 @@ import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
@@ -260,30 +258,25 @@ import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCo
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { CloudData_RefetchDocument } from '../generated/graphql-test'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
 
 const route = useRoute()
 const { t } = useI18n()
 
-const latestRunsDocsUrl = computed(() => {
-  return getUrlWithParams({
-    url: 'https://on.cypress.io/specs-latest-runs',
-    params: {
-      utm_medium: 'Specs Latest Runs Tooltip',
-      utm_campaign: 'Latest Runs',
-    },
-  })
+const latestRunsDocsUrl = getUrlWithParams({
+  url: 'https://on.cypress.io/specs-latest-runs',
+  params: {
+    utm_medium: 'Specs Latest Runs Tooltip',
+    utm_campaign: 'Latest Runs',
+  },
 })
 
-const averageDurationDocsUrl = computed(() => {
-  return getUrlWithParams({
-    url: 'https://on.cypress.io/specs-average-duration',
-    params: {
-      utm_medium: 'Specs Average Duration Tooltip',
-      utm_campaign: 'Average Duration',
-    },
-  })
+const averageDurationDocsUrl = getUrlWithParams({
+  url: 'https://on.cypress.io/specs-average-duration',
+  params: {
+    utm_medium: 'Specs Average Duration Tooltip',
+    utm_campaign: 'Average Duration',
+  },
 })
 
 const isOnline = useOnline()
@@ -424,10 +417,8 @@ const specs = computed(() => {
 // when specs list data is updated on scroll (e.g., latest-runs & average-duration data loading async)
 const treeExpansionCache = ref(new Map<string, boolean>())
 
-// When search value changes reset the tree expansion cache so that any collapsed directories re-expand
-watch(() => search.value, () => treeExpansionCache.value.clear())
-// When specs are added or removed reset the tree expansion cache so that any collapsed directories re-expand
-watch(() => specs.value.length, () => treeExpansionCache.value.clear())
+// When search value changes or when specs are added/removed, reset the tree expansion cache so that any collapsed directories re-expand
+watch([() => search.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
@@ -553,13 +544,7 @@ const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloud
 
 const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
 
-watch(debouncedDisplayedSpecIds, fetchMissingOrErroneousItems)
-
-watch(isOnline, fetchMissingOrErroneousItems)
-
-watch(isProjectDisconnected, fetchMissingOrErroneousItems)
-
-watch(() => props.mostRecentUpdate, fetchMissingOrErroneousItems)
+watch([debouncedDisplayedSpecIds, isOnline, isProjectDisconnected, () => props.mostRecentUpdate], fetchMissingOrErroneousItems)
 
 async function refetchFailedCloudData () {
   const latestRunsIds = props.gql.currentProject?.specs
