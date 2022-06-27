@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
+import { getSameSiteContext } from './util/cookies'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -20,12 +21,39 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const ExtractIsAUTFrameHeader: RequestMiddleware = async function () {
+const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
+
+  this.next()
+}
+
+const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
+  const currentAUTUrl = this.getAUTUrl()
+
+  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
+    return this.next()
+  }
+
+  const sameSiteContext = getSameSiteContext(
+    currentAUTUrl,
+    this.req.proxiedUrl,
+    this.req.isAUTFrame,
+  )
+
+  const cookies = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
+  const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
+  const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+
+  this.debug('existing cookies on request: %s', existingCookies.join('; '))
+  this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
+
+  // if two or more cookies have the same key, the first one found is preferred,
+  // so we prepend the added cookies so they take preference
+  this.req.headers['cookie'] = cookiesToAdd.concat(existingCookies).join('; ')
 
   this.next()
 }
@@ -207,6 +235,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,

@@ -259,8 +259,12 @@ export const mutation = mutationType({
     t.field('login', {
       type: Query,
       description: 'Auth with Cypress Dashboard',
+      args: {
+        utmMedium: nonNull(stringArg()),
+        utmSource: nonNull(stringArg()),
+      },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login(args.utmSource, args.utmMedium)
 
         return {}
       },
@@ -659,6 +663,15 @@ export const mutation = mutationType({
         ctx.cloud.reset()
 
         return true
+      },
+    })
+
+    t.json('_showUrqlCache', {
+      description: 'Internal use only, clears the cloud cache',
+      resolve: async (source, args, ctx) => {
+        const { data } = await ctx.cloud.getCache()
+
+        return data
       },
     })
   },

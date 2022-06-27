@@ -8,6 +8,9 @@ gql`
      target
      fragment
      data
+     errors
+     variables
+     invalidateCache
    }
  }
 `

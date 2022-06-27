@@ -16,6 +16,7 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
+import { cookieJar } from './cookie-jar'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 import path from 'path'
@@ -457,6 +458,7 @@ export class SocketBase {
             case 'get:session':
               return session.getSession(args[0])
             case 'reset:session:state':
+              cookieJar.removeAllCookies()
               session.clearSessions()
               resetRenderedHTMLOrigins()
 
@@ -474,6 +476,8 @@ export class SocketBase {
               return this.localBus.emit('cross:origin:release:html')
             case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
+            case 'cross:origin:automation:cookies:received':
+              return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

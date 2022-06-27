@@ -9,17 +9,20 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
       return
     }
 
-    const whenStable = state('whenStable')
-
-    if (stable && whenStable) {
-      whenStable()
-    }
-
     state('isStable', stable)
 
     // we notify the outside world because this is what the runner uses to
     // show the 'loading spinner' during an app page loading transition event
     Cypress.action('cy:stability:changed', stable, event)
+
+    Cypress.action('cy:before:stability:release', stable)
+    .then(() => {
+      const whenStable = state('whenStable')
+
+      if (stable && whenStable) {
+        whenStable()
+      }
+    })
   },
 
   whenStable: (fn: () => any) => {

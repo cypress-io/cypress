@@ -7,6 +7,14 @@ import semver from 'semver'
 
 type Env = typeof process.env
 
+export function webpackReporter () {
+  return runWebpack({
+    cwd: monorepoPaths.pkgReporter,
+    prefix: 'webpack:reporter',
+    args: ['-w'],
+  })
+}
+
 export function webpackRunnerCT () {
   return runWebpack({
     cwd: monorepoPaths.pkgRunnerCt,
