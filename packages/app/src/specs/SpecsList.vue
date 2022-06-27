@@ -400,17 +400,17 @@ function handleClear () {
 }
 
 const specs = computed(() => {
-  const specs2 = cachedSpecs.value.map((x) => {
+  const fuzzyFoundSpecs = cachedSpecs.value.map((x) => {
     const s = makeFuzzyFoundSpec(x)
 
     return s
   })
 
   if (!debouncedSearchString.value) {
-    return specs2
+    return fuzzyFoundSpecs
   }
 
-  return fuzzySortSpecs(specs2, debouncedSearchString.value)
+  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSearchString.value)
 })
 
 // Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved

@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 export type RawNode <T> = {
@@ -54,9 +54,19 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
     return !!roots.find((r) => r.expanded.value === false)
   })
 
+  let wrappedToggle = toggle
+
   // If this is a non-hidden directory then watch for expansion changes and register them into the cache if one was provided
-  if (!hidden.value && treeNode.children?.length) {
-    watch(() => expanded.value, (newValue) => cache?.set(rawNode.id, newValue))
+  // This is done by wrapping the 'toggle' function so we don't have to register an actual 'watch'
+  if (!!cache && !hidden.value && rawNode.children?.length) {
+    wrappedToggle = (value?: boolean): boolean => {
+      const originalState = expanded.value
+      const newValue = toggle(value)
+
+      cache.set(rawNode.id, !originalState)
+
+      return newValue
+    }
   }
 
   return {
@@ -65,7 +75,7 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
     parent,
     hidden,
     expanded,
-    toggle,
+    toggle: wrappedToggle,
   }
 }
 
