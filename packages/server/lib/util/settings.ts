@@ -79,12 +79,3 @@ export function writeForTesting (projectRoot, objToWrite = {}) {
 
   return _write(file, objToWrite)
 }
-
-// Dead code?
-// export function pathToConfigFile (projectRoot) {
-//   const ctx = getCtx()
-
-//   ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-//   return ctx.lifecycleManager.configFilePath
-// }
