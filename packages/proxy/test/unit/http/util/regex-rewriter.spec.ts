@@ -82,8 +82,22 @@ const original = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
+      if (e.self==e.top) run()
+      if (a.self===a.top) run()
+      if (f.top===g.self) run()
+      if (g.top==g.self) run()
     </script>
     <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+        dynamicIntegrityScript.id = 'dynamic-set-integrity'
+        dynamicIntegrityScript.type = 'text/javascript'
+        dynamicIntegrityScript.src = 'integrity.js'
+        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+        dynamicIntegrityScript.setAttribute('integrity', "sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="
+        document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
   </body>
 </html>\
 `
@@ -164,8 +178,22 @@ const expected = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
+      if (e.self==e.self) run()
+      if (a.self===a.self) run()
+      if (f.self===g.self) run()
+      if (g.self==g.self) run()
     </script>
-    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress:stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+        dynamicIntegrityScript.id = 'dynamic-set-integrity'
+        dynamicIntegrityScript.type = 'text/javascript'
+        dynamicIntegrityScript.src = 'integrity.js'
+        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="
+        document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
   </body>
 </html>\
 `

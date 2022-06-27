@@ -21,7 +21,7 @@ const originalSetAttribute = Element.prototype.setAttribute
 
 Element.prototype.setAttribute = function (qualifiedName, value) {
   if (qualifiedName === 'integrity') {
-    qualifiedName = 'cypress:stripped-integrity'
+    qualifiedName = 'cypress-stripped-integrity'
   }
 
   originalSetAttribute.apply(this, [qualifiedName, value])

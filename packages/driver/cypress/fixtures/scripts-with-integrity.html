@@ -11,20 +11,20 @@
   <% if(data && data.staticLinkInjection) { %>
     <!-- static link injection -->
     <!-- the actual integrity of the file is: <%=data.integrityValue%> -->
-    <link rel="stylesheet" href="integrity.css" integrity="<%=data.integrityValue%>">
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css" integrity="<%=data.integrityValue%>">
   <% } %>
 
   <% if(data && data.staticScriptInjection) { %>
     <!-- static script injection -->
     <!-- the actual integrity of the file is: <%=data.integrityValue%> -->
-    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="<%=data.integrityValue%>"></script>
+    <script id="static-set-integrity-script" type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="<%=data.integrityValue%>"></script>
   <% } %>
 
   <% if(data && data.dynamicScriptInjection) { %>
     <!-- dynamic script injection-->
     <script type="text/javascript">
       const dynamicIntegrityScript = document.createElement('script')
-      dynamicIntegrityScript.id = 'dynamic-set-integrity'
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-script'
       dynamicIntegrityScript.type = 'text/javascript'
       dynamicIntegrityScript.src = 'integrity.js'
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
@@ -40,6 +40,7 @@
     <!-- dynamic link injection -->
     <script id="dynamic-link-injection" type="text/javascript">
       const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
       dynamicIntegrityScript.rel = "stylesheet"
       dynamicIntegrityScript.href = 'integrity.css'
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")

@@ -65,6 +65,8 @@ describe('Integrity Preservation', () => {
           cy.get('#integrity', {
             timeout: 1000,
           }).should('contain', 'integrity script loaded')
+
+          cy.get('#static-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
         })
       })
 
@@ -86,6 +88,8 @@ describe('Integrity Preservation', () => {
           cy.get('#integrity', {
             timeout: 1000,
           }).should('contain', 'integrity script loaded')
+
+          cy.get('#dynamic-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
         })
       })
     })
@@ -113,6 +117,8 @@ describe('Integrity Preservation', () => {
             // add a color 'red' to the data-cy="integrity-header" element
             expect(window.getComputedStyle(integrityHeader[0]).getPropertyValue('color')).to.equal('rgb(255, 0, 0)')
           })
+
+          cy.get('#static-set-integrity-link').should('have.attr', 'cypress-stripped-integrity')
         })
       })
 
@@ -136,6 +142,8 @@ describe('Integrity Preservation', () => {
             // add a color 'red' to the data-cy="integrity-header" element
             expect(window.getComputedStyle(integrityHeader[0]).getPropertyValue('color')).to.equal('rgb(255, 0, 0)')
           })
+
+          cy.get('#dynamic-set-integrity-link').should('have.attr', 'cypress-stripped-integrity')
         })
       })
     })

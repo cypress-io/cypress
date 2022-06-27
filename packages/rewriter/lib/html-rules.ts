@@ -29,7 +29,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
     const sriAttr = find(startTag.attrs, { name: 'integrity' })
 
     if (sriAttr) {
-      sriAttr.name = 'cypress:stripped-integrity'
+      sriAttr.name = 'cypress-stripped-integrity'
     }
 
     return rewriter.emitStartTag(startTag)
