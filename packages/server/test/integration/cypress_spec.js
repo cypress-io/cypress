@@ -478,7 +478,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project headlessly and displays gui', function () {
+    it('runs project headed and displays gui', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
