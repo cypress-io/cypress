@@ -2,7 +2,7 @@
   <Tooltip
     placement="top"
     :is-interactive="true"
-    :show-group="props.headerTextKeyPath"
+    :show-group="VALUES[mode].header"
   >
     <div
       class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
@@ -11,11 +11,11 @@
       <span
         class="hidden lg:flex"
         data-cy="full-header-text"
-      >{{ t(headerTextKeyPath) }}</span>
+      >{{ t(VALUES[mode].header) }}</span>
       <span
         class="lg:hidden"
         data-cy="short-header-text"
-      >{{ t(headerShortTextKeyPath || headerTextKeyPath) }}</span>
+      >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
     </div>
     <template
       #popper
@@ -33,10 +33,10 @@
             :keypath="tooltipTextKey"
           >
             <ExternalLink
-              :href="props.docsUrl"
+              :href="VALUES[mode].docsUrl"
               class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
             >
-              {{ t(docsTextKeyPath) }}
+              {{ t(VALUES[mode].docs) }}
             </ExternalLink>
           </i18n-t>
         </div>
@@ -94,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
@@ -107,6 +108,51 @@ import { computed, onMounted, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 const { t } = useI18n()
 
+type CloudDataTooltipMode = 'LATEST_RUNS' | 'AVG_DURATION'
+
+type CouldDataTooltipModeValues = {
+  header: string
+  shortHeader: string
+  connected: string
+  notConnected: string
+  noAccess: string
+  docsUrl: string
+  docs: string
+}
+
+const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
+  LATEST_RUNS: {
+    header: 'specPage.latestRuns.header',
+    shortHeader: 'specPage.latestRuns.headerShort',
+    connected: 'specPage.latestRuns.tooltip.connected',
+    notConnected: 'specPage.latestRuns.tooltip.notConnected',
+    noAccess: 'specPage.latestRuns.tooltip.noAccess',
+    docsUrl: getUrlWithParams({
+      url: 'https://on.cypress.io/specs-latest-runs',
+      params: {
+        utm_medium: 'Specs Latest Runs Tooltip',
+        utm_campaign: 'Latest Runs',
+      },
+    }),
+    docs: 'specPage.latestRuns.tooltip.linkText',
+  },
+  AVG_DURATION: {
+    header: 'specPage.averageDuration.header',
+    shortHeader: 'specPage.averageDuration.headerShort',
+    connected: 'specPage.averageDuration.tooltip.connected',
+    notConnected: 'specPage.averageDuration.tooltip.notConnected',
+    noAccess: 'specPage.averageDuration.tooltip.noAccess',
+    docsUrl: getUrlWithParams({
+      url: 'https://on.cypress.io/specs-average-duration',
+      params: {
+        utm_medium: 'Specs Average Duration Tooltip',
+        utm_campaign: 'Average Duration',
+      },
+    }),
+    docs: 'specPage.averageDuration.tooltip.linkText',
+  },
+}
+
 const emits = defineEmits<{
   (eventName: 'showLogin'): void
   (eventName: 'showConnectToProject'): void
@@ -114,13 +160,7 @@ const emits = defineEmits<{
 
 const props = defineProps<{
   gql: SpecHeaderCloudDataTooltipFragment
-  headerTextKeyPath: string
-  headerShortTextKeyPath?: string
-  connectedTextKeyPath: string
-  notConnectedTextKeyPath: string
-  noAccessTextKeyPath: string
-  docsUrl: string
-  docsTextKeyPath: string
+  mode: CloudDataTooltipMode
 }>()
 
 gql`
@@ -194,11 +234,11 @@ async function requestAccess () {
 }
 
 const tooltipTextKey = computed(() => {
-  if (projectConnectionStatus.value === 'CONNECTED') return props.connectedTextKeyPath
+  if (projectConnectionStatus.value === 'CONNECTED') return VALUES[props.mode].connected
 
-  if (['UNAUTHORIZED', 'ACCESS_REQUESTED'].includes(projectConnectionStatus.value)) return props.noAccessTextKeyPath
+  if (['UNAUTHORIZED', 'ACCESS_REQUESTED'].includes(projectConnectionStatus.value)) return VALUES[props.mode].noAccess
 
-  return props.notConnectedTextKeyPath
+  return VALUES[props.mode].notConnected
 })
 
 </script>

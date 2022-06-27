@@ -6,6 +6,7 @@ import { defaultMessages } from '@cy/i18n'
 describe('SpecHeaderCloudDataTooltip', () => {
   function mountWithStatus (
     status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
+    mode: string,
     msgKeys: {
       header: string
       connected: string
@@ -49,13 +50,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
           <div class="flex justify-around">
             <SpecHeaderCloudDataTooltip
               gql={gql}
-              headerTextKeyPath={msgKeys.header}
-              connectedTextKeyPath={msgKeys.connected}
-              notConnectedTextKeyPath={msgKeys.notConnected}
-              noAccessTextKeyPath={msgKeys.noAccess}
-              docsTextKeyPath={msgKeys.docs}
-              docsUrl="https://dummy.cypress.io/specs-latest-runs?utm_medium=Specs+Latest+Runs+Tooltip&utm_campaign=Latest+Runs"
-              data-cy="latest-runs-header"
+              mode={mode as any}
               onShowLogin={showLoginSpy}
               onShowConnectToProject={showConnectToProjectSpy}
             />
@@ -65,7 +60,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
   }
 
   [{
-    contextName: 'Average Duration',
+    mode: 'AVG_DURATION',
     msgKeys: {
       header: 'specPage.averageDuration.header',
       connected: 'specPage.averageDuration.tooltip.connected',
@@ -74,7 +69,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
       docs: 'specPage.averageDuration.tooltip.linkText',
     },
   }, {
-    contextName: 'Latest Runs',
+    mode: 'LATEST_RUNS',
     msgKeys: {
       header: 'specPage.latestRuns.header',
       connected: 'specPage.latestRuns.tooltip.connected',
@@ -82,11 +77,11 @@ describe('SpecHeaderCloudDataTooltip', () => {
       noAccess: 'specPage.latestRuns.tooltip.noAccess',
       docs: 'specPage.latestRuns.tooltip.linkText',
     },
-  }].forEach(({ contextName, msgKeys }) => {
-    context(contextName, () => {
+  }].forEach(({ mode, msgKeys }) => {
+    context(mode, () => {
       context('connected', () => {
         beforeEach(() => {
-          mountWithStatus('CONNECTED', msgKeys)
+          mountWithStatus('CONNECTED', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {
@@ -104,7 +99,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
 
       context('not connected', () => {
         beforeEach(() => {
-          mountWithStatus('NOT_CONNECTED', msgKeys)
+          mountWithStatus('NOT_CONNECTED', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {
@@ -126,7 +121,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
 
       context('unauthorized', () => {
         beforeEach(() => {
-          mountWithStatus('UNAUTHORIZED', msgKeys)
+          mountWithStatus('UNAUTHORIZED', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {
@@ -164,7 +159,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
 
       context('access requested', () => {
         beforeEach(() => {
-          mountWithStatus('ACCESS_REQUESTED', msgKeys)
+          mountWithStatus('ACCESS_REQUESTED', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {
@@ -184,7 +179,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
 
       context('logged out', () => {
         beforeEach(() => {
-          mountWithStatus('LOGGED_OUT', msgKeys)
+          mountWithStatus('LOGGED_OUT', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {
@@ -206,7 +201,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
 
       context('not found', () => {
         beforeEach(() => {
-          mountWithStatus('NOT_FOUND', msgKeys)
+          mountWithStatus('NOT_FOUND', mode, msgKeys)
         })
 
         it('should render expected tooltip content', () => {

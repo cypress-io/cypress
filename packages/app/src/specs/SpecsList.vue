@@ -96,13 +96,7 @@
       <div class="flex items-center justify-end whitespace-nowrap">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          header-text-key-path="specPage.latestRuns.header"
-          header-short-text-key-path="specPage.latestRuns.headerShort"
-          connected-text-key-path="specPage.latestRuns.tooltip.connected"
-          not-connected-text-key-path="specPage.latestRuns.tooltip.notConnected"
-          no-access-text-key-path="specPage.latestRuns.tooltip.noAccess"
-          docs-text-key-path="specPage.latestRuns.tooltip.linkText"
-          :docs-url="latestRunsDocsUrl"
+          mode="LATEST_RUNS"
           data-cy="latest-runs-header"
           @showLogin="showLogin('Specs Latest Runs Tooltip')"
           @showConnectToProject="showConnectToProject"
@@ -111,13 +105,7 @@
       <div class="hidden items-center justify-end truncate md:flex md:col-span-2">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
-          header-text-key-path="specPage.averageDuration.header"
-          header-short-text-key-path="specPage.averageDuration.headerShort"
-          connected-text-key-path="specPage.averageDuration.tooltip.connected"
-          not-connected-text-key-path="specPage.averageDuration.tooltip.notConnected"
-          no-access-text-key-path="specPage.averageDuration.tooltip.noAccess"
-          docs-text-key-path="specPage.averageDuration.tooltip.linkText"
-          :docs-url="averageDurationDocsUrl"
+          mode="AVG_DURATION"
           data-cy="average-duration-header"
           @showLogin="showLogin('Specs Average Duration Tooltip')"
           @showConnectToProject="showConnectToProject"
@@ -229,7 +217,6 @@
 
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
-import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
@@ -262,22 +249,6 @@ import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/genera
 
 const route = useRoute()
 const { t } = useI18n()
-
-const latestRunsDocsUrl = getUrlWithParams({
-  url: 'https://on.cypress.io/specs-latest-runs',
-  params: {
-    utm_medium: 'Specs Latest Runs Tooltip',
-    utm_campaign: 'Latest Runs',
-  },
-})
-
-const averageDurationDocsUrl = getUrlWithParams({
-  url: 'https://on.cypress.io/specs-average-duration',
-  params: {
-    utm_medium: 'Specs Average Duration Tooltip',
-    utm_campaign: 'Average Duration',
-  },
-})
 
 const isOnline = useOnline()
 const isOffline = ref(false)

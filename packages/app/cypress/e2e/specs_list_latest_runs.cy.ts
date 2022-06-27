@@ -122,7 +122,7 @@ function allVisibleSpecsShouldBePlaceholders () {
   cy.get('.spec-list-container').scrollTo('bottom')
 }
 
-describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewportHeight: 900 }, () => {
+describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200, viewportHeight: 900 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
@@ -175,8 +175,12 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
 
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'Connect to the Cypress Dashboard to see the status of your latest runs')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Log in to the Dashboard').click()
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .find('button')
+      .should('have.text', 'Log in to the Dashboard')
+      .click()
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
         cy.get('[aria-label="Close"]').click()
@@ -185,8 +189,12 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
       cy.findByTestId('latest-runs-header').trigger('mouseleave')
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Log in to the Dashboard').click()
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .find('button')
+      .should('have.text', 'Log in to the Dashboard')
+      .click()
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
         cy.get('[aria-label="Close"]').click()
@@ -213,8 +221,12 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
 
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'Connect to the Cypress Dashboard to see the status of your latest runs')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Connect your project').click()
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .find('button')
+      .should('have.text', 'Connect your project')
+      .click()
+
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
         cy.get('[aria-label="Close"]').click({ force: true })
       })
@@ -222,8 +234,12 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
       cy.findByTestId('latest-runs-header').trigger('mouseleave')
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
-      cy.get('.v-popper__popper--shown button').should('have.text', 'Connect your project').click()
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .find('button')
+      .should('have.text', 'Connect your project')
+      .click()
+
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
         cy.get('[aria-label="Close"]').click({ force: true })
       })
@@ -261,13 +277,19 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
 
     it('shows correct tooltips', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'The status of your latest runs in the Cypress Dashboard')
-      cy.get('.v-popper__popper--shown button').should('not.exist')
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'The status of your latest runs in the Cypress Dashboard')
+      .find('button')
+      .should('not.exist')
+
       cy.findByTestId('latest-runs-header').trigger('mouseleave')
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
-      cy.contains('.v-popper__popper--shown', 'The average spec durations of your latest runs in the Cypress Dashboard')
-      cy.get('.v-popper__popper--shown button').should('not.exist')
+      cy.get('.v-popper__popper--shown')
+      .should('contain', 'The average spec durations of your latest runs in the Cypress Dashboard')
+      .find('button')
+      .should('not.exist')
+
       cy.findByTestId('average-duration-header').trigger('mouseleave')
     })
 
@@ -342,7 +364,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
     })
 
     it('should retain data after app navigation', () => {
-      // ACI data should load and render to start
+      // App/Cloud Integration data should load and render to start
       specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
 
@@ -356,7 +378,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
       cy.location('hash').should('include', '/specs')
       cy.findByText('E2E specs').should('be.visible')
 
-      // ACI data should still be loaded and rendered
+      // App/Cloud Integration data should still be loaded and rendered
       specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
     })
@@ -575,7 +597,7 @@ describe('ACI - Latest runs and Average duration', { viewportWidth: 1200, viewpo
   })
 })
 
-describe('ACI - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
+describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
   context('when offline', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
