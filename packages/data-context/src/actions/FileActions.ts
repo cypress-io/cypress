@@ -8,29 +8,29 @@ import assert from 'assert'
 export class FileActions {
   constructor (private ctx: DataContext) {}
 
-  readFileInProject (relativePath: string): string {
+  async readFileInProject (relativePath: string): Promise<string> {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot write file in project without active project`)
     }
 
     const filePath = path.join(this.ctx.currentProject, relativePath)
 
-    this.ctx.fs.ensureDirSync(path.dirname(filePath))
+    await this.ctx.fs.ensureDir(path.dirname(filePath))
 
-    return this.ctx.fs.readFileSync(filePath, 'utf-8')
+    return this.ctx.fs.readFile(filePath, 'utf-8')
   }
 
-  writeFileInProject (relativePath: string, data: any) {
+  async writeFileInProject (relativePath: string, data: any) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot write file in project without active project`)
     }
 
     const filePath = path.join(this.ctx.currentProject, relativePath)
 
-    this.ctx.fs.ensureDirSync(path.dirname(filePath))
+    await this.ctx.fs.ensureDir(path.dirname(filePath))
 
     // Typically used in e2e tests, simpler than forcing async
-    this.ctx.fs.writeFileSync(
+    await this.ctx.fs.writeFile(
       filePath,
       data,
     )
@@ -42,7 +42,7 @@ export class FileActions {
     }
 
     // Typically used in e2e tests, simpler than forcing async
-    this.ctx.fs.removeSync(path.join(this.ctx.currentProject, relativePath))
+    await this.ctx.fs.remove(path.join(this.ctx.currentProject, relativePath))
   }
 
   async moveFileInProject (relativePath: string, toRelativePath: string) {
@@ -51,7 +51,7 @@ export class FileActions {
     }
 
     // Typically used in e2e tests, simpler than forcing async
-    this.ctx.fs.moveSync(
+    await this.ctx.fs.move(
       path.join(this.ctx.currentProject, relativePath),
       path.join(this.ctx.currentProject, toRelativePath),
     )

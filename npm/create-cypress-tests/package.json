@@ -2,7 +2,6 @@
   "name": "create-cypress-tests",
   "version": "0.0.0-development",
   "description": "Cypress smart installation wizard",
-  "private": true,
   "main": "dist/src/main.js",
   "scripts": {
     "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",

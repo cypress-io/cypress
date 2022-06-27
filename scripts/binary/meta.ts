@@ -36,7 +36,12 @@ export const buildDir = function (...args: string[]) {
     case 'darwin':
       // the new electron-builder for some reason adds its own platform
       // subfolder and it is NOT "darwin" but "mac"
-      return path.resolve(root, 'mac', ...args)
+      switch (os.arch()) {
+        case 'arm64':
+          return path.resolve(root, 'mac-arm64', ...args)
+        default:
+          return path.resolve(root, 'mac', ...args)
+      }
     case 'linux':
       // https://github.com/cypress-io/cypress/pull/19498
       switch (os.arch()) {

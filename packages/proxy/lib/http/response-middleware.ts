@@ -2,7 +2,7 @@ import _ from 'lodash'
 import charset from 'charset'
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils, uri } from '@packages/network'
+import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
@@ -12,7 +12,7 @@ import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 import { URL } from 'url'
-import type { Browser } from '@packages/server/lib/browsers/types'
+import { CookiesHelper } from './util/cookies'
 
 interface ResponseMiddlewareProps {
   /**
@@ -393,8 +393,8 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
-  const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
+const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  const currentAUTUrl = ctx.getAUTUrl()
 
   // A cookie needs cross origin handling if it's an AUT request and
   // either the request itself is cross-origin or the origins between
@@ -402,90 +402,90 @@ const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMid
   // case and if it's secondary-origin -> primary-origin, we don't
   // recognize the request as cross-origin
   return (
-    !!ctx.req.isAUTFrame &&
-    (
-      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
+    ctx.config.experimentalSessionAndOrigin
+    && ctx.req.isAUTFrame
+    && (
+      (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
     )
   )
 }
 
-interface EnsureSameSiteNoneProps {
-  cookie: string
-  browser: Browser | { family: string | null }
-  isLocalhost: boolean
-  url: URL
-  ctxDebug: Debug.Debugger
-}
-
-const cookieSameSiteRegex = /SameSite=(\w+)/i
-const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
-const cookieSecureSemicolonRegex = /;\s*Secure/i
-
-const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url, ctxDebug }: EnsureSameSiteNoneProps) => {
-  ctxDebug('original cookie: %s', cookie)
-
-  if (cookieSameSiteRegex.test(cookie)) {
-    ctxDebug('change cookie to SameSite=None')
-    cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
-  } else {
-    ctxDebug('add SameSite=None to cookie')
-    cookie += '; SameSite=None'
-  }
-
-  const isFirefox = browser.family === 'firefox'
-
-  // Secure is required for SameSite=None cookies to be set in secure contexts
-  // (https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy),
-  // but will not allow the cookie to be set in an insecure context.
-  // Normally http://localhost is considered a secure context (see
-  // https://w3c.github.io/webappsec-secure-contexts/#localhost), but Firefox
-  // does not consider the Cypress-launched browser to be a secure context (see
-  // https://github.com/cypress-io/cypress/issues/18217). For that reason, we
-  // remove Secure from http://localhost cookies in Firefox.
-  if (cookieSecureRegex.test(cookie)) {
-    if (isFirefox && isLocalhost && url.protocol === 'http:') {
-      ctxDebug('remove Secure from cookie')
-      cookie = cookie.replace(cookieSecureSemicolonRegex, '')
-    }
-  } else if (!isFirefox || url.protocol === 'https:') {
-    ctxDebug('add Secure to cookie')
-    cookie += '; Secure'
-  }
-
-  ctxDebug('resulting cookie: %s', cookie)
-
-  return cookie
-}
-
-const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
+const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
-  if (cookies) {
-    const needsCrossOriginHandling = (
-      this.config.experimentalSessionAndOrigin
-      && determineIfNeedsCrossOriginHandling(this)
-    )
-    const browser = this.getCurrentBrowser() || { family: null }
-    const url = new URL(this.req.proxiedUrl)
-    const isLocalhost = uri.isLocalhost(url)
-
-    this.debug('force SameSite=None?', needsCrossOriginHandling)
-
-    ;([] as string[]).concat(cookies).forEach((cookie) => {
-      if (needsCrossOriginHandling) {
-        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url, ctxDebug: this.debug })
-      }
-
-      try {
-        this.res.append('Set-Cookie', cookie)
-      } catch (err) {
-        this.debug('failed to Set-Cookie, continuing %o', { err, cookie })
-      }
-    })
+  if (!cookies || !cookies.length) {
+    return this.next()
   }
 
-  this.next()
+  // Cross-origin Cookie Handling
+  // ---------------------------
+  // - We capture cookies sent by responses and add them to our own server-side
+  //   tough-cookie cookie jar. All request cookies are captured, since any
+  //   future request could be cross-origin even if the response that sets them
+  //   is not.
+  // - If we sent the cookie header, it would fail to be set by the browser
+  //   (in most cases). We change the header name to 'X-Set-Cookie' to make it
+  //   clear that it's one we're handling ourselves.
+  // - We also set the cookies through automation so they are available in the
+  //   browser via document.cookie and via Cypress cookie APIs
+  //   (e.g. cy.getCookie). This is only done for cross-origin responses, since
+  //   non-cross-origin responses will be successfully set in the browser
+  //   automatically.
+  // - In the request middleware, we retrieve the cookies for a given URL
+  //   and attach them to the request, like the browser normally would.
+  //   tough-cookie handles retrieving the correct cookies based on domain,
+  //   path, etc. It also removes cookies from the cookie jar if they've expired.
+  const needsCrossOriginHandling = checkIfNeedsCrossOriginHandling(this)
+
+  const appendCookie = (cookie: string) => {
+    const headerName = needsCrossOriginHandling ? 'X-Set-Cookie' : 'Set-Cookie'
+
+    try {
+      this.res.append(headerName, cookie)
+    } catch (err) {
+      this.debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
+    }
+  }
+
+  if (!this.config.experimentalSessionAndOrigin) {
+    ([] as string[]).concat(cookies).forEach((cookie) => {
+      appendCookie(cookie)
+    })
+
+    return this.next()
+  }
+
+  const cookiesHelper = new CookiesHelper({
+    cookieJar: this.getCookieJar(),
+    currentAUTUrl: this.getAUTUrl(),
+    debug: this.debug,
+    request: {
+      url: this.req.proxiedUrl,
+      isAUTFrame: this.req.isAUTFrame,
+      needsCrossOriginHandling,
+    },
+  })
+
+  await cookiesHelper.capturePreviousCookies()
+
+  ;([] as string[]).concat(cookies).forEach((cookie) => {
+    cookiesHelper.setCookie(cookie)
+
+    appendCookie(cookie)
+  })
+
+  const addedCookies = await cookiesHelper.getAddedCookies()
+
+  if (!needsCrossOriginHandling || !addedCookies.length) {
+    return this.next()
+  }
+
+  this.serverBus.once('cross:origin:automation:cookies:received', () => {
+    this.next()
+  })
+
+  this.serverBus.emit('cross:origin:automation:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -509,6 +509,12 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
   this.res.status(Number(this.incomingRes.statusCode))
+  // Set custom status message/reason phrase from http response
+  // https://github.com/cypress-io/cypress/issues/16973
+  if (this.incomingRes.statusMessage) {
+    this.res.statusMessage = this.incomingRes.statusMessage
+  }
+
   this.next()
 }
 
@@ -596,7 +602,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   if (this.req.isAUTFrame) {
     // track the previous AUT request URL so we know if the next requests
     // is cross-origin
-    this.setPreviousAUTRequestUrl(this.req.proxiedUrl)
+    this.setAUTUrl(this.req.proxiedUrl)
   }
 
   this.incomingResStream.pipe(this.res).on('error', this.onError)

@@ -181,6 +181,10 @@ export class ProjectLifecycleManager {
     return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
+  get eventProcessPid () {
+    return this._configManager?.eventProcessPid
+  }
+
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
@@ -469,7 +473,7 @@ export class ProjectLifecycleManager {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
-      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPath) as LegacyCypressConfigJson
+      const legacyConfig = await this.ctx.fs.readJson(legacyConfigPath) as LegacyCypressConfigJson
 
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
@@ -619,6 +623,8 @@ export class ProjectLifecycleManager {
     }
 
     try {
+      // TODO: convert to async FS method
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
       if (pkgJson.type === 'module') {
@@ -701,6 +707,8 @@ export class ProjectLifecycleManager {
 
   private verifyProjectRoot (root: string) {
     try {
+      // TODO: convert to async fs call
+      // eslint-disable-next-line no-restricted-syntax
       if (!fs.statSync(root).isDirectory()) {
         throw new Error('NOT DIRECTORY')
       }

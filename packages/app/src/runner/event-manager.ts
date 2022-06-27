@@ -39,7 +39,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:automation:cookies'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 /**
