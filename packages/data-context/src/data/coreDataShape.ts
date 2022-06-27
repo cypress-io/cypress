@@ -18,7 +18,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
-  savedState?: SavedStateShape
+  savedState?: () => Promise<Maybe<SavedStateShape>>
 }
 
 export interface DevStateShape {
@@ -35,6 +35,7 @@ export interface SavedStateShape {
   firstOpened?: number | null
   lastOpened?: number | null
   promptsShown?: object | null
+  lastProjectId?: string | null
 }
 
 export interface ConfigChildProcessShape {

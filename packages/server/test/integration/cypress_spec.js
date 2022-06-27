@@ -473,33 +473,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    // NOTE: Removal of fixtures is not supported in new flow
-    it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
-
-      ctx.lifecycleManager.getFullInitialConfig()
-      .then((cfg) => {
-        this.cfg = cfg
-
-        return fs.statAsync(this.cfg.fixturesFolder)
-      }).then(() => {
-        return settings.read(this.idsPath)
-      }).then((json) => {
-        json.fixturesFolder = false
-
-        return settings.writeForTesting(this.idsPath, json)
-      }).then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
-        return fs.statAsync(this.cfg.fixturesFolder)
-        .then(() => {
-          throw new Error('fixturesFolder should not exist!')
-        }).catch(() => {
-          return done()
-        })
-      })
-    })
-
     it('runs project headlessly and displays gui', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
       .then(() => {
@@ -727,13 +700,12 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: test this
-    it.skip('logs error and exits when project has cypress.config.js syntax error', function () {
+    it('logs error and exits when project has cypress.config.js syntax error', function () {
       return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
+        this.expectExitWithErr('CONFIG_FILE_REQUIRE_ERROR', this.todosPath)
       })
     })
 
@@ -1143,8 +1115,7 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      // TODO: fix
-      it.skip(`with a custom config file fails when it doesn't exist`, function () {
+      it(`with a custom config file fails when it doesn't exist`, function () {
         this.filename = 'abcdefgh.test.js'
 
         return fs.statAsync(path.join(this.todosPath, this.filename))
@@ -1726,61 +1697,6 @@ describe('lib/cypress', () => {
         expect(cfg.resolved.env.baz).to.deep.eq({
           value: 'baz',
           from: 'cli',
-        })
-      })
-    })
-
-    // NOTE: skipped because we want to ensure this is captured in v10
-    it.skip('sends warning when baseUrl cannot be verified', function () {
-      const bus = new EE()
-      const event = { sender: { send: sinon.stub() } }
-      const warning = { message: 'Blah blah baseUrl blah blah' }
-
-      sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
-
-      return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
-      .then(() => {
-        const options = Events.start.firstCall.args[0]
-
-        Events.handleEvent(options, bus, event, 123, 'on:project:warning')
-
-        return Events.handleEvent(options, bus, event, 123, 'open:project', this.todosPath)
-      }).then(() => {
-        expect(event.sender.send.withArgs('response').firstCall.args[1].data).to.eql(warning)
-      })
-    })
-
-    describe('--config-file', () => {
-      beforeEach(function () {
-        this.filename = 'foo.bar.baz.asdf.quux.json'
-        this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
-      })
-
-      // TODO: (tgriesser) needs a system test, the mocking here no longer is correct
-      it.skip('reads config from a custom config file', function () {
-        const bus = new EE()
-
-        return fs.writeJson(path.join(this.pristinePath, this.filename), {
-          env: { foo: 'bar' },
-          port: 2020,
-        }).then(() => {
-          return cypress.start([
-          `--config-file=${this.filename}`,
-          ])
-          .then(() => {
-            const options = Events.start.firstCall.args[0]
-
-            return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
-          })
-          .then(() => {
-            expect(this.open).to.be.called
-
-            const cfg = this.open.getCall(0).args[0]
-
-            expect(cfg.env.foo).to.equal('bar')
-
-            expect(cfg.port).to.equal(2020)
-          })
         })
       })
     })
