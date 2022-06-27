@@ -40,4 +40,7 @@ export const stubQuery: MaybeResolver<Query> = {
   scaffoldedFiles () {
     return null
   },
+  isInGlobalMode () {
+    return false
+  },
 }
