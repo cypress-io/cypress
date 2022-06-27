@@ -5,10 +5,6 @@
 
 * display cy.mount command log ([#21500](https://github.com/cypress-io/cypress/issues/21500)) ([140b4ba](https://github.com/cypress-io/cypress/commit/140b4ba2110243712a614a39b2408c30cce4d0b1))
 * Doc changes around vue2 ([#21066](https://github.com/cypress-io/cypress/issues/21066)) ([17905a7](https://github.com/cypress-io/cypress/commit/17905a79ee5106b0d72c8e74bb717fcd7b796dee))
-* scope config to current testing type ([#20677](https://github.com/cypress-io/cypress/issues/20677)) ([61f7cfc](https://github.com/cypress-io/cypress/commit/61f7cfc59284a2938e0a1c15d74ee75215ba5f8b))
-* update scaffold template to use correct path ([#20047](https://github.com/cypress-io/cypress/issues/20047)) ([6e80359](https://github.com/cypress-io/cypress/commit/6e803597a379222cf936e5977c8314d693ee1912))
-* wire up scaffolded indexHtml to dev servers ([#20453](https://github.com/cypress-io/cypress/issues/20453)) ([3a8797e](https://github.com/cypress-io/cypress/commit/3a8797e54db9fd0ef93a14ddc71c138ba8251e53))
-* **unified-desktop-gui branch:** initial installation on windows ([#18247](https://github.com/cypress-io/cypress/issues/18247)) ([8614e97](https://github.com/cypress-io/cypress/commit/8614e978029bcbf7155b7ae98ac54feb11f2e7f3))
 
 
 ### chore
@@ -18,22 +14,11 @@
 
 ### Features
 
-* add devServer to config file ([#18962](https://github.com/cypress-io/cypress/issues/18962)) ([2573375](https://github.com/cypress-io/cypress/commit/2573375b5b6616efd2d213a94cd55fd8e0385864))
-* Add vue2 package from npm/vue/v2 branch ([#21026](https://github.com/cypress-io/cypress/issues/21026)) ([3aa69e2](https://github.com/cypress-io/cypress/commit/3aa69e2538aae5702bfc48789c54f37263ce08fc))
-* adding settings accordion ([e977b60](https://github.com/cypress-io/cypress/commit/e977b60521b863a227eb37189ab1b3081af00d9f))
-* Deprecate run-ct / open-ct, and update all examples to use --ct instead ([#18422](https://github.com/cypress-io/cypress/issues/18422)) ([196e8f6](https://github.com/cypress-io/cypress/commit/196e8f62cc6d27974f235945cb5700624b3dae41))
+* Update "typescript" dev dependency ([e977b60](https://github.com/cypress-io/cypress/commit/e977b60521b863a227eb37189ab1b3081af00d9f))
 * embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
-* merging / delegating remote queries to cloud schema ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
-* Structuring context & schema so it can be used on the client ([#17489](https://github.com/cypress-io/cypress/issues/17489)) ([e2f395e](https://github.com/cypress-io/cypress/commit/e2f395e330f384993ed1116469102a5315a21270)), closes [#17551](https://github.com/cypress-io/cypress/issues/17551)
-* support specPattern, deprecate integrationFolder and componentFolder ([#19319](https://github.com/cypress-io/cypress/issues/19319)) ([792980a](https://github.com/cypress-io/cypress/commit/792980ac12746ef47b9c944ebe4c6c353a187ab2))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 * update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
-* Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
-* use devServer instad of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
-* Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
-* use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
-* validate specPattern root level ([#19980](https://github.com/cypress-io/cypress/issues/19980)) ([5d52758](https://github.com/cypress-io/cypress/commit/5d52758d82c47033803c69c7858fc786a900faaf))
-* vue-cli and nuxt preset for CT object API architecture ([#20956](https://github.com/cypress-io/cypress/issues/20956)) ([57659c4](https://github.com/cypress-io/cypress/commit/57659c42468591265143aae2ff06bae4e440085f))
+* Update "@vue/test-utils" dependency ([#20956](https://github.com/cypress-io/cypress/issues/20956)) ([57659c4](https://github.com/cypress-io/cypress/commit/57659c42468591265143aae2ff06bae4e440085f))
 
 
 ### BREAKING CHANGES
