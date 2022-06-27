@@ -6,6 +6,13 @@ import { getPathForPlatform } from './support/getPathForPlatform'
 const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
+  describe('accessibility', () => {
+    it('has no axe violations', () => {
+      cy.injectAxe()
+      cy.checkA11y()
+    })
+  })
+
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
