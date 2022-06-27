@@ -44,8 +44,8 @@ describe('CLI Interface', () => {
     })
   })
 
-  // TODO:(tgriesser) originally skipped this, not sure why
-  it.skip('writes out package.json and exits', (done) => {
+  // This fails on MacOS due to an apparent limit on the buffer size of stdout
+  it('writes out package.json and exits', (done) => {
     return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)
