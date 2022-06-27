@@ -55,7 +55,7 @@
     "raw-loader": "1.0.0",
     "renderkid": "2.0.5",
     "rxjs": "~6.6.0",
-    "semantic-release": "17.4.2",
+    "semantic-release": "19.0.3",
     "to-string-loader": "1.1.6",
     "ts-loader": "8.1.0",
     "ts-node": "^10.2.1",

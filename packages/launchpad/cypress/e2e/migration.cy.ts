@@ -1075,6 +1075,22 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-plugins-implicit-index-js', () => {
+    startMigrationFor('migration-e2e-plugins-implicit-index-js')
+    // no specs, nothing to rename?
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    runAutoRename()
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-fully-custom', () => {
     startMigrationFor('migration-e2e-fully-custom')
     // integration folder and testFiles are custom, cannot rename anything
@@ -1698,7 +1714,8 @@ describe('Migrate custom config files', () => {
   it('shows error if plugins file do not exist', () => {
     scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
 
-    cy.contains(`${getPathForPlatform('foo/bar')} file threw an error.`)
-    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
+    const err = `Looked for pluginsFile at foo/bar, but it was not found.`
+
+    cy.contains(err)
   })
 })

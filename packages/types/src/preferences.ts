@@ -30,6 +30,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'ctSpecListWidth',
   'firstOpened',
   'lastOpened',
+  'lastProjectId',
   'promptsShown',
   'preferredEditorBinary',
   'isSideNavigationOpen',
@@ -60,6 +61,7 @@ export type AllowedState = Partial<{
   ctReporterWidth: Maybe<number>
   ctIsSpecsListOpen: Maybe<boolean>
   ctSpecListWidth: Maybe<number>
+  lastProjectId: Maybe<string>
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
   promptsShown: Maybe<object>

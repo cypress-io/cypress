@@ -44,8 +44,8 @@ describe('CLI Interface', () => {
     })
   })
 
-  // TODO:(tgriesser) originally skipped this, not sure why
-  it.skip('writes out package.json and exits', (done) => {
+  // This fails on MacOS due to an apparent limit on the buffer size of stdout
+  it('writes out package.json and exits', (done) => {
     return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)
@@ -96,8 +96,17 @@ describe('CLI Interface', () => {
     describe('through NPM script', () => {
       let npmVersion = null
 
-      const isNpmSlurpingCode = () => {
-        return semver.lt(npmVersion, '4.0.0')
+      /**
+       * In certain versions of npm, code with an exit code of 10 (Internal Runtime Javascript Failure)
+       * is ultimately displayed as an exit code of 1 (Uncaught Runtime Exception).
+       * This seems to occur before Node 7 / NPM 4 and after Node 14/ NPM 7.
+       * Please see https://github.com/arzzen/all-exit-error-codes/blob/master/programming-languages/javascript/nodejs.md
+       * for more details.
+       *
+       * @returns {boolean}
+       */
+      const doesNpmObscureInternalExitCode = () => {
+        return semver.lt(npmVersion, '4.0.0') || semver.gt(npmVersion, '6.0.0')
       }
 
       beforeEach(() => {
@@ -111,7 +120,7 @@ describe('CLI Interface', () => {
       })
 
       it('npm slurps up or not exit value on failure', (done) => {
-        const expectedCode = isNpmSlurpingCode() ? 1 : 10
+        const expectedCode = doesNpmObscureInternalExitCode() ? 1 : 10
         const s = cp.exec('npm run dev -- --exit-with-code=10')
 
         return s.on('close', (code) => {
