@@ -146,6 +146,8 @@
     "detect-port": "^1.3.0",
     "electron": "18.0.4",
     "electron-builder": "^22.13.1",
+    "electron-link": "^0.6.0",
+    "electron-mksnapshot": "18.0.0",
     "electron-notarize": "^1.1.1",
     "enzyme-adapter-react-16": "1.12.1",
     "esbuild": "^0.14.39",

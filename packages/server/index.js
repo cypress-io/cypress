@@ -8,7 +8,7 @@ const run = async (profiler) => {
     require('time-require')
   }
 
-  const srv = require('../../.bundle/server')
+  const srv = require('./server-entry')
 
   await srv.server.cypressServer()
 

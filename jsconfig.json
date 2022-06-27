@@ -11,6 +11,11 @@
     "**/dist/**",
     "**/dist-test/**",
     "**/.cy/**",
-    "**/.bundle/**"
+    "**/.bundle/**",
+    "**/cache/**",
+    "**/server/server.js",
+    "**/server/server-snapshot.js",
+    "**/server/server-entry.js",
+    "**/server/child.js"
   ]
 }

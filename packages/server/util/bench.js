@@ -22,7 +22,7 @@ class Benchmark {
     this._workflow = workflow
 
     if (!useProfiler) {
-      const filename = `${this._workflow}${process.env.MINIFY_IND != null ? '-minify' : ''}.json`
+      const filename = `${this._workflow}${process.env.MINIFY_IND != null ? '-minify' : ''}${process.env.USE_SNAPSHOT != null ? '-snapshot' : ''}${process.env.USE_VANILLA_SNAPSHOT != null ? '-vanilla-snapshot' : ''}.json`
 
       this.filePath = path.join(__dirname, '..', 'results', filename)
 

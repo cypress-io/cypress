@@ -20,7 +20,7 @@ class Profiler {
     if (useProfiler) {
       const inspectorProf = await inspector.profiler.stop()
 
-      fs.writeFileSync(`packages/server/results/${this._workflow}${process.env.MINIFY_IND != null ? '-minify' : ''}.cpuprofile`, JSON.stringify(inspectorProf))
+      fs.writeFileSync(`packages/server/results/${this._workflow}${process.env.MINIFY_IND != null ? '-minify' : ''}${process.env.USE_SNAPSHOT != null ? '-snapshot' : ''}${process.env.USE_VANILLA_SNAPSHOT != null ? '-vanilla-snapshot' : ''}.cpuprofile`, JSON.stringify(inspectorProf))
     }
   }
 }

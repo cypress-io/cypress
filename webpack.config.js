@@ -39,6 +39,14 @@ module.exports = (opts, config) => {
     target: 'node',
     // externalsPresets: { electron: true },
     externals: [
+      'signal-exit',
+      'graceful-fs',
+      'lockfile',
+      'evil-dns',
+      'ws/lib',
+      'get-stream',
+      'process-nextick-args',
+
       // Needs to be global
       'graphql',
       'typescript',
@@ -88,11 +96,24 @@ module.exports = (opts, config) => {
 
       // What is the deal with this package:
       'electron',
+      'v8-snapshot',
+      'bluebird',
+      'execa',
+      'colors/safe',
+      'json5',
+      'async',
+      'he',
+      'has',
+      'jsesc',
       // '@packages/electron',
 
       function (context, request, callback) {
         if (request.startsWith('@cypress/')) {
           return callback(null, `commonjs ${request}`)
+        }
+
+        if (request.endsWith('util/suppress_warnings') || request.endsWith('registerDir') || request.endsWith('/capture')) {
+          return callback(null, `commonjs ./${path.relative(path.join(__dirname, 'packages', 'server'), path.join(context, request.replace('@packages', '../../packages')))}`)
         }
 
         return callback()
@@ -103,7 +124,7 @@ module.exports = (opts, config) => {
     //   // outputModule: true,
     // },
     output: {
-      path: path.join(__dirname, '.bundle'),
+      path: path.join(__dirname, 'packages', 'server'),
       libraryTarget: 'commonjs',
       library: ['server'],
       // libraryExport: ['server'],

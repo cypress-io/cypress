@@ -383,3 +383,7 @@ globbed_node_modules
 *.gen.json
 
 .bundle
+.electron-cache
+packages/server/child.js
+packages/server/server.js
+packages/server/server-snapshot.js
