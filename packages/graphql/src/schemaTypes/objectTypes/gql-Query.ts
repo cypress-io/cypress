@@ -78,7 +78,7 @@ export const Query = objectType({
     })
 
     t.nonNull.boolean('isGlobalMode', {
-      description: 'Whether the project was specified from the --project or --global flag',
+      description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.global),
     })
 
