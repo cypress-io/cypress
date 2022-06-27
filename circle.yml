@@ -366,12 +366,44 @@ commands:
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: yarn check-terminal
 
-  print-ci-settings:
+  distribute-test-files-for-external-contributors:
+    parameters:
+      package:
+        description: package to target
+        type: enum
+        enum: ['frontend-shared', 'launchpad', 'app', 'reporter', 'driver']
+      type:
+        description: ct or e2e
+        type: enum
+        enum: ['ct', 'e2e']
     steps:
       - run:
+          name: Distribute test files for external contributors.
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
+
+            if ! [[ -v MAIN_RECORD_KEY ]]; then
+              # To make `circleci tests` work correctly, we need to step into the package folder.
+              cd packages/<<parameters.package>>
+
+              GLOB="cypress/e2e/**/*cy.*"
+
+              if [[ <<parameters.type>> == 'ct' ]]; then
+                # component tests are located side by side with the source codes.
+                GLOB="src/**/*cy.*"
+              fi
+
+              echo "export TESTFILES=$(circleci tests glob \"$GLOB\" | circleci tests split --total=$CIRCLE_NODE_TOTAL)" >> $BASH_ENV
+              echo "Test files for this machine are $TESTFILES"
+
+              if [[ -z "$TESTFILES" ]]; then
+                echo "Empty list of test files"
+              fi
+
+              # To run the `yarn` command, we need to walk out of the package folder.
+              cd ../..
+            fi
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -444,7 +476,6 @@ commands:
             - install-chrome:
                 channel: <<parameters.install-chrome-channel>>
                 version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
-      - print-ci-settings
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -519,7 +550,9 @@ commands:
       - restore_cached_workspace
       - windows-install-chrome:
           browser: <<parameters.browser>>
-      - print-ci-settings
+      - distribute-test-files-for-external-contributors:
+          package: <<parameters.package>>
+          type: <<parameters.type>>
       - run:
           command: |
             if [[ -v MAIN_RECORD_KEY ]]; then
@@ -534,23 +567,6 @@ commands:
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
-
-              # To make `circleci tests` work correctly, we need to step into the package folder.
-              cd packages/<<parameters.package>>
-
-              GLOB="cypress/e2e/**/*cy.*"
-
-              if [[ <<parameters.type>> == 'ct' ]]; then
-                # component tests are located side by side with the source codes.
-                GLOB="src/**/*cy.*"
-              fi
-
-              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-              echo "Test files for this machine are $TESTFILES"
-
-              # To run the `yarn` command, we need to walk out of the package folder.
-              cd ../..
-
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
