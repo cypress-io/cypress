@@ -169,11 +169,7 @@ const dotClasses = computed(() => {
 })
 
 const latestRun = computed(() => {
-  if (runs.value == null || runs.value.length === 0 || runs.value[0] === null) {
-    return null
-  }
-
-  return runs.value[0]
+  return runs.value?.[0] ?? null
 })
 
 const latestDot = computed(() => {
