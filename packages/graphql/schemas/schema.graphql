@@ -1226,15 +1226,15 @@ type Query {
   """
   invokedFromCli: Boolean!
 
+  """Whether the app was opened with --global flag"""
+  isGlobalMode: Boolean!
+
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
-
-  """Whether the project was specified from the --project or --global flag"""
-  isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
