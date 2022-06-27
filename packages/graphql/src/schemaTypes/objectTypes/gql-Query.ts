@@ -77,11 +77,6 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.appData.projects,
     })
 
-    t.nonNull.boolean('isInGlobalMode', {
-      description: 'Whether the app is in global mode or not',
-      resolve: (source, args, ctx) => !ctx.currentProject,
-    })
-
     t.nonNull.field('authState', {
       type: AuthState,
       description: 'The latest state of the auth process',

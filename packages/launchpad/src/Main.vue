@@ -125,7 +125,7 @@ fragment MainLaunchpadQueryData on Query {
   migration {
     videoEmbedHtml
   }
-  isInGlobalMode
+  # isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
   ...WarningList

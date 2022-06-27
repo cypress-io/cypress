@@ -125,10 +125,6 @@ export class DataContext {
     return this._config.localSettingsApi
   }
 
-  get isGlobalMode () {
-    return this.appData.isInGlobalMode
-  }
-
   get modeOptions () {
     return this._modeOptions
   }

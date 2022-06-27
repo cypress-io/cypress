@@ -1226,9 +1226,6 @@ type Query {
   """
   invokedFromCli: Boolean!
 
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 

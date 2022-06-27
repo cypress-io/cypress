@@ -28,9 +28,6 @@ export const stubQuery: MaybeResolver<Query> = {
   authState (source, args, ctx) {
     return ctx.authState
   },
-  isInGlobalMode (source, args, ctx) {
-    return !ctx.currentProject
-  },
   invokedFromCli (source, args, ctx) {
     return true
   },

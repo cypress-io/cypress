@@ -71,7 +71,6 @@ describe('MigrationActions', () => {
       ctx.update((coreData) => {
         coreData.currentProject = currentProject
         coreData.currentTestingType = 'e2e'
-        coreData.app.isInGlobalMode = true
       })
 
       ctx.actions.migration.initialize({})
@@ -91,7 +90,6 @@ describe('MigrationActions', () => {
       ctx.update((coreData) => {
         coreData.currentProject = currentProject
         coreData.currentTestingType = 'e2e'
-        coreData.app.isInGlobalMode = true
       })
 
       ctx.actions.migration.initialize({}).then(done)
