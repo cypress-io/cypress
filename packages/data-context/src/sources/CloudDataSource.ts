@@ -307,7 +307,9 @@ export class CloudDataSource {
     `, { args }, {
       fetchOptions: {
         headers: {
-          // TODO: replace this with an exchange to filter out this request
+          // Not urgent, but a nice-to-have, replace this with an exchange to
+          // be more explicit about filtering out this request, rather than looking at headers
+          // in the in the "fetch" exchange
           INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
         },
       },
@@ -322,7 +324,7 @@ export class CloudDataSource {
     `, { }, {
       fetchOptions: {
         headers: {
-          // TODO: replace this with an exchange to filter out this request
+          // Same note as above on the "invalidate", we could make this a bit clearer
           INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
         },
       },

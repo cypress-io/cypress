@@ -10,7 +10,7 @@
       class="h-full truncate"
       data-cy="tooltip"
     >
-      <div class="flex h-full gap-9px justify-start items-center">
+      <button class="flex h-full gap-9px justify-start items-center">
         <div>
           <component
             :is="classes.icon"
@@ -23,7 +23,7 @@
         >
           {{ props.gql?.lastModifiedHumanReadable ?? '' }}
         </div>
-      </div>
+      </button>
       <template
         #popper
       >

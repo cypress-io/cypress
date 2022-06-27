@@ -200,13 +200,6 @@ export class ProjectActions {
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      this.projects.push({ projectRoot, savedState: this.api.makeProjectSavedState(projectRoot) })
-      await this.api.insertProjectToCache(projectRoot)
-    }
-
     if (args.open) {
       this.setCurrentProject(projectRoot).catch(this.ctx.onError)
     } else {

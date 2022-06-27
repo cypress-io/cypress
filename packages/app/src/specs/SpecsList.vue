@@ -493,17 +493,20 @@ function shouldRefetch (item: CloudSpecItem) {
   return false
 }
 
-function getItemsToRefetch () {
+type NonNullCloudSpec = Exclude<SpecsListFragment['cloudSpec'], undefined | null>
+
+function getIdsToRefetch () {
   return list.value
   .map((spec) => spec.data.data?.cloudSpec)
-  .filter((cloudSpec) => cloudSpec && shouldRefetch(cloudSpec))
+  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec && shouldRefetch(cloudSpec)))
+  .map((cloudSpec) => cloudSpec.id)
   ?? []
 }
 async function fetchMissingOrErroneousItems () {
-  const items = getItemsToRefetch()
+  const cloudSpecIds = getIdsToRefetch()
 
-  if (items.length > 0) {
-    await refetch(items.map((cloudSpec) => cloudSpec?.id ?? ''))
+  if (cloudSpecIds.length > 0) {
+    await refetch(cloudSpecIds)
   }
 }
 
@@ -515,8 +518,9 @@ watch([debouncedDisplayedSpecIds, isOnline, isProjectDisconnected, () => props.m
 
 async function refetchFailedCloudData () {
   const latestRunsIds = props.gql.currentProject?.specs
-  .filter((s) => s.cloudSpec?.fetchingStatus === 'ERRORED')
-  .map((s) => s.cloudSpec?.id as string) ?? []
+  .map((s) => s.cloudSpec)
+  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec?.fetchingStatus === 'ERRORED'))
+  .map((cloudSpec) => cloudSpec.id) ?? []
 
   await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
 }

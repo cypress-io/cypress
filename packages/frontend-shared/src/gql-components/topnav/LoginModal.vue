@@ -111,6 +111,8 @@ const online = useOnline()
 function continueAuth (isLoggedIn: boolean) {
   if (isLoggedIn) {
     emit('loggedin')
+
+    return
   }
 
   emit('update:modelValue', false)
