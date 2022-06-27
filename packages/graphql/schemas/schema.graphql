@@ -1233,7 +1233,7 @@ type Query {
   migration: Migration
   node(id: ID!): Node
 
-  """Whether the project was specified from the --project flag"""
+  """Whether the project was specified from the --project or --global flag"""
   isInGlobalMode: Boolean!
 
   """All known projects for the app"""
