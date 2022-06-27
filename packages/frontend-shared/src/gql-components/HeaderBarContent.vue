@@ -26,7 +26,9 @@
             <li class="inline-block">
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
+              <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
+                :key="Boolean(hasLinkToProjects).toString()"
                 class="font-medium"
                 :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
@@ -51,7 +53,9 @@
             <li class="inline-block">
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
+              <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
+                :key="Boolean(hasLinkToCurrentProject).toString()"
                 class="font-medium"
                 :role="hasLinkToCurrentProject ? undefined : 'link'"
                 :href="hasLinkToCurrentProject ? 'choose-testing-type' : undefined"
