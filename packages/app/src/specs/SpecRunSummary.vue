@@ -30,7 +30,7 @@
         v-if="props.run.createdAt"
         data-cy="spec-run-time-ago"
       >
-        {{ getTimeAgo(props.run.createdAt!) }}
+        {{ getTimeAgo(props.run.createdAt) }}
       </div>
       <i-cy-dot-solid_x4
         width="4px"

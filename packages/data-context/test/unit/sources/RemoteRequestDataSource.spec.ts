@@ -55,18 +55,4 @@ describe('RemoteRequestDataSource', () => {
       })
     })
   })
-
-  describe('batchResolveRemoteFields', () => {
-    it('')
-  })
-
-  describe('loadRemoteFetchable', () => {
-    it('')
-  })
-
-  describe('shouldEagerFetch', () => {
-    it('determines if the field should be eager fetched', () => {
-      //
-    })
-  })
 })

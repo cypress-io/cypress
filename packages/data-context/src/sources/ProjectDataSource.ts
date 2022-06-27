@@ -551,7 +551,8 @@ export class ProjectDataSource {
       return savedState.lastProjectId
     }
 
-    // Otherwise, we can try to derive the projectId by reading it from the config file (todo)
+    // Otherwise, we can try to derive the projectId by reading it from the config file
+    // (implement this in the future, if we ever want to display runs for a project in global mode)
     return null
   }
 }

@@ -24,6 +24,15 @@ window.__toPrintClear = function () {
   }
 }
 
+/**
+ * detailedDebugExchange:
+ *
+ * This is not imported/included by default in the urqlClient, but can be very helpful when debugging
+ * edge-case bugs in the urqlCache exchange. To use, import & add in the exchanges array, prior to the
+ * makeCacheExchange() definition. Calling `copy(window.__toPrint__)` in the console will spit out a whole
+ * bunch of metadata logged about the URQL request/response handling. The `window.__toPrintClear` can be used
+ * to reset the state, if you need to narrow down the logs to a smaller scope of payloads.
+ */
 export const detailedDebugExchange: Exchange = ({ forward }) => {
   return (ops$) => {
     window.__toPrint__ ??= {

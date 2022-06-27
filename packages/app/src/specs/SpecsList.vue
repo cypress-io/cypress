@@ -400,11 +400,7 @@ function handleClear () {
 }
 
 const specs = computed(() => {
-  const fuzzyFoundSpecs = cachedSpecs.value.map((x) => {
-    const s = makeFuzzyFoundSpec(x)
-
-    return s
-  })
+  const fuzzyFoundSpecs = cachedSpecs.value.map(makeFuzzyFoundSpec)
 
   if (!debouncedSearchString.value) {
     return fuzzyFoundSpecs

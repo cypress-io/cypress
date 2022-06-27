@@ -155,7 +155,6 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
         showError(error)
       },
     }),
-    // detailedDebugExchange,
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
     namedRouteExchange,
