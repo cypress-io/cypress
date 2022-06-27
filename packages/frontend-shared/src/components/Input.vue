@@ -3,10 +3,13 @@
     class="border-0 m-0 p-0"
     :class="$attrs.class"
   >
-    <div class="relative">
+    <div
+      class="rounded-md flex flex-row border-1 border-gray-100 leading-tight relative"
+      :class="[props.inputClasses, {'hocus-default focus-within-default': !hasError, 'border-error-300 ring-2 ring-error-100 hocus-error': hasError}]"
+    >
       <div
         v-if="hasPrefix"
-        class="flex pl-4 inset-y-0 left-0 absolute items-center"
+        class="flex flex-none -ml-1px pl-4 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="prefix">
@@ -29,13 +32,13 @@
         :style="style"
         :type="type"
         :spellcheck="false"
-        :class="[_inputClasses, {'hocus-default text-gray-800': !hasError, 'border-error-300 ring-2 ring-error-100 hocus-error text-error-500': hasError}]"
-        class="rounded-md border-gray-100 leading-tight w-full py-9px pl-10 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
+        :class="[{'text-gray-800': !hasError, 'text-error-500': hasError}]"
+        class="border-0 flex-1 ml-1px min-w-100px py-9px pl-2 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
         v-bind="inputAttrs"
       >
       <div
         v-if="hasSuffix"
-        class="flex pr-3 inset-y-0 right-0 absolute items-center"
+        class="flex flex-none -mr-1px pr-3 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="suffix">
@@ -105,14 +108,6 @@ const hasPrefix = computed(() => {
 
 const hasSuffix = computed(() => {
   return !!(slots.suffix || props.suffixIcon)
-})
-
-const _inputClasses = computed(() => {
-  return ([
-    props.inputClasses,
-    hasPrefix.value ? 'pl-10' : 'pl-4',
-    hasSuffix.value ? 'pr-6' : 'pr-0',
-  ])
 })
 
 </script>

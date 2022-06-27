@@ -202,6 +202,15 @@ export class CdpAutomation {
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
     if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
 
+    // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
+    // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
+    // Example data url: "data:font/woff;base64,<base64 encoded string>"
+    if (url.startsWith('data:')) {
+      debugVerbose('skipping `data:` url %s', url)
+
+      return
+    }
+
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
     const browserPreRequest: BrowserPreRequest = {
@@ -299,6 +308,11 @@ export class CdpAutomation {
 
           return this.getCookie(data)
         })
+
+      case 'add:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+
+        return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
 
       case 'set:cookies':
         setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
