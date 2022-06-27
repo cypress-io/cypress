@@ -65,7 +65,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       cypressVersion: pkg.version,
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
-      setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
+      setupFullConfigWithDefaults: configUtils.setupFullConfigWithDefaults,
     },
     appApi: {
       appData,
