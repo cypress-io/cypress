@@ -136,8 +136,7 @@ describe('gui/interactive', () => {
       sinon.stub(state, 'get').resolves(this.state)
     })
 
-    // TODO: skip
-    it.skip('calls Events.start with options, adding env, onFocusTests, and os', () => {
+    it('calls Events.start with options, adding env, onFocusTests, and os', () => {
       sinon.stub(os, 'platform').returns('someOs')
       const opts = {}
 

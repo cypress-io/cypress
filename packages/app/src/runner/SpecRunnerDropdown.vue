@@ -13,10 +13,11 @@
       :disabled="props.disabled"
     >
       <div
-        class="flex text-gray-600 gap-8px items-center"
+        class="flex gap-8px items-center"
         :class="{
           'group-hocus:text-indigo-600': !props.disabled,
           'text-indigo-600': open,
+          'text-gray-600': !open,
         }"
       >
         <slot

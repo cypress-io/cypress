@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "react": "^17.0.0",
     "vite": "2.9.1"
   },

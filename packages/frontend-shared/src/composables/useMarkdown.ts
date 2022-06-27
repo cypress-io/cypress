@@ -41,7 +41,7 @@ const defaultClasses = {
   h6: ['font-medium', 'text-xs', 'mb-3'],
   p: ['my-3 first:mt-0 text-sm mb-4'],
   pre: ['rounded p-3 bg-white mb-2'],
-  code: [`font-medium rounded text-sm px-4px py-2px bg-red-100`],
+  code: ['font-medium rounded text-sm px-4px py-2px'],
   a: ['text-blue-500', 'hover:underline text-sm'],
   ul: ['list-disc pl-6 my-3 text-sm'],
   ol: ['list-decimal pl-6 my-3 text-sm'],

@@ -12,9 +12,7 @@
           {{ t('runner.automation.disconnected.description') }}
         </p>
         <Button
-          class="bg-indigo-500 text-white"
           size="md"
-          variant="outline"
           :prefix-icon="RefreshIcon"
           prefix-icon-class="icon-dark-white"
           @click="relaunch"
