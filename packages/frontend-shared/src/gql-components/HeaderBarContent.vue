@@ -21,7 +21,7 @@
         <nav>
           <ol>
             <li
-              v-if="props.gql.isInGlobalMode"
+              v-if="props.gql.isGlobalMode"
               class="inline-block"
             >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
@@ -40,7 +40,7 @@
             </li>
             <!-- Once we have a current project, only show "Projects" in global mode -->
             <li
-              v-if="props.gql.isInGlobalMode && currentProject?.title"
+              v-if="props.gql.isGlobalMode && currentProject?.title"
               class="mx-2px align-middle inline-block"
               aria-hidden
             >
@@ -263,7 +263,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     branch
     isLoadingNodeEvents
   }
-  isInGlobalMode,
+  isGlobalMode,
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth

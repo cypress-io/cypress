@@ -91,7 +91,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       })
 
       it('in global mode, show links to Projects and branch name', () => {
-        mountFragmentWithData({ isInGlobalMode: true, currentProject })
+        mountFragmentWithData({ isGlobalMode: true, currentProject })
         cy.contains('a', 'Projects')
         .should('have.attr', 'href', 'select-project')
         .should('have.attr', 'aria-disabled', 'false')
@@ -99,14 +99,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       })
 
       it('in non-global mode, does not show link to Projects', () => {
-        mountFragmentWithData({ isInGlobalMode: false, currentProject })
+        mountFragmentWithData({ isGlobalMode: false, currentProject })
         cy.contains('a', 'Projects').should('not.exist')
       })
     })
 
     context('without current project', () => {
       it('in global mode, shows disabled link to Projects', () => {
-        mountFragmentWithData({ isInGlobalMode: true, currentProject: undefined })
+        mountFragmentWithData({ isGlobalMode: true, currentProject: undefined })
         cy.contains('a', 'Projects')
         .should('have.attr', 'aria-disabled', 'true')
         .should('have.attr', 'role', 'link')
@@ -114,7 +114,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       })
 
       it('in non-global mode, does not show link to Projects', () => {
-        mountFragmentWithData({ isInGlobalMode: false, currentProject: undefined })
+        mountFragmentWithData({ isGlobalMode: false, currentProject: undefined })
         cy.contains('a', 'Projects').should('not.exist')
       })
     })
