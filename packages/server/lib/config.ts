@@ -78,6 +78,8 @@ export function isValidCypressInternalEnvValue (value) {
   return _.includes(names, value)
 }
 
+export const setupFullConfigWithDefaults = configUtils.setupFullConfigWithDefaults
+
 export function mergeDefaults (
   config: Record<string, any> = {},
   options: Record<string, any> = {},
