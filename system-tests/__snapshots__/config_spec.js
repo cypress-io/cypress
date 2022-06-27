@@ -482,3 +482,12 @@ exports['e2e config finds supportFiles in projects containing glob syntax 1'] = 
 
 
 `
+
+exports['e2e config throws an error if cypress.env.json specifies invalid property 1'] = `
+Your configFile at /foo/bar/.projects/invalid-env-file/cypress.env.json set an invalid value:
+
+Expected reporter to be a string.
+
+Instead the value was: 5
+
+`
