@@ -83,6 +83,7 @@ const original = `\
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
     </script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
   </body>
 </html>\
 `
@@ -164,6 +165,7 @@ const expected = `\
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
     </script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress:stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
   </body>
 </html>\
 `

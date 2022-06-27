@@ -17,7 +17,7 @@
   <% if(data && data.staticScriptInjection) { %>
     <!-- static script injection -->
     <!-- the actual integrity of the file is: <%=data.integrityValue%> -->
-    <script type="text/javascript" src="integrity.js" data-script-type="dynamic" crossorigin="anonymous" integrity="<%=data.integrityValue%>"></script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="<%=data.integrityValue%>"></script>
   <% } %>
 
   <% if(data && data.dynamicScriptInjection) { %>
