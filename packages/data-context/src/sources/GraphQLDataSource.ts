@@ -2,6 +2,7 @@ import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.
 import debugLib from 'debug'
 import { execute, FieldNode, GraphQLResolveInfo, print, visit } from 'graphql'
 import type { core } from 'nexus'
+import _ from 'lodash'
 import type { DataContext } from '..'
 import { DocumentNodeBuilder } from '../util/DocumentNodeBuilder'
 
@@ -107,6 +108,16 @@ export class GraphQLDataSource {
     return Buffer.from(str, 'base64').toString('utf8')
   }
 
+  invalidateClientUrqlCache (ctx: DataContext) {
+    ctx.emitter.pushFragment([{
+      data: null,
+      errors: [],
+      target: 'Query',
+      fragment: '{}',
+      invalidateCache: true,
+    }])
+  }
+
   pushResult ({ source, info, ctx, result }: PushResultParams) {
     if (info.parentType.name === 'Query') {
       this.#pushFragment({ result, ctx, info })
@@ -124,13 +135,17 @@ export class GraphQLDataSource {
 
   #pushFragment (params: PushNodeFragmentParams | PushQueryFragmentParams, isNode: boolean = false) {
     const docBuilder = new DocumentNodeBuilder({
+      isNode,
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
-    }, isNode)
+      variableDefinitions: params.info.operation.variableDefinitions,
+      operationName: params.info.operation.name?.value ?? params.info.fieldNodes.map((n) => n.name.value).sort().join('_'),
+    })
 
     Promise.resolve(execute({
       schema: params.info.schema,
       document: isNode ? docBuilder.queryNode : docBuilder.query,
+      variableValues: params.info.variableValues,
       rootValue: this.#makeRootValue(params, isNode, params.source),
       contextValue: params.ctx,
     })).then((result) => {
@@ -143,9 +158,19 @@ export class GraphQLDataSource {
       params.ctx.emitter.pushFragment([{
         target: params.info.parentType.name,
         fragment: print(docBuilder.clientWriteFragment),
+        variables: _.pick(params.info.variableValues, docBuilder.variableNames),
         data,
+        errors: result.errors,
       }])
     }).catch((e) => {
+      params.ctx.emitter.pushFragment([{
+        target: params.info.parentType.name,
+        fragment: print(docBuilder.clientWriteFragment),
+        variables: _.pick(params.info.variableValues, docBuilder.variableNames),
+        data: null,
+        errors: [e],
+      }])
+
       debug(`pushFragment execution error %o`, e)
     })
   }

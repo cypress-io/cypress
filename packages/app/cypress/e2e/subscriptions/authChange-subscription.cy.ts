@@ -33,7 +33,7 @@ describe('authChange subscription', () => {
       cy.contains('Log In')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')
@@ -62,7 +62,7 @@ describe('authChange subscription', () => {
       cy.contains('Log In')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')
@@ -90,7 +90,7 @@ describe('authChange subscription', () => {
       cy.contains('Log In')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')

@@ -1,9 +1,5 @@
+import dedent from 'dedent'
 import { interfaceType } from 'nexus'
-
-export interface ProjectShape {
-  projectId?: string | null
-  projectRoot: string
-}
 
 export const ProjectLike = interfaceType({
   name: 'ProjectLike',
@@ -15,18 +11,36 @@ export const ProjectLike = interfaceType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress dashboard',
-      resolve: (source, args, ctx) => ctx.project.projectId(),
+      resolve: (source, args, ctx) => ctx.project.maybeGetProjectId(source),
     })
 
     t.nonNull.string('title', {
       resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
+    })
+
+    t.remoteField('cloudProjectRemote', {
+      type: 'CloudProjectResult',
+      remoteQueryField: 'cloudProjectBySlug',
+      description: dedent`
+        A refetchable remote field implementation to fetch the cloudProject,
+        this can safely be used when rendering a list of projects
+      `,
+      queryArgs: async (source, args, ctx) => {
+        const projectId = await ctx.project.maybeGetProjectId(source)
+
+        if (projectId) {
+          return { slug: projectId }
+        }
+
+        return false
+      },
     })
   },
   resolveType (root) {
     return 'GlobalProject'
   },
   sourceType: {
-    module: __dirname,
+    module: '@packages/data-context/src/data/coreDataShape',
     export: 'ProjectShape',
   },
 })
