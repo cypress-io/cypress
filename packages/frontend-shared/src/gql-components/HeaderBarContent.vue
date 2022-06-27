@@ -28,7 +28,6 @@
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
-                :key="Boolean(hasLinkToProjects).toString()"
                 class="font-medium"
                 :class="currentProject ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
@@ -53,7 +52,7 @@
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
-                :key="Boolean(hasLinkToCurrentProject).toString()"
+                :key="Boolean(currentProject).toString()"
                 class="font-medium"
                 :role="canClearTestingType ? undefined : 'link'"
                 :href="canClearTestingType ? 'choose-testing-type' : undefined"
