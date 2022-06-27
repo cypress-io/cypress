@@ -27,6 +27,7 @@
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
+                :key="hasLinkToProjects"
                 class="font-medium"
                 :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
@@ -52,6 +53,7 @@
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
+                :key="hasLinkToCurrentProject"
                 class="font-medium"
                 :role="hasLinkToCurrentProject ? undefined : 'link'"
                 :href="hasLinkToCurrentProject ? 'choose-testing-type' : undefined"
