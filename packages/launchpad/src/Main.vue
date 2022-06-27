@@ -20,7 +20,7 @@
         :retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
-        v-else-if="!query.data.value?.currentProject"
+        v-else-if="query.data.value?.isGlobalMode && !query.data.value?.currentProject"
         :gql="query.data.value"
       />
       <MigrationWizard
@@ -125,6 +125,7 @@ fragment MainLaunchpadQueryData on Query {
   migration {
     videoEmbedHtml
   }
+  isGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
   ...WarningList
