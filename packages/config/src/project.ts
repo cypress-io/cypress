@@ -7,7 +7,7 @@ import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 import { uri } from '@packages/network'
-import { getCtx } from '@packages/data-context'
+import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
   ResolvedConfigurationOptionSource, ResolvedFromConfig, TestingType,
 } from '@packages/types'
