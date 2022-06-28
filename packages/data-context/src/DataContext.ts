@@ -40,7 +40,9 @@ import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecy
 import type { CypressError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
+import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 import { resetIssuedWarnings } from '@packages/config'
+import { RemotePollingDataSource } from './sources/RemotePollingDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -111,6 +113,11 @@ export class DataContext {
   @cached
   get graphql () {
     return new GraphQLDataSource()
+  }
+
+  @cached
+  get remoteRequest () {
+    return new RemoteRequestDataSource()
   }
 
   get electronApp () {
@@ -213,11 +220,17 @@ export class DataContext {
   }
 
   @cached
+  get remotePolling () {
+    return new RemotePollingDataSource(this)
+  }
+
+  @cached
   get cloud () {
     return new CloudDataSource({
       fetch: (...args) => this.util.fetch(...args),
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
+      invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
     })
   }
 
@@ -486,5 +499,30 @@ export class DataContext {
     toAwait.push(this.actions.project.loadProjects())
 
     await Promise.all(toAwait)
+  }
+
+  static #activeRequestCount = 0
+  static #awaitingEmptyRequestCount: Function[] = []
+
+  static addActiveRequest () {
+    this.#activeRequestCount++
+  }
+
+  static finishActiveRequest () {
+    this.#activeRequestCount--
+    if (this.#activeRequestCount === 0) {
+      this.#awaitingEmptyRequestCount.forEach((fn) => fn())
+      this.#awaitingEmptyRequestCount = []
+    }
+  }
+
+  static async waitForActiveRequestsToFlush () {
+    if (this.#activeRequestCount === 0) {
+      return
+    }
+
+    return new Promise((resolve) => {
+      this.#awaitingEmptyRequestCount.push(resolve)
+    })
   }
 }
