@@ -64,7 +64,7 @@ shikiWrapperClasses computed property.
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="bg-white ml-auto -mt-[32px] sticky margin-top:"
+      class="bg-white ml-auto -mt-32px sticky margin-top:"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
