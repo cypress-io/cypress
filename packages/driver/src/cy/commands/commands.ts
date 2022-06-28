@@ -16,7 +16,7 @@ const command = function (ctx, name, ...args) {
 }
 
 export default function (Commands, Cypress, cy) {
-  $Chainer.add('command', function command (chainer, userInvocationStack, args) {
+  $Chainer.add('command', function (chainer, userInvocationStack, args) {
     // `...args` below is the shorthand of `args[0], ...args.slice(1)`
     // TypeScript doesn't allow this.
     // @ts-ignore
