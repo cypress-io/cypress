@@ -52,7 +52,7 @@
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
-                :key="Boolean(currentProject).toString()"
+                :key="canClearTestingType.toString()"
                 class="font-medium"
                 :role="canClearTestingType ? undefined : 'link'"
                 :href="canClearTestingType ? 'choose-testing-type' : undefined"
@@ -289,7 +289,7 @@ const cloudProjectId = computed(() => {
 const currentProject = computed(() => props.gql.currentProject)
 
 const canClearTestingType = computed(() => {
-  return props.gql.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
+  return Boolean(props.gql.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents)
 })
 
 const isLoginOpen = ref(false)
