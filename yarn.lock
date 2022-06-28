@@ -36009,6 +36009,11 @@ token-stream@1.0.0:
   resolved "https://registry.yarnpkg.com/token-stream/-/token-stream-1.0.0.tgz#cc200eab2613f4166d27ff9afc7ca56d49df6eb4"
   integrity sha1-zCAOqyYT9BZtJ/+a/HylbUnfbrQ=
 
+tota11y@0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/tota11y/-/tota11y-0.1.6.tgz#312723614ff95ffbb874e56880494077471e1547"
+  integrity sha512-wdwWo2bmADv92e8RMIwhE9x0t0KWwli3gNrKrhxwJABcmMuUo4ntq3giqLP1NZEcKprs/vSOnxKW1CABTZ1Tzg==
+
 totalist@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/totalist/-/totalist-1.1.0.tgz#a4d65a3e546517701e3e5c37a47a70ac97fe56df"

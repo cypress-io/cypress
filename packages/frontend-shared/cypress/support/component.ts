@@ -6,6 +6,7 @@ import 'cypress-real-events/support'
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
+import 'tota11y/build/tota11y.min.js'
 
 declare global {
   namespace Cypress {
