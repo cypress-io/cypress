@@ -16,6 +16,7 @@
         </h1>
 
         <div
+          v-if="showButtons"
           class="font-medium w-full pt-12px gap-4 inline-flex justify-center "
         >
           <Button
@@ -139,10 +140,12 @@ fragment BaseError on ErrorWrapper {
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
-  retrying: boolean
-}>()
+  retrying?: boolean
+  showRetryButton?: boolean
+  showButtons?: boolean
+}>(), { retrying: false, showButtons: true })
 
 const emit = defineEmits<{
   (e: 'retry', id: string): void
