@@ -193,7 +193,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 1)
-   46 modules
+   40 modules
 
 
   ✓ renders hello world
