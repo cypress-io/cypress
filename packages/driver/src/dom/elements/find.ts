@@ -161,7 +161,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
 /**
  * By XY Coordinate
  */
-export const elementFromPoint = (doc, x, y) => {
+export const elementFromPoint = (doc, x, y): HTMLElement => {
   // first try the native elementFromPoint method
   let elFromPoint = doc.elementFromPoint(x, y)
 
