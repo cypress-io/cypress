@@ -77,9 +77,11 @@ import type { Highlighter, ILanguageRegistration } from 'shiki'
 import { getHighlighter, setOnigasmWASM } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 import shikiCyTheme from '../public/shiki/themes/cypress.theme.json'
-const langTmsRaw = import.meta.globEager('../public/shiki/languages/*.tmLanguage.json')
+const langJSONFilesArray = import.meta.globEager('../public/shiki/languages/*.tmLanguage.json')
 
-const langTms: ILanguageRegistration[] = Object.values(langTmsRaw).map((grammar: any) => {
+// Convert to the format shiki needs for language customization.
+// @see https://github.com/shikijs/shiki/blob/main/docs/languages.md
+const langs: ILanguageRegistration[] = Object.values(langJSONFilesArray).map((grammar: any) => {
   return {
     grammar,
     id: grammar.name,
@@ -93,7 +95,7 @@ let highlighter: Highlighter
 
 export type CyLangType = 'typescript' | 'javascript' | 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml' | 'html' | 'plaintext' | 'txt' | 'text' | 'vue' | string
 
-export const langsSupported = langTms.map((lang: ILanguageRegistration) => lang.id)
+export const langsSupported = langs.map((lang: ILanguageRegistration) => lang.id)
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -102,7 +104,7 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     theme: shikiCyTheme as any,
-    langs: langTms,
+    langs,
   })
 }
 
