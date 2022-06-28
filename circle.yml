@@ -2390,22 +2390,22 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2418,7 +2418,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install          
     - run-app-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
