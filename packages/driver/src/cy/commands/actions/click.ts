@@ -5,6 +5,9 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
+import type { ElViewportPostion } from '../../../dom/coordinates'
+import type { $Cy } from '../../../cypress/cy'
+import type { ForceEl } from '../../mouse'
 
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
@@ -39,12 +42,12 @@ type MouseActionOptions = {
   positionOrX: string | number
   y: number
   userOptions: Record<string, any>
-  onReady: Function
+  onReady: (fromElViewport: ElViewportPostion, forceEl: ForceEl) => any
   onTable: Function
   defaultOptions?: Record<string, any>
 }
 
-export default (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy: $Cy, state, config) => {
   const { mouse, keyboard } = cy.devices
 
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }: MouseActionOptions) => {
@@ -128,7 +131,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // add this delay delta to the runnables timeout because we delay
       // by it below before performing each click
-      cy.timeout($actionability.delay, true, eventName)
+      cy.timeout($actionability.delay, true)
 
       const createLog = (domEvents, fromElWindow, fromAutWindow) => {
         let consoleObj

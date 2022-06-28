@@ -181,6 +181,10 @@ export class ProjectLifecycleManager {
     return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
+  get eventProcessPid () {
+    return this._configManager?.eventProcessPid
+  }
+
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
