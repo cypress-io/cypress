@@ -80,7 +80,9 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
     return consoleProps.Command === consolePropCommand && props.id.includes(matchingOrigin)
   })
 
-  const logAttrs = matchedLogs.map((log) => log.get())
+  // While we'd expect the incoming log order to be deterministic, in practice we've found it fairly
+  // flakey. Sorting here eliminates this, resulting in far more reliable tests.
+  const logAttrs = matchedLogs.map((log) => log.get()).sort()
 
   return logAttrs.length === 1 ? logAttrs[0] : logAttrs
 }
