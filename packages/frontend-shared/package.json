@@ -17,7 +17,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@cypress-design/vue-icon": "^0.2.0"
+    "@cypress-design/vue-icon": "^0.3.0"
   },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
