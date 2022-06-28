@@ -35,11 +35,11 @@ const imageMarkdown = /!\[.*?\]\(.*?\)/g
 const doubleslashRe = /\\\\/g
 const escapedDoubleslashRe = /__double_slash__/g
 
-type CreateFunc = ((specWindow, state, assertFn) => ({
+type CreateFunc = (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) => ({
   chai: Chai.ChaiStatic
   expect: (val: any, message?: string) => Chai.Assertion
   assert: any
-}))
+})
 export let create: CreateFunc | null = null
 
 chai.use(sinonChai)
@@ -439,7 +439,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const captureUserInvocationStack = (specWindow, state: StateFunc, ssfi) => {
+  const captureUserInvocationStack = (specWindow: SpecWindow, state: StateFunc, ssfi) => {
     // we need a user invocation stack with the top line being the point where
     // the error occurred for the sake of the code frame
     // in chrome, stack lines from another frame don't appear in the
