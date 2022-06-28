@@ -154,6 +154,7 @@
                 <Auth
                   :gql="props.gql"
                   :show-logout="true"
+                  utm-medium="Nav"
                 />
               </div>
             </div>
@@ -174,6 +175,7 @@
       <LoginModal
         v-model="isLoginOpen"
         :gql="props.gql"
+        utm-medium="Nav"
       />
     </div>
   </div>

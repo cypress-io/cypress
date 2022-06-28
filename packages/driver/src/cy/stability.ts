@@ -58,7 +58,7 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
     state('anticipatingCrossOriginResponse', request)
   },
 
-  whenStableOrAnticipatingCrossOriginResponse (fn, command) {
+  whenStableOrAnticipatingCrossOriginResponse (fn, command?) {
     const commandIsOrigin = command?.get('name') === 'origin'
     const commandIsEndLogGroup = command?.get('name') === 'end-logGroup'
 
