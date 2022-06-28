@@ -2853,13 +2853,11 @@ declare namespace Cypress {
      * Whether Cypress will search for and replace
      * additional obstructive JS code in .js or .html files
      * that are leveraged by common authentication providers.
-     * 
      * NOTE: Setting this flag to true currently removes Subresource Integrity (SRI).
-     * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
-     * 
+     * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity. 
      * This option has no impact on experimentalSourceRewriting and is only used with the
      * non-experimental source rewriter.
-     *
+     * This option also modifies ANY javascript, including cross-origin scripts, to be passed through the rewriter.
      * @see https://on.cypress.io/configuration#experimentalExpandedModifyObstructiveCode
      */
     experimentalExpandedModifyObstructiveCode: boolean

@@ -335,7 +335,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   }
 
   this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode &&
-    (this.res.wantsInjection === 'full' || this.res.wantsInjection === 'fullCrossOrigin' || resContentTypeIsJavaScript(this.incomingRes))
+    (this.res.wantsInjection === 'full' || this.res.wantsInjection === 'fullCrossOrigin' || (resContentTypeIsJavaScript(this.incomingRes) && this.config.experimentalExpandedModifyObstructiveCode))
 
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
