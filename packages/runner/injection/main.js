@@ -27,20 +27,6 @@ Element.prototype.setAttribute = function (qualifiedName, value) {
   originalSetAttribute.apply(this, [qualifiedName, value])
 }
 
-const documentCookie = Object.getOwnPropertyDescriptors(Document.prototype).cookie
-
-Object.defineProperty(window.document, 'cookie', {
-  get () {
-    let cookie = documentCookie.get.apply(window.document)
-
-    if (cookie.length === 0) cookie = 'CkTst=G1655410048348'
-
-    return cookie
-  },
-  set (value) {
-    documentCookie.set.apply(window.document, [value])
-  },
-})
 /* eslint-enable */
 
 // We wrap timers in the injection code because if we do it in the driver (like
