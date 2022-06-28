@@ -110,10 +110,6 @@ export class DataContext {
     return this._config.mode === 'run'
   }
 
-  get isGlobalMode () {
-    return this.appData.isGlobalMode
-  }
-
   @cached
   get graphql () {
     return new GraphQLDataSource()
@@ -134,6 +130,10 @@ export class DataContext {
 
   get localSettingsApi () {
     return this._config.localSettingsApi
+  }
+
+  get isGlobalMode () {
+    return this.appData.isGlobalMode
   }
 
   get modeOptions () {
