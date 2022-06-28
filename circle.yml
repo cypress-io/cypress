@@ -528,14 +528,45 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-            DEBUG=<<parameters.debug>> \
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            else
+              # external PR
+
+              # To make `circleci tests` work correctly, we need to step into the package folder.
+              cd packages/<<parameters.package>>
+
+              GLOB="cypress/e2e/**/*cy.*"
+
+              if [[ <<parameters.type>> == 'ct' ]]; then
+                # component tests are located side by side with the source codes.
+                GLOB="src/**/*cy.*"
+              fi
+
+              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              # To run the `yarn` command, we need to walk out of the package folder.
+              cd ../..
+
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+            fi
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
@@ -2359,22 +2390,22 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2387,7 +2418,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install          
     - run-app-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
