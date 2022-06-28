@@ -1,5 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
+import debugLib from 'debug'
 import { fork } from 'child_process'
 import fs from 'fs-extra'
 import semver from 'semver'
@@ -29,10 +30,13 @@ import {
   getSpecPattern,
   legacyOptions,
   legacyIntegrationFolder,
+  getLegacyPluginsCustomFilePath,
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 import { hasTypeScriptInstalled } from '../util'
+
+const debug = debugLib('cypress:data-context:MigrationActions')
 
 const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
 
@@ -71,7 +75,11 @@ export function getDiff (oldConfig: any, newConfig: any) {
 }
 
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
-  const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
+  const pluginFile = legacyConfig.pluginsFile
+    ? await getLegacyPluginsCustomFilePath(projectRoot, legacyConfig.pluginsFile)
+    : await tryGetDefaultLegacyPluginsFile(projectRoot)
+
+  debug('found legacy pluginsFile at %s', pluginFile)
 
   return new Promise((resolve, reject) => {
     // couldn't find a pluginsFile
@@ -121,10 +129,12 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const legacyConfigWithDefaults = getConfigWithDefaults(legacyConfig)
 
     ipc.on('ready', () => {
+      debug('legacyConfigIpc:ready')
       ipc.send('loadLegacyPlugins', legacyConfigWithDefaults)
     })
 
     ipc.on('loadLegacyPlugins:reply', (modifiedLegacyConfig) => {
+      debug('loadLegacyPlugins:reply')
       const diff = getDiff(legacyConfigWithDefaults, modifiedLegacyConfig)
 
       // if env is updated by plugins, avoid adding it to the config file
@@ -139,6 +149,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     })
 
     ipc.on('loadLegacyPlugins:error', (error) => {
+      debug('loadLegacyPlugins:error')
       error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
 
       reject(error)
@@ -146,6 +157,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     })
 
     ipc.on('childProcess:unhandledError', (error) => {
+      debug('childProcess:unhandledError')
       reject(error)
       ipc.killChildProcess()
     })

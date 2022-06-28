@@ -79,7 +79,8 @@
           <Auth
             :gql="props.gql"
             :show-retry="!!error"
-            @continue="$emit('update:modelValue', false)"
+            :utm-medium="props.utmMedium"
+            @continue="continueAuth"
           />
         </div>
       </div>
@@ -107,13 +108,23 @@ import type { LoginModalFragment } from '../../generated/graphql'
 
 const online = useOnline()
 
+function continueAuth (isLoggedIn: boolean) {
+  if (isLoggedIn) {
+    emit('loggedin')
+  }
+
+  emit('update:modelValue', false)
+}
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
+  (event: 'loggedin'): void
 }>()
 
 const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
+  utmMedium: string
 }>()
 
 gql`

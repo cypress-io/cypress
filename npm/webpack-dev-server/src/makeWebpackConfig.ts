@@ -10,6 +10,7 @@ import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
 import type { WebpackConfiguration } from 'webpack-dev-server'
 import { sourceDefaultWebpackDependencies } from './helpers/sourceRelativeWebpackModules'
+import { sourceNextWebpackDeps } from './helpers/nextHandler'
 import type { WebpackDevServerConfig } from './devServer'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
@@ -89,6 +90,16 @@ function getMajorVersion (semver: string) {
   return toNum
 }
 
+function isUsingNext (projectRoot: string) {
+  try {
+    require.resolve('next', { paths: [projectRoot] })
+
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 /**
  * We ignore `react-dom/client` if the React is present and
  * we the version is <= 17.
@@ -97,31 +108,34 @@ function getMajorVersion (semver: string) {
  * we are using and match the API.
  */
 function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
-  const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
+  debug('making react-version specific ignore plugin')
 
-  debug(`import user's webpack from %s. It is version %s`,
-    sourceWebpackModulesResult.webpack.importPath,
-    sourceWebpackModulesResult.webpack.majorVersion)
+  let webpackModule
 
-  const webpackModule = require(sourceWebpackModulesResult.webpack.importPath)
+  // If they are using Next.js, we cannot just grab the webpack path, since
+  // webpack is not included as a dependency - it's inlined in the next/dist
+  // directory
+  if (isUsingNext(devServerConfig.cypressConfig.projectRoot)) {
+    debug('project is using Next.js. Sourcing webpack module from Next.js specific location')
+    const nextModules = sourceNextWebpackDeps(devServerConfig)
+
+    // need to grab webpack from the `.webpack` property - Next.js only
+    webpackModule = require(nextModules.webpack.importPath).webpack
+  } else {
+    const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
+
+    debug(`import user's webpack from %s. It is version %s`,
+      sourceWebpackModulesResult.webpack.importPath,
+      sourceWebpackModulesResult.webpack.majorVersion)
+
+    webpackModule = require(sourceWebpackModulesResult.webpack.importPath)
+  }
 
   // https://webpack.js.org/plugins/ignore-plugin/
-  if (sourceWebpackModulesResult.webpack.majorVersion === 5) {
-    return new webpackModule.IgnorePlugin({
-      resourceRegExp: /react-dom\/client$/,
-      contextRegExp: /cypress/,
-    })
-  }
-
-  // https://v4.webpack.js.org/plugins/ignore-plugin/
-  if (sourceWebpackModulesResult.webpack.majorVersion === 4) {
-    return new webpackModule.IgnorePlugin({
-      resourceRegExp: /react-dom\/client$/,
-      contextRegExp: /cypress/,
-    })
-  }
-
-  throw new Error(`Found webpack ${sourceWebpackModulesResult.webpack.majorVersion}. Only v4 and v5 are supported`)
+  return new webpackModule.IgnorePlugin({
+    resourceRegExp: /react-dom\/client$/,
+    contextRegExp: /cypress/,
+  })
 }
 
 /**
