@@ -14,7 +14,17 @@
     >
       <template #suffix>
         <button
-          class="rounded-r-md outline-none h-38px mr-[-0.75rem] group"
+          v-if="props.modelValue"
+          type="button"
+          data-cy="clear-search-button"
+          class="border-transparent rounded-md flex outline-none h-24px mr-16px w-24px duration-300 items-center justify-center group hocus-default hocus:ring-0 hocus:bg-indigo-50"
+          :aria-label="t('specPage.clearSearch')"
+          @click="clearInput"
+        >
+          <i-cy-delete_x16 class="icon-light-gray-50 icon-dark-gray-500 group-hocus:icon-dark-indigo-500" />
+        </button>
+        <button
+          class="rounded-r-md outline-none h-38px mr-[-0.75rem] group relative"
           aria-live="polite"
           @click="emit('showSpecPatternModal')"
         >
@@ -82,6 +92,10 @@ const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
 
   emit('update:modelValue', value)
+}
+
+const clearInput = (e: Event) => {
+  emit('update:modelValue', '')
 }
 </script>
 

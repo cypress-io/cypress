@@ -419,6 +419,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   },
+  // Possibly add a defaultValue for specPattern https://github.com/cypress-io/cypress/issues/22507
+  {
+    name: 'specPattern',
+    validation: validate.isStringOrArrayOfStrings,
+    canUpdateDuringTestTime: false,
+  },
 ]
 
 const runtimeOptions: Array<RuntimeConfigOption> = [

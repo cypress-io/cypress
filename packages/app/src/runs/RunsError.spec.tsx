@@ -6,17 +6,19 @@ describe('<RunsError />', () => {
     cy.mount({
       name: 'RunsError',
       render () {
-        return (<div class="h-screen">
-          <RunsError
-            message="Cannot connect to the Cypress Dashboard"
-            icon="error"
-            buttonText="Request Access"
-            buttonIcon={PaperAirplaneIcon}
-          >
-          The request timed out when trying to retrieve the recorded runs from the Cypress Dashboard. <br/>
-          Please refresh the page to try again and visit our Status Page if this behavior continues.
-          </RunsError>
-        </div>)
+        return (
+          <div class="h-screen">
+            <RunsError
+              message="Cannot connect to the Cypress Dashboard"
+              icon="error"
+              buttonText="Request Access"
+              buttonIcon={PaperAirplaneIcon}
+            >
+            The request timed out when trying to retrieve the recorded runs from the Cypress Dashboard. <br/>
+            Please refresh the page to try again and visit our Status Page if this behavior continues.
+            </RunsError>
+          </div>
+        )
       },
     })
   })
