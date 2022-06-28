@@ -7,6 +7,7 @@ export type SecurityOpts = {
   isHtml?: boolean
   url: string
   useAstSourceRewriting: boolean
+  useExpandedModifyObstructiveCode: boolean
   deferSourceMapRewrite: (opts: any) => string
 }
 

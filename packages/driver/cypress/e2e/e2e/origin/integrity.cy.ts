@@ -1,6 +1,9 @@
 import CryptoJS from 'crypto-js'
 import type { TemplateExecutor } from 'lodash'
 
+// NOTE: in order to run these tests, the following config flags need to be set
+//    experimentalSessionAndOrigin=true
+//    experimentalExpandedModifyObstructiveCode=true
 describe('Integrity Preservation', () => {
   // Add common SRI hashes used when setting script/link integrity.
   // These are the ones supported by SRI (see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity)

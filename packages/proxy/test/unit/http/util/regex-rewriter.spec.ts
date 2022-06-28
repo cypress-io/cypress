@@ -82,34 +82,6 @@ const original = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
-      if (e.self==e.top) run()
-      if (a.self===a.top) run()
-      if (f.top===g.self) run()
-      if (g.top==g.self) run()
-    </script>
-    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
-    <script type="text/javascript" integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
-    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-      const dynamicIntegrityScript = document.createElement('script')
-        dynamicIntegrityScript.id = 'dynamic-set-integrity'
-        dynamicIntegrityScript.type = 'text/javascript'
-        dynamicIntegrityScript.src = 'integrity.js'
-        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
-        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
-        document.querySelector('head').appendChild(dynamicIntegrityScript)
-    </script>
-    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
-    <link integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
-    <script id="dynamic-link-injection" type="text/javascript">
-      const dynamicIntegrityScript = document.createElement('link')
-      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
-      dynamicIntegrityScript.rel = "stylesheet"
-      dynamicIntegrityScript.href = 'integrity.css'
-      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
-      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
-      document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   </body>
 </html>\
@@ -191,6 +163,52 @@ const expected = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
+    </script>
+  </body>
+</html>\
+`
+
+const originalWithExpandedModifyObstructiveCode = `\
+<html>
+  <body>
+    <script type="text/javascript">
+      if (e.self==e.top) run()
+      if (a.self===a.top) run()
+      if (f.top===g.self) run()
+      if (g.top==g.self) run()
+    </script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+        dynamicIntegrityScript.id = 'dynamic-set-integrity'
+        dynamicIntegrityScript.type = 'text/javascript'
+        dynamicIntegrityScript.src = 'integrity.js'
+        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
+        document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
+    <link integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+  </body>
+</html>\
+`
+
+const expectedWithExpandedModifyObstructiveCode = `\
+<html>
+  <body>
+    <script type="text/javascript">
       if (e.self==e.self) run()
       if (a.self===a.self) run()
       if (f.self===g.self) run()
@@ -228,6 +246,12 @@ describe('http/util/regex-rewriter', () => {
   context('.strip', () => {
     it('replaces obstructive code', () => {
       expect(regexRewriter.strip(original)).to.eq(expected)
+    })
+
+    it('replaces additional obstructive code with the "useExpandedModifyObstructiveCode" set', () => {
+      expect(regexRewriter.strip(originalWithExpandedModifyObstructiveCode, {
+        useExpandedModifyObstructiveCode: true,
+      })).to.eq(expectedWithExpandedModifyObstructiveCode)
     })
 
     it('replaces jira window getter', () => {
@@ -411,6 +435,32 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
         try {
           expect(string).to.eq(expected)
+
+          done()
+        } catch (err) {
+          done(err)
+        }
+      }))
+
+      haystacks.forEach((haystack) => {
+        replacer.write(`${haystack}\n`)
+      })
+
+      replacer.end()
+    })
+
+    it('replaces additional obstructive code with the "useExpandedModifyObstructiveCode" set', (done) => {
+      const haystacks = originalWithExpandedModifyObstructiveCode.split('\n')
+
+      const replacer = regexRewriter.stripStream({
+        useExpandedModifyObstructiveCode: true,
+      })
+
+      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+        const string = str.toString().trim()
+
+        try {
+          expect(string).to.eq(expectedWithExpandedModifyObstructiveCode)
 
           done()
         } catch (err) {

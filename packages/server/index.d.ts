@@ -21,6 +21,7 @@ export namespace CyServer {
     clientRoute: string
     experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
+    experimentalExpandedModifyObstructiveCode: boolean
     /**
      * URL to Cypress's runner.
      */

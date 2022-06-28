@@ -1,3 +1,5 @@
+import type { SecurityOpts } from './rewriter'
+
 const pumpify = require('pumpify')
 const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
@@ -17,45 +19,58 @@ const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*
 const integrityTagLookAheadRe = /(?<=\s)integrity(?==(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))|^integrity$/g
 const dynamicIntegritySetAttributeRe = /(?<=[a-zA-z]\.setAttribute\((?:\"|\'))integrity(?=\"|\')|^integrity$/g
 
-export function strip (html: string) {
-  // TODO: maybe put this behind a flag?
-  return html
-  .replace(integrityTagLookAheadRe, integrityStrippedAttributeTag)
-  .replace(dynamicIntegritySetAttributeRe, integrityStrippedAttributeTag)
+export function strip (html: string, { useExpandedModifyObstructiveCode }: Partial<SecurityOpts> = {
+  useExpandedModifyObstructiveCode: false,
+}) {
+  const rewrittenHTML = html
   .replace(topOrParentEqualityBeforeRe, '$1self')
   .replace(topOrParentEqualityAfterRe, 'self$2')
   .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
   .replace(formTopTarget, 'target="_self"')
-  .replace(topOrParentEqualityRe, 'self')
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
+
+  if (useExpandedModifyObstructiveCode) {
+    return rewrittenHTML
+    .replace(topOrParentEqualityRe, 'self')
+    .replace(integrityTagLookAheadRe, integrityStrippedAttributeTag)
+    .replace(dynamicIntegritySetAttributeRe, integrityStrippedAttributeTag)
+  }
+
+  return rewrittenHTML
 }
 
-export function stripStream () {
+export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<SecurityOpts> = {
+  useExpandedModifyObstructiveCode: false,
+}) {
   return pumpify(
     utf8Stream(),
     replaceStream(
       [
         topOrParentEqualityBeforeRe,
         topOrParentEqualityAfterRe,
-        topOrParentEqualityRe,
         topOrParentLocationOrFramesRe,
         formTopTarget,
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
-        integrityTagLookAheadRe,
-        dynamicIntegritySetAttributeRe,
+        ...(useExpandedModifyObstructiveCode ? [
+          topOrParentEqualityRe,
+          integrityTagLookAheadRe,
+          dynamicIntegritySetAttributeRe,
+        ] : []),
       ],
       [
         '$1self',
         'self$2',
-        'self',
         '$1self$3$4',
         'target="_self"',
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
-        integrityStrippedAttributeTag,
-        integrityStrippedAttributeTag,
+        ...(useExpandedModifyObstructiveCode ? [
+          'self',
+          integrityStrippedAttributeTag,
+          integrityStrippedAttributeTag,
+        ] : []),
       ],
     ),
   )

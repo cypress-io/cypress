@@ -552,6 +552,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isHtml: isHtml(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      useExpandedModifyObstructiveCode: this.config.experimentalExpandedModifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
     })
@@ -580,6 +581,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
     isHtml: isHtml(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
+    useExpandedModifyObstructiveCode: this.config.experimentalExpandedModifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
   })).on('error', this.onError)
