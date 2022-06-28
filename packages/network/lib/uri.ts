@@ -103,3 +103,15 @@ export function isLocalhost (url: URL) {
     || localhostIPRegex.test(url.hostname)
   )
 }
+
+export function origin (urlStr: string) {
+  const parsed = url.parse(urlStr)
+
+  parsed.hash = null
+  parsed.search = null
+  parsed.query = null
+  parsed.path = null
+  parsed.pathname = null
+
+  return url.format(parsed)
+}
