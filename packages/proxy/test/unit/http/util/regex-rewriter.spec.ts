@@ -88,6 +88,8 @@ const original = `\
       if (g.top==g.self) run()
     </script>
     <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
     <script type="text/javascript">
       const dynamicIntegrityScript = document.createElement('script')
         dynamicIntegrityScript.id = 'dynamic-set-integrity'
@@ -95,8 +97,19 @@ const original = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('integrity', "sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="
+        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
         document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
+    <link integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   </body>
 </html>\
@@ -184,6 +197,8 @@ const expected = `\
       if (g.self==g.self) run()
     </script>
     <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" cypress-stripped-integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
     <script type="text/javascript">
       const dynamicIntegrityScript = document.createElement('script')
         dynamicIntegrityScript.id = 'dynamic-set-integrity'
@@ -191,8 +206,19 @@ const expected = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="
+        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
         document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
+    <link cypress-stripped-integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   </body>
 </html>\
