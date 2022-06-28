@@ -51,17 +51,17 @@ export interface RemoteGraphQLInterceptPayload {
   Response: typeof Response
 }
 
-export interface RemoteGraphQLBatchInterceptPayload {
+export interface RemoteGraphQLBatchInterceptPayload<T> {
   key: string
   index: number
   field: string
   variables: Record<string, any>
-  result: ExecutionResult
+  result: T
 }
 
 export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
 
-export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload, testState: Record<string, any>) => T | Promise<T>
+export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload<T>, testState: Record<string, any>) => T | Promise<T>
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
