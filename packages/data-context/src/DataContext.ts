@@ -110,6 +110,10 @@ export class DataContext {
     return this._config.mode === 'run'
   }
 
+  get isGlobalMode () {
+    return this.appData.isGlobalMode
+  }
+
   @cached
   get graphql () {
     return new GraphQLDataSource()
