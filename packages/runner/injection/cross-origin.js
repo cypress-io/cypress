@@ -44,11 +44,11 @@ const Cypress = findCypress()
 const originalSetAttribute = Element.prototype.setAttribute
 
 Element.prototype.setAttribute = function (qualifiedName, value) {
-  if (qualifiedName === 'integrity') {
+  if (qualifiedName === 'integrity' && Cypress.config('useExpandedModifyObstructiveCode')) {
     qualifiedName = 'cypress-stripped-integrity'
   }
 
-  if (qualifiedName === 'target' && value === '_top') {
+  if (qualifiedName === 'target' && value === '_top' && Cypress.config('useExpandedModifyObstructiveCode')) {
     value = '_self'
   }
 

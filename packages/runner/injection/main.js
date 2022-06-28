@@ -20,7 +20,7 @@ Cypress in the parent window but it is missing. This should never happen and lik
 const originalSetAttribute = Element.prototype.setAttribute
 
 Element.prototype.setAttribute = function (qualifiedName, value) {
-  if (qualifiedName === 'integrity') {
+  if (qualifiedName === 'integrity' && Cypress.config('useExpandedModifyObstructiveCode')) {
     qualifiedName = 'cypress-stripped-integrity'
   }
 
