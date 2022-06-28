@@ -5,3 +5,5 @@ export * from './browser'
 export * from './project'
 
 export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions, defineConfigAvailable } from './ast-utils/addToCypressConfig'
+
+export { hideKeys } from './utils'
