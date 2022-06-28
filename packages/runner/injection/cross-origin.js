@@ -44,9 +44,9 @@ const Cypress = findCypress()
 const originalSetAttribute = Element.prototype.setAttribute
 
 Element.prototype.setAttribute = function (qualifiedName, value) {
-  // if (qualifiedName === 'integrity') {
-  //   qualifiedName = 'cypress-stripped-integrity'
-  // }
+  if (qualifiedName === 'integrity') {
+    qualifiedName = 'cypress-stripped-integrity'
+  }
 
   if (qualifiedName === 'target' && value === '_top') {
     value = '_self'
