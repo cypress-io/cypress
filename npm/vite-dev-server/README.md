@@ -2,6 +2,8 @@
 
 Implements the APIs for the object-syntax of the Cypress Component-testing "vite dev server".
 
+> **Note:** This package is bundled with the Cypress binary and should not need to be installed separately. See the [Component Framework Configuration Docs](https://docs.cypress.io/guides/component-testing/component-framework-configuration) for setting up component testing with vite. The `devServer` function signature is for advanced use-cases.
+
 Object syntax:
 
 ```ts
@@ -26,9 +28,9 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   component: {
-    devServer(cypressConfig) {
+    devServer(devServerConfig) {
       return devServer({
-        cypressConfig,
+        ...devServerConfig,
         framework: 'react',
         viteConfig: require('./vite.config.js')
       })
@@ -47,6 +49,17 @@ From there, we check the "framework" field to source or define any known vite tr
 
 We then merge the sourced config with the user's vite config, and layer on our own transforms, and provide this to a vite instance. The vite instance used to create a vite-dev-server, which is returned.
 
-## Changelog
+## Compatibility
 
-[Changelog](./CHANGELOG.md)
+| @cypress/vite-dev-server | cypress |
+| ------------------------ | ------- |
+| <= v2                    | <= v9   |
+| >= v3                    | >= v10  |
+
+## License
+
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
+
+This project is licensed under the terms of the [MIT license](/LICENSE).
+
+## [Changelog](./CHANGELOG.md)
