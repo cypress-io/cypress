@@ -59,9 +59,9 @@ export interface RemoteGraphQLBatchInterceptPayload {
   result: ExecutionResult
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
+export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
 
-export type RemoteGraphQLBatchInterceptor = (obj: RemoteGraphQLBatchInterceptPayload, testState: Record<string, any>) => any | Promise<any>
+export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload, testState: Record<string, any>) => T | Promise<T>
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -144,7 +144,7 @@ declare global {
        */
       remoteGraphQLIntercept: typeof remoteGraphQLIntercept
       /**
-       * Gives the ability to intercept the remote GraphQL request & respond accordingly
+       * Gives the ability to intercept the batched remote GraphQL request & respond accordingly
        */
       remoteGraphQLInterceptBatched: typeof remoteGraphQLInterceptBatched
       /**
@@ -452,13 +452,13 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
   })
 }
 
-function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
+function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>) {
   return logInternal('remoteGraphQLIntercept', () => {
     return taskInternal('__internal_remoteGraphQLIntercept', fn.toString())
   })
 }
 
-function remoteGraphQLInterceptBatched (fn: RemoteGraphQLBatchInterceptor) {
+function remoteGraphQLInterceptBatched <T = any> (fn: RemoteGraphQLBatchInterceptor<T>) {
   return logInternal('remoteGraphQLInterceptBatched', () => {
     return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })

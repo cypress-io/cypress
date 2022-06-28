@@ -221,7 +221,30 @@ async function makeE2ETasks () {
             const keys: string[] = []
             const values: Promise<any>[] = []
             const finalVal: Record<string, any> = {}
+            const errors: GraphQLError[] = []
 
+            // The batch execution plugin (https://www.graphql-tools.com/docs/batch-execution) batches the
+            // query variables & payloads by rewriting both the fields & variables to ensure there
+            // are no collisions. It does so in a consistent manner, prefixing each field with an incrementing integer,
+            // and prefixing the variables within that selection set with the same id
+            //
+            // It ends up looking something like this:
+            //
+            // query ($_0_variableA: String, $_0_variableB: String, $_1_variableA: String, $_1_variableB: String) {
+            //   _0_someQueryField: someQueryField(argA: $_0_variableA) {
+            //     id
+            //     field(argB: $_0_variableB))
+            //   }
+            //   _1_someQueryField: someQueryField(argA: $_1_variableA) {
+            //     id
+            //     field(argB: $_1_variableB))
+            //   }
+            // }
+            //
+            // To make it simpler to test, we take this knowledge and use some regexes & rewriting it to parse out the index,
+            // and re-write the variables as though we were executing the query individually, the same way the plugin does when
+            // we return the resolved data. We then expect that you return the data for the individual row
+            //
             for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
               const re = /^_(\d+)_(.*?)$/.exec(key)
 
@@ -244,11 +267,15 @@ async function makeE2ETasks () {
                   variables: subqueryVariables,
                   result: result[key],
                 }, testState)
+              }).catch((e) => {
+                errors.push(new GraphQLError(e.message, undefined, undefined, undefined, [key], e))
+
+                return null
               }))
             }
             result = {
               data: _.zipObject(keys, (await Promise.allSettled(values)).map((v) => v.status === 'fulfilled' ? v.value : v.reason)),
-              errors: result.errors,
+              errors: errors.length ? [...(result.errors ?? []), ...errors] : result.errors,
               extensions: result.extensions,
             }
           } else if (remoteGraphQLIntercept) {
