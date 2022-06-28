@@ -151,16 +151,21 @@ const props = withDefaults(defineProps<{
 })
 
 const resolvedLang = computed(() => {
-  if (!props.lang) {
-    return 'plaintext'
+  switch (props.lang) {
+    case 'javascript':
+    case 'js':
+    case 'jsx':
+      return 'jsx'
+    case 'typescript':
+    case 'ts':
+    case 'tsx':
+      return 'tsx'
+    default:
+      return props.lang && langsSupported.includes(props.lang)
+        ? props.lang
+        // if the language is not recognized use plaintext
+        : 'plaintext'
   }
-
-  if (['javascript', 'js', 'jsx'].includes(props.lang)) return 'jsx'
-
-  if (['typescript', 'ts', 'tsx'].includes(props.lang)) return 'tsx'
-
-  // if the language is not recognized use plaintext
-  return langsSupported.includes(props.lang) ? props.lang : 'plaintext'
 })
 
 const trimmedCode = computed(() => props.skipTrim ? props.code : props.code.trim())
