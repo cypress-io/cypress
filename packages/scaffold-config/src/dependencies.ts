@@ -34,6 +34,15 @@ export const WIZARD_DEPENDENCY_REACT = {
   minVersion: '>=16.x',
 } as const
 
+export const WIZARD_DEPENDENCY_REACT_DOM = {
+  type: 'react-dom',
+  name: 'React DOM',
+  package: 'react-dom',
+  installer: 'react-dom',
+  description: 'This package serves as the entry point to the DOM and server renderers for React',
+  minVersion: '>=16.x',
+} as const
+
 export const WIZARD_DEPENDENCY_TYPESCRIPT = {
   type: 'typescript',
   name: 'TypeScript',
@@ -97,6 +106,7 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_NUXT,
   WIZARD_DEPENDENCY_NEXT,
   WIZARD_DEPENDENCY_REACT,
+  WIZARD_DEPENDENCY_REACT_DOM,
   WIZARD_DEPENDENCY_VUE_2,
   WIZARD_DEPENDENCY_VUE_3,
 ] as const
