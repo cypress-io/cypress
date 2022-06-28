@@ -57,7 +57,7 @@
       </template>
       <template #right>
         <RunResults
-          :gql="run"
+          :gql="props.gql"
         />
       </template>
     </ListRowHeader>
