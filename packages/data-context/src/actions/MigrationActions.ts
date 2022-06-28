@@ -34,11 +34,11 @@ import {
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
-import { hasTypeScriptInstalled } from '../util'
+import { hasTypeScriptInstalled, toPosix } from '../util'
 
 const debug = debugLib('cypress:data-context:MigrationActions')
 
-const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
+const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -103,7 +103,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     // this matches the 9.x behavior, which is what we want for
     // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
     if (hasTypeScriptInstalled(projectRoot)) {
-      const tsNodeLoader = `--require ${tsNode}`
+      const tsNodeLoader = `--require "${tsNode}"`
 
       if (!childOptions.env) {
         childOptions.env = {}

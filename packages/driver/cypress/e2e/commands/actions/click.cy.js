@@ -745,7 +745,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').click({ multiple: true }).then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'click']))
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true]))
 
         expect(num.length).to.eq(count)
       })
@@ -3239,7 +3239,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').dblclick().then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'dblclick']))
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true]))
 
         expect(num.length).to.eq(count)
       })
