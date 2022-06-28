@@ -7,7 +7,7 @@ const integrityStrippedAttributeTag = 'cypress-stripped-integrity'
 
 const topOrParentEqualityBeforeRe = /((?:\bwindow\b|\bself\b)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
 const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:\bwindow\b|\bself\b))/g
-const topOrParentEqualityRe = /(?<=[a-zA-z]\.self==[a-zA-z]\.)top|(?<=[a-zA-z]\.self===[a-zA-z]\.)top|top(?===[a-zA-z]\.self)|top(?====[a-zA-z]\.self)|^top$/g
+const topIsSelfEqualityRe = /(?<=[a-zA-z]\.self==[a-zA-z]\.)top|(?<=[a-zA-z]\.self===[a-zA-z]\.)top|top(?===[a-zA-z]\.self)|top(?====[a-zA-z]\.self)|^top$/g
 
 const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.])(\blocation\b|\bframes\b)/g
 const formTopTarget = /target="_top"/g
@@ -26,13 +26,13 @@ export function strip (html: string, { useExpandedModifyObstructiveCode }: Parti
   .replace(topOrParentEqualityBeforeRe, '$1self')
   .replace(topOrParentEqualityAfterRe, 'self$2')
   .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
-  .replace(formTopTarget, 'target="_self"')
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 
   if (useExpandedModifyObstructiveCode) {
     return rewrittenHTML
-    .replace(topOrParentEqualityRe, 'self')
+    .replace(topIsSelfEqualityRe, 'self')
+    .replace(formTopTarget, 'target="_self"')
     .replace(integrityTagLookAheadRe, integrityStrippedAttributeTag)
     .replace(dynamicIntegritySetAttributeRe, integrityStrippedAttributeTag)
   }
@@ -50,11 +50,11 @@ export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<Secur
         topOrParentEqualityBeforeRe,
         topOrParentEqualityAfterRe,
         topOrParentLocationOrFramesRe,
-        formTopTarget,
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
         ...(useExpandedModifyObstructiveCode ? [
-          topOrParentEqualityRe,
+          topIsSelfEqualityRe,
+          formTopTarget,
           integrityTagLookAheadRe,
           dynamicIntegritySetAttributeRe,
         ] : []),
@@ -63,11 +63,11 @@ export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<Secur
         '$1self',
         'self$2',
         '$1self$3$4',
-        'target="_self"',
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
         ...(useExpandedModifyObstructiveCode ? [
           'self',
+          'target="_self"',
           integrityStrippedAttributeTag,
           integrityStrippedAttributeTag,
         ] : []),
