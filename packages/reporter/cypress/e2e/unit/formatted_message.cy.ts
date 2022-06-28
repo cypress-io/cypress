@@ -18,7 +18,7 @@ describe('formattedMessage', () => {
     const specialMessage = 'expected ***abcdef*** to equal ***abcdef***'
     const result = formattedMessage(specialMessage)
 
-    expect(result).to.equal('expected <em><strong>abcdef</strong></em>  to equal <strong>***abcdef***</strong>')
+    expect(result).to.equal('expected <em><strong>abcdef</strong></em> to equal <strong>***abcdef***</strong>')
   })
 
   it('does NOT maintain special characters when "to equal" or "to match" are not in assertion', () => {
