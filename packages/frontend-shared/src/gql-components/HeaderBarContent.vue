@@ -289,7 +289,7 @@ const cloudProjectId = computed(() => {
 const currentProject = computed(() => props.gql.currentProject)
 
 const canClearTestingType = computed(() => {
-  return Boolean(props.gql.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents)
+  return Boolean(props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents)
 })
 
 const isLoginOpen = ref(false)
