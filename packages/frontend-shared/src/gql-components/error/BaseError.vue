@@ -16,16 +16,15 @@
         </h1>
 
         <div
-          v-if="retry"
-          class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
+          class="font-medium w-full pt-12px gap-4 inline-flex justify-center "
         >
           <Button
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
-            :prefix-icon-class="`${retrying && 'animate-spin'} icon-dark-indigo-500`"
+            :prefix-icon-class="{ 'animate-spin': retrying, 'icon-dark-indigo-500': true }"
             :disabled="retrying"
-            @click="onRetry()"
+            @click="emit('retry', baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -142,20 +141,16 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
-  retry?: (id: string) => void
+  retrying: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'retry', id: string): void
 }>()
 
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
-
-const retrying = ref(false)
-
-const onRetry = async () => {
-  retrying.value = true
-  await props.retry?.(baseError.value.id)
-  retrying.value = false
-}
 
 const getDocsType = (): string => {
   const { errorType, errorStack } = baseError.value

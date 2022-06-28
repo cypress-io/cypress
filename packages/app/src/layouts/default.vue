@@ -24,7 +24,8 @@
       <BaseError
         v-if="query.data.value?.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        :retrying="retrying"
+        @retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />
@@ -60,7 +61,7 @@ import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
 
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
@@ -104,10 +105,15 @@ const query = useQuery({
 })
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
 
-const resetErrorAndLoadConfig = (id: string) => {
+const retrying = ref(false)
+
+const resetErrorAndLoadConfig = async (id: string) => {
+  retrying.value = true
   if (!mutation.fetching.value) {
-    mutation.executeMutation({ id })
+    await mutation.executeMutation({ id })
   }
+
+  retrying.value = false
 }
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
