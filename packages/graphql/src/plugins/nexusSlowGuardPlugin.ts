@@ -2,7 +2,7 @@ import { plugin } from 'nexus'
 import { isPromiseLike, pathToArray } from 'nexus/dist/utils'
 import chalk from 'chalk'
 
-const HANGING_RESOLVER_THRESHOLD = 15
+const HANGING_RESOLVER_THRESHOLD = 100
 
 export const nexusSlowGuardPlugin = plugin({
   name: 'NexusSlowGuard',
