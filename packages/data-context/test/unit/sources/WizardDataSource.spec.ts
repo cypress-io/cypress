@@ -123,7 +123,7 @@ describe('packagesToInstall', () => {
 
     const actual = ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D next react`)
+    expect(actual).to.eq(`npm install -D next react react-dom`)
   })
 
   it('nuxtjs-vue2-unconfigured', async () => {

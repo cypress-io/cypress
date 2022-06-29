@@ -129,6 +129,7 @@ export const WIZARD_FRAMEWORKS = [
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
       ]
     },
     codeGenFramework: 'react',
