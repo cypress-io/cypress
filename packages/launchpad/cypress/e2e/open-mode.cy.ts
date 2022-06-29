@@ -119,42 +119,6 @@ describe('Launchpad: Open Mode', () => {
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
     })
-
-    it('updates the breadcrumb when navigating forward and back', () => {
-      const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
-        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
-      }
-
-      cy.scaffoldProject('todos')
-      cy.openProject('todos')
-      cy.visitLaunchpad()
-
-      cy.contains('h1', 'Welcome to Cypress!')
-
-      getBreadcrumbLink('Projects', { disabled: true })
-      getBreadcrumbLink('todos', { disabled: true })
-
-      cy.get('[data-cy-testingtype="e2e"]').click()
-
-      cy.contains('h1', 'Choose a Browser')
-
-      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
-      getBreadcrumbLink('Projects', { disabled: true })
-
-      cy.withCtx((ctx, { sinon }) => {
-        sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
-      })
-
-      getBreadcrumbLink('todos').click()
-
-      cy.contains('h1', 'Welcome to Cypress!')
-      getBreadcrumbLink('Projects', { disabled: true })
-      getBreadcrumbLink('todos', { disabled: true })
-
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
-    })
   })
 
   describe('open in ide', () => {
