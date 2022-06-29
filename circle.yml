@@ -2712,7 +2712,7 @@ windows-workflow: &windows-workflow
         name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 
@@ -2720,7 +2720,7 @@ windows-workflow: &windows-workflow
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 
