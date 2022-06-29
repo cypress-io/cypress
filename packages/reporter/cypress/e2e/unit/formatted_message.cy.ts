@@ -11,7 +11,7 @@ describe('formattedMessage', () => {
     const specialMessage = 'expected **__*abcdef*__** to match /__.*abcdef.*__/'
     const result = formattedMessage(specialMessage)
 
-    expect(result).to.equal('expected <strong><strong><em>abcdef</em></strong></strong>  to match <strong>/__.*abcdef.*__/</strong>')
+    expect(result).to.equal('expected <strong><strong><em>abcdef</em></strong></strong> to match <strong>/__.*abcdef.*__/</strong>')
   })
 
   it('maintains special characters when using "to contain"', () => {
