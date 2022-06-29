@@ -1,4 +1,5 @@
 const run = async (profiler) => {
+  const cpuUsage = require('./util/cpuUsage').initCpuUsage()
   const bench = require('./util/bench').initBenchmark('startup')
 
   bench.time('start')
@@ -12,6 +13,7 @@ const run = async (profiler) => {
 
   await srv.server.cypressServer()
 
+  cpuUsage.stop()
   // eslint-disable-next-line no-console
   await profiler.stop()
 

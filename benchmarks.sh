@@ -2,7 +2,7 @@ rm ./packages/server/results/startup.json
 yarn webpack
 for (( i = 0; i <= 8; i++ )) ;
 do 
-  ( CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
+  ( BENCH_IND=1 CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
 done
 
 PROFILE_IND=1 CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress;
@@ -13,7 +13,7 @@ rm ./packages/server/results/startup-snapshot.json
 node packages/snapshot/scripts/setup-prod
 for (( i = 0; i <= 8; i++ )) ;
 do 
-  ( PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
+  ( BENCH_IND=1 PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
 done
 
 PROFILE_IND=1 PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress;
@@ -25,7 +25,7 @@ rm ./packages/server/results/startup-vanilla-snapshot.json
 PROJECT_BASE_DIR=`pwd` node ./generate-snapshot.js   
 for (( i = 0; i <= 8; i++ )) ;
 do 
-  ( PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
+  ( BENCH_IND=1 PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
 done
 
 PROFILE_IND=1 PROJECT_BASE_DIR=`pwd` CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress;
@@ -37,7 +37,7 @@ rm ./packages/server/results/startup-minify.json
 yarn webpack
 for (( i = 0; i <= 8; i++ )) ;
 do 
-  ( CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
+  ( BENCH_IND=1 CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress; ) 
 done
 
 PROFILE_IND=1 CYPRESS_INTERNAL_ENV=development ./packages/electron/dist/Cypress/Cypress.app/Contents/MacOS/Cypress;

@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const getTime = require('performance-now')
 
-const useProfiler = process.env.PROFILE_IND != null
+const useBench = process.env.BENCH_IND != null
 
 function threeDecimals (n) {
   return Math.round(n * 1000) / 1000
@@ -21,7 +21,7 @@ class Benchmark {
   constructor (workflow) {
     this._workflow = workflow
 
-    if (!useProfiler) {
+    if (useBench) {
       const filename = `${this._workflow}${process.env.MINIFY_IND != null ? '-minify' : ''}${process.env.USE_SNAPSHOT != null ? '-snapshot' : ''}${process.env.USE_VANILLA_SNAPSHOT != null ? '-vanilla-snapshot' : ''}.json`
 
       this.filePath = path.join(__dirname, '..', 'results', filename)
@@ -43,7 +43,7 @@ class Benchmark {
   }
 
   time (key) {
-    if (!useProfiler) {
+    if (useBench) {
       const now = getTime()
 
       this._measures.set(key, now)
@@ -51,7 +51,7 @@ class Benchmark {
   }
 
   timeEnd (key) {
-    if (!useProfiler) {
+    if (useBench) {
       assert(this._measures.has(key), `${key} not added via time()`)
       const now = getTime()
       const before = this._measures.get(key)
@@ -68,20 +68,20 @@ class Benchmark {
   }
 
   save () {
-    if (!useProfiler) {
+    if (useBench) {
       fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2))
     }
   }
 
   dumpData () {
-    if (!useProfiler) {
+    if (useBench) {
     // eslint-disable-next-line
     console.log(this.data)
     }
   }
 
   dumpAverages () {
-    if (!useProfiler) {
+    if (useBench) {
       const rx = /_avg$/
       const d = {}
 
