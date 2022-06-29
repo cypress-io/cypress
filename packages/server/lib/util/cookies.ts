@@ -1,6 +1,7 @@
 import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
+import type { AutomationCookie } from '../automation/cookies'
 
-export { Cookie }
+export { AutomationCookie, Cookie }
 
 interface CookieData {
   name: string
@@ -16,7 +17,7 @@ interface CookieData {
 export class CookieJar {
   _cookieJar: ToughCookieJar
 
-  static parse (cookie) {
+  static parse (cookie: string) {
     return Cookie.parse(cookie)
   }
 
