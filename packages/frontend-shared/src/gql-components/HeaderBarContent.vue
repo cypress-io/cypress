@@ -268,7 +268,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     branch
     isLoadingNodeEvents
   }
-  isGlobalMode,
+  isGlobalMode
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth
