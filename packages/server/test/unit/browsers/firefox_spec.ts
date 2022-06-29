@@ -279,13 +279,6 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    // TODO: pick open port for debugger
-    it.skip('finds remote port for firefox debugger', function () {
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        // expect(firefoxUtil.findRemotePort).to.be.called
-      })
-    })
-
     it('sets proxy-related preferences if specified', function () {
       this.options.proxyServer = 'http://proxy-server:1234'
 
