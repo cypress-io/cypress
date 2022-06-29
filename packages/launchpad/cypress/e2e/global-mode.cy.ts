@@ -30,8 +30,11 @@ describe('Launchpad: Global Mode', () => {
         .dropFileWithPath(projectPath)
       })
 
-      cy.contains('Welcome to Cypress!')
-      cy.contains('a', 'Projects').should('have.attr', 'aria-disabled', 'false').click() // .should() sidesteps detached DOM error with .click()
+      cy.contains('Welcome to Cypress!').should('be.visible')
+      cy.findByRole('link', { name: 'Projects' })
+      .should('have.attr', 'aria-disabled', 'false')
+      .click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
       .should('contain', 'todos')
