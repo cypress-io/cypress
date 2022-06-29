@@ -452,7 +452,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out support + files if they do not exist', async function () {
+    // NOTE: This test is skipped because it causes the subsequent test to fail intermittently
+    it.skip('scaffolds out support + files if they do not exist', async function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
       setCtx(makeDataContext({}))
