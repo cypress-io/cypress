@@ -95,7 +95,7 @@ describe('App: Specs', () => {
 
         const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
-        it('scaffolds example files when card is clicked', () => {
+        it('scaffolds example files when card is clicked', { viewportHeight: 1200 }, () => {
           cy.get('@ScaffoldCard').click()
 
           cy.findByRole('dialog', {
