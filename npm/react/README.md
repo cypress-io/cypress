@@ -13,6 +13,20 @@ Mount React components in the open source [Cypress.io](https://www.cypress.io/) 
 npm install --save-dev @cypress/react
 ```
 
+## Run
+
+Open cypress test runner
+```
+npx cypress open --component
+```
+
+If you need to run test in CI
+```
+npx cypress run --component
+```
+
+For more information, please check the official docs for [running Cypress](https://on.cypress.io/guides/getting-started/opening-the-app#Quick-Configuration) and for [component testing](https://on.cypress.io/guides/component-testing/writing-your-first-component-test).
+
 ## API
 
 - `mount` is the most important function, allows to mount a given React component as a mini web application and interact with it using Cypress commands
