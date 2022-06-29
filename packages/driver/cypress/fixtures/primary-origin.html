@@ -3,24 +3,29 @@
 <head>
 </head>
 <body>
-  <style>
-    a {
-      display: block;
-    }
-  </style>
-  <div>
-    Go to different origin:
-    <a data-cy="cross-origin-secondary-link"
-        href="http://www.foobar.com:3500/fixtures/secondary-origin.html">http://www.foobar.com:3500/fixtures/secondary-origin.html</a>
-    <a data-cy="dom-link" href="http://www.foobar.com:3500/fixtures/dom.html">http://www.foobar.com:3500/fixtures/dom.html</a>
-    <a data-cy="scrolling-link" href="http://www.foobar.com:3500/fixtures/scrolling.html">http://www.foobar.com:3500/fixtures/scrolling.html</a>
-    <a data-cy="request-link" href="http://www.foobar.com:3500/fixtures/request.html">http://www.foobar.com:3500/fixtures/request.html</a>
-    <a data-cy="shadow-dom-link" href="http://www.foobar.com:3500/fixtures/shadow-dom.html">http://www.foobar.com:3500/fixtures/shadow-dom.html</a>
-    <a data-cy="files-form-link" href="http://www.foobar.com:3500/fixtures/files-form.html">http://www.foobar.com:3500/fixtures/files-form.html</a>
-    <a data-cy="errors-link" href="http://www.foobar.com:3500/fixtures/errors.html">http://www.foobar.com:3500/fixtures/errors.html</a>
-    <a data-cy="screenshots-link" href="http://www.foobar.com:3500/fixtures/screenshots.html">http://www.foobar.com:3500/fixtures/screenshots.html</a>
-    <a data-cy="cookie-login" href="http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login">Login with Social</a>
-    <a data-cy="welcome" href="http://localhost:3500/welcome">Go to Welcome</a>
-  </div>
+  <p>Go to different origin:</p>
+  <ul>
+    <li><a data-cy="cross-origin-secondary-link" href="http://www.foobar.com:3500/fixtures/secondary-origin.html">http://www.foobar.com:3500/fixtures/secondary-origin.html</a></li>
+    <li><a data-cy="dom-link" href="http://www.foobar.com:3500/fixtures/dom.html">http://www.foobar.com:3500/fixtures/dom.html</a></li>
+    <li><a data-cy="scrolling-link" href="http://www.foobar.com:3500/fixtures/scrolling.html">http://www.foobar.com:3500/fixtures/scrolling.html</a></li>
+    <li><a data-cy="request-link" href="http://www.foobar.com:3500/fixtures/request.html">http://www.foobar.com:3500/fixtures/request.html</a></li>
+    <li><a data-cy="shadow-dom-link" href="http://www.foobar.com:3500/fixtures/shadow-dom.html">http://www.foobar.com:3500/fixtures/shadow-dom.html</a></li>
+    <li><a data-cy="files-form-link" href="http://www.foobar.com:3500/fixtures/files-form.html">http://www.foobar.com:3500/fixtures/files-form.html</a></li>
+    <li><a data-cy="errors-link" href="http://www.foobar.com:3500/fixtures/errors.html">http://www.foobar.com:3500/fixtures/errors.html</a></li>
+    <li><a data-cy="screenshots-link" href="http://www.foobar.com:3500/fixtures/screenshots.html">http://www.foobar.com:3500/fixtures/screenshots.html</a></li>
+    <li><a data-cy="cookie-login">Login with Social</a></li>
+    <li><a data-cy="cookie-login-https">Login with Social (https)</a></li>
+    <li><a data-cy="cookie-login-subdomain">Login with Social (subdomain)</a></li>
+    <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
+    <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
+    <li><a data-cy="welcome" href="http://localhost:3500/welcome">Go to Welcome</a></li>
+  </ul>
+  <script>
+    document.querySelector('[data-cy=cookie-login]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login')}`
+    document.querySelector('[data-cy=cookie-login-https]').href = `https://localhost:3502/prelogin?redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
+    document.querySelector('[data-cy=cookie-login-subdomain]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&subdomain=true')}`
+    document.querySelector('[data-cy=cookie-login-alias]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&alias=true')}`
+    document.querySelector('[data-cy=cookie-login-override]').href = `https://localhost:3502/prelogin?override=true&redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
+  </script>
 </body>
 </html>
