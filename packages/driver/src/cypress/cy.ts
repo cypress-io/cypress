@@ -123,7 +123,17 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+interface ICyFocused extends Omit<
+  IFocused,
+  'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
+> {}
+
+interface ICySnapshots extends Omit<
+  ISnapshots,
+  'onCssModified' | 'onBeforeWindowLoad'
+> {}
+
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -195,19 +205,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
 
-  // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
+  overrides: IOverrides
+
+  // Private methods
 
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
 
-  onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
-  overrides: IOverrides
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
@@ -348,12 +358,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.detachDom = snapshots.detachDom
     this.getStyles = snapshots.getStyles
 
-    this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout)
 
     setTopOnError(Cypress, this)
 
@@ -1095,9 +1104,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // reset the nestedIndex back to null
     this.state('nestedIndex', null)
-
-    // also reset recentlyReady back to null
-    this.state('recentlyReady', null)
 
     // and forcibly move the index needle to the
     // end in case we have after / afterEach hooks
