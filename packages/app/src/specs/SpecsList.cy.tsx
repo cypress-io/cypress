@@ -121,6 +121,23 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
     })
 
+    it('displays as expected at various widths', () => {
+      cy.get('[data-cy="spec-list-file"]')
+      .should('have.length.above', 2)
+      .should('have.length.below', specs.length)
+
+      cy.viewport(500, 850)
+      cy.percySnapshot('narrowest')
+      cy.viewport(650, 850)
+      cy.percySnapshot('narrow')
+      cy.viewport(800, 850)
+      cy.percySnapshot('medium')
+      cy.viewport(1200, 850)
+      cy.percySnapshot('wide')
+      cy.viewport(2000, 850)
+      cy.percySnapshot('widest')
+    })
+
     describe('column headers', () => {
       // Spec name (first) column is handled by type-specific tests below
 
