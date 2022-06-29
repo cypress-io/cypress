@@ -17,7 +17,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retrying="retrying"
+        :retrying="mutation.fetching.value"
         @retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
@@ -149,14 +149,10 @@ mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
 
 const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
-const retrying = ref(false)
-const resetErrorAndLoadConfig = async (id: string) => {
-  retrying.value = true
+const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
-    await mutation.executeMutation({ id })
+    mutation.executeMutation({ id })
   }
-
-  retrying.value = false
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)

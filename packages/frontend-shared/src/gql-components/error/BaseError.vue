@@ -23,8 +23,7 @@
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
-            :prefix-icon-class="{ 'animate-spin': retrying, 'icon-dark-indigo-500': true }"
-            :disabled="retrying"
+            prefix-icon-class="icon-dark-indigo-500"
             @click="emit('retry', baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
@@ -142,10 +141,9 @@ const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
-  retrying?: boolean
   showRetryButton?: boolean
   showButtons?: boolean
-}>(), { retrying: false, showButtons: true })
+}>(), { showButtons: true })
 
 const emit = defineEmits<{
   (e: 'retry', id: string): void

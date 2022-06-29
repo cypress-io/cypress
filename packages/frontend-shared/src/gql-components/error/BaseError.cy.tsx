@@ -69,7 +69,7 @@ describe('<BaseError />', () => {
       .should('have.attr', 'href', docsButton.configGuide.link)
     })
 
-    it('emits a \'retry\' event when clicked', () => {
+    it(`emits a 'retry' event when clicked`, () => {
       mountFragmentWithError()
       cy.get(retryButtonSelector)
       .should('not.be.disabled')
@@ -77,15 +77,6 @@ describe('<BaseError />', () => {
       .click()
       .get('@retry')
       .should('have.been.calledTwice')
-    })
-
-    it('disables and animates button when retrying', () => {
-      mountFragmentWithError({}, true)
-      cy.get(retryButtonSelector)
-      .should('be.visible')
-      .should('be.disabled')
-      .get('svg')
-      .should('have.class', 'animate-spin')
     })
 
     it('does not render retry or docs buttons when showButtons prop is false', () => {
