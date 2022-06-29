@@ -21,6 +21,10 @@ export const patchDocumentCookie = (Cypress) => {
     const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
 
     Cypress.automation('set:cookie', automationCookie)
+    .catch(() => {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+    })
   }
 
   let documentCookieValue = ''
@@ -58,9 +62,14 @@ export const patchDocumentCookie = (Cypress) => {
   setInterval(async () => {
     const { superDomain: domain } = Cypress.Location.create(window.location.href)
 
-    const cookies = await Cypress.automation('get:cookies', { domain })
-    const cookiesString = cookies.map((c) => `${c.name}=${c.value}`).join('; ')
+    try {
+      const cookies = await Cypress.automation('get:cookies', { domain })
+      const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
 
-    documentCookieValue = cookiesString
+      documentCookieValue = cookiesString
+    } catch (err) {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+    }
   }, 250)
 }
