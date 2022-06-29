@@ -104,9 +104,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       onWarning: this.ctx.onWarning,
       ...options,
     }
-
-    // This is async now
-    // this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
   }
 
   protected ensureProp = ensureProp

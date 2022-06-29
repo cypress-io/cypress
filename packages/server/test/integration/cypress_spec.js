@@ -797,7 +797,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
-      }).then(async () => {
+      }).then(() => {
         return cypress.start([`--run-project=${permissionsPath}`])
       }).then(() => {
         return fs.chmodAsync(permissionsPath, '777')
