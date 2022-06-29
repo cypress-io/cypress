@@ -100,9 +100,21 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
 
     it('should remain visible when content becomes scrollable', () => {
       cy.mount(() => <div class="h-10 p-12"><ShikiHighlight code={code.repeat(5)} lang="ts" copyButton={true} /></div>)
-      cy.get('button').should('be.visible')
-      cy.scrollTo('bottom', { duration: 500 })
-      cy.get('button').should('be.visible')
+      cy.get('button').validateWithinViewport()
+
+      cy.percySnapshot('copy button initially within viewport')
+
+      cy.scrollTo('bottom', { duration: 100 })
+      .get('button')
+      .validateWithinViewport()
+
+      cy.percySnapshot('copy button remains within viewport on scroll down')
+
+      cy.scrollTo('top', { duration: 100 })
+      .get('button')
+      .validateWithinViewport()
+
+      cy.percySnapshot('copy button remains within viewport on scroll up')
     })
   })
 })
