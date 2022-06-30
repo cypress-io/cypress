@@ -8,7 +8,7 @@ export const REPORTER_ID = 'unified-reporter'
 function getElementById (id: string) {
   const el = document.querySelector<HTMLElement>(`#${id}`)
 
-  if (!el) {
+  if (!el && id !== REPORTER_ID) {
     throw Error(`Expected element with #${id} but did not find it.`)
   }
 
