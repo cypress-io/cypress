@@ -75,12 +75,6 @@ module.exports = (on, config) => {
         return null
       })
     },
-    'get:integrity:js' () {
-      return fs.readFileSync(path.resolve(__dirname, '../fixtures/integrity.js')).toString()
-    },
-    'get:integrity:css' () {
-      return fs.readFileSync(path.resolve(__dirname, '../fixtures/integrity.css')).toString()
-    },
   })
 
   return config

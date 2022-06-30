@@ -24,7 +24,7 @@ describe('Integrity Preservation', () => {
     // so we can set the integrity tag appropriately for the digest.
 
     // This requires building digests for the integrity JS file that the regex-rewriter will rewrite.
-    cy.task('get:integrity:js').then((integrityJS) => {
+    cy.readFile('cypress/fixtures/integrity.js').then((integrityJS) => {
       availableDigests.forEach((algo) => {
         const hash = CryptoJS[algo](integrityJS)
         const stringifiedBase64 = hash.toString(CryptoJS.enc.Base64)
@@ -34,7 +34,7 @@ describe('Integrity Preservation', () => {
     })
 
     // And building digests for the integrity CSS file that SHOULDN'T be impacted, but important to test against.
-    cy.task('get:integrity:css').then((integrityCSS) => {
+    cy.readFile('cypress/fixtures/integrity.css').then((integrityCSS) => {
       availableDigests.forEach((algo) => {
         const hash = CryptoJS[algo](integrityCSS)
         const stringifiedBase64 = hash.toString(CryptoJS.enc.Base64)
