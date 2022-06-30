@@ -25,6 +25,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
 export interface Cfg extends ReceivedCypressOptions {
+  projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
@@ -160,6 +161,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
+      getAutomation: () => this.automation,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
       onError: this.options.onError,
@@ -197,8 +199,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     // save the last time they opened the project
     // along with the first time they opened it
     const now = Date.now()
+
     const stateToSave = {
       lastOpened: now,
+      lastProjectId: cfg.projectId ?? null,
     } as any
 
     if (!cfg.state || !cfg.state.firstOpened) {
