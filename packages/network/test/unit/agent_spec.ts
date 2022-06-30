@@ -608,7 +608,7 @@ describe('lib/agent', function () {
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
-        'Proxy-Authorization: basic YmF6OnF1dXg=',
+        'Proxy-Authorization: Basic YmF6OnF1dXg=',
         '', '',
       ].join('\r\n'))
     })
