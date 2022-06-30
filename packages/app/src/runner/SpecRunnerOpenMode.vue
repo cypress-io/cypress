@@ -22,7 +22,7 @@
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
-      :show-panel2="!screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting && !noCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -51,6 +51,7 @@
           class="h-full"
         >
           <div
+            v-if="!noCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -202,6 +203,8 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
+const noCommandLog = runnerUiStore.noCommandLog
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
@@ -210,12 +213,16 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
-preferences.update('reporterWidth', reporterWidthPreferences.value)
-preferences.update('specListWidth', specsListWidthPreferences.value)
 
-// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
+// if the CYPRESS_NO_COMMAND_LOG environment variable is hidden,
+// don't use widths or open status of specs list from GQl
+if (!noCommandLog) {
+  preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
+  preferences.update('reporterWidth', reporterWidthPreferences.value)
+  preferences.update('specListWidth', specsListWidthPreferences.value)
+  // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
 // will be available during the initial calculation that useRunnerStyle does
+}
 
 const {
   viewportStyle,
