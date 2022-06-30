@@ -63,7 +63,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.percySnapshot()
   })
 
-  it('hides reporter when NO_COMMAND_LOG is set', () => {
+  it('hides reporter when NO_COMMAND_LOG is set in run mode', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
@@ -71,14 +71,12 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.withCtx(async (ctx, o) => {
       const config = await ctx.project.getConfig()
 
-      o.sinon.stub(ctx.project, 'getConfig').callsFake(() => {
-        return {
-          ...config,
-          env: {
-            ...config.env,
-            NO_COMMAND_LOG: 1,
-          },
-        }
+      o.sinon.stub(ctx.project, 'getConfig').resolves({
+        ...config,
+        env: {
+          ...config.env,
+          NO_COMMAND_LOG: 1,
+        },
       })
     })
 
