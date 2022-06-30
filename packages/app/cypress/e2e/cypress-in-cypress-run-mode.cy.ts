@@ -62,6 +62,16 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     cy.percySnapshot()
   })
+
+  it('hides reporter when NO_COMMAND_LOG is set', () => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer()
+    cy.visitApp()
+    simulateRunModeInUI()
+    cy.contains('dom-content.spec').click()
+  })
 })
 
 function simulateRunModeInUI () {
