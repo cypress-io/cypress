@@ -86,10 +86,6 @@ import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 
-// See TODO comments within the template block of this file.
-// import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-// import AutomationMissing from './automation/AutomationMissing.vue'
-
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
