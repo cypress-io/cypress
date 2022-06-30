@@ -586,6 +586,125 @@ describe('http/response-middleware', function () {
       })
     })
 
+    describe('wantsSecurityRemoved', () => {
+      it('removes security if full injection is requested', () => {
+        prepareContext({
+          res: {
+            wantsInjection: 'full',
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.true
+        })
+      })
+
+      it('removes security if fullCrossOrigin injection is requested', () => {
+        prepareContext({
+          res: {
+            wantsInjection: 'fullCrossOrigin',
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.true
+        })
+      })
+
+      ;['application/javascript', 'application/x-javascript', 'text/javascript'].forEach((javascriptMIME) => {
+        it(`removes security if the MIME type is ${javascriptMIME} and is on the currently active remote state`, () => {
+          prepareContext({
+            incomingRes: {
+              headers: {
+                'content-type': `${javascriptMIME}`,
+              },
+            },
+            config: {
+              modifyObstructiveCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
+          })
+        })
+      })
+
+      it('otherwise, does not try to remove security on other MIME Types', () => {
+        prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'application/xml',
+            },
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.false
+        })
+      })
+
+      describe('experimentalExpandedModifyObstructiveCode', () => {
+        it('continues to "modifyObstructiveCode" when "experimentalExpandedModifyObstructiveCode" is true, even if "modifyObstructiveCode" is set to false.', () => {
+          prepareContext({
+            res: {
+              wantsInjection: 'full',
+            },
+            config: {
+              modifyObstructiveCode: false,
+              experimentalExpandedModifyObstructiveCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
+          })
+        })
+
+        ;['text/html', 'application/xhtml+xml', 'application/javascript', 'application/x-javascript', 'text/javascript'].forEach((MIMEType) => {
+          it(`removes security for ${MIMEType} MIME when "experimentalExpandedModifyObstructiveCode" is true, regardless of injection or request origin.`, () => {
+            prepareContext({
+              req: {
+                proxiedUrl: 'http://www.some-third-party-script-or-html.com/',
+                isAUTFrame: false,
+              },
+              incomingRes: {
+                headers: {
+                  // simplest way to make injection expected
+                  'content-type': `${MIMEType}`,
+                },
+              },
+              res: {
+                wantsInjection: 'partial',
+              },
+              config: {
+                experimentalExpandedModifyObstructiveCode: true,
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              expect(ctx.res.wantsSecurityRemoved).to.be.true
+            })
+          })
+        })
+      })
+    })
+
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
       const eventEmitter = new EventEmitter()

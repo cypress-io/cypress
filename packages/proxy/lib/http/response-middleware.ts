@@ -334,11 +334,14 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.setHeader('Origin-Agent-Cluster', '?0')
   }
 
-  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode &&
-    (this.res.wantsInjection === 'full' ||
+  this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalExpandedModifyObstructiveCode) &&
+    // if experimentalExpandedModifyObstructiveCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
+    ((this.config.experimentalExpandedModifyObstructiveCode
+      && resContentTypeIs(this.incomingRes, 'text/html') || resContentTypeIs(this.incomingRes, 'application/xhtml+xml') || resContentTypeIsJavaScript(this.incomingRes)) ||
+     this.res.wantsInjection === 'full' ||
      this.res.wantsInjection === 'fullCrossOrigin' ||
-     // only modify JavasScript if matching the current origin policy or if experimentalExpandedModifyObstructiveCode is enabled
-     (resContentTypeIsJavaScript(this.incomingRes) && (isReqMatchOriginPolicy || this.config.experimentalExpandedModifyObstructiveCode)))
+     // only modify JavasScript if matching the current origin policy or if experimentalExpandedModifyObstructiveCode is enabled (above)
+     (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchOriginPolicy))
 
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
