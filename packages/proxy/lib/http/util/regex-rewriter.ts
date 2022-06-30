@@ -1,9 +1,9 @@
+import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter'
 import type { SecurityOpts } from './rewriter'
 
 const pumpify = require('pumpify')
 const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
-const integrityStrippedAttributeTag = 'cypress-stripped-integrity'
 
 const topOrParentEqualityBeforeRe = /((?:\bwindow\b|\bself\b)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
 const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:\bwindow\b|\bself\b))/g
@@ -33,8 +33,8 @@ export function strip (html: string, { useExpandedModifyObstructiveCode }: Parti
     return rewrittenHTML
     .replace(topIsSelfEqualityRe, 'self')
     .replace(formTopTarget, 'target="_self"')
-    .replace(integrityTagLookAheadRe, integrityStrippedAttributeTag)
-    .replace(dynamicIntegritySetAttributeRe, integrityStrippedAttributeTag)
+    .replace(integrityTagLookAheadRe, STRIPPED_INTEGRITY_TAG)
+    .replace(dynamicIntegritySetAttributeRe, STRIPPED_INTEGRITY_TAG)
   }
 
   return rewrittenHTML
@@ -68,8 +68,8 @@ export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<Secur
         ...(useExpandedModifyObstructiveCode ? [
           'self',
           'target="_self"',
-          integrityStrippedAttributeTag,
-          integrityStrippedAttributeTag,
+          STRIPPED_INTEGRITY_TAG,
+          STRIPPED_INTEGRITY_TAG,
         ] : []),
       ],
     ),

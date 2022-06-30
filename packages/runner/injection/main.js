@@ -9,6 +9,7 @@
  */
 
 import { createTimers } from './timers'
+import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
 
 const Cypress = window.Cypress = parent.Cypress
 
@@ -22,7 +23,7 @@ if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
 
   Element.prototype.setAttribute = function (qualifiedName, value) {
     if (qualifiedName === 'integrity' && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
-      qualifiedName = 'cypress-stripped-integrity'
+      qualifiedName = STRIPPED_INTEGRITY_TAG
     }
 
     return originalSetAttribute.apply(this, [qualifiedName, value])
