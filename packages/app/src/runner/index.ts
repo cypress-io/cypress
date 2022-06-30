@@ -227,7 +227,7 @@ function runSpecCT (spec: SpecFile) {
   // watches spec file for changes.
   getEventManager().setup(config)
 
-  const $runnerRoot = getRunnerElement()
+  const $runnerRoot = getRunnerElement() as HTMLElement
 
   // clear AUT, if there is one.
   empty($runnerRoot)
@@ -292,7 +292,7 @@ function runSpecE2E (spec: SpecFile) {
   // watches spec file for changes.
   getEventManager().setup(config)
 
-  const $runnerRoot = getRunnerElement()
+  const $runnerRoot = getRunnerElement() as HTMLElement
 
   // clear AUT, if there is one.
   empty($runnerRoot)
