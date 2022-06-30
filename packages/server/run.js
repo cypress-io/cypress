@@ -130,7 +130,7 @@
 // require('@cypress/parse-domain/lists/icann.complete.js')
 // require('@cypress/parse-domain/lists/private.complete.js')
 // require('@electron/get/dist/cjs/downloader-resolver.js')
-require('@electron/get/node_modules/@szmarczak/http-timer/source/index.js')
+// require('@electron/get/node_modules/@szmarczak/http-timer/source/index.js')
 // // require('@electron/get/node_modules/cacheable-request/node_modules/get-stream/index.js')
 // // require('@electron/get/node_modules/cacheable-request/node_modules/lowercase-keys/index.js')
 // // require('@electron/get/node_modules/cacheable-request/src/index.js')
@@ -2777,6 +2777,19 @@ require('@electron/get/node_modules/@szmarczak/http-timer/source/index.js')
 // require('@packages/types/src/spec.ts')
 // require('@packages/types/src/util.ts')
 // require('@packages/types/src/warning.ts')
+
+// require('@packages/socket')
+// require('@packages/types')
+// ['pick'].map((f) => {
+//   require(`lodash/${f}`)
+// })
+
+// require('uuid')
+// require('@babel/types')
+// require('graphql')
+// require('lodash')
+// require('ramda')
+// require('@packages/data-context')
 
 exports.cypressServer = async function () {
   await require('./entry')

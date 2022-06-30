@@ -1,0 +1,15 @@
+diff --git a/node_modules/electron-link/lib/file-require-transform.js b/node_modules/electron-link/lib/file-require-transform.js
+index 07d7430..bc9199c 100644
+--- a/node_modules/electron-link/lib/file-require-transform.js
++++ b/node_modules/electron-link/lib/file-require-transform.js
+@@ -26,6 +26,10 @@ module.exports = class FileRequireTransform {
+       // supported inside javascript strings) with escape unicode sequences.
+       source = "module.exports = " + source.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
+     }
++    // Hack for now to ensure we don't include the webpack bundled server code
++    if (this.options.filePath.endsWith('server/server.js')) {
++      return source
++    }
+     this.ast = recast.parse(source, {
+       parser: {
+         parse(source) {

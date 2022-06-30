@@ -6,7 +6,7 @@ const childProcess = require('child_process')
 
 const run = async () => {
   let processedFiles = 0
-  const baseDirPath = process.env.PROJECT_BASE_DIR
+  const baseDirPath = process.env.PROJECT_BASE_DIR // ?? process.cwd()
   const snapshotScriptPath = path.join(__dirname, 'packages', 'server', 'server-snapshot.js')
   const coreModules = new Set([
     'electron',
@@ -25,9 +25,11 @@ const run = async () => {
   ])
   const { snapshotScript } = await electronLink({
     baseDirPath,
-    mainPath: path.join(__dirname, 'packages', 'server', 'server.js'),
+    mainPath: path.join(__dirname, 'packages', 'server', 'snap-entry.js'),
     cachePath: path.join(__dirname, '.electron-cache'),
     shouldExcludeModule: ({ requiringModulePath, requiredModulePath }) => {
+      console.log({ requiringModulePath, requiredModulePath })
+
       if (processedFiles > 0) {
         process.stdout.write('\r')
       }
@@ -157,7 +159,7 @@ const run = async () => {
   try {
     vm.runInNewContext(snapshotScript, undefined, { filename: snapshotScriptPath, displayErrors: true })
 
-    childProcess.spawnSync('node', ['node_modules/electron-mksnapshot/mksnapshot.js', '/Users/ryanm/v8-snapshots/tg-webpack/packages/server/server-snapshot.js'])
+    childProcess.spawnSync('node', ['node_modules/electron-mksnapshot/mksnapshot.js', `${__dirname}/packages/server/server-snapshot.js`])
 
     const files = ['snapshot_blob.bin', 'v8_context_snapshot.x86_64.bin']
 

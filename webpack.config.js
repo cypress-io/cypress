@@ -48,7 +48,6 @@ module.exports = (opts, config) => {
       'process-nextick-args',
 
       // Needs to be global
-      'graphql',
       'typescript',
 
       // Native modules, or ones with binaries we don't want to worry about
@@ -71,7 +70,14 @@ module.exports = (opts, config) => {
       'esbuild',
       'bundle-require',
       'electron-packager',
+
+      // bundled in snap
+      'graphql',
       'marionette-client',
+      '@babel/types',
+      '@babel/generator',
+      /lodash/,
+      /ramda/,
 
       // Things with css
       'errorhandler',
@@ -174,19 +180,23 @@ module.exports = (opts, config) => {
       rules: [
         {
           test: /\.(m|j|t)s$/,
-          loader: 'esbuild-loader',
-          options: {
-            minify: false,
-            loader: 'ts',
-            target: 'node10',
-            tsconfigRaw: {
-              allowSyntheticDefaultImports: true,
-              esModuleInterop: true,
+          use: [
+            {
+              loader: 'esbuild-loader',
+              options: {
+                minify: false,
+                loader: 'ts',
+                target: 'node10',
+                tsconfigRaw: {
+                  allowSyntheticDefaultImports: true,
+                  esModuleInterop: true,
+                },
+                // json5.parse(
+                //   fs.readFileSync('./packages/ts/tsconfig.json', 'utf8'),
+                // ),
+              },
             },
-            // json5.parse(
-            //   fs.readFileSync('./packages/ts/tsconfig.json', 'utf8'),
-            // ),
-          },
+          ],
         },
         {
           test: /\.graphql$/,

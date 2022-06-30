@@ -144,7 +144,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^1.3.0",
-    "electron": "18.0.4",
+    "electron": "18.0.0",
     "electron-builder": "^22.13.1",
     "electron-link": "^0.6.0",
     "electron-mksnapshot": "18.0.0",
