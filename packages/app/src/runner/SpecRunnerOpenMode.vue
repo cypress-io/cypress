@@ -215,7 +215,7 @@ onMounted(() => {
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 
 // if the CYPRESS_NO_COMMAND_LOG environment variable is hidden,
-// don't use widths or open status of specs list from GQl
+// don't use the widths or the open status of specs list from GraphQL
 if (!noCommandLog) {
   preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
   preferences.update('reporterWidth', reporterWidthPreferences.value)
