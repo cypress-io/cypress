@@ -378,46 +378,50 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       .value() as unknown as typeof libs
 
       _.each(libs, (url, lib) => {
-        it(`does not alter code from: '${lib}'`, function () {
-          this.timeout(10000)
+        [false, true].forEach((useExpandedModifyObstructiveCode) => {
+          it(`does not alter code from: '${lib}', with useExpandedModifyObstructiveCode set to ${useExpandedModifyObstructiveCode}`, function () {
+            this.timeout(10000)
 
-          const pathToLib = `/tmp/${lib}`
+            const pathToLib = `/tmp/${lib}`
 
-          const downloadFile = () => {
-            return rp(url)
-            .then((resp) => {
-              return Promise.fromCallback((cb) => {
-                fs.writeFile(pathToLib, resp, cb)
+            const downloadFile = () => {
+              return rp(url)
+              .then((resp) => {
+                return Promise.fromCallback((cb) => {
+                  fs.writeFile(pathToLib, resp, cb)
+                })
+                .return(resp)
               })
-              .return(resp)
+            }
+
+            return Promise.fromCallback((cb) => {
+              fs.readFile(pathToLib, 'utf8', cb)
             })
-          }
+            .catch(downloadFile)
+            .then((libCode: string) => {
+              let stripped = regexRewriter.strip(libCode, {
+                useExpandedModifyObstructiveCode,
+              })
+              // nothing should have changed!
 
-          return Promise.fromCallback((cb) => {
-            fs.readFile(pathToLib, 'utf8', cb)
-          })
-          .catch(downloadFile)
-          .then((libCode: string) => {
-            let stripped = regexRewriter.strip(libCode)
-            // nothing should have changed!
+              // TODO: this is currently failing but we're
+              // going to accept this for now and make this
+              // test pass, but need to refactor to using
+              // inline expressions and change the strategy
+              // for removing obstructive code
+              if (lib === 'hugeApp') {
+                stripped = stripped.replace(
+                  'window.self !== window.self',
+                  'window.self !== window.top',
+                )
+              }
 
-            // TODO: this is currently failing but we're
-            // going to accept this for now and make this
-            // test pass, but need to refactor to using
-            // inline expressions and change the strategy
-            // for removing obstructive code
-            if (lib === 'hugeApp') {
-              stripped = stripped.replace(
-                'window.self !== window.self',
-                'window.self !== window.top',
-              )
-            }
-
-            try {
-              expect(stripped).to.eq(libCode)
-            } catch (err) {
-              throw new Error(`code from '${lib}' was different`)
-            }
+              try {
+                expect(stripped).to.eq(libCode)
+              } catch (err) {
+                throw new Error(`code from '${lib}' was different`)
+              }
+            })
           })
         })
       })
