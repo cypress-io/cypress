@@ -141,7 +141,6 @@ const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
-  showRetryButton?: boolean
   showButtons?: boolean
 }>(), { showButtons: true })
 
