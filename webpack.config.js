@@ -38,93 +38,21 @@ module.exports = (opts, config) => {
     },
     target: 'node',
     // externalsPresets: { electron: true },
-    externals: [
-      'signal-exit',
-      'graceful-fs',
-      'lockfile',
-      'evil-dns',
-      'ws/lib',
-      'get-stream',
-      'process-nextick-args',
-
-      // Needs to be global
-      'typescript',
-
-      // Native modules, or ones with binaries we don't want to worry about
-      'registry-js',
-      'fsevents',
-      'fluent-ffmpeg',
-
-      // Others with errors, why do we even have some of these??
-      'cson-parser',
-      'coffeescript',
-      'jsonlint',
-      'konfig',
-
-      // require.extensions use
-      'tsconfig-paths',
-      'ts-node',
-      'ts-loader',
-
-      // Things we don't want to bundle
-      'esbuild',
-      'bundle-require',
-      'electron-packager',
-
-      // bundled in snap
-      'graphql',
-      'marionette-client',
-      '@babel/types',
-      '@babel/generator',
-      /lodash/,
-      /ramda/,
-
-      // Things with css
-      'errorhandler',
-
-      // Optional / missing deps
-      // 'utf-8-validate',
-      'prettier',
-      'original-fs',
-      'osx-temperature-sensor',
-
-      // Too many expression dependencies
-      'express',
-      'firefox-profile',
-      'nexus',
-      '@ffmpeg-installer/ffmpeg',
-      /nexus\/dist\/utils/,
-
-      // Skip the dev-servers / bundlers for now
-      // '@cypress/vite-dev-server',
-      // '@cypress/webpack-dev-server',
-      // '@cypress/webpack-batteries-included-preprocessor',
-
-      // What is the deal with this package:
-      'electron',
-      'v8-snapshot',
-      'bluebird',
-      'execa',
-      'colors/safe',
-      'json5',
-      'async',
-      'he',
-      'has',
-      'jsesc',
-      // '@packages/electron',
-
-      function (context, request, callback) {
-        if (request.startsWith('@cypress/')) {
-          return callback(null, `commonjs ${request}`)
-        }
-
-        if (request.endsWith('util/suppress_warnings') || request.endsWith('registerDir') || request.endsWith('/capture')) {
-          return callback(null, `commonjs ./${path.relative(path.join(__dirname, 'packages', 'server'), path.join(context, request.replace('@packages', '../../packages')))}`)
-        }
-
+    externals (context, request, callback) {
+      // socket.io is patch-packaged in a way that we need to import the relative package,
+      // we could likely force this better with an alias / fix the fact that we have multiple versions
+      if (request.startsWith('@packages') || request.startsWith('.') || request.includes('socket.io')) {
         return callback()
-      },
-    ],
+      }
+
+      if (request.endsWith('util/suppress_warnings') || request.endsWith('registerDir') || request.endsWith('/capture')) {
+        // console.log({context, request})
+
+        return callback(null, `commonjs ./${path.relative(__dirname, path.join(context, request.replace('@packages', '../../packages')))}`)
+      }
+
+      return callback(null, `commonjs ${request}`)
+    },
     // externalsType: 'commonjs',
     // experiments: {
     //   // outputModule: true,

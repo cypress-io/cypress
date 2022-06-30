@@ -8,7 +8,7 @@ const run = async () => {
   let processedFiles = 0
   const baseDirPath = process.env.PROJECT_BASE_DIR // ?? process.cwd()
   const snapshotScriptPath = path.join(__dirname, 'packages', 'server', 'server-snapshot.js')
-  const coreModules = new Set([
+  const skippedModules = new Set([
     'electron',
     'async_hooks',
     'inspector',
@@ -23,6 +23,11 @@ const run = async () => {
     'original-fs',
     'process',
   ])
+
+  process.stdout.write(
+    `Generating snapshot script at "${snapshotScriptPath}" (${++processedFiles})`,
+  )
+
   const { snapshotScript } = await electronLink({
     baseDirPath,
     mainPath: path.join(__dirname, 'packages', 'server', 'snap-entry.js'),
@@ -35,7 +40,7 @@ const run = async () => {
       }
 
       process.stdout.write(
-        `Generating snapshot script at "${snapshotScriptPath}" (${++processedFiles})`,
+        `Processing "${requiredModulePath}" (${++processedFiles})`,
       )
 
       const requiredModuleRelativePath = path.relative(
@@ -46,110 +51,119 @@ const run = async () => {
       return (
         requiredModulePath.endsWith('.node') ||
         coreModules.has(requiredModulePath) ||
-        requiredModuleRelativePath.includes(
-          path.join(
-            'node_modules',
-            'bluebird',
-          ),
-        ) ||
-        requiredModuleRelativePath.includes(
-          path.join(
-            'node_modules',
-            'electron',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'bundle-require',
-            'dist',
-            'index.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'lockfile',
-            'lockfile.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'npm-conf',
-            'lib',
-            'defaults.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'evil-dns',
-            'evil-dns.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'signal-exit',
-            'index.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.includes(
-          path.join(
-            '@cypress',
-            'webpack-dev-server',
-          ),
-        ) ||
-        requiredModuleRelativePath.includes(
-          path.join(
-            'node_modules',
-            'safefs',
-          ),
-        ) ||
-        requiredModuleRelativePath.includes(
-          path.join(
-            'node_modules',
-            'express',
-            'lib',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'prettier',
-            'index.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'ts-node',
-            'dist',
-            'index.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'coffeescript',
-            'lib',
-            'coffee-script',
-            'register.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join(
-            'node_modules',
-            'coffee-script',
-            'lib',
-            'coffee-script',
-            'register.js',
-          ),
-        ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join('node_modules', 'graceful-fs', 'graceful-fs.js'),
-        )
+        /node_modules\/(ignore|prettier|typescript|bundle-require|electron-packager|safefs)/.test(requiredModulePath)
+
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     'node_modules',
+      //     'ignore',
+      //   ),
+      // )
+      // ||
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     'node_modules',
+      //     'bluebird',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     'node_modules',
+      //     'electron',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'bundle-require',
+      //     'dist',
+      //     'index.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'lockfile',
+      //     'lockfile.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'npm-conf',
+      //     'lib',
+      //     'defaults.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'evil-dns',
+      //     'evil-dns.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'signal-exit',
+      //     'index.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     '@cypress',
+      //     'webpack-dev-server',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     'node_modules',
+      //     'safefs',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.includes(
+      //   path.join(
+      //     'node_modules',
+      //     'express',
+      //     'lib',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'prettier',
+      //     'index.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'ts-node',
+      //     'dist',
+      //     'index.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'coffeescript',
+      //     'lib',
+      //     'coffee-script',
+      //     'register.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join(
+      //     'node_modules',
+      //     'coffee-script',
+      //     'lib',
+      //     'coffee-script',
+      //     'register.js',
+      //   ),
+      // ) ||
+      // requiredModuleRelativePath.endsWith(
+      //   path.join('node_modules', 'graceful-fs', 'graceful-fs.js'),
+      // )
       )
     },
   })

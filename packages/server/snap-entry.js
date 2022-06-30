@@ -1,23 +1,3 @@
-// Add all the items here that can't be executed at startup, but where we still want them
-// bundled in the snapshot to avoid the disk access
-// eslint-disable-next-line
-const deferredButBundled = () => {
-  require('konfig')
-  require('uuid')
-  require('express')
-  require('bluebird')
-  require('cson-parser')
-  require('coffeescript')
-  require('jsonlint')
-  require('konfig')
-  require('registry-js')
-  require('fsevents')
-  require('fluent-ffmpeg')
-  require('@babel/generator')
-  require('prettier')
-  require('marionette-client')
-}
-
 // Add all the modules we know to be "pure" here, allowing us to require them during startup,
 // to include the top-level execution in the snapshot
 require('@babel/types')
@@ -204,4 +184,4 @@ require('graphql')
 require('nexus')
 require('lodash')
 require('ramda')
-require('./server')
+module.exports = require('./server.js')
