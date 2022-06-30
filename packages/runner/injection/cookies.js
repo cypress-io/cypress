@@ -59,7 +59,7 @@ export const patchDocumentCookie = (Cypress) => {
   // document.cookie returns an out-of-date value, but there's not really a
   // way around that since it's a synchronous API and we can only get the
   // browser's true cookie values asynchronously.
-  setInterval(async () => {
+  const intervalId = setInterval(async () => {
     const { superDomain: domain } = Cypress.Location.create(window.location.href)
 
     try {
@@ -72,4 +72,11 @@ export const patchDocumentCookie = (Cypress) => {
       // they're not user-actionable
     }
   }, 250)
+
+  const onUnload = () => {
+    window.removeEventListener('unload', onUnload)
+    clearInterval(intervalId)
+  }
+
+  window.addEventListener('unload', onUnload)
 }
