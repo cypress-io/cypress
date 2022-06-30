@@ -80,7 +80,7 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-8 md:grid-cols-9 children:font-medium children:text-gray-800"
+      class="mb-4 grid grid-cols-7 md:grid-cols-9 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
     >
       <div
