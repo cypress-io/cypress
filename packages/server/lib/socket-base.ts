@@ -614,7 +614,6 @@ export class SocketBase {
   }
 
   changeToUrl (url: string) {
-    console.log('Go to!!!', url)
     return this.toRunner('change:to:url', url)
   }
 }

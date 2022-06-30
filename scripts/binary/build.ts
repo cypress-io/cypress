@@ -281,7 +281,7 @@ require('./packages/server')\
 
     const executablePath = meta.buildAppExecutable()
 
-    // await smoke.test(executablePath)
+    await smoke.test(executablePath)
   } finally {
     if (usingXvfb) {
       await xvfb.stop()
