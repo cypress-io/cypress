@@ -12,7 +12,7 @@
     />
     <div
       v-else
-      class="px-24px pt-86px"
+      class="px-24px pt-86px pb-24px"
     >
       <BaseError
         v-if="query.data.value.baseError"
