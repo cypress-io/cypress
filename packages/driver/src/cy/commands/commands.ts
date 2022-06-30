@@ -16,14 +16,11 @@ const command = function (ctx, name, ...args) {
 }
 
 export default function (Commands, Cypress, cy) {
-  Commands.addChainer({
-    // userInvocationStack has to be passed in here, but can be ignored
-    command (chainer, userInvocationStack, args) {
-      // `...args` below is the shorthand of `args[0], ...args.slice(1)`
-      // TypeScript doesn't allow this.
-      // @ts-ignore
-      return command(chainer, ...args)
-    },
+  $Chainer.add('command', function (chainer, userInvocationStack, args) {
+    // `...args` below is the shorthand of `args[0], ...args.slice(1)`
+    // TypeScript doesn't allow this.
+    // @ts-ignore
+    return command(chainer, ...args)
   })
 
   Commands.addAllSync({
