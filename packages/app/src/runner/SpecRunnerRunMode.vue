@@ -17,7 +17,7 @@
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
       :show-panel1="false"
-      :show-panel2="!screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting && !noCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -26,6 +26,7 @@
           class="h-full"
         >
           <div
+            v-if="!noCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -109,6 +110,8 @@ const {
   startSpecWatcher,
   cleanupRunner,
 } = useEventManager()
+
+const noCommandLog = runnerUiStore.noCommandLog
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
