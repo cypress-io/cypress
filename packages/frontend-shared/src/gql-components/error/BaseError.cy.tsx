@@ -34,14 +34,14 @@ describe('<BaseError />', () => {
   context('retry action', () => {
     const { docsButton } = cy.i18n.launchpadErrors.generic
 
-    const mountFragmentWithError = (errorProps = {}, retrying = false) => {
+    const mountFragmentWithError = (errorProps = {}) => {
       const retrySpy = cy.spy().as('retry')
 
       cy.mountFragment(BaseErrorFragmentDoc, {
         render: (gqlVal) => (<BaseError gql={{
           ...gqlVal,
           ...errorProps,
-        }} retrying={retrying} onRetry={retrySpy} />),
+        }} onRetry={retrySpy} />),
       })
     }
 
