@@ -63,7 +63,7 @@ export const useRunnerStyle = () => {
 
   const viewportStyle = computed(() => {
     // in the below styles, `position: absolute` is required to avoid certain edge cases
-    // that can happen with overflow (mainly, in Firefox, but not always) since, see
+    // that can happen with overflow (mainly, in Firefox, but not always)
     // see this issue for details: https://github.com/cypress-io/cypress/issues/21881
 
     let style = `
