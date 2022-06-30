@@ -22,7 +22,7 @@ if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
   const originalSetAttribute = Element.prototype.setAttribute
 
   Element.prototype.setAttribute = function (qualifiedName, value) {
-    if (qualifiedName === 'integrity' && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+    if (qualifiedName === 'integrity') {
       qualifiedName = STRIPPED_INTEGRITY_TAG
     }
 
