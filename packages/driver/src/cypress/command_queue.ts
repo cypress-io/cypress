@@ -165,8 +165,9 @@ export class CommandQueue extends Queue<$Command> {
         Cypress.once('command:enqueued', commandEnqueued)
       }
 
+      args = [command.get('chainerId'), ...args]
+
       // run the command's fn with runnable's context
-      args.unshift(command.get('chainerId'))
       try {
         ret = __stackReplacementMarker(command.get('fn'), this.state('ctx'), args)
       } catch (err) {

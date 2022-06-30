@@ -166,7 +166,9 @@ const defaults = function (state: StateFunc, config, obj) {
     // so it can conditionally return either
     // parent or child (useful in assertions)
     if (_.isFunction(obj.type)) {
-      obj.type = obj.type(current, state('subject'))
+      const chainerId = current && current.get('chainerId')
+
+      obj.type = obj.type(current, state('subject')[chainerId])
     }
   }
 

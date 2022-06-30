@@ -806,7 +806,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       cy.get('body').then(() => {
-        expect(cy.state('subject')).to.match('body')
+        expect(cy.subjectForChainer(cy.state('chainerId'))).to.match('body')
       })
     })
 
