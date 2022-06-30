@@ -245,8 +245,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
       cy.findByLabelText('Stats').should('not.exist')
+      cy.findByTestId('specs-list-panel').should('not.be.visible')
       cy.findByTestId('reporter-panel').should('not.be.visible')
       cy.findByTestId('reporter-element').should('not.exist')
+      cy.findByTestId('sidebar').should('be.visible')
     })
   })
 
