@@ -18,14 +18,28 @@
     <li><a data-cy="cookie-login-subdomain">Login with Social (subdomain)</a></li>
     <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
     <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
-    <li><a data-cy="welcome" href="http://localhost:3500/welcome">Go to Welcome</a></li>
+    <li><a data-cy="cookie-login-land-on-idp">Login with Social (lands on idp)</a></li>
   </ul>
   <script>
-    document.querySelector('[data-cy=cookie-login]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login')}`
-    document.querySelector('[data-cy=cookie-login-https]').href = `https://localhost:3502/prelogin?redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
-    document.querySelector('[data-cy=cookie-login-subdomain]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&subdomain=true')}`
-    document.querySelector('[data-cy=cookie-login-alias]').href = `http://localhost:3500/prelogin?redirect=${encodeURIComponent('http://www.foobar.com:3500/fixtures/auth/cookie-login.html?redirect=http://localhost:3500/login&alias=true')}`
-    document.querySelector('[data-cy=cookie-login-override]').href = `https://localhost:3502/prelogin?override=true&redirect=${encodeURIComponent('https://www.foobar.com:3502/fixtures/auth/cookie-login.html?redirect=https://localhost:3502/login')}`
+    function setHref (dataCy, redirect2, primaryQueryAddition = '') {
+      const isHttps = redirect2.startsWith('https')
+      const url = isHttps ? 'https://localhost:3502' : 'http://localhost:3500'
+      const redirect1Path = '/fixtures/auth/cookie-login.html'
+      const redirect = encodeURIComponent(isHttps
+        ? `https://www.foobar.com:3502${redirect1Path}?redirect=${redirect2}`
+        : `http://www.foobar.com:3500${redirect1Path}?redirect=${redirect2}`)
+
+      document.querySelector(`[data-cy="${dataCy}"]`).href = (
+        `${url}/prelogin?redirect=${redirect}${primaryQueryAddition}`
+      )
+    }
+
+    setHref('cookie-login', 'http://localhost:3500/login')
+    setHref('cookie-login-https', 'https://localhost:3502/login')
+    setHref('cookie-login-subdomain', 'http://localhost:3500/login&subdomain=true')
+    setHref('cookie-login-alias', 'http://localhost:3500/login&alias=true')
+    setHref('cookie-login-override', 'https://localhost:3502/login', '&override=true')
+    setHref('cookie-login-land-on-idp', 'http://www.idp.com:3500/welcome')
   </script>
 </body>
 </html>

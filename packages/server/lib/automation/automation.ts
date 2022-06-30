@@ -4,7 +4,7 @@ import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
-import { cookieJar } from '../cookie-jar'
+import { cookieJar } from '../util/cookies'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
