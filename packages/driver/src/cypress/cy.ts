@@ -697,7 +697,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.commandFns[name] = fn
 
     const wrap = function (firstCall) {
-      if (type === 'parent' || type === 'utility') {
+      if (type === 'parent') {
         return (chainerId, ...args) => fn(...args)
       }
 
@@ -1253,7 +1253,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   subjectForChainer (chainerId: string) {
-    return this.state('subject')[chainerId]
+    return (this.state('subject') || {})[chainerId]
   }
 
   linkSubject (fromChainerId, toChainerId) {
