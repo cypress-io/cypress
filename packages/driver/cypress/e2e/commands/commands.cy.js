@@ -107,13 +107,13 @@ describe('src/cy/commands/commands', () => {
 
     it('throws when attempting to add a command with the same name as an internal function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addChainer` because that name is reserved internally by Cypress.')
+        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addCommand` because that name is reserved internally by Cypress.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
 
         done()
       })
 
-      Cypress.Commands.add('addChainer', () => {
+      Cypress.Commands.add('addCommand', () => {
         cy
         .get('[contenteditable]')
         .first()

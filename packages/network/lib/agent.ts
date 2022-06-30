@@ -38,7 +38,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
   connectReq.push(`Host: ${hostname}:${port}`)
 
   if (proxy.auth) {
-    connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
+    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
