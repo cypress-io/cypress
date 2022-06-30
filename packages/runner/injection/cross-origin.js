@@ -10,6 +10,7 @@
 
 import { createTimers } from './timers'
 import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
+import { patchDocumentCookie } from './cookies'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -57,6 +58,8 @@ if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
     return originalSetAttribute.apply(this, [qualifiedName, value])
   }
 }
+
+patchDocumentCookie(Cypress)
 
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
