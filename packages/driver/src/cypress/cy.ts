@@ -697,7 +697,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.commandFns[name] = fn
 
     const wrap = function (firstCall) {
-      if (type === 'parent') {
+      if (type === 'parent' || type === 'utility') {
         return (chainerId, ...args) => fn(...args)
       }
 
