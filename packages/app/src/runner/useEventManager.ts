@@ -51,6 +51,12 @@ export function useEventManager () {
   }
 
   function cleanupRunner () {
+    const reporterElement = getReporterElement()
+
+    if (!reporterElement) {
+      return
+    }
+
     // Clean up the AUT and Reporter every time we leave the route.
     empty(getRunnerElement())
 
