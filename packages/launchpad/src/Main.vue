@@ -17,7 +17,6 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retrying="mutation.fetching.value"
         @retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
