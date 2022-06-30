@@ -1,3 +1,4 @@
+/* global Element */
 /**
  * This is the entry point for the script that gets injected into
  * the AUT on a secondary origin. It gets bundled on its own and injected
@@ -40,22 +41,21 @@ const findCypress = () => {
 
 const Cypress = findCypress()
 
-/* eslint-disable */
-const originalSetAttribute = Element.prototype.setAttribute
+if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+  const originalSetAttribute = Element.prototype.setAttribute
 
-Element.prototype.setAttribute = function (qualifiedName, value) {
-  if (qualifiedName === 'integrity' && Cypress.config('useExpandedModifyObstructiveCode')) {
-    qualifiedName = 'cypress-stripped-integrity'
+  Element.prototype.setAttribute = function (qualifiedName, value) {
+    if (qualifiedName === 'integrity') {
+      qualifiedName = 'cypress-stripped-integrity'
+    }
+
+    if (qualifiedName === 'target' && value === '_top') {
+      value = '_self'
+    }
+
+    return originalSetAttribute.apply(this, [qualifiedName, value])
   }
-
-  if (qualifiedName === 'target' && value === '_top' && Cypress.config('useExpandedModifyObstructiveCode')) {
-    value = '_self'
-  }
-
-  originalSetAttribute.apply(this, [qualifiedName, value])
 }
-
-/* eslint-enable */
 
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()

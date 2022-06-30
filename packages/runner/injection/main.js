@@ -1,3 +1,4 @@
+/* global Element */
 /**
  * This is the entry point for the script that gets injected into
  * the AUT. It gets bundled on its own and injected into the <head>
@@ -16,18 +17,17 @@ if (!Cypress) {
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
 
-/* eslint-disable */
-const originalSetAttribute = Element.prototype.setAttribute
+if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+  const originalSetAttribute = Element.prototype.setAttribute
 
-Element.prototype.setAttribute = function (qualifiedName, value) {
-  if (qualifiedName === 'integrity' && Cypress.config('useExpandedModifyObstructiveCode')) {
-    qualifiedName = 'cypress-stripped-integrity'
+  Element.prototype.setAttribute = function (qualifiedName, value) {
+    if (qualifiedName === 'integrity' && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+      qualifiedName = 'cypress-stripped-integrity'
+    }
+
+    return originalSetAttribute.apply(this, [qualifiedName, value])
   }
-
-  originalSetAttribute.apply(this, [qualifiedName, value])
 }
-
-/* eslint-enable */
 
 // We wrap timers in the injection code because if we do it in the driver (like
 // we used to do), any uncaught errors thrown in the timer callbacks would
