@@ -11,7 +11,7 @@
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
-      :href="cloudUrl"
+      :href="dashboardUrl"
       :use-default-hocus="false"
     >
       <div
@@ -49,7 +49,7 @@
     >
       <ExternalLink
         v-if="latestRun"
-        :href="cloudUrl"
+        :href="dashboardUrl"
         :use-default-hocus="false"
       >
         <SpecRunSummary
@@ -196,7 +196,7 @@ const latestDot = computed(() => {
   }
 })
 
-const cloudUrl = computed(() => {
+const dashboardUrl = computed(() => {
   if (latestRun.value?.url) {
     return getUrlWithParams({
       url: latestRun.value.url,
