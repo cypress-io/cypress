@@ -254,11 +254,6 @@ export default {
         })
       },
 
-      addSelector (name, fn) {
-        // TODO: Add overriding stuff.
-        return cy.addSelector(name, fn)
-      },
-
       overwrite (name, fn) {
         return storeOverride(name, fn)
       },

@@ -166,6 +166,7 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       // run the command's fn with runnable's context
+      args.unshift(command.get('chainerId'))
       try {
         ret = __stackReplacementMarker(command.get('fn'), this.state('ctx'), args)
       } catch (err) {
@@ -247,7 +248,7 @@ export class CommandQueue extends Queue<$Command> {
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
-      this.state('subject', subject)
+      cy.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
     })
@@ -278,7 +279,8 @@ export class CommandQueue extends Queue<$Command> {
         })
 
         this.state('index', index + 1)
-        this.state('subject', command.get('subject'))
+
+        cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 

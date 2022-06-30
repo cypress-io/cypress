@@ -640,9 +640,6 @@ class $Cypress {
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
 
-      case 'cy:next:subject:prepared':
-        return this.emit('next:subject:prepared', ...args)
-
       case 'cy:collect:run:state':
         return this.emitThen('collect:run:state')
 

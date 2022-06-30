@@ -221,7 +221,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
-  private selectorFns: Record<string, Function> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -695,37 +694,33 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   addCommand ({ name, fn, type, prevSubject }) {
     const cy = this
 
-    // TODO: prob don't need this anymore
     this.commandFns[name] = fn
 
     const wrap = function (firstCall) {
-      fn = cy.commandFns[name]
-      const wrapped = wrapByType(fn, firstCall)
+      if (type === 'parent') {
+        return (chainerId, ...args) => fn(...args)
+      }
+
+      const wrapped = function (chainerId, ...args) {
+        // push the subject into the args
+        if (firstCall) {
+          cy.validateFirstCall(name, args, prevSubject)
+        }
+
+        args = cy.pushSubject(name, args, prevSubject, chainerId)
+
+        return fn.apply(cy.runnableCtx(name), args)
+      }
 
       wrapped.originalFn = fn
 
       return wrapped
     }
 
-    const wrapByType = function (fn, firstCall) {
-      if (type === 'parent') {
-        return fn
-      }
+    const cyFn = wrap(true)
+    const chainerFn = wrap(false)
 
-      // child, dual, assertion, utility command
-      // pushes the previous subject into them
-      // after verifying its of the correct type
-      return function (...args) {
-        // push the subject into the args
-        args = cy.pushSubjectAndValidate(name, args, firstCall, prevSubject)
-
-        return fn.apply(cy.runnableCtx(name), args)
-      }
-    }
-
-    const callback = (chainer, userInvocationStack, args) => {
-      const { firstCall, chainerId } = chainer
-
+    const callback = (chainer, userInvocationStack, args, firstCall = false) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
@@ -741,13 +736,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         name,
         args,
         type,
-        chainerId,
+        chainerId: chainer.chainerId,
         userInvocationStack,
         injected,
-        fn: wrap(firstCall),
+        fn: firstCall ? cyFn : chainerFn,
       })
-
-      chainer.firstCall = false
     }
 
     $Chainer.add(name, callback)
@@ -759,9 +752,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // so create a new chainer instance
       const chainer = new $Chainer(cy.specWindow)
 
+      if (cy.state('chainerId')) {
+        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
+      }
+
       const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
-      callback(chainer, userInvocationStack, args)
+      callback(chainer, userInvocationStack, args, true)
 
       // if we are in the middle of a command
       // and its return value is a promise
@@ -1225,29 +1222,24 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
 
-  // TODO: make string[] more
-  private pushSubjectAndValidate (name, args, firstCall, prevSubject: string[]) {
-    if (firstCall) {
-      // if we have a prevSubject then error
-      // since we're invoking this improperly
-      if (prevSubject && !([] as string[]).concat(prevSubject).includes('optional')) {
-        const stringifiedArg = $utils.stringifyActual(args[0])
+  private validateFirstCall (name, args, prevSubject: string[]) {
+    // if we have a prevSubject then error
+    // since we're invoking this improperly
+    if (prevSubject && !([] as string[]).concat(prevSubject).includes('optional')) {
+      const stringifiedArg = $utils.stringifyActual(args[0])
 
-        $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
-          args: {
-            cmd: name,
-            args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
-          },
-        })
-      }
-
-      // else if this is the very first call
-      // on the chainer then make the first
-      // argument undefined (we have no subject)
-      this.state('subject', undefined)
+      $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        args: {
+          cmd: name,
+          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+        },
+      })
     }
+  }
 
-    const subject = this.state('subject')
+  // TODO: make string[] more
+  private pushSubject (name, args, prevSubject: string[], chainerId) {
+    const subject = this.subjectForChainer(chainerId)
 
     if (prevSubject) {
       // make sure our current subject is valid for
@@ -1257,9 +1249,38 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     args.unshift(subject)
 
-    this.Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
-
     return args
+  }
+
+  subjectForChainer (chainerId: string) {
+    return this.state('subject')[chainerId]
+  }
+
+  linkSubject (fromChainerId, toChainerId) {
+    const links = this.state('subjectLinks') || {}
+
+    links[fromChainerId] = toChainerId
+    this.state('subjectLinks', links)
+  }
+
+  breakSubjectLinksToCurrentChainer () {
+    const chainerId = this.state('chainerId')
+    const links = this.state('subjectLinks') || {}
+
+    this.state('subjectLinks', _.omitBy(links, (l) => l === chainerId))
+  }
+
+  setSubjectForChainer (chainerId: string, subject: any) {
+    const cySubject = this.state('subject') || {}
+
+    cySubject[chainerId] = subject
+    this.state('subject', cySubject)
+
+    const links = this.state('subjectLinks') || {}
+
+    if (links[chainerId]) {
+      this.setSubjectForChainer(links[chainerId], subject)
+    }
   }
 
   private doneEarly () {
