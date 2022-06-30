@@ -777,6 +777,12 @@ module.exports = {
 
   displayRunStarting,
 
+  navigateToNextSpec (spec) {
+    debug('navigating to next spec')
+
+    return openProject.changeUrlToSpec('', spec)
+  },
+
   exitEarly (err) {
     debug('set early exit error: %s', err.stack)
 
@@ -1109,6 +1115,13 @@ module.exports = {
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
+      if (options.testingType === 'component' && !options.isFirstSpec) {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return Promise.resolve(this.navigateToNextSpec(options.spec))
+      }
+
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
         .tap(() => {
@@ -1251,11 +1264,11 @@ module.exports = {
       //   await openProject.closeBrowser()
       // } else {
       debug('attempting to close the browser tab')
-      await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      // await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
       // }
 
       debug('resetting server state')
-      openProject.projectBase.server.reset()
+      // openProject.projectBase.server.reset()
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1497,6 +1510,8 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          testingType: options.testingType,
+          isFirstSpec,
           shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
           // TODO(tim): investigate the socket disconnect
         }),

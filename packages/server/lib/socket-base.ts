@@ -612,4 +612,9 @@ export class SocketBase {
   close () {
     return this._io?.close()
   }
+
+  changeToUrl (url: string) {
+    console.log('Go to!!!', url)
+    return this.toRunner('change:to:url', url)
+  }
 }

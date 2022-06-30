@@ -222,6 +222,29 @@ export class OpenProject {
     this.closeOpenProjectAndBrowsers()
   }
 
+  changeUrlToSpec (browserUrl: string, spec: Cypress.Spec) {
+    if (!this.projectBase) {
+      return
+    }
+
+    const newSpecUrl = getSpecUrl({
+      projectRoot: this.projectBase.projectRoot,
+      spec,
+      // absoluteSpecPath: spec.absolute,
+      // specType: spec.specType,
+      // browserUrl: this.openProject.cfg.browserUrl,
+      // integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
+      // componentFolder: this.openProject.cfg.componentFolder || 'component',
+      // projectRoot: this.openProject.projectRoot,
+    })
+
+    console.log(`New url is ${newSpecUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newSpecUrl)
+
+    // this.openProject.changeToUrl(newSpecUrl)
+  }
+
   // close existing open project if it exists, for example
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad
