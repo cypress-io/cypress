@@ -60,6 +60,11 @@ const setRequest = (state, xhr, alias) => {
   return state('requests', requests)
 }
 
+export type XHRRequest = {
+  xhr: any
+  alias: any
+}
+
 export interface XHRResponse {
   xhr: any
   alias: any

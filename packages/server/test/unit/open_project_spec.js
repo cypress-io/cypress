@@ -66,8 +66,7 @@ describe('lib/open_project', () => {
       this.browser = { name: 'chrome' }
     })
 
-    // NOTE: todo come back to this
-    it.skip('tells preprocessor to remove file on browser close', function () {
+    it('tells preprocessor to remove file on browser close', function () {
       return openProject.launch(this.browser, this.spec)
       .then(() => {
         browsers.open.lastCall.args[1].onBrowserClose()
@@ -76,8 +75,7 @@ describe('lib/open_project', () => {
       })
     })
 
-    // NOTE: todo come back to this
-    it.skip('does not tell preprocessor to remove file if no spec', function () {
+    it('does not tell preprocessor to remove file if no spec', function () {
       return openProject.launch(this.browser, {})
       .then(() => {
         browsers.open.lastCall.args[1].onBrowserClose()

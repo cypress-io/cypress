@@ -1,9 +1,13 @@
 import _ from 'lodash'
-// @ts-ignore
 import { registerFetch } from 'unfetch'
 import $selection from '../dom/selection'
 
-export const create = (state, config, focused, snapshots) => {
+import type { ICypress } from '../cypress'
+import type { StateFunc } from '../cypress/state'
+import type { IFocused } from './focused'
+import type { ISnapshots } from './snapshots'
+
+export const create = (state: StateFunc, config: ICypress['config'], focused: IFocused, snapshots: ISnapshots) => {
   const wrapNativeMethods = function (contentWindow) {
     try {
       // return null to trick contentWindow into thinking

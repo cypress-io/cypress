@@ -35,4 +35,12 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     cy.findAllByLabelText('status').should('have.value', 'Coffee Loading')
     cy.percySnapshot('with icons')
   })
+
+  it('ensures autocomplete is disabled', () => {
+    const value = ref('')
+
+    // @ts-ignore = vModel is v-model in vue
+    cy.mount(() => <Input vModel={value.value}/>)
+    cy.get('input').should('have.attr', 'autocomplete', 'off')
+  })
 })
