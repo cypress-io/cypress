@@ -205,9 +205,6 @@ export function setupHooks (optionalCallback?: Function) {
   // testing so we early return.
   // System test to verify CT side effects do not pollute e2e: system-tests/test/e2e_with_mount_import_spec.ts
   if (Cypress.testingType !== 'component') {
-    // eslint-disable-next-line no-console
-    console.log('Skipping component setup as Cypress is not running in component mode. You are probably seeing this message due to an inclusion of a "mount" import in your support file.')
-
     return
   }
 
