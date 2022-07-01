@@ -6,7 +6,6 @@ import 'cypress-real-events/support'
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
-import { configure } from '@testing-library/cypress'
 
 declare global {
   namespace Cypress {
@@ -21,7 +20,6 @@ cy.gqlStub = GQLStubRegistry
 
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
-configure({ testIdAttribute: 'data-cy' })
 registerMountFn()
 addVueCommand()
 installCustomPercyCommand()
