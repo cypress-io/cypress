@@ -2,8 +2,7 @@ import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
-import { Cookie, CookieJar } from '@packages/server/lib/cookie-jar'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface RequestDetails {
   url: string
@@ -32,26 +31,6 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
   return isAUTFrameRequest ? 'lax' : 'none'
 }
 
-const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
-
-export const parseCookie = (cookie: string) => {
-  const toughCookie = CookieJar.parse(cookie)
-
-  if (!toughCookie) return
-
-  // fixes tough-cookie defaulting undefined/invalid SameSite to 'none'
-  // https://github.com/salesforce/tough-cookie/issues/191
-  const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
-
-  // not all browsers currently default to lax, but they're heading in that
-  // direction since it's now the standard, so this is more future-proof
-  if (hasUnspecifiedSameSite) {
-    toughCookie.sameSite = 'lax'
-  }
-
-  return toughCookie
-}
-
 const comparableCookieString = (toughCookie: Cookie): string => {
   return _(toughCookie)
   .pick('key', 'value', 'domain', 'path')
@@ -69,22 +48,6 @@ const matchesPreviousCookie = (previousCookies: Cookie[], cookie: Cookie) => {
   return !!previousCookies.find((previousCookie) => {
     return areCookiesEqual(previousCookie, cookie)
   })
-}
-
-const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
-  const expiry = toughCookie.expiryTime()
-
-  return {
-    domain: toughCookie.domain || defaultDomain,
-    expiry: isFinite(expiry) ? expiry / 1000 : null,
-    httpOnly: toughCookie.httpOnly,
-    maxAge: toughCookie.maxAge,
-    name: toughCookie.key,
-    path: toughCookie.path,
-    sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
-    secure: toughCookie.secure,
-    value: toughCookie.value,
-  }
 }
 
 /**
@@ -140,7 +103,7 @@ export class CookiesHelper {
   }
 
   setCookie (cookie: string) {
-    const toughCookie = parseCookie(cookie)
+    const toughCookie = CookieJar.parse(cookie)
 
     // don't set the cookie in our own cookie jar if the parsed cookie is
     // undefined (meaning it's invalid) or if the browser would not set it

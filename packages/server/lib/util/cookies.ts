@@ -1,12 +1,31 @@
 import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
+import type { AutomationCookie } from '../automation/cookies'
 
-export { Cookie }
+export { AutomationCookie, Cookie }
 
 interface CookieData {
   name: string
   domain: string
   path?: string
 }
+
+export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
+  const expiry = toughCookie.expiryTime()
+
+  return {
+    domain: toughCookie.domain || defaultDomain,
+    expiry: isFinite(expiry) ? expiry / 1000 : null,
+    httpOnly: toughCookie.httpOnly,
+    maxAge: toughCookie.maxAge,
+    name: toughCookie.key,
+    path: toughCookie.path,
+    sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
+    secure: toughCookie.secure,
+    value: toughCookie.value,
+  }
+}
+
+const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
 
 /**
  * An adapter for tough-cookie's CookieJar
@@ -16,8 +35,22 @@ interface CookieData {
 export class CookieJar {
   _cookieJar: ToughCookieJar
 
-  static parse (cookie) {
-    return Cookie.parse(cookie)
+  static parse (cookie: string) {
+    const toughCookie = Cookie.parse(cookie)
+
+    if (!toughCookie) return
+
+    // fixes tough-cookie defaulting undefined/invalid SameSite to 'none'
+    // https://github.com/salesforce/tough-cookie/issues/191
+    const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
+
+    // not all browsers currently default to lax, but they're heading in that
+    // direction since it's now the standard, so this is more future-proof
+    if (hasUnspecifiedSameSite) {
+      toughCookie.sameSite = 'lax'
+    }
+
+    return toughCookie
   }
 
   constructor () {

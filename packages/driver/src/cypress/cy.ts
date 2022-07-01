@@ -221,6 +221,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
+  private selectorFns: Record<string, Function> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -244,7 +245,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.stop = this.stop.bind(this)
     this.reset = this.reset.bind(this)
     this.addCommandSync = this.addCommandSync.bind(this)
-    this.addChainer = this.addChainer.bind(this)
     this.addCommand = this.addCommand.bind(this)
     this.now = this.now.bind(this)
     this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
@@ -675,9 +675,21 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  addChainer (name, fn) {
-    // add this function to our chainer class
-    return $Chainer.add(name, fn)
+  runQueue () {
+    cy.queue.run()
+    .then(() => {
+      const onQueueEnd = cy.state('onQueueEnd')
+
+      if (onQueueEnd) {
+        onQueueEnd()
+      }
+    })
+    .catch(() => {
+      // errors from the queue are propagated to cy.fail by the queue itself
+      // and can be safely ignored here. omitting this catch causes
+      // unhandled rejections to be logged because Bluebird sees a promise
+      // chain with no catch handler
+    })
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
@@ -711,17 +723,45 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       }
     }
 
-    cy[name] = function (...args) {
-      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+    const callback = (chainer, userInvocationStack, args) => {
+      const { firstCall, chainerId } = chainer
 
+      // dont enqueue / inject any new commands if
+      // onInjectCommand returns false
+      const onInjectCommand = cy.state('onInjectCommand')
+      const injected = _.isFunction(onInjectCommand)
+
+      if (injected) {
+        if (onInjectCommand.call(cy, name, ...args) === false) {
+          return
+        }
+      }
+
+      cy.enqueue({
+        name,
+        args,
+        type,
+        chainerId,
+        userInvocationStack,
+        injected,
+        fn: wrap(firstCall),
+      })
+
+      chainer.firstCall = false
+    }
+
+    $Chainer.add(name, callback)
+
+    cy[name] = function (...args) {
       cy.ensureRunnable(name)
 
       // this is the first call on cypress
       // so create a new chainer instance
-      const chain = $Chainer.create(name, userInvocationStack, cy.specWindow, args)
+      const chainer = new $Chainer(cy.specWindow)
 
-      // store the chain so we can access it later
-      cy.state('chain', chain)
+      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+
+      callback(chainer, userInvocationStack, args)
 
       // if we are in the middle of a command
       // and its return value is a promise
@@ -753,51 +793,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
-        cy.queue.run()
-        .then(() => {
-          const onQueueEnd = cy.state('onQueueEnd')
-
-          if (onQueueEnd) {
-            onQueueEnd()
-          }
-        })
-        .catch(() => {
-          // errors from the queue are propagated to cy.fail by the queue itself
-          // and can be safely ignored here. omitting this catch causes
-          // unhandled rejections to be logged because Bluebird sees a promise
-          // chain with no catch handler
-        })
+        cy.runQueue()
       }
 
-      return chain
+      return chainer
     }
-
-    return this.addChainer(name, (chainer, userInvocationStack, args) => {
-      const { firstCall, chainerId } = chainer
-
-      // dont enqueue / inject any new commands if
-      // onInjectCommand returns false
-      const onInjectCommand = cy.state('onInjectCommand')
-      const injected = _.isFunction(onInjectCommand)
-
-      if (injected) {
-        if (onInjectCommand.call(cy, name, ...args) === false) {
-          return
-        }
-      }
-
-      cy.enqueue({
-        name,
-        args,
-        type,
-        chainerId,
-        userInvocationStack,
-        injected,
-        fn: wrap(firstCall),
-      })
-
-      return true
-    })
   }
 
   now (name, ...args) {
