@@ -63,9 +63,13 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
   })
 
   it('provides expected tooltip content', () => {
-    cy.get('.v-popper').trigger('mouseenter')
-    cy.findByTestId('new-spec-tooltip').should('be.visible')
-        .and('have.text', 'Create New Spec')
+    cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+    /></div>))
+    .get(buttonSelector)
+    .realHover()
+
+    cy.get('[data-cy=new-spec-tooltip]')
+    .should('contain.text', 'Create New Spec')
 
     cy.percySnapshot()
   })
