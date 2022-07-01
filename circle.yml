@@ -528,14 +528,45 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-            DEBUG=<<parameters.debug>> \
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            else
+              # external PR
+
+              # To make `circleci tests` work correctly, we need to step into the package folder.
+              cd packages/<<parameters.package>>
+
+              GLOB="cypress/e2e/**/*cy.*"
+
+              if [[ <<parameters.type>> == 'ct' ]]; then
+                # component tests are located side by side with the source codes.
+                GLOB="src/**/*cy.*"
+              fi
+
+              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              # To run the `yarn` command, we need to walk out of the package folder.
+              cd ../..
+
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_KONFIG_ENV=production \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+            fi
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
@@ -2029,41 +2060,7 @@ jobs:
       - run:
           name: Scaffold full TypeScript project 🏗
           working_directory: <<parameters.wd>>
-          command: npx @bahmutov/cly@1 init --typescript
-      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
-      - run:
-          name: Update example spec
-          working_directory: <<parameters.wd>>
-          command: |
-            mkdir cypress/e2e
-            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
-      - run:
-          name: Scaffold new config file
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo "export default {
-                    e2e: {
-                      setupNodeEvents (on, config) {
-                        on('task', {
-                          log (x) {
-                            console.log(x)
-
-                            return null
-                          },
-                        })
-
-                        return config
-                      },
-                    },
-                  }" > cypress.config.ts
-      - run:
-          name: Rename support file
-          working_directory: <<parameters.wd>>
-          command: mv cypress/support/index.ts cypress/support/e2e.js
+          command: npx @bahmutov/cly@1.9.0 init --typescript
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2231,27 +2228,7 @@ jobs:
       - run:
           name: Add Cypress demo
           working_directory: test-binary
-          command: npx @bahmutov/cly init
-      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.js` when Cypress v10 is released.
-      - run:
-          name: Update example spec
-          working_directory: test-binary
-          command: |
-            mkdir cypress/e2e
-            mv cypress/integration/spec.js cypress/e2e/spec.cy.js
-      - run:
-          name: Scaffold new config file
-          working_directory: test-binary
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo 'module.exports = { e2e: {} }' > cypress.config.js
-      - run:
-          name: Rename support file
-          working_directory: test-binary
-          command: mv cypress/support/index.js cypress/support/e2e.js
+          command: npx @bahmutov/cly@1.9.0 init
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -2359,22 +2336,22 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2387,7 +2364,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install          
     - run-app-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2681,7 +2658,7 @@ windows-workflow: &windows-workflow
         name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 
@@ -2689,7 +2666,7 @@ windows-workflow: &windows-workflow
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 

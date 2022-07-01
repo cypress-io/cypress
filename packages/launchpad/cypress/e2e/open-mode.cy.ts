@@ -176,7 +176,7 @@ describe('Launchpad: Open Mode', () => {
           },
         ]
 
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project', savedState: () => Promise.resolve({}) }]
       })
 
       cy.visitLaunchpad()
@@ -203,7 +203,7 @@ describe('Launchpad: Open Mode', () => {
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project', savedState: () => Promise.resolve({}) }]
       })
 
       cy.visitLaunchpad()
@@ -240,6 +240,13 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
 
     cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
+    cy.get('h1').should('contain', 'Choose a Browser')
+  })
+
+  it('opens project with spaces in path', () => {
+    cy.scaffoldProject('simple with spaces')
+    cy.openProject('simple with spaces', ['--e2e'])
+    cy.visitLaunchpad()
     cy.get('h1').should('contain', 'Choose a Browser')
   })
 })
