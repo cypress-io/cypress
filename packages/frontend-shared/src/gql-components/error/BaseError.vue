@@ -16,15 +16,15 @@
         </h1>
 
         <div
-          v-if="retry"
-          class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
+          v-if="showButtons"
+          class="font-medium w-full pt-12px gap-4 inline-flex justify-center "
         >
           <Button
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
-            @click="retry?.(baseError.id)"
+            @click="emit('retry', baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -139,9 +139,13 @@ fragment BaseError on ErrorWrapper {
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
-  retry?: (id: string) => void
+  showButtons?: boolean
+}>(), { showButtons: true })
+
+const emit = defineEmits<{
+  (e: 'retry', id: string): void
 }>()
 
 const markdownTarget = ref()

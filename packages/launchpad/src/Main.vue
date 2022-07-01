@@ -17,7 +17,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        @retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isGlobalMode && !query.data.value?.currentProject"
