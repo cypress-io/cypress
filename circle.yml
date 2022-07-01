@@ -2060,7 +2060,7 @@ jobs:
       - run:
           name: Scaffold full TypeScript project 🏗
           working_directory: <<parameters.wd>>
-          command: npx @bahmutov/cly@1 init --typescript
+          command: npx @bahmutov/cly@1.9.0 init --typescript
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2228,7 +2228,7 @@ jobs:
       - run:
           name: Add Cypress demo
           working_directory: test-binary
-          command: npx @bahmutov/cly init
+          command: npx @bahmutov/cly@1.9.0 init
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
