@@ -17,6 +17,7 @@
         <img
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
+          alt="cypress"
         >
         <nav>
           <ol>
