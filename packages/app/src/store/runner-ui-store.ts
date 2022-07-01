@@ -26,7 +26,7 @@ export interface RunnerUiState {
   reporterWidth: number
   automationStatus: AutomationStatus
   randomString: string
-  noCommandLog: boolean
+  hideCommandLog: boolean
 }
 
 export const useRunnerUiStore = defineStore({
@@ -41,7 +41,7 @@ export const useRunnerUiStore = defineStore({
       reporterWidth: runnerConstants.defaultReporterWidth,
       automationStatus: automation.CONNECTING,
       randomString: `${Math.random()}`,
-      noCommandLog: window.__CYPRESS_CONFIG__.noCommandLog,
+      hideCommandLog: window.__CYPRESS_CONFIG__.hideCommandLog,
     }
   },
 
