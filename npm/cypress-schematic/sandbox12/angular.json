@@ -102,5 +102,8 @@
       }
     }
   },
-  "defaultProject": "sandbox"
+  "defaultProject": "sandbox",
+  "cli": {
+    "packageManager": "yarn"
+  }
 }
