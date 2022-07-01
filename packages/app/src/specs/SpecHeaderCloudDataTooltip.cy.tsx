@@ -91,7 +91,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-          cy.get('button').should('not.exist')
+          cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
 
           cy.percySnapshot()
         })
