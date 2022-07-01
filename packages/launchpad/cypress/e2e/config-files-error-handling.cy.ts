@@ -162,7 +162,6 @@ describe('Launchpad: Error System Tests', () => {
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
-    cy.percySnapshot()
 
     // Try again while the config is still invalid
     cy.findByRole('button', { name: 'Try again' }).click()
