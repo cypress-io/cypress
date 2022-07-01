@@ -88,4 +88,22 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.actions.project.launchProject).to.not.be.called
     })
   })
+
+  context('#eventProcessPid', () => {
+    it('returns process id from config manager', () => {
+      // @ts-expect-error
+      ctx.lifecycleManager._configManager = {
+        eventProcessPid: 12399,
+        destroy: () => {},
+      }
+
+      expect(ctx.lifecycleManager.eventProcessPid).to.eq(12399)
+    })
+
+    it('does not throw if config manager is not initialized', () => {
+      // @ts-expect-error
+      ctx.lifecycleManager._configManager = undefined
+      expect(ctx.lifecycleManager.eventProcessPid).to.eq(undefined)
+    })
+  })
 })
