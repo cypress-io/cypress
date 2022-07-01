@@ -33,6 +33,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       cy.mount(() => (
         <div class="h-screen">
           <ResizablePanels
+            class="h-full"
             maxTotalWidth={1500}
             v-slots={slotContents}
             initialPanel1Width={defaultPanel1Width}
@@ -46,6 +47,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
 
     it('the panels can be resized', () => {
       assertWidth('panel1', defaultPanel1Width)
+      cy.percySnapshot('starting sizes')
       dragHandleToClientX('panel1', 500)
       assertWidth('panel1', 500)
       dragHandleToClientX('panel1', 400)
@@ -56,6 +58,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       assertWidth('panel2', 400)
       dragHandleToClientX('panel2', 700)
       assertWidth('panel2', 300)
+      cy.percySnapshot('ending sizes')
     })
 
     it('panel 1 can be resized between its minimum allowed width and maximum available space', () => {
@@ -112,6 +115,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
           <div class='bg-green-600 text-white w-100px'> 100px wide sidebar</div>
           <div class="flex-grow h-screen">
             <ResizablePanels
+              class="h-full"
               maxTotalWidth={1500}
               v-slots={slotContents}
               offsetLeft={100}
@@ -130,6 +134,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       assertWidth('panel2', 300)
       dragHandleToClientX('panel2', 590)
       assertWidth('panel2', 290)
+      cy.percySnapshot()
     })
   })
 
@@ -139,6 +144,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
         <div class="h-screen">
           <ResizablePanels
             maxTotalWidth={1500}
+            class="h-full"
             v-slots={slotContents}
             showPanel1={false}
           />
@@ -149,6 +155,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       dragHandleToClientX('panel2', 1000)
       assertWidth('panel2', 1000)
       assertWidth('panel3', 500)
+      cy.percySnapshot()
     })
 
     it('panel 2 can be hidden with a prop', () => {
@@ -156,6 +163,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
         <div class="h-screen">
           <ResizablePanels
             maxTotalWidth={1500}
+            class="h-full"
             v-slots={slotContents}
             showPanel2={false}
           />
@@ -167,6 +175,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       dragHandleToClientX('panel1', 955)
       assertWidth('panel1', 950)
       assertWidth('panel3', 550)
+      cy.percySnapshot()
     })
 
     it('Panel 3 resizes correctly when both panels are hidden', () => {
@@ -174,6 +183,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
         <div class="h-screen">
           <ResizablePanels
             maxTotalWidth={1500}
+            class="h-full"
             v-slots={slotContents}
             showPanel1={false}
             showPanel2={false}
@@ -183,6 +193,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       cy.contains('panel1').should('not.be.visible')
       cy.contains('panel2').should('not.be.visible')
       assertWidth('panel3', 1500)
+      cy.percySnapshot()
     })
   })
 })
