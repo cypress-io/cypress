@@ -35,5 +35,8 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
     "typescript": "~4.5.5"
+  },
+  "resolutions": {
+    "@types/eslint": "8.4.3"
   }
 }
