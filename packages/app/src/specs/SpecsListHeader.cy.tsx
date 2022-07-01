@@ -4,27 +4,47 @@ import { defaultMessages } from '@cy/i18n'
 
 const buttonSelector = '[data-cy=new-spec-button]'
 
+const mountWithSearchRef = () => {
+  const search = ref('')
+
+  cy.wrap(search).as('search')
+
+  cy.mount(defineComponent({
+    setup () {
+      return () => h(SpecsListHeader, {
+        modelValue: search.value,
+        'onUpdate:modelValue': (val: string) => {
+          search.value = val
+        },
+      })
+    },
+  }))
+}
+
 describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
   it('can be searched', () => {
-    const search = ref('')
     const searchString = 'my/component.cy.tsx'
 
-    cy.mount(defineComponent({
-      setup () {
-        return () => h(SpecsListHeader, {
-          modelValue: search.value,
-          'onUpdate:modelValue': (val: string) => {
-            search.value = val
-          },
-        })
-      },
-    }))
+    mountWithSearchRef()
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
     .type(searchString, { delay: 0 })
-    .then(() => {
-      expect(search.value).to.equal(searchString)
-    })
+    .get('@search').its('value').should('eq', searchString)
+  })
+
+  it('clears search field when clear button is clicked', () => {
+    mountWithSearchRef()
+
+    cy.findByTestId('clear-search-button')
+    .should('not.exist')
+
+    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    .type('abcd', { delay: 0 })
+    .get('@search').its('value').should('eq', 'abcd')
+
+    cy.findByTestId('clear-search-button')
+    .click()
+    .get('@search').its('value').should('eq', '')
   })
 
   it('emits a new spec event', () => {

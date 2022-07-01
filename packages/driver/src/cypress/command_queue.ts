@@ -8,6 +8,10 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import type $Command from './command'
+import type { StateFunc } from './state'
+import type { $Cy } from './cy'
+import type { IStability } from '../cy/stability'
+import type { ITimeouts } from '../cy/timeouts'
 
 const debugErrors = Debug('cypress:driver:errors')
 
@@ -53,14 +57,15 @@ const commandRunningFailed = (Cypress, state, err) => {
 }
 
 export class CommandQueue extends Queue<$Command> {
-  state: any
-  timeout: any
-  stability: any
-  cleanup: any
-  fail: any
-  isCy: any
+  state: StateFunc
+  timeout: $Cy['timeout']
+  stability: IStability
+  cleanup: $Cy['cleanup']
+  fail: $Cy['fail']
+  isCy: $Cy['isCy']
+  clearTimeout: ITimeouts['clearTimeout']
 
-  constructor (state, timeout, stability, cleanup, fail, isCy) {
+  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
     super()
     this.state = state
     this.timeout = timeout
@@ -68,6 +73,7 @@ export class CommandQueue extends Queue<$Command> {
     this.cleanup = cleanup
     this.fail = fail
     this.isCy = isCy
+    this.clearTimeout = clearTimeout
   }
 
   logs (filter) {
@@ -238,9 +244,6 @@ export class CommandQueue extends Queue<$Command> {
       // reset the nestedIndex back to null
       this.state('nestedIndex', null)
 
-      // also reset recentlyReady back to null
-      this.state('recentlyReady', null)
-
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
@@ -310,8 +313,8 @@ export class CommandQueue extends Queue<$Command> {
 
       // If we have created a timeout but are in an unstable state, clear the
       // timeout in favor of the on load timeout already running.
-      if (!cy.state('isStable')) {
-        cy.clearTimeout()
+      if (!this.state('isStable')) {
+        this.clearTimeout()
       }
 
       // store the current runnable
@@ -319,7 +322,7 @@ export class CommandQueue extends Queue<$Command> {
 
       Cypress.action('cy:command:start', command)
 
-      return this.runCommand(command)
+      return this.runCommand(command)!
       .then(() => {
         // each successful command invocation should
         // always reset the timeout for the current runnable
