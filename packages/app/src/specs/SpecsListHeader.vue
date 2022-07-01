@@ -44,16 +44,32 @@
     </Input>
 
     <div class="flex h-40px min-w-127px gap-16px">
-      <Button
-        data-cy="new-spec-button"
-        :prefix-icon="IconAdd"
-        prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-        class="min-w-127px"
-        size="lg"
-        @click="emit('showCreateSpecModal')"
+      <Tooltip
+          class="h-full truncate"
+          data-cy="tooltip"
+          placement="top"
       >
-        {{ t('specPage.newSpecButton') }}
-      </Button>
+        <Button
+            data-cy="new-spec-button"
+            :prefix-icon="IconAdd"
+            prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
+            class="min-w-127px"
+            size="lg"
+            @click="emit('showCreateSpecModal')"
+        >
+          {{ t('specPage.newSpecButton') }}
+        </Button>
+        <template
+            #popper
+        >
+          <p
+              data-cy="new-spec-tooltip"
+              class="max-w-sm text-sm truncate overflow-hidden"
+          >
+            Create New Spec
+          </p>
+        </template>
+      </Tooltip>
     </div>
   </div>
 </template>
@@ -66,6 +82,7 @@ import type { Ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
+import Tooltip from '@cy/components/Tooltip.vue'
 import IconMagnifyingGlass from '~icons/cy/magnifying-glass_x16'
 import IconAdd from '~icons/cy/add-large_x16'
 
