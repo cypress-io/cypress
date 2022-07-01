@@ -38,7 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
-          pattern: "-release$"
+          pattern: "lmiller/21381-react-18-with-ignore"
           value: << pipeline.git.branch >>
 
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
