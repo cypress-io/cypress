@@ -155,7 +155,7 @@
     "eslint-plugin-react": "7.22.0",
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-vue": "7.18.0",
-    "execa": "4.0.0",
+    "execa": "5.1.1",
     "filesize": "4.1.2",
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",

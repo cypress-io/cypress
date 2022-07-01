@@ -39,7 +39,7 @@
     "debug": "^4.3.2",
     "enquirer": "^2.3.6",
     "eventemitter2": "^6.4.3",
-    "execa": "4.1.0",
+    "execa": "5.1.1",
     "executable": "^4.1.1",
     "extract-zip": "2.0.1",
     "figures": "^3.2.0",

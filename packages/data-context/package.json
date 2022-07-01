@@ -29,7 +29,7 @@
     "dedent": "^0.7.0",
     "ejs": "^3.1.6",
     "endent": "2.0.1",
-    "execa": "1.0.0",
+    "execa": "5.1.1",
     "front-matter": "^4.0.2",
     "fs-extra": "8.1.0",
     "getenv": "1.0.0",
