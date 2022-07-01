@@ -27,7 +27,7 @@ describe('packagesToInstall', () => {
 
     const actual = ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D react-scripts webpack react`)
+    expect(actual).to.eq(`npm install -D react-scripts webpack react-dom react`)
   })
 
   it('vueclivue2-unconfigured', async () => {
@@ -91,7 +91,7 @@ describe('packagesToInstall', () => {
 
     const actual = ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D vite react`)
+    expect(actual).to.eq(`npm install -D vite react react-dom`)
   })
 
   it('regular vue project with vite', async () => {
@@ -123,7 +123,7 @@ describe('packagesToInstall', () => {
 
     const actual = ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D next react`)
+    expect(actual).to.eq(`npm install -D next react react-dom`)
   })
 
   it('nuxtjs-vue2-unconfigured', async () => {

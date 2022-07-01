@@ -24,7 +24,7 @@ const buildLoginRedirectUrl = (server) => {
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
+const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium) => {
   const { port } = server.address()
 
   if (!authState) {
@@ -43,10 +43,10 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
       platform: os.platform(),
     }
 
-    if (utmCode) {
+    if (utmMedium) {
       authUrl.query = {
-        utm_source: 'Test Runner',
-        utm_medium: utmCode,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
         utm_campaign: 'Log In',
         ...authUrl.query,
       }
@@ -65,7 +65,7 @@ const getOriginFromUrl = (originalUrl) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
+const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium) => {
   if (!server) {
     // launch an express server to listen for the auth callback from dashboard
     const origin = getOriginFromUrl(baseLoginUrl)
@@ -76,7 +76,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      buildFullLoginUrl(baseLoginUrl, server, utmCode)
+      buildFullLoginUrl(baseLoginUrl, server, utmSource, utmMedium)
       .then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
@@ -187,7 +187,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmCode) => {
+const start = (onMessage, utmSource, utmMedium) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -199,7 +199,7 @@ const start = (onMessage, utmCode) => {
 
   return user.getBaseLoginUrl()
   .then((baseLoginUrl) => {
-    return _internal.launchServer(baseLoginUrl, sendMessage, utmCode)
+    return _internal.launchServer(baseLoginUrl, sendMessage, utmSource, utmMedium)
   })
   .then(() => {
     return _internal.buildLoginRedirectUrl(server)

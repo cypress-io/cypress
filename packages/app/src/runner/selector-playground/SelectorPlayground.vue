@@ -61,6 +61,7 @@
         <input
           v-model="selector"
           autocapitalize="none"
+          autocomplete="off"
           autocorrect="off"
           spellcheck="false"
           data-cy="playground-selector"
