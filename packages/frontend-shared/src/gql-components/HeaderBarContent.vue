@@ -20,34 +20,36 @@
         >
         <nav>
           <ol>
+            <template v-if="props.gql.isGlobalMode">
+              <li class="inline-block">
+                <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
+                <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
+                <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
+                <a
+                  :key="Boolean(currentProject).toString()"
+                  class="font-medium"
+                  :class="currentProject ? 'text-indigo-500 hocus-link-default' :
+                    'text-gray-700'"
+                  :role="currentProject ? undefined : 'link'"
+                  :href="currentProject ? 'select-project' : undefined"
+                  :ariaDisabled="!currentProject"
+                  @click.prevent="clearCurrentProject"
+                >
+                  {{ t('topNav.global.projects') }}
+                </a>
+              </li>
+              <li
+                v-if="currentProject?.title"
+                class="mx-2px align-middle inline-block"
+                aria-hidden
+              >
+                <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+              </li>
+            </template>
             <li
-              v-if="props.gql.isGlobalMode"
+              v-if="currentProject?.branch"
               class="inline-block"
             >
-              <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
-              <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
-              <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
-              <a
-                :key="Boolean(currentProject).toString()"
-                class="font-medium"
-                :class="currentProject ? 'text-indigo-500 hocus-link-default' :
-                  'text-gray-700'"
-                :role="currentProject ? undefined : 'link'"
-                :href="currentProject ? 'select-project' : undefined"
-                :ariaDisabled="!currentProject"
-                @click.prevent="clearCurrentProject"
-              >
-                {{ t('topNav.global.projects') }}
-              </a>
-            </li>
-            <li
-              v-if="props.gql.isGlobalMode && currentProject?.title"
-              class="mx-2px align-middle inline-block"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
-            </li>
-            <li class="inline-block">
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
@@ -61,44 +63,32 @@
                 :ariaDisabled="!canClearTestingType"
                 @click.prevent="clearTestingType"
               >
-                {{ currentProject?.title }}
+                {{ currentProject.title }}
               </a>
-              <template
-                v-if="currentProject?.branch"
+              {{ }}
+              <Tooltip
+                placement="bottom"
+                class="inline-block"
               >
-                <!-- Using a margin here causes different overflow problems.
-                        See PR #21325. Using a space for now. -->
-                {{ ' ' }}
-                <Tooltip
-                  placement="bottom"
-                  class="inline-block"
-                >
-                  <span
-                    class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
-                  >
-                    ({{ currentProject.branch }})
-                  </span>
-                  <template #popper>
-                    {{ currentProject.branch }}
-                  </template>
-                </Tooltip>
-              </template>
+                <span class="font-normal max-w-200px text-gray-500 inline-block truncate align-top">
+                  ({{ currentProject.branch }})
+                </span>
+                <template #popper>
+                  {{ currentProject.branch }}
+                </template>
+              </Tooltip>
             </li>
-            <li
-              v-if="props.gql?.currentProject?.currentTestingType"
-              class="mx-2px inline-block align-middle"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16
-                class="icon-dark-gray-200"
-              />
-            </li>
-            <li
-              v-if="currentProject?.currentTestingType"
-              class="inline-block"
-            >
-              {{ t(`testingType.${currentProject?.currentTestingType}.name`) }}
-            </li>
+            <template v-if="currentProject?.currentTestingType">
+              <li
+                class="mx-2px inline-block align-middle"
+                aria-hidden
+              >
+                <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+              </li>
+              <li class="inline-block">
+                {{ t(`testingType.${currentProject.currentTestingType}.name`) }}
+              </li>
+            </template>
           </ol>
         </nav>
       </div>
