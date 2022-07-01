@@ -20,7 +20,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
-import type { CookieJar } from '@packages/server/lib/cookie-jar'
+import type { CookieJar } from '@packages/server/lib/util/cookies'
 import type { Automation } from '@packages/server/lib/automation/automation'
 
 function getRandomColorFn () {
