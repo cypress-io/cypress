@@ -797,7 +797,7 @@ export class ProjectLifecycleManager {
    * centrally in the e2e tests, as well as notify the "pending initialization"
    * for run mode
    */
-  onLoadError = (err: any) => {
+  onLoadError = (err: CypressError) => {
     if (this.ctx.isRunMode && this._configManager) {
       this._configManager.onLoadError(err)
     } else {
