@@ -7,8 +7,5 @@
   ],
   "files": [
     "./../ts/index.d.ts"
-  ],
-  "compilerOptions": {
-    "resolveJsonModule": true,
-  },
+  ]
 }
