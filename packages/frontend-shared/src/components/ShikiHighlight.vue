@@ -18,7 +18,7 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="cursor-text text-left relative">
+  <div class="cursor-text text-left">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-normal',
+        'overflow-scroll hover:border-indigo-200 text-14px leading-24px font-normal',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -64,7 +64,7 @@ shikiWrapperClasses computed property.
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="bg-white absolute"
+      class="bg-white ml-auto -mt-32px sticky"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
