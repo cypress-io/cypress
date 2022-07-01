@@ -17,14 +17,14 @@ context('cy.origin aliasing', () => {
 
     it('fails for dom elements outside origin', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.get()` could not find a registered alias for: `@welcome_button`.\nYou have not aliased anything yet.')
+        expect(err.message).to.equal('`cy.get()` could not find a registered alias for: `@link`.\nYou have not aliased anything yet.')
         done()
       })
 
-      cy.get('[data-cy="welcome"]').as('welcome_button')
+      cy.get('[data-cy="cross-origin-secondary-link"]').as('link')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.get('@welcome_button').click()
+        cy.get('@link').click()
       })
     })
   })

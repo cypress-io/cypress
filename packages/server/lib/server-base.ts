@@ -32,7 +32,7 @@ import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
-import { cookieJar } from './cookie-jar'
+import { cookieJar } from './util/cookies'
 import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
 
