@@ -24,55 +24,91 @@ function runWithVanillaSnapshot () {
 
     // console.log('entryPointDirPath:', entryPointDirPath)
 
-    // Module.prototype.require = function (module) {
-    //   const absoluteFilePath = module.startsWith('./node_modules') || module.startsWith('./packages') || module.startsWith('node_modules') || module.startsWith('packages') ? module : Module._resolveFilename(module, this, false)
-    //   let relativeFilePath = path.relative(
-    //     entryPointDirPath,
-    //     absoluteFilePath,
-    //   )
+    let webpackRequire
+    let webpackRequireCache
 
-    //   if (!relativeFilePath.startsWith('./')) {
-    //     relativeFilePath = `./${relativeFilePath}`
-    //   }
+    const originalRequire = Module.prototype.require
 
-    //   if (process.platform === 'win32') {
-    //     relativeFilePath = relativeFilePath.replace(/\\/g, '/')
-    //   }
+    Module.prototype.require = function (module) {
+      if (require.cache[module]) {
+        return require.cache[module].exports
+      }
 
-    //   let cachedModule =
-    //     // eslint-disable-next-line no-undef
-    //     snapshotResult.customRequire.cache[relativeFilePath]
+      if (!module.startsWith('.') && Module.builtinModules.indexOf(module) !== -1) {
+        const cachedModule = {
+          id: module,
+          exports: originalRequire(module),
+        }
 
-    //   // eslint-disable-next-line no-undef
-    //   if (snapshotResult.customRequire.cache[relativeFilePath]) {
-    //     // console.log('Snapshot cache hit:', relativeFilePath)
-    //   }
+        require.cache[module] = cachedModule
 
-    //   if (!cachedModule) {
-    //     // console.log('Uncached module:', module, relativeFilePath)
-    //     if (module === './node_modules/electron/index.js') {
-    //       cachedModule = { exports: Module._load('electron', this, false) }
-    //     } else if (module.startsWith('./node_modules') || module.startsWith('./packages')) {
-    //       cachedModule = { exports: Module._load(`../.${module}`, this, false) }
-    //     } else if (module.startsWith('node_modules') || module.startsWith('packages')) {
-    //       cachedModule = { exports: Module._load(`../../${module}`, this, false) }
-    //     } else {
-    //       cachedModule = { exports: Module._load(module, this, false) }
-    //     }
+        return cachedModule.exports
+      }
 
-    //     // eslint-disable-next-line no-undef
-    //     snapshotResult.customRequire.cache[relativeFilePath] = cachedModule
-    //   }
+      const absoluteFilePath = module.startsWith('./node_modules') || module.startsWith('./packages') || module.startsWith('node_modules') || module.startsWith('packages') ? module : Module._resolveFilename(module, this, false)
+      let relativeFilePath = path.relative(
+        entryPointDirPath,
+        absoluteFilePath,
+      )
 
-    //   return cachedModule.exports
-    // }
+      if (!relativeFilePath.startsWith('./')) {
+        relativeFilePath = `./${relativeFilePath}`
+      }
+
+      if (process.platform === 'win32') {
+        relativeFilePath = relativeFilePath.replace(/\\/g, '/')
+      }
+
+      let cachedModule =
+        // eslint-disable-next-line no-undef
+        snapshotResult.customRequire.cache[relativeFilePath]
+
+      if (cachedModule) {
+        return cachedModule.exports
+      }
+
+      if (snapshotResult.customRequire.definitions[relativeFilePath]) {
+        return snapshotResult.customRequire(relativeFilePath)
+      }
+
+      if (!snapshotResult.customRequire) {
+        snapshotResult.customRequire
+      }
+
+      if (!cachedModule) {
+        // console.log(`Cache miss for ${relativeFilePath}`)
+        if (webpackRequireCache && webpackRequireCache[relativeFilePath]) {
+          // console.log(`Webpack cache hit for ${relativeFilePath}`)
+          cachedModule = webpackRequire(relativeFilePath)
+        } else if (module === './node_modules/electron/index.js') {
+          cachedModule = { exports: Module._load('electron', this, false) }
+        } else if (module.startsWith('./node_modules') || module.startsWith('./packages')) {
+          cachedModule = { exports: Module._load(`../.${module}`, this, false) }
+        } else if (module.startsWith('node_modules') || module.startsWith('packages')) {
+          cachedModule = { exports: Module._load(`../../${module}`, this, false) }
+        } else {
+          cachedModule = { exports: Module._load(module, this, false) }
+        }
+
+        // eslint-disable-next-line no-undef
+        if (relativeFilePath === './packages/server/server.js') {
+          webpackRequire = cachedModule.exports.server.webpackRequire
+          webpackRequireCache = cachedModule.exports.server.webpackRequire.m
+        }
+
+        // eslint-disable-next-line no-undef
+        snapshotResult.customRequire.cache[relativeFilePath] = cachedModule
+      }
+
+      return cachedModule.exports
+    }
 
     // eslint-disable-next-line no-undef
     snapshotResult.setGlobals(
       global,
       process,
-      {},
-      {},
+      undefined,
+      undefined,
       console,
       require,
     )

@@ -50,8 +50,8 @@ const run = async () => {
 
       return (
         requiredModulePath.endsWith('.node') ||
-        coreModules.has(requiredModulePath) ||
-        /node_modules\/(ignore|prettier|typescript|bundle-require|electron-packager|safefs)/.test(requiredModulePath)
+        skippedModules.has(requiredModulePath) ||
+        /node_modules\/(ignore|prettier|typescript|electron|bluebird|marionette-client|@benmalka\/foxdriver|ffmpeg-installer|bundle-require|electron-packager|safefs)/.test(requiredModulePath)
 
       // requiredModuleRelativePath.includes(
       //   path.join(

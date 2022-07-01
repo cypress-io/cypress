@@ -3,7 +3,6 @@ const mime = require('mime')
 const path = require('path')
 const Promise = require('bluebird')
 const dataUriToBuffer = require('data-uri-to-buffer')
-const Jimp = require('jimp')
 const sizeOf = require('image-size')
 const colorString = require('color-string')
 const sanitize = require('sanitize-filename')
@@ -46,7 +45,7 @@ const isWhite = (rgba) => {
 }
 
 const intToRGBA = function (int) {
-  const obj = Jimp.intToRGBA(int)
+  const obj = require('jimp').intToRGBA(int)
 
   if (debug.enabled) {
     obj.name = colorString.to.keyword([
@@ -126,7 +125,7 @@ const captureAndCheck = function (data, automate, conditionFn) {
     .then((dataUrl) => {
       debug('received screenshot data from automation layer', dataUrl.slice(0, 100))
 
-      return Jimp.read(dataUriToBuffer(dataUrl))
+      return require('jimp').read(dataUriToBuffer(dataUrl))
     }).then((image) => {
       debug(`read buffer to image ${image.bitmap.width} x ${image.bitmap.height}`)
 
@@ -253,6 +252,7 @@ const stitchScreenshots = function (pixelRatio) {
 
   const takenAts = []
   let heightMarker = 0
+  const Jimp = require('jimp')
   const fullImage = new Jimp(fullWidth, fullHeight)
 
   _.each(multipartImages, ({ data, image, takenAt }) => {
@@ -280,6 +280,8 @@ const getBuffer = function (details) {
   if (details.buffer) {
     return Promise.resolve(details.buffer)
   }
+
+  const Jimp = require('jimp')
 
   return Promise
   .promisify(details.image.getBuffer)

@@ -25,6 +25,26 @@ module.exports = (opts, config) => {
     )
   }
 
+  const toInclude = [
+    // socket.io is patch-packaged in a way that we need to import the relative package,
+    // we could likely force this better with an alias / fix the fact that we have multiple versions
+    'socket.io',
+    // The rest of these seem to not play nicely with electron link snapshotting
+    'bluebird',
+    'fs-extra',
+    'graceful-fs',
+    '@cypress/request-promise',
+    'signal-exit',
+    'execa',
+    // 'marionette-client',
+    'express',
+    'lockfile',
+    'jimp',
+    'mocha-7.0.1',
+    'mocha',
+    // '@benmalka/foxdriver'
+  ]
+
   /**
    * @type {import('webpack').Configuration}
    */
@@ -39,9 +59,7 @@ module.exports = (opts, config) => {
     target: 'node',
     // externalsPresets: { electron: true },
     externals (context, request, callback) {
-      // socket.io is patch-packaged in a way that we need to import the relative package,
-      // we could likely force this better with an alias / fix the fact that we have multiple versions
-      if (request.startsWith('@packages') || request.startsWith('.') || request.includes('socket.io')) {
+      if (request.startsWith('@packages') || request.startsWith('.') || toInclude.includes(request) || toInclude.some((i) => context.includes(i))) {
         return callback()
       }
 
