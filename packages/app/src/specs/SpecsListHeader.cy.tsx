@@ -62,6 +62,14 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .should('have.been.called')
   })
 
+  it('provides expected tooltip content', () => {
+    cy.get('.v-popper').trigger('mouseenter')
+    cy.findByTestId('new-spec-tooltip').should('be.visible')
+        .and('have.text', 'Create New Spec')
+
+    cy.percySnapshot()
+  })
+
   it('emits a spec pattern event', () => {
     const onShowSpecPatternModal = cy.stub().as('show-spec-pattern-modal')
     const search = ref('')
