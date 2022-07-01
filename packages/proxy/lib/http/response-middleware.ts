@@ -337,7 +337,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalExpandedModifyObstructiveCode) &&
     // if experimentalExpandedModifyObstructiveCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
     ((this.config.experimentalExpandedModifyObstructiveCode
-      && resContentTypeIs(this.incomingRes, 'text/html') || resContentTypeIs(this.incomingRes, 'application/xhtml+xml') || resContentTypeIsJavaScript(this.incomingRes)) ||
+      && (resContentTypeIs(this.incomingRes, 'text/html') || resContentTypeIs(this.incomingRes, 'application/xhtml+xml') || resContentTypeIsJavaScript(this.incomingRes))) ||
      this.res.wantsInjection === 'full' ||
      this.res.wantsInjection === 'fullCrossOrigin' ||
      // only modify JavasScript if matching the current origin policy or if experimentalExpandedModifyObstructiveCode is enabled (above)
