@@ -60,4 +60,10 @@ describe('<GeneratorSuccess />', () => {
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, relative, contents: longContent }} />))
     cy.percySnapshot()
   })
+
+  it('does not render a copy button', () => {
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
+    .get('body')
+    .findByTestId('copy-button').should('not.exist')
+  })
 })
