@@ -94,7 +94,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.get('@specsListInput').clear()
 
       directories.forEach((dir) => {
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
+        cy.contains('button[data-cy="row-directory-depth-0"]', new RegExp(`^${dir}`))
         .should('have.attr', 'aria-expanded', 'true')
         .click()
         .should('have.attr', 'aria-expanded', 'false')
