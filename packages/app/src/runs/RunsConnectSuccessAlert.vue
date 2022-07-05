@@ -14,10 +14,10 @@
           keypath="runs.connectSuccessAlert.item1"
         >
           <template #projectId>
-            <span class="font-normal m-4px text-jade-600">projectId</span>
+            <span class="font-normal text-jade-600">projectId</span>
           </template>
           <template #configFile>
-            <span class="font-normal m-4px text-jade-600">{{ configFilePath }}</span>
+            <span class="font-normal text-jade-600">{{ configFilePath }}</span>
           </template>
         </i18n-t>
       </span>
@@ -29,7 +29,7 @@
           scope="global"
           keypath="runs.connectSuccessAlert.item2"
         >
-          <span class="font-normal m-4px text-jade-600">{{ configFilePath }}</span>
+          <span class="font-normal text-jade-600">{{ configFilePath }}</span>
         </i18n-t>
       </span>
     </p>
