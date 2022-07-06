@@ -30,7 +30,6 @@
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
-            data-cy="reporter-element"
           />
         </HideDuringScreenshot>
       </template>

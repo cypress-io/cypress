@@ -9,6 +9,7 @@
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
+    <!-- using v-show to preserve state since panel1 is collapsible/expandable by the user from the UI -->
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
@@ -26,9 +27,9 @@
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
-
+    <!-- using v-if since this gets hidden only from the command line, and never needs to re-open with state -->
     <div
-      v-show="showPanel2"
+      v-if="showPanel2"
       data-cy="reporter-panel"
       class="h-full flex-shrink-0 z-10 relative"
       :style="{width: `${panel2Width}px`}"
