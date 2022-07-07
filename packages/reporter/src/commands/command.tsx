@@ -33,7 +33,7 @@ export const formattedMessage = (message: string) => {
   const regex = new RegExp(searchText.join('|'))
   const split = message.split(regex)
   const matchingText = searchText.find((text) => message.includes(text))
-  const textToConvert = [split[0], ...(matchingText ? [matchingText] : [])].join(' ')
+  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
   const converted = md.renderInline(textToConvert)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
