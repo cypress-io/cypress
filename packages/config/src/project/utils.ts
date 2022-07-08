@@ -7,7 +7,7 @@ import type { ResolvedFromConfig } from '@packages/types'
 import { matchesConfigKey } from '../browser'
 import { hideKeys } from '../utils'
 
-const hideSpecialVals = function (val, key) {
+const hideSpecialVals = function (val: string, key: string) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
     return hideKeys(val)
   }
@@ -23,7 +23,7 @@ export const utils = {
 export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {
   const envVars: any = (resolved.env = {})
 
-  const resolveFrom = (from, obj = {}) => {
+  const resolveFrom = (from: string, obj = {}) => {
     return _.each(obj, (val, key) => {
       return envVars[key] = {
         value: val,
@@ -88,7 +88,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
 //   /foo/bar -> /foo/bar/index.js
 // Bad case: return true
 //   /tmp/foo/bar -> /private/tmp/foo/bar/index.js
-export const checkIfResolveChangedRootFolder = (resolved, initial) => {
+export const checkIfResolveChangedRootFolder = (resolved: string, initial: string) => {
   return path.isAbsolute(resolved) &&
   path.isAbsolute(initial) &&
   !resolved.startsWith(initial)
