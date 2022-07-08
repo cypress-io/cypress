@@ -198,6 +198,17 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('setSpecFilter', {
+      type: 'Query',
+      description: 'Save the filter state for this project',
+      args: { specFilter: nonNull('String') },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.setSpecFilter(args.specFilter)
+
+        return {}
+      },
+    })
+
     t.field('wizardUpdate', {
       type: Wizard,
       description: 'Updates the different fields of the wizard data store',
