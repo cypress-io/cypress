@@ -9,11 +9,7 @@ export const setupFullConfigWithDefaults = configUtils.setupFullConfigWithDefaul
 
 export const mergeDefaults = configUtils.mergeDefaults
 
-export const setPluginResolvedOn = configUtils.setPluginResolvedOn
-
 export const updateWithPluginValues = configUtils.updateWithPluginValues
-
-export const resolveConfigValues = configUtils.resolveConfigValues
 
 export const setNodeBinary = configUtils.setNodeBinary
 

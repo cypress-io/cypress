@@ -25,6 +25,10 @@ import {
   setPluginResolvedOn,
 } from './utils'
 
+import {
+  setUrls,
+} from '../utils'
+
 const debug = Debug('cypress:config:project')
 
 const folders = _(options).filter({ isFolder: true }).map('name').value()
