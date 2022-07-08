@@ -118,6 +118,26 @@ export function resolveConfigValues (config: Record<string, any>, defaults: Reco
   .value()
 }
 
+// Given an object "resolvedObj" and a list of overrides in "obj"
+// marks all properties from "obj" inside "resolvedObj" using
+// {value: obj.val, from: "plugin"}
+export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>): any {
+  return _.each(obj, (val, key) => {
+    if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
+      // recurse setting overrides
+      // inside of objected
+      return setPluginResolvedOn(resolvedObj[key], val)
+    }
+
+    const valueFrom: ResolvedFromConfig = {
+      value: val,
+      from: 'plugin',
+    }
+
+    resolvedObj[key] = valueFrom
+  })
+}
+
 // require.resolve walks the symlinks, which can really change
 // the results. For example
 //  /tmp/foo is symlink to /private/tmp/foo on Mac

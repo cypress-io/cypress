@@ -6,6 +6,7 @@ import {
   parseEnv,
   utils,
   resolveConfigValues,
+  setPluginResolvedOn,
 } from '../../src/project/utils'
 
 describe('config/src/project/utils', () => {
@@ -121,6 +122,96 @@ describe('config/src/project/utils', () => {
           baseUrl: {
             value: 'localhost',
             from: 'cli',
+          },
+        },
+      })
+    })
+  })
+
+  context('.setPluginResolvedOn', () => {
+    it('resolves an object with single property', () => {
+      const cfg = {}
+      const obj = {
+        foo: 'bar',
+      }
+
+      setPluginResolvedOn(cfg, obj)
+
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: 'bar',
+          from: 'plugin',
+        },
+      })
+    })
+
+    it('resolves an object with multiple properties', () => {
+      const cfg = {}
+      const obj = {
+        foo: 'bar',
+        baz: [1, 2, 3],
+      }
+
+      setPluginResolvedOn(cfg, obj)
+
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: 'bar',
+          from: 'plugin',
+        },
+        baz: {
+          value: [1, 2, 3],
+          from: 'plugin',
+        },
+      })
+    })
+
+    it('resolves a nested object', () => {
+      // we need at least the structure
+      const cfg = {
+        foo: {
+          bar: 1,
+        },
+      }
+      const obj = {
+        foo: {
+          bar: 42,
+        },
+      }
+
+      setPluginResolvedOn(cfg, obj)
+
+      expect(cfg, 'foo.bar gets value').to.deep.eq({
+        foo: {
+          bar: {
+            value: 42,
+            from: 'plugin',
+          },
+        },
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7959
+    it('resolves a single object', () => {
+      const cfg = {
+      }
+      const obj = {
+        foo: {
+          bar: {
+            baz: 42,
+          },
+        },
+      }
+
+      setPluginResolvedOn(cfg, obj)
+
+      expect(cfg).to.deep.eq({
+        foo: {
+          from: 'plugin',
+          value: {
+            bar: {
+              baz: 42,
+            },
           },
         },
       })

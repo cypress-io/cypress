@@ -23,6 +23,7 @@ import {
   parseEnv,
   checkIfResolveChangedRootFolder,
   resolveConfigValues,
+  setPluginResolvedOn,
 } from './utils'
 
 const debug = Debug('cypress:config:project')
@@ -234,26 +235,6 @@ function setResolvedConfigValues (config, defaults, resolved) {
   debug('resolved config is %o', obj.resolved.browsers)
 
   return obj
-}
-
-// Given an object "resolvedObj" and a list of overrides in "obj"
-// marks all properties from "obj" inside "resolvedObj" using
-// {value: obj.val, from: "plugin"}
-export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>): any {
-  return _.each(obj, (val, key) => {
-    if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
-      // recurse setting overrides
-      // inside of objected
-      return setPluginResolvedOn(resolvedObj[key], val)
-    }
-
-    const valueFrom: ResolvedFromConfig = {
-      value: val,
-      from: 'plugin',
-    }
-
-    resolvedObj[key] = valueFrom
-  })
 }
 
 export function updateWithPluginValues (cfg, overrides, testingType: TestingType) {
