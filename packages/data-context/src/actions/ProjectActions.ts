@@ -36,6 +36,7 @@ export interface ProjectApiShape {
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
+  setSpecFilter(specFilter: string): void
   makeProjectSavedState(projectRoot: string): () => Promise<Maybe<SavedStateShape>>
   getDevServer (): {
     updateSpecs(specs: FoundSpec[]): void
@@ -306,6 +307,10 @@ export class ProjectActions {
 
   setPromptShown (slug: string) {
     this.api.setPromptShown(slug)
+  }
+
+  setSpecFilter (specFilter: string) {
+    this.api.setSpecFilter(specFilter)
   }
 
   setSpecs (specs: FoundSpec[]) {
