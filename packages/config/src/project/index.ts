@@ -17,7 +17,6 @@ import {
   validate,
   validateNoBreakingConfig,
 } from '../browser'
-import { options } from '../options'
 import {
   parseEnv,
   checkIfResolveChangedRootFolder,
@@ -30,20 +29,6 @@ import {
 } from '../utils'
 
 const debug = Debug('cypress:config:project')
-
-const folders = _(options).filter({ isFolder: true }).map('name').value()
-
-const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
-  return _.reduce(folders, (memo, folder) => {
-    const val = obj[folder]
-
-    if ((val != null) && (val !== false)) {
-      memo[folder] = path.resolve(projectRoot, val)
-    }
-
-    return memo
-  }, {})
-}
 
 // an object with a few utility methods for easy stubbing from unit tests
 export const utils = {
@@ -442,23 +427,4 @@ export async function setSupportFileAndFolder (obj) {
 
     return obj
   })
-}
-
-export function setAbsolutePaths (obj) {
-  let pr
-
-  obj = _.clone(obj)
-
-  // if we have a projectRoot
-  pr = obj.projectRoot
-
-  if (pr) {
-    // reset fileServerFolder to be absolute
-    // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
-
-    // and do the same for all the rest
-    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
-  }
-
-  return obj
 }

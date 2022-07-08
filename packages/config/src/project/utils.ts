@@ -12,6 +12,7 @@ import {
   getPublicConfigKeys,
 } from '../browser'
 import { hideKeys } from '../utils'
+import { options } from '../options'
 
 const hideSpecialVals = function (val: string, key: string) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
@@ -136,6 +137,37 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
 
     resolvedObj[key] = valueFrom
   })
+}
+
+export function setAbsolutePaths (obj) {
+  obj = _.clone(obj)
+
+  // if we have a projectRoot
+  const pr = obj.projectRoot
+
+  if (pr) {
+    // reset fileServerFolder to be absolute
+    // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
+
+    // and do the same for all the rest
+    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
+  }
+
+  return obj
+}
+
+const folders = _(options).filter({ isFolder: true }).map('name').value()
+
+const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
+  return _.reduce(folders, (memo, folder) => {
+    const val = obj[folder]
+
+    if ((val != null) && (val !== false)) {
+      memo[folder] = path.resolve(projectRoot, val)
+    }
+
+    return memo
+  }, {})
 }
 
 // require.resolve walks the symlinks, which can really change

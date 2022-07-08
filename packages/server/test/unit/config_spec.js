@@ -1953,47 +1953,6 @@ describe('lib/config', () => {
     })
   })
 
-  context('.setAbsolutePaths', () => {
-    it('is noop without projectRoot', () => {
-      expect(config.setAbsolutePaths({})).to.deep.eq({})
-    })
-
-    it('does not mutate existing obj', () => {
-      const obj = {}
-
-      expect(config.setAbsolutePaths(obj)).not.to.eq(obj)
-    })
-
-    it('ignores non special *folder properties', () => {
-      const obj = {
-        projectRoot: '/_test-output/path/to/project',
-        blehFolder: 'some/rando/path',
-        foo: 'bar',
-        baz: 'quux',
-      }
-
-      expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
-    })
-
-    return ['fileServerFolder', 'fixturesFolder'].forEach((folder) => {
-      it(`converts relative ${folder} to absolute path`, () => {
-        const obj = {
-          projectRoot: '/_test-output/path/to/project',
-        }
-
-        obj[folder] = 'foo/bar'
-
-        const expected = {
-          projectRoot: '/_test-output/path/to/project',
-        }
-
-        expected[folder] = '/_test-output/path/to/project/foo/bar'
-
-        expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
-      })
-    })
-  })
-
   context('.setNodeBinary', () => {
     beforeEach(function () {
       this.nodeVersion = process.versions.node

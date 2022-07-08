@@ -8,6 +8,7 @@ import {
   utils,
   resolveConfigValues,
   setPluginResolvedOn,
+  setAbsolutePaths,
 } from '../../src/project/utils'
 
 describe('config/src/project/utils', () => {
@@ -232,6 +233,47 @@ describe('config/src/project/utils', () => {
 
       expect(merged, 'arrays are combined').to.deep.eq({
         list: [1, 2],
+      })
+    })
+  })
+
+  context('.setAbsolutePaths', () => {
+    it('is noop without projectRoot', () => {
+      expect(setAbsolutePaths({})).to.deep.eq({})
+    })
+
+    it('does not mutate existing obj', () => {
+      const obj = {}
+
+      expect(setAbsolutePaths(obj)).not.to.eq(obj)
+    })
+
+    it('ignores non special *folder properties', () => {
+      const obj = {
+        projectRoot: '/_test-output/path/to/project',
+        blehFolder: 'some/rando/path',
+        foo: 'bar',
+        baz: 'quux',
+      }
+
+      expect(setAbsolutePaths(obj)).to.deep.eq(obj)
+    })
+
+    return ['fileServerFolder', 'fixturesFolder'].forEach((folder) => {
+      it(`converts relative ${folder} to absolute path`, () => {
+        const obj = {
+          projectRoot: '/_test-output/path/to/project',
+        }
+
+        obj[folder] = 'foo/bar'
+
+        const expected = {
+          projectRoot: '/_test-output/path/to/project',
+        }
+
+        expected[folder] = '/_test-output/path/to/project/foo/bar'
+
+        expect(setAbsolutePaths(obj)).to.deep.eq(expected)
       })
     })
   })

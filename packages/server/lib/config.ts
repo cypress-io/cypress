@@ -17,8 +17,6 @@ export const relativeToProjectRoot = configUtils.relativeToProjectRoot
 
 export const setSupportFileAndFolder = configUtils.setSupportFileAndFolder
 
-export const setAbsolutePaths = configUtils.setAbsolutePaths
-
 export const setUrls = configUtils.setUrls
 
 export function getResolvedRuntimeConfig (config, runtimeConfig) {
