@@ -237,7 +237,6 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
-        // @ts-expect-error - errors b/c it's a private method
         const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
         const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 

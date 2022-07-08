@@ -34,6 +34,11 @@ describe('cy.origin - cookie login', () => {
     cy.get('h1').invoke('text').should('equal', 'No user found')
   }
 
+  beforeEach(() => {
+    // makes it nice and readable even on a small screen with devtools open :)
+    cy.viewport(300, 400)
+  })
+
   /****************************************************************************
     Cookie Login Flow
     - localhost/fixtures/primary-origin.html:
@@ -105,17 +110,6 @@ describe('cy.origin - cookie login', () => {
       })
 
       verifyLoggedIn(username)
-    })
-
-    it('makes cross-origin cookies readable via document.cookie', () => {
-      cy.visit('/fixtures/primary-origin.html')
-      cy.get('[data-cy="cookie-login"]').click()
-      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
-        cy.get('[data-cy="login"]').click()
-      })
-
-      cy.document().its('cookie').should('include', `user=${username}`)
     })
 
     it('handles browser-sent cookies being overridden by server-kept cookies', () => {
@@ -421,10 +415,10 @@ describe('cy.origin - cookie login', () => {
       username = getUsername()
 
       cy.visit('/fixtures/primary-origin.html')
-      cy.get('[data-cy="cookie-login"]').click()
     })
 
     it('expired -> not logged in', () => {
+      cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         const expires = (new Date()).toUTCString()
 
@@ -437,6 +431,7 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('expired -> not accessible via cy.getCookie()', () => {
+      cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         const expires = (new Date()).toUTCString()
 
@@ -449,6 +444,7 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('expired -> not accessible via document.cookie', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         const expires = (new Date()).toUTCString()
 
@@ -457,7 +453,10 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.document().its('cookie').should('not.include', 'user=')
+      cy.origin('http://idp.com:3500', () => {
+        cy.clearCookie('user')
+        cy.document().its('cookie').should('not.include', 'user=')
+      })
     })
   })
 
@@ -468,10 +467,10 @@ describe('cy.origin - cookie login', () => {
       username = getUsername()
 
       cy.visit('/fixtures/primary-origin.html')
-      cy.get('[data-cy="cookie-login"]').click()
     })
 
     it('past max-age -> not logged in', () => {
+      cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
@@ -487,6 +486,7 @@ describe('cy.origin - cookie login', () => {
     // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
     // as it happens even using cy.setCookie()
     it('past max-age -> not accessible via cy.getCookie()', { browser: '!firefox' }, () => {
+      cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
@@ -499,18 +499,25 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('past max-age -> not accessible via document.cookie', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1000) // give cookie time to expire
-      cy.reload()
-      cy.document().its('cookie').should('not.include', 'user=')
+      cy.origin('http://idp.com:3500', () => {
+        cy.wait(1000) // give cookie time to expire
+        cy.reload()
+        cy.document().its('cookie').should('not.include', 'user=')
+      })
     })
 
     describe('preference over Expires', () => {
+      beforeEach(() => {
+        cy.get('[data-cy="cookie-login"]').click()
+      })
+
       it('past Max-Age, before Expires -> not logged in', () => {
         const expires = dayjs().add(1, 'day').toDate().toUTCString()
 
@@ -640,6 +647,154 @@ describe('cy.origin - cookie login', () => {
 
       // __Secure- prefix requires Secure flag
       verifyIdpNotLoggedIn({ isHttps: true, cookieKey: '__Secure-user' })
+    })
+  })
+
+  describe('document.cookie', () => {
+    let username
+
+    beforeEach(() => {
+      username = getUsername()
+
+      cy.visit('/fixtures/primary-origin.html')
+    })
+
+    it('gets cookie set by http request', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://idp.com:3500', { args: { username } }, ({ username }) => {
+        cy.document().its('cookie').should('include', `user=${username}`)
+      })
+    })
+
+    it('works when setting cookie', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value'
+        })
+
+        cy.document().its('cookie').should('equal', 'key=value')
+      })
+    })
+
+    it('works when setting cookie with extra, benign parts', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value; wont=beset'
+        })
+
+        cy.document().its('cookie').should('equal', 'key=value')
+      })
+    })
+
+    it('cookie properties are preserved when set via automation', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value; SameSite=Strict; Path=/foo'
+        })
+
+        cy.getCookie('key').then((cookie) => {
+          expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
+            domain: '.foobar.com',
+            httpOnly: false,
+            name: 'key',
+            path: '/foo',
+            sameSite: 'strict',
+            secure: false,
+            value: 'value',
+          })
+        })
+      })
+    })
+
+    it('does not set cookie when invalid', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = '=value'
+        })
+
+        cy.document().its('cookie').should('equal', '')
+      })
+    })
+
+    it('works when setting subsequent cookies', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key1=value1'
+        })
+
+        cy.document().its('cookie').should('equal', 'key1=value1')
+        cy.document().then((doc) => {
+          doc.cookie = 'key2=value2'
+        })
+
+        cy.document().its('cookie').should('equal', 'key2=value2; key1=value1')
+      })
+    })
+
+    it('makes cookie available to cy.getCookie()', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value'
+        })
+
+        cy.getCookie('key').its('value').should('equal', 'value')
+      })
+    })
+
+    it('no longer returns cookie after cy.clearCookie()', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://idp.com:3500', () => {
+        cy.clearCookie('user')
+        cy.document().its('cookie').should('equal', '')
+      })
+    })
+
+    it('no longer returns cookie after cy.clearCookies()', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://idp.com:3500', () => {
+        cy.clearCookies()
+        cy.document().its('cookie').should('equal', '')
+      })
+    })
+
+    it('works when setting cookie in addition to cookie that already exists from http request', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://idp.com:3500', { args: { username } }, ({ username }) => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value'
+        })
+
+        // order of the cookies differs depending on browser, so just
+        // ensure that each one is there
+        cy.document().its('cookie').should('include', 'key=value')
+        cy.document().its('cookie').should('include', `user=${username}`)
+      })
     })
   })
 })
