@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
@@ -31,6 +31,7 @@ import CreateSpecModal from './CreateSpecModal.vue'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useDebounce } from '@vueuse/core'
+import { useSpecStore } from '../store'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -67,7 +68,8 @@ const props = defineProps<{
 
 const showModal = ref(false)
 
-const search = ref('')
+const specStore = useSpecStore()
+const search = ref(specStore.specFilter)
 const debouncedSearchString = useDebounce(search, 200)
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
@@ -77,6 +79,10 @@ const specs = computed<FuzzyFoundSpec[]>(() => {
   if (!debouncedSearchString.value) return specs
 
   return fuzzySortSpecs(specs, debouncedSearchString.value)
+})
+
+watch(() => debouncedSearchString.value, () => {
+  specStore.setSpecFilter(debouncedSearchString.value ?? '')
 })
 
 </script>

@@ -246,6 +246,7 @@ import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import { useSpecStore } from '../store'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -359,7 +360,9 @@ const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
 )
 
-const search = ref('')
+const specStore = useSpecStore()
+const search = ref(specStore.specFilter)
+
 const specsListInputRef = ref<HTMLInputElement>()
 const debouncedSearchString = useDebounce(search, 200)
 
@@ -414,9 +417,12 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
-// If you are scrolled down the virtual list and the search filter changes,
+watch(() => debouncedSearchString.value, () => {
+  // If you are scrolled down the virtual list and the search filter changes,
 // reset scroll position to top of list
-watch(() => debouncedSearchString.value, () => scrollTo(0))
+  scrollTo(0)
+  specStore.setSpecFilter(debouncedSearchString.value ?? '')
+})
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
