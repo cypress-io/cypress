@@ -2,9 +2,15 @@ import _ from 'lodash'
 import path from 'path'
 
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from '@packages/server/lib/util/config'
-import type { ResolvedFromConfig } from '@packages/types'
+import type {
+  ResolvedFromConfig,
+  ResolvedConfigurationOptionSource,
+} from '@packages/types'
 
-import { matchesConfigKey } from '../browser'
+import {
+  matchesConfigKey,
+  getPublicConfigKeys,
+} from '../browser'
 import { hideKeys } from '../utils'
 
 const hideSpecialVals = function (val: string, key: string) {
@@ -73,6 +79,43 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   // envProc is from process env vars
   // envCLI is from CLI arguments
   return _.extend(envCfg, envFile, envProc, envCLI)
+}
+
+// combines the default configuration object with values specified in the
+// configuration file like "cypress.{ts|js}". Values in configuration file
+// overwrite the defaults.
+export function resolveConfigValues (config: Record<string, any>, defaults: Record<string, any>, resolved: any = {}) {
+  // pick out only known configuration keys
+  return _
+  .chain(config)
+  .pick(getPublicConfigKeys())
+  .mapValues((val, key) => {
+    const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
+      return {
+        value: val,
+        from: s,
+      }
+    }
+
+    const r = resolved[key]
+
+    if (r) {
+      if (_.isObject(r)) {
+        return r
+      }
+
+      return source(r)
+    }
+
+    if (_.isEqual(config[key], defaults[key]) || key === 'browsers') {
+      // "browsers" list is special, since it is dynamic by default
+      // and can only be overwritten via plugins file
+      return source('default')
+    }
+
+    return source('config')
+  })
+  .value()
 }
 
 // require.resolve walks the symlinks, which can really change

@@ -9,18 +9,21 @@ import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/err
 import { uri } from '@packages/network'
 import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
-  ResolvedConfigurationOptionSource, ResolvedFromConfig, TestingType,
+  ResolvedFromConfig, TestingType,
 } from '@packages/types'
 
 import {
   allowed,
   getDefaultValues,
-  getPublicConfigKeys,
   validate,
   validateNoBreakingConfig,
 } from '../browser'
 import { options } from '../options'
-import { parseEnv, checkIfResolveChangedRootFolder } from './utils'
+import {
+  parseEnv,
+  checkIfResolveChangedRootFolder,
+  resolveConfigValues,
+} from './utils'
 
 const debug = Debug('cypress:config:project')
 
@@ -341,43 +344,6 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
   debug('merged plugins config %o', merged)
 
   return merged
-}
-
-// combines the default configuration object with values specified in the
-// configuration file like "cypress.{ts|js}". Values in configuration file
-// overwrite the defaults.
-export function resolveConfigValues (config, defaults, resolved: any = {}) {
-  // pick out only known configuration keys
-  return _
-  .chain(config)
-  .pick(getPublicConfigKeys())
-  .mapValues((val, key) => {
-    let r
-    const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
-      return {
-        value: val,
-        from: s,
-      }
-    }
-
-    r = resolved[key]
-
-    if (r) {
-      if (_.isObject(r)) {
-        return r
-      }
-
-      return source(r)
-    }
-
-    if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
-      // "browsers" list is special, since it is dynamic by default
-      // and can only be overwritten via plugins file
-      return source('default')
-    }
-
-    return source('config')
-  }).value()
 }
 
 // instead of the built-in Node process, specify a path to 3rd party Node

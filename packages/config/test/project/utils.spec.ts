@@ -1,7 +1,12 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import { checkIfResolveChangedRootFolder, parseEnv, utils } from '../../src/project/utils'
+import {
+  checkIfResolveChangedRootFolder,
+  parseEnv,
+  utils,
+  resolveConfigValues,
+} from '../../src/project/utils'
 
 describe('config/src/project/utils', () => {
   describe('checkIfResolveChangedRootFolder', () => {
@@ -52,6 +57,72 @@ describe('config/src/project/utils', () => {
         user: 'bob',
         foo: 'bar',
         baz: 'quux',
+      })
+    })
+  })
+
+  context('.resolveConfigValues', () => {
+    beforeEach(function () {
+      this.expected = function (obj) {
+        const merged = resolveConfigValues(obj.config, obj.defaults, obj.resolved)
+
+        expect(merged).to.deep.eq(obj.final)
+      }
+    })
+
+    it('sets baseUrl to default', function () {
+      return this.expected({
+        config: { baseUrl: null },
+        defaults: { baseUrl: null },
+        resolved: {},
+        final: {
+          baseUrl: {
+            value: null,
+            from: 'default',
+          },
+        },
+      })
+    })
+
+    it('sets baseUrl to config', function () {
+      return this.expected({
+        config: { baseUrl: 'localhost' },
+        defaults: { baseUrl: null },
+        resolved: {},
+        final: {
+          baseUrl: {
+            value: 'localhost',
+            from: 'config',
+          },
+        },
+      })
+    })
+
+    it('does not change existing resolved values', function () {
+      return this.expected({
+        config: { baseUrl: 'localhost' },
+        defaults: { baseUrl: null },
+        resolved: { baseUrl: 'cli' },
+        final: {
+          baseUrl: {
+            value: 'localhost',
+            from: 'cli',
+          },
+        },
+      })
+    })
+
+    it('ignores values not found in configKeys', function () {
+      return this.expected({
+        config: { baseUrl: 'localhost', foo: 'bar' },
+        defaults: { baseUrl: null },
+        resolved: { baseUrl: 'cli' },
+        final: {
+          baseUrl: {
+            value: 'localhost',
+            from: 'cli',
+          },
+        },
       })
     })
   })
