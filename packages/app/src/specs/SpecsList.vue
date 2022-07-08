@@ -246,6 +246,7 @@ import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import { useSpecFilter } from '../composables/useSpecFilter'
 import { useSpecStore } from '../store'
 
 const route = useRoute()
@@ -253,6 +254,8 @@ const { t } = useI18n()
 
 const isOnline = useOnline()
 const isOffline = ref(false)
+
+const { setSpecFilter } = useSpecFilter()
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
@@ -421,7 +424,7 @@ watch(() => debouncedSearchString.value, () => {
   // If you are scrolled down the virtual list and the search filter changes,
 // reset scroll position to top of list
   scrollTo(0)
-  specStore.setSpecFilter(debouncedSearchString.value ?? '')
+  setSpecFilter(debouncedSearchString.value ?? '')
 })
 
 function getIdIfDirectory (row) {
