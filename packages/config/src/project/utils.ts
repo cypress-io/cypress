@@ -6,6 +6,7 @@ import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
 } from '@packages/types'
+import { uri } from '@packages/network'
 
 import {
   matchesConfigKey,
@@ -136,6 +137,34 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
 
     resolvedObj[key] = valueFrom
   })
+}
+
+interface ConfigUrl {
+  port?: number
+  baseUrl?: string
+  clientRoute?: string
+  reporterRoute?: string
+  namespace?: string
+  xhrRoute?: string
+}
+
+export function setUrls (obj: ConfigUrl) {
+  obj = _.clone(obj)
+
+  // TODO: rename this to be proxyServer
+  const proxyUrl = `http://localhost:${obj.port}`
+
+  const rootUrl = obj.baseUrl
+    ? uri.origin(obj.baseUrl)
+    : proxyUrl
+
+  return {
+    ...obj,
+    proxyUrl,
+    browserUrl: rootUrl + obj.clientRoute,
+    reporterUrl: rootUrl + obj.reporterRoute,
+    xhrUrl: `${obj.namespace}${obj.xhrRoute}`,
+  }
 }
 
 // require.resolve walks the symlinks, which can really change

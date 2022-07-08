@@ -6,7 +6,6 @@ import fs from 'fs-extra'
 import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
-import { uri } from '@packages/network'
 import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
   ResolvedFromConfig, TestingType,
@@ -456,26 +455,6 @@ export function setAbsolutePaths (obj) {
     // and do the same for all the rest
     _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
   }
-
-  return obj
-}
-
-export function setUrls (obj) {
-  obj = _.clone(obj)
-
-  // TODO: rename this to be proxyServer
-  const proxyUrl = `http://localhost:${obj.port}`
-
-  const rootUrl = obj.baseUrl
-    ? uri.origin(obj.baseUrl)
-    : proxyUrl
-
-  _.extend(obj, {
-    proxyUrl,
-    browserUrl: rootUrl + obj.clientRoute,
-    reporterUrl: rootUrl + obj.reporterRoute,
-    xhrUrl: obj.namespace + obj.xhrRoute,
-  })
 
   return obj
 }
