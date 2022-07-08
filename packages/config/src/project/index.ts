@@ -11,7 +11,6 @@ import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
   ResolvedConfigurationOptionSource, ResolvedFromConfig, TestingType,
 } from '@packages/types'
-import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from '@packages/server/lib/util/config'
 
 import {
   allowed,
@@ -19,13 +18,9 @@ import {
   getPublicConfigKeys,
   validate,
   validateNoBreakingConfig,
-  matchesConfigKey,
-} from './browser'
-import { options } from './options'
-import {
-  checkIfResolveChangedRootFolder,
-  hideKeys,
-} from './utils'
+} from '../browser'
+import { options } from '../options'
+import { parseEnv, checkIfResolveChangedRootFolder } from './utils'
 
 const debug = Debug('cypress:config:project')
 
@@ -41,14 +36,6 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 
     return memo
   }, {})
-}
-
-const hideSpecialVals = function (val, key) {
-  if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
-    return hideKeys(val)
-  }
-
-  return val
 }
 
 // an object with a few utility methods for easy stubbing from unit tests
@@ -544,59 +531,4 @@ export function setUrls (obj) {
   })
 
   return obj
-}
-
-export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {
-  const envVars: any = (resolved.env = {})
-
-  const resolveFrom = (from, obj = {}) => {
-    return _.each(obj, (val, key) => {
-      return envVars[key] = {
-        value: val,
-        from,
-      }
-    })
-  }
-
-  const envCfg = cfg.env != null ? cfg.env : {}
-  const envFile = cfg.envFile != null ? cfg.envFile : {}
-  let envProc = getProcessEnvVars(process.env) || {}
-
-  envCLI = envCLI != null ? envCLI : {}
-
-  const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    const cfgKey = matchesConfigKey(key)
-
-    if (cfgKey) {
-      // only change the value if it hasn't been
-      // set by the CLI. override default + config
-      if (resolved[cfgKey] !== 'cli') {
-        cfg[cfgKey] = val
-        resolved[cfgKey] = {
-          value: val,
-          from: 'env',
-        } as ResolvedFromConfig
-      }
-
-      memo.push(key)
-    }
-
-    return memo
-  }, [])
-
-  envProc = _.chain(envProc)
-  .omit(configFromEnv)
-  .mapValues(hideSpecialVals)
-  .value()
-
-  resolveFrom('config', envCfg)
-  resolveFrom('envFile', envFile)
-  resolveFrom('env', envProc)
-  resolveFrom('cli', envCLI)
-
-  // envCfg is from cypress.config.{js,ts,mjs,cjs}
-  // envFile is from cypress.env.json
-  // envProc is from process env vars
-  // envCLI is from CLI arguments
-  return _.extend(envCfg, envFile, envProc, envCLI)
 }

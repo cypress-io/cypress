@@ -25,8 +25,6 @@ export const setAbsolutePaths = configUtils.setAbsolutePaths
 
 export const setUrls = configUtils.setUrls
 
-export const parseEnv = configUtils.parseEnv
-
 export function getResolvedRuntimeConfig (config, runtimeConfig) {
   const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v): ResolvedFromConfig => ({ value: v, from: 'runtime' }))
 

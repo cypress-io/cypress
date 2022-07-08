@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { hideKeys, checkIfResolveChangedRootFolder } from '../src/utils'
+import { hideKeys } from '../src/utils'
 
 describe('hideKeys', () => {
   it('removes middle part of the string', () => {
@@ -16,19 +16,5 @@ describe('hideKeys', () => {
   it('returns undefined for non-string argument', () => {
     expect(hideKeys(true)).to.be.undefined
     expect(hideKeys(1234)).to.be.undefined
-  })
-})
-
-describe('checkIfResolveChangedRootFolder', () => {
-  it('ignores non-absolute paths', () => {
-    expect(checkIfResolveChangedRootFolder('foo/index.js', 'foo')).to.be.false
-  })
-
-  it('handles paths that do not switch', () => {
-    expect(checkIfResolveChangedRootFolder('/foo/index.js', '/foo')).to.be.false
-  })
-
-  it('detects path switch', () => {
-    expect(checkIfResolveChangedRootFolder('/private/foo/index.js', '/foo')).to.be.true
   })
 })
