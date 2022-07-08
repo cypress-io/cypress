@@ -55,7 +55,10 @@ function getMajorVersion (semver: string) {
 }
 
 async function importReactModules () {
-  const react = await import('react')
+  let react = await import('react')
+
+  // @ts-ignore - depending on bundler, sometimes we need to grab `.default`
+  react = react?.default ?? react
   const majorVersion = getMajorVersion(react.version)
   const reactDomImport = majorVersion <= 17
     ? () => import('react-dom')
@@ -132,7 +135,8 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
     return importReactModules()
     .then(({ react, reactDom, majorVersion }) => {
-      const reactDomToUse = options.ReactDom || reactDom
+      // @ts-ignore - depending on bundler, sometimes we need to grab `.default`
+      const reactDomToUse = options.ReactDom?.default ?? options.ReactDom ?? reactDom?.default ?? reactDom
 
       lastMountedReactDom = reactDomToUse
 
@@ -149,9 +153,9 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       }).children
 
       if (majorVersion <= 17) {
-        reactDom.render(reactComponent, el)
+        reactDomToUse.render(reactComponent, el)
       } else {
-        const root = reactDom.createRoot(el)
+        const root = reactDomToUse.createRoot(el)
 
         root.render(reactComponent)
       }
