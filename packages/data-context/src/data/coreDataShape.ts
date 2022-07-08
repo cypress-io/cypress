@@ -36,6 +36,7 @@ export interface SavedStateShape {
   lastOpened?: number | null
   promptsShown?: object | null
   lastProjectId?: string | null
+  specFilter?: string | null
 }
 
 export interface ConfigChildProcessShape {
