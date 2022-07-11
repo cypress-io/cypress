@@ -23,7 +23,7 @@
 
       <div
         data-cy="panel1ResizeHandle"
-        class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        class="cursor-ew-resize h-full top-0 -right-6px w-10px z-30 absolute"
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
@@ -38,7 +38,7 @@
 
       <div
         data-cy="panel2ResizeHandle"
-        class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        class="cursor-ew-resize h-full top-0 -right-6px w-10px z-30 absolute"
         @mousedown="handleMousedown('panel2', $event)"
       />
     </div>

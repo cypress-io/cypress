@@ -21,7 +21,7 @@ describe('<BaseError />', () => {
 
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <BaseError gql={gqlVal} showButtons={false} />,
     })
     .get(headerSelector)
     .should('contain.text', cy.gqlStub.ErrorWrapper.title)
@@ -31,7 +31,7 @@ describe('<BaseError />', () => {
     .should('not.exist')
   })
 
-  context('retry prop', () => {
+  context('retry action', () => {
     const { docsButton } = cy.i18n.launchpadErrors.generic
 
     const mountFragmentWithError = (errorProps = {}) => {
@@ -41,7 +41,7 @@ describe('<BaseError />', () => {
         render: (gqlVal) => (<BaseError gql={{
           ...gqlVal,
           ...errorProps,
-        }} retry={retrySpy} />),
+        }} onRetry={retrySpy} />),
       })
     }
 
@@ -69,18 +69,19 @@ describe('<BaseError />', () => {
       .should('have.attr', 'href', docsButton.configGuide.link)
     })
 
-    it('calls the retry function passed in', () => {
+    it(`emits a 'retry' event when clicked`, () => {
       mountFragmentWithError()
       cy.get(retryButtonSelector)
+      .should('not.be.disabled')
       .click()
       .click()
       .get('@retry')
       .should('have.been.calledTwice')
     })
 
-    it('does not render retry or docs buttons when retry prop is NOT passed in', () => {
+    it('does not render retry or docs buttons when showButtons prop is false', () => {
       cy.mountFragment(BaseErrorFragmentDoc, {
-        render: (gqlVal) => <BaseError gql={gqlVal} />,
+        render: (gqlVal) => <BaseError gql={gqlVal} showButtons={false} />,
       })
 
       cy.get(retryButtonSelector).should('not.exist')
