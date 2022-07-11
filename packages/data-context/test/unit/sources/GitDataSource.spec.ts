@@ -8,7 +8,7 @@ import pDefer from 'p-defer'
 import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
-import { GitDataSource } from '../../../src/sources/GitDataSource'
+import { GitDataSource, GitInfo } from '../../../src/sources/GitDataSource'
 
 describe('GitDataSource', () => {
   let git: ReturnType<typeof simpleGit>
@@ -97,6 +97,56 @@ describe('GitDataSource', () => {
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.to.be.undefined
     expect(modified.lastModifiedTimestamp).not.to.be.undefined
+  })
+
+  it(`handles files with special characters on ${os.platform()}`, async () => {
+    const filepaths = [
+      'file withSpace.cy.js',
+      'file~WithTilde.cy.js',
+      'file-withHyphen.cy.js',
+      'file_withUnderscore.cy.js',
+      'file;WithSemicolon.cy.js',
+      'file,withComma.cy.js',
+      'file@withAtSymbol.cy.js',
+      'file^withCarat.cy.js',
+      'file=withEqual.cy.js',
+      'file+withPlus.cy.js',
+      'file"withOneSingleQuote.cy.js',
+      'file"withOneDoubleQuote.cy.js',
+    ].map((filename) => path.join(e2eFolder, filename))
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: sinon.stub(),
+      onGitInfoChange: sinon.stub(),
+      onError: sinon.stub(),
+    })
+
+    for (let filepath of filepaths) {
+      fs.createFileSync(filepath)
+    }
+
+    gitInfo.setSpecs(filepaths)
+
+    let results: (GitInfo | null)[] = []
+
+    do {
+      results = await Promise.all(filepaths.map(function (filepath) {
+        return gitInfo.gitInfoFor(filepath)
+      }))
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } while (results.some((r) => r == null))
+
+    expect(results).to.have.lengthOf(filepaths.length)
+
+    filepaths.forEach((filepath, index) => {
+      const result = results[index]
+
+      expect(result?.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+      expect(result?.statusType).to.eql('created')
+    })
   })
 
   it(`watches switching branches on ${os.platform()}`, async () => {
