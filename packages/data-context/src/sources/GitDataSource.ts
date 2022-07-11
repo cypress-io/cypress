@@ -350,8 +350,8 @@ export class GitDataSource {
       ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
       : `IFS=$'\n'; for file in ${paths}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
-    debug('executing command `%s`:', cmd)
-    debug('gitBaseDir `%s`:', this.#gitBaseDir)
+    debug('executing command: `%s`', cmd)
+    debug('cwd: `%s`', this.#gitBaseDir)
 
     const result = await execa(cmd, { shell: true, cwd: this.#gitBaseDir })
     const stdout = result.stdout.split('\n')
@@ -373,8 +373,8 @@ export class GitDataSource {
     const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
 
-    debug('executing command `%s`:', cmd)
-    debug('gitBaseDir `%s`:', this.#gitBaseDir)
+    debug('executing command: `%s`', cmd)
+    debug('cwd: `%s`', this.config.projectRoot)
 
     const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
 

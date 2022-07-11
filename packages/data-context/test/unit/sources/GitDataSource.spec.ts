@@ -100,7 +100,7 @@ describe('GitDataSource', () => {
   })
 
   it(`handles files with special characters on ${os.platform()}`, async () => {
-    const filepaths = [
+    let filepaths = [
       'file withSpace.cy.js',
       'file~WithTilde.cy.js',
       'file-withHyphen.cy.js',
@@ -112,12 +112,14 @@ describe('GitDataSource', () => {
       'file=withEqual.cy.js',
       'file+withPlus.cy.js',
       'file\'withOneSingleQuote.cy.js',
-    ].map((filename) => path.join(e2eFolder, filename))
+    ]
 
     if (os.platform() !== 'win32') {
       // Double quote not a legal character on NTFS
       filepaths.push('file"withOneDoubleQuote.cy.js')
     }
+
+    filepaths = filepaths.map((filename) => path.join(e2eFolder, filename))
 
     gitInfo = new GitDataSource({
       isRunMode: false,
