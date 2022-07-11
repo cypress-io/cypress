@@ -1220,7 +1220,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return memo
     }
 
-    return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
+    // A workaround to ensure that when looking back, aliases don't extend beyond the current
+    // chainer. This whole area (`replayCommandsFrom` for aliases) will be replaced with subject chains as
+    // part of the detached DOM work.
+    const prev = command.get('prev')
+
+    if (prev.get('chainerId') !== command.get('chainerId')) {
+      return memo
+    }
+
+    return this.getCommandsUntilFirstParentOrValidSubject(prev, memo)
   }
 
   private validateFirstCall (name, args, prevSubject: string[]) {
