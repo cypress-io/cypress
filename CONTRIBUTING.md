@@ -587,7 +587,7 @@ Below are guidelines to help during code review. If any of the following require
 
 - [ ] The code is readable (too many nested 'if's are a bad sign).
 - [ ] Names used for variables, methods, etc, clearly describe their function.
-- [ ] The code is easy to understood and there are relevant comments explaining.
+- [ ] The code is easy to understand and there are relevant comments explaining.
 - [ ] New algorithms are documented in the code with link(s) to external docs (flowcharts, w3c, chrome, firefox).
 - [ ] There are comments containing link(s) to the addressed issue (in tests and code).
 

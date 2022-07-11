@@ -12,12 +12,12 @@
     />
     <div
       v-else
-      class="px-24px pt-86px"
+      class="px-24px pt-86px pb-24px"
     >
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        @retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"

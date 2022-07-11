@@ -30,8 +30,11 @@ describe('Launchpad: Global Mode', () => {
         .dropFileWithPath(projectPath)
       })
 
-      cy.contains('Welcome to Cypress!')
-      cy.get('a').contains('Projects').click()
+      cy.contains('Welcome to Cypress!').should('be.visible')
+      cy.findByRole('link', { name: 'Projects' })
+      .should('have.attr', 'aria-disabled', 'false')
+      .click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
       .should('contain', 'todos')
@@ -94,6 +97,8 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
+
+      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {

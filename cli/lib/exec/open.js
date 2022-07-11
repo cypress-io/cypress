@@ -76,7 +76,6 @@ module.exports = {
         return spawn.start(args, {
           dev: options.dev,
           detached: Boolean(options.detached),
-          stdio: 'inherit',
         })
       } catch (err) {
         if (err.details) {
