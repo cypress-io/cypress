@@ -51,19 +51,17 @@ export function useEventManager () {
   }
 
   function cleanupRunner () {
-    const reporterElement = getReporterElement()
-
-    if (!reporterElement) {
-      return
-    }
-
     // Clean up the AUT and Reporter every time we leave the route.
     empty(getRunnerElement())
 
     // TODO: UNIFY-1318 - this should be handled by whoever starts it, reporter?
     window.UnifiedRunner.shortcuts.stop()
 
-    empty(reporterElement)
+    const reporterElement = getReporterElement()
+
+    if (reporterElement) {
+      empty(reporterElement)
+    }
   }
 
   return {
