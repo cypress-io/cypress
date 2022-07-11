@@ -63,7 +63,7 @@ export function useEventManager () {
     // TODO: UNIFY-1318 - this should be handled by whoever starts it, reporter?
     window.UnifiedRunner.shortcuts.stop()
 
-    empty(getReporterElement())
+    empty(reporterElement)
   }
 
   return {
