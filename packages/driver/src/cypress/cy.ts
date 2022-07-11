@@ -699,7 +699,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     const wrap = function (firstCall) {
       if (type === 'parent') {
-        return (chainerId, ...args) => fn(...args)
+        return (chainerId, ...args) => fn.apply(cy.runnableCtx(name), args)
       }
 
       const wrapped = function (chainerId, ...args) {

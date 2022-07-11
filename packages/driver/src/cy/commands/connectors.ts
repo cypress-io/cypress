@@ -123,6 +123,8 @@ export default function (Commands, Cypress, cy, state) {
         return subject
       }
 
+      cy.breakSubjectLinksToCurrentChainer()
+
       return ret
     }).catch(Promise.TimeoutError, () => {
       return $errUtils.throwErrByPath('invoke_its.timed_out', {
