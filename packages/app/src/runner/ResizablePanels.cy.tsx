@@ -161,7 +161,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
           />
         </div>))
 
-      cy.contains('panel2').should('not.be.visible')
+      cy.contains('panel2').should('not.exist')
       assertWidth('panel1', defaultPanel1Width)
       dragHandleToClientX('panel1', 950)
       dragHandleToClientX('panel1', 955)
@@ -181,7 +181,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
         </div>))
 
       cy.contains('panel1').should('not.be.visible')
-      cy.contains('panel2').should('not.be.visible')
+      cy.contains('panel2').should('not.exist')
       assertWidth('panel3', 1500)
     })
   })
