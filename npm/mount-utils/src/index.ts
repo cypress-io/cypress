@@ -46,7 +46,7 @@ export const getContainerEl = (): HTMLElement => {
     return el
   }
 
-  throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
+  throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please add a root element with data-cy-root attribute to your "component-index.html" file so that Cypress can attach your component to the DOM.`)
 }
 
 /**
@@ -200,6 +200,14 @@ export const injectStylesBeforeElement = (
 }
 
 export function setupHooks (optionalCallback?: Function) {
+  // Consumed by the framework "mount" libs. A user might register their own mount in the scaffolded 'commands.js'
+  // file that is imported by e2e and component support files by default. We don't want CT side effects to run when e2e
+  // testing so we early return.
+  // System test to verify CT side effects do not pollute e2e: system-tests/test/e2e_with_mount_import_spec.ts
+  if (Cypress.testingType !== 'component') {
+    return
+  }
+
   // When running component specs, we cannot allow "cy.visit"
   // because it will wipe out our preparation work, and does not make much sense
   // thus we overwrite "cy.visit" to throw an error
