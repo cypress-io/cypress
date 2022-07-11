@@ -3,6 +3,8 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 
+const extensionRegexp = /\.(css|js|mjs)(\?|$)/
+
 export class CypressIndexHtmlWebpackPlugin {
   private webpack = this.config.sourceWebpackModulesResult.webpack.module as any
 
@@ -40,7 +42,9 @@ export class CypressIndexHtmlWebpackPlugin {
 
     for (const entryName of entryNames) {
       const entryPointFiles = compilation.entrypoints.get(entryName)?.getFiles() || []
-      const publicPaths = entryPointFiles?.map((chunkFile) => this.publicPath + urlEncodePath(chunkFile))
+      const publicPaths = entryPointFiles
+      .map((chunkFile) => this.publicPath + urlEncodePath(chunkFile))
+      .filter((file) => extensionRegexp.test(file))
 
       entryPointPublicPaths.push(...publicPaths)
     }
