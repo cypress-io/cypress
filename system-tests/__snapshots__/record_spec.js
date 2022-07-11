@@ -251,8 +251,8 @@ We dynamically generated a new test to display this failure.
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -348,8 +348,8 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -462,8 +462,8 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -544,8 +544,8 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -698,8 +698,8 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -913,8 +913,8 @@ We dynamically generated a new test to display this failure.
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1159,8 +1159,8 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1361,8 +1361,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1441,8 +1441,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1526,8 +1526,8 @@ Details:
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1862,8 +1862,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -1944,8 +1944,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -2024,8 +2024,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -2104,8 +2104,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -2184,8 +2184,8 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -2454,8 +2454,8 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
   Exiting with non-zero exit code because the run was canceled.
 
@@ -2533,8 +2533,8 @@ exports['e2e record api skips specs records tests and exits without executing in
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
   Exiting with non-zero exit code because the run was canceled.
 
@@ -2630,8 +2630,8 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
@@ -2723,8 +2723,8 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 `
 
