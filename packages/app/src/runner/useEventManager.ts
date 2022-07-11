@@ -60,6 +60,8 @@ export function useEventManager () {
     const reporterElement = getReporterElement()
 
     if (reporterElement) {
+      // reporter can be disabled by the user,
+      // so sometimes will not exist to be cleaned up
       empty(reporterElement)
     }
   }
