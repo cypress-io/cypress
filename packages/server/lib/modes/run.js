@@ -412,6 +412,7 @@ const renderSummaryTable = (runUrl) => {
         console.log(terminal.renderTables(table4))
 
         console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
+        console.log('')
       }
     }
   }
