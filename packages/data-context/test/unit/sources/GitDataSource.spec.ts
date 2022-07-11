@@ -111,9 +111,13 @@ describe('GitDataSource', () => {
       'file^withCarat.cy.js',
       'file=withEqual.cy.js',
       'file+withPlus.cy.js',
-      'file"withOneSingleQuote.cy.js',
-      'file"withOneDoubleQuote.cy.js',
+      'file\'withOneSingleQuote.cy.js',
     ].map((filename) => path.join(e2eFolder, filename))
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filepaths.push('file"withOneDoubleQuote.cy.js')
+    }
 
     gitInfo = new GitDataSource({
       isRunMode: false,

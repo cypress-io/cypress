@@ -370,9 +370,7 @@ export class GitDataSource {
 
   async #getInfoWindows (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
-    const paths = absolutePaths
-    .map((x) => x.replace(/\"/g, '\\"'))
-    .map((x) => `"${path.resolve(x)}"`).join(',')
+    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
 
     debug('executing command `%s`:', cmd)
