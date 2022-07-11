@@ -42,7 +42,6 @@ export interface SourceRelativeWebpackResult {
   framework: SourcedDependency | null
   webpack: SourcedWebpack
   webpackDevServer: SourcedWebpackDevServer
-  htmlWebpackPlugin: SourcedHtmlWebpackPlugin
 }
 
 const originalModuleLoad = (Module as ModuleClass)._load
@@ -56,11 +55,13 @@ export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
   })
 }
 
+const higherOrderFrameworks = ['create-react-app', 'nuxt', 'vue-cli', 'next']
+
 // Source the users framework from the provided projectRoot. The framework, if available, will server
 // as the resolve base for webpack dependency resolution.
 export function sourceFramework (config: WebpackDevServerConfig): SourcedDependency | null {
   debug('Framework: Attempting to source framework for %s', config.cypressConfig.projectRoot)
-  if (!config.framework) {
+  if (!config.framework || !higherOrderFrameworks.includes(config.framework)) {
     debug('Framework: No framework provided')
 
     return null
@@ -194,67 +195,16 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, framewor
   return webpackDevServer
 }
 
-// Source the html-webpack-plugin module from the provided framework or projectRoot.
-// If none is found, we fallback to the version bundled with this package dependent on the major version of webpack.
-// We ship both v4 and v5 of 'html-webpack-plugin' by aliasing the package with the major version (check package.json).
-export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framework: SourcedDependency | null, webpack: SourcedWebpack): SourcedHtmlWebpackPlugin {
-  const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
-
-  debug('HtmlWebpackPlugin: Attempting to source html-webpack-plugin from %s', searchRoot)
-
-  const htmlWebpackPlugin = { } as SourcedHtmlWebpackPlugin
-  let htmlWebpackPluginJsonPath: string
-
-  try {
-    htmlWebpackPluginJsonPath = require.resolve('html-webpack-plugin/package.json', {
-      paths: [searchRoot],
-    })
-
-    htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
-    // Check that they're not using v3 of html-webpack-plugin. Since we should be the only consumer of it,
-    // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
-    htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
-  } catch (e) {
-    const err = e as Error & {code?: string}
-
-    if (err.code !== 'MODULE_NOT_FOUND' && !err.message.includes('Unexpected major version')) {
-      debug('HtmlWebpackPlugin: Failed to source html-webpack-plugin - %s', e)
-      throw e
-    }
-
-    const htmlWebpack = `html-webpack-plugin-${webpack.majorVersion}`
-
-    debug('HtmlWebpackPlugin: Falling back to bundled version %s', htmlWebpack)
-
-    htmlWebpackPluginJsonPath = require.resolve(`${htmlWebpack}/package.json`, {
-      paths: [
-        __dirname,
-      ],
-    })
-  }
-
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
-  htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
-
-  debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)
-
-  return htmlWebpackPlugin
-}
-
 // Most frameworks follow a similar path for sourcing webpack dependencies so this is a utility to handle all the sourcing.
 export function sourceDefaultWebpackDependencies (config: WebpackDevServerConfig): SourceRelativeWebpackResult {
   const framework = sourceFramework(config)
   const webpack = sourceWebpack(config, framework)
   const webpackDevServer = sourceWebpackDevServer(config, framework)
-  const htmlWebpackPlugin = sourceHtmlWebpackPlugin(config, framework, webpack)
 
   return {
     framework,
     webpack,
     webpackDevServer,
-    htmlWebpackPlugin,
   }
 }
 

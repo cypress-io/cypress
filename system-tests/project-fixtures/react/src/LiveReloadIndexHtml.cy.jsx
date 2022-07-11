@@ -1,9 +1,8 @@
-import { mount } from 'cypress/react'
 import React from 'react'
-import App from './App'
+import { mount } from 'cypress/react'
+import { App } from './App'
 
-it('works', () => {
+it('renders hello world', () => {
   mount(<App />)
-  cy.contains('Learn React')
   cy.get('body').should('have.css', 'background-color', 'rgb(255, 0, 0)')
-}) 
+})

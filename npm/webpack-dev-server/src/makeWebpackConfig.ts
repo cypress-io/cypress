@@ -72,6 +72,15 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   return webpackConfig
 }
 
+export function getPublicPath (devServerPublicPathRoute: string) {
+  return (path.sep === posixSeparator)
+    ? path.join(devServerPublicPathRoute, posixSeparator)
+    // The second line here replaces backslashes on windows with posix compatible slash
+    // See https://github.com/cypress-io/cypress/issues/16097
+    : path.join(devServerPublicPathRoute, posixSeparator)
+    .replace(OsSeparatorRE, posixSeparator)
+}
+
 /**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
@@ -133,12 +142,7 @@ export async function makeWebpackConfig (
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
 
-  const publicPath = (path.sep === posixSeparator)
-    ? path.join(devServerPublicPathRoute, posixSeparator)
-    // The second line here replaces backslashes on windows with posix compatible slash
-    // See https://github.com/cypress-io/cypress/issues/16097
-    : path.join(devServerPublicPathRoute, posixSeparator)
-    .replace(OsSeparatorRE, posixSeparator)
+  const publicPath = getPublicPath(devServerPublicPathRoute)
 
   const dynamicWebpackConfig = {
     output: {
@@ -157,7 +161,7 @@ export async function makeWebpackConfig (
 
   const mergedConfig = merge(
     userAndFrameworkWebpackConfig,
-    makeDefaultWebpackConfig(config),
+    makeDefaultWebpackConfig(config, publicPath),
     dynamicWebpackConfig,
   )
 

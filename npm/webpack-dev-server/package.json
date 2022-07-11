@@ -19,8 +19,6 @@
   "dependencies": {
     "find-up": "6.3.0",
     "fs-extra": "9.1.0",
-    "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
-    "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "local-pkg": "0.4.1",
     "speed-measure-webpack-plugin": "1.4.2",
     "tslib": "^2.3.1",

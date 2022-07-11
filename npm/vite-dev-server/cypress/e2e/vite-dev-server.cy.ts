@@ -25,6 +25,10 @@ describe('Config options', () => {
     cy.withCtx(async (ctx) => {
       const config = ctx.lifecycleManager.loadedFullConfig
 
+      if (!config) {
+        throw new Error('"ctx.lifecycleManager.loadedFullConfig" should be loaded by this point')
+      }
+
       expect(config.baseUrl).to.equal('http://localhost:3001')
     })
   })
@@ -55,6 +59,29 @@ describe('Config options', () => {
 
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+  })
+
+  // NOTE: Getting "Maximum update depth exceeded" which doesn't happen outside of cy-in-cy
+  it.skip('supports live-reloading component-index.html', () => {
+    cy.scaffoldProject('vite2.9.1-react')
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('LiveReloadIndexHtml.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.failed > .num').should('contain', 1)
+
+    cy.withCtx(async (ctx) => {
+      const indexHtmlFilePath = ctx.path.join('cypress', 'support', 'component-index.html')
+      const indexHtmlContent = await ctx.file.readFileInProject(indexHtmlFilePath)
+      const indexHtmlWithStyles = indexHtmlContent.replace(/<\/head>/, `<style>body { background-color: red; }</style></head>`)
+
+      await ctx.actions.file.writeFileInProject(indexHtmlFilePath, indexHtmlWithStyles)
+    })
+
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
   })

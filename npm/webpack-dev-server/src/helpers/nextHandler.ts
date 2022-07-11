@@ -4,7 +4,7 @@ import type { Configuration } from 'webpack'
 import * as fs from 'fs'
 import * as path from 'path'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
-import { cypressWebpackPath, getMajorVersion, ModuleClass, SourcedDependency, SourcedWebpack, sourceFramework, sourceHtmlWebpackPlugin, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
+import { cypressWebpackPath, getMajorVersion, ModuleClass, SourcedDependency, SourcedWebpack, sourceFramework, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:nextHandler')
 
@@ -170,13 +170,11 @@ function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
   const framework = sourceFramework(devServerConfig)!
   const webpack = sourceNextWebpack(devServerConfig, framework)
   const webpackDevServer = sourceWebpackDevServer(devServerConfig, framework)
-  const htmlWebpackPlugin = sourceHtmlWebpackPlugin(devServerConfig, framework, webpack)
 
   return {
     framework,
     webpack,
     webpackDevServer,
-    htmlWebpackPlugin,
   }
 }
 
