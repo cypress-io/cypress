@@ -54,7 +54,7 @@ export interface ConfigChildProcessShape {
 }
 
 export interface AppDataShape {
-  isInGlobalMode: boolean
+  isGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
@@ -182,7 +182,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshState: null,
     },
     app: {
-      isInGlobalMode: Boolean(modeOptions.global),
+      isGlobalMode: Boolean(modeOptions.global),
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,
