@@ -200,7 +200,7 @@ const latestDot = computed(() => {
 <style lang="scss">
 .RunStatusDots_Tooltip {
   .v-popper__arrow-container {
-    margin-left: 13.5px;
+    margin-left: 14px;
   }
 }
 </style>
