@@ -399,9 +399,20 @@ const renderSummaryTable = (runUrl) => {
 
       if (runUrl) {
         console.log('')
-        // renderTables will cut off longer urls which "renders" the url unusable
-        console.log(`  Recorded Run: ${runUrl}`)
+
+        const table4 = terminal.table({
+          colWidths: [100],
+          type: 'pageDivider',
+          style: {
+            'padding-left': 2,
+          },
+        })
+
+        table4.push(['', ''])
+        console.log(terminal.renderTables(table4))
+
         console.log('')
+        console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
       }
     }
   }
