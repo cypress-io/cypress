@@ -1,4 +1,4 @@
-exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-react 1'] = `
+exports['@cypress/vite-dev-server react executes all of the tests for vite-2-react 1'] = `
 
 ====================================================================================================
 
@@ -208,7 +208,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 `
 
-exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-react 1'] = `
+exports['@cypress/vite-dev-server react executes all of the tests for vite-3-react 1'] = `
 
 ====================================================================================================
 
@@ -267,7 +267,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   1) An uncaught error was detected outside of a test:
      TypeError: The following error originated from your test code, not from Cypress.
 
-  > Failed to fetch dynamically imported module: http://localhost:3000/__cypress/src/src/AppCompilationError.cy.jsx
+  > Failed to fetch dynamically imported module: http://localhost:5173/__cypress/src/src/AppCompilationError.cy.jsx
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 

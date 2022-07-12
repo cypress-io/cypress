@@ -24,12 +24,14 @@ describe('example vite test', function () {
     browser: 'electron',
   })
 
-  systemTests.it.only(`should work with Vite 3.x`, {
-    project: 'vite-3-react',
-    testingType: 'component',
-    spec: 'src/App.cy.jsx',
-    configFile: 'cypress-vite.config.ts',
-    expectedExitCode: 0,
-    browser: 'electron',
-  })
+  for (const major of [2, 3] as const) {
+    systemTests.it.only(`should work with Vite ${major}.x`, {
+      project: `vite-${major}-react`,
+      testingType: 'component',
+      spec: 'src/App.cy.jsx',
+      configFile: 'cypress-vite.config.ts',
+      expectedExitCode: 0,
+      browser: 'electron',
+    })
+  }
 })
