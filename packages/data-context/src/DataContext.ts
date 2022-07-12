@@ -429,14 +429,14 @@ export class DataContext {
   }
 
   async destroy () {
-    let destroy = () => Promise.resolve()
+    let destroyGqlServer = () => Promise.resolve()
 
     if (this.coreData.servers.gqlServer?.destroy) {
-      destroy = util.promisify(this.coreData.servers.gqlServer?.destroy)
+      destroyGqlServer = util.promisify(this.coreData.servers.gqlServer.destroy)
     }
 
     return Promise.all([
-      destroy(),
+      destroyGqlServer(),
       this._reset(),
     ])
   }

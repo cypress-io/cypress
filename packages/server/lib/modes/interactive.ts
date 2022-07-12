@@ -173,23 +173,13 @@ export = {
       makeGraphQLServer(),
     ])
 
-    const clearCtxAndQuit = async () => {
-      try {
-        await clearCtx()
-      } catch (e) {
-        // Silently handle clearCtx errors, we still need to quit the app
-        debug(`DataContext cleared with error: ${e?.message}`)
-      }
-
-      debug('DataContext cleared, quitting app')
-
-      app.quit()
-    }
-
     // Before the electron app quits, we interrupt and ensure the current
     // DataContext is completely destroyed prior to quitting the process.
-    // Parts of the DataContext teardown are asynchronous and can cause
-    // the electron process to throw if not awaited.
+    // Parts of the DataContext teardown are asynchronous, particularly the
+    // closing of open file watchers, and not awaiting these can cause
+    // the electron process to throw.
+    // https://github.com/cypress-io/cypress/issues/22026
+
     app.once('will-quit', (event: Event) => {
       // We must call synchronously call preventDefault on the will-quit event
       // to halt the current quit lifecycle
@@ -200,7 +190,18 @@ export = {
       // We use setImmediate to guarantee that app.quit will be called asynchronously;
       // synchronously calling app.quit in the will-quit handler prevent the subsequent
       // close from occurring
-      setImmediate(clearCtxAndQuit)
+      setImmediate(async () => {
+        try {
+          await clearCtx()
+        } catch (e) {
+          // Silently handle clearCtx errors, we still need to quit the app
+          debug(`DataContext cleared with error: ${e?.message}`)
+        }
+
+        debug('DataContext cleared, quitting app')
+
+        app.quit()
+      })
     })
 
     return this.ready(options, port)
