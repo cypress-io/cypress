@@ -174,6 +174,7 @@ async function makeE2ETasks () {
      */
     async __internal__beforeEach () {
       testState = {}
+      await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
@@ -214,7 +215,7 @@ async function makeE2ETasks () {
 
           if (remoteGraphQLIntercept) {
             try {
-              result = await remoteGraphQLIntercept({
+              result = await Promise.resolve(remoteGraphQLIntercept({
                 operationName,
                 variables,
                 document,
@@ -222,11 +223,13 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState)
+              }, testState))
             } catch (e) {
               const err = e as Error
 
-              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              const code = err.message.includes('Unauthorized') ? 'UNAUTHORIZED' : 'INTERNAL_SERVER_ERROR'
+
+              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err, { code })] }
             }
           }
 

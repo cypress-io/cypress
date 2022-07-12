@@ -29,16 +29,15 @@ export class VersionsDataSource {
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
     this._currentTestingType = this.ctx.coreData.currentTestingType
-    this.#ensureData()
   }
 
-  #ensureData () {
+  #populateVersionMetadata () {
     let versionData = this.ctx.coreData.versionData
 
     if (!versionData) {
       versionData = {
-        latestVersion: this.getLatestVersion().catch((e) => pkg.version),
-        npmMetadata: this.getVersionMetadata().catch((e) => ({})),
+        latestVersion: this.#getLatestVersion().catch((e) => pkg.version),
+        npmMetadata: this.#getVersionMetadata().catch((e) => ({})),
       }
 
       this.ctx.update((d) => {
@@ -65,7 +64,7 @@ export class VersionsDataSource {
    * }
    */
   async versionData (): Promise<VersionData> {
-    const versionData = this.#ensureData()
+    const versionData = this.#populateVersionMetadata()
     const [latestVersion, npmMetadata] = await Promise.all([
       versionData.latestVersion,
       versionData.npmMetadata,
@@ -93,15 +92,16 @@ export class VersionsDataSource {
       this._currentTestingType = this.ctx.coreData.currentTestingType
       this.ctx.update((d) => {
         if (d.versionData) {
-          d.versionData.latestVersion = this.getLatestVersion()
+          d.versionData.latestVersion = this.#getLatestVersion()
         }
       })
     }
   }
 
-  private async getVersionMetadata (): Promise<Record<string, string>> {
+  async #getVersionMetadata (): Promise<Record<string, string>> {
+    const now = new Date().toISOString()
     const DEFAULT_RESPONSE = {
-      [pkg.version]: new Date().toISOString(),
+      [pkg.version]: now,
     }
 
     if (this.ctx.isRunMode) {
@@ -112,29 +112,25 @@ export class VersionsDataSource {
 
     try {
       response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+      const responseJson = await response.json() as { time: Record<string, string>}
+
+      debug('NPM release dates received %o', { modified: responseJson.time.modified })
+
+      return responseJson.time ?? now
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
       debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
-    }
 
-    if (!response) {
       return DEFAULT_RESPONSE
     }
-
-    const responseJson = await response.json() as { time: Record<string, string>}
-
-    debug('NPM release dates received %o', { modified: responseJson.time.modified })
-
-    return responseJson.time
   }
 
-  private async getLatestVersion (): Promise<string> {
+  async #getLatestVersion (): Promise<string> {
     if (this.ctx.isRunMode) {
       return pkg.version
     }
 
-    const url = REMOTE_MANIFEST_URL
     const id = await VersionsDataSource.machineId()
 
     const manifestHeaders: HeadersInit = {
@@ -153,36 +149,44 @@ export class VersionsDataSource {
       manifestHeaders['x-machine-id'] = id
     }
 
-    let manifestResponse
+    const devServer = this.ctx.lifecycleManager?.loadedConfigFile?.component?.devServer
+
+    if (typeof devServer === 'object') {
+      if (devServer.bundler) {
+        manifestHeaders['x-dev-server'] = devServer.bundler
+      }
+
+      if (devServer.framework) {
+        manifestHeaders['x-framework'] = devServer.framework
+      }
+    }
 
     try {
-      manifestResponse = await this.ctx.util.fetch(url, {
+      const manifestResponse = await this.ctx.util.fetch(REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
+
+      debug('retrieving latest version information with headers: %o', manifestHeaders)
+
+      const manifest = await manifestResponse.json() as { version: string }
+
+      debug('latest version information: %o', manifest)
+
+      return manifest.version ?? pkg.version
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %o', url, e)
-    }
+      debug('Error fetching %s: %o', REMOTE_MANIFEST_URL, e)
 
-    if (!manifestResponse) {
       return pkg.version
+    } finally {
+      this._initialLaunch = false
     }
-
-    debug('retrieving latest version information with headers: %o', manifestHeaders)
-
-    const manifest = await manifestResponse.json() as { version: string }
-
-    debug('latest version information: %o', manifest)
-
-    this._initialLaunch = false
-
-    return manifest.version
   }
 
   private static async machineId (): Promise<string | undefined> {
     try {
-      return nmi.machineId()
+      return await nmi.machineId()
     } catch (error) {
       return undefined
     }

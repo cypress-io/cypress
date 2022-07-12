@@ -6,7 +6,9 @@ module.exports = {
     'specPattern': 'src/**/*.spec.cy.js',
     'supportFile': 'tests/_support/spec_helper.js',
     'devServer': {
+      'framework': 'react',
       'bundler': 'webpack',
+      'webpackConfig': {},
     },
   },
   'e2e': {

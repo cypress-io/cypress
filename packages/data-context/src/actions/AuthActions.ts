@@ -4,7 +4,7 @@ import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void, utmCode: string): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   resetAuthState(): void
 }
@@ -33,19 +33,22 @@ export class AuthActions {
   }
 
   async checkAuth () {
+    const operation = `query Cypress_CheckAuth { cloudViewer { id email fullName } }`
     const result = await this.ctx.cloud.executeRemoteGraphQL({
+      fieldName: 'cloudViewer',
       operationType: 'query',
-      document: parse(`query Cypress_CheckAuth { cloudViewer { id email fullName } }`),
-      variables: {},
+      operation,
+      operationDoc: parse(operation),
+      operationVariables: {},
     })
 
-    if (!result.data?.cloudViewer) {
+    if (!result.data?.cloudViewer && !result.error?.networkError) {
       this.ctx.coreData.user = null
       await this.logout()
     }
   }
 
-  async login () {
+  async login (utmSource: string, utmMedium: string) {
     const onMessage = (authState: AuthStateShape) => {
       this.ctx.update((coreData) => {
         coreData.authState = authState
@@ -63,7 +66,7 @@ export class AuthActions {
       this.#cancelActiveLogin = () => resolve(null)
 
       // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
-      this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
+      this.authApi.logIn(onMessage, utmSource, utmMedium).then(resolve, reject)
     })
 
     const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()

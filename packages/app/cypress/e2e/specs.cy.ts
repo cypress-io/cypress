@@ -95,7 +95,7 @@ describe('App: Specs', () => {
 
         const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
-        it('scaffolds example files when card is clicked', () => {
+        it('scaffolds example files when card is clicked', { viewportHeight: 1200 }, () => {
           cy.get('@ScaffoldCard').click()
 
           cy.findByRole('dialog', {
@@ -187,7 +187,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.percySnapshot('Generator success')
 
@@ -278,7 +278,7 @@ describe('App: Specs', () => {
 
           cy.percySnapshot('Generator success')
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.ts\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.get('[aria-label="Close"]').click()
 
@@ -412,7 +412,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
 
-          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
           cy.percySnapshot('Generator success')
 
@@ -423,7 +423,7 @@ describe('App: Specs', () => {
 
         it('generates spec with file name that does not contain a known spec extension', () => {
           cy.withCtx(async (ctx) => {
-            let config = ctx.actions.file.readFileInProject('cypress.config.js')
+            let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
             config = config.replace(
                 `specPattern: 'src/**/*.{cy,spec}.{js,jsx}'`,
@@ -700,7 +700,7 @@ describe('App: Specs', () => {
 
       it('generates spec with file name that does not contain a known spec extension', () => {
         cy.withCtx(async (ctx) => {
-          let config = ctx.actions.file.readFileInProject('cypress.config.js')
+          let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
           config = config.replace(
               `specPattern: 'src/specs-folder/*.cy.{js,jsx}'`,

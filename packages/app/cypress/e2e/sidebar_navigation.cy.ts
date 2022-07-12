@@ -137,17 +137,17 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
-      cy.get('[href="#/runs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.get('[href="#/runs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-runs-page').trigger('mouseout')
 
-      cy.get('[href="#/specs"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.get('[href="#/specs"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
 
-      cy.get('[href="#/settings"]').trigger('mouseenter')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.get('[href="#/settings"]').trigger('mouseout')
+      cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
@@ -221,7 +221,8 @@ describe('Sidebar Navigation', () => {
 
     it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
-      cy.findByText('Runs').should('be.visible').click()
+
+      cy.findByTestId('sidebar-link-runs-page').should('have.text', 'Runs').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
       cy.get('.router-link-active').findByText('Runs').should('be.visible')
     })
@@ -233,6 +234,20 @@ describe('Sidebar Navigation', () => {
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
       cy.get('.router-link-active').findByText('Specs').should('be.visible')
+    })
+
+    it('Specs sidebar nav link is not active when a test is running', () => {
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
+
+      cy.findAllByTestId('spec-item').first().click()
+      cy.location('hash').should('contain', '#/specs/runner')
+      cy.contains('.router-link-exact-active', 'Specs').should('not.exist')
+      cy.percySnapshot()
+
+      cy.findByTestId('sidebar-link-specs-page').click()
+      cy.location('hash').should('equal', '#/specs')
+      cy.contains('.router-link-exact-active', 'Specs')
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {

@@ -61,6 +61,7 @@
         <input
           v-model="selector"
           autocapitalize="none"
+          autocomplete="off"
           autocorrect="off"
           spellcheck="false"
           data-cy="playground-selector"
@@ -223,7 +224,7 @@ function printSelected () {
 
 const { copy } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {
-  copy(selector.value)
+  copy(selectorPlaygroundStore.command)
 }
 </script>
 

@@ -1,11 +1,13 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
 import { snapshotCypressDirectory } from './cypress/tasks/snapshotsScaffold'
+import { uninstallDependenciesInScaffoldedProject } from './cypress/tasks/uninstallDependenciesInScaffoldedProject'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
+const CYPRESS_INTERNAL_DEV_PROJECT_ID = getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'sehy69')
 
 export default defineConfig({
-  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : 'sehy69',
+  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : CYPRESS_INTERNAL_DEV_PROJECT_ID,
   viewportWidth: 800,
   viewportHeight: 850,
   retries: {
@@ -41,6 +43,7 @@ export default defineConfig({
 
       on('task', {
         snapshotCypressDirectory,
+        uninstallDependenciesInScaffoldedProject,
       })
 
       return await e2ePluginSetup(on, config)

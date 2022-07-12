@@ -125,6 +125,16 @@ describe('e2e config', () => {
     })
   })
 
+  it('throws an error if cypress.env.json specifies invalid property', async function () {
+    await Fixtures.scaffoldProject('invalid-env-file')
+
+    return systemTests.exec(this, {
+      project: 'invalid-env-file',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
   it('throws an error if specPattern is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
 
@@ -233,6 +243,15 @@ describe('e2e config', () => {
       project: 'invalid-root-level-config',
       configFile: 'invalid-componentFolder-config.js',
       expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('finds supportFiles in projects containing glob syntax', async function () {
+    await Fixtures.scaffoldProject('project-with-(glob)-[chars]')
+
+    return systemTests.exec(this, {
+      project: 'project-with-(glob)-[chars]',
       snapshot: true,
     })
   })

@@ -23,17 +23,12 @@ describe('cypress config with esm and cjs', function () {
     })
   })
 
-  ;[
-    'config-cjs-and-esm/config-with-ts-module-component',
-  ].forEach((project) => {
-    // This covers Vite and SvelteKit component testing projects
-    systemTests.it(`supports modules and cjs in ${project}`, {
-      project,
-      testingType: 'component',
-      spec: 'src/app.cy.js',
-      browser: 'chrome',
-      expectedExitCode: 0,
-    })
+  systemTests.it('supports modules and cjs in component testing', {
+    project: 'config-cjs-and-esm/config-with-ts-module-component',
+    testingType: 'component',
+    spec: 'src/foo.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
   })
 })
 

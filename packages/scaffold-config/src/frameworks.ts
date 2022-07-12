@@ -26,6 +26,8 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
     const loc = require.resolve(path.join(dependency.package, 'package.json'), {
       paths: [projectPath],
     })
+    // TODO: convert to async FS method
+    // eslint-disable-next-line no-restricted-syntax
     const pkg = fs.readJsonSync(loc) as PkgJson
     const pkgVersion = semver.coerce(pkg.version)
 
@@ -69,6 +71,7 @@ export const WIZARD_FRAMEWORKS = [
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
@@ -126,6 +129,7 @@ export const WIZARD_FRAMEWORKS = [
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
       ]
     },
     codeGenFramework: 'react',
@@ -205,6 +209,7 @@ export const WIZARD_FRAMEWORKS = [
       return [
         getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
       ]
     },
     codeGenFramework: 'react',

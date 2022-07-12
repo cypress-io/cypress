@@ -81,6 +81,10 @@ export class ProjectConfigManager {
     return this._configFilePath
   }
 
+  get eventProcessPid () {
+    return this._eventsIpc?.childProcessPid
+  }
+
   set configFilePath (configFilePath) {
     this._configFilePath = configFilePath
   }
@@ -260,10 +264,17 @@ export class ProjectConfigManager {
         this._eventsIpc.cleanupIpc()
       }
 
-      this._eventsIpc = new ProjectConfigIpc(this.options.ctx.nodePath, this.options.projectRoot, this.configFilePath, this.options.configFile, (cypressError: CypressError, title?: string | undefined) => {
-        this._state = 'errored'
-        this.options.ctx.onError(cypressError, title)
-      }, this.options.ctx.onWarning)
+      this._eventsIpc = new ProjectConfigIpc(
+        this.options.ctx.nodePath,
+        this.options.projectRoot,
+        this.configFilePath,
+        this.options.configFile,
+        (cypressError: CypressError, title?: string | undefined) => {
+          this._state = 'errored'
+          this.options.ctx.onError(cypressError, title)
+        },
+        this.options.ctx.onWarning,
+      )
 
       this._loadConfigPromise = this._eventsIpc.loadConfig()
     }
@@ -338,6 +349,7 @@ export class ProjectConfigManager {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
       cwd: this.options.projectRoot,
+      ignorePermissionErrors: true,
     })
 
     this._watchers.add(w)

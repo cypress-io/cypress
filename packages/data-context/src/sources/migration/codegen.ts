@@ -11,11 +11,11 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
-import { LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
+import { isDefaultSupportFile, LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
-import { getBreakingKeys } from '@packages/config'
+import { defineConfigAvailable, getBreakingKeys } from '@packages/config'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -51,6 +51,8 @@ export async function createConfigString (cfg: LegacyCypressConfigJson, options:
   const newConfig = reduceConfig(cfg, options)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
+  debug('creating cypress.config from newConfig %o relativePluginPath %s options %o', newConfig, relativePluginPath, options)
+
   return createCypressConfig(newConfig, relativePluginPath, options)
 }
 
@@ -81,6 +83,7 @@ export async function initComponentTestingMigration (
   const watcher = chokidar.watch(
     watchPaths, {
       cwd: projectRoot,
+      ignorePermissionErrors: true,
     },
   )
 
@@ -147,29 +150,11 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
-// If they are running an old version of Cypress
-// or running Cypress that isn't installed in their
-// project's node_modules, we don't want to include
-// defineConfig(/***/) in their cypress.config.js,
-// since it won't exist.
-export function defineConfigAvailable (projectRoot: string) {
-  try {
-    const cypress = require.resolve('cypress', {
-      paths: [projectRoot],
-    })
-    const api = require(cypress)
-
-    return 'defineConfig' in api
-  } catch (e) {
-    return false
-  }
-}
-
-function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
+async function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): Promise<string> {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = options.hasE2ESpec
-    ? createE2ETemplate(pluginPath, options, config.e2e)
+    ? await createE2ETemplate(pluginPath, options, config.e2e)
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
@@ -205,7 +190,68 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+// Returns path of `pluginsFile` relative to projectRoot
+// Considers cases of:
+// 1. `pluginsFile` pointing to a directory containing an index file
+// 2. `pluginsFile` pointing to a file
+//
+// Example:
+// - projectRoot
+// --- cypress
+// ----- plugins
+// -------- index.js
+// Both { "pluginsFile": "cypress/plugins"} and { "pluginsFile": "cypress/plugins/index.js" } are valid.
+//
+// Will return `cypress/plugins/index.js` for both cases.
+export async function getLegacyPluginsCustomFilePath (projectRoot: string, pluginPath: string): Promise<string> {
+  debug('looking for pluginPath %s in projectRoot %s', pluginPath, projectRoot)
+
+  const pluginLoc = path.join(projectRoot, pluginPath)
+
+  debug('fs.stats on %s', pluginLoc)
+
+  let stats: fs.Stats
+
+  try {
+    stats = await fs.stat(pluginLoc)
+  } catch (e) {
+    throw Error(`Looked for pluginsFile at ${pluginPath}, but it was not found.`)
+  }
+
+  if (stats.isFile()) {
+    debug('found pluginsFile %s', pluginLoc)
+
+    return pluginPath
+  }
+
+  if (stats.isDirectory()) {
+    // Although you are supposed to pass a file to `pluginsFile`, we also supported
+    // passing a directory containing an `index` file.
+    // If pluginsFile is a directory, see if there is an index.{js,ts} and grab that.
+    // {
+    //    "pluginsFile": "plugins"
+    // }
+    // Where cypress/plugins contains an `index.{js,ts,coffee...}` but NOT `index.d.ts`.
+    const ls = await fs.readdir(pluginLoc)
+    const indexFile = ls.find((file) => file.startsWith('index.') && !file.endsWith('.d.ts'))
+
+    debug('pluginsFile was a directory containing %o, looks like we want %s', ls, indexFile)
+
+    if (indexFile) {
+      const pathToIndex = path.join(pluginPath, indexFile)
+
+      debug('found pluginsFile %s', pathToIndex)
+
+      return pathToIndex
+    }
+  }
+
+  debug('error, could not find path to pluginsFile!')
+
+  throw Error(`Could not find pluginsFile. Received projectRoot ${projectRoot} and pluginPath: ${pluginPath}`)
+}
+
+async function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
   if (createConfigOptions.shouldAddCustomE2ESpecPattern && !options.specPattern) {
     options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
   }
@@ -218,8 +264,7 @@ function createE2ETemplate (pluginPath: string | undefined, createConfigOptions:
     `
   }
 
-  const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
-  let relPluginsPath
+  let relPluginsPath: string
 
   const startsWithDotSlash = new RegExp(/^.\//)
 
@@ -228,6 +273,9 @@ function createE2ETemplate (pluginPath: string | undefined, createConfigOptions:
   } else {
     relPluginsPath = `'./${pluginPath}'`
   }
+
+  const legacyPluginFileLoc = await getLegacyPluginsCustomFilePath(createConfigOptions.projectRoot, pluginPath)
+  const pluginFile = await fs.readFile(path.join(createConfigOptions.projectRoot, legacyPluginFileLoc), 'utf8')
 
   const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require(${relPluginsPath}).default(on, config)`
@@ -435,6 +483,13 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
+        // If the supportFile is set, but is the same value as the default one; where
+        // we migrate it, we do not want to put the legacy value in the migrated config.
+        // It can be .ts or .js
+        if (isDefaultSupportFile(val)) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, supportFile: val },

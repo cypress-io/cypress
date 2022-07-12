@@ -8,8 +8,8 @@
       @click="emit('clearForceOpen')"
     >
       <div
-        class="flex text-gray-600 gap-8px items-center group-hocus:text-indigo-600"
-        :class="(open || props.forceOpenState) ? 'text-indigo-600' : ''"
+        class="flex gap-8px items-center group-hocus:text-indigo-600"
+        :class="(open || props.forceOpenState) ? 'text-indigo-600' : 'text-gray-600'"
       >
         <slot
           name="heading"
@@ -30,7 +30,7 @@
       >
         <ul
           v-if="variant !== 'panel'"
-          class="flex flex-col"
+          class="flex flex-col max-h-50vh overflow-auto"
         >
           <slot />
         </ul>

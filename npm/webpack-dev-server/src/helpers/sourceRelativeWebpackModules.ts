@@ -50,9 +50,11 @@ const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 
 // We ship webpack@4 as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
-export const cypressWebpackPath = require.resolve('@cypress/webpack-batteries-included-preprocessor', {
-  paths: [__dirname],
-})
+export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+  return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
+    paths: [config.cypressConfig.cypressBinaryRoot],
+  })
+}
 
 // Source the users framework from the provided projectRoot. The framework, if available, will server
 // as the resolve base for webpack dependency resolution.
@@ -113,7 +115,7 @@ export function sourceWebpack (config: WebpackDevServerConfig, framework: Source
     debug('Webpack: Falling back to bundled version')
 
     webpackJsonPath = require.resolve('webpack/package.json', {
-      paths: [cypressWebpackPath],
+      paths: [cypressWebpackPath(config)],
     })
   }
 

@@ -98,13 +98,13 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('redirects to the specs list with error if a spec is not found when navigating', () => {
-    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const { title, intro, explainer } = defaultMessages.specPage.noSpecError
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
     cy.visitApp(`/specs/runner?file=${badFilePath}`)
-    cy.contains(noSpecErrorTitle).should('be.visible')
-    cy.contains(noSpecErrorIntro).should('be.visible')
-    cy.contains(noSpecErrorExplainer).should('be.visible')
+    cy.contains(title).should('be.visible')
+    cy.contains(intro).should('be.visible')
+    cy.contains(explainer).should('be.visible')
     cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
     cy.location()
     .its('href')
@@ -114,11 +114,11 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     // should clear after reload
     cy.reload()
-    cy.contains(noSpecErrorTitle).should('not.exist')
+    cy.contains(title).should('not.exist')
   })
 
   it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
-    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const { title, intro, explainer } = defaultMessages.specPage.noSpecError
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
@@ -129,9 +129,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.withCtx((ctx, o) => {
       ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
     }, { path: goodFilePath }).then(() => {
-      cy.contains(noSpecErrorTitle).should('be.visible')
-      cy.contains(noSpecErrorIntro).should('be.visible')
-      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(title).should('be.visible')
+      cy.contains(intro).should('be.visible')
+      cy.contains(explainer).should('be.visible')
       cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
@@ -145,6 +145,34 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .click()
 
     cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
+  })
+
+  it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
+    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
+
+    cy.visitApp()
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Bad spec', () => { it('has a syntax error', () => { expect(true).to.be.true }) }`)
+    }, { path: getPathForPlatform('cypress/e2e/bad-spec.spec.js') })
+
+    cy.contains('bad-spec.spec')
+    .click()
+
+    cy.contains('No tests found').should('be.visible')
+
+    cy.contains('SyntaxError')
+    .should('be.visible')
+    .invoke('outerHeight')
+    .should('eq', expectedAutHeight)
+
+    // Checking the height here might seem excessive
+    // but we really want some warning if this changes
+    // and should understand the reasons if it does.
+    // We could consider removing this after percy is
+    // up and running for e2e tests.
+
+    cy.percySnapshot()
   })
 
   it('should show visit failure blank page', () => {
@@ -205,10 +233,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('.passed > .num').should('contain', 1)
     cy.get('.failed > .num').should('contain', '--')
 
-    cy.get('[href="#/runs"]').click()
+    cy.findByTestId('sidebar-link-runs-page').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-    cy.get('[href="#/specs"]').click()
+    cy.findByTestId('sidebar-link-specs-page').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
     cy.contains('dom-content.spec').click()
@@ -231,8 +259,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       }).invoke('connected').should('be.true')
     })
 
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject(o.path, `
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `
 describe('Dom Content', () => {
   it('renders the new test content', () => {
     cy.visit('cypress/e2e/dom-content.html')
@@ -244,5 +272,23 @@ describe('Dom Content', () => {
     cy.get('[data-model-state="passed"]').should('contain', 'renders the new test content')
     cy.get('.passed > .num').should('contain', 1)
     cy.get('.failed > .num').should('contain', '--')
+  })
+
+  describe('accessibility', () => {
+    it('has no axe violations in specs list panel', () => {
+      cy.visitApp()
+      cy.contains('withFailure.spec').click()
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
+      cy.injectAxe()
+      cy.checkA11y('[data-cy="specs-list-panel"]')
+    })
+
+    it('has no axe violations in reporter panel', () => {
+      cy.visitApp()
+      cy.contains('withFailure.spec').click()
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
+      cy.injectAxe()
+      cy.checkA11y('[data-cy="reporter-panel"]')
+    })
   })
 })

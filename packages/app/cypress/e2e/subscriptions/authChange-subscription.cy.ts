@@ -31,8 +31,9 @@ describe('authChange subscription', () => {
 
     it('responds to authChange subscription for login', () => {
       cy.contains('Log In')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')
@@ -42,6 +43,7 @@ describe('authChange subscription', () => {
       setActiveUser()
       cy.reload() // Reload to show the latest state
       cy.contains('Test User')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.logout()
       })
@@ -58,8 +60,9 @@ describe('authChange subscription', () => {
 
     it('responds to authChange subscription for login', () => {
       cy.contains('Log In')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')
@@ -69,6 +72,7 @@ describe('authChange subscription', () => {
       setActiveUser()
       cy.reload() // Reload to show the latest state
       cy.contains('Test User')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.logout()
       })
@@ -84,8 +88,9 @@ describe('authChange subscription', () => {
 
     it('responds to authChange subscription for login', () => {
       cy.contains('Log In')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
-        await ctx.actions.auth.login()
+        await ctx.actions.auth.login('testing', 'testing')
       })
 
       cy.contains('Test User')
@@ -95,6 +100,7 @@ describe('authChange subscription', () => {
       setActiveUser()
       cy.visitLaunchpad()
       cy.contains('Test User')
+      cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.logout()
       })

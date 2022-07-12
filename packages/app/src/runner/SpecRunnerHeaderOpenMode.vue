@@ -21,11 +21,15 @@
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
-          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
+          <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
-        <div class="mr-12px max-w-100% grid text-gray-600 items-center truncate">
+        <a
+          target="_blank"
+          :href="autStore.url"
+          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
+        >
           {{ autStore.url }}
-        </div>
+        </a>
       </div>
       <div
         v-else
@@ -34,12 +38,12 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="border-gray-100  mr-12px"
+          class="border-gray-100 mr-12px"
           variant="outline"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
-          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
+          <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
       </div>
       <SpecRunnerDropdown
@@ -98,9 +102,9 @@
             >
               <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
+              <InlineCodeFragment class="font-medium text-xs leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium leading-5">cy.viewport()</InlineCodeFragment>
+              <InlineCodeFragment class="font-medium text-xs leading-5">cy.viewport()</InlineCodeFragment>
             </i18n-t>
             <div class="flex justify-center">
               <Button

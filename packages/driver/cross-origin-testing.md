@@ -65,6 +65,8 @@ Each **secondary driver** has a **SpecBridgeCommunicator** instance that can rec
 
 One of the main responsibilities of the communicators is to prepare/preprocess data for serialization. All data going over the postMessage API gets serialized by the [structured clone algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm). In order to either prevent or catch serialization errors and ensure all relevant data is properly transmitted, we preprocess data such as the subject, logs, snapshots, and errors themselves.
 
+For more information, please see the [Cross-origin Serialization Explainer](./src/util/serialization/README.md)
+
 ## Automation / Proxy
 
 Browser automation APIs and the proxy play a small but critical role in facilitating cross-origin testing.
@@ -119,11 +121,9 @@ Similar to **defaults()** methods needing to be called again, some events may ne
 
 ## Cookies
 
-Having the **AUT** on a different origin than **top** causes issues with cookies being set for the origin in the **AUT**. Cookies have a **SameSite** attribute that can be set to **Strict**, **Lax**, ****or **None**. If **Strict** or **Lax**, cookies will not be set when the site is in an iframe on a different origin from the **top frame**.
+Having the **AUT** on a different origin than **top** causes issues with cookies being set for the origin in the **AUT**. Cookies that would normally be set when a user's app is run outside of Cypress are not set due to it being rendered in an iframe.
 
-In order to counteract this, we currently coerce the **SameSite** value of all cross-origin cookies to be **None**. This is not particularly ideal, since it could lead to unexpected behavior if cookies are set even though they should not be.
-
-There are plans to change the implementation so that coercing the cookies is not necessary, so this behavior will change, but cookies will still need special handling for them to work as expected with a site whose origin is secondary.
+In order to counteract this, we utilize the [proxy](../proxy) to capture cookies from cross-origin responses, store them in our own server-side cookie jar, set them in the browser with automation, and then attach them to cross-origin requests where appropriate. This simulates how cookies behave outside of Cypress.
 
 ## Unsupported APIs
 

@@ -11,6 +11,7 @@ import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
+import fs from 'fs'
 
 const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
@@ -18,6 +19,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
@@ -297,6 +299,12 @@ export class ProjectDataSource {
   }: FindSpecs<string[]>) {
     this.stopSpecWatcher()
 
+    // Early return the spec watcher if we're in run mode, we do not want to
+    // init a lot of files watchers that are unneeded
+    if (this.ctx.isRunMode) {
+      return
+    }
+
     const currentProject = this.ctx.currentProject
 
     if (!currentProject) {
@@ -329,14 +337,52 @@ export class ProjectDataSource {
     // We respond to all changes to the project's filesystem when
     // files or directories are added and removed that are not explicitly
     // ignored by config
-    this._specWatcher = chokidar.watch('.', {
-      ignoreInitial: true,
-      cwd: projectRoot,
-      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
+    this._specWatcher = this._makeSpecWatcher({
+      projectRoot,
+      specPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
     this._specWatcher.on('all', onProjectFileSystemChange)
+  }
+
+  _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
+    return chokidar.watch('.', {
+      ignoreInitial: true,
+      ignorePermissionErrors: true,
+      cwd: projectRoot,
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
+        // Add a extra safe to prevent watching node_modules, in case the glob
+        // pattern is not taken into account by the ignored
+        if (file.includes('node_modules')) {
+          return true
+        }
+
+        // We need stats arg to make the determination of whether to watch it, because we need to watch directories
+        // chokidar is extremely inconsistent in whether or not it has the stats arg internally
+        if (!stats) {
+          try {
+            // TODO: find a way to avoid this sync call - might require patching chokidar
+            // eslint-disable-next-line no-restricted-syntax
+            stats = fs.statSync(file)
+          } catch {
+            // If the file/folder is removed do not ignore it, in case it is added
+            // again
+            return false
+          }
+        }
+
+        // don't ignore directories
+        if (stats.isDirectory()) {
+          return false
+        }
+
+        // If none of the spec patterns match, we don't need to watch it
+        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
+      }],
+    })
   }
 
   async defaultSpecFileName (): Promise<string> {
@@ -490,5 +536,23 @@ export class ProjectDataSource {
     }
 
     return _.isEqual(specPattern, [component])
+  }
+
+  async maybeGetProjectId (source: ProjectShape) {
+    // If this is the currently active project, we can look at the project id
+    if (source.projectRoot === this.ctx.currentProject) {
+      return await this.projectId()
+    }
+
+    // Get the saved state & resolve the lastProjectId
+    const savedState = await source.savedState?.()
+
+    if (savedState?.lastProjectId) {
+      return savedState.lastProjectId
+    }
+
+    // Otherwise, we can try to derive the projectId by reading it from the config file
+    // (implement this in the future, if we ever want to display runs for a project in global mode)
+    return null
   }
 }
