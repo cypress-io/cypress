@@ -27,9 +27,9 @@
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
-    <!-- using v-if since this gets hidden only from the command line, and never needs to re-open with state -->
+    <!-- using v-show to preserve state since panel1 is collapsible/expandable during screenshots -->
     <div
-      v-if="showPanel2"
+      v-show="showPanel2"
       data-cy="reporter-panel"
       class="h-full flex-shrink-0 z-10 relative"
       :style="{width: `${panel2Width}px`}"
