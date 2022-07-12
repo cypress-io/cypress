@@ -25,7 +25,7 @@ describe('example vite test', function () {
   })
 
   for (const major of [2, 3] as const) {
-    systemTests.it.only(`should work with Vite ${major}.x`, {
+    systemTests.it(`should work with Vite ${major}.x`, {
       project: `vite-${major}-react`,
       testingType: 'component',
       spec: 'src/App.cy.jsx',

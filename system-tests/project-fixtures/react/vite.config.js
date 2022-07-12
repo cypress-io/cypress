@@ -1,9 +1,7 @@
 const {defineConfig} = require('vite')
-const react = require('@vitejs/plugin-react')
 
 module.exports = defineConfig({
   logLevel: 'silent',
-  plugins: [react()],
   server: {
     fs: {
       // this is needed to run on CI since we
