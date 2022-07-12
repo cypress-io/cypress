@@ -32,6 +32,7 @@ import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useDebounce } from '@vueuse/core'
 import { useSpecStore } from '../store'
+import { useSpecFilter } from '../composables/useSpecFilter'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -54,6 +55,7 @@ fragment Specs_InlineSpecList on Query {
     id
     projectRoot
     currentTestingType
+    savedState
     specs {
       id
       ...SpecNode_InlineSpecList
@@ -69,6 +71,15 @@ const props = defineProps<{
 const showModal = ref(false)
 
 const specStore = useSpecStore()
+
+const { setSpecFilter } = useSpecFilter()
+
+const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
+
+if (!specStore.specFilter && savedFilterForCurrentProject) {
+  specStore.setSpecFilter(savedFilterForCurrentProject.value)
+}
+
 const search = ref(specStore.specFilter)
 const debouncedSearchString = useDebounce(search, 200)
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
@@ -82,7 +93,7 @@ const specs = computed<FuzzyFoundSpec[]>(() => {
 })
 
 watch(() => debouncedSearchString.value, () => {
-  specStore.setSpecFilter(debouncedSearchString.value ?? '')
+  setSpecFilter(debouncedSearchString.value ?? '')
 })
 
 </script>

@@ -336,6 +336,7 @@ fragment Specs_SpecsList on Query {
       ...SpecsList
     }
     config
+    savedState
     ...SpecPatternModal
   }
   ...SpecHeaderCloudDataTooltip
@@ -364,6 +365,13 @@ const cachedSpecs = useCachedSpecs(
 )
 
 const specStore = useSpecStore()
+
+const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
+
+if (!specStore.specFilter && savedFilterForCurrentProject) {
+  specStore.setSpecFilter(savedFilterForCurrentProject.value)
+}
+
 const search = ref(specStore.specFilter)
 
 const specsListInputRef = ref<HTMLInputElement>()
