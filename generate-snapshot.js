@@ -22,6 +22,8 @@ const run = async () => {
     'console',
     'original-fs',
     'process',
+    'graceful-fs',
+    'safer-buffer',
   ])
   const { snapshotScript } = await electronLink({
     baseDirPath,
@@ -86,6 +88,12 @@ const run = async () => {
             'evil-dns.js',
           ),
         ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
+            'safer-buffer',
+          ),
+        ) || 
         requiredModuleRelativePath.endsWith(
           path.join(
             'node_modules',
@@ -145,8 +153,8 @@ const run = async () => {
             'register.js',
           ),
         ) ||
-        requiredModuleRelativePath.endsWith(
-          path.join('node_modules', 'graceful-fs', 'graceful-fs.js'),
+        requiredModuleRelativePath.includes(
+          path.join('node_modules', 'graceful-fs'),
         )
       )
     },

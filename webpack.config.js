@@ -2,6 +2,7 @@
 // const json5 = require('json5')
 const StartServerWebpackPlugin = require('razzle-start-server-webpack-plugin')
 const path = require('path')
+const webpack = require('webpack')
 // const webpackNodeExternals = require('webpack-node-externals')
 
 /**
@@ -108,6 +109,7 @@ module.exports = (opts, config) => {
       // '@packages/electron',
 
       function (context, request, callback) {
+
         if (request.startsWith('@cypress/')) {
           return callback(null, `commonjs ${request}`)
         }
@@ -136,6 +138,15 @@ module.exports = (opts, config) => {
     },
     optimization: {
       usedExports: true,
+      // concatenateModules: false,
+      namedModules: true,
+      // minimizer: [
+      //   new webpack.TerserPlugin({
+      //     terserOptions: {
+      //       keep_fnames: true,
+      //     },
+      //   }),
+      // ],
     },
     // optimization: {
     //   splitChunks: {
