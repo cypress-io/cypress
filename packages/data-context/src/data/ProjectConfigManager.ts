@@ -498,7 +498,7 @@ export class ProjectConfigManager {
   private async closeWatchers () {
     await Promise.all(Array.from(this._watchers).map((watcher) => {
       return watcher.close().catch((error) => {
-        debug('file watcher errored on close: ', e)
+        // Watcher close errors are ignored, we cannot meaningfully handle these
       })
     }))
 
