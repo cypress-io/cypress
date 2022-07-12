@@ -426,4 +426,12 @@ export const mountCallback = (
   return () => mount(component, options)
 }
 
+// Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this
+// by creating an explicit function/import that the user can register in their 'component.js' support file,
+// such as:
+//    import 'cypress/<my-framework>/support'
+// or
+//    import { registerCT } from 'cypress/<my-framework>'
+//    registerCT()
+// Note: This would be a breaking change
 setupHooks()
