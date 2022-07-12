@@ -23,4 +23,13 @@ describe('example vite test', function () {
     expectedExitCode: 0,
     browser: 'electron',
   })
+
+  systemTests.it.only(`should work with Vite 3.x`, {
+    project: 'vite-3-react',
+    testingType: 'component',
+    spec: 'src/App.cy.jsx',
+    configFile: 'cypress-vite.config.ts',
+    expectedExitCode: 0,
+    browser: 'electron',
+  })
 })
