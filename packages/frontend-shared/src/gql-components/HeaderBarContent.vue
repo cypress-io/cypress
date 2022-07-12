@@ -17,77 +17,72 @@
         <img
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
+          alt="cypress"
         >
-        <nav
-          role="navigation"
-          aria-label="Breadcrumbs"
-        >
+        <nav>
           <ol>
-            <li class="inline-block">
+            <li
+              v-if="props.gql.isGlobalMode"
+              class="inline-block"
+            >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
-                :key="Boolean(hasLinkToProjects).toString()"
+                :key="Boolean(currentProject).toString()"
                 class="font-medium"
-                :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
+                :class="currentProject ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                :role="hasLinkToProjects ? undefined : 'link'"
-                :href="hasLinkToProjects ? 'global-mode' : undefined"
-                :ariaDisabled="!hasLinkToProjects"
+                :role="currentProject ? undefined : 'link'"
+                :href="currentProject ? 'select-project' : undefined"
+                :ariaDisabled="!currentProject"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
-            <li
-              v-if="props.gql?.currentProject"
-              class="mx-2px align-middle inline-block"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16
-
-                class="icon-dark-gray-200"
-              />
-            </li>
-            <li class="inline-block">
-              {{ props.gql?.currentProject?.title }}
-              <template
-                v-if="props.gql?.currentProject?.branch"
+            <template v-if="currentProject?.title">
+              <li
+                v-if="props.gql.isGlobalMode"
+                class="mx-2px align-middle inline-block"
+                aria-hidden
               >
-                <!-- Using a margin here causes different overflow problems.
-                        See PR #21325. Using a space for now. -->
-                {{ ' ' }}
-                <Tooltip
-                  placement="bottom"
-                  class="inline-block"
-                >
-                  <span
-                    class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
+                <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+              </li>
+              <li class="inline-block">
+                <span class="font-medium">
+                  {{ currentProject.title }}
+                </span>
+                <!-- currentProject might not have a branch -->
+                <template v-if="currentProject.branch">
+                  <!-- Using a margin here causes different overflow problems.
+                      See PR #21325. Using a space for now. -->
+                  {{ ' ' }}
+                  <Tooltip
+                    placement="bottom"
+                    class="inline-block"
                   >
-                    ({{ props.gql.currentProject.branch }})
-                  </span>
-                  <template #popper>
-                    {{ props.gql.currentProject.branch }}
-                  </template>
-                </Tooltip>
+                    <span class="font-normal max-w-200px text-gray-500 inline-block truncate align-top">
+                      ({{ currentProject.branch }})
+                    </span>
+                    <template #popper>
+                      {{ currentProject.branch }}
+                    </template>
+                  </Tooltip>
+                </template>
+              </li>
+              <template v-if="currentProject.currentTestingType">
+                <li
+                  class="mx-2px inline-block align-middle"
+                  aria-hidden
+                >
+                  <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+                </li>
+                <li class="inline-block">
+                  {{ t(`testingType.${currentProject.currentTestingType}.name`) }}
+                </li>
               </template>
-            </li>
-            <li
-              v-if="props.gql?.currentProject?.currentTestingType"
-              class="mx-2px inline-block align-middle"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16
-                class="icon-dark-gray-200"
-              />
-            </li>
-            <li
-              v-if="props.gql?.currentProject?.currentTestingType"
-              class="inline-block"
-            >
-              {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
-            </li>
+            </template>
           </ol>
         </nav>
       </div>
@@ -239,7 +234,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     branch
     isLoadingNodeEvents
   }
-  projectRootFromCI
+  isGlobalMode
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth
@@ -257,9 +252,7 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const hasLinkToProjects = computed(() => {
-  return props.gql?.currentProject && !props.gql?.projectRootFromCI
-})
+const currentProject = computed(() => props.gql.currentProject)
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
@@ -269,7 +262,7 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (hasLinkToProjects.value) {
+  if (currentProject.value) {
     clearCurrentProjectMutation.executeMutation({})
   }
 }

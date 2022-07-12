@@ -33,8 +33,8 @@
 /packages/net-stubbing/  @cypress-io/end-to-end
 /packages/network/  @cypress-io/end-to-end
 /packages/proxy/  @cypress-io/end-to-end
-/packages/data-context/  @tgriesser
-/packages/graphql/  @tgriesser
+/packages/data-context/  @cypress-io/end-to-end @cypress-io/component-testing
+/packages/graphql/  @cypress-io/end-to-end @cypress-io/component-testing
 /packages/reporter/  @cypress-io/end-to-end
 /packages/resolve-dist/  @cypress-io/end-to-end
 /packages/rewriter/  @cypress-io/end-to-end

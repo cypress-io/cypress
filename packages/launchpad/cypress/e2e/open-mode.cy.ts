@@ -115,7 +115,6 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('todos')
       cy.visitLaunchpad()
 
-      cy.contains('Projects').should('be.visible')
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
     })
@@ -144,7 +143,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.get('a').contains('Projects').click()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project Actions"]').click()
       cy.get('button').contains('Open In IDE').click()
@@ -171,7 +169,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.get('a').contains('Projects').click()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project Actions"]').click()
 

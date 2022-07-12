@@ -15,7 +15,6 @@ const builtInCommands = [
 
 const reservedCommandNames = {
   addAlias: true,
-  addChainer: true,
   addCommand: true,
   addCommandSync: true,
   aliasNotFoundFor: true,
@@ -255,16 +254,9 @@ export default {
         })
       },
 
-      addChainer (obj) {
-        // perp loop
-        for (let name in obj) {
-          const fn = obj[name]
-
-          cy.addChainer(name, fn)
-        }
-
-        // prevent loop comprehension
-        return null
+      addSelector (name, fn) {
+        // TODO: Add overriding stuff.
+        return cy.addSelector(name, fn)
       },
 
       overwrite (name, fn) {
