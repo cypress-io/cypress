@@ -78,7 +78,7 @@ export default class Hook implements HookProps {
   }
 
   addCommand (command: CommandModel) {
-    if (!command.event && !this.isStudio) {
+    if (!command.event && command.type !== 'system' && !this.isStudio) {
       command.number = this._currentNumber
       this._currentNumber++
     }

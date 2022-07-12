@@ -2,7 +2,6 @@
   "name": "@cypress/vue",
   "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
-  "private": true,
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
     "build-prod": "yarn build",

@@ -347,12 +347,16 @@ export function loadClientCertificateConfig (config) {
 function loadBinaryFromFile (filepath: string): Buffer {
   debug(`loadCertificateFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath)
 }
 
 function loadTextFromFile (filepath: string): string {
   debug(`loadPassphraseFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath, 'utf8').toString()
 }
 

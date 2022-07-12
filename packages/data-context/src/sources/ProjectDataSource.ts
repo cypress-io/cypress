@@ -19,6 +19,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
@@ -363,6 +364,8 @@ export class ProjectDataSource {
         // chokidar is extremely inconsistent in whether or not it has the stats arg internally
         if (!stats) {
           try {
+            // TODO: find a way to avoid this sync call - might require patching chokidar
+            // eslint-disable-next-line no-restricted-syntax
             stats = fs.statSync(file)
           } catch {
             // If the file/folder is removed do not ignore it, in case it is added
@@ -533,5 +536,23 @@ export class ProjectDataSource {
     }
 
     return _.isEqual(specPattern, [component])
+  }
+
+  async maybeGetProjectId (source: ProjectShape) {
+    // If this is the currently active project, we can look at the project id
+    if (source.projectRoot === this.ctx.currentProject) {
+      return await this.projectId()
+    }
+
+    // Get the saved state & resolve the lastProjectId
+    const savedState = await source.savedState?.()
+
+    if (savedState?.lastProjectId) {
+      return savedState.lastProjectId
+    }
+
+    // Otherwise, we can try to derive the projectId by reading it from the config file
+    // (implement this in the future, if we ever want to display runs for a project in global mode)
+    return null
   }
 }

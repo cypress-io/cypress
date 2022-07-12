@@ -114,7 +114,7 @@ const props = defineProps<{
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: ButtonSizes
   variant?: ButtonVariants
-  prefixIconClass?: string
+  prefixIconClass?: string | Record<string, string | boolean>
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
   to?: object | string // will render as a router-link with button styles

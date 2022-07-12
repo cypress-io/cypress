@@ -84,6 +84,9 @@ module.exports = {
     return tx.set({ PROJECTS: projects })
   },
 
+  /**
+   * @return {Promise<string[]>}
+   */
   getProjectRoots () {
     return fileUtil.transaction((tx) => {
       return this._getProjects(tx).then((projects) => {
@@ -188,10 +191,4 @@ module.exports = {
   // for testing purposes
 
   __get: fileUtil.get.bind(fileUtil),
-
-  __removeSync () {
-    fileUtil._cache = {}
-
-    return fs.removeSync(this.path)
-  },
 }

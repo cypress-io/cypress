@@ -1,12 +1,14 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
-
-import type { DataContext } from '../DataContext'
+import { DataContext } from '../DataContext'
 
 export interface PushFragmentData {
   data: any
+  errors: any
   target: string
   fragment: string
+  variables?: any
+  invalidateCache?: boolean
 }
 
 abstract class DataEmitterEvents {
@@ -49,6 +51,13 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when there is a change in the date related to refetching specs
+   */
+  specPollingUpdate (lastUpdated: string | null) {
+    this._emit('specPollingUpdate', lastUpdated)
+  }
+
+  /**
    * Emitted when cypress.config is re-executed and we'd like to
    * either re-run a spec or update something in the App UI.
    */
@@ -85,7 +94,36 @@ abstract class DataEmitterEvents {
    * triggering a full refresh, we can send down a specific fragment / data to update
    */
   pushFragment (toPush: PushFragmentData[]) {
-    this._emit('pushFragment', toPush)
+    DataContext.waitForActiveRequestsToFlush().then(() => {
+      this.#queuePushFragment(toPush)
+    }).catch(() => {
+      // This promise can never fail, it only ever resolves
+    })
+  }
+
+  // Batch the "push fragment" in 10ms payloads so remotely fetched data comes in
+  // with less noise to the frontend
+  #timer?: NodeJS.Timer
+  #toPush: PushFragmentData[] = []
+  #queuePushFragment = (toPush: PushFragmentData[]) => {
+    this.#toPush.push(...toPush)
+    if (!this.#timer) {
+      this.#timer = setTimeout(() => {
+        const toPush = this.#toPush
+
+        this.#toPush = []
+        this.#timer = undefined
+        this._emit('pushFragment', toPush)
+      }, 10)
+    }
+  }
+
+  /**
+   * This should never be triggered, but fulfills the type signatures so we can subscribeTo
+   * it in a situation where we want a "fake" subscription
+   */
+  noopChange () {
+    throw new Error('Do not call this')
   }
 
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
@@ -139,7 +177,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean}): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, onUnsubscribe?: () => void }): AsyncGenerator<any> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
@@ -156,6 +194,7 @@ export class DataEmitterActions extends DataEmitterEvents {
         pending.push({ done: false, value })
       }
     }
+
     this.pub.on(evt, subscribed)
 
     const iterator = {
@@ -183,6 +222,11 @@ export class DataEmitterActions extends DataEmitterEvents {
       },
       return: async () => {
         this.pub.off(evt, subscribed)
+
+        if (opts?.onUnsubscribe) {
+          opts.onUnsubscribe()
+        }
+
         // If we are currently waiting on a deferred promise, we need to resolve it and signify we're done to ensure that the async loop terminates
         if (dfd) {
           dfd.resolve({ done: true, value: undefined })

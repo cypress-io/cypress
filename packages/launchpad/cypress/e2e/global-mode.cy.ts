@@ -30,8 +30,11 @@ describe('Launchpad: Global Mode', () => {
         .dropFileWithPath(projectPath)
       })
 
-      cy.contains('Welcome to Cypress!')
-      cy.get('a').contains('Projects').click()
+      cy.contains('Welcome to Cypress!').should('be.visible')
+      cy.findByRole('link', { name: 'Projects' })
+      .should('have.attr', 'aria-disabled', 'false')
+      .click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
       .should('contain', 'todos')
@@ -94,6 +97,8 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
+
+      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {
@@ -152,7 +157,8 @@ describe('Launchpad: Global Mode', () => {
 
     it('updates breadcrumb when selecting a project and navigating back', () => {
       const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
-        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+        // The timeout is increased to account for variability in configuration load times in CI.
+        return cy.findByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
       }
 
       const resetSpies = () => {

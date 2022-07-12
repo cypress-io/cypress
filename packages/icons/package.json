@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "yarn build",
-    "build": "ts-node ./scripts/build.ts && ts-node ./src/ico.ts",
+    "build": "ts-node ./scripts/build.ts && ts-node ./scripts/ico.ts",
     "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
     "test": "yarn test-unit"
   },
