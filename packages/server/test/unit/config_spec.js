@@ -1952,24 +1952,4 @@ describe('lib/config', () => {
       })
     })
   })
-
-  describe('relativeToProjectRoot', () => {
-    context('posix', () => {
-      it('returns path of file relative to projectRoot', () => {
-        const projectRoot = '/root/projects'
-        const supportFile = '/root/projects/cypress/support/e2e.js'
-
-        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq('cypress/support/e2e.js')
-      })
-    })
-
-    context('windows', () => {
-      it('returns path of file relative to projectRoot', () => {
-        const projectRoot = `\\root\\projects`
-        const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
-
-        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
-      })
-    })
-  })
 })

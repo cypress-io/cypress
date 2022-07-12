@@ -190,6 +190,17 @@ export const setNodeBinary = (obj: Record<string, any>, userNodePath?: string, u
   return obj
 }
 
+export function relativeToProjectRoot (projectRoot: string, file: string) {
+  if (!file.startsWith(projectRoot)) {
+    return file
+  }
+
+  // captures leading slash(es), both forward slash and back slash
+  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+
+  return file.replace(projectRoot, '').replace(leadingSlashRe, '')
+}
+
 // require.resolve walks the symlinks, which can really change
 // the results. For example
 //  /tmp/foo is symlink to /private/tmp/foo on Mac

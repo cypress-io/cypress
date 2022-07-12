@@ -24,6 +24,7 @@ import {
   setPluginResolvedOn,
   setAbsolutePaths,
   setNodeBinary,
+  relativeToProjectRoot,
 } from './utils'
 
 import {
@@ -315,17 +316,6 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
   debug('merged plugins config %o', merged)
 
   return merged
-}
-
-export function relativeToProjectRoot (projectRoot: string, file: string) {
-  if (!file.startsWith(projectRoot)) {
-    return file
-  }
-
-  // captures leading slash(es), both forward slash and back slash
-  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
-
-  return file.replace(projectRoot, '').replace(leadingSlashRe, '')
 }
 
 // async function

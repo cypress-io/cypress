@@ -10,6 +10,7 @@ import {
   setPluginResolvedOn,
   setAbsolutePaths,
   setNodeBinary,
+  relativeToProjectRoot,
 } from '../../src/project/utils'
 
 describe('config/src/project/utils', () => {
@@ -326,6 +327,26 @@ describe('config/src/project/utils', () => {
       expect(obj).to.deep.eq({
         nodeVersion: 'system',
         resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+  })
+
+  describe('relativeToProjectRoot', () => {
+    context('posix', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = '/root/projects'
+        const supportFile = '/root/projects/cypress/support/e2e.js'
+
+        expect(relativeToProjectRoot(projectRoot, supportFile)).to.eq('cypress/support/e2e.js')
+      })
+    })
+
+    context('windows', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = `\\root\\projects`
+        const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
+
+        expect(relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
       })
     })
   })
