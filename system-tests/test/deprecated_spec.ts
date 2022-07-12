@@ -25,7 +25,7 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     expectedExitCode: 1,
     snapshot: true,
   })
@@ -38,7 +38,7 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     snapshot: true,
     onStdout: includesString('Deprecation Warning:'),
   })
@@ -55,12 +55,12 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     snapshot: true,
     onStdout: excludesString('Deprecation Warning:'),
   })
 
-  systemTests.it('concat return returns once per spec', {
+  systemTests.it('concat return returns once', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -72,8 +72,15 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js,app_spec2.js',
+    spec: 'app.cy.js,app_spec2.js',
     snapshot: true,
+    onRun: (exec, browser) => {
+      if (browser === 'electron') {
+        return exec({ originalTitle: `deprecated before:browser:launch args / concat return returns once per spec - [electron]` })
+      }
+
+      return exec({ originalTitle: `deprecated before:browser:launch args / concat return returns once per test run - [firefox,chromium]` })
+    },
     onStdout: includesString('Deprecation Warning:'),
   })
 
@@ -91,7 +98,7 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     snapshot: true,
     onStdout: includesString('Deprecation Warning:'),
   })
@@ -109,7 +116,7 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js,app_spec2.js',
+    spec: 'app.cy.js,app_spec2.js',
     expectedExitCode: 1,
     snapshot: true,
   })
@@ -127,7 +134,7 @@ describe('deprecated before:browser:launch args', () => {
       },
     },
     project: beforeBrowserLaunchProject,
-    spec: 'app_spec.js,app_spec2.js',
+    spec: 'app.cy.js,app_spec2.js',
     expectedExitCode: 1,
     snapshot: true,
   })

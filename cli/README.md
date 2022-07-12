@@ -60,6 +60,47 @@ yarn add ~/{your-dirs}/cypress/cli/build/cypress-3.3.1.tgz --ignore-scripts
 
 Which installs the `tgz` file we have just built from folder `Users/jane-lane/{your-dirs}/cypress/cli/build`.
 
+#### Sub-package API
+
+> How do deep imports from cypress/* get resolved?
+
+The cypress npm package comes pre-assembled with mounting libraries for major front-end frameworks. These mounting libraries are the first examples of Cypress providing re-exported sub-packages. These sub-packages follow the same naming convention they do when they're published on **npm**, but without a leading **`@`** sign. For example:
+
+##### An example of a sub-package: @cypress/vue, @cypress/react, @cypress/mount-utils
+
+**Let's discuss the Vue mounting library that Cypress ships.**
+
+If you'd installed the `@cypress/vue` package from NPM, you could write the following code.
+
+This would be necessary when trying to use a version of Vue, React, or other library that may be newer or older than the current version of cypress itself.
+
+```js
+import { mount } from '@cypress/vue'
+```
+
+Now, with the sub-package API, you're able to import the latest APIs directly from Cypress without needing to install a separate dependency.
+
+```js
+import { mount } from 'cypress/vue'
+```
+
+The only difference is the import name, and if you still need to use a specific version of one of our external sub-packages, you may install it and import it directly.
+
+##### Adding a new sub-package
+
+There are a few steps when adding a new sub-package.
+
+1. Make sure the sub-package's rollup build is _self-contained_ or that any dependencies are also declared in the CLI's **`package.json`**.
+2. Now, in the **`postbuild`** script for the sub-package you'd like to embed, invoke `node ./scripts/sync-exported-npm-with-cli.js` (relative to the sub-package, see **`npm/vue`** for an example).
+3. Add the sub-package's name to the following locations:
+  - **`cli/.gitignore`**
+  - **`cli/scripts/post-build.js`**
+  - **`.eslintignore`** (under cli/sub-package)
+4. DO NOT manually update the **package.json** file. Running `yarn build` will automate this process.
+5. Commit the changed files.
+
+[Here is an example Pull Request](https://github.com/cypress-io/cypress/pull/20930/files#diff-21b1fe66043572c76c549a4fc5f186e9a69c330b186fc91116b9b70a4d047902)
+
 #### Module API
 
 The module API can be tested locally using something like:

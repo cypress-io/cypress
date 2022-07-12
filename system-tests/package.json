@@ -3,12 +3,16 @@
   "version": "0.0.0-development",
   "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
   "private": true,
-  "main": "index.js",
+  "main": "lib/fixtures.ts",
+  "browser": "lib/fixtureDirs.ts",
   "scripts": {
     "type-check": "tsc --project .",
+    "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
+    "preprojects:yarn:install": "yarn clean-deps",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
-    "test:ci": "node ./scripts/run.js"
+    "test:ci": "node ./scripts/run.js",
+    "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
@@ -78,9 +82,10 @@
     "supertest": "4.0.2",
     "systeminformation": "5.6.4",
     "temp-dir": "^2.0.0",
-    "webpack": "4.43.0",
+    "webpack": "^4.44.2",
     "ws": "5.2.3"
   },
+  "types": "lib/fixtures.ts",
   "license": "ISC",
   "author": "",
   "keywords": []

@@ -21,13 +21,14 @@ describe('e2e cy.origin retries', () => {
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },
+      e2e: {},
     },
   })
 
   systemTests.it('Appropriately displays test retry errors without other side effects', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
-    spec: 'cy_origin_retries_spec.ts',
+    spec: 'cy_origin_retries.cy.ts',
     snapshot: true,
     expectedExitCode: 1,
     config: {

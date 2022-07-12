@@ -17,6 +17,7 @@ describe('e2e stdout', () => {
         'www.apple.com': '127.0.0.1',
         '*.cypress.io': '127.0.0.1',
       },
+      e2e: {},
     },
   })
 
@@ -24,14 +25,14 @@ describe('e2e stdout', () => {
     return systemTests.exec(this, {
       port: 2020,
       snapshot: true,
-      spec: 'stdout_failing_spec.js',
+      spec: 'stdout_failing.cy.js',
       expectedExitCode: 3,
     })
   })
 
   it('displays errors from exiting early due to bundle errors', function () {
     return systemTests.exec(this, {
-      spec: 'stdout_exit_early_failing_spec.js',
+      spec: 'stdout_exit_early_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout: systemTests.normalizeWebpackErrors,
@@ -40,7 +41,7 @@ describe('e2e stdout', () => {
 
   it('does not duplicate suites or tests between visits', function () {
     return systemTests.exec(this, {
-      spec: 'stdout_passing_spec.js',
+      spec: 'stdout_passing.cy.js',
       timeout: 120000,
       snapshot: true,
     })
@@ -48,7 +49,7 @@ describe('e2e stdout', () => {
 
   it('respects quiet mode', function () {
     return systemTests.exec(this, {
-      spec: 'stdout_passing_spec.js',
+      spec: 'stdout_passing.cy.js',
       timeout: 120000,
       snapshot: true,
       quiet: true,
@@ -64,7 +65,7 @@ describe('e2e stdout', () => {
   })
 
   systemTests.it('displays assertion errors', {
-    spec: 'stdout_assertion_errors_spec.js',
+    spec: 'stdout_assertion_errors.cy.js',
     snapshot: true,
     expectedExitCode: 4,
   })

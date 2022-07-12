@@ -36,8 +36,11 @@ export class SocketAllowed {
    */
   isRequestAllowed (req: Request) {
     const { remotePort, remoteAddress } = req.socket
-    const isAllowed = this.allowedLocalPorts.includes(remotePort!)
-      && ['127.0.0.1', '::1'].includes(remoteAddress!)
+    const remotePortInAllowList = this.allowedLocalPorts.includes(remotePort!)
+
+    // When testing cypress in cypress, we pass along the x-cypress-forwarded-from-cypress header to signify this is a safe request
+    const trustedSourceUsingCypressInCypress = !!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && !!req.headers['x-cypress-forwarded-from-cypress']
+    const isAllowed = (remotePortInAllowList || trustedSourceUsingCypressInCypress) && ['127.0.0.1', '::1'].includes(remoteAddress!)
 
     debug('is incoming request allowed? %o', { isAllowed, reqUrl: req.url, remotePort, remoteAddress })
 

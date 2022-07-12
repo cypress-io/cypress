@@ -10,10 +10,6 @@ export class SocketCt extends SocketBase {
   constructor (config: Record<string, any>) {
     super(config)
 
-    devServer.emitter.on('dev-server:compile:error', (error: string | undefined) => {
-      this.toRunner('dev-server:hmr:error', error)
-    })
-
     // should we use this option at all for component testing 😕?
     if (config.watchForFileChanges) {
       devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
@@ -23,10 +19,6 @@ export class SocketCt extends SocketBase {
   }
 
   startListening (server: DestroyableHttpServer, automation, config, options) {
-    const { componentFolder } = config
-
-    this.testsDir = componentFolder
-
     return super.startListening(server, automation, config, options, {
       onSocketConnection (socket: socketIo.SocketIOServer) {
         debug('do onSocketConnection')

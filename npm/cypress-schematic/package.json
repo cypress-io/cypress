@@ -2,32 +2,31 @@
   "name": "@cypress/schematic",
   "version": "0.0.0-development",
   "description": "Official Cypress schematic for the Angular CLI",
-  "private": false,
   "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:test": "tsc -p tsconfig.spec.json",
     "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "clean": "git checkout HEAD -- sandbox && git clean -f -d sandbox",
-    "launch": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
-    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --e2eUpdate=true && cd ..",
-    "link:sandbox": "yarn link && cd sandbox && yarn link @cypress/schematic",
+    "clean12": "git checkout HEAD -- sandbox12 && git clean -f -d sandbox12",
+    "launch12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic && cd ..",
+    "launch:test12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic --e2eUpdate=true && cd ..",
+    "link:sandbox12": "yarn link && cd sandbox12 && yarn link @cypress/schematic",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
-    "test:e2e:sandbox": "cd sandbox && ng run sandbox:cypress-run",
-    "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
+    "test:e2e:sandbox12": "cd sandbox12 && ng run sandbox:cypress-run",
+    "unlink:sandbox12": "cd sandbox12 && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
     "@angular-devkit/architect": "^0.1202.10",
-    "@angular-devkit/core": "^12.2.10",
-    "@angular-devkit/schematics": "^12.2.10",
-    "@schematics/angular": "^12.2.10",
+    "@angular-devkit/core": "^12.2.17",
+    "@angular-devkit/schematics": "^12.2.17",
+    "@schematics/angular": "^12.2.17",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^12.2.10",
-    "@angular/cli": "^12",
+    "@angular-devkit/schematics-cli": "^12.2.17",
+    "@angular/cli": "^12.2.17",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
@@ -35,6 +34,10 @@
     "cypress": "0.0.0-development",
     "mocha": "3.5.3",
     "typescript": "~4.2.4"
+  },
+  "peerDependencies": {
+    "@angular/cli": ">=12",
+    "@angular/core": ">=12"
   },
   "license": "MIT",
   "repository": {
@@ -48,7 +51,9 @@
     "schematics",
     "cypress",
     "e2e",
-    "testing"
+    "testing",
+    "angular",
+    "automation"
   ],
   "publishConfig": {
     "access": "public"

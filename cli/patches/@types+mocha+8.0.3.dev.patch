@@ -1,0 +1,5607 @@
+diff --git a/node_modules/@types/mocha/index.d.ts b/node_modules/@types/mocha/index.d.ts
+index 8d4c6db..307f232 100644
+--- a/node_modules/@types/mocha/index.d.ts
++++ b/node_modules/@types/mocha/index.d.ts
+@@ -1,2801 +1,2801 @@
+-// Type definitions for mocha 8.0
+-// Project: https://mochajs.org
+-// Definitions by: Kazi Manzur Rashid <https://github.com/kazimanzurrashid>
+-//                 otiai10 <https://github.com/otiai10>
+-//                 Vadim Macagon <https://github.com/enlight>
+-//                 Andrew Bradley <https://github.com/cspotcode>
+-//                 Dmitrii Sorin <https://github.com/1999>
+-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+-// TypeScript Version: 2.1
+-
+-/**
+- * Mocha API
+- *
+- * @see https://mochajs.org/api/mocha
+- */
+-declare class Mocha {
+-    private _growl;
+-    private _reporter;
+-    private _ui;
+-
+-    constructor(options?: Mocha.MochaOptions);
+-
+-    suite: Mocha.Suite;
+-    files: string[];
+-    options: Mocha.MochaInstanceOptions;
+-
+-    /**
+-     * Enable or disable bailing on the first failure.
+-     *
+-     * @see https://mochajs.org/api/mocha#bail
+-     */
+-    bail(bail?: boolean): this;
+-
+-    /**
+-     * Add test `file`.
+-     *
+-     * @see https://mochajs.org/api/mocha#addFile
+-     */
+-    addFile(file: string): this;
+-
+-    /**
+-     * Set reporter to one of the built-in reporters.
+-     *
+-     * @see https://mochajs.org/api/mocha#reporter
+-     */
+-    reporter(reporter: Mocha.Reporter, reporterOptions?: any): this;
+-
+-    /**
+-     * Set reporter to the provided constructor, one of the built-in reporters, or loads a reporter
+-     * from a module path. Defaults to `"spec"`.
+-     *
+-     * @see https://mochajs.org/api/mocha#reporter
+-     */
+-    reporter(reporter?: string | Mocha.ReporterConstructor, reporterOptions?: any): this;
+-
+-    /**
+-     * Set test UI to one of the built-in test interfaces.
+-     *
+-     * @see https://mochajs.org/api/mocha#ui
+-     */
+-    ui(name: Mocha.Interface): this;
+-
+-    /**
+-     * Set test UI to one of the built-in test interfaces or loads a test interface from a module
+-     * path. Defaults to `"bdd"`.
+-     *
+-     * @see https://mochajs.org/api/mocha#ui
+-     */
+-    ui(name?: string): this;
+-
+-    /**
+-     * Escape string and add it to grep as a RegExp.
+-     *
+-     * @see https://mochajs.org/api/mocha#fgrep
+-     */
+-    fgrep(str: string): this;
+-
+-    /**
+-     * Add regexp to grep, if `re` is a string it is escaped.
+-     *
+-     * @see https://mochajs.org/api/mocha#grep
+-     */
+-    grep(re: string | RegExp): this;
+-
+-    /**
+-     * Invert `.grep()` matches.
+-     *
+-     * @see https://mochajs.org/api/mocha#invert
+-     */
+-    invert(): this;
+-
+-    /**
+-     * Enable global leak checking.
+-     *
+-     * @see https://mochajs.org/api/mocha#checkLeaks
+-     */
+-    checkLeaks(): this;
+-
+-    /**
+-     * Display long stack-trace on failing
+-     *
+-     * @see https://mochajs.org/api/mocha#fullTrace
+-     */
+-    fullTrace(): this;
+-
+-    /**
+-     * Enable growl support.
+-     *
+-     * @see https://mochajs.org/api/mocha#growl
+-     */
+-    growl(): this;
+-
+-    /**
+-     * Ignore `globals` array or string.
+-     *
+-     * @see https://mochajs.org/api/mocha#globals
+-     */
+-    globals(globals: string | ReadonlyArray<string>): this;
+-
+-    /**
+-     * Set the timeout in milliseconds.
+-     *
+-     * @see https://mochajs.org/api/mocha#timeout
+-     */
+-    timeout(timeout: string | number): this;
+-
+-    /**
+-     * Set the number of times to retry failed tests.
+-     *
+-     * @see https://mochajs.org/api/mocha#retries
+-     */
+-    retries(n: number): this;
+-
+-    /**
+-     * Set slowness threshold in milliseconds.
+-     *
+-     * @see https://mochajs.org/api/mocha#slow
+-     */
+-    slow(slow: string | number): this;
+-
+-    /**
+-     * Makes all tests async (accepting a callback)
+-     *
+-     * @see https://mochajs.org/api/mocha#asyncOnly.
+-     */
+-    asyncOnly(): this;
+-
+-    /**
+-     * Disable syntax highlighting (in browser).
+-     *
+-     * @see https://mochajs.org/api/mocha#noHighlighting
+-     */
+-    noHighlighting(): this;
+-
+-    /**
+-     * Enable uncaught errors to propagate (in browser).
+-     *
+-     * @see https://mochajs.org/api/mocha#allowUncaught
+-     */
+-    allowUncaught(): boolean;
+-
+-    /**
+-     * Delay root suite execution.
+-     *
+-     * @see https://mochajs.org/api/mocha#delay
+-     */
+-    delay(): boolean;
+-
+-    /**
+-     * Tests marked only fail the suite
+-     *
+-     * @see https://mochajs.org/api/mocha#forbidOnly
+-     */
+-    forbidOnly(): boolean;
+-
+-    /**
+-     * Pending tests and tests marked skip fail the suite
+-     *
+-     * @see https://mochajs.org/api/mocha#forbidPending
+-     */
+-    forbidPending(): boolean;
+-
+-    /**
+-     * Run tests and invoke `fn()` when complete.
+-     *
+-     * Note that `run` relies on Node's `require` to execute
+-     * the test interface functions and will be subject to the
+-     * cache - if the files are already in the `require` cache,
+-     * they will effectively be skipped. Therefore, to run tests
+-     * multiple times or to run tests in files that are already
+-     * in the `require` cache, make sure to clear them from the
+-     * cache first in whichever manner best suits your needs.
+-     *
+-     * @see https://mochajs.org/api/mocha#run
+-     */
+-    run(fn?: (failures: number) => void): Mocha.Runner;
+-
+-    /**
+-     * Loads ESM (and CJS) test files asynchronously.
+-     *
+-     * @see https://mochajs.org/api/mocha#loadFilesAsync
+-     */
+-    loadFilesAsync(): Promise<void>;
+-
+-    /**
+-     * Load registered files.
+-     *
+-     * @see https://mochajs.org/api/mocha#loadFiles
+-     */
+-    protected loadFiles(fn?: () => void): void;
+-
+-    /**
+-     * Unloads `files` from Node's `require` cache.
+-     *
+-     * This allows required files to be "freshly" reloaded, providing the ability
+-     * to reuse a Mocha instance programmatically.
+-     * Note: does not clear ESM module files from the cache
+-     */
+-    unloadFiles(): this;
+-
+-    /**
+-     * Toggles parallel mode.
+-     *
+-     * Must be run before calling `run`. Changes the `Runner` class to
+-     * use; also enables lazy file loading if not already done so.
+-     *
+-     * @see https://mochajs.org/api/mocha#parallelMode
+-     */
+-    parallelMode(enabled?: boolean): this;
+-
+-    /**
+-     * Assigns hooks to the root suite.
+-     *
+-     * @see https://mochajs.org/api/mocha#rootHooks
+-     */
+-    rootHooks(hooks: Mocha.RootHookObject): this;
+-}
+-
+-declare namespace Mocha {
+-    namespace utils {
+-        /**
+-         * Compute a slug from the given `str`.
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.slug
+-         */
+-        function slug(str: string): string;
+-
+-        /**
+-         * Strip the function definition from `str`, and re-indent for pre whitespace.
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.clean
+-         */
+-        function clean(str: string): string;
+-
+-        /**
+-         * Highlight the given string of `js`.
+-         */
+-        function highlight(js: string): string;
+-
+-        /**
+-         * Takes some variable and asks `Object.prototype.toString()` what it thinks it is.
+-         */
+-        function type(value: any): string;
+-
+-        /**
+-         * Stringify `value`. Different behavior depending on type of value:
+-         *
+-         * - If `value` is undefined or null, return `'[undefined]'` or `'[null]'`, respectively.
+-         * - If `value` is not an object, function or array, return result of `value.toString()` wrapped in double-quotes.
+-         * - If `value` is an *empty* object, function, or array, returns `'{}'`, `'[Function]'`, or `'[]'` respectively.
+-         * - If `value` has properties, call canonicalize} on it, then return result of `JSON.stringify()`
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.stringify
+-         */
+-        function stringify(value: any): string;
+-
+-        /**
+-         * Return a new Thing that has the keys in sorted order. Recursive.
+-         *
+-         * If the Thing...
+-         * - has already been seen, return string `'[Circular]'`
+-         * - is `undefined`, return string `'[undefined]'`
+-         * - is `null`, return value `null`
+-         * - is some other primitive, return the value
+-         * - is not a primitive or an `Array`, `Object`, or `Function`, return the value of the Thing's `toString()` method
+-         * - is a non-empty `Array`, `Object`, or `Function`, return the result of calling this function again.
+-         * - is an empty `Array`, `Object`, or `Function`, returns `'[]'`, `'{}'`, or `'[Function]'` respectively.
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.canonicalize
+-         */
+-        function canonicalize(value: any, stack: any[], typeHint: string): any;
+-
+-        /**
+-         * Lookup file names at the given `path`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.utils.html#.exports.lookupFiles
+-         */
+-        function lookupFiles(filepath: string, extensions?: string[], recursive?: boolean): string[];
+-
+-        /**
+-         * Generate an undefined error with a message warning the user.
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.undefinedError
+-         */
+-        function undefinedError(): Error;
+-
+-        /**
+-         * Generate an undefined error if `err` is not defined.
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.getError
+-         */
+-        function getError(err: Error | undefined): Error;
+-
+-        /**
+-         * When invoking this function you get a filter function that get the Error.stack as an
+-         * input, and return a prettify output. (i.e: strip Mocha and internal node functions from
+-         * stack trace).
+-         *
+-         * @see https://mochajs.org/api/module-utils.html#.stackTraceFilter
+-         */
+-        function stackTraceFilter(): (stack: string) => string;
+-    }
+-
+-    namespace interfaces {
+-        function bdd(suite: Suite): void;
+-        function tdd(suite: Suite): void;
+-        function qunit(suite: Suite): void;
+-        function exports(suite: Suite): void;
+-    }
+-
+-    // #region Test interface augmentations
+-
+-    interface HookFunction {
+-        /**
+-         * [bdd, qunit, tdd] Describe a "hook" to execute the given callback `fn`. The name of the
+-         * function is used as the name of the hook.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: Func): void;
+-
+-        /**
+-         * [bdd, qunit, tdd] Describe a "hook" to execute the given callback `fn`. The name of the
+-         * function is used as the name of the hook.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: AsyncFunc): void;
+-
+-        /**
+-         * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (name: string, fn?: Func): void;
+-
+-        /**
+-         * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (name: string, fn?: AsyncFunc): void;
+-    }
+-
+-    interface SuiteFunction {
+-        /**
+-         * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
+-         * nested suites.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn: (this: Suite) => void): Suite;
+-
+-        /**
+-         * [qunit] Describe a "suite" with the given `title`.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string): Suite;
+-
+-        /**
+-         * [bdd, tdd, qunit] Indicates this suite should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        only: ExclusiveSuiteFunction;
+-
+-        /**
+-         * [bdd, tdd] Indicates this suite should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        skip: PendingSuiteFunction;
+-    }
+-
+-    interface ExclusiveSuiteFunction {
+-        /**
+-         * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
+-         * nested suites. Indicates this suite should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn: (this: Suite) => void): Suite;
+-
+-        /**
+-         * [qunit] Describe a "suite" with the given `title`. Indicates this suite should be executed
+-         * exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string): Suite;
+-    }
+-
+-    /**
+-     * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
+-     * nested suites. Indicates this suite should not be executed.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @returns [bdd] `Suite`
+-     * @returns [tdd] `void`
+-     */
+-    interface PendingSuiteFunction {
+-        (title: string, fn: (this: Suite) => void): Suite | void;
+-    }
+-
+-    interface TestFunction {
+-        /**
+-         * Describe a specification or test-case with the given callback `fn` acting as a thunk.
+-         * The name of the function is used as the name of the test.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: Func): Test;
+-
+-        /**
+-         * Describe a specification or test-case with the given callback `fn` acting as a thunk.
+-         * The name of the function is used as the name of the test.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: AsyncFunc): Test;
+-
+-        /**
+-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+-         * as a thunk.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: Func): Test;
+-
+-        /**
+-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+-         * as a thunk.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: AsyncFunc): Test;
+-
+-        /**
+-         * Indicates this test should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        only: ExclusiveTestFunction;
+-
+-        /**
+-         * Indicates this test should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        skip: PendingTestFunction;
+-
+-        /**
+-         * Number of attempts to retry.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        retries(n: number): void;
+-    }
+-
+-    interface ExclusiveTestFunction {
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
+-         * acting as a thunk. The name of the function is used as the name of the test. Indicates
+-         * this test should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: Func): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
+-         * acting as a thunk. The name of the function is used as the name of the test. Indicates
+-         * this test should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: AsyncFunc): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
+-         * callback `fn` acting as a thunk. Indicates this test should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: Func): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
+-         * callback `fn` acting as a thunk. Indicates this test should be executed exclusively.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: AsyncFunc): Test;
+-    }
+-
+-    interface PendingTestFunction {
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
+-         * acting as a thunk. The name of the function is used as the name of the test. Indicates
+-         * this test should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: Func): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
+-         * acting as a thunk. The name of the function is used as the name of the test. Indicates
+-         * this test should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (fn: AsyncFunc): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
+-         * callback `fn` acting as a thunk. Indicates this test should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: Func): Test;
+-
+-        /**
+-         * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
+-         * callback `fn` acting as a thunk. Indicates this test should not be executed.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        (title: string, fn?: AsyncFunc): Test;
+-    }
+-
+-    /**
+-     * Execute after each test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#afterEach
+-     */
+-    let afterEach: HookFunction;
+-
+-    /**
+-     * Execute after running tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#after
+-     */
+-    let after: HookFunction;
+-
+-    /**
+-     * Execute before each test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#beforeEach
+-     */
+-    let beforeEach: HookFunction;
+-
+-    /**
+-     * Execute before running tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#before
+-     */
+-    let before: HookFunction;
+-
+-    /**
+-     * Describe a "suite" containing nested suites and tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     */
+-    let describe: SuiteFunction;
+-
+-    /**
+-     * Describes a test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     */
+-    let it: TestFunction;
+-
+-    /**
+-     * Describes a pending test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     */
+-    let xit: PendingTestFunction;
+-
+-    /**
+-     * Execute before each test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#beforeEach
+-     */
+-    let setup: HookFunction;
+-
+-    /**
+-     * Execute before running tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#before
+-     */
+-    let suiteSetup: HookFunction;
+-
+-    /**
+-     * Execute after running tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#after
+-     */
+-    let suiteTeardown: HookFunction;
+-
+-    /**
+-     * Describe a "suite" containing nested suites and tests.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     */
+-    let suite: SuiteFunction;
+-
+-    /**
+-     * Execute after each test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#afterEach
+-     */
+-    let teardown: HookFunction;
+-
+-    /**
+-     * Describes a test case.
+-     *
+-     * - _Only available when invoked via the mocha CLI._
+-     */
+-    let test: TestFunction;
+-
+-    /**
+-     * Triggers root suite execution.
+-     *
+-     * - _Only available if flag --delay is passed into Mocha._
+-     * - _Only available when invoked via the mocha CLI._
+-     *
+-     * @see https://mochajs.org/api/global.html#runWithSuite
+-     */
+-    function run(): void;
+-
+-    // #endregion Test interface augmentations
+-
+-    namespace reporters {
+-        /**
+-         * Initialize a new `Base` reporter.
+-         *
+-         * All other reporters generally inherit from this reporter, providing stats such as test duration,
+-         * number of tests passed / failed, etc.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Base.html
+-         */
+-        class Base {
+-            constructor(runner: Runner, options?: MochaOptions);
+-
+-            /**
+-             * Test run statistics
+-             */
+-            stats: Stats;
+-
+-            /**
+-             * Test failures
+-             */
+-            failures: Test[];
+-
+-            /**
+-             * The configured runner
+-             */
+-            runner: Runner;
+-
+-            /**
+-             * Output common epilogue used by many of the bundled reporters.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.Base.html#.Base#epilogue
+-             */
+-            epilogue(): void;
+-
+-            done?(failures: number, fn?: (failures: number) => void): void;
+-        }
+-
+-        namespace Base {
+-            /**
+-             * Enables coloring by default
+-             *
+-             * @see https://mochajs.org/api/module-base#.useColors
+-             */
+-            let useColors: boolean;
+-
+-            /**
+-             * Inline diffs instead of +/-
+-             *
+-             * @see https://mochajs.org/api/module-base#.inlineDiffs
+-             */
+-            let inlineDiffs: boolean;
+-
+-            /**
+-             * Default color map
+-             *
+-             * @see https://mochajs.org/api/module-base#.colors
+-             */
+-            const colors: ColorMap;
+-
+-            /**
+-             * Default color map
+-             *
+-             * @see https://mochajs.org/api/module-base#.colors
+-             */
+-            interface ColorMap {
+-                // added by Base
+-                pass: number;
+-                fail: number;
+-                "bright pass": number;
+-                "bright fail": number;
+-                "bright yellow": number;
+-                pending: number;
+-                suite: number;
+-                "error title": number;
+-                "error message": number;
+-                "error stack": number;
+-                checkmark: number;
+-                fast: number;
+-                medium: number;
+-                slow: number;
+-                green: number;
+-                light: number;
+-                "diff gutter": number;
+-                "diff added": number;
+-                "diff removed": number;
+-
+-                // added by Progress
+-                progress: number;
+-
+-                // added by Landing
+-                plane: number;
+-                "plane crash": number;
+-                runway: number;
+-
+-                [key: string]: number;
+-            }
+-
+-            /**
+-             * Default symbol map
+-             *
+-             * @see https://mochajs.org/api/module-base#.symbols
+-             */
+-            const symbols: SymbolMap;
+-
+-            /**
+-             * Default symbol map
+-             *
+-             * @see https://mochajs.org/api/module-base#.symbols
+-             */
+-            interface SymbolMap {
+-                ok: string;
+-                err: string;
+-                dot: string;
+-                comma: string;
+-                bang: string;
+-                [key: string]: string;
+-            }
+-
+-            /**
+-             * Color `str` with the given `type` (from `colors`)
+-             *
+-             * @see https://mochajs.org/api/module-base#.color
+-             */
+-            function color(type: string, str: string): string;
+-
+-            /**
+-             * Expose terminal window size
+-             *
+-             * @see https://mochajs.org/api/module-base#.window
+-             */
+-            const window: {
+-                width: number;
+-            };
+-
+-            /**
+-             * ANSI TTY control sequences common among reporters.
+-             *
+-             * @see https://mochajs.org/api/module-base#.cursor
+-             */
+-            namespace cursor {
+-                /**
+-                 * Hides the cursor
+-                 */
+-                function hide(): void;
+-
+-                /**
+-                 * Shows the cursor
+-                 */
+-                function show(): void;
+-
+-                /**
+-                 * Deletes the current line
+-                 */
+-                function deleteLine(): void;
+-
+-                /**
+-                 * Moves to the beginning of the line
+-                 */
+-                function beginningOfLine(): void;
+-
+-                /**
+-                 * Clears the line and moves to the beginning of the line.
+-                 */
+-                function CR(): void;
+-            }
+-
+-            /**
+-             * Returns a diff between two strings with colored ANSI output.
+-             *
+-             * @see https://mochajs.org/api/module-base#.generateDiff
+-             */
+-            function generateDiff(actual: string, expected: string): string;
+-
+-            /**
+-             * Output the given `failures` as a list.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.Base.html#.exports.list1
+-             */
+-            function list(failures: Test[]): void;
+-        }
+-
+-        /**
+-         * Initialize a new `Dot` matrix test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Dot.html
+-         */
+-        class Dot extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `Doc` reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Doc.html
+-         */
+-        class Doc extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `TAP` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.TAP.html
+-         */
+-        class TAP extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `JSON` reporter
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.JSON.html
+-         */
+-        class JSON extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `HTML` reporter.
+-         *
+-         * - _This reporter cannot be used on the console._
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.HTML.html
+-         */
+-        class HTML extends Base {
+-            /**
+-             * Provide suite URL.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.HTML.html#suiteURL
+-             */
+-            suiteURL(suite: Suite): string;
+-
+-            /**
+-             * Provide test URL.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.HTML.html#testURL
+-             */
+-            testURL(test: Test): string;
+-
+-            /**
+-             * Adds code toggle functionality for the provided test's list element.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.HTML.html#addCodeToggle
+-             */
+-            addCodeToggle(el: HTMLLIElement, contents: string): void;
+-        }
+-
+-        /**
+-         * Initialize a new `List` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.List.html
+-         */
+-        class List extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `Min` minimal test reporter (best used with --watch).
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Min.html
+-         */
+-        class Min extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `Spec` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Spec.html
+-         */
+-        class Spec extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `NyanCat` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Nyan.html
+-         */
+-        class Nyan extends Base {
+-            private colorIndex;
+-            private numberOfLines;
+-            private rainbowColors;
+-            private scoreboardWidth;
+-            private tick;
+-            private trajectories;
+-            private trajectoryWidthMax;
+-            private draw;
+-            private drawScoreboard;
+-            private appendRainbow;
+-            private drawRainbow;
+-            private drawNyanCat;
+-            private face;
+-            private cursorUp;
+-            private cursorDown;
+-            private generateColors;
+-            private rainbowify;
+-        }
+-
+-        /**
+-         * Initialize a new `XUnit` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.XUnit.html
+-         */
+-        class XUnit extends Base {
+-            constructor(runner: Runner, options?: XUnit.MochaOptions);
+-
+-            /**
+-             * Override done to close the stream (if it's a file).
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#done
+-             */
+-            done(failures: number, fn: (failures: number) => void): void;
+-
+-            /**
+-             * Write out the given line.
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#write
+-             */
+-            write(line: string): void;
+-
+-            /**
+-             * Output tag for the given `test.`
+-             *
+-             * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#test
+-             */
+-            test(test: Test): void;
+-        }
+-
+-        namespace XUnit {
+-            interface MochaOptions extends Mocha.MochaOptions {
+-                reporterOptions?: ReporterOptions;
+-            }
+-
+-            interface ReporterOptions {
+-                output?: string;
+-                suiteName?: string;
+-            }
+-        }
+-
+-        /**
+-         * Initialize a new `Markdown` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Markdown.html
+-         */
+-        class Markdown extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `Progress` bar test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Progress.html
+-         */
+-        class Progress extends Base {
+-            constructor(runner: Runner, options?: Progress.MochaOptions);
+-        }
+-
+-        namespace Progress {
+-            interface MochaOptions extends Mocha.MochaOptions {
+-                reporterOptions?: ReporterOptions;
+-            }
+-
+-            interface ReporterOptions {
+-                open?: string;
+-                complete?: string;
+-                incomplete?: string;
+-                close?: string;
+-                verbose?: boolean;
+-            }
+-        }
+-
+-        /**
+-         * Initialize a new `Landing` reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.Landing.html
+-         */
+-        class Landing extends Base {
+-        }
+-
+-        /**
+-         * Initialize a new `JSONStream` test reporter.
+-         *
+-         * @see https://mochajs.org/api/Mocha.reporters.JSONStream.html
+-         */
+-        class JSONStream extends Base {
+-        }
+-
+-        // value-only aliases
+-        const base: typeof Base;
+-        const dot: typeof Dot;
+-        const doc: typeof Doc;
+-        const tap: typeof TAP;
+-        const json: typeof JSON;
+-        const html: typeof HTML;
+-        const list: typeof List;
+-        const spec: typeof Spec;
+-        const nyan: typeof Nyan;
+-        const xunit: typeof XUnit;
+-        const markdown: typeof Markdown;
+-        const progress: typeof Progress;
+-        const landing: typeof Landing;
+-        // NOTE: not possible to type this correctly:
+-        // const "json-stream": typeof JSONStream;
+-    }
+-
+-    /**
+-     * Initialize a new `Runnable` with the given `title` and callback `fn`.
+-     *
+-     * @see https://mochajs.org/api/Runnable.html
+-     */
+-    class Runnable {
+-        private _slow;
+-        private _retries;
+-        private _currentRetry;
+-        private _timeout;
+-        private _timeoutError;
+-
+-        constructor(title: string, fn?: Func | AsyncFunc);
+-
+-        title: string;
+-        fn: Func | AsyncFunc | undefined;
+-        body: string;
+-        async: boolean;
+-        sync: boolean;
+-        timedOut: boolean;
+-        pending: boolean;
+-        duration?: number;
+-        parent?: Suite;
+-        state?: "failed" | "passed";
+-        timer?: any;
+-        ctx?: Context;
+-        callback?: Done;
+-        allowUncaught?: boolean;
+-        file?: string;
+-
+-        /**
+-         * Get test timeout.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#timeout
+-         */
+-        timeout(): number;
+-
+-        /**
+-         * Set test timeout.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#timeout
+-         */
+-        timeout(ms: string | number): this;
+-
+-        /**
+-         * Get test slowness threshold.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#slow
+-         */
+-        slow(): number;
+-
+-        /**
+-         * Set test slowness threshold.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#slow
+-         */
+-        slow(ms: string | number): this;
+-
+-        /**
+-         * Halt and mark as pending.
+-         */
+-        skip(): never;
+-
+-        /**
+-         * Check if this runnable or its parent suite is marked as pending.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#isPending
+-         */
+-        isPending(): boolean;
+-
+-        /**
+-         * Return `true` if this Runnable has failed.
+-         */
+-        isFailed(): boolean;
+-
+-        /**
+-         * Return `true` if this Runnable has passed.
+-         */
+-        isPassed(): boolean;
+-
+-        /**
+-         * Set or get number of retries.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#retries
+-         */
+-        retries(): number;
+-
+-        /**
+-         * Set or get number of retries.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#retries
+-         */
+-        retries(n: number): void;
+-
+-        /**
+-         * Set or get current retry
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#currentRetry
+-         */
+-        protected currentRetry(): number;
+-
+-        /**
+-         * Set or get current retry
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#currentRetry
+-         */
+-        protected currentRetry(n: number): void;
+-
+-        /**
+-         * Return the full title generated by recursively concatenating the parent's full title.
+-         */
+-        fullTitle(): string;
+-
+-        /**
+-         * Return the title path generated by concatenating the parent's title path with the title.
+-         */
+-        titlePath(): string[];
+-
+-        /**
+-         * Clear the timeout.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#clearTimeout
+-         */
+-        clearTimeout(): void;
+-
+-        /**
+-         * Inspect the runnable void of private properties.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#inspect
+-         */
+-        inspect(): string;
+-
+-        /**
+-         * Reset the timeout.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#resetTimeout
+-         */
+-        resetTimeout(): void;
+-
+-        /**
+-         * Get a list of whitelisted globals for this test run.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#globals
+-         */
+-        globals(): string[];
+-
+-        /**
+-         * Set a list of whitelisted globals for this test run.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#globals
+-         */
+-        globals(globals: ReadonlyArray<string>): void;
+-
+-        /**
+-         * Run the test and invoke `fn(err)`.
+-         *
+-         * @see https://mochajs.org/api/Runnable.html#run
+-         */
+-        run(fn: Done): void;
+-    }
+-
+-    // #region Runnable "error" event
+-    interface Runnable extends NodeJS.EventEmitter {
+-        on(event: "error", listener: (error: any) => void): this;
+-        once(event: "error", listener: (error: any) => void): this;
+-        addListener(event: "error", listener: (error: any) => void): this;
+-        removeListener(event: "error", listener: (error: any) => void): this;
+-        prependListener(event: "error", listener: (error: any) => void): this;
+-        prependOnceListener(event: "error", listener: (error: any) => void): this;
+-        emit(name: "error", error: any): boolean;
+-    }
+-    // #endregion Runnable "error" event
+-    // #region Runnable untyped events
+-    interface Runnable extends NodeJS.EventEmitter {
+-        on(event: string, listener: (...args: any[]) => void): this;
+-        once(event: string, listener: (...args: any[]) => void): this;
+-        addListener(event: string, listener: (...args: any[]) => void): this;
+-        removeListener(event: string, listener: (...args: any[]) => void): this;
+-        prependListener(event: string, listener: (...args: any[]) => void): this;
+-        prependOnceListener(event: string, listener: (...args: any[]) => void): this;
+-        emit(name: string, ...args: any[]): boolean;
+-    }
+-    // #endregion Runnable untyped events
+-
+-    /**
+-     * Test context
+-     *
+-     * @see https://mochajs.org/api/module-Context.html#~Context
+-     */
+-    class Context {
+-        private _runnable;
+-
+-        test?: Runnable;
+-        currentTest?: Test;
+-
+-        /**
+-         * Get the context `Runnable`.
+-         */
+-        runnable(): Runnable;
+-
+-        /**
+-         * Set the context `Runnable`.
+-         */
+-        runnable(runnable: Runnable): this;
+-
+-        /**
+-         * Get test timeout.
+-         */
+-        timeout(): number;
+-
+-        /**
+-         * Set test timeout.
+-         */
+-        timeout(ms: string | number): this;
+-
+-        /**
+-         * Get test slowness threshold.
+-         */
+-        slow(): number;
+-
+-        /**
+-         * Set test slowness threshold.
+-         */
+-        slow(ms: string | number): this;
+-
+-        /**
+-         * Mark a test as skipped.
+-         */
+-        skip(): never;
+-
+-        /**
+-         * Get the number of allowed retries on failed tests.
+-         */
+-        retries(): number;
+-
+-        /**
+-         * Set the number of allowed retries on failed tests.
+-         */
+-        retries(n: number): this;
+-
+-        [key: string]: any;
+-    }
+-
+-    interface RunnerConstants {
+-        readonly EVENT_HOOK_BEGIN: 'hook';
+-        readonly EVENT_HOOK_END: 'hook end';
+-        readonly EVENT_RUN_BEGIN: 'start';
+-        readonly EVENT_DELAY_BEGIN: 'waiting';
+-        readonly EVENT_DELAY_END: 'ready';
+-        readonly EVENT_RUN_END: 'end';
+-        readonly EVENT_SUITE_BEGIN: 'suite';
+-        readonly EVENT_SUITE_END: 'suite end';
+-        readonly EVENT_TEST_BEGIN: 'test';
+-        readonly EVENT_TEST_END: 'test end';
+-        readonly EVENT_TEST_FAIL: 'fail';
+-        readonly EVENT_TEST_PASS: 'pass';
+-        readonly EVENT_TEST_PENDING: 'pending';
+-        readonly EVENT_TEST_RETRY: 'retry';
+-    }
+-
+-    /**
+-     * Initialize a `Runner` for the given `suite`.
+-     *
+-     * @see https://mochajs.org/api/Mocha.Runner.html
+-     */
+-    class Runner {
+-        private _globals;
+-        private _abort;
+-        private _delay;
+-        private _defaultGrep;
+-        private next;
+-        private hookErr;
+-        private prevGlobalsLength;
+-        private nextSuite;
+-
+-        static readonly constants: RunnerConstants;
+-
+-        constructor(suite: Suite, delay: boolean);
+-
+-        suite: Suite;
+-        started: boolean;
+-        total: number;
+-        failures: number;
+-        asyncOnly?: boolean;
+-        allowUncaught?: boolean;
+-        fullStackTrace?: boolean;
+-        forbidOnly?: boolean;
+-        forbidPending?: boolean;
+-        checkLeaks?: boolean;
+-        test?: Test;
+-        currentRunnable?: Runnable;
+-        stats?: Stats; // added by reporters
+-
+-        /**
+-         * Run tests with full titles matching `re`. Updates runner.total
+-         * with number of tests matched.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#grep
+-         */
+-        grep(re: RegExp, invert: boolean): this;
+-
+-        /**
+-         * Returns the number of tests matching the grep search for the
+-         * given suite.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#grepTotal
+-         */
+-        grepTotal(suite: Suite): number;
+-
+-        /**
+-         * Gets the allowed globals.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#globals
+-         */
+-        globals(): string[];
+-
+-        /**
+-         * Allow the given `arr` of globals.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#globals
+-         */
+-        globals(arr: ReadonlyArray<string>): this;
+-
+-        /**
+-         * Run the root suite and invoke `fn(failures)` on completion.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#run
+-         */
+-        run(fn?: (failures: number) => void): this;
+-
+-        /**
+-         * Cleanly abort execution.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#abort
+-         */
+-        abort(): this;
+-
+-        /**
+-         * Handle uncaught exceptions.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#uncaught
+-         */
+-        uncaught(err: any): void;
+-
+-        /**
+-         * Wrapper for setImmediate, process.nextTick, or browser polyfill.
+-         */
+-        protected static immediately(callback: Function): void;
+-
+-        /**
+-         * Return a list of global properties.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#globalProps
+-         */
+-        protected globalProps(): string[];
+-
+-        /**
+-         * Check for global variable leaks.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#checkGlobals
+-         */
+-        protected checkGlobals(test: Test): void;
+-
+-        /**
+-         * Fail the given `test`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#fail
+-         */
+-        protected fail(test: Test, err: any): void;
+-
+-        /**
+-         * Fail the given `hook` with `err`.
+-         *
+-         * Hook failures work in the following pattern:
+-         * - If bail, then exit
+-         * - Failed `before` hook skips all tests in a suite and subsuites,
+-         *   but jumps to corresponding `after` hook
+-         * - Failed `before each` hook skips remaining tests in a
+-         *   suite and jumps to corresponding `after each` hook,
+-         *   which is run only once
+-         * - Failed `after` hook does not alter
+-         *   execution order
+-         * - Failed `after each` hook skips remaining tests in a
+-         *   suite and subsuites, but executes other `after each`
+-         *   hooks
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#failHook
+-         */
+-        protected failHook(hook: Hook, err: any): void;
+-
+-        /**
+-         * Run hook `name` callbacks and then invoke `fn()`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#hook
+-         */
+-        protected hook(name: string, fn: () => void): void;
+-
+-        /**
+-         * Run hook `name` for the given array of `suites`
+-         * in order, and callback `fn(err, errSuite)`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#hooks
+-         */
+-        protected hooks(name: string, suites: Suite[], fn: (err?: any, errSuite?: Suite) => void): void;
+-
+-        /**
+-         * Run hooks from the top level down.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#hookUp
+-         */
+-        protected hookUp(name: string, fn: (err?: any, errSuite?: Suite) => void): void;
+-
+-        /**
+-         * Run hooks from the bottom up.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#hookDown
+-         */
+-        protected hookDown(name: string, fn: (err?: any, errSuite?: Suite) => void): void;
+-
+-        /**
+-         * Return an array of parent Suites from closest to furthest.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#parents
+-         */
+-        protected parents(): Suite[];
+-
+-        /**
+-         * Run the current test and callback `fn(err)`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#runTest
+-         */
+-        protected runTest(fn: Done): any;
+-
+-        /**
+-         * Run tests in the given `suite` and invoke the callback `fn()` when complete.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#runTests
+-         */
+-        protected runTests(suite: Suite, fn: (errSuite?: Suite) => void): void;
+-
+-        /**
+-         * Run the given `suite` and invoke the callback `fn()` when complete.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Runner.html#runSuite
+-         */
+-        protected runSuite(suite: Suite, fn: (errSuite?: Suite) => void): void;
+-    }
+-
+-    // #region Runner "waiting" event
+-    interface Runner {
+-        on(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        once(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        addListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        removeListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        prependListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        prependOnceListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
+-        emit(name: "waiting", rootSuite: Suite): boolean;
+-    }
+-    // #endregion Runner "waiting" event
+-    // #region Runner "start" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "start", listener: () => void): this;
+-        once(event: "start", listener: () => void): this;
+-        addListener(event: "start", listener: () => void): this;
+-        removeListener(event: "start", listener: () => void): this;
+-        prependListener(event: "start", listener: () => void): this;
+-        prependOnceListener(event: "start", listener: () => void): this;
+-        emit(name: "start"): boolean;
+-    }
+-    // #endregion Runner "start" event
+-    // #region Runner "end" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "end", listener: () => void): this;
+-        once(event: "end", listener: () => void): this;
+-        addListener(event: "end", listener: () => void): this;
+-        removeListener(event: "end", listener: () => void): this;
+-        prependListener(event: "end", listener: () => void): this;
+-        prependOnceListener(event: "end", listener: () => void): this;
+-        emit(name: "end"): boolean;
+-    }
+-    // #endregion Runner "end" event
+-    // #region Runner "suite" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "suite", listener: (suite: Suite) => void): this;
+-        once(event: "suite", listener: (suite: Suite) => void): this;
+-        addListener(event: "suite", listener: (suite: Suite) => void): this;
+-        removeListener(event: "suite", listener: (suite: Suite) => void): this;
+-        prependListener(event: "suite", listener: (suite: Suite) => void): this;
+-        prependOnceListener(event: "suite", listener: (suite: Suite) => void): this;
+-        emit(name: "suite", suite: Suite): boolean;
+-    }
+-    // #endregion Runner "suite" event
+-    // #region Runner "suite end" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "suite end", listener: (suite: Suite) => void): this;
+-        once(event: "suite end", listener: (suite: Suite) => void): this;
+-        addListener(event: "suite end", listener: (suite: Suite) => void): this;
+-        removeListener(event: "suite end", listener: (suite: Suite) => void): this;
+-        prependListener(event: "suite end", listener: (suite: Suite) => void): this;
+-        prependOnceListener(event: "suite end", listener: (suite: Suite) => void): this;
+-        emit(name: "suite end", suite: Suite): boolean;
+-    }
+-    // #endregion Runner "suite end" event
+-    // #region Runner "test" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "test", listener: (test: Test) => void): this;
+-        once(event: "test", listener: (test: Test) => void): this;
+-        addListener(event: "test", listener: (test: Test) => void): this;
+-        removeListener(event: "test", listener: (test: Test) => void): this;
+-        prependListener(event: "test", listener: (test: Test) => void): this;
+-        prependOnceListener(event: "test", listener: (test: Test) => void): this;
+-        emit(name: "test", test: Test): boolean;
+-    }
+-    // #endregion Runner "test" event
+-    // #region Runner "test end" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "test end", listener: (test: Test) => void): this;
+-        once(event: "test end", listener: (test: Test) => void): this;
+-        addListener(event: "test end", listener: (test: Test) => void): this;
+-        removeListener(event: "test end", listener: (test: Test) => void): this;
+-        prependListener(event: "test end", listener: (test: Test) => void): this;
+-        prependOnceListener(event: "test end", listener: (test: Test) => void): this;
+-        emit(name: "test end", test: Test): boolean;
+-    }
+-    // #endregion Runner "test end" event
+-    // #region Runner "hook" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "hook", listener: (hook: Hook) => void): this;
+-        once(event: "hook", listener: (hook: Hook) => void): this;
+-        addListener(event: "hook", listener: (hook: Hook) => void): this;
+-        removeListener(event: "hook", listener: (hook: Hook) => void): this;
+-        prependListener(event: "hook", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "hook", listener: (hook: Hook) => void): this;
+-        emit(name: "hook", hook: Hook): boolean;
+-    }
+-    // #endregion Runner "hook" event
+-    // #region Runner "hook end" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "hook end", listener: (hook: Hook) => void): this;
+-        once(event: "hook end", listener: (hook: Hook) => void): this;
+-        addListener(event: "hook end", listener: (hook: Hook) => void): this;
+-        removeListener(event: "hook end", listener: (hook: Hook) => void): this;
+-        prependListener(event: "hook end", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "hook end", listener: (hook: Hook) => void): this;
+-        emit(name: "hook end", hook: Hook): boolean;
+-    }
+-    // #endregion Runner "hook end" event
+-    // #region Runner "pass" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "pass", listener: (test: Test) => void): this;
+-        once(event: "pass", listener: (test: Test) => void): this;
+-        addListener(event: "pass", listener: (test: Test) => void): this;
+-        removeListener(event: "pass", listener: (test: Test) => void): this;
+-        prependListener(event: "pass", listener: (test: Test) => void): this;
+-        prependOnceListener(event: "pass", listener: (test: Test) => void): this;
+-        emit(name: "pass", test: Test): boolean;
+-    }
+-    // #endregion Runner "pass" event
+-    // #region Runner "fail" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "fail", listener: (test: Test, err: any) => void): this;
+-        once(event: "fail", listener: (test: Test, err: any) => void): this;
+-        addListener(event: "fail", listener: (test: Test, err: any) => void): this;
+-        removeListener(event: "fail", listener: (test: Test, err: any) => void): this;
+-        prependListener(event: "fail", listener: (test: Test, err: any) => void): this;
+-        prependOnceListener(event: "fail", listener: (test: Test, err: any) => void): this;
+-        emit(name: "fail", test: Test, err: any): boolean;
+-    }
+-    // #endregion Runner "fail" event
+-    // #region Runner "pending" event
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: "pending", listener: (test: Test) => void): this;
+-        once(event: "pending", listener: (test: Test) => void): this;
+-        addListener(event: "pending", listener: (test: Test) => void): this;
+-        removeListener(event: "pending", listener: (test: Test) => void): this;
+-        prependListener(event: "pending", listener: (test: Test) => void): this;
+-        prependOnceListener(event: "pending", listener: (test: Test) => void): this;
+-        emit(name: "pending", test: Test): boolean;
+-    }
+-    // #endregion Runner "pending" event
+-    // #region Runner untyped events
+-    interface Runner extends NodeJS.EventEmitter {
+-        on(event: string, listener: (...args: any[]) => void): this;
+-        once(event: string, listener: (...args: any[]) => void): this;
+-        addListener(event: string, listener: (...args: any[]) => void): this;
+-        removeListener(event: string, listener: (...args: any[]) => void): this;
+-        prependListener(event: string, listener: (...args: any[]) => void): this;
+-        prependOnceListener(event: string, listener: (...args: any[]) => void): this;
+-        emit(name: string, ...args: any[]): boolean;
+-    }
+-    // #endregion Runner untyped events
+-
+-    interface SuiteConstants {
+-        readonly EVENT_FILE_POST_REQUIRE: 'post-require';
+-        readonly EVENT_FILE_PRE_REQUIRE: 'pre-require';
+-        readonly EVENT_FILE_REQUIRE: 'require';
+-        readonly EVENT_ROOT_SUITE_RUN: 'run';
+-
+-        readonly HOOK_TYPE_AFTER_ALL: 'afterAll';
+-        readonly HOOK_TYPE_AFTER_EACH: 'afterEach';
+-        readonly HOOK_TYPE_BEFORE_ALL: 'beforeAll';
+-        readonly HOOK_TYPE_BEFORE_EACH: 'beforeEach';
+-
+-        readonly EVENT_SUITE_ADD_HOOK_AFTER_ALL: 'afterAll';
+-        readonly EVENT_SUITE_ADD_HOOK_AFTER_EACH: 'afterEach';
+-        readonly EVENT_SUITE_ADD_HOOK_BEFORE_ALL: 'beforeAll';
+-        readonly EVENT_SUITE_ADD_HOOK_BEFORE_EACH: 'beforeEach';
+-        readonly EVENT_SUITE_ADD_SUITE: 'suite';
+-        readonly EVENT_SUITE_ADD_TEST: 'test';
+-    }
+-
+-    /**
+-     * Initialize a new `Suite` with the given `title` and `ctx`.
+-     *
+-     * @see https://mochajs.org/api/Mocha.Suite.html
+-     */
+-    class Suite {
+-        private _beforeEach;
+-        private _beforeAll;
+-        private _afterEach;
+-        private _afterAll;
+-        private _timeout;
+-        private _slow;
+-        private _bail;
+-        private _retries;
+-        private _onlyTests;
+-        private _onlySuites;
+-
+-        static readonly constants: SuiteConstants;
+-
+-        constructor(title: string, parentContext?: Context);
+-
+-        ctx: Context;
+-        suites: Suite[];
+-        tests: Test[];
+-        pending: boolean;
+-        file?: string;
+-        root: boolean;
+-        delayed: boolean;
+-        parent: Suite | undefined;
+-        title: string;
+-
+-        /**
+-         * Create a new `Suite` with the given `title` and parent `Suite`. When a suite
+-         * with the same title is already present, that suite is returned to provide
+-         * nicer reporter and more flexible meta-testing.
+-         *
+-         * @see https://mochajs.org/api/mocha#.exports.create
+-         */
+-        static create(parent: Suite, title: string): Suite;
+-
+-        /**
+-         * Return a clone of this `Suite`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#clone
+-         */
+-        clone(): Suite;
+-
+-        /**
+-         * Get timeout `ms`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#timeout
+-         */
+-        timeout(): number;
+-
+-        /**
+-         * Set timeout `ms` or short-hand such as "2s".
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#timeout
+-         */
+-        timeout(ms: string | number): this;
+-
+-        /**
+-         * Get number of times to retry a failed test.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#retries
+-         */
+-        retries(): number;
+-
+-        /**
+-         * Set number of times to retry a failed test.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#retries
+-         */
+-        retries(n: string | number): this;
+-
+-        /**
+-         * Get slow `ms`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#slow
+-         */
+-        slow(): number;
+-
+-        /**
+-         * Set slow `ms` or short-hand such as "2s".
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#slow
+-         */
+-        slow(ms: string | number): this;
+-
+-        /**
+-         * Get whether to bail after first error.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#bail
+-         */
+-        bail(): boolean;
+-
+-        /**
+-         * Set whether to bail after first error.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#bail
+-         */
+-        bail(bail: boolean): this;
+-
+-        /**
+-         * Check if this suite or its parent suite is marked as pending.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#isPending
+-         */
+-        isPending(): boolean;
+-
+-        /**
+-         * Run `fn(test[, done])` before running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
+-         */
+-        beforeAll(fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
+-         */
+-        beforeAll(fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
+-         */
+-        beforeAll(title: string, fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
+-         */
+-        beforeAll(title: string, fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
+-         */
+-        afterAll(fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
+-         */
+-        afterAll(fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
+-         */
+-        afterAll(title: string, fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after running tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
+-         */
+-        afterAll(title: string, fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
+-         */
+-        beforeEach(fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
+-         */
+-        beforeEach(fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
+-         */
+-        beforeEach(title: string, fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` before each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
+-         */
+-        beforeEach(title: string, fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
+-         */
+-        afterEach(fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
+-         */
+-        afterEach(fn?: AsyncFunc): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
+-         */
+-        afterEach(title: string, fn?: Func): this;
+-
+-        /**
+-         * Run `fn(test[, done])` after each test case.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
+-         */
+-        afterEach(title: string, fn?: AsyncFunc): this;
+-
+-        /**
+-         * Add a test `suite`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#addSuite
+-         */
+-        addSuite(suite: Suite): this;
+-
+-        /**
+-         * Add a `test` to this suite.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#addTest
+-         */
+-        addTest(test: Test): this;
+-
+-        /**
+-         * Return the full title generated by recursively concatenating the parent's
+-         * full title.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#fullTitle
+-         */
+-        fullTitle(): string;
+-
+-        /**
+-         * Return the title path generated by recursively concatenating the parent's
+-         * title path.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#titlePath
+-         */
+-        titlePath(): string[];
+-
+-        /**
+-         * Return the total number of tests.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#total
+-         */
+-        total(): number;
+-
+-        /**
+-         * Iterates through each suite recursively to find all tests. Applies a
+-         * function in the format `fn(test)`.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#eachTest
+-         */
+-        eachTest(fn: (test: Test) => void): this;
+-
+-        /**
+-         * This will run the root suite if we happen to be running in delayed mode.
+-         *
+-         * @see https://mochajs.org/api/Mocha.Suite.html#run
+-         */
+-        run(): void;
+-
+-        /**
+-         * Generic hook-creator.
+-         */
+-        protected _createHook(title: string, fn?: Func | AsyncFunc): Hook;
+-    }
+-
+-    // #region Suite "beforeAll" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        once(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        addListener(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        removeListener(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        prependListener(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "beforeAll", listener: (hook: Hook) => void): this;
+-        emit(name: "beforeAll", hook: Hook): boolean;
+-    }
+-    // #endregion Suite "beforeAll" event
+-    // #region Suite "afterAll" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "afterAll", listener: (hook: Hook) => void): this;
+-        once(event: "afterAll", listener: (hook: Hook) => void): this;
+-        addListener(event: "afterAll", listener: (hook: Hook) => void): this;
+-        removeListener(event: "afterAll", listener: (hook: Hook) => void): this;
+-        prependListener(event: "afterAll", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "afterAll", listener: (hook: Hook) => void): this;
+-        emit(name: "afterAll", hook: Hook): boolean;
+-    }
+-    // #endregion Suite "afterAll" event
+-    // #region Suite "beforeEach" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        once(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        addListener(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        removeListener(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        prependListener(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "beforeEach", listener: (hook: Hook) => void): this;
+-        emit(name: "beforeEach", hook: Hook): boolean;
+-    }
+-    // #endregion Suite "beforeEach" event
+-    // #region Suite "afterEach" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "afterEach", listener: (hook: Hook) => void): this;
+-        once(event: "afterEach", listener: (hook: Hook) => void): this;
+-        addListener(event: "afterEach", listener: (hook: Hook) => void): this;
+-        removeListener(event: "afterEach", listener: (hook: Hook) => void): this;
+-        prependListener(event: "afterEach", listener: (hook: Hook) => void): this;
+-        prependOnceListener(event: "afterEach", listener: (hook: Hook) => void): this;
+-        emit(name: "afterEach", hook: Hook): boolean;
+-    }
+-    // #endregion Suite "afterEach" event
+-    // #region Suite "suite" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "suite", listener: (suite: Suite) => void): this;
+-        once(event: "suite", listener: (suite: Suite) => void): this;
+-        addListener(event: "suite", listener: (suite: Suite) => void): this;
+-        removeListener(event: "suite", listener: (suite: Suite) => void): this;
+-        prependListener(event: "suite", listener: (suite: Suite) => void): this;
+-        prependOnceListener(event: "suite", listener: (suite: Suite) => void): this;
+-        emit(name: "suite", suite: Suite): boolean;
+-    }
+-    // #endregion Suite "suite" event
+-    // #region Suite "test" event
+-    interface Suite {
+-        on(event: "test", listener: (test: Test) => void): this;
+-        once(event: "test", listener: (test: Test) => void): this;
+-        addListener(event: "test", listener: (test: Test) => void): this;
+-        removeListener(event: "test", listener: (test: Test) => void): this;
+-        prependListener(event: "test", listener: (test: Test) => void): this;
+-        prependOnceListener(event: "test", listener: (test: Test) => void): this;
+-        emit(name: "test", test: Test): boolean;
+-    }
+-    // #endregion Suite "test" event
+-    // #region Suite "run" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "run", listener: () => void): this;
+-        once(event: "run", listener: () => void): this;
+-        addListener(event: "run", listener: () => void): this;
+-        removeListener(event: "run", listener: () => void): this;
+-        prependListener(event: "run", listener: () => void): this;
+-        prependOnceListener(event: "run", listener: () => void): this;
+-        emit(name: "run"): boolean;
+-    }
+-    // #endregion Suite "run" event
+-    // #region Suite "pre-require" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        once(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        addListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        removeListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        prependListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        prependOnceListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        emit(name: "pre-require", context: MochaGlobals, file: string, mocha: Mocha): boolean;
+-    }
+-    // #endregion Suite "pre-require" event
+-    // #region Suite "require" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        once(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        addListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        removeListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        prependListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        prependOnceListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
+-        emit(name: "require", module: any, file: string, mocha: Mocha): boolean;
+-    }
+-    // #endregion Suite "require" event
+-    // #region Suite "post-require" event
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        once(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        addListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        removeListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        prependListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        prependOnceListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
+-        emit(name: "post-require", context: MochaGlobals, file: string, mocha: Mocha): boolean;
+-    }
+-    // #endregion Suite "post-require" event
+-    // #region Suite untyped events
+-    interface Suite extends NodeJS.EventEmitter {
+-        on(event: string, listener: (...args: any[]) => void): this;
+-        once(event: string, listener: (...args: any[]) => void): this;
+-        addListener(event: string, listener: (...args: any[]) => void): this;
+-        removeListener(event: string, listener: (...args: any[]) => void): this;
+-        prependListener(event: string, listener: (...args: any[]) => void): this;
+-        prependOnceListener(event: string, listener: (...args: any[]) => void): this;
+-        emit(name: string, ...args: any[]): boolean;
+-    }
+-    // #endregion Runner untyped events
+-
+-    /**
+-     * Initialize a new `Hook` with the given `title` and callback `fn`
+-     *
+-     * @see https://mochajs.org/api/Hook.html
+-     */
+-    class Hook extends Runnable {
+-        private _error;
+-
+-        type: "hook";
+-        originalTitle?: string; // added by Runner
+-
+-        /**
+-         * Get the test `err`.
+-         *
+-         * @see https://mochajs.org/api/Hook.html#error
+-         */
+-        error(): any;
+-
+-        /**
+-         * Set the test `err`.
+-         *
+-         * @see https://mochajs.org/api/Hook.html#error
+-         */
+-        error(err: any): void;
+-    }
+-
+-    /**
+-     * An alternative way to define root hooks that works with parallel runs.
+-     *
+-     * Root hooks work with any interface, but the property names do not change.
+-     * In other words, if you are using the tdd interface, suiteSetup maps to beforeAll, and setup maps to beforeEach.
+-     *
+-     * As with other hooks, `this` refers to to the current context object.
+-     *
+-     * @see https://mochajs.org/#root-hook-plugins
+-     */
+-    interface RootHookObject {
+-      /**
+-       * In serial mode, run after all tests end, once only.
+-       * In parallel mode, run after all tests end, for each file.
+-       */
+-      afterAll?: Func | AsyncFunc | Func[] | AsyncFunc[];
+-      /**
+-       * In serial mode (Mocha's default), before all tests begin, once only.
+-       * In parallel mode, run before all tests begin, for each file.
+-       */
+-      beforeAll?: Func | AsyncFunc | Func[] | AsyncFunc[];
+-      /**
+-       * In both modes, run after every test.
+-       */
+-      afterEach?: Func | AsyncFunc | Func[] | AsyncFunc[];
+-      /**
+-       * In both modes, run before each test.
+-       */
+-      beforeEach?: Func | AsyncFunc | Func[] | AsyncFunc[];
+-    }
+-
+-    /**
+-     * Initialize a new `Test` with the given `title` and callback `fn`.
+-     *
+-     * @see https://mochajs.org/api/Test.html
+-     */
+-    class Test extends Runnable {
+-        type: "test";
+-        speed?: "slow" | "medium" | "fast"; // added by reporters
+-        err?: Error; // added by reporters
+-        clone(): Test;
+-    }
+-
+-    /**
+-     * Test statistics
+-     */
+-    interface Stats {
+-        suites: number;
+-        tests: number;
+-        passes: number;
+-        pending: number;
+-        failures: number;
+-        start?: Date;
+-        end?: Date;
+-        duration?: number;
+-    }
+-
+-    type TestInterface = (suite: Suite) => void;
+-
+-    interface ReporterConstructor {
+-        new (runner: Runner, options: MochaOptions): reporters.Base;
+-    }
+-
+-    type Done = (err?: any) => void;
+-
+-    /**
+-     * Callback function used for tests and hooks.
+-     */
+-    type Func = (this: Context, done: Done) => void;
+-
+-    /**
+-     * Async callback function used for tests and hooks.
+-     */
+-    type AsyncFunc = (this: Context) => PromiseLike<any>;
+-
+-    /**
+-     * Options to pass to Mocha.
+-     */
+-    interface MochaOptions {
+-        /** Test interfaces ("bdd", "tdd", "exports", etc.). */
+-        ui?: Interface;
+-
+-        /**
+-         * Reporter constructor, built-in reporter name, or reporter module path. Defaults to
+-         * `"spec"`.
+-         */
+-        reporter?: string | ReporterConstructor;
+-
+-        /** Options to pass to the reporter. */
+-        reporterOptions?: any;
+-
+-        /** Array of accepted globals. */
+-        globals?: string[];
+-
+-        /** timeout in milliseconds or time string like '1s'. */
+-        timeout?: number | string;
+-
+-        /** number of times to retry failed tests. */
+-        retries?: number;
+-
+-        /** bail on the first test failure. */
+-        bail?: boolean;
+-
+-        /** milliseconds to wait before considering a test slow. */
+-        slow?: number;
+-
+-        /** check for global variable leaks. */
+-        checkLeaks?: boolean;
+-
+-        /** display the full stack trace on failure. */
+-        fullStackTrace?: boolean;
+-
+-        /** string or regexp to filter tests with. */
+-        grep?: string | RegExp;
+-
+-        /** Enable growl support. */
+-        growl?: boolean;
+-
+-        /** Color TTY output from reporter */
+-        color?: boolean;
+-
+-        /** Use inline diffs rather than +/-. */
+-        inlineDiffs?: boolean;
+-
+-        /** Do not show diffs at all. */
+-        hideDiff?: boolean;
+-
+-        /** Run job in parallel */
+-        parallel?: boolean;
+-
+-        /** Max number of worker processes for parallel runs */
+-        jobs?: number;
+-
+-        /** Assigns hooks to the root suite */
+-        rootHooks?: RootHookObject;
+-
+-        asyncOnly?: boolean;
+-        delay?: boolean;
+-        forbidOnly?: boolean;
+-        forbidPending?: boolean;
+-        noHighlighting?: boolean;
+-        allowUncaught?: boolean;
+-        fullTrace?: boolean;
+-    }
+-
+-    interface MochaInstanceOptions extends MochaOptions {
+-        files?: string[];
+-    }
+-
+-    /**
+-     * Variables added to the global scope by Mocha when run in the CLI.
+-     */
+-    interface MochaGlobals {
+-        /**
+-         * Execute before running tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#before
+-         */
+-        before: HookFunction;
+-
+-        /**
+-         * Execute after running tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#after
+-         */
+-        after: HookFunction;
+-
+-        /**
+-         * Execute before each test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#beforeEach
+-         */
+-        beforeEach: HookFunction;
+-
+-        /**
+-         * Execute after each test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#afterEach
+-         */
+-        afterEach: HookFunction;
+-
+-        /**
+-         * Describe a "suite" containing nested suites and tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        describe: SuiteFunction;
+-
+-        /**
+-         * Describe a "suite" containing nested suites and tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        context: SuiteFunction;
+-
+-        /**
+-         * Pending suite.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        xdescribe: PendingSuiteFunction;
+-
+-        /**
+-         * Pending suite.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        xcontext: PendingSuiteFunction;
+-
+-        /**
+-         * Describes a test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        it: TestFunction;
+-
+-        /**
+-         * Describes a test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        specify: TestFunction;
+-
+-        /**
+-         * Describes a pending test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        xit: PendingTestFunction;
+-
+-        /**
+-         * Describes a pending test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        xspecify: PendingTestFunction;
+-
+-        /**
+-         * Execute before running tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#before
+-         */
+-        suiteSetup: HookFunction;
+-
+-        /**
+-         * Execute after running tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#after
+-         */
+-        suiteTeardown: HookFunction;
+-
+-        /**
+-         * Execute before each test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#beforeEach
+-         */
+-        setup: HookFunction;
+-
+-        /**
+-         * Execute after each test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         *
+-         * @see https://mochajs.org/api/global.html#afterEach
+-         */
+-        teardown: HookFunction;
+-
+-        /**
+-         * Describe a "suite" containing nested suites and tests.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        suite: SuiteFunction;
+-
+-        /**
+-         * Describes a test case.
+-         *
+-         * - _Only available when invoked via the mocha CLI._
+-         */
+-        test: TestFunction;
+-
+-        run: typeof run;
+-    }
+-
+-    /**
+-     * Third-party declarations that want to add new entries to the `Reporter` union can
+-     * contribute names here.
+-     */
+-    interface ReporterContributions {
+-        Base: never;
+-        base: never;
+-        Dot: never;
+-        dot: never;
+-        TAP: never;
+-        tap: never;
+-        JSON: never;
+-        json: never;
+-        HTML: never;
+-        html: never;
+-        List: never;
+-        list: never;
+-        Min: never;
+-        min: never;
+-        Spec: never;
+-        spec: never;
+-        Nyan: never;
+-        nyan: never;
+-        XUnit: never;
+-        xunit: never;
+-        Markdown: never;
+-        markdown: never;
+-        Progress: never;
+-        progress: never;
+-        Landing: never;
+-        landing: never;
+-        JSONStream: never;
+-        "json-stream": never;
+-    }
+-
+-    type Reporter = keyof ReporterContributions;
+-
+-    /**
+-     * Third-party declarations that want to add new entries to the `Interface` union can
+-     * contribute names here.
+-     */
+-    interface InterfaceContributions {
+-        bdd: never;
+-        tdd: never;
+-        qunit: never;
+-        exports: never;
+-    }
+-
+-    type Interface = keyof InterfaceContributions;
+-}
+-
+-// #region Test interface augmentations
+-
+-/**
+- * Triggers root suite execution.
+- *
+- * - _Only available if flag --delay is passed into Mocha._
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#runWithSuite
+- */
+-declare function run(): void;
+-
+-/**
+- * Execute before running tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#before
+- */
+-declare var before: Mocha.HookFunction;
+-
+-/**
+- * Execute before running tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#before
+- */
+-declare var suiteSetup: Mocha.HookFunction;
+-
+-/**
+- * Execute after running tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#after
+- */
+-declare var after: Mocha.HookFunction;
+-
+-/**
+- * Execute after running tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#after
+- */
+-declare var suiteTeardown: Mocha.HookFunction;
+-
+-/**
+- * Execute before each test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#beforeEach
+- */
+-declare var beforeEach: Mocha.HookFunction;
+-
+-/**
+- * Execute before each test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#beforeEach
+- */
+-declare var setup: Mocha.HookFunction;
+-
+-/**
+- * Execute after each test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#afterEach
+- */
+-declare var afterEach: Mocha.HookFunction;
+-
+-/**
+- * Execute after each test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- *
+- * @see https://mochajs.org/api/global.html#afterEach
+- */
+-declare var teardown: Mocha.HookFunction;
+-
+-/**
+- * Describe a "suite" containing nested suites and tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var describe: Mocha.SuiteFunction;
+-
+-/**
+- * Describe a "suite" containing nested suites and tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var context: Mocha.SuiteFunction;
+-
+-/**
+- * Describe a "suite" containing nested suites and tests.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var suite: Mocha.SuiteFunction;
+-
+-/**
+- * Pending suite.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var xdescribe: Mocha.PendingSuiteFunction;
+-
+-/**
+- * Pending suite.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var xcontext: Mocha.PendingSuiteFunction;
+-
+-/**
+- * Describes a test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var it: Mocha.TestFunction;
+-
+-/**
+- * Describes a test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var specify: Mocha.TestFunction;
+-
+-/**
+- * Describes a test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var test: Mocha.TestFunction;
+-
+-/**
+- * Describes a pending test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var xit: Mocha.PendingTestFunction;
+-
+-/**
+- * Describes a pending test case.
+- *
+- * - _Only available when invoked via the mocha CLI._
+- */
+-declare var xspecify: Mocha.PendingTestFunction;
+-
+-// #endregion Test interface augmentations
+-
+-// #region Reporter augmentations
+-
+-// Forward declaration for `HTMLLIElement` from lib.dom.d.ts.
+-// Required by Mocha.reporters.HTML.
+-// NOTE: Mocha *must not* have a direct dependency on DOM types.
+-// tslint:disable-next-line no-empty-interface
+-interface HTMLLIElement { }
+-
+-// Augments the DOM `Window` object when lib.dom.d.ts is loaded.
+-// tslint:disable-next-line no-empty-interface
+-interface Window extends Mocha.MochaGlobals { }
+-
+-declare namespace NodeJS {
+-    // Forward declaration for `NodeJS.EventEmitter` from node.d.ts.
+-    // Required by Mocha.Runnable, Mocha.Runner, and Mocha.Suite.
+-    // NOTE: Mocha *must not* have a direct dependency on @types/node.
+-    // tslint:disable-next-line no-empty-interface
+-    interface EventEmitter { }
+-
+-    // Augments NodeJS's `global` object when node.d.ts is loaded
+-    // tslint:disable-next-line no-empty-interface
+-    interface Global extends Mocha.MochaGlobals { }
+-}
+-
+-// #endregion Reporter augmentations
+-
+-// #region Browser augmentations
+-
+-/**
+- * Mocha global.
+- *
+- * - _Only supported in the browser._
+- */
+-declare const mocha: BrowserMocha;
+-
+-interface BrowserMocha extends Mocha {
+-    /**
+-     * Function to allow assertion libraries to throw errors directly into mocha.
+-     * This is useful when running tests in a browser because window.onerror will
+-     * only receive the 'message' attribute of the Error.
+-     *
+-     * - _Only supported in the browser._
+-     */
+-    throwError(err: any): never;
+-
+-    /**
+-     * Setup mocha with the given settings options.
+-     *
+-     * - _Only supported in the browser._
+-     */
+-    setup(opts?: Mocha.Interface | Mocha.MochaOptions): this;
+-}
+-
+-// #endregion Browser augmentations
+-
+-declare module "mocha" {
+-    export = Mocha;
+-}
+-
+-declare module "mocha/lib/ms" {
+-    export = milliseconds;
+-    /**
+-     * Parse the given `str` and return milliseconds.
+-     *
+-     * @see {@link https://mochajs.org/api/module-milliseconds.html}
+-     * @see {@link https://mochajs.org/api/module-milliseconds.html#~parse}
+-     */
+-    function milliseconds(val: string): number;
+-
+-    /**
+-     * Format for `ms`.
+-     *
+-     * @see {@link https://mochajs.org/api/module-milliseconds.html}
+-     * @see {@link https://mochajs.org/api/module-milliseconds.html#~format}
+-     */
+-    function milliseconds(val: number): string;
+-}
+-
+-declare module "mocha/lib/interfaces/common" {
+-    export = common;
+-
+-    function common(suites: Mocha.Suite[], context: Mocha.MochaGlobals, mocha: Mocha): common.CommonFunctions;
+-
+-    namespace common {
+-        interface CommonFunctions {
+-            /**
+-             * This is only present if flag --delay is passed into Mocha. It triggers
+-             * root suite execution.
+-             */
+-            runWithSuite(suite: Mocha.Suite): () => void;
+-
+-            /**
+-             * Execute before running tests.
+-             */
+-            before(fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute before running tests.
+-             */
+-            before(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute after running tests.
+-             */
+-            after(fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute after running tests.
+-             */
+-            after(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute before each test case.
+-             */
+-            beforeEach(fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute before each test case.
+-             */
+-            beforeEach(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute after each test case.
+-             */
+-            afterEach(fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            /**
+-             * Execute after each test case.
+-             */
+-            afterEach(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
+-
+-            suite: SuiteFunctions;
+-            test: TestFunctions;
+-        }
+-
+-        interface CreateOptions {
+-            /** Title of suite */
+-            title: string;
+-
+-            /** Suite function */
+-            fn?: (this: Mocha.Suite) => void;
+-
+-            /** Is suite pending? */
+-            pending?: boolean;
+-
+-            /** Filepath where this Suite resides */
+-            file?: string;
+-
+-            /** Is suite exclusive? */
+-            isOnly?: boolean;
+-        }
+-
+-        interface SuiteFunctions {
+-            /**
+-             * Create an exclusive Suite; convenience function
+-             */
+-            only(opts: CreateOptions): Mocha.Suite;
+-
+-            /**
+-             * Create a Suite, but skip it; convenience function
+-             */
+-            skip(opts: CreateOptions): Mocha.Suite;
+-
+-            /**
+-             * Creates a suite.
+-             */
+-            create(opts: CreateOptions): Mocha.Suite;
+-        }
+-
+-        interface TestFunctions {
+-            /**
+-             * Exclusive test-case.
+-             */
+-            only(mocha: Mocha, test: Mocha.Test): Mocha.Test;
+-
+-            /**
+-             * Pending test case.
+-             */
+-            skip(title: string): void;
+-
+-            /**
+-             * Number of retry attempts
+-             */
+-            retries(n: number): void;
+-        }
+-    }
+-}
++//z // Type definitions for mocha 8.0
++//z // Project: https://mochajs.org
++//z // Definitions by: Kazi Manzur Rashid <https://github.com/kazimanzurrashid>
++//z //                 otiai10 <https://github.com/otiai10>
++//z //                 Vadim Macagon <https://github.com/enlight>
++//z //                 Andrew Bradley <https://github.com/cspotcode>
++//z //                 Dmitrii Sorin <https://github.com/1999>
++//z // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
++//z // TypeScript Version: 2.1
++
++//z /**
++//z  * Mocha API
++//z  *
++//z  * @see https://mochajs.org/api/mocha
++//z  */
++//z declare class Mocha {
++//z     private _growl;
++//z     private _reporter;
++//z     private _ui;
++
++//z     constructor(options?: Mocha.MochaOptions);
++
++//z     suite: Mocha.Suite;
++//z     files: string[];
++//z     options: Mocha.MochaInstanceOptions;
++
++//z     /**
++//z      * Enable or disable bailing on the first failure.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#bail
++//z      */
++//z     bail(bail?: boolean): this;
++
++//z     /**
++//z      * Add test `file`.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#addFile
++//z      */
++//z     addFile(file: string): this;
++
++//z     /**
++//z      * Set reporter to one of the built-in reporters.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#reporter
++//z      */
++//z     reporter(reporter: Mocha.Reporter, reporterOptions?: any): this;
++
++//z     /**
++//z      * Set reporter to the provided constructor, one of the built-in reporters, or loads a reporter
++//z      * from a module path. Defaults to `"spec"`.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#reporter
++//z      */
++//z     reporter(reporter?: string | Mocha.ReporterConstructor, reporterOptions?: any): this;
++
++//z     /**
++//z      * Set test UI to one of the built-in test interfaces.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#ui
++//z      */
++//z     ui(name: Mocha.Interface): this;
++
++//z     /**
++//z      * Set test UI to one of the built-in test interfaces or loads a test interface from a module
++//z      * path. Defaults to `"bdd"`.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#ui
++//z      */
++//z     ui(name?: string): this;
++
++//z     /**
++//z      * Escape string and add it to grep as a RegExp.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#fgrep
++//z      */
++//z     fgrep(str: string): this;
++
++//z     /**
++//z      * Add regexp to grep, if `re` is a string it is escaped.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#grep
++//z      */
++//z     grep(re: string | RegExp): this;
++
++//z     /**
++//z      * Invert `.grep()` matches.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#invert
++//z      */
++//z     invert(): this;
++
++//z     /**
++//z      * Enable global leak checking.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#checkLeaks
++//z      */
++//z     checkLeaks(): this;
++
++//z     /**
++//z      * Display long stack-trace on failing
++//z      *
++//z      * @see https://mochajs.org/api/mocha#fullTrace
++//z      */
++//z     fullTrace(): this;
++
++//z     /**
++//z      * Enable growl support.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#growl
++//z      */
++//z     growl(): this;
++
++//z     /**
++//z      * Ignore `globals` array or string.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#globals
++//z      */
++//z     globals(globals: string | ReadonlyArray<string>): this;
++
++//z     /**
++//z      * Set the timeout in milliseconds.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#timeout
++//z      */
++//z     timeout(timeout: string | number): this;
++
++//z     /**
++//z      * Set the number of times to retry failed tests.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#retries
++//z      */
++//z     retries(n: number): this;
++
++//z     /**
++//z      * Set slowness threshold in milliseconds.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#slow
++//z      */
++//z     slow(slow: string | number): this;
++
++//z     /**
++//z      * Makes all tests async (accepting a callback)
++//z      *
++//z      * @see https://mochajs.org/api/mocha#asyncOnly.
++//z      */
++//z     asyncOnly(): this;
++
++//z     /**
++//z      * Disable syntax highlighting (in browser).
++//z      *
++//z      * @see https://mochajs.org/api/mocha#noHighlighting
++//z      */
++//z     noHighlighting(): this;
++
++//z     /**
++//z      * Enable uncaught errors to propagate (in browser).
++//z      *
++//z      * @see https://mochajs.org/api/mocha#allowUncaught
++//z      */
++//z     allowUncaught(): boolean;
++
++//z     /**
++//z      * Delay root suite execution.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#delay
++//z      */
++//z     delay(): boolean;
++
++//z     /**
++//z      * Tests marked only fail the suite
++//z      *
++//z      * @see https://mochajs.org/api/mocha#forbidOnly
++//z      */
++//z     forbidOnly(): boolean;
++
++//z     /**
++//z      * Pending tests and tests marked skip fail the suite
++//z      *
++//z      * @see https://mochajs.org/api/mocha#forbidPending
++//z      */
++//z     forbidPending(): boolean;
++
++//z     /**
++//z      * Run tests and invoke `fn()` when complete.
++//z      *
++//z      * Note that `run` relies on Node's `require` to execute
++//z      * the test interface functions and will be subject to the
++//z      * cache - if the files are already in the `require` cache,
++//z      * they will effectively be skipped. Therefore, to run tests
++//z      * multiple times or to run tests in files that are already
++//z      * in the `require` cache, make sure to clear them from the
++//z      * cache first in whichever manner best suits your needs.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#run
++//z      */
++//z     run(fn?: (failures: number) => void): Mocha.Runner;
++
++//z     /**
++//z      * Loads ESM (and CJS) test files asynchronously.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#loadFilesAsync
++//z      */
++//z     loadFilesAsync(): Promise<void>;
++
++//z     /**
++//z      * Load registered files.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#loadFiles
++//z      */
++//z     protected loadFiles(fn?: () => void): void;
++
++//z     /**
++//z      * Unloads `files` from Node's `require` cache.
++//z      *
++//z      * This allows required files to be "freshly" reloaded, providing the ability
++//z      * to reuse a Mocha instance programmatically.
++//z      * Note: does not clear ESM module files from the cache
++//z      */
++//z     unloadFiles(): this;
++
++//z     /**
++//z      * Toggles parallel mode.
++//z      *
++//z      * Must be run before calling `run`. Changes the `Runner` class to
++//z      * use; also enables lazy file loading if not already done so.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#parallelMode
++//z      */
++//z     parallelMode(enabled?: boolean): this;
++
++//z     /**
++//z      * Assigns hooks to the root suite.
++//z      *
++//z      * @see https://mochajs.org/api/mocha#rootHooks
++//z      */
++//z     rootHooks(hooks: Mocha.RootHookObject): this;
++//z }
++
++//z declare namespace Mocha {
++//z     namespace utils {
++//z         /**
++//z          * Compute a slug from the given `str`.
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.slug
++//z          */
++//z         function slug(str: string): string;
++
++//z         /**
++//z          * Strip the function definition from `str`, and re-indent for pre whitespace.
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.clean
++//z          */
++//z         function clean(str: string): string;
++
++//z         /**
++//z          * Highlight the given string of `js`.
++//z          */
++//z         function highlight(js: string): string;
++
++//z         /**
++//z          * Takes some variable and asks `Object.prototype.toString()` what it thinks it is.
++//z          */
++//z         function type(value: any): string;
++
++//z         /**
++//z          * Stringify `value`. Different behavior depending on type of value:
++//z          *
++//z          * - If `value` is undefined or null, return `'[undefined]'` or `'[null]'`, respectively.
++//z          * - If `value` is not an object, function or array, return result of `value.toString()` wrapped in double-quotes.
++//z          * - If `value` is an *empty* object, function, or array, returns `'{}'`, `'[Function]'`, or `'[]'` respectively.
++//z          * - If `value` has properties, call canonicalize} on it, then return result of `JSON.stringify()`
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.stringify
++//z          */
++//z         function stringify(value: any): string;
++
++//z         /**
++//z          * Return a new Thing that has the keys in sorted order. Recursive.
++//z          *
++//z          * If the Thing...
++//z          * - has already been seen, return string `'[Circular]'`
++//z          * - is `undefined`, return string `'[undefined]'`
++//z          * - is `null`, return value `null`
++//z          * - is some other primitive, return the value
++//z          * - is not a primitive or an `Array`, `Object`, or `Function`, return the value of the Thing's `toString()` method
++//z          * - is a non-empty `Array`, `Object`, or `Function`, return the result of calling this function again.
++//z          * - is an empty `Array`, `Object`, or `Function`, returns `'[]'`, `'{}'`, or `'[Function]'` respectively.
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.canonicalize
++//z          */
++//z         function canonicalize(value: any, stack: any[], typeHint: string): any;
++
++//z         /**
++//z          * Lookup file names at the given `path`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.utils.html#.exports.lookupFiles
++//z          */
++//z         function lookupFiles(filepath: string, extensions?: string[], recursive?: boolean): string[];
++
++//z         /**
++//z          * Generate an undefined error with a message warning the user.
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.undefinedError
++//z          */
++//z         function undefinedError(): Error;
++
++//z         /**
++//z          * Generate an undefined error if `err` is not defined.
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.getError
++//z          */
++//z         function getError(err: Error | undefined): Error;
++
++//z         /**
++//z          * When invoking this function you get a filter function that get the Error.stack as an
++//z          * input, and return a prettify output. (i.e: strip Mocha and internal node functions from
++//z          * stack trace).
++//z          *
++//z          * @see https://mochajs.org/api/module-utils.html#.stackTraceFilter
++//z          */
++//z         function stackTraceFilter(): (stack: string) => string;
++//z     }
++
++//z     namespace interfaces {
++//z         function bdd(suite: Suite): void;
++//z         function tdd(suite: Suite): void;
++//z         function qunit(suite: Suite): void;
++//z         function exports(suite: Suite): void;
++//z     }
++
++//z     // #region Test interface augmentations
++
++//z     interface HookFunction {
++//z         /**
++//z          * [bdd, qunit, tdd] Describe a "hook" to execute the given callback `fn`. The name of the
++//z          * function is used as the name of the hook.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: Func): void;
++
++//z         /**
++//z          * [bdd, qunit, tdd] Describe a "hook" to execute the given callback `fn`. The name of the
++//z          * function is used as the name of the hook.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: AsyncFunc): void;
++
++//z         /**
++//z          * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (name: string, fn?: Func): void;
++
++//z         /**
++//z          * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (name: string, fn?: AsyncFunc): void;
++//z     }
++
++//z     interface SuiteFunction {
++//z         /**
++//z          * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
++//z          * nested suites.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn: (this: Suite) => void): Suite;
++
++//z         /**
++//z          * [qunit] Describe a "suite" with the given `title`.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string): Suite;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Indicates this suite should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         only: ExclusiveSuiteFunction;
++
++//z         /**
++//z          * [bdd, tdd] Indicates this suite should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         skip: PendingSuiteFunction;
++//z     }
++
++//z     interface ExclusiveSuiteFunction {
++//z         /**
++//z          * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
++//z          * nested suites. Indicates this suite should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn: (this: Suite) => void): Suite;
++
++//z         /**
++//z          * [qunit] Describe a "suite" with the given `title`. Indicates this suite should be executed
++//z          * exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string): Suite;
++//z     }
++
++//z     /**
++//z      * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
++//z      * nested suites. Indicates this suite should not be executed.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @returns [bdd] `Suite`
++//z      * @returns [tdd] `void`
++//z      */
++//z     interface PendingSuiteFunction {
++//z         (title: string, fn: (this: Suite) => void): Suite | void;
++//z     }
++
++//z     interface TestFunction {
++//z         /**
++//z          * Describe a specification or test-case with the given callback `fn` acting as a thunk.
++//z          * The name of the function is used as the name of the test.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: Func): Test;
++
++//z         /**
++//z          * Describe a specification or test-case with the given callback `fn` acting as a thunk.
++//z          * The name of the function is used as the name of the test.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: AsyncFunc): Test;
++
++//z         /**
++//z          * Describe a specification or test-case with the given `title` and callback `fn` acting
++//z          * as a thunk.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: Func): Test;
++
++//z         /**
++//z          * Describe a specification or test-case with the given `title` and callback `fn` acting
++//z          * as a thunk.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: AsyncFunc): Test;
++
++//z         /**
++//z          * Indicates this test should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         only: ExclusiveTestFunction;
++
++//z         /**
++//z          * Indicates this test should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         skip: PendingTestFunction;
++
++//z         /**
++//z          * Number of attempts to retry.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         retries(n: number): void;
++//z     }
++
++//z     interface ExclusiveTestFunction {
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
++//z          * acting as a thunk. The name of the function is used as the name of the test. Indicates
++//z          * this test should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: Func): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
++//z          * acting as a thunk. The name of the function is used as the name of the test. Indicates
++//z          * this test should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: AsyncFunc): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
++//z          * callback `fn` acting as a thunk. Indicates this test should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: Func): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
++//z          * callback `fn` acting as a thunk. Indicates this test should be executed exclusively.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: AsyncFunc): Test;
++//z     }
++
++//z     interface PendingTestFunction {
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
++//z          * acting as a thunk. The name of the function is used as the name of the test. Indicates
++//z          * this test should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: Func): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given callback `fn`
++//z          * acting as a thunk. The name of the function is used as the name of the test. Indicates
++//z          * this test should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (fn: AsyncFunc): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
++//z          * callback `fn` acting as a thunk. Indicates this test should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: Func): Test;
++
++//z         /**
++//z          * [bdd, tdd, qunit] Describe a specification or test-case with the given `title` and
++//z          * callback `fn` acting as a thunk. Indicates this test should not be executed.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         (title: string, fn?: AsyncFunc): Test;
++//z     }
++
++//z     /**
++//z      * Execute after each test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#afterEach
++//z      */
++//z     let afterEach: HookFunction;
++
++//z     /**
++//z      * Execute after running tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#after
++//z      */
++//z     let after: HookFunction;
++
++//z     /**
++//z      * Execute before each test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#beforeEach
++//z      */
++//z     let beforeEach: HookFunction;
++
++//z     /**
++//z      * Execute before running tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#before
++//z      */
++//z     let before: HookFunction;
++
++//z     /**
++//z      * Describe a "suite" containing nested suites and tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      */
++//z     let describe: SuiteFunction;
++
++//z     /**
++//z      * Describes a test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      */
++//z     let it: TestFunction;
++
++//z     /**
++//z      * Describes a pending test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      */
++//z     let xit: PendingTestFunction;
++
++//z     /**
++//z      * Execute before each test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#beforeEach
++//z      */
++//z     let setup: HookFunction;
++
++//z     /**
++//z      * Execute before running tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#before
++//z      */
++//z     let suiteSetup: HookFunction;
++
++//z     /**
++//z      * Execute after running tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#after
++//z      */
++//z     let suiteTeardown: HookFunction;
++
++//z     /**
++//z      * Describe a "suite" containing nested suites and tests.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      */
++//z     let suite: SuiteFunction;
++
++//z     /**
++//z      * Execute after each test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#afterEach
++//z      */
++//z     let teardown: HookFunction;
++
++//z     /**
++//z      * Describes a test case.
++//z      *
++//z      * - _Only available when invoked via the mocha CLI._
++//z      */
++//z     let test: TestFunction;
++
++//z     /**
++//z      * Triggers root suite execution.
++//z      *
++//z      * - _Only available if flag --delay is passed into Mocha._
++//z      * - _Only available when invoked via the mocha CLI._
++//z      *
++//z      * @see https://mochajs.org/api/global.html#runWithSuite
++//z      */
++//z     function run(): void;
++
++//z     // #endregion Test interface augmentations
++
++//z     namespace reporters {
++//z         /**
++//z          * Initialize a new `Base` reporter.
++//z          *
++//z          * All other reporters generally inherit from this reporter, providing stats such as test duration,
++//z          * number of tests passed / failed, etc.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Base.html
++//z          */
++//z         class Base {
++//z             constructor(runner: Runner, options?: MochaOptions);
++
++//z             /**
++//z              * Test run statistics
++//z              */
++//z             stats: Stats;
++
++//z             /**
++//z              * Test failures
++//z              */
++//z             failures: Test[];
++
++//z             /**
++//z              * The configured runner
++//z              */
++//z             runner: Runner;
++
++//z             /**
++//z              * Output common epilogue used by many of the bundled reporters.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.Base.html#.Base#epilogue
++//z              */
++//z             epilogue(): void;
++
++//z             done?(failures: number, fn?: (failures: number) => void): void;
++//z         }
++
++//z         namespace Base {
++//z             /**
++//z              * Enables coloring by default
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.useColors
++//z              */
++//z             let useColors: boolean;
++
++//z             /**
++//z              * Inline diffs instead of +/-
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.inlineDiffs
++//z              */
++//z             let inlineDiffs: boolean;
++
++//z             /**
++//z              * Default color map
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.colors
++//z              */
++//z             const colors: ColorMap;
++
++//z             /**
++//z              * Default color map
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.colors
++//z              */
++//z             interface ColorMap {
++//z                 // added by Base
++//z                 pass: number;
++//z                 fail: number;
++//z                 "bright pass": number;
++//z                 "bright fail": number;
++//z                 "bright yellow": number;
++//z                 pending: number;
++//z                 suite: number;
++//z                 "error title": number;
++//z                 "error message": number;
++//z                 "error stack": number;
++//z                 checkmark: number;
++//z                 fast: number;
++//z                 medium: number;
++//z                 slow: number;
++//z                 green: number;
++//z                 light: number;
++//z                 "diff gutter": number;
++//z                 "diff added": number;
++//z                 "diff removed": number;
++
++//z                 // added by Progress
++//z                 progress: number;
++
++//z                 // added by Landing
++//z                 plane: number;
++//z                 "plane crash": number;
++//z                 runway: number;
++
++//z                 [key: string]: number;
++//z             }
++
++//z             /**
++//z              * Default symbol map
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.symbols
++//z              */
++//z             const symbols: SymbolMap;
++
++//z             /**
++//z              * Default symbol map
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.symbols
++//z              */
++//z             interface SymbolMap {
++//z                 ok: string;
++//z                 err: string;
++//z                 dot: string;
++//z                 comma: string;
++//z                 bang: string;
++//z                 [key: string]: string;
++//z             }
++
++//z             /**
++//z              * Color `str` with the given `type` (from `colors`)
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.color
++//z              */
++//z             function color(type: string, str: string): string;
++
++//z             /**
++//z              * Expose terminal window size
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.window
++//z              */
++//z             const window: {
++//z                 width: number;
++//z             };
++
++//z             /**
++//z              * ANSI TTY control sequences common among reporters.
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.cursor
++//z              */
++//z             namespace cursor {
++//z                 /**
++//z                  * Hides the cursor
++//z                  */
++//z                 function hide(): void;
++
++//z                 /**
++//z                  * Shows the cursor
++//z                  */
++//z                 function show(): void;
++
++//z                 /**
++//z                  * Deletes the current line
++//z                  */
++//z                 function deleteLine(): void;
++
++//z                 /**
++//z                  * Moves to the beginning of the line
++//z                  */
++//z                 function beginningOfLine(): void;
++
++//z                 /**
++//z                  * Clears the line and moves to the beginning of the line.
++//z                  */
++//z                 function CR(): void;
++//z             }
++
++//z             /**
++//z              * Returns a diff between two strings with colored ANSI output.
++//z              *
++//z              * @see https://mochajs.org/api/module-base#.generateDiff
++//z              */
++//z             function generateDiff(actual: string, expected: string): string;
++
++//z             /**
++//z              * Output the given `failures` as a list.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.Base.html#.exports.list1
++//z              */
++//z             function list(failures: Test[]): void;
++//z         }
++
++//z         /**
++//z          * Initialize a new `Dot` matrix test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Dot.html
++//z          */
++//z         class Dot extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `Doc` reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Doc.html
++//z          */
++//z         class Doc extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `TAP` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.TAP.html
++//z          */
++//z         class TAP extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `JSON` reporter
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.JSON.html
++//z          */
++//z         class JSON extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `HTML` reporter.
++//z          *
++//z          * - _This reporter cannot be used on the console._
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.HTML.html
++//z          */
++//z         class HTML extends Base {
++//z             /**
++//z              * Provide suite URL.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.HTML.html#suiteURL
++//z              */
++//z             suiteURL(suite: Suite): string;
++
++//z             /**
++//z              * Provide test URL.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.HTML.html#testURL
++//z              */
++//z             testURL(test: Test): string;
++
++//z             /**
++//z              * Adds code toggle functionality for the provided test's list element.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.HTML.html#addCodeToggle
++//z              */
++//z             addCodeToggle(el: HTMLLIElement, contents: string): void;
++//z         }
++
++//z         /**
++//z          * Initialize a new `List` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.List.html
++//z          */
++//z         class List extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `Min` minimal test reporter (best used with --watch).
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Min.html
++//z          */
++//z         class Min extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `Spec` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Spec.html
++//z          */
++//z         class Spec extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `NyanCat` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Nyan.html
++//z          */
++//z         class Nyan extends Base {
++//z             private colorIndex;
++//z             private numberOfLines;
++//z             private rainbowColors;
++//z             private scoreboardWidth;
++//z             private tick;
++//z             private trajectories;
++//z             private trajectoryWidthMax;
++//z             private draw;
++//z             private drawScoreboard;
++//z             private appendRainbow;
++//z             private drawRainbow;
++//z             private drawNyanCat;
++//z             private face;
++//z             private cursorUp;
++//z             private cursorDown;
++//z             private generateColors;
++//z             private rainbowify;
++//z         }
++
++//z         /**
++//z          * Initialize a new `XUnit` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.XUnit.html
++//z          */
++//z         class XUnit extends Base {
++//z             constructor(runner: Runner, options?: XUnit.MochaOptions);
++
++//z             /**
++//z              * Override done to close the stream (if it's a file).
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#done
++//z              */
++//z             done(failures: number, fn: (failures: number) => void): void;
++
++//z             /**
++//z              * Write out the given line.
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#write
++//z              */
++//z             write(line: string): void;
++
++//z             /**
++//z              * Output tag for the given `test.`
++//z              *
++//z              * @see https://mochajs.org/api/Mocha.reporters.XUnit.html#test
++//z              */
++//z             test(test: Test): void;
++//z         }
++
++//z         namespace XUnit {
++//z             interface MochaOptions extends Mocha.MochaOptions {
++//z                 reporterOptions?: ReporterOptions;
++//z             }
++
++//z             interface ReporterOptions {
++//z                 output?: string;
++//z                 suiteName?: string;
++//z             }
++//z         }
++
++//z         /**
++//z          * Initialize a new `Markdown` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Markdown.html
++//z          */
++//z         class Markdown extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `Progress` bar test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Progress.html
++//z          */
++//z         class Progress extends Base {
++//z             constructor(runner: Runner, options?: Progress.MochaOptions);
++//z         }
++
++//z         namespace Progress {
++//z             interface MochaOptions extends Mocha.MochaOptions {
++//z                 reporterOptions?: ReporterOptions;
++//z             }
++
++//z             interface ReporterOptions {
++//z                 open?: string;
++//z                 complete?: string;
++//z                 incomplete?: string;
++//z                 close?: string;
++//z                 verbose?: boolean;
++//z             }
++//z         }
++
++//z         /**
++//z          * Initialize a new `Landing` reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.Landing.html
++//z          */
++//z         class Landing extends Base {
++//z         }
++
++//z         /**
++//z          * Initialize a new `JSONStream` test reporter.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.reporters.JSONStream.html
++//z          */
++//z         class JSONStream extends Base {
++//z         }
++
++//z         // value-only aliases
++//z         const base: typeof Base;
++//z         const dot: typeof Dot;
++//z         const doc: typeof Doc;
++//z         const tap: typeof TAP;
++//z         const json: typeof JSON;
++//z         const html: typeof HTML;
++//z         const list: typeof List;
++//z         const spec: typeof Spec;
++//z         const nyan: typeof Nyan;
++//z         const xunit: typeof XUnit;
++//z         const markdown: typeof Markdown;
++//z         const progress: typeof Progress;
++//z         const landing: typeof Landing;
++//z         // NOTE: not possible to type this correctly:
++//z         // const "json-stream": typeof JSONStream;
++//z     }
++
++//z     /**
++//z      * Initialize a new `Runnable` with the given `title` and callback `fn`.
++//z      *
++//z      * @see https://mochajs.org/api/Runnable.html
++//z      */
++//z     class Runnable {
++//z         private _slow;
++//z         private _retries;
++//z         private _currentRetry;
++//z         private _timeout;
++//z         private _timeoutError;
++
++//z         constructor(title: string, fn?: Func | AsyncFunc);
++
++//z         title: string;
++//z         fn: Func | AsyncFunc | undefined;
++//z         body: string;
++//z         async: boolean;
++//z         sync: boolean;
++//z         timedOut: boolean;
++//z         pending: boolean;
++//z         duration?: number;
++//z         parent?: Suite;
++//z         state?: "failed" | "passed";
++//z         timer?: any;
++//z         ctx?: Context;
++//z         callback?: Done;
++//z         allowUncaught?: boolean;
++//z         file?: string;
++
++//z         /**
++//z          * Get test timeout.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#timeout
++//z          */
++//z         timeout(): number;
++
++//z         /**
++//z          * Set test timeout.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#timeout
++//z          */
++//z         timeout(ms: string | number): this;
++
++//z         /**
++//z          * Get test slowness threshold.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#slow
++//z          */
++//z         slow(): number;
++
++//z         /**
++//z          * Set test slowness threshold.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#slow
++//z          */
++//z         slow(ms: string | number): this;
++
++//z         /**
++//z          * Halt and mark as pending.
++//z          */
++//z         skip(): never;
++
++//z         /**
++//z          * Check if this runnable or its parent suite is marked as pending.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#isPending
++//z          */
++//z         isPending(): boolean;
++
++//z         /**
++//z          * Return `true` if this Runnable has failed.
++//z          */
++//z         isFailed(): boolean;
++
++//z         /**
++//z          * Return `true` if this Runnable has passed.
++//z          */
++//z         isPassed(): boolean;
++
++//z         /**
++//z          * Set or get number of retries.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#retries
++//z          */
++//z         retries(): number;
++
++//z         /**
++//z          * Set or get number of retries.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#retries
++//z          */
++//z         retries(n: number): void;
++
++//z         /**
++//z          * Set or get current retry
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#currentRetry
++//z          */
++//z         protected currentRetry(): number;
++
++//z         /**
++//z          * Set or get current retry
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#currentRetry
++//z          */
++//z         protected currentRetry(n: number): void;
++
++//z         /**
++//z          * Return the full title generated by recursively concatenating the parent's full title.
++//z          */
++//z         fullTitle(): string;
++
++//z         /**
++//z          * Return the title path generated by concatenating the parent's title path with the title.
++//z          */
++//z         titlePath(): string[];
++
++//z         /**
++//z          * Clear the timeout.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#clearTimeout
++//z          */
++//z         clearTimeout(): void;
++
++//z         /**
++//z          * Inspect the runnable void of private properties.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#inspect
++//z          */
++//z         inspect(): string;
++
++//z         /**
++//z          * Reset the timeout.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#resetTimeout
++//z          */
++//z         resetTimeout(): void;
++
++//z         /**
++//z          * Get a list of whitelisted globals for this test run.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#globals
++//z          */
++//z         globals(): string[];
++
++//z         /**
++//z          * Set a list of whitelisted globals for this test run.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#globals
++//z          */
++//z         globals(globals: ReadonlyArray<string>): void;
++
++//z         /**
++//z          * Run the test and invoke `fn(err)`.
++//z          *
++//z          * @see https://mochajs.org/api/Runnable.html#run
++//z          */
++//z         run(fn: Done): void;
++//z     }
++
++//z     // #region Runnable "error" event
++//z     interface Runnable extends NodeJS.EventEmitter {
++//z         on(event: "error", listener: (error: any) => void): this;
++//z         once(event: "error", listener: (error: any) => void): this;
++//z         addListener(event: "error", listener: (error: any) => void): this;
++//z         removeListener(event: "error", listener: (error: any) => void): this;
++//z         prependListener(event: "error", listener: (error: any) => void): this;
++//z         prependOnceListener(event: "error", listener: (error: any) => void): this;
++//z         emit(name: "error", error: any): boolean;
++//z     }
++//z     // #endregion Runnable "error" event
++//z     // #region Runnable untyped events
++//z     interface Runnable extends NodeJS.EventEmitter {
++//z         on(event: string, listener: (...args: any[]) => void): this;
++//z         once(event: string, listener: (...args: any[]) => void): this;
++//z         addListener(event: string, listener: (...args: any[]) => void): this;
++//z         removeListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependOnceListener(event: string, listener: (...args: any[]) => void): this;
++//z         emit(name: string, ...args: any[]): boolean;
++//z     }
++//z     // #endregion Runnable untyped events
++
++//z     /**
++//z      * Test context
++//z      *
++//z      * @see https://mochajs.org/api/module-Context.html#~Context
++//z      */
++//z     class Context {
++//z         private _runnable;
++
++//z         test?: Runnable;
++//z         currentTest?: Test;
++
++//z         /**
++//z          * Get the context `Runnable`.
++//z          */
++//z         runnable(): Runnable;
++
++//z         /**
++//z          * Set the context `Runnable`.
++//z          */
++//z         runnable(runnable: Runnable): this;
++
++//z         /**
++//z          * Get test timeout.
++//z          */
++//z         timeout(): number;
++
++//z         /**
++//z          * Set test timeout.
++//z          */
++//z         timeout(ms: string | number): this;
++
++//z         /**
++//z          * Get test slowness threshold.
++//z          */
++//z         slow(): number;
++
++//z         /**
++//z          * Set test slowness threshold.
++//z          */
++//z         slow(ms: string | number): this;
++
++//z         /**
++//z          * Mark a test as skipped.
++//z          */
++//z         skip(): never;
++
++//z         /**
++//z          * Get the number of allowed retries on failed tests.
++//z          */
++//z         retries(): number;
++
++//z         /**
++//z          * Set the number of allowed retries on failed tests.
++//z          */
++//z         retries(n: number): this;
++
++//z         [key: string]: any;
++//z     }
++
++//z     interface RunnerConstants {
++//z         readonly EVENT_HOOK_BEGIN: 'hook';
++//z         readonly EVENT_HOOK_END: 'hook end';
++//z         readonly EVENT_RUN_BEGIN: 'start';
++//z         readonly EVENT_DELAY_BEGIN: 'waiting';
++//z         readonly EVENT_DELAY_END: 'ready';
++//z         readonly EVENT_RUN_END: 'end';
++//z         readonly EVENT_SUITE_BEGIN: 'suite';
++//z         readonly EVENT_SUITE_END: 'suite end';
++//z         readonly EVENT_TEST_BEGIN: 'test';
++//z         readonly EVENT_TEST_END: 'test end';
++//z         readonly EVENT_TEST_FAIL: 'fail';
++//z         readonly EVENT_TEST_PASS: 'pass';
++//z         readonly EVENT_TEST_PENDING: 'pending';
++//z         readonly EVENT_TEST_RETRY: 'retry';
++//z     }
++
++//z     /**
++//z      * Initialize a `Runner` for the given `suite`.
++//z      *
++//z      * @see https://mochajs.org/api/Mocha.Runner.html
++//z      */
++//z     class Runner {
++//z         private _globals;
++//z         private _abort;
++//z         private _delay;
++//z         private _defaultGrep;
++//z         private next;
++//z         private hookErr;
++//z         private prevGlobalsLength;
++//z         private nextSuite;
++
++//z         static readonly constants: RunnerConstants;
++
++//z         constructor(suite: Suite, delay: boolean);
++
++//z         suite: Suite;
++//z         started: boolean;
++//z         total: number;
++//z         failures: number;
++//z         asyncOnly?: boolean;
++//z         allowUncaught?: boolean;
++//z         fullStackTrace?: boolean;
++//z         forbidOnly?: boolean;
++//z         forbidPending?: boolean;
++//z         checkLeaks?: boolean;
++//z         test?: Test;
++//z         currentRunnable?: Runnable;
++//z         stats?: Stats; // added by reporters
++
++//z         /**
++//z          * Run tests with full titles matching `re`. Updates runner.total
++//z          * with number of tests matched.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#grep
++//z          */
++//z         grep(re: RegExp, invert: boolean): this;
++
++//z         /**
++//z          * Returns the number of tests matching the grep search for the
++//z          * given suite.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#grepTotal
++//z          */
++//z         grepTotal(suite: Suite): number;
++
++//z         /**
++//z          * Gets the allowed globals.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#globals
++//z          */
++//z         globals(): string[];
++
++//z         /**
++//z          * Allow the given `arr` of globals.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#globals
++//z          */
++//z         globals(arr: ReadonlyArray<string>): this;
++
++//z         /**
++//z          * Run the root suite and invoke `fn(failures)` on completion.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#run
++//z          */
++//z         run(fn?: (failures: number) => void): this;
++
++//z         /**
++//z          * Cleanly abort execution.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#.Runner#abort
++//z          */
++//z         abort(): this;
++
++//z         /**
++//z          * Handle uncaught exceptions.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#uncaught
++//z          */
++//z         uncaught(err: any): void;
++
++//z         /**
++//z          * Wrapper for setImmediate, process.nextTick, or browser polyfill.
++//z          */
++//z         protected static immediately(callback: Function): void;
++
++//z         /**
++//z          * Return a list of global properties.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#globalProps
++//z          */
++//z         protected globalProps(): string[];
++
++//z         /**
++//z          * Check for global variable leaks.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#checkGlobals
++//z          */
++//z         protected checkGlobals(test: Test): void;
++
++//z         /**
++//z          * Fail the given `test`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#fail
++//z          */
++//z         protected fail(test: Test, err: any): void;
++
++//z         /**
++//z          * Fail the given `hook` with `err`.
++//z          *
++//z          * Hook failures work in the following pattern:
++//z          * - If bail, then exit
++//z          * - Failed `before` hook skips all tests in a suite and subsuites,
++//z          *   but jumps to corresponding `after` hook
++//z          * - Failed `before each` hook skips remaining tests in a
++//z          *   suite and jumps to corresponding `after each` hook,
++//z          *   which is run only once
++//z          * - Failed `after` hook does not alter
++//z          *   execution order
++//z          * - Failed `after each` hook skips remaining tests in a
++//z          *   suite and subsuites, but executes other `after each`
++//z          *   hooks
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#failHook
++//z          */
++//z         protected failHook(hook: Hook, err: any): void;
++
++//z         /**
++//z          * Run hook `name` callbacks and then invoke `fn()`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#hook
++//z          */
++//z         protected hook(name: string, fn: () => void): void;
++
++//z         /**
++//z          * Run hook `name` for the given array of `suites`
++//z          * in order, and callback `fn(err, errSuite)`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#hooks
++//z          */
++//z         protected hooks(name: string, suites: Suite[], fn: (err?: any, errSuite?: Suite) => void): void;
++
++//z         /**
++//z          * Run hooks from the top level down.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#hookUp
++//z          */
++//z         protected hookUp(name: string, fn: (err?: any, errSuite?: Suite) => void): void;
++
++//z         /**
++//z          * Run hooks from the bottom up.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#hookDown
++//z          */
++//z         protected hookDown(name: string, fn: (err?: any, errSuite?: Suite) => void): void;
++
++//z         /**
++//z          * Return an array of parent Suites from closest to furthest.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#parents
++//z          */
++//z         protected parents(): Suite[];
++
++//z         /**
++//z          * Run the current test and callback `fn(err)`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#runTest
++//z          */
++//z         protected runTest(fn: Done): any;
++
++//z         /**
++//z          * Run tests in the given `suite` and invoke the callback `fn()` when complete.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#runTests
++//z          */
++//z         protected runTests(suite: Suite, fn: (errSuite?: Suite) => void): void;
++
++//z         /**
++//z          * Run the given `suite` and invoke the callback `fn()` when complete.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Runner.html#runSuite
++//z          */
++//z         protected runSuite(suite: Suite, fn: (errSuite?: Suite) => void): void;
++//z     }
++
++//z     // #region Runner "waiting" event
++//z     interface Runner {
++//z         on(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         once(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         addListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         removeListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         prependListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         prependOnceListener(event: "waiting", listener: (rootSuite: Suite) => void): this;
++//z         emit(name: "waiting", rootSuite: Suite): boolean;
++//z     }
++//z     // #endregion Runner "waiting" event
++//z     // #region Runner "start" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "start", listener: () => void): this;
++//z         once(event: "start", listener: () => void): this;
++//z         addListener(event: "start", listener: () => void): this;
++//z         removeListener(event: "start", listener: () => void): this;
++//z         prependListener(event: "start", listener: () => void): this;
++//z         prependOnceListener(event: "start", listener: () => void): this;
++//z         emit(name: "start"): boolean;
++//z     }
++//z     // #endregion Runner "start" event
++//z     // #region Runner "end" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "end", listener: () => void): this;
++//z         once(event: "end", listener: () => void): this;
++//z         addListener(event: "end", listener: () => void): this;
++//z         removeListener(event: "end", listener: () => void): this;
++//z         prependListener(event: "end", listener: () => void): this;
++//z         prependOnceListener(event: "end", listener: () => void): this;
++//z         emit(name: "end"): boolean;
++//z     }
++//z     // #endregion Runner "end" event
++//z     // #region Runner "suite" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "suite", listener: (suite: Suite) => void): this;
++//z         once(event: "suite", listener: (suite: Suite) => void): this;
++//z         addListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         removeListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         prependListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         prependOnceListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         emit(name: "suite", suite: Suite): boolean;
++//z     }
++//z     // #endregion Runner "suite" event
++//z     // #region Runner "suite end" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "suite end", listener: (suite: Suite) => void): this;
++//z         once(event: "suite end", listener: (suite: Suite) => void): this;
++//z         addListener(event: "suite end", listener: (suite: Suite) => void): this;
++//z         removeListener(event: "suite end", listener: (suite: Suite) => void): this;
++//z         prependListener(event: "suite end", listener: (suite: Suite) => void): this;
++//z         prependOnceListener(event: "suite end", listener: (suite: Suite) => void): this;
++//z         emit(name: "suite end", suite: Suite): boolean;
++//z     }
++//z     // #endregion Runner "suite end" event
++//z     // #region Runner "test" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "test", listener: (test: Test) => void): this;
++//z         once(event: "test", listener: (test: Test) => void): this;
++//z         addListener(event: "test", listener: (test: Test) => void): this;
++//z         removeListener(event: "test", listener: (test: Test) => void): this;
++//z         prependListener(event: "test", listener: (test: Test) => void): this;
++//z         prependOnceListener(event: "test", listener: (test: Test) => void): this;
++//z         emit(name: "test", test: Test): boolean;
++//z     }
++//z     // #endregion Runner "test" event
++//z     // #region Runner "test end" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "test end", listener: (test: Test) => void): this;
++//z         once(event: "test end", listener: (test: Test) => void): this;
++//z         addListener(event: "test end", listener: (test: Test) => void): this;
++//z         removeListener(event: "test end", listener: (test: Test) => void): this;
++//z         prependListener(event: "test end", listener: (test: Test) => void): this;
++//z         prependOnceListener(event: "test end", listener: (test: Test) => void): this;
++//z         emit(name: "test end", test: Test): boolean;
++//z     }
++//z     // #endregion Runner "test end" event
++//z     // #region Runner "hook" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "hook", listener: (hook: Hook) => void): this;
++//z         once(event: "hook", listener: (hook: Hook) => void): this;
++//z         addListener(event: "hook", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "hook", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "hook", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "hook", listener: (hook: Hook) => void): this;
++//z         emit(name: "hook", hook: Hook): boolean;
++//z     }
++//z     // #endregion Runner "hook" event
++//z     // #region Runner "hook end" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "hook end", listener: (hook: Hook) => void): this;
++//z         once(event: "hook end", listener: (hook: Hook) => void): this;
++//z         addListener(event: "hook end", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "hook end", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "hook end", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "hook end", listener: (hook: Hook) => void): this;
++//z         emit(name: "hook end", hook: Hook): boolean;
++//z     }
++//z     // #endregion Runner "hook end" event
++//z     // #region Runner "pass" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "pass", listener: (test: Test) => void): this;
++//z         once(event: "pass", listener: (test: Test) => void): this;
++//z         addListener(event: "pass", listener: (test: Test) => void): this;
++//z         removeListener(event: "pass", listener: (test: Test) => void): this;
++//z         prependListener(event: "pass", listener: (test: Test) => void): this;
++//z         prependOnceListener(event: "pass", listener: (test: Test) => void): this;
++//z         emit(name: "pass", test: Test): boolean;
++//z     }
++//z     // #endregion Runner "pass" event
++//z     // #region Runner "fail" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         once(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         addListener(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         removeListener(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         prependListener(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         prependOnceListener(event: "fail", listener: (test: Test, err: any) => void): this;
++//z         emit(name: "fail", test: Test, err: any): boolean;
++//z     }
++//z     // #endregion Runner "fail" event
++//z     // #region Runner "pending" event
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: "pending", listener: (test: Test) => void): this;
++//z         once(event: "pending", listener: (test: Test) => void): this;
++//z         addListener(event: "pending", listener: (test: Test) => void): this;
++//z         removeListener(event: "pending", listener: (test: Test) => void): this;
++//z         prependListener(event: "pending", listener: (test: Test) => void): this;
++//z         prependOnceListener(event: "pending", listener: (test: Test) => void): this;
++//z         emit(name: "pending", test: Test): boolean;
++//z     }
++//z     // #endregion Runner "pending" event
++//z     // #region Runner untyped events
++//z     interface Runner extends NodeJS.EventEmitter {
++//z         on(event: string, listener: (...args: any[]) => void): this;
++//z         once(event: string, listener: (...args: any[]) => void): this;
++//z         addListener(event: string, listener: (...args: any[]) => void): this;
++//z         removeListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependOnceListener(event: string, listener: (...args: any[]) => void): this;
++//z         emit(name: string, ...args: any[]): boolean;
++//z     }
++//z     // #endregion Runner untyped events
++
++//z     interface SuiteConstants {
++//z         readonly EVENT_FILE_POST_REQUIRE: 'post-require';
++//z         readonly EVENT_FILE_PRE_REQUIRE: 'pre-require';
++//z         readonly EVENT_FILE_REQUIRE: 'require';
++//z         readonly EVENT_ROOT_SUITE_RUN: 'run';
++
++//z         readonly HOOK_TYPE_AFTER_ALL: 'afterAll';
++//z         readonly HOOK_TYPE_AFTER_EACH: 'afterEach';
++//z         readonly HOOK_TYPE_BEFORE_ALL: 'beforeAll';
++//z         readonly HOOK_TYPE_BEFORE_EACH: 'beforeEach';
++
++//z         readonly EVENT_SUITE_ADD_HOOK_AFTER_ALL: 'afterAll';
++//z         readonly EVENT_SUITE_ADD_HOOK_AFTER_EACH: 'afterEach';
++//z         readonly EVENT_SUITE_ADD_HOOK_BEFORE_ALL: 'beforeAll';
++//z         readonly EVENT_SUITE_ADD_HOOK_BEFORE_EACH: 'beforeEach';
++//z         readonly EVENT_SUITE_ADD_SUITE: 'suite';
++//z         readonly EVENT_SUITE_ADD_TEST: 'test';
++//z     }
++
++//z     /**
++//z      * Initialize a new `Suite` with the given `title` and `ctx`.
++//z      *
++//z      * @see https://mochajs.org/api/Mocha.Suite.html
++//z      */
++//z     class Suite {
++//z         private _beforeEach;
++//z         private _beforeAll;
++//z         private _afterEach;
++//z         private _afterAll;
++//z         private _timeout;
++//z         private _slow;
++//z         private _bail;
++//z         private _retries;
++//z         private _onlyTests;
++//z         private _onlySuites;
++
++//z         static readonly constants: SuiteConstants;
++
++//z         constructor(title: string, parentContext?: Context);
++
++//z         ctx: Context;
++//z         suites: Suite[];
++//z         tests: Test[];
++//z         pending: boolean;
++//z         file?: string;
++//z         root: boolean;
++//z         delayed: boolean;
++//z         parent: Suite | undefined;
++//z         title: string;
++
++//z         /**
++//z          * Create a new `Suite` with the given `title` and parent `Suite`. When a suite
++//z          * with the same title is already present, that suite is returned to provide
++//z          * nicer reporter and more flexible meta-testing.
++//z          *
++//z          * @see https://mochajs.org/api/mocha#.exports.create
++//z          */
++//z         static create(parent: Suite, title: string): Suite;
++
++//z         /**
++//z          * Return a clone of this `Suite`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#clone
++//z          */
++//z         clone(): Suite;
++
++//z         /**
++//z          * Get timeout `ms`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#timeout
++//z          */
++//z         timeout(): number;
++
++//z         /**
++//z          * Set timeout `ms` or short-hand such as "2s".
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#timeout
++//z          */
++//z         timeout(ms: string | number): this;
++
++//z         /**
++//z          * Get number of times to retry a failed test.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#retries
++//z          */
++//z         retries(): number;
++
++//z         /**
++//z          * Set number of times to retry a failed test.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#retries
++//z          */
++//z         retries(n: string | number): this;
++
++//z         /**
++//z          * Get slow `ms`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#slow
++//z          */
++//z         slow(): number;
++
++//z         /**
++//z          * Set slow `ms` or short-hand such as "2s".
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#slow
++//z          */
++//z         slow(ms: string | number): this;
++
++//z         /**
++//z          * Get whether to bail after first error.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#bail
++//z          */
++//z         bail(): boolean;
++
++//z         /**
++//z          * Set whether to bail after first error.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#bail
++//z          */
++//z         bail(bail: boolean): this;
++
++//z         /**
++//z          * Check if this suite or its parent suite is marked as pending.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#isPending
++//z          */
++//z         isPending(): boolean;
++
++//z         /**
++//z          * Run `fn(test[, done])` before running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
++//z          */
++//z         beforeAll(fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
++//z          */
++//z         beforeAll(fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
++//z          */
++//z         beforeAll(title: string, fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeAll
++//z          */
++//z         beforeAll(title: string, fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
++//z          */
++//z         afterAll(fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
++//z          */
++//z         afterAll(fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
++//z          */
++//z         afterAll(title: string, fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after running tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterAll
++//z          */
++//z         afterAll(title: string, fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
++//z          */
++//z         beforeEach(fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
++//z          */
++//z         beforeEach(fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
++//z          */
++//z         beforeEach(title: string, fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` before each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#beforeEach
++//z          */
++//z         beforeEach(title: string, fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
++//z          */
++//z         afterEach(fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
++//z          */
++//z         afterEach(fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
++//z          */
++//z         afterEach(title: string, fn?: Func): this;
++
++//z         /**
++//z          * Run `fn(test[, done])` after each test case.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#afterEach
++//z          */
++//z         afterEach(title: string, fn?: AsyncFunc): this;
++
++//z         /**
++//z          * Add a test `suite`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#addSuite
++//z          */
++//z         addSuite(suite: Suite): this;
++
++//z         /**
++//z          * Add a `test` to this suite.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#addTest
++//z          */
++//z         addTest(test: Test): this;
++
++//z         /**
++//z          * Return the full title generated by recursively concatenating the parent's
++//z          * full title.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#fullTitle
++//z          */
++//z         fullTitle(): string;
++
++//z         /**
++//z          * Return the title path generated by recursively concatenating the parent's
++//z          * title path.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#titlePath
++//z          */
++//z         titlePath(): string[];
++
++//z         /**
++//z          * Return the total number of tests.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#.Suite#total
++//z          */
++//z         total(): number;
++
++//z         /**
++//z          * Iterates through each suite recursively to find all tests. Applies a
++//z          * function in the format `fn(test)`.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#eachTest
++//z          */
++//z         eachTest(fn: (test: Test) => void): this;
++
++//z         /**
++//z          * This will run the root suite if we happen to be running in delayed mode.
++//z          *
++//z          * @see https://mochajs.org/api/Mocha.Suite.html#run
++//z          */
++//z         run(): void;
++
++//z         /**
++//z          * Generic hook-creator.
++//z          */
++//z         protected _createHook(title: string, fn?: Func | AsyncFunc): Hook;
++//z     }
++
++//z     // #region Suite "beforeAll" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         once(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         addListener(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "beforeAll", listener: (hook: Hook) => void): this;
++//z         emit(name: "beforeAll", hook: Hook): boolean;
++//z     }
++//z     // #endregion Suite "beforeAll" event
++//z     // #region Suite "afterAll" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         once(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         addListener(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "afterAll", listener: (hook: Hook) => void): this;
++//z         emit(name: "afterAll", hook: Hook): boolean;
++//z     }
++//z     // #endregion Suite "afterAll" event
++//z     // #region Suite "beforeEach" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         once(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         addListener(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "beforeEach", listener: (hook: Hook) => void): this;
++//z         emit(name: "beforeEach", hook: Hook): boolean;
++//z     }
++//z     // #endregion Suite "beforeEach" event
++//z     // #region Suite "afterEach" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         once(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         addListener(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         removeListener(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         prependListener(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         prependOnceListener(event: "afterEach", listener: (hook: Hook) => void): this;
++//z         emit(name: "afterEach", hook: Hook): boolean;
++//z     }
++//z     // #endregion Suite "afterEach" event
++//z     // #region Suite "suite" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "suite", listener: (suite: Suite) => void): this;
++//z         once(event: "suite", listener: (suite: Suite) => void): this;
++//z         addListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         removeListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         prependListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         prependOnceListener(event: "suite", listener: (suite: Suite) => void): this;
++//z         emit(name: "suite", suite: Suite): boolean;
++//z     }
++//z     // #endregion Suite "suite" event
++//z     // #region Suite "test" event
++//z     interface Suite {
++//z         on(event: "test", listener: (test: Test) => void): this;
++//z         once(event: "test", listener: (test: Test) => void): this;
++//z         addListener(event: "test", listener: (test: Test) => void): this;
++//z         removeListener(event: "test", listener: (test: Test) => void): this;
++//z         prependListener(event: "test", listener: (test: Test) => void): this;
++//z         prependOnceListener(event: "test", listener: (test: Test) => void): this;
++//z         emit(name: "test", test: Test): boolean;
++//z     }
++//z     // #endregion Suite "test" event
++//z     // #region Suite "run" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "run", listener: () => void): this;
++//z         once(event: "run", listener: () => void): this;
++//z         addListener(event: "run", listener: () => void): this;
++//z         removeListener(event: "run", listener: () => void): this;
++//z         prependListener(event: "run", listener: () => void): this;
++//z         prependOnceListener(event: "run", listener: () => void): this;
++//z         emit(name: "run"): boolean;
++//z     }
++//z     // #endregion Suite "run" event
++//z     // #region Suite "pre-require" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         once(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         addListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         removeListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         prependListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         prependOnceListener(event: "pre-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         emit(name: "pre-require", context: MochaGlobals, file: string, mocha: Mocha): boolean;
++//z     }
++//z     // #endregion Suite "pre-require" event
++//z     // #region Suite "require" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         once(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         addListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         removeListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         prependListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         prependOnceListener(event: "require", listener: (module: any, file: string, mocha: Mocha) => void): this;
++//z         emit(name: "require", module: any, file: string, mocha: Mocha): boolean;
++//z     }
++//z     // #endregion Suite "require" event
++//z     // #region Suite "post-require" event
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         once(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         addListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         removeListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         prependListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         prependOnceListener(event: "post-require", listener: (context: MochaGlobals, file: string, mocha: Mocha) => void): this;
++//z         emit(name: "post-require", context: MochaGlobals, file: string, mocha: Mocha): boolean;
++//z     }
++//z     // #endregion Suite "post-require" event
++//z     // #region Suite untyped events
++//z     interface Suite extends NodeJS.EventEmitter {
++//z         on(event: string, listener: (...args: any[]) => void): this;
++//z         once(event: string, listener: (...args: any[]) => void): this;
++//z         addListener(event: string, listener: (...args: any[]) => void): this;
++//z         removeListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependListener(event: string, listener: (...args: any[]) => void): this;
++//z         prependOnceListener(event: string, listener: (...args: any[]) => void): this;
++//z         emit(name: string, ...args: any[]): boolean;
++//z     }
++//z     // #endregion Runner untyped events
++
++//z     /**
++//z      * Initialize a new `Hook` with the given `title` and callback `fn`
++//z      *
++//z      * @see https://mochajs.org/api/Hook.html
++//z      */
++//z     class Hook extends Runnable {
++//z         private _error;
++
++//z         type: "hook";
++//z         originalTitle?: string; // added by Runner
++
++//z         /**
++//z          * Get the test `err`.
++//z          *
++//z          * @see https://mochajs.org/api/Hook.html#error
++//z          */
++//z         error(): any;
++
++//z         /**
++//z          * Set the test `err`.
++//z          *
++//z          * @see https://mochajs.org/api/Hook.html#error
++//z          */
++//z         error(err: any): void;
++//z     }
++
++//z     /**
++//z      * An alternative way to define root hooks that works with parallel runs.
++//z      *
++//z      * Root hooks work with any interface, but the property names do not change.
++//z      * In other words, if you are using the tdd interface, suiteSetup maps to beforeAll, and setup maps to beforeEach.
++//z      *
++//z      * As with other hooks, `this` refers to to the current context object.
++//z      *
++//z      * @see https://mochajs.org/#root-hook-plugins
++//z      */
++//z     interface RootHookObject {
++//z       /**
++//z        * In serial mode, run after all tests end, once only.
++//z        * In parallel mode, run after all tests end, for each file.
++//z        */
++//z       afterAll?: Func | AsyncFunc | Func[] | AsyncFunc[];
++//z       /**
++//z        * In serial mode (Mocha's default), before all tests begin, once only.
++//z        * In parallel mode, run before all tests begin, for each file.
++//z        */
++//z       beforeAll?: Func | AsyncFunc | Func[] | AsyncFunc[];
++//z       /**
++//z        * In both modes, run after every test.
++//z        */
++//z       afterEach?: Func | AsyncFunc | Func[] | AsyncFunc[];
++//z       /**
++//z        * In both modes, run before each test.
++//z        */
++//z       beforeEach?: Func | AsyncFunc | Func[] | AsyncFunc[];
++//z     }
++
++//z     /**
++//z      * Initialize a new `Test` with the given `title` and callback `fn`.
++//z      *
++//z      * @see https://mochajs.org/api/Test.html
++//z      */
++//z     class Test extends Runnable {
++//z         type: "test";
++//z         speed?: "slow" | "medium" | "fast"; // added by reporters
++//z         err?: Error; // added by reporters
++//z         clone(): Test;
++//z     }
++
++//z     /**
++//z      * Test statistics
++//z      */
++//z     interface Stats {
++//z         suites: number;
++//z         tests: number;
++//z         passes: number;
++//z         pending: number;
++//z         failures: number;
++//z         start?: Date;
++//z         end?: Date;
++//z         duration?: number;
++//z     }
++
++//z     type TestInterface = (suite: Suite) => void;
++
++//z     interface ReporterConstructor {
++//z         new (runner: Runner, options: MochaOptions): reporters.Base;
++//z     }
++
++//z     type Done = (err?: any) => void;
++
++//z     /**
++//z      * Callback function used for tests and hooks.
++//z      */
++//z     type Func = (this: Context, done: Done) => void;
++
++//z     /**
++//z      * Async callback function used for tests and hooks.
++//z      */
++//z     type AsyncFunc = (this: Context) => PromiseLike<any>;
++
++//z     /**
++//z      * Options to pass to Mocha.
++//z      */
++//z     interface MochaOptions {
++//z         /** Test interfaces ("bdd", "tdd", "exports", etc.). */
++//z         ui?: Interface;
++
++//z         /**
++//z          * Reporter constructor, built-in reporter name, or reporter module path. Defaults to
++//z          * `"spec"`.
++//z          */
++//z         reporter?: string | ReporterConstructor;
++
++//z         /** Options to pass to the reporter. */
++//z         reporterOptions?: any;
++
++//z         /** Array of accepted globals. */
++//z         globals?: string[];
++
++//z         /** timeout in milliseconds or time string like '1s'. */
++//z         timeout?: number | string;
++
++//z         /** number of times to retry failed tests. */
++//z         retries?: number;
++
++//z         /** bail on the first test failure. */
++//z         bail?: boolean;
++
++//z         /** milliseconds to wait before considering a test slow. */
++//z         slow?: number;
++
++//z         /** check for global variable leaks. */
++//z         checkLeaks?: boolean;
++
++//z         /** display the full stack trace on failure. */
++//z         fullStackTrace?: boolean;
++
++//z         /** string or regexp to filter tests with. */
++//z         grep?: string | RegExp;
++
++//z         /** Enable growl support. */
++//z         growl?: boolean;
++
++//z         /** Color TTY output from reporter */
++//z         color?: boolean;
++
++//z         /** Use inline diffs rather than +/-. */
++//z         inlineDiffs?: boolean;
++
++//z         /** Do not show diffs at all. */
++//z         hideDiff?: boolean;
++
++//z         /** Run job in parallel */
++//z         parallel?: boolean;
++
++//z         /** Max number of worker processes for parallel runs */
++//z         jobs?: number;
++
++//z         /** Assigns hooks to the root suite */
++//z         rootHooks?: RootHookObject;
++
++//z         asyncOnly?: boolean;
++//z         delay?: boolean;
++//z         forbidOnly?: boolean;
++//z         forbidPending?: boolean;
++//z         noHighlighting?: boolean;
++//z         allowUncaught?: boolean;
++//z         fullTrace?: boolean;
++//z     }
++
++//z     interface MochaInstanceOptions extends MochaOptions {
++//z         files?: string[];
++//z     }
++
++//z     /**
++//z      * Variables added to the global scope by Mocha when run in the CLI.
++//z      */
++//z     interface MochaGlobals {
++//z         /**
++//z          * Execute before running tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#before
++//z          */
++//z         before: HookFunction;
++
++//z         /**
++//z          * Execute after running tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#after
++//z          */
++//z         after: HookFunction;
++
++//z         /**
++//z          * Execute before each test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#beforeEach
++//z          */
++//z         beforeEach: HookFunction;
++
++//z         /**
++//z          * Execute after each test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#afterEach
++//z          */
++//z         afterEach: HookFunction;
++
++//z         /**
++//z          * Describe a "suite" containing nested suites and tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         describe: SuiteFunction;
++
++//z         /**
++//z          * Describe a "suite" containing nested suites and tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         context: SuiteFunction;
++
++//z         /**
++//z          * Pending suite.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         xdescribe: PendingSuiteFunction;
++
++//z         /**
++//z          * Pending suite.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         xcontext: PendingSuiteFunction;
++
++//z         /**
++//z          * Describes a test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         it: TestFunction;
++
++//z         /**
++//z          * Describes a test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         specify: TestFunction;
++
++//z         /**
++//z          * Describes a pending test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         xit: PendingTestFunction;
++
++//z         /**
++//z          * Describes a pending test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         xspecify: PendingTestFunction;
++
++//z         /**
++//z          * Execute before running tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#before
++//z          */
++//z         suiteSetup: HookFunction;
++
++//z         /**
++//z          * Execute after running tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#after
++//z          */
++//z         suiteTeardown: HookFunction;
++
++//z         /**
++//z          * Execute before each test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#beforeEach
++//z          */
++//z         setup: HookFunction;
++
++//z         /**
++//z          * Execute after each test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          *
++//z          * @see https://mochajs.org/api/global.html#afterEach
++//z          */
++//z         teardown: HookFunction;
++
++//z         /**
++//z          * Describe a "suite" containing nested suites and tests.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         suite: SuiteFunction;
++
++//z         /**
++//z          * Describes a test case.
++//z          *
++//z          * - _Only available when invoked via the mocha CLI._
++//z          */
++//z         test: TestFunction;
++
++//z         run: typeof run;
++//z     }
++
++//z     /**
++//z      * Third-party declarations that want to add new entries to the `Reporter` union can
++//z      * contribute names here.
++//z      */
++//z     interface ReporterContributions {
++//z         Base: never;
++//z         base: never;
++//z         Dot: never;
++//z         dot: never;
++//z         TAP: never;
++//z         tap: never;
++//z         JSON: never;
++//z         json: never;
++//z         HTML: never;
++//z         html: never;
++//z         List: never;
++//z         list: never;
++//z         Min: never;
++//z         min: never;
++//z         Spec: never;
++//z         spec: never;
++//z         Nyan: never;
++//z         nyan: never;
++//z         XUnit: never;
++//z         xunit: never;
++//z         Markdown: never;
++//z         markdown: never;
++//z         Progress: never;
++//z         progress: never;
++//z         Landing: never;
++//z         landing: never;
++//z         JSONStream: never;
++//z         "json-stream": never;
++//z     }
++
++//z     type Reporter = keyof ReporterContributions;
++
++//z     /**
++//z      * Third-party declarations that want to add new entries to the `Interface` union can
++//z      * contribute names here.
++//z      */
++//z     interface InterfaceContributions {
++//z         bdd: never;
++//z         tdd: never;
++//z         qunit: never;
++//z         exports: never;
++//z     }
++
++//z     type Interface = keyof InterfaceContributions;
++//z }
++
++//z // #region Test interface augmentations
++
++//z /**
++//z  * Triggers root suite execution.
++//z  *
++//z  * - _Only available if flag --delay is passed into Mocha._
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#runWithSuite
++//z  */
++//z declare function run(): void;
++
++//z /**
++//z  * Execute before running tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#before
++//z  */
++//z declare var before: Mocha.HookFunction;
++
++//z /**
++//z  * Execute before running tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#before
++//z  */
++//z declare var suiteSetup: Mocha.HookFunction;
++
++//z /**
++//z  * Execute after running tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#after
++//z  */
++//z declare var after: Mocha.HookFunction;
++
++//z /**
++//z  * Execute after running tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#after
++//z  */
++//z declare var suiteTeardown: Mocha.HookFunction;
++
++//z /**
++//z  * Execute before each test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#beforeEach
++//z  */
++//z declare var beforeEach: Mocha.HookFunction;
++
++//z /**
++//z  * Execute before each test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#beforeEach
++//z  */
++//z declare var setup: Mocha.HookFunction;
++
++//z /**
++//z  * Execute after each test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#afterEach
++//z  */
++//z declare var afterEach: Mocha.HookFunction;
++
++//z /**
++//z  * Execute after each test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  *
++//z  * @see https://mochajs.org/api/global.html#afterEach
++//z  */
++//z declare var teardown: Mocha.HookFunction;
++
++//z /**
++//z  * Describe a "suite" containing nested suites and tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var describe: Mocha.SuiteFunction;
++
++//z /**
++//z  * Describe a "suite" containing nested suites and tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var context: Mocha.SuiteFunction;
++
++//z /**
++//z  * Describe a "suite" containing nested suites and tests.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var suite: Mocha.SuiteFunction;
++
++//z /**
++//z  * Pending suite.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var xdescribe: Mocha.PendingSuiteFunction;
++
++//z /**
++//z  * Pending suite.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var xcontext: Mocha.PendingSuiteFunction;
++
++//z /**
++//z  * Describes a test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var it: Mocha.TestFunction;
++
++//z /**
++//z  * Describes a test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var specify: Mocha.TestFunction;
++
++//z /**
++//z  * Describes a test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var test: Mocha.TestFunction;
++
++//z /**
++//z  * Describes a pending test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var xit: Mocha.PendingTestFunction;
++
++//z /**
++//z  * Describes a pending test case.
++//z  *
++//z  * - _Only available when invoked via the mocha CLI._
++//z  */
++//z declare var xspecify: Mocha.PendingTestFunction;
++
++//z // #endregion Test interface augmentations
++
++//z // #region Reporter augmentations
++
++//z // Forward declaration for `HTMLLIElement` from lib.dom.d.ts.
++//z // Required by Mocha.reporters.HTML.
++//z // NOTE: Mocha *must not* have a direct dependency on DOM types.
++//z // tslint:disable-next-line no-empty-interface
++//z interface HTMLLIElement { }
++
++//z // Augments the DOM `Window` object when lib.dom.d.ts is loaded.
++//z // tslint:disable-next-line no-empty-interface
++//z interface Window extends Mocha.MochaGlobals { }
++
++//z declare namespace NodeJS {
++//z     // Forward declaration for `NodeJS.EventEmitter` from node.d.ts.
++//z     // Required by Mocha.Runnable, Mocha.Runner, and Mocha.Suite.
++//z     // NOTE: Mocha *must not* have a direct dependency on @types/node.
++//z     // tslint:disable-next-line no-empty-interface
++//z     interface EventEmitter { }
++
++//z     // Augments NodeJS's `global` object when node.d.ts is loaded
++//z     // tslint:disable-next-line no-empty-interface
++//z     interface Global extends Mocha.MochaGlobals { }
++//z }
++
++//z // #endregion Reporter augmentations
++
++//z // #region Browser augmentations
++
++//z /**
++//z  * Mocha global.
++//z  *
++//z  * - _Only supported in the browser._
++//z  */
++//z declare const mocha: BrowserMocha;
++
++//z interface BrowserMocha extends Mocha {
++//z     /**
++//z      * Function to allow assertion libraries to throw errors directly into mocha.
++//z      * This is useful when running tests in a browser because window.onerror will
++//z      * only receive the 'message' attribute of the Error.
++//z      *
++//z      * - _Only supported in the browser._
++//z      */
++//z     throwError(err: any): never;
++
++//z     /**
++//z      * Setup mocha with the given settings options.
++//z      *
++//z      * - _Only supported in the browser._
++//z      */
++//z     setup(opts?: Mocha.Interface | Mocha.MochaOptions): this;
++//z }
++
++//z // #endregion Browser augmentations
++
++//z declare module "mocha" {
++//z     export = Mocha;
++//z }
++
++//z declare module "mocha/lib/ms" {
++//z     export = milliseconds;
++//z     /**
++//z      * Parse the given `str` and return milliseconds.
++//z      *
++//z      * @see {@link https://mochajs.org/api/module-milliseconds.html}
++//z      * @see {@link https://mochajs.org/api/module-milliseconds.html#~parse}
++//z      */
++//z     function milliseconds(val: string): number;
++
++//z     /**
++//z      * Format for `ms`.
++//z      *
++//z      * @see {@link https://mochajs.org/api/module-milliseconds.html}
++//z      * @see {@link https://mochajs.org/api/module-milliseconds.html#~format}
++//z      */
++//z     function milliseconds(val: number): string;
++//z }
++
++//z declare module "mocha/lib/interfaces/common" {
++//z     export = common;
++
++//z     function common(suites: Mocha.Suite[], context: Mocha.MochaGlobals, mocha: Mocha): common.CommonFunctions;
++
++//z     namespace common {
++//z         interface CommonFunctions {
++//z             /**
++//z              * This is only present if flag --delay is passed into Mocha. It triggers
++//z              * root suite execution.
++//z              */
++//z             runWithSuite(suite: Mocha.Suite): () => void;
++
++//z             /**
++//z              * Execute before running tests.
++//z              */
++//z             before(fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute before running tests.
++//z              */
++//z             before(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute after running tests.
++//z              */
++//z             after(fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute after running tests.
++//z              */
++//z             after(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute before each test case.
++//z              */
++//z             beforeEach(fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute before each test case.
++//z              */
++//z             beforeEach(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute after each test case.
++//z              */
++//z             afterEach(fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             /**
++//z              * Execute after each test case.
++//z              */
++//z             afterEach(name: string, fn?: Mocha.Func | Mocha.AsyncFunc): void;
++
++//z             suite: SuiteFunctions;
++//z             test: TestFunctions;
++//z         }
++
++//z         interface CreateOptions {
++//z             /** Title of suite */
++//z             title: string;
++
++//z             /** Suite function */
++//z             fn?: (this: Mocha.Suite) => void;
++
++//z             /** Is suite pending? */
++//z             pending?: boolean;
++
++//z             /** Filepath where this Suite resides */
++//z             file?: string;
++
++//z             /** Is suite exclusive? */
++//z             isOnly?: boolean;
++//z         }
++
++//z         interface SuiteFunctions {
++//z             /**
++//z              * Create an exclusive Suite; convenience function
++//z              */
++//z             only(opts: CreateOptions): Mocha.Suite;
++
++//z             /**
++//z              * Create a Suite, but skip it; convenience function
++//z              */
++//z             skip(opts: CreateOptions): Mocha.Suite;
++
++//z             /**
++//z              * Creates a suite.
++//z              */
++//z             create(opts: CreateOptions): Mocha.Suite;
++//z         }
++
++//z         interface TestFunctions {
++//z             /**
++//z              * Exclusive test-case.
++//z              */
++//z             only(mocha: Mocha, test: Mocha.Test): Mocha.Test;
++
++//z             /**
++//z              * Pending test case.
++//z              */
++//z             skip(title: string): void;
++
++//z             /**
++//z              * Number of retry attempts
++//z              */
++//z             retries(n: number): void;
++//z         }
++//z     }
++//z }

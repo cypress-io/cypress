@@ -8,7 +8,7 @@ exports['e2e studio / extends test'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (extend.spec.js)                                                         │
-  │ Searched:     cypress/integration/extend.spec.js                                               │
+  │ Searched:     cypress/e2e/extend.spec.js                                               │
   │ Experiments:  experimentalStudio=true                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -189,7 +189,7 @@ exports['e2e studio / creates new test'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (new.spec.js)                                                            │
-  │ Searched:     cypress/integration/new.spec.js                                                  │
+  │ Searched:     cypress/e2e/new.spec.js                                                  │
   │ Experiments:  experimentalStudio=true                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -302,7 +302,7 @@ exports['e2e studio / can write to imported files'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (external.spec.js)                                                       │
-  │ Searched:     cypress/integration/external.spec.js                                             │
+  │ Searched:     cypress/e2e/external.spec.js                                             │
   │ Experiments:  experimentalStudio=true                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -408,7 +408,7 @@ exports['e2e studio / extends test without source maps'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (extend.spec.js)                                                         │
-  │ Searched:     cypress/integration/extend.spec.js                                               │
+  │ Searched:     cypress/e2e/extend.spec.js                                               │
   │ Experiments:  experimentalStudio=true                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -504,7 +504,7 @@ exports['e2e studio / creates new test without source maps'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (new.spec.js)                                                            │
-  │ Searched:     cypress/integration/new.spec.js                                                  │
+  │ Searched:     cypress/e2e/new.spec.js                                                  │
   │ Experiments:  experimentalStudio=true                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

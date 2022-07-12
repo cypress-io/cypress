@@ -12,10 +12,10 @@ const { it } = systemTests
 const outputPath = path.join(e2ePath, 'output.json')
 
 const specs = [
-  'simple_passing_spec.js',
-  'simple_hooks_spec.js',
-  'simple_failing_spec.js',
-  'simple_failing_h*_spec.js', // simple failing hook spec
+  'simple_passing.cy.js',
+  'simple_hooks.cy.js',
+  'simple_failing.cy.js',
+  'simple_failing_h*.cy.js', // simple failing hook spec
 ].join(',')
 
 describe('e2e spec_isolation', () => {
@@ -52,7 +52,7 @@ describe('e2e spec_isolation', () => {
   })
 
   it('failing with retries enabled', {
-    spec: 'simple_failing_hook_spec.js,simple_retrying_spec.js',
+    spec: 'simple_failing_hook.cy.js,simple_retrying.cy.js',
     outputPath,
     snapshot: true,
     expectedExitCode: 4,

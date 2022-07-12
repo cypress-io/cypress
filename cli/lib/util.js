@@ -198,12 +198,15 @@ const parseOpts = (opts) => {
     'cacheClear',
     'cachePrune',
     'ciBuildId',
+    'ct',
+    'component',
     'config',
     'configFile',
     'cypressVersion',
     'destination',
     'detached',
     'dev',
+    'e2e',
     'exit',
     'env',
     'force',
@@ -211,6 +214,8 @@ const parseOpts = (opts) => {
     'group',
     'headed',
     'headless',
+    'inspect',
+    'inspectBrk',
     'key',
     'path',
     'parallel',
@@ -252,12 +257,16 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    folder = `${folder}-e2e-test`
+  }
 
   const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 
@@ -306,7 +315,7 @@ const util = {
     // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
     // version that has been updated to webpack >= 5.61, which no longer relies on
     // Node's builtin crypto.hash function.
-    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
+    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
       opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
     }
 
@@ -450,19 +459,62 @@ const util = {
     })
   },
 
-  getPlatformInfo () {
-    return util.getOsVersionAsync().then((version) => {
-      let osArch = arch()
+  async getPlatformInfo () {
+    const [version, osArch] = await Promise.all([
+      util.getOsVersionAsync(),
+      this.getRealArch(),
+    ])
 
-      if (osArch === 'x86') {
-        osArch = 'ia32'
+    return stripIndent`
+      Platform: ${os.platform()}-${osArch} (${version})
+      Cypress Version: ${util.pkgVersion()}
+    `
+  },
+
+  _cachedArch: undefined,
+
+  /**
+   * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
+   */
+  async getRealArch () {
+    if (this._cachedArch) return this._cachedArch
+
+    async function _getRealArch () {
+      const osPlatform = os.platform()
+      // eslint-disable-next-line no-restricted-syntax
+      const osArch = os.arch()
+
+      debug('detecting arch %o', { osPlatform, osArch })
+
+      if (osArch === 'arm64') return 'arm64'
+
+      if (osPlatform === 'darwin') {
+        // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
+        // https://stackoverflow.com/a/65347893/3474615
+        const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
+
+        debug('rosetta check result: %o', { stdout })
+        if (stdout === '1') return 'arm64'
       }
 
-      return stripIndent`
-        Platform: ${os.platform()}-${osArch} (${version})
-        Cypress Version: ${util.pkgVersion()}
-      `
-    })
+      if (osPlatform === 'linux') {
+        // could possibly be x64 node on arm64 linux, check the "machine hardware name"
+        // list of names for reference: https://stackoverflow.com/a/45125525/3474615
+        const { stdout } = await execa('uname', ['-m']).catch(() => '')
+
+        debug('arm uname -m result: %o ', { stdout })
+        if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      const pkgArch = arch()
+
+      if (pkgArch === 'x86') return 'ia32'
+
+      return pkgArch
+    }
+
+    return (this._cachedArch = await _getRealArch())
   },
 
   // attention:

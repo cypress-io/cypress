@@ -8,7 +8,7 @@ import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
   StyleOptions,
-  ROOT_ID,
+  getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
 
@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-type CyMountOptions<Props, Data = {}> = Omit<MountingOptions<Props, Data>, 'attachTo'> & {
+export type CyMountOptions<Props, Data= {}> = Omit<MountingOptions<Props, Data>, 'attachTo'> & {
   log?: boolean
   /**
    * @deprecated use vue-test-utils `global` instead
@@ -39,11 +39,9 @@ type CyMountOptions<Props, Data = {}> = Omit<MountingOptions<Props, Data>, 'atta
   }
 } & Partial<StyleOptions>
 
-let initialInnerHtml = ''
-
 Cypress.on('run:start', () => {
   // `mount` is designed to work with component testing only.
-  // it assumes ROOT_ID exists, which is not the case in e2e.
+  // it assumes ROOT_SELECTOR exists, which is not the case in e2e.
   // if the user registers a custom command that imports `cypress/vue`,
   // this event will be registered and cause an error when the user
   // launches e2e (since it's common to use Cypress for both CT and E2E.
@@ -52,19 +50,11 @@ Cypress.on('run:start', () => {
     return
   }
 
-  initialInnerHtml = document.head.innerHTML
   Cypress.on('test:before:run', () => {
     Cypress.vueWrapper?.unmount()
-    // @ts-ignore
-    const document: Document = cy.state('document')
-    let el = document.getElementById(ROOT_ID)
-
-    if (!el) {
-      throw Error(`no element found at query #${ROOT_ID}. Please use the mount utils to mount it properly`)
-    }
+    const el = getContainerEl()
 
     el.innerHTML = ''
-    document.head.innerHTML = initialInnerHtml
   })
 })
 
@@ -238,11 +228,7 @@ export function mount (
     // @ts-ignore
     const document: Document = cy.state('document')
 
-    let el = document.getElementById(ROOT_ID)
-
-    if (!el) {
-      throw Error(`no element found at query #${ROOT_ID}. Please use the mount utils to mount it properly`)
-    }
+    const el = getContainerEl()
 
     injectStylesBeforeElement(options, document, el)
 
@@ -293,7 +279,7 @@ function getComponentDisplayName (componentOptions: any): string {
 
   if (componentOptions.__file) {
     const filepathSplit = componentOptions.__file.split('/')
-    const fileName = filepathSplit[filepathSplit.length - 1]
+    const fileName = filepathSplit[filepathSplit.length - 1] ?? DEFAULT_COMP_NAME
 
     // remove the extension .js, .ts or .vue from the filename to get the name of the component
     const baseFileName = fileName.replace(/\.(js|ts|vue)?$/, '')

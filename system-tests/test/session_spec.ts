@@ -126,11 +126,12 @@ describe('e2e sessions', () => {
       hosts: {
         '*.foo.com': '127.0.0.1',
       },
+      e2e: {},
     },
   })
 
   it('session tests', {
-    spec: 'session_spec.js',
+    spec: 'session.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,
@@ -139,7 +140,7 @@ describe('e2e sessions', () => {
   })
 
   it('sessions persist on reload, and clear between specs', {
-    spec: 'session_persist_spec_1.js,session_persist_spec_2.js',
+    spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,

@@ -136,7 +136,7 @@ describe('e2e fetch polyfill', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'fetch_spec.js',
+    spec: 'fetch.cy.js',
     snapshot: false,
     config: {
       experimentalFetchPolyfill: true,
@@ -153,7 +153,7 @@ describe('e2e no fetch polyfill', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'fetch_no_polyfill_spec.js',
+    spec: 'fetch_no_polyfill.cy.js',
     snapshot: false,
     config: {
       experimentalFetchPolyfill: false,

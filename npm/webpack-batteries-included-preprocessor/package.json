@@ -22,7 +22,7 @@
     "ts-loader": "^8.0.2",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "webpack": "^4.44.1"
+    "webpack": "^4.44.2"
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "0.0.0-development",

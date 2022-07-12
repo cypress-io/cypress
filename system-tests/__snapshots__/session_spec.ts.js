@@ -7,15 +7,15 @@ exports['e2e sessions / session tests'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (session_spec.js)                                                        │
-  │ Searched:     cypress/integration/session_spec.js                                              │
+  │ Specs:        1 found (session.cy.js)                                                          │
+  │ Searched:     cypress/e2e/session.cy.js                                                        │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_spec.js                                                                 (1 of 1)
+  Running:  session.cy.js                                                                   (1 of 1)
 
 
   cross origin automations
@@ -24,10 +24,6 @@ exports['e2e sessions / session tests'] = `
     ✓ set storage
     ✓ get localStorage from all origins
     ✓ only gets localStorage from origins visited in test
-
-  args
-    ✓ accepts string or object as id
-    ✓ uses sorted stringify and rejects duplicate registrations
 
   with a blank session
     ✓ t1
@@ -87,14 +83,6 @@ exports['e2e sessions / session tests'] = `
     ✓ t1
     ✓ t2
 
-  options.validate failing test
-    ✓ test fails when options.validate after setup fails command
-    ✓ test fails when options.validate after setup throws
-    ✓ test fails when options.validate after setup rejects
-    ✓ test fails when options.validate after setup returns false
-    ✓ test fails when options.validate after setup resolves false
-    ✓ test fails when options.validate after setup returns Chainer<false>
-
   can wait for login redirect automatically
     ✓ t1
 
@@ -118,30 +106,23 @@ exports['e2e sessions / session tests'] = `
       ✓ switches to secure context - clears only secure context data - 1/2
       ✓ clears only secure context data - 2/2
 
-  errors
-    ✓ throws error when experimentalSessionAndOrigin not enabled
-    ✓ throws error when experimentalSessionSupport is enabled through test config
-    ✓ throws error when experimentalSessionSupport is enabled through Cypress.config
-    ✓ throws if session has not been defined during current test
-    ✓ throws if multiple session calls with same name but different options
 
-
-  56 passing
+  43 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        57                                                                               │
-  │ Passing:      56                                                                               │
+  │ Tests:        44                                                                               │
+  │ Passing:      43                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_spec.js                                                                  │
+  │ Spec Ran:     session.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -152,9 +133,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       57       56        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       44       43        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       57       56        -        1        -  
+    ✔  All specs passed!                        XX:XX       44       43        -        1        -  
 
 
 `
@@ -168,16 +149,16 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (session_persist_spec_1.js, session_persist_spec_2.js)                   │
-  │ Searched:     cypress/integration/session_persist_spec_1.js, cypress/integration/session_persi │
-  │               st_spec_2.js                                                                     │
+  │ Specs:        2 found (session_persist_spec_1.cy.js, session_persist_spec_2.cy.js)             │
+  │ Searched:     cypress/e2e/session_persist_spec_1.cy.js, cypress/e2e/session_persist_spec_2.cy. │
+  │               js                                                                               │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_persist_spec_1.js                                                       (1 of 2)
+  Running:  session_persist_spec_1.cy.js                                                    (1 of 2)
 
 
   persist saved sessions between spec reruns
@@ -201,13 +182,13 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_persist_spec_1.js                                                        │
+  │ Spec Ran:     session_persist_spec_1.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_persist_spec_2.js                                                       (2 of 2)
+  Running:  session_persist_spec_2.cy.js                                                    (2 of 2)
 
 
   after running spec with saved session
@@ -228,7 +209,7 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_persist_spec_2.js                                                        │
+  │ Spec Ran:     session_persist_spec_2.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -239,9 +220,9 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_persist_spec_1.js                XX:XX        1        1        -        -        - │
+  │ ✔  session_persist_spec_1.cy.js             XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  session_persist_spec_2.js                XX:XX        1        1        -        -        - │
+  │ ✔  session_persist_spec_2.cy.js             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
