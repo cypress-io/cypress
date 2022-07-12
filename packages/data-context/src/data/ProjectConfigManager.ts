@@ -151,13 +151,9 @@ export class ProjectConfigManager {
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.options.refreshLifecycle().catch(async (e) => {
-        await this.onLoadError(e)
-      })
+      this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(async (e) => {
-        await this.onLoadError(e)
-      })
+      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
   }
 
@@ -314,7 +310,7 @@ export class ProjectConfigManager {
     )
   }
 
-  private async onLoadError (error: any) {
+  onLoadError = async (error: any) => {
     await this.closeWatchers()
     this.options.onError(error, 'Cypress configuration error')
   }
@@ -338,9 +334,7 @@ export class ProjectConfigManager {
 
     w.on('all', (evt) => {
       debug(`changed ${file}: ${evt}`)
-      this.options.refreshLifecycle().catch(async (e) => {
-        await this.onLoadError(e)
-      })
+      this.options.refreshLifecycle().catch(this.onLoadError)
     })
 
     w.on('error', (err) => {

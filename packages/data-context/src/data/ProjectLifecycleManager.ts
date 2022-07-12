@@ -261,7 +261,7 @@ export class ProjectLifecycleManager {
           }
 
           if (pingBaseUrl) {
-            this.ctx.actions.project.pingBaseUrl().catch((e) => this.onLoadError(e))
+            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
           }
         }
 
@@ -387,7 +387,7 @@ export class ProjectLifecycleManager {
     this._configManager = this.createConfigManager()
 
     // Preemptively load these so that they are available when we need them later
-    this.ctx.browser.machineBrowsers().catch((e) => this.onLoadError(e))
+    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
 
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
@@ -415,7 +415,7 @@ export class ProjectLifecycleManager {
     this.verifyProjectRoot(projectRoot)
 
     if (this.readyToInitialize(this._projectRoot)) {
-      this._configManager.initializeConfig().catch((e) => this.onLoadError(e))
+      this._configManager.initializeConfig().catch(this.onLoadError)
     }
   }
 
@@ -449,7 +449,7 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch((e) => this.onLoadError(e))
+      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
 
       return false
     }
