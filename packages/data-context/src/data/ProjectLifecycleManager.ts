@@ -87,11 +87,8 @@ export class ProjectLifecycleManager {
   private _initializedProject: unknown | undefined
   private _eventRegistrar: EventRegistrar
 
-  private _destroyed: boolean
-
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
-    this._destroyed = false
 
     if (ctx.coreData.currentProject) {
       this._setCurrentProject(ctx.coreData.currentProject)
@@ -213,13 +210,7 @@ export class ProjectLifecycleManager {
       handlers: getServerPluginHandlers(),
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       eventRegistrar: this._eventRegistrar,
-      onError: (cypressError, title) => {
-        if (this.ctx.isRunMode && this._pendingInitialize) {
-          this._pendingInitialize.reject(cypressError)
-        } else {
-          this.ctx.onError(cypressError, title)
-        }
-      },
+      onError: this.onLoadError,
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
@@ -798,8 +789,8 @@ export class ProjectLifecycleManager {
    * for run mode
    */
   private onLoadError = (err: any) => {
-    if (this.ctx.isRunMode && this._configManager) {
-      this._configManager.onLoadError(err)
+    if (this.ctx.isRunMode && this._pendingInitialize) {
+      this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
     }

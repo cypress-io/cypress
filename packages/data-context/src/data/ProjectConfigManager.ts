@@ -310,9 +310,8 @@ export class ProjectConfigManager {
     )
   }
 
-  onLoadError = (error: any) => {
-    // Tyler TODO: Do we need to close here? Making this async has downstream effects
-    // this.closeWatchers()
+  private async onLoadError (error: any) {
+    await this.closeWatchers()
     this.options.onError(error, 'Cypress configuration error')
   }
 
@@ -497,11 +496,12 @@ export class ProjectConfigManager {
   }
 
   private async closeWatchers () {
-    for (const watcher of this._watchers.values()) {
-      // We don't care if there's an error while closing the watcher,
-      // the watch listener on our end is already removed synchronously by chokidar
-      await watcher.close().catch((e) => {})
-    }
+    await Promise.all(Array.from(this._watchers).map((watcher) => {
+      return watcher.close().catch((error) => {
+        debug('file watcher errored on close: ', e)
+      })
+    }))
+
     this._watchers = new Set()
     this._pathToWatcherRecord = {}
   }
