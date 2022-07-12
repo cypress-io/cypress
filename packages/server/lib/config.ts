@@ -11,8 +11,6 @@ export const mergeDefaults = configUtils.mergeDefaults
 
 export const updateWithPluginValues = configUtils.updateWithPluginValues
 
-export const setNodeBinary = configUtils.setNodeBinary
-
 export const relativeToProjectRoot = configUtils.relativeToProjectRoot
 
 export const setSupportFileAndFolder = configUtils.setSupportFileAndFolder

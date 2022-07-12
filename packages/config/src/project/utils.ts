@@ -139,7 +139,12 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
   })
 }
 
-export function setAbsolutePaths (obj) {
+interface Paths {
+  projectRoot?: string
+  [key: string]: string | false | undefined
+}
+
+export function setAbsolutePaths (obj: Paths) {
   obj = _.clone(obj)
 
   // if we have a projectRoot
@@ -158,8 +163,8 @@ export function setAbsolutePaths (obj) {
 
 const folders = _(options).filter({ isFolder: true }).map('name').value()
 
-const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
-  return _.reduce(folders, (memo, folder) => {
+const convertRelativeToAbsolutePaths = (projectRoot: string, obj: Paths) => {
+  return _.reduce(folders, (memo: Record<string, string>, folder) => {
     const val = obj[folder]
 
     if ((val != null) && (val !== false)) {
@@ -168,6 +173,21 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 
     return memo
   }, {})
+}
+
+// instead of the built-in Node process, specify a path to 3rd party Node
+export const setNodeBinary = (obj: Record<string, any>, userNodePath?: string, userNodeVersion?: string) => {
+  // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
+  if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
+    obj.resolvedNodePath = userNodePath
+    obj.resolvedNodeVersion = userNodeVersion
+
+    return obj
+  }
+
+  obj.resolvedNodeVersion = process.versions.node
+
+  return obj
 }
 
 // require.resolve walks the symlinks, which can really change

@@ -9,6 +9,7 @@ import {
   resolveConfigValues,
   setPluginResolvedOn,
   setAbsolutePaths,
+  setNodeBinary,
 } from '../../src/project/utils'
 
 describe('config/src/project/utils', () => {
@@ -274,6 +275,57 @@ describe('config/src/project/utils', () => {
         expected[folder] = '/_test-output/path/to/project/foo/bar'
 
         expect(setAbsolutePaths(obj)).to.deep.eq(expected)
+      })
+    })
+  })
+
+  context('.setNodeBinary', () => {
+    beforeEach(function () {
+      this.nodeVersion = process.versions.node
+    })
+
+    it('sets bundled Node ver if nodeVersion != system', function () {
+      const obj = setNodeBinary({
+        nodeVersion: 'bundled',
+      })
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'bundled',
+        resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+
+    it('sets cli Node ver if nodeVersion = system', function () {
+      const obj = setNodeBinary({
+        nodeVersion: 'system',
+      }, '/foo/bar/node', '1.2.3')
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: '1.2.3',
+        resolvedNodePath: '/foo/bar/node',
+      })
+    })
+
+    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
+      const obj = setNodeBinary({
+        nodeVersion: 'system',
+      }, undefined, '1.2.3')
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+
+    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
+      const obj = setNodeBinary({
+        nodeVersion: 'system',
+      }, '/foo/bar/node')
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
       })
     })
   })

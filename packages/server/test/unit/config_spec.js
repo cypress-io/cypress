@@ -1953,57 +1953,6 @@ describe('lib/config', () => {
     })
   })
 
-  context('.setNodeBinary', () => {
-    beforeEach(function () {
-      this.nodeVersion = process.versions.node
-    })
-
-    it('sets bundled Node ver if nodeVersion != system', function () {
-      const obj = config.setNodeBinary({
-        nodeVersion: 'bundled',
-      })
-
-      expect(obj).to.deep.eq({
-        nodeVersion: 'bundled',
-        resolvedNodeVersion: this.nodeVersion,
-      })
-    })
-
-    it('sets cli Node ver if nodeVersion = system', function () {
-      const obj = config.setNodeBinary({
-        nodeVersion: 'system',
-      }, '/foo/bar/node', '1.2.3')
-
-      expect(obj).to.deep.eq({
-        nodeVersion: 'system',
-        resolvedNodeVersion: '1.2.3',
-        resolvedNodePath: '/foo/bar/node',
-      })
-    })
-
-    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
-      const obj = config.setNodeBinary({
-        nodeVersion: 'system',
-      }, undefined, '1.2.3')
-
-      expect(obj).to.deep.eq({
-        nodeVersion: 'system',
-        resolvedNodeVersion: this.nodeVersion,
-      })
-    })
-
-    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
-      const obj = config.setNodeBinary({
-        nodeVersion: 'system',
-      }, '/foo/bar/node')
-
-      expect(obj).to.deep.eq({
-        nodeVersion: 'system',
-        resolvedNodeVersion: this.nodeVersion,
-      })
-    })
-  })
-
   describe('relativeToProjectRoot', () => {
     context('posix', () => {
       it('returns path of file relative to projectRoot', () => {

@@ -22,6 +22,8 @@ import {
   checkIfResolveChangedRootFolder,
   resolveConfigValues,
   setPluginResolvedOn,
+  setAbsolutePaths,
+  setNodeBinary,
 } from './utils'
 
 import {
@@ -313,21 +315,6 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
   debug('merged plugins config %o', merged)
 
   return merged
-}
-
-// instead of the built-in Node process, specify a path to 3rd party Node
-export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
-  // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
-  if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
-    obj.resolvedNodePath = userNodePath
-    obj.resolvedNodeVersion = userNodeVersion
-
-    return obj
-  }
-
-  obj.resolvedNodeVersion = process.versions.node
-
-  return obj
 }
 
 export function relativeToProjectRoot (projectRoot: string, file: string) {
