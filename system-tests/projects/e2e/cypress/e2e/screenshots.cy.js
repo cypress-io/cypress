@@ -204,64 +204,6 @@ describe('taking screenshots', () => {
     })
   })
 
-  it('properly blacks out absolute elements within a relative container', () => {
-    cy.visit('cypress/fixtures/screenshot-blackout.html')
-    .get('.centered-container')
-    .screenshot({
-      blackout: ['.blue'],
-      onBeforeScreenshot () {
-        const blackedOutElementCoordinates = Cypress.$(
-          '#__cypress-animation-disabler+div.__cypress-blackout',
-        )[0].getBoundingClientRect()
-
-        const actualElementCoordinates = Cypress.$(
-          '.centered-container .blue',
-        )[0].getBoundingClientRect()
-
-        // make sure blackout element is within 1 pixel of it's element it is supposed to black out
-        expect(blackedOutElementCoordinates.bottom).to.be.closeTo(
-          actualElementCoordinates.bottom,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.height).to.be.closeTo(
-          actualElementCoordinates.height,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.left).to.be.closeTo(
-          actualElementCoordinates.left,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.right).to.be.closeTo(
-          actualElementCoordinates.right,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.top).to.be.closeTo(
-          actualElementCoordinates.top,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.width).to.be.closeTo(
-          actualElementCoordinates.width,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.x).to.be.closeTo(
-          actualElementCoordinates.x,
-          1,
-        )
-
-        expect(blackedOutElementCoordinates.y).to.be.closeTo(
-          actualElementCoordinates.y,
-          1,
-        )
-      },
-    })
-  })
-
   describe('clipping', () => {
     it('can clip app screenshots', () => {
       cy.viewport(600, 200)
