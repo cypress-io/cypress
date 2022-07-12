@@ -49,9 +49,9 @@ describe('GitDataSource', () => {
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
+    const fooSpec = path.join(e2eFolder, 'foo.cy.js').replace(/\\/g, '/')
+    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js').replace(/\\/g, '/')
+    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js').replace(/\\/g, '/')
 
     gitInfo = new GitDataSource({
       isRunMode: false,
@@ -119,7 +119,9 @@ describe('GitDataSource', () => {
       filepaths.push('file"withOneDoubleQuote.cy.js')
     }
 
-    filepaths = filepaths.map((filename) => path.join(e2eFolder, filename))
+    filepaths = filepaths
+    .map((filename) => path.join(e2eFolder, filename))
+    .map((filepath) => filepath.replace(/\\/g, '/'))
 
     gitInfo = new GitDataSource({
       isRunMode: false,

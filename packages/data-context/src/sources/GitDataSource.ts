@@ -376,7 +376,14 @@ export class GitDataSource {
     debug('executing command: `%s`', cmd)
     debug('cwd: `%s`', this.config.projectRoot)
 
-    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
+    const subprocess = execa(cmd, { shell: true, cwd: this.config.projectRoot })
+    let result
+
+    try {
+      result = await subprocess
+    } catch (err) {
+      result = err
+    }
 
     const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
