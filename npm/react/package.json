@@ -15,7 +15,8 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
-    "debug": "^4.3.2"
+    "debug": "^4.3.2",
+    "semver": "7.3.2"
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",

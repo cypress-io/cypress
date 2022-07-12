@@ -1,5 +1,6 @@
 import { debug as debugFn } from 'debug'
 
+import { major } from 'semver'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
@@ -77,19 +78,6 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   return webpackConfig
 }
 
-const versionRe = /(\d.+?)\./
-
-function getMajorVersion (semver: string) {
-  const match = semver.match(versionRe)
-  const toNum = match?.[1] && parseInt(match?.[1])
-
-  if (!toNum) {
-    throw Error(`Could not extract major version from ${semver}`)
-  }
-
-  return toNum
-}
-
 function isUsingNext (projectRoot: string) {
   try {
     require.resolve('next', { paths: [projectRoot] })
@@ -141,7 +129,7 @@ function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig): WebpackPlug
 function maybeGetReactIgnorePlugin (projectRoot: string, devServerConfig: WebpackDevServerConfig) {
   try {
     const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
-    const majorVersion = getMajorVersion(reactDom?.default?.version || reactDom?.version)
+    const majorVersion = major(reactDom?.default?.version || reactDom?.version)
 
     debug('detected react-dom version %s', majorVersion)
 

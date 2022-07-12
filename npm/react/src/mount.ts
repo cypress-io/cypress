@@ -1,5 +1,6 @@
 import type * as React from 'react'
 import type * as ReactDOM from 'react-dom'
+import { major } from 'semver'
 import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
@@ -41,17 +42,8 @@ const injectStyles = (options: MountOptions) => {
  **/
 export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => _mount('mount', jsx, options)
 
-const versionRe = /(\d.+?)\./
-
-function getMajorVersion (semver: string) {
-  const match = semver.match(versionRe)
-  const toNum = match?.[1] && parseInt(match?.[1])
-
-  if (!toNum) {
-    throw Error(`Could not extract major version from ${semver}`)
-  }
-
-  return toNum
+function isLessThan18 (reactVersion: typeof React) {
+  return major(reactVersion.version) < 18
 }
 
 async function importReactModules () {
@@ -59,8 +51,7 @@ async function importReactModules () {
 
   // @ts-ignore - depending on bundler, sometimes we need to grab `.default`
   react = react?.default ?? react
-  const majorVersion = getMajorVersion(react.version)
-  const reactDomImport = majorVersion <= 17
+  const reactDomImport = isLessThan18(react)
     ? () => import('react-dom')
     // @ts-ignore
     : () => import('react-dom/client')
@@ -70,7 +61,6 @@ async function importReactModules () {
   return {
     react,
     reactDom,
-    majorVersion,
   }
 }
 
@@ -134,7 +124,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
     }
 
     return importReactModules()
-    .then(({ react, reactDom, majorVersion }) => {
+    .then(({ react, reactDom }) => {
       // @ts-ignore - depending on bundler, sometimes we need to grab `.default`
       const reactDomToUse = options.ReactDom?.default ?? options.ReactDom ?? reactDom?.default ?? reactDom
 
@@ -152,7 +142,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
         children: React.ReactNode
       }).children
 
-      if (majorVersion <= 17) {
+      if (isLessThan18(react)) {
         reactDomToUse.render(reactComponent, el)
       } else {
         const root = reactDomToUse.createRoot(el)
