@@ -417,10 +417,14 @@ export class ProjectDataSource {
       // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
       const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
 
-      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
+      if (commonPrefixFromSpecs) {
+        return path.join(commonPrefixFromSpecs, filename)
+      }
 
       // 4. Otherwise, return a path that fulfills the spec pattern.
-      if (pathFromSpecPattern) return pathFromSpecPattern
+      if (pathFromSpecPattern) {
+        return pathFromSpecPattern
+      }
 
       // 5. Return the default for this testing type if we cannot decide from the spec pattern.
       return defaultPathname

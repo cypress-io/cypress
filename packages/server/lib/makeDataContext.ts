@@ -1,7 +1,5 @@
-import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
-import pkg from '@packages/root'
-import * as configUtils from '@packages/config'
+import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 
 import { isListening } from './util/ensure-url'
 import { isMainWindowFocused, focusMainWindow } from './gui/windows'
@@ -61,9 +59,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     configApi: {
-      allowedConfig: configUtils.allowed,
-      cypressVersion: pkg.version,
-      validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
     },

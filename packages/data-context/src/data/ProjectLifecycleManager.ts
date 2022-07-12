@@ -11,7 +11,7 @@ import _ from 'lodash'
 import resolve from 'resolve'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
+import { getError, CypressError } from '@packages/errors'
 import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
@@ -46,9 +46,6 @@ const POTENTIAL_CONFIG_FILES = [
  * since these are not strictly typed
  */
 export interface InjectedConfigApi {
-  cypressVersion: string
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
-  allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>, testingType: TestingType): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
 }
