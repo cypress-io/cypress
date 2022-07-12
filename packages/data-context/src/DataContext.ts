@@ -133,7 +133,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return this.appData.isInGlobalMode
+    return this.appData.isGlobalMode
   }
 
   get modeOptions () {
