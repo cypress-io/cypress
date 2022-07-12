@@ -3,7 +3,7 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
-import type { Configuration } from 'webpack'
+import type { Configuration, WebpackPluginInstance } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -107,7 +107,7 @@ function isUsingNext (projectRoot: string) {
  * different between the two, so we check which version of webpack
  * we are using and match the API.
  */
-function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
+function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig): WebpackPluginInstance {
   debug('making react-version specific ignore plugin')
 
   let webpackModule
@@ -136,6 +136,30 @@ function makeIgnorePlugin (devServerConfig: WebpackDevServerConfig) {
     resourceRegExp: /react-dom\/client$/,
     contextRegExp: /cypress/,
   })
+}
+
+function maybeGetReactIgnorePlugin (projectRoot: string, devServerConfig: WebpackDevServerConfig) {
+  try {
+    const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
+    const majorVersion = getMajorVersion(reactDom?.default?.version || reactDom?.version)
+
+    debug('detected react-dom version %s', majorVersion)
+
+    debug('found react-dom version %s', reactDom.version)
+    if (majorVersion < 18) {
+      debug('ignoring react-dom/client ', majorVersion)
+
+      return makeIgnorePlugin(devServerConfig)
+    }
+  } catch (e) {
+    const err = e as Error
+
+    if (err.name === 'MODULE_NOT_FOUND') {
+      debug('no react-dom found')
+    } else {
+      debug('error when adding IgnorePlugin for react-dom/client %s', e)
+    }
+  }
 }
 
 /**
@@ -213,25 +237,13 @@ export async function makeWebpackConfig (
     plugins: [],
   }
 
-  try {
-    const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
-    const majorVersion = getMajorVersion(reactDom?.default?.version || reactDom?.version)
+  // If React version is <= 17, we need to ignore the `react-dom/client` reference
+  // in cypress/react, since that's a new, non-backwards compatible module that will
+  // cause webpack compilation to fail.
+  const reactIgnorePlugin = maybeGetReactIgnorePlugin(projectRoot, config.devServerConfig)
 
-    debug('detected react-dom version %s', majorVersion)
-
-    debug('found react-dom version %s', reactDom.version)
-    if (majorVersion < 18) {
-      debug('ignoring react-dom/client ', majorVersion)
-      dynamicWebpackConfig.plugins?.push(makeIgnorePlugin(config.devServerConfig))
-    }
-  } catch (e) {
-    const err = e as Error
-
-    if (err.name === 'MODULE_NOT_FOUND') {
-      debug('no react-dom found')
-    } else {
-      debug('error when adding IgnorePlugin for react-dom/client %s', e)
-    }
+  if (reactIgnorePlugin && dynamicWebpackConfig.plugins) {
+    dynamicWebpackConfig.plugins.push(reactIgnorePlugin)
   }
 
   dynamicWebpackConfig.plugins?.push(
