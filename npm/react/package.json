@@ -39,7 +39,7 @@
   "peerDependencies": {
     "@types/react": "^16.9.16 || ^17.0.0 || ^18.0.0",
     "cypress": "*",
-    "react": "^=16.x || ^=17.x || ^=18",
+    "react": "^=16.x || ^=17.x || ^=18.x",
     "react-dom": "^=16.x || ^=17.x || ^=18"
   },
   "files": [
