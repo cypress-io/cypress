@@ -2,8 +2,8 @@
 
 describe('Config options', () => {
   it('supports supportFile = false', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts'])
+    cy.scaffoldProject('vite-2-react')
+    cy.openProject('vite-2-react', ['--config-file', 'cypress-vite-no-support.config.ts'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -13,8 +13,8 @@ describe('Config options', () => {
   })
 
   it('chooses new port when specified port is in use', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-port-in-use.config.ts'])
+    cy.scaffoldProject('vite-2-react')
+    cy.openProject('vite-2-react', ['--config-file', 'cypress-vite-port-in-use.config.ts'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -32,8 +32,8 @@ describe('Config options', () => {
   it('supports serving files with whitespace', () => {
     const specWithWhitespace = 'spec with whitespace.cy.jsx'
 
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.scaffoldProject('vite-2-react')
+    cy.openProject('vite-2-react', ['--config-file', 'cypress-vite.config.ts'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, { specWithWhitespace }) => {
@@ -49,8 +49,8 @@ describe('Config options', () => {
   })
 
   it('supports @cypress/vite-dev-server', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts'])
+    cy.scaffoldProject('vite-2-react')
+    cy.openProject('vite-2-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts'])
     cy.startAppServer('component')
 
     cy.visitApp()

@@ -52,7 +52,7 @@ describe('resolveConfig', function () {
       })
 
       it('should not add inspect plugin if not installed', async () => {
-        const projectRoot = await scaffoldSystemTestProject('vite2.9.1-react')
+        const projectRoot = await scaffoldSystemTestProject('vite-2-react')
         const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
