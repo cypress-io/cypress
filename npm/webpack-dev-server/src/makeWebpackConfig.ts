@@ -1,6 +1,6 @@
 import { debug as debugFn } from 'debug'
 
-import { major } from 'semver'
+import major from 'semver/functions/major'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'

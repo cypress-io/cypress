@@ -1,6 +1,6 @@
 import type * as React from 'react'
 import type * as ReactDOM from 'react-dom'
-import { major } from 'semver'
+import major from 'semver/functions/major'
 import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
