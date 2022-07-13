@@ -14,17 +14,8 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
   debug('resolved next.js webpack config %o', webpackConfig)
 
   checkSWC(webpackConfig, devServerConfig.cypressConfig)
-
-  // Next webpack compiler ignored watching any node_modules changes, but we need to watch
-  // for changes to 'dist/browser.js' in order to detect new specs that have been added
-  if (webpackConfig.watchOptions && Array.isArray(webpackConfig.watchOptions.ignored)) {
-    webpackConfig.watchOptions = {
-      ...webpackConfig.watchOptions,
-      ignored: [...webpackConfig.watchOptions.ignored.filter((pattern: string) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
-    }
-
-    debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
-  }
+  watchEntryPoint(webpackConfig)
+  allowGlobalStylesImports(webpackConfig)
 
   return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceNextWebpackDeps(devServerConfig) }
 }
@@ -254,4 +245,40 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
   }
 
   return webpack
+}
+
+// Next webpack compiler ignored watching any node_modules changes, but we need to watch
+// for changes to 'dist/browser.js' in order to detect new specs that have been added
+function watchEntryPoint (webpackConfig: Configuration) {
+  if (webpackConfig.watchOptions && Array.isArray(webpackConfig.watchOptions.ignored)) {
+    webpackConfig.watchOptions = {
+      ...webpackConfig.watchOptions,
+      ignored: [...webpackConfig.watchOptions.ignored.filter((pattern: string) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
+    }
+
+    debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
+  }
+}
+
+const globalCssRe = [/(?<!\.module)\.css$/, /(?<!\.module)\.(scss|sass)$/]
+const globalCssModulesRe = [/\.module\.css$/, /\.module\.(scss|sass)$/]
+const allCssTests = [...globalCssRe, ...globalCssModulesRe]
+
+// Next does not allow global styles to be loaded outside of the main <App /> component.
+// We want users to be able to import the global styles into their component support file so we
+// delete the "issuer" from the rules that process css/scss files.
+// see: https://github.com/cypress-io/cypress/issues/22525
+// Motivated by: https://github.com/bem/next-global-css
+function allowGlobalStylesImports (webpackConfig: Configuration) {
+  const rules = webpackConfig.module?.rules || []
+
+  for (const rule of rules) {
+    if (typeof rule !== 'string' && rule.oneOf) {
+      for (const oneOf of rule.oneOf) {
+        if (oneOf.test && allCssTests.some((re) => re.source === (oneOf as any).test?.source)) {
+          delete oneOf.issuer
+        }
+      }
+    }
+  }
 }
