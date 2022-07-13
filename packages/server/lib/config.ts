@@ -4,8 +4,6 @@ import * as configUtils from '@packages/config'
 
 export const setupFullConfigWithDefaults = configUtils.setupFullConfigWithDefaults
 
-export const mergeDefaults = configUtils.mergeDefaults
-
 export const updateWithPluginValues = configUtils.updateWithPluginValues
 
 export const setUrls = configUtils.setUrls

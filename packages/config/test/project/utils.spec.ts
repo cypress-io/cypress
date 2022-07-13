@@ -5,7 +5,9 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import stripAnsi from 'strip-ansi'
 import Debug from 'debug'
+import os from 'node:os'
 
+import errors from '@packages/errors'
 import Fixtures from '@tooling/system-tests'
 
 import {
@@ -18,6 +20,7 @@ import {
   setNodeBinary,
   relativeToProjectRoot,
   setSupportFileAndFolder,
+  mergeDefaults,
 } from '../../src/project/utils'
 
 const debug = Debug('test')
@@ -35,6 +38,10 @@ describe('config/src/project/utils', () => {
     process.env = this.env
   })
 
+  afterEach(() => {
+    sinon.restore()
+  })
+
   describe('checkIfResolveChangedRootFolder', () => {
     it('ignores non-absolute paths', () => {
       expect(checkIfResolveChangedRootFolder('foo/index.js', 'foo')).to.be.false
@@ -46,6 +53,40 @@ describe('config/src/project/utils', () => {
 
     it('detects path switch', () => {
       expect(checkIfResolveChangedRootFolder('/private/foo/index.js', '/foo')).to.be.true
+    })
+  })
+
+  context('environment name check', () => {
+    it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
+      sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar');
+      (process as any).env.CYPRESS_INTERNAL_ENV = 'foo-bar'
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+      const options = {}
+
+      try {
+        await mergeDefaults(cfg, options)
+      } catch {
+        //
+      }
+
+      expect(errors.throwErr).have.been.calledOnce
+    })
+
+    it('allows production CYPRESS_INTERNAL_ENV', async () => {
+      sinon.stub(errors, 'throwErr')
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+      const options = {}
+
+      await mergeDefaults(cfg, options)
+
+      expect(errors.throwErr).not.to.be.called
     })
   })
 
@@ -373,10 +414,6 @@ describe('config/src/project/utils', () => {
   })
 
   context('.setSupportFileAndFolder', () => {
-    afterEach(() => {
-      sinon.restore()
-    })
-
     it('does nothing if supportFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -529,6 +566,559 @@ describe('config/src/project/utils', () => {
           projectRoot,
           supportFolder,
           supportFile: supportFilename,
+        })
+      })
+    })
+  })
+
+  context('.mergeDefaults', () => {
+    beforeEach(function () {
+      this.defaults = (prop, value, cfg: any = {}, options = {}) => {
+        cfg.projectRoot = '/foo/bar/'
+
+        return mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options)
+        .then((mergedConfig) => {
+          expect(mergedConfig[prop]).to.deep.eq(value)
+        })
+      }
+    })
+
+    it('slowTestThreshold=10000 for e2e', function () {
+      return this.defaults('slowTestThreshold', 10000, {}, { testingType: 'e2e' })
+    })
+
+    it('slowTestThreshold=250 for component', function () {
+      return this.defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
+    })
+
+    it('port=null', function () {
+      return this.defaults('port', null)
+    })
+
+    it('projectId=null', function () {
+      return this.defaults('projectId', null)
+    })
+
+    it('autoOpen=false', function () {
+      return this.defaults('autoOpen', false)
+    })
+
+    it('browserUrl=http://localhost:2020/__/', function () {
+      return this.defaults('browserUrl', 'http://localhost:2020/__/', { port: 2020 })
+    })
+
+    it('proxyUrl=http://localhost:2020', function () {
+      return this.defaults('proxyUrl', 'http://localhost:2020', { port: 2020 })
+    })
+
+    it('namespace=__cypress', function () {
+      return this.defaults('namespace', '__cypress')
+    })
+
+    it('baseUrl=http://localhost:8000/app/', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000/app/', {
+        baseUrl: 'http://localhost:8000/app///',
+      })
+    })
+
+    it('baseUrl=http://localhost:8000/app/', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000/app/', {
+        baseUrl: 'http://localhost:8000/app//',
+      })
+    })
+
+    it('baseUrl=http://localhost:8000/app', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000/app', {
+        baseUrl: 'http://localhost:8000/app',
+      })
+    })
+
+    it('baseUrl=http://localhost:8000/', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000/', {
+        baseUrl: 'http://localhost:8000//',
+      })
+    })
+
+    it('baseUrl=http://localhost:8000/', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000/', {
+        baseUrl: 'http://localhost:8000/',
+      })
+    })
+
+    it('baseUrl=http://localhost:8000', function () {
+      return this.defaults('baseUrl', 'http://localhost:8000', {
+        baseUrl: 'http://localhost:8000',
+      })
+    })
+
+    it('viewportWidth=1000', function () {
+      return this.defaults('viewportWidth', 1000)
+    })
+
+    it('viewportHeight=660', function () {
+      return this.defaults('viewportHeight', 660)
+    })
+
+    it('userAgent=null', function () {
+      return this.defaults('userAgent', null)
+    })
+
+    it('baseUrl=null', function () {
+      return this.defaults('baseUrl', null)
+    })
+
+    it('defaultCommandTimeout=4000', function () {
+      return this.defaults('defaultCommandTimeout', 4000)
+    })
+
+    it('pageLoadTimeout=60000', function () {
+      return this.defaults('pageLoadTimeout', 60000)
+    })
+
+    it('requestTimeout=5000', function () {
+      return this.defaults('requestTimeout', 5000)
+    })
+
+    it('responseTimeout=30000', function () {
+      return this.defaults('responseTimeout', 30000)
+    })
+
+    it('execTimeout=60000', function () {
+      return this.defaults('execTimeout', 60000)
+    })
+
+    it('waitForAnimations=true', function () {
+      return this.defaults('waitForAnimations', true)
+    })
+
+    it('scrollBehavior=start', function () {
+      return this.defaults('scrollBehavior', 'top')
+    })
+
+    it('animationDistanceThreshold=5', function () {
+      return this.defaults('animationDistanceThreshold', 5)
+    })
+
+    it('video=true', function () {
+      return this.defaults('video', true)
+    })
+
+    it('videoCompression=32', function () {
+      return this.defaults('videoCompression', 32)
+    })
+
+    it('videoUploadOnPasses=true', function () {
+      return this.defaults('videoUploadOnPasses', true)
+    })
+
+    it('trashAssetsBeforeRuns=32', function () {
+      return this.defaults('trashAssetsBeforeRuns', true)
+    })
+
+    it('morgan=true', function () {
+      return this.defaults('morgan', true)
+    })
+
+    it('isTextTerminal=false', function () {
+      return this.defaults('isTextTerminal', false)
+    })
+
+    it('socketId=null', function () {
+      return this.defaults('socketId', null)
+    })
+
+    it('reporter=spec', function () {
+      return this.defaults('reporter', 'spec')
+    })
+
+    it('watchForFileChanges=true', function () {
+      return this.defaults('watchForFileChanges', true)
+    })
+
+    it('numTestsKeptInMemory=50', function () {
+      return this.defaults('numTestsKeptInMemory', 50)
+    })
+
+    it('modifyObstructiveCode=true', function () {
+      return this.defaults('modifyObstructiveCode', true)
+    })
+
+    it('supportFile=false', function () {
+      return this.defaults('supportFile', false, { supportFile: false })
+    })
+
+    it('blockHosts=null', function () {
+      return this.defaults('blockHosts', null)
+    })
+
+    it('blockHosts=[a,b]', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
+      })
+    })
+
+    it('blockHosts=a|b', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
+      })
+    })
+
+    it('hosts=null', function () {
+      return this.defaults('hosts', null)
+    })
+
+    it('hosts={}', function () {
+      return this.defaults('hosts', {
+        foo: 'bar',
+        baz: 'quux',
+      }, {
+        hosts: {
+          foo: 'bar',
+          baz: 'quux',
+        },
+      })
+    })
+
+    it('resets numTestsKeptInMemory to 0 when runMode', () => {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      .then((cfg) => {
+        expect(cfg.numTestsKeptInMemory).to.eq(0)
+      })
+    })
+
+    it('resets watchForFileChanges to false when runMode', () => {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      .then((cfg) => {
+        expect(cfg.watchForFileChanges).to.be.false
+      })
+    })
+
+    it('can override morgan in options', () => {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false })
+      .then((cfg) => {
+        expect(cfg.morgan).to.be.false
+      })
+    })
+
+    it('can override isTextTerminal in options', () => {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      .then((cfg) => {
+        expect(cfg.isTextTerminal).to.be.true
+      })
+    })
+
+    it('can override socketId in options', () => {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
+      .then((cfg) => {
+        expect(cfg.socketId).to.eq('1234')
+      })
+    })
+
+    it('deletes envFile', () => {
+      const obj = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+        env: {
+          foo: 'bar',
+          version: '0.5.2',
+        },
+        envFile: {
+          bar: 'baz',
+          version: '1.0.1',
+        },
+      }
+
+      return mergeDefaults(obj)
+      .then((cfg) => {
+        expect(cfg.env).to.deep.eq({
+          foo: 'bar',
+          bar: 'baz',
+          version: '1.0.1',
+        })
+
+        expect(cfg.cypressEnv).to.eq(process.env['CYPRESS_INTERNAL_ENV'])
+
+        expect(cfg).not.to.have.property('envFile')
+      })
+    })
+
+    it('merges env into @env', () => {
+      const obj = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+        env: {
+          host: 'localhost',
+          user: 'brian',
+          version: '0.12.2',
+        },
+      }
+
+      const options = {
+        env: {
+          version: '0.13.1',
+          foo: 'bar',
+        },
+      }
+
+      return mergeDefaults(obj, options)
+      .then((cfg) => {
+        expect(cfg.env).to.deep.eq({
+          host: 'localhost',
+          user: 'brian',
+          version: '0.13.1',
+          foo: 'bar',
+        })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/6892
+    it('warns if experimentalGetCookiesSameSite is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalGetCookiesSameSite', true, {
+        experimentalGetCookiesSameSite: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
+    })
+
+    it('warns if experimentalSessionSupport is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionSupport', true, {
+        experimentalSessionSupport: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
+    })
+
+    it('warns if experimentalShadowDomSupport is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalShadowDomSupport', true, {
+        experimentalShadowDomSupport: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
+    })
+
+    it('warns if experimentalRunEvents is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalRunEvents', true, {
+        experimentalRunEvents: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
+    })
+
+    it('warns if experimentalStudio is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalStudio', true, {
+        experimentalStudio: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
+    })
+
+    // @see https://github.com/cypress-io/cypress/pull/9185
+    it('warns if experimentalNetworkStubbing is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalNetworkStubbing', true, {
+        experimentalNetworkStubbing: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
+    })
+
+    it('warns if firefoxGcInterval is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('firefoxGcInterval', true, {
+        firefoxGcInterval: true,
+      })
+
+      expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
+    })
+
+    describe('.resolved', () => {
+      it('sets reporter and port to cli', () => {
+        const obj = {
+          projectRoot: '/foo/bar',
+          supportFile: false,
+        }
+
+        const options = {
+          reporter: 'json',
+          port: 1234,
+        }
+
+        return mergeDefaults(obj, options)
+        .then((cfg) => {
+          expect(cfg.resolved).to.deep.eq({
+            animationDistanceThreshold: { value: 5, from: 'default' },
+            arch: { value: os.arch(), from: 'default' },
+            baseUrl: { value: null, from: 'default' },
+            blockHosts: { value: null, from: 'default' },
+            browsers: { value: [], from: 'default' },
+            chromeWebSecurity: { value: true, from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
+            defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            env: {},
+            execTimeout: { value: 60000, from: 'default' },
+            experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalSourceRewriting: { value: false, from: 'default' },
+            fileServerFolder: { value: '', from: 'default' },
+            fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+            hosts: { value: null, from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            includeShadowDom: { value: false, from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
+            modifyObstructiveCode: { value: true, from: 'default' },
+            numTestsKeptInMemory: { value: 50, from: 'default' },
+            pageLoadTimeout: { value: 60000, from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
+            port: { value: 1234, from: 'cli' },
+            projectId: { value: null, from: 'default' },
+            redirectionLimit: { value: 20, from: 'default' },
+            reporter: { value: 'json', from: 'cli' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
+            reporterOptions: { value: null, from: 'default' },
+            requestTimeout: { value: 5000, from: 'default' },
+            responseTimeout: { value: 30000, from: 'default' },
+            retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
+            screenshotOnRunFailure: { value: true, from: 'default' },
+            screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
+            supportFile: { value: false, from: 'config' },
+            supportFolder: { value: false, from: 'default' },
+            taskTimeout: { value: 60000, from: 'default' },
+            trashAssetsBeforeRuns: { value: true, from: 'default' },
+            userAgent: { value: null, from: 'default' },
+            video: { value: true, from: 'default' },
+            videoCompression: { value: 32, from: 'default' },
+            videosFolder: { value: 'cypress/videos', from: 'default' },
+            videoUploadOnPasses: { value: true, from: 'default' },
+            viewportHeight: { value: 660, from: 'default' },
+            viewportWidth: { value: 1000, from: 'default' },
+            waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
+            watchForFileChanges: { value: true, from: 'default' },
+          })
+        })
+      })
+
+      it('sets config, envFile and env', () => {
+        sinon.stub(utils, 'getProcessEnvVars').returns({
+          quux: 'quux',
+          RECORD_KEY: 'foobarbazquux',
+          PROJECT_ID: 'projectId123',
+        })
+
+        const obj = {
+          projectRoot: '/foo/bar',
+          supportFile: false,
+          baseUrl: 'http://localhost:8080',
+          port: 2020,
+          env: {
+            foo: 'foo',
+          },
+          envFile: {
+            bar: 'bar',
+          },
+        }
+
+        const options = {
+          env: {
+            baz: 'baz',
+          },
+        }
+
+        return mergeDefaults(obj, options)
+        .then((cfg) => {
+          expect(cfg.resolved).to.deep.eq({
+            arch: { value: os.arch(), from: 'default' },
+            animationDistanceThreshold: { value: 5, from: 'default' },
+            baseUrl: { value: 'http://localhost:8080', from: 'config' },
+            blockHosts: { value: null, from: 'default' },
+            browsers: { value: [], from: 'default' },
+            chromeWebSecurity: { value: true, from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
+            defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            execTimeout: { value: 60000, from: 'default' },
+            experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalSourceRewriting: { value: false, from: 'default' },
+            env: {
+              foo: {
+                value: 'foo',
+                from: 'config',
+              },
+              bar: {
+                value: 'bar',
+                from: 'envFile',
+              },
+              baz: {
+                value: 'baz',
+                from: 'cli',
+              },
+              quux: {
+                value: 'quux',
+                from: 'env',
+              },
+              RECORD_KEY: {
+                value: 'fooba...zquux',
+                from: 'env',
+              },
+            },
+            fileServerFolder: { value: '', from: 'default' },
+            fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+            hosts: { value: null, from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            includeShadowDom: { value: false, from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
+            modifyObstructiveCode: { value: true, from: 'default' },
+            numTestsKeptInMemory: { value: 50, from: 'default' },
+            pageLoadTimeout: { value: 60000, from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
+            port: { value: 2020, from: 'config' },
+            projectId: { value: 'projectId123', from: 'env' },
+            redirectionLimit: { value: 20, from: 'default' },
+            reporter: { value: 'spec', from: 'default' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
+            reporterOptions: { value: null, from: 'default' },
+            requestTimeout: { value: 5000, from: 'default' },
+            responseTimeout: { value: 30000, from: 'default' },
+            retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
+            screenshotOnRunFailure: { value: true, from: 'default' },
+            screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
+            supportFile: { value: false, from: 'config' },
+            supportFolder: { value: false, from: 'default' },
+            taskTimeout: { value: 60000, from: 'default' },
+            trashAssetsBeforeRuns: { value: true, from: 'default' },
+            userAgent: { value: null, from: 'default' },
+            video: { value: true, from: 'default' },
+            videoCompression: { value: 32, from: 'default' },
+            videosFolder: { value: 'cypress/videos', from: 'default' },
+            videoUploadOnPasses: { value: true, from: 'default' },
+            viewportHeight: { value: 660, from: 'default' },
+            viewportWidth: { value: 1000, from: 'default' },
+            waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
+            watchForFileChanges: { value: true, from: 'default' },
+          })
         })
       })
     })
