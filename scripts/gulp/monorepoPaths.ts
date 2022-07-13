@@ -31,6 +31,7 @@ export const monorepoPaths = {
   pkgRunnerShared: path.join(__dirname, '../../packages/runner-shared'),
   pkgScaffoldConfig: path.join(__dirname, '../../packages/scaffold-config'),
   pkgServer: path.join(__dirname, '../../packages/server'),
+  pkgSnapshot: path.join(__dirname, '../../packages/snapshot'),
   pkgSocket: path.join(__dirname, '../../packages/socket'),
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),

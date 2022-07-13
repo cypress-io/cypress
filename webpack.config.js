@@ -2,8 +2,10 @@
 // const json5 = require('json5')
 const StartServerWebpackPlugin = require('razzle-start-server-webpack-plugin')
 const path = require('path')
-const webpack = require('webpack')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 // const webpackNodeExternals = require('webpack-node-externals')
+
+const smp = new SpeedMeasurePlugin()
 
 /**
  * @return {import('webpack').Configuration}
@@ -26,10 +28,31 @@ module.exports = (opts, config) => {
     )
   }
 
+  const toInclude = [
+    // socket.io is patch-packaged in a way that we need to import the relative package,
+    // we could likely force this better with an alias / fix the fact that we have multiple versions
+    'socket.io',
+    // The rest of these seem to not play nicely with electron link snapshotting
+    'bluebird',
+    'fs-extra',
+    'graceful-fs',
+    '@cypress/request-promise',
+    'signal-exit',
+    'execa',
+    // 'marionette-client',
+    'express',
+    'lockfile',
+    'jimp',
+    'mocha-7.0.1',
+    'mocha',
+    'mime',
+    // '@benmalka/foxdriver'
+  ]
+
   /**
    * @type {import('webpack').Configuration}
    */
-  return {
+  return smp.wrap({
     mode: process.env.MINIFY_IND != null ? 'production' : 'development',
     devtool: false,
     node: {
@@ -39,88 +62,21 @@ module.exports = (opts, config) => {
     },
     target: 'node',
     // externalsPresets: { electron: true },
-    externals: [
-      'signal-exit',
-      'graceful-fs',
-      'lockfile',
-      'evil-dns',
-      'ws/lib',
-      'get-stream',
-      'process-nextick-args',
-
-      // Needs to be global
-      'graphql',
-      'typescript',
-
-      // Native modules, or ones with binaries we don't want to worry about
-      'registry-js',
-      'fsevents',
-      'fluent-ffmpeg',
-
-      // Others with errors, why do we even have some of these??
-      'cson-parser',
-      'coffeescript',
-      'jsonlint',
-      'konfig',
-
-      // require.extensions use
-      'tsconfig-paths',
-      'ts-node',
-      'ts-loader',
-
-      // Things we don't want to bundle
-      'esbuild',
-      'bundle-require',
-      'electron-packager',
-      'marionette-client',
-
-      // Things with css
-      'errorhandler',
-
-      // Optional / missing deps
-      // 'utf-8-validate',
-      'prettier',
-      'original-fs',
-      'osx-temperature-sensor',
-
-      // Too many expression dependencies
-      'express',
-      'firefox-profile',
-      'nexus',
-      '@ffmpeg-installer/ffmpeg',
-      /nexus\/dist\/utils/,
-
-      // Skip the dev-servers / bundlers for now
-      // '@cypress/vite-dev-server',
-      // '@cypress/webpack-dev-server',
-      // '@cypress/webpack-batteries-included-preprocessor',
-
-      // What is the deal with this package:
-      'electron',
-      'v8-snapshot',
-      'bluebird',
-      'execa',
-      'colors/safe',
-      'json5',
-      'async',
-      'he',
-      'has',
-      'jsesc',
-      // '@packages/electron',
-
-      function (context, request, callback) {
-
-        if (request.startsWith('@cypress/')) {
-          return callback(null, `commonjs ${request}`)
-        }
-
-        if (request.endsWith('util/suppress_warnings') || request.endsWith('registerDir') || request.endsWith('/capture')) {
-          return callback(null, `commonjs ./${path.relative(path.join(__dirname, 'packages', 'server'), path.join(context, request.replace('@packages', '../../packages')))}`)
-        }
-
+    externals (context, request, callback) {
+      // socket.io is patch-packaged in a way that we need to import the relative package,
+      // we could likely force this better with an alias / fix the fact that we have multiple versions
+      if (request.startsWith('@packages') || request.startsWith('.') || toInclude.includes(request) || toInclude.some((i) => context.includes(i))) {
         return callback()
-      },
-    ],
+      }
+
+      if (request.endsWith('util/suppress_warnings') || request.endsWith('registerDir') || request.endsWith('/capture')) {
+        // console.log({context, request})
+
+        return callback(null, `commonjs ./${path.relative(__dirname, path.join(context, request.replace('@packages', '../../packages')))}`)
+      }
+
+      return callback(null, `commonjs ${request}`)
+    },
     // externalsType: 'commonjs',
     // experiments: {
     //   // outputModule: true,
@@ -138,15 +94,7 @@ module.exports = (opts, config) => {
     },
     optimization: {
       usedExports: true,
-      // concatenateModules: false,
       namedModules: true,
-      // minimizer: [
-      //   new webpack.TerserPlugin({
-      //     terserOptions: {
-      //       keep_fnames: true,
-      //     },
-      //   }),
-      // ],
     },
     // optimization: {
     //   splitChunks: {
@@ -185,19 +133,23 @@ module.exports = (opts, config) => {
       rules: [
         {
           test: /\.(m|j|t)s$/,
-          loader: 'esbuild-loader',
-          options: {
-            minify: false,
-            loader: 'ts',
-            target: 'node10',
-            tsconfigRaw: {
-              allowSyntheticDefaultImports: true,
-              esModuleInterop: true,
+          use: [
+            {
+              loader: 'esbuild-loader',
+              options: {
+                minify: false,
+                loader: 'ts',
+                target: 'node10',
+                tsconfigRaw: {
+                  allowSyntheticDefaultImports: true,
+                  esModuleInterop: true,
+                },
+                // json5.parse(
+                //   fs.readFileSync('./packages/ts/tsconfig.json', 'utf8'),
+                // ),
+              },
             },
-            // json5.parse(
-            //   fs.readFileSync('./packages/ts/tsconfig.json', 'utf8'),
-            // ),
-          },
+          ],
         },
         {
           test: /\.graphql$/,
@@ -205,5 +157,5 @@ module.exports = (opts, config) => {
         },
       ],
     },
-  }
+  })
 }

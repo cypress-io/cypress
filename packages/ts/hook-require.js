@@ -18,13 +18,34 @@ if (process.env.USE_SNAPSHOT != null) {
 function runWithVanillaSnapshot () {
   if (typeof snapshotResult !== 'undefined') {
     // console.log('snapshotResult available!', snapshotResult)
+    // console.log('require cache', require.cache)
 
     const Module = require('module')
     const entryPointDirPath = path.join(process.env.PROJECT_BASE_DIR)
 
     // console.log('entryPointDirPath:', entryPointDirPath)
 
+    let webpackRequire
+    let webpackRequireCache
+
+    const originalRequire = Module.prototype.require
+
     Module.prototype.require = function (module) {
+      if (require.cache[module]) {
+        return require.cache[module].exports
+      }
+
+      if (!module.startsWith('.') && Module.builtinModules.indexOf(module) !== -1) {
+        const cachedModule = {
+          id: module,
+          exports: originalRequire(module),
+        }
+
+        require.cache[module] = cachedModule
+
+        return cachedModule.exports
+      }
+
       const absoluteFilePath = module.startsWith('./node_modules') || module.startsWith('./packages') || module.startsWith('node_modules') || module.startsWith('packages') ? module : Module._resolveFilename(module, this, false)
       let relativeFilePath = path.relative(
         entryPointDirPath,
@@ -35,6 +56,8 @@ function runWithVanillaSnapshot () {
         relativeFilePath = `./${relativeFilePath}`
       }
 
+      // console.log(relativeFilePath)
+
       if (process.platform === 'win32') {
         relativeFilePath = relativeFilePath.replace(/\\/g, '/')
       }
@@ -43,13 +66,29 @@ function runWithVanillaSnapshot () {
         // eslint-disable-next-line no-undef
         snapshotResult.customRequire.cache[relativeFilePath]
 
+      if (cachedModule) {
+        return cachedModule.exports
+      }
+
       // eslint-disable-next-line no-undef
-      if (snapshotResult.customRequire.cache[relativeFilePath]) {
-        // console.log('Snapshot cache hit:', relativeFilePath)
+      if (snapshotResult.customRequire.definitions[relativeFilePath]) {
+        // eslint-disable-next-line no-undef
+        cachedModule = snapshotResult.customRequire(relativeFilePath)
+        if (relativeFilePath === './packages/server/server.js') {
+          webpackRequire = cachedModule.server.webpackRequire
+          webpackRequireCache = cachedModule.server.webpackRequire.m
+        }
+
+        return cachedModule
       }
 
       if (!cachedModule) {
-        // console.log('Uncached module:', module, relativeFilePath)
+        if (webpackRequireCache && webpackRequireCache[relativeFilePath]) {
+          cachedModule = webpackRequire(relativeFilePath)
+
+          return cachedModule
+        }
+
         if (module === './node_modules/electron/index.js') {
           cachedModule = { exports: Module._load('electron', this, false) }
         } else if (module.startsWith('./node_modules') || module.startsWith('./packages')) {
@@ -60,6 +99,11 @@ function runWithVanillaSnapshot () {
           cachedModule = { exports: Module._load(module, this, false) }
         }
 
+        if (relativeFilePath === './packages/server/server.js') {
+          webpackRequire = cachedModule.exports.server.webpackRequire
+          webpackRequireCache = cachedModule.exports.server.webpackRequire.m
+        }
+
         // eslint-disable-next-line no-undef
         snapshotResult.customRequire.cache[relativeFilePath] = cachedModule
       }
@@ -67,12 +111,21 @@ function runWithVanillaSnapshot () {
       return cachedModule.exports
     }
 
+    const checked_process =
+      typeof process !== 'undefined' ? process : undefined
+    const checked_window =
+      // eslint-disable-next-line no-undef
+      typeof window !== 'undefined' ? window : undefined
+    const checked_document =
+      // eslint-disable-next-line no-undef
+      typeof document !== 'undefined' ? document : undefined
+
     // eslint-disable-next-line no-undef
     snapshotResult.setGlobals(
       global,
-      process,
-      undefined,
-      undefined,
+      checked_process,
+      checked_window,
+      checked_document,
       console,
       require,
     )

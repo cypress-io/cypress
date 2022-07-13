@@ -211,6 +211,7 @@
     "shx": "0.3.3",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
+    "speed-measure-webpack-plugin": "^1.5.0",
     "start-server-and-test": "1.10.8",
     "stop-only": "3.0.1",
     "strip-ansi": "6.0.0",

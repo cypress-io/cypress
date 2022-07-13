@@ -1,10 +1,8 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
-import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
@@ -244,6 +242,7 @@ export default {
       getDelayMsForRetry,
     })
 
+    const Foxdriver = require('@benmalka/foxdriver')
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
     const { browser } = foxdriver
@@ -303,6 +302,8 @@ export default {
   },
 
   async setupMarionette (extensions, url, port) {
+    const Marionette = require('marionette-client')
+
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,

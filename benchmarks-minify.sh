@@ -23,6 +23,7 @@ export USE_SNAPSHOT=1
 unset USE_SNAPSHOT
 export USE_VANILLA_SNAPSHOT=1
 
+rm -rf .electron-cache
 rm ./packages/server/results/startup-minify-vanilla-snapshot.json
 PROJECT_BASE_DIR=`pwd` node ./generate-snapshot.js   
 for (( i = 0; i <= 8; i++ )) ;

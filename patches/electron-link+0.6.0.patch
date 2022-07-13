@@ -1,0 +1,45 @@
+diff --git a/node_modules/electron-link/lib/file-require-transform.js b/node_modules/electron-link/lib/file-require-transform.js
+index 07d7430..77133ff 100644
+--- a/node_modules/electron-link/lib/file-require-transform.js
++++ b/node_modules/electron-link/lib/file-require-transform.js
+@@ -26,6 +26,10 @@ module.exports = class FileRequireTransform {
+       // supported inside javascript strings) with escape unicode sequences.
+       source = "module.exports = " + source.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
+     }
++    // Hack for now to ensure we don't include the webpack bundled server code
++    // if (this.options.filePath.endsWith('server/server.js')) {
++    //   return source
++    // }
+     this.ast = recast.parse(source, {
+       parser: {
+         parse(source) {
+diff --git a/node_modules/electron-link/lib/generate-snapshot-script.js b/node_modules/electron-link/lib/generate-snapshot-script.js
+index bc7f05a..a7196ae 100644
+--- a/node_modules/electron-link/lib/generate-snapshot-script.js
++++ b/node_modules/electron-link/lib/generate-snapshot-script.js
+@@ -22,7 +22,14 @@ module.exports = async function (cache, options) {
+       relativeFilePath = './' + relativeFilePath
+     }
+     if (!moduleASTs[relativeFilePath]) {
+-      const source = fs.readFileSync(filePath, 'utf8')
++      let source
++      try {
++        source = fs.readFileSync(filePath, 'utf8')
++      } catch (e) {
++        console.error("Cannot find " + filePath)
++        continue;
++      }
++
+       let foundRequires = []
+       const transform = new FileRequireTransform({
+         filePath,
+@@ -58,7 +65,8 @@ module.exports = async function (cache, options) {
+             const after = source.slice(e.index, e.index + 100)
+             console.error(`\n${before}==>${after}\n`)
+           }
+-          throw e
++          transformedSource = source
++          // throw e
+         }
+         await cache.put({filePath, original: source, transformed: transformedSource, requires: foundRequires})
+       }

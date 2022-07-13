@@ -3,6 +3,8 @@ const path = require('path')
 const fs = require('fs').promises
 const vm = require('vm')
 const childProcess = require('child_process')
+const config = require('./webpack.config.js')
+const webpack = require('webpack')
 
 const run = async () => {
   let processedFiles = 0
@@ -55,7 +57,25 @@ const run = async () => {
         requiredModuleRelativePath.includes(
           path.join(
             'node_modules',
+            'common-path-prefix',
+          ),
+        ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
+            'mocha-7.0.1',
+          ),
+        ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
             'electron',
+          ),
+        ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
+            'ignore',
           ),
         ) ||
         requiredModuleRelativePath.endsWith(
@@ -71,6 +91,18 @@ const run = async () => {
             'node_modules',
             'lockfile',
             'lockfile.js',
+          ),
+        ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
+            'jimp',
+          ),
+        ) ||
+        requiredModuleRelativePath.includes(
+          path.join(
+            'node_modules',
+            'iconv-lite',
           ),
         ) ||
         requiredModuleRelativePath.endsWith(
@@ -93,7 +125,7 @@ const run = async () => {
             'node_modules',
             'safer-buffer',
           ),
-        ) || 
+        ) ||
         requiredModuleRelativePath.endsWith(
           path.join(
             'node_modules',
@@ -178,4 +210,6 @@ const run = async () => {
   }
 }
 
-run()
+webpack(config({}), () => {
+  run()
+})

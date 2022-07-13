@@ -1,6 +1,4 @@
 const _ = require('lodash')
-let r = require('@cypress/request')
-let rp = require('@cypress/request-promise')
 const url = require('url')
 const tough = require('tough-cookie')
 const debug = require('debug')('cypress:server:request')
@@ -17,6 +15,9 @@ const VERBOSE_REQUEST_OPTS = 'followRedirect strictSSL'.split(' ')
 const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket timeout upgrade'.split(' ')
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
+
+let rp
+let r
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -212,6 +213,8 @@ const createRetryingRequestPromise = function (opts) {
       return createRetryingRequestPromise(opts)
     })
   }
+
+  rp = rp || require('@cypress/request-promise')
 
   return rp(opts)
   .catch((err) => {
@@ -442,8 +445,8 @@ module.exports = function (options = {}) {
     proxy: null, // upstream proxying is handled by CombinedAgent
   }
 
-  r = r.defaults(defaults)
-  rp = rp.defaults(defaults)
+  r = require('@cypress/request').defaults(defaults)
+  rp = require('@cypress/request-promise').defaults(defaults)
 
   return {
     r: require('@cypress/request'),

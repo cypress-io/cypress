@@ -7,11 +7,11 @@
 // built Electron app without ts-node hook. Assume the
 // build has been done correctly
 module.exports = function (scopeDir) {
-  const hook = './hook'
+  // const hook = './hook'
 
-  if (require.name !== 'customRequire') {
-    require(`${hook}-require`)
-  }
+  // if (require.name !== 'customRequire') {
+  //   require(`${hook}-require`)
+  // }
 
   // try {
   //   // Prevent double-compiling if we're testing the app and already have ts-node hook installed
