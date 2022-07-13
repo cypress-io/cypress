@@ -62,10 +62,15 @@ export const useRunnerStyle = () => {
   })
 
   const viewportStyle = computed(() => {
+    // in the below styles, `position: absolute` is required to avoid certain edge cases
+    // that can happen with overflow (mainly, in Firefox, but not always)
+    // see this issue for details: https://github.com/cypress-io/cypress/issues/21881
+
     let style = `
     width: ${autStore.viewportDimensions.width}px;
     height: ${autStore.viewportDimensions.height}px;
     transform: scale(${scale.value});
+    position: absolute;
     `
 
     // to keep the AUT iframe centered during scaling, we need to calculate the difference between
