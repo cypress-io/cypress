@@ -13,6 +13,7 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
+  matchedIntercept?: boolean
 }
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false

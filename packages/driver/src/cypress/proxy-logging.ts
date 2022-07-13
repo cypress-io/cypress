@@ -247,6 +247,10 @@ type UnmatchedXhrLog = {
   stack?: string
 }
 
+type FilterFnRequestInfo = {
+  matchedIntercept: boolean
+} & BrowserPreRequest
+
 function defaultFilterFn (preRequest: BrowserPreRequest) {
   return ['xhr', 'fetch'].includes(preRequest.resourceType)
 }
@@ -255,7 +259,7 @@ export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
-  filterFn: (preRequest: BrowserPreRequest) => boolean = defaultFilterFn
+  filterFn: (requestInfo: FilterFnRequestInfo) => boolean = defaultFilterFn
 
   constructor (private Cypress: Cypress.Cypress) {
     Cypress.on('request:event', (eventName, data) => {
@@ -378,7 +382,7 @@ export default class ProxyLogging {
   /**
    * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
    */
-  private logIncomingRequest (preRequest: BrowserPreRequest): void {
+  private logIncomingRequest ({ preRequest, matchedIntercept }: { preRequest: BrowserPreRequest, matchedIntercept: boolean }): void {
     // if this is an XHR, check to see if it matches an XHR log that is missing a pre-request
     if (preRequest.resourceType === 'xhr') {
       const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
@@ -399,7 +403,7 @@ export default class ProxyLogging {
       }
     }
 
-    if (!this.filterFn(preRequest)) {
+    if (!this.filterFn({ ...preRequest, matchedIntercept })) {
       this.unloggedPreRequests.push(preRequest)
 
       return

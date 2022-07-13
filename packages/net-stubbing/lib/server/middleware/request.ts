@@ -80,6 +80,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
+  this.req.matchedIntercept = true
 
   this.netStubbingState.requests[request.id] = request
 
