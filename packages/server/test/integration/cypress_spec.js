@@ -452,33 +452,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    // NOTE: This test is skipped because it causes the subsequent test to fail intermittently
-    it.skip('scaffolds out support + files if they do not exist', async function () {
-      const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
-
-      setCtx(makeDataContext({}))
-
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
-
-      return ctx.lifecycleManager.getFullInitialConfig()
-      .then(() => {
-        return fs.rmdir(supportFolder, { recursive: true })
-      }).then(() => {
-        return fs.statAsync(supportFolder)
-      })
-      .then(() => {
-        throw new Error('supportFolder should not exist!')
-      }).catch({ code: 'ENOENT' }, () => {
-        return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
-      }).then(() => {
-        return fs.statAsync(supportFolder)
-      }).then(() => {
-        throw new Error('supportFolder should not exist!')
-      }).catch((err) => {
-        expect(err.code).eq('ENOENT')
-      })
-    })
-
     it('runs project headed and displays gui', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
       .then(() => {
