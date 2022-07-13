@@ -68,7 +68,7 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
     const originalCachePredicate = webpackConfig.module.unsafeCache
 
     webpackConfig.module.unsafeCache = (module: any) => {
-      return originalCachePredicate(module) && !/[\\/]Webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
+      return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
     }
   }
 
