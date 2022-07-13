@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-describe('Proxy Logging', () => {
+describe('Network Logs', () => {
   const { _ } = Cypress
 
   const url = '/testFlag'
@@ -137,10 +137,10 @@ describe('Proxy Logging', () => {
           }
         })
 
-        const oldUpdateRequestWithResponse = Cypress.ProxyLogging['updateRequestWithResponse']
+        const oldUpdateRequestWithResponse = Cypress.NetworkLogs['updateRequestWithResponse']
 
         // @ts-expect-error stubbing private method
-        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
+        cy.stub(Cypress.NetworkLogs, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
           setTimeout(() => {
             oldUpdateRequestWithResponse.call(this, ...args)
           }, 500)
@@ -187,13 +187,13 @@ describe('Proxy Logging', () => {
 
         const xhr = new win.XMLHttpRequest()
 
-        const logIncomingRequest = Cypress.ProxyLogging['logIncomingRequest']
-        const updateRequestWithResponse = Cypress.ProxyLogging['updateRequestWithResponse']
+        const logIncomingRequest = Cypress.NetworkLogs['logIncomingRequest']
+        const updateRequestWithResponse = Cypress.NetworkLogs['updateRequestWithResponse']
 
         // To simulate the xhr call landing second, we send updateRequestWithResponse immediately after
         // the call is intercepted
         // @ts-expect-error stubbing private method
-        cy.stub(Cypress.ProxyLogging, 'logIncomingRequest').log(false).callsFake(function (...args) {
+        cy.stub(Cypress.NetworkLogs, 'logIncomingRequest').log(false).callsFake(function (...args) {
           logIncomingRequest.call(this, ...args)
           updateRequestWithResponse.call(this, {
             requestId: args[0].requestId,
@@ -202,7 +202,7 @@ describe('Proxy Logging', () => {
         })
 
         // @ts-expect-error stubbing private method
-        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function () {})
+        cy.stub(Cypress.NetworkLogs, 'updateRequestWithResponse').log(false).callsFake(function () {})
 
         xhr.open('GET', '/some-url')
         xhr.send()
@@ -522,7 +522,7 @@ describe('Proxy Logging', () => {
       let logs: Cypress.Log[] = []
 
       beforeEach(() => {
-        Cypress.ProxyLogging.filter()
+        Cypress.NetworkLogs.filter()
 
         logs = []
         cy.on('log:added', (log) => {
@@ -552,7 +552,7 @@ describe('Proxy Logging', () => {
       }
 
       it('can filter out XHR', () => {
-        Cypress.ProxyLogging.filter((req) => req.resourceType !== 'xhr')
+        Cypress.NetworkLogs.filter((req) => req.resourceType !== 'xhr')
         sendXhr()
         .then(() => {
           expect(logs).to.have.length(0)
@@ -560,7 +560,7 @@ describe('Proxy Logging', () => {
       })
 
       it('can filter out fetch', () => {
-        Cypress.ProxyLogging.filter((req) => req.resourceType !== 'fetch')
+        Cypress.NetworkLogs.filter((req) => req.resourceType !== 'fetch')
         sendFetch()
         .then(() => {
           expect(logs).to.have.length(0)
@@ -568,7 +568,7 @@ describe('Proxy Logging', () => {
       })
 
       it('can not filter out intercept', () => {
-        Cypress.ProxyLogging.filter((req) => false)
+        Cypress.NetworkLogs.filter((req) => false)
 
         cy.intercept('/foo-fetch', 'boo')
         .then(sendFetch)
@@ -579,7 +579,7 @@ describe('Proxy Logging', () => {
     })
   })
 
-  context('Cypress.ProxyLogging', () => {
+  context('Cypress.NetworkLogs', () => {
     describe('.logInterception', () => {
       it('creates a fake log for unmatched requests', () => {
         const interception = {
@@ -593,7 +593,7 @@ describe('Proxy Logging', () => {
 
         const route = {}
 
-        const ret = Cypress.ProxyLogging['logInterception'](interception, route)
+        const ret = Cypress.NetworkLogs['logInterception'](interception, route)
 
         expect(ret.preRequest).to.deep.eq({
           requestId: 'request123',

@@ -4,7 +4,7 @@ import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@
 import $errUtils from './error_utils'
 import Debug from 'debug'
 
-const debug = Debug('cypress:driver:proxy-logging')
+const debug = Debug('cypress:driver:network-logs')
 
 /**
  * Remove and return the first element from `array` for which `filterFn` returns a truthy value.
@@ -255,7 +255,7 @@ function defaultFilterFn (preRequest: BrowserPreRequest) {
   return ['xhr', 'fetch'].includes(preRequest.resourceType)
 }
 
-export default class ProxyLogging {
+export default class NetworkLogs {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
@@ -290,7 +290,7 @@ export default class ProxyLogging {
   filter (filterFn?: typeof this.filterFn): void {
     if (filterFn !== undefined && typeof filterFn !== 'function') {
       // TODO: move to error_messages once API is finalized
-      throw new Error(`ProxyLogging.filter() accepts a function as the first argument, but a ${typeof filterFn} was passed.`)
+      throw new Error(`NetworkLogs.filter() accepts a function as the first argument, but a ${typeof filterFn} was passed.`)
     }
 
     this.filterFn = filterFn || defaultFilterFn

@@ -600,13 +600,13 @@ declare namespace Cypress {
       defaults(options: Partial<KeyboardDefaultsOptions>): void
     }
 
-    ProxyLogging: {
+    NetworkLogs: {
       /**
-       * Reset the filter rules for proxy logs to the default (all XHRs and fetches are logged)
+       * Reset the filter rules for network logs to the default (all XHRs and fetches are logged)
        */
       filter(): void
       /**
-       * Set custom filtering rules for proxy logs.
+       * Set custom filtering rules for network logs.
        * @param filterFn a function that returns true if the request should be logged and false otherwise
        */
       filter(filterFn: (req: {

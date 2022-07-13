@@ -10,8 +10,8 @@ interface InternalWindowLoadDetails {
 declare namespace Cypress {
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
-    ProxyLogging: any
+    // TODO: how to pull this from network-logs.ts? can't import in a d.ts file...
+    NetworkLogs: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
     resolveWindowReference: any
     resolveLocationReference: any

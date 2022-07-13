@@ -32,7 +32,7 @@ import { $Chainer } from './cypress/chainer'
 import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
-import ProxyLogging from './cypress/proxy-logging'
+import NetworkLogs from './cypress/network-logs'
 import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
@@ -100,7 +100,7 @@ class $Cypress {
   env: any
   getTestRetries: any
   Cookies!: ICookies
-  ProxyLogging: any
+  NetworkLogs: any
   _onInitialize: any
   isCy: any
   log: any
@@ -269,7 +269,7 @@ class $Cypress {
 
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
-    this.ProxyLogging = new ProxyLogging(this)
+    this.NetworkLogs = new NetworkLogs(this)
 
     return this.action('cypress:config', config)
   }

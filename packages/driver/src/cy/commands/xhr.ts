@@ -108,7 +108,7 @@ const startXhrServer = (Cypress, cy, state, config) => {
   const logs = {}
 
   function shouldLogXhr (xhr) {
-    return Cypress.ProxyLogging.filterFn({
+    return Cypress.NetworkLogs.filterFn({
       requestId: xhr.id,
       method: xhr.method,
       url: xhr.url,
@@ -216,7 +216,7 @@ const startXhrServer = (Cypress, cy, state, config) => {
         },
       })
 
-      Cypress.ProxyLogging.addXhrLog({ xhr, route, log, stack })
+      Cypress.NetworkLogs.addXhrLog({ xhr, route, log, stack })
 
       return log?.snapshot('request')
     },
