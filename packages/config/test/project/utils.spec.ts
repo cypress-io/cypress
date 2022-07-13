@@ -1,6 +1,12 @@
+import '@packages/server/test/spec_helper'
+
 import _ from 'lodash'
 import { expect } from 'chai'
 import sinon from 'sinon'
+import stripAnsi from 'strip-ansi'
+import Debug from 'debug'
+
+import Fixtures from '@tooling/system-tests'
 
 import {
   checkIfResolveChangedRootFolder,
@@ -11,9 +17,24 @@ import {
   setAbsolutePaths,
   setNodeBinary,
   relativeToProjectRoot,
+  setSupportFileAndFolder,
 } from '../../src/project/utils'
 
+const debug = Debug('test')
+
 describe('config/src/project/utils', () => {
+  before(function () {
+    this.env = process.env;
+
+    (process as any).env = _.omit(process.env, 'CYPRESS_DEBUG')
+
+    Fixtures.scaffold()
+  })
+
+  after(function () {
+    process.env = this.env
+  })
+
   describe('checkIfResolveChangedRootFolder', () => {
     it('ignores non-absolute paths', () => {
       expect(checkIfResolveChangedRootFolder('foo/index.js', 'foo')).to.be.false
@@ -347,6 +368,168 @@ describe('config/src/project/utils', () => {
         const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
 
         expect(relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
+      })
+    })
+  })
+
+  context('.setSupportFileAndFolder', () => {
+    afterEach(() => {
+      sinon.restore()
+    })
+
+    it('does nothing if supportFile is falsey', () => {
+      const obj = {
+        projectRoot: '/_test-output/path/to/project',
+      }
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql(obj)
+      })
+    })
+
+    it('sets the full path to the supportFile and supportFolder if it exists', () => {
+      const projectRoot = process.cwd()
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'test/project/utils.spec.ts',
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: `${projectRoot}/test/project/utils.spec.ts`,
+          supportFolder: `${projectRoot}/test/project`,
+        })
+      })
+    })
+
+    it('sets the supportFile to default e2e.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
+      const projectRoot = Fixtures.projectPath('no-scaffolding')
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
+          supportFolder: `${projectRoot}/cypress/support`,
+        })
+      })
+    })
+
+    it('finds support file in project path that contains glob syntax', () => {
+      const projectRoot = Fixtures.projectPath('project-with-(glob)-[chars]')
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
+          supportFolder: `${projectRoot}/cypress/support`,
+        })
+      })
+    })
+
+    it('sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default', () => {
+      const projectRoot = Fixtures.projectPath('empty-folders')
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: false,
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: false,
+        })
+      })
+    })
+
+    it('throws error if supportFile is not default and does not exist', () => {
+      const projectRoot = process.cwd()
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'does/not/exist',
+        resolved: {
+          supportFile: {
+            value: 'does/not/exist',
+            from: 'default',
+          },
+        },
+      })
+
+      return setSupportFileAndFolder(obj)
+      .catch((err) => {
+        expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
+      })
+    })
+
+    it('sets the supportFile to index.ts if it exists (without ts require hook)', () => {
+      const projectRoot = Fixtures.projectPath('ts-proj')
+      const supportFolder = `${projectRoot}/cypress/support`
+      const supportFilename = `${supportFolder}/index.ts`
+
+      const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
+
+      e.code = 'MODULE_NOT_FOUND'
+      sinon.stub(utils, 'resolveModule').withArgs(supportFilename).throws(e)
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/index.ts',
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        debug('result is', result)
+
+        expect(result).to.eql({
+          projectRoot,
+          supportFolder,
+          supportFile: supportFilename,
+        })
+      })
+    })
+
+    it('uses custom TS supportFile if it exists (without ts require hook)', () => {
+      const projectRoot = Fixtures.projectPath('ts-proj-custom-names')
+      const supportFolder = `${projectRoot}/cypress`
+      const supportFilename = `${supportFolder}/support.ts`
+
+      const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
+
+      e.code = 'MODULE_NOT_FOUND'
+      sinon.stub(utils, 'resolveModule').withArgs(supportFilename).throws(e)
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support.ts',
+      })
+
+      return setSupportFileAndFolder(obj)
+      .then((result) => {
+        debug('result is', result)
+
+        expect(result).to.eql({
+          projectRoot,
+          supportFolder,
+          supportFile: supportFilename,
+        })
       })
     })
   })

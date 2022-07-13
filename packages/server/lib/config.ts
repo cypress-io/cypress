@@ -2,16 +2,11 @@ import _ from 'lodash'
 import type { ResolvedFromConfig } from '@packages/types'
 import * as configUtils from '@packages/config'
 
-// an object with a few utility methods for easy stubbing from unit tests
-export const utils = configUtils.utils
-
 export const setupFullConfigWithDefaults = configUtils.setupFullConfigWithDefaults
 
 export const mergeDefaults = configUtils.mergeDefaults
 
 export const updateWithPluginValues = configUtils.updateWithPluginValues
-
-export const setSupportFileAndFolder = configUtils.setSupportFileAndFolder
 
 export const setUrls = configUtils.setUrls
 

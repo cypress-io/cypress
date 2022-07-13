@@ -1,8 +1,5 @@
-import Bluebird from 'bluebird'
 import _ from 'lodash'
 import Debug from 'debug'
-import path from 'path'
-import fs from 'fs-extra'
 import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
@@ -19,49 +16,19 @@ import {
 } from '../browser'
 import {
   parseEnv,
-  checkIfResolveChangedRootFolder,
   resolveConfigValues,
   setPluginResolvedOn,
   setAbsolutePaths,
   setNodeBinary,
-  relativeToProjectRoot,
+  setSupportFileAndFolder,
 } from './utils'
+import type { Config } from './types'
 
 import {
   setUrls,
 } from '../utils'
 
 const debug = Debug('cypress:config:project')
-
-// an object with a few utility methods for easy stubbing from unit tests
-export const utils = {
-  resolveModule (name) {
-    return require.resolve(name)
-  },
-
-  // returns:
-  //   false - if the file should not be set
-  //   string - found filename
-  //   null - if there is an error finding the file
-  discoverModuleFile (options) {
-    debug('discover module file %o', options)
-    const { filename } = options
-
-    // they have it explicitly set, so it should be there
-    return fs.pathExists(filename)
-    .then((found) => {
-      if (found) {
-        debug('file exists, assuming it will load')
-
-        return filename
-      }
-
-      debug('could not find %o', { filename })
-
-      return null
-    })
-  },
-}
 
 function isValidCypressInternalEnvValue (value) {
   // names of config environments, see "config/app.yml"
@@ -91,7 +58,7 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
 }
 
 export function mergeDefaults (
-  config: Record<string, any> = {},
+  config: Config = {},
   options: Record<string, any> = {},
   cliConfig: Record<string, any> = {},
 ) {
@@ -316,92 +283,4 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
   debug('merged plugins config %o', merged)
 
   return merged
-}
-
-// async function
-export async function setSupportFileAndFolder (obj) {
-  if (!obj.supportFile) {
-    return Bluebird.resolve(obj)
-  }
-
-  obj = _.clone(obj)
-
-  const ctx = getCtx()
-
-  const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile)
-
-  if (supportFilesByGlob.length > 1) {
-    return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
-  }
-
-  if (supportFilesByGlob.length === 0) {
-    if (obj.resolved.supportFile.from === 'default') {
-      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
-    }
-
-    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
-  }
-
-  // TODO move this logic to find support file into util/path_helpers
-  const sf = supportFilesByGlob[0]
-
-  debug(`setting support file ${sf}`)
-  debug(`for project root ${obj.projectRoot}`)
-
-  return Bluebird
-  .try(() => {
-    // resolve full path with extension
-    obj.supportFile = utils.resolveModule(sf)
-
-    return debug('resolved support file %s', obj.supportFile)
-  }).then(() => {
-    if (!checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-      return
-    }
-
-    debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
-    // this means the path was probably symlinked, like
-    // /tmp/foo -> /private/tmp/foo
-    // which can confuse the rest of the code
-    // switch it back to "normal" file
-    const supportFileName = path.basename(obj.supportFile)
-    const base = sf?.endsWith(supportFileName) ? path.dirname(sf) : sf
-
-    obj.supportFile = path.join(base || '', supportFileName)
-
-    return fs.pathExists(obj.supportFile)
-    .then((found) => {
-      if (!found) {
-        errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
-      }
-
-      return debug('switching to found file %s', obj.supportFile)
-    })
-  }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-    debug('support JS module %s does not load', sf)
-
-    return utils.discoverModuleFile({
-      filename: sf,
-      projectRoot: obj.projectRoot,
-    })
-    .then((result) => {
-      if (result === null) {
-        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
-      }
-
-      debug('setting support file to %o', { result })
-      obj.supportFile = result
-
-      return obj
-    })
-  })
-  .then(() => {
-    if (obj.supportFile) {
-      // set config.supportFolder to its directory
-      obj.supportFolder = path.dirname(obj.supportFile)
-      debug(`set support folder ${obj.supportFolder}`)
-    }
-
-    return obj
-  })
 }
