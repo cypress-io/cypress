@@ -262,7 +262,8 @@ function watchEntryPoint (webpackConfig: Configuration) {
 
 const globalCssRe = [/(?<!\.module)\.css$/, /(?<!\.module)\.(scss|sass)$/]
 const globalCssModulesRe = [/\.module\.css$/, /\.module\.(scss|sass)$/]
-const allCssTests = [...globalCssRe, ...globalCssModulesRe]
+
+export const allCssTests = [...globalCssRe, ...globalCssModulesRe]
 
 // Next does not allow global styles to be loaded outside of the main <App /> component.
 // We want users to be able to import the global styles into their component support file so we

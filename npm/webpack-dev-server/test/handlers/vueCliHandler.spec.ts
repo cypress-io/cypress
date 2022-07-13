@@ -18,7 +18,7 @@ describe('vueCliHandler', function () {
     } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
-    expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(webpackConfig.plugins?.find((plug) => plug.constructor.name === 'VueLoader'))
   })
 
   it('sources from a @vue/cli-service@4.x project with Vue 2', async () => {
@@ -31,6 +31,6 @@ describe('vueCliHandler', function () {
     } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
-    expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(webpackConfig.plugins?.find((plug) => plug.constructor.name === 'VueLoader'))
   })
 })
