@@ -27,6 +27,7 @@ it('takes consistent viewport captures', () => {
   })
 })
 
+// @see https://github.com/cypress-io/cypress/issues/22173
 it('properly blacks out absolute elements within a relative container', () => {
   cy.visit('cypress/fixtures/screenshot-blackout.html')
   .get('.centered-container')
