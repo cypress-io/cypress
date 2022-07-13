@@ -22,7 +22,7 @@ export class ErrorActions {
       }
 
       if (d.baseError?.id === id) {
-        d.baseError === null
+        d.baseError = null
       }
     })
   }

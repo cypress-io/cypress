@@ -30,7 +30,21 @@ const isRenderWorkerRe = /\.RenderWorker-/
 // https://github.com/cypress-io/cypress/issues/19299
 const isDbusWarning = /Failed to connect to the bus:/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning]
+// Electron began logging these on self-signed certs with 17.0.0-alpha.4.
+// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/34583
+// Sample:
+// [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
+// ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
+// ERROR: No matching issuer found
+const isCertVerifyProcBuiltin = /(^\[.*ERROR:cert_verify_proc_builtin\.cc|^----- Certificate i=0 \(OU=Cypress Proxy|^ERROR: No matching issuer found$)/
+
+// Electron logs a benign warning about WebSwapCGLLayer on MacOS v12 and Electron v18 due to a naming collision in shared libraries.
+// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/33685
+// Sample:
+// objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
+const isMacOSElectronWebSwapCGLLayerWarning = /^objc\[\d+\]: Class WebSwapCGLLayer is implemented in both.*Which one is undefined\./
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {

@@ -54,7 +54,6 @@
       :code="content"
       line-numbers
       copy-on-click
-      copy-button
     />
   </Collapsible>
 </template>
@@ -80,8 +79,7 @@ import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
-import ShikiHighlight, { langsSupported } from '@cy/components/ShikiHighlight.vue'
-import type { CyLangType } from '@cy/components/ShikiHighlight.vue'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import AddedIcon from '~icons/cy/file-changes-added_x24.svg'
@@ -102,13 +100,7 @@ const props = defineProps<{
 const language = computed(() => {
   // The fileExtension from FileParts is prepended with a period;
   // we must strip the period to validate against our supported languages.
-  let extension = props.fileExtension.replace(/^\./, '')
-
-  if (extension && (langsSupported as readonly string[]).includes(extension)) {
-    return extension as CyLangType
-  }
-
-  return 'plaintext'
+  return props.fileExtension.replace(/^\./, '')
 })
 
 const statusInfo: ComputedRef<StatusInfo> = computed(() => {

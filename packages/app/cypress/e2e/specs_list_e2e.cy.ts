@@ -112,19 +112,19 @@ describe('App: Spec List (E2E)', () => {
 
   describe('typing the filter', function () {
     it('displays only matching spec', function () {
-      cy.get('button').contains('14 Matches')
+      cy.get('button').contains('23 Matches')
       cy.findByLabelText('Search Specs').type('content')
       cy.get('[data-cy="spec-item"]')
       .should('have.length', 2)
       .and('contain', 'dom-content.spec.js')
 
-      cy.get('button').contains('2 of 14 Matches')
+      cy.get('button').contains('2 of 23 Matches')
 
       cy.findByLabelText('Search Specs').clear().type('asdf')
       cy.get('[data-cy="spec-item"]')
       .should('have.length', 0)
 
-      cy.get('button').contains('0 of 14 Matches')
+      cy.get('button').contains('0 of 23 Matches')
     })
 
     it('only shows matching folders', () => {
@@ -176,7 +176,7 @@ describe('App: Spec List (E2E)', () => {
       .should('have.value', '')
 
       cy.get('[data-cy="spec-item"]')
-      .should('have.length', 14)
+      .should('have.length', 23)
     })
 
     it('clears the filter if the user presses ESC key', function () {
@@ -187,8 +187,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findByLabelText('Search Specs')
       .should('have.value', '')
 
-      cy.get('[data-cy="spec-item"]')
-      .should('have.length', 14)
+      cy.get('button').contains('23 Matches')
     })
 
     it('shows empty message if no results', function () {
@@ -203,8 +202,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findByText('Clear Search').click()
       cy.focused().should('have.id', 'spec-filter')
 
-      cy.get('[data-cy="spec-item"]')
-      .should('have.length', 14)
+      cy.get('button').contains('23 Matches')
     })
 
     //TODO: https://cypress-io.atlassian.net/browse/UNIFY-1588

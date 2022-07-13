@@ -85,4 +85,36 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.get('.shiki').should('be.visible')
     cy.percySnapshot()
   })
+
+  describe('copy button', () => {
+    it('should not render when specified "false"', () => {
+      cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" copyButton={false} /></div>)
+      cy.get('button').should('not.exist')
+    })
+
+    it('should render when specified "true"', () => {
+      cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" copyButton={true} /></div>)
+      cy.get('button').should('be.visible')
+      cy.percySnapshot()
+    })
+
+    it('should remain visible when content becomes scrollable', () => {
+      cy.mount(() => <div class="h-10 p-12"><ShikiHighlight code={code.repeat(5)} lang="ts" copyButton={true} /></div>)
+      cy.get('button').validateWithinViewport()
+
+      cy.percySnapshot('copy button initially within viewport')
+
+      cy.scrollTo('bottom', { duration: 100 })
+      .get('button')
+      .validateWithinViewport()
+
+      cy.percySnapshot('copy button remains within viewport on scroll down')
+
+      cy.scrollTo('top', { duration: 100 })
+      .get('button')
+      .validateWithinViewport()
+
+      cy.percySnapshot('copy button remains within viewport on scroll up')
+    })
+  })
 })
