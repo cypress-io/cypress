@@ -21,15 +21,17 @@ export interface SourcedDependency {
   packageJson: PackageJson
 }
 
+export type WebpackModule = typeof import('webpack')
+
 export interface SourcedWebpack extends SourcedDependency {
-  module: Function
+  module: WebpackModule
   majorVersion: 4 | 5
 }
 
+export type WebpackDevServerModule = typeof import('webpack-dev-server')
+
 export interface SourcedWebpackDevServer extends SourcedDependency {
-  module: {
-    new (...args: unknown[]): unknown
-  }
+  module: WebpackDevServerModule
   majorVersion: 3 | 4
 }
 
