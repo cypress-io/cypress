@@ -394,10 +394,10 @@ commands:
       - update_known_hosts
       - when:
           condition: 
-            equal: [true, true]
+            equal: [windows, "$PLATFORM"]
           steps:
             - run: 
-                name: Update NVM for Windows
+                name: Update NVM for Windows with node 16.14.2 fix
                 if: 
                 shell: powershell.exe -ExecutionPolicy Bypass
                 command: |
@@ -408,30 +408,14 @@ commands:
           command: |
             node_version=$(cat .node-version)
             source ./scripts/ensure-node.sh
-      - run:
-          name: Install yarn
-          command: |
-            source ./scripts/ensure-node.sh
-            which nvm
-            nvm -v
-            which node
-            node -v
-            which npm
-            npm -v
+            echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
+            yarn check-node-version
       - run:
           name: Check Node
           shell: powershell.exe -ExecutionPolicy Bypass
           command: |
             source ./scripts/ensure-node.sh
-            which nvm
-            nvm -v
-            which node
-            node -v
-            which npm
-            npm -v
-            which yarn
-            npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
 
   install-chrome:
@@ -2731,5 +2715,17 @@ windows-workflow: &windows-workflow
           - windows-create-build-artifacts
 
 workflows:
+  linux-x64:
+    <<: *linux-x64-workflow
+    <<: *linux-x64-workflow-exclude-filters
+  linux-arm64:
+    <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+    <<: *darwin-workflow-filters
+  darwin-arm64:
+    <<: *darwin-arm64-workflow
+    <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
