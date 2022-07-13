@@ -4,7 +4,7 @@ import { makeSchema, connectionPlugin } from 'nexus'
 import * as schemaTypes from './schemaTypes/'
 import { nodePlugin } from './plugins/nexusNodePlugin'
 import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
-import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDeferIfNotLoadedPlugin, nexusDeferResolveGuard } from './plugins'
+import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDeferIfNotLoadedPlugin, nexusDeferResolveGuard, remoteFieldPlugin } from './plugins'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
@@ -30,17 +30,21 @@ export const graphqlSchema = makeSchema({
     },
   },
   plugins: [
-    nexusDeferResolveGuard,
-    nexusSlowGuardPlugin,
-    nexusDeferIfNotLoadedPlugin,
-    nexusDebugLogPlugin,
-    mutationErrorPlugin,
+    // Structural Plugins
     connectionPlugin({
       nonNullDefaults: {
         output: true,
       },
     }),
     nodePlugin,
+    remoteFieldPlugin,
+
+    // Runtime Resolver Plugins
+    nexusDeferResolveGuard,
+    nexusSlowGuardPlugin,
+    nexusDeferIfNotLoadedPlugin,
+    nexusDebugLogPlugin,
+    mutationErrorPlugin,
   ],
   formatTypegen (content, type) {
     if (type === 'schema') {

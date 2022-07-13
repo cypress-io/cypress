@@ -18,7 +18,7 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="cursor-text text-left relative">
+  <div class="cursor-text text-left">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-normal',
+        'overflow-scroll hover:border-indigo-200 text-14px leading-24px font-normal',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -52,19 +52,19 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick ? () => copyCode() : () => {}"
+      @click="copyOnClick ? () => copyCode() : () => { }"
       v-html="highlightedCode"
     />
     <pre
       v-else
       class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
-      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px']"
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="bg-white absolute"
+      class="bg-white ml-auto -mt-32px sticky"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
@@ -73,20 +73,29 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import type { Highlighter } from 'shiki'
-import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import type { Highlighter, ILanguageRegistration } from 'shiki'
+import { getHighlighter, setOnigasmWASM } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
+import shikiCyTheme from '../public/shiki/themes/cypress.theme.json'
+const langJSONFilesArray = import.meta.globEager('../public/shiki/languages/*.tmLanguage.json')
+
+// Convert to the format shiki needs for language customization.
+// @see https://github.com/shikijs/shiki/blob/main/docs/languages.md
+const langs: ILanguageRegistration[] = Object.values(langJSONFilesArray).map((grammar: any) => {
+  return {
+    grammar,
+    id: grammar.name,
+    scopeName: grammar.scopeName,
+  }
+})
 
 setOnigasmWASM(onigasm)
-setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
 
-export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
+export type CyLangType = 'typescript' | 'javascript' | 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml' | 'html' | 'plaintext' | 'txt' | 'text' | 'vue' | string
 
-let langs = langsSupported.concat([])
-
-export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
+export const langsSupported = langs.map((lang: ILanguageRegistration) => lang.id)
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -94,7 +103,7 @@ export async function initHighlighter () {
   }
 
   highlighter = await getHighlighter({
-    themes: ['cypress.theme'],
+    theme: shikiCyTheme as any,
     langs,
   })
 }
@@ -142,12 +151,21 @@ const props = withDefaults(defineProps<{
 })
 
 const resolvedLang = computed(() => {
-  if (props.lang === 'javascript' || props.lang === 'js' || props.lang === 'jsx') return 'jsx'
-
-  if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
-
-  // if the language is not recognized use plaintext
-  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
+  switch (props.lang) {
+    case 'javascript':
+    case 'js':
+    case 'jsx':
+      return 'jsx'
+    case 'typescript':
+    case 'ts':
+    case 'tsx':
+      return 'tsx'
+    default:
+      return props.lang && langsSupported.includes(props.lang)
+        ? props.lang
+        // if the language is not recognized use plaintext
+        : 'plaintext'
+  }
 })
 
 const trimmedCode = computed(() => props.skipTrim ? props.code : props.code.trim())
@@ -181,7 +199,6 @@ avoid colliding with styles elsewhere in the document.
 -->
 
 <style lang="scss" scoped>
-
 $offset: 1.1em;
 
 .inline:deep(.shiki) {
@@ -199,12 +216,14 @@ $offset: 1.1em;
 
   &.line-numbers:deep(.shiki) {
     @apply py-8px;
+
     code {
       counter-reset: step;
       counter-increment: step calc(v-bind('props.initialLine') - 1);
 
       // Keep bg-gray-50 synced with the box-shadows.
-      .line::before, .line:first-child::before {
+      .line::before,
+      .line:first-child::before {
         @apply bg-gray-50 text-right mr-16px min-w-40px px-8px text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);

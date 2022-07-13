@@ -1,4 +1,4 @@
 module.exports = {
   spec: 'test/**/*.spec.ts',
-  timeout: 10000,
+  timeout: 15000,
 }

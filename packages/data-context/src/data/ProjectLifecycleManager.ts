@@ -181,6 +181,10 @@ export class ProjectLifecycleManager {
     return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
+  get eventProcessPid () {
+    return this._configManager?.eventProcessPid
+  }
+
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
@@ -793,7 +797,7 @@ export class ProjectLifecycleManager {
    * centrally in the e2e tests, as well as notify the "pending initialization"
    * for run mode
    */
-  private onLoadError = (err: any) => {
+  onLoadError = (err: CypressError) => {
     if (this.ctx.isRunMode && this._configManager) {
       this._configManager.onLoadError(err)
     } else {

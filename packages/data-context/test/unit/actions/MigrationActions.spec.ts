@@ -1,9 +1,12 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import { getConfigWithDefaults, getDiff } from '../../../src/actions/MigrationActions'
 import fs from 'fs-extra'
 import Fixtures from '@tooling/system-tests'
 import { createTestDataContext, scaffoldMigrationProject } from '../helper'
 import path from 'path'
+
+chai.use(chaiAsPromised)
 
 describe('MigrationActions', () => {
   context('getConfigWithDefaults', () => {
@@ -64,37 +67,35 @@ describe('MigrationActions', () => {
       fs.writeJsonSync(path.join(mockCypressDir, 'package.json'), mockPkgJson)
     }
 
-    it('errors when local cypress version is <10', (done) => {
+    it('errors when local cypress version is <10', () => {
       mockLocallyInstalledCypress(currentProject, '9.5.0')
       const ctx = createTestDataContext()
 
       ctx.update((coreData) => {
         coreData.currentProject = currentProject
         coreData.currentTestingType = 'e2e'
-        coreData.app.isInGlobalMode = true
+        coreData.app.isGlobalMode = true
       })
 
-      ctx.actions.migration.initialize({})
-      .catch((e) => {
-        expect((e as Error).message).to.include(
+      return (
+        expect(ctx.actions.migration.initialize({})).to.eventually.be.rejectedWith(
           'You are running Cypress version 10 in global mode, but you are attempting to migrate a project where Cypress version 9.5.0 is installed',
         )
-
-        done()
-      })
+      )
     })
 
-    it('does not error when local cypress version is 10', (done) => {
+    it('does not error when local cypress version is 10', () => {
       mockLocallyInstalledCypress(currentProject, '10.0.0')
       const ctx = createTestDataContext()
 
       ctx.update((coreData) => {
         coreData.currentProject = currentProject
         coreData.currentTestingType = 'e2e'
-        coreData.app.isInGlobalMode = true
       })
 
-      ctx.actions.migration.initialize({}).then(done)
+      return (
+        expect(ctx.actions.migration.initialize({})).to.eventually.not.be.rejected
+      )
     })
   })
 })
