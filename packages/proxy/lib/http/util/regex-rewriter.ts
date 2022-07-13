@@ -19,8 +19,8 @@ const formTopTarget = /target="_top"/g
 const integrityTagLookAheadRe = /(?<=\s)integrity(?==(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))|^integrity$/g
 const dynamicIntegritySetAttributeRe = /(?<=[a-zA-z]\.setAttribute\((?:\"|\'))integrity(?=\"|\')|^integrity$/g
 
-export function strip (html: string, { useExpandedModifyObstructiveCode }: Partial<SecurityOpts> = {
-  useExpandedModifyObstructiveCode: false,
+export function strip (html: string, { useModifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+  useModifyObstructiveThirdPartyCode: false,
 }) {
   const rewrittenHTML = html
   .replace(topOrParentEqualityBeforeRe, '$1self')
@@ -29,7 +29,7 @@ export function strip (html: string, { useExpandedModifyObstructiveCode }: Parti
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 
-  if (useExpandedModifyObstructiveCode) {
+  if (useModifyObstructiveThirdPartyCode) {
     return rewrittenHTML
     .replace(topIsSelfEqualityRe, 'self')
     .replace(formTopTarget, 'target="_self"')
@@ -40,8 +40,8 @@ export function strip (html: string, { useExpandedModifyObstructiveCode }: Parti
   return rewrittenHTML
 }
 
-export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<SecurityOpts> = {
-  useExpandedModifyObstructiveCode: false,
+export function stripStream ({ useModifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+  useModifyObstructiveThirdPartyCode: false,
 }) {
   return pumpify(
     utf8Stream(),
@@ -52,7 +52,7 @@ export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<Secur
         topOrParentLocationOrFramesRe,
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
-        ...(useExpandedModifyObstructiveCode ? [
+        ...(useModifyObstructiveThirdPartyCode ? [
           topIsSelfEqualityRe,
           formTopTarget,
           integrityTagLookAheadRe,
@@ -65,7 +65,7 @@ export function stripStream ({ useExpandedModifyObstructiveCode }: Partial<Secur
         '$1self$3$4',
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
-        ...(useExpandedModifyObstructiveCode ? [
+        ...(useModifyObstructiveThirdPartyCode ? [
           'self',
           'target="_self"',
           STRIPPED_INTEGRITY_TAG,

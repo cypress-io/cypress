@@ -657,15 +657,15 @@ describe('http/response-middleware', function () {
         })
       })
 
-      describe('experimentalExpandedModifyObstructiveCode', () => {
-        it('continues to "modifyObstructiveCode" when "experimentalExpandedModifyObstructiveCode" is true, even if "modifyObstructiveCode" is set to false.', () => {
+      describe('experimentalModifyObstructiveThirdPartyCode', () => {
+        it('continues to "modifyObstructiveCode" when "experimentalModifyObstructiveThirdPartyCode" is true, even if "modifyObstructiveCode" is set to false.', () => {
           prepareContext({
             res: {
               wantsInjection: 'full',
             },
             config: {
               modifyObstructiveCode: false,
-              experimentalExpandedModifyObstructiveCode: true,
+              experimentalModifyObstructiveThirdPartyCode: true,
             },
           })
 
@@ -676,7 +676,7 @@ describe('http/response-middleware', function () {
         })
 
         ;['text/html', 'application/xhtml+xml', 'application/javascript', 'application/x-javascript', 'text/javascript'].forEach((MIMEType) => {
-          it(`removes security for ${MIMEType} MIME when "experimentalExpandedModifyObstructiveCode" is true, regardless of injection or request origin.`, () => {
+          it(`removes security for ${MIMEType} MIME when "experimentalModifyObstructiveThirdPartyCode" is true, regardless of injection or request origin.`, () => {
             prepareContext({
               req: {
                 proxiedUrl: 'http://www.some-third-party-script-or-html.com/',
@@ -692,7 +692,7 @@ describe('http/response-middleware', function () {
                 wantsInjection: 'partial',
               },
               config: {
-                experimentalExpandedModifyObstructiveCode: true,
+                experimentalModifyObstructiveThirdPartyCode: true,
               },
             })
 

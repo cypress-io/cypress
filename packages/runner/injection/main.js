@@ -18,7 +18,7 @@ if (!Cypress) {
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
 
-if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
   const originalSetAttribute = Element.prototype.setAttribute
 
   Element.prototype.setAttribute = function (qualifiedName, value) {

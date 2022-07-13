@@ -43,7 +43,7 @@ const findCypress = () => {
 
 const Cypress = findCypress()
 
-if (Cypress && Cypress.config('experimentalExpandedModifyObstructiveCode')) {
+if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
   const originalSetAttribute = Element.prototype.setAttribute
 
   Element.prototype.setAttribute = function (qualifiedName, value) {

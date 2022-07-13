@@ -212,7 +212,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalExpandedModifyObstructiveCode',
+    name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
