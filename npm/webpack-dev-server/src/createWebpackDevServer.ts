@@ -1,5 +1,5 @@
 import debugLib from 'debug'
-import type { Configuration } from 'webpack-dev-server-3'
+import type { Configuration } from 'webpack-dev-server'
 
 import type { WebpackDevServerConfig } from './devServer'
 import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
