@@ -5,7 +5,7 @@ import deepDiff from 'return-deep-diff'
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
-  ResolvedFromConfig, TestingType,
+  ResolvedFromConfig, TestingType, FullConfig,
 } from '@packages/types'
 
 import {
@@ -16,10 +16,12 @@ import {
   setPluginResolvedOn,
   mergeDefaults,
 } from './utils'
+import type { Config } from './types'
 
 const debug = Debug('cypress:config:project')
 
-export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
+// TODO: Config -> SetupFullConfigOptions
+export function setupFullConfigWithDefaults (obj: Config = {}) {
   debug('setting config object %o', obj)
   let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
@@ -39,16 +41,17 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   return mergeDefaults(config, options, cliConfig)
 }
 
-export function updateWithPluginValues (cfg, overrides, testingType: TestingType) {
-  if (!overrides) {
-    overrides = {}
+// TODO: Config -> Partial<Cypress.ConfigOptions>
+export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: Config, testingType: TestingType) {
+  if (!modifiedConfig) {
+    modifiedConfig = {}
   }
 
-  debug('updateWithPluginValues %o', { cfg, overrides })
+  debug('updateWithPluginValues %o', { cfg, modifiedConfig })
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
+  validate(modifiedConfig, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = getCtx().lifecycleManager.configFile
 
     if (_.isString(validationResult)) {
@@ -66,11 +69,11 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
     return cyError
   }
 
-  validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+  validateNoBreakingConfig(modifiedConfig, errors.warning, (err, options) => {
     throw makeSetupError(errors.get(err, options))
   }, testingType)
 
-  validateNoBreakingConfig(overrides[testingType], errors.warning, (err, options) => {
+  validateNoBreakingConfig(modifiedConfig[testingType], errors.warning, (err, options) => {
     throw makeSetupError(errors.get(err, {
       ...options,
       name: `${testingType}.${options.name}`,
@@ -82,7 +85,7 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
     from: 'default',
   } as ResolvedFromConfig
 
-  const diffs = deepDiff(cfg, overrides, true)
+  const diffs = deepDiff(cfg, modifiedConfig, true)
 
   debug('config diffs %o', diffs)
 
@@ -115,7 +118,7 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
     merged.resolved.browsers.value = userBrowserList
   }
 
-  if (overrides.browsers === null) {
+  if (modifiedConfig.browsers === null) {
     // null breaks everything when merging lists
     debug('replacing null browsers with original list %o', originalResolvedBrowsers)
     merged.browsers = cfg.browsers
