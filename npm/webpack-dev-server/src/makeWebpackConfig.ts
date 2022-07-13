@@ -4,12 +4,12 @@ import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
-import { IgnorePlugin } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
 import type { WebpackConfiguration } from 'webpack-dev-server'
+import type { WebpackModule } from './helpers/sourceRelativeWebpackModules'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -82,7 +82,7 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
  * different between the two, so we check which version of webpack
  * we are using and match the API.
  */
-function maybeGetReactIgnorePlugin (projectRoot: string) {
+function maybeGetReactIgnorePlugin (projectRoot: string, webpack: WebpackModule) {
   try {
     const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
     const majorVersion = major(reactDom?.default?.version || reactDom?.version)
@@ -94,7 +94,7 @@ function maybeGetReactIgnorePlugin (projectRoot: string) {
       debug('ignoring react-dom/client ', majorVersion)
 
       // https://webpack.js.org/plugins/ignore-plugin/
-      return new IgnorePlugin({
+      return new webpack.IgnorePlugin({
         resourceRegExp: /react-dom\/client$/,
         contextRegExp: /cypress/,
       })
@@ -188,7 +188,7 @@ export async function makeWebpackConfig (
   // If React version is <= 17, we need to ignore the `react-dom/client` reference
   // in cypress/react, since that's a new, non-backwards compatible module that will
   // cause webpack compilation to fail.
-  const reactIgnorePlugin = maybeGetReactIgnorePlugin(projectRoot)
+  const reactIgnorePlugin = maybeGetReactIgnorePlugin(projectRoot, webpack)
 
   if (reactIgnorePlugin && dynamicWebpackConfig.plugins) {
     dynamicWebpackConfig.plugins.push(reactIgnorePlugin)
