@@ -124,8 +124,7 @@
     },
     "./vue": {
       "import": "./vue/dist/cypress-vue.esm-bundler.js",
-      "require": "./vue/dist/cypress-vue.cjs.js",
-      "types": "./vue/dist/index.d.ts"
+      "require": "./vue/dist/cypress-vue.cjs.js"
     },
     "./vue2": {
       "import": "./vue2/dist/cypress-vue2.esm-bundler.js",

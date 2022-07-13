@@ -29,9 +29,13 @@ import {
 import * as _VueTestUtils from '@vue/test-utils'
 
 const {
+  // We do not expose the `mount` from VueTestUtils, instead, we wrap it and expose a
+  // Cypress-compatible `mount` API.
   mount: VTUmount,
-  // TODO: Should we expose shallowMount? It doesn't make much sense in the context of Cypress
-  // but it might be useful for people who like to migrate some Test Utils tests to Cypress.
+  // We do not expose shallowMount. It doesn't make much sense in the context of Cypress.
+  // It might be useful for people who like to migrate some Test Utils tests to Cypress,
+  // so if we decide it is useful to expose, just remove the next line, and it will be
+  // available on the `VueTestUtils` import.
   shallowMount,
   ...VueTestUtils
 } = _VueTestUtils
