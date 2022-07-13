@@ -392,13 +392,13 @@ commands:
     steps:
       # installing NVM will use git+ssh, so update known_hosts
       - update_known_hosts
-        - run:             
-            name: Update NVM for Windows with node 16.14.2 fix
-            command: |
-              [[ $PLATFORM == 'windows' ]] && \
-              curl -L -O https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip && \
-              tar -xvf nvm-noinstall.zip -C C:/ProgramData/nvm || \
-              [[ $PLATFORM != 'windows' ]] 
+      - run:
+          name: Update NVM for Windows with node 16.14.2 fix
+          command: |
+            [[ $PLATFORM == 'windows' ]] && \
+            curl -L -O https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip && \
+            tar -xvf nvm-noinstall.zip -C C:/ProgramData/nvm || \
+            [[ $PLATFORM != 'windows' ]] 
       - run:
           name: Install Node
           command: |
