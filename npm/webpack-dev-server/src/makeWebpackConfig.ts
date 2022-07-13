@@ -1,5 +1,6 @@
 import { debug as debugFn } from 'debug'
 import major from 'semver/functions/major'
+import type * as webpackModule from 'webpack'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
@@ -67,7 +68,7 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
     const originalCachePredicate = webpackConfig.module.unsafeCache
 
     webpackConfig.module.unsafeCache = (module: any) => {
-      return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
+      return originalCachePredicate(module) && !/[\\/]Webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
     }
   }
 
@@ -81,7 +82,7 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
  * different between the two, so we check which version of webpack
  * we are using and match the API.
  */
-function maybeGetReactIgnorePlugin (projectRoot: string, webpack: any) {
+function maybeGetReactIgnorePlugin (projectRoot: string, webpack: typeof webpackModule) {
   try {
     const reactDom = require(require.resolve('react-dom/package.json', { paths: [projectRoot] }))
     const majorVersion = major(reactDom?.default?.version || reactDom?.version)
