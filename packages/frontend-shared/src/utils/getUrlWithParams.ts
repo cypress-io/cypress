@@ -7,9 +7,10 @@ export type LinkWithParams = {
 
 export const getUrlWithParams = (link: LinkWithParams) => {
   let result = link.url
+  const paramNames = Object.keys(link.params)
 
-  if (Object.keys(link.params).length > 0) {
-    const hasUtmParams = Object.keys(link.params).some((param) => param.startsWith('utm_'))
+  if (paramNames.length > 0) {
+    const hasUtmParams = paramNames.some((param) => param.startsWith('utm_'))
 
     if (hasUtmParams) {
       link.params.utm_source = getUtmSource()
