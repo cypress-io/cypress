@@ -251,17 +251,15 @@ type FilterFnRequestInfo = {
   matchedIntercept: boolean
 } & BrowserPreRequest
 
-function defaultFilterFn (preRequest: BrowserPreRequest) {
-  return ['xhr', 'fetch'].includes(preRequest.resourceType)
-}
-
 export default class NetworkLogs {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
-  filterFn: (requestInfo: FilterFnRequestInfo) => boolean = defaultFilterFn
+  _filter: (requestInfo: FilterFnRequestInfo) => boolean
 
   constructor (private Cypress: Cypress.Cypress) {
+    this._filter = this.defaultFilter
+
     Cypress.on('request:event', (eventName, data) => {
       switch (eventName) {
         case 'incoming:request':
@@ -287,13 +285,17 @@ export default class NetworkLogs {
     })
   }
 
-  filter (filterFn?: typeof this.filterFn): void {
+  set filter (filterFn: typeof this._filter | undefined) {
     if (filterFn !== undefined && typeof filterFn !== 'function') {
       // TODO: move to error_messages once API is finalized
-      throw new Error(`NetworkLogs.filter() accepts a function as the first argument, but a ${typeof filterFn} was passed.`)
+      throw new Error(`NetworkLogs.filter should be set to a function, but a ${typeof filterFn} was passed.`)
     }
 
-    this.filterFn = filterFn || defaultFilterFn
+    this._filter = filterFn || this.defaultFilter
+  }
+
+  readonly defaultFilter = (requestInfo: FilterFnRequestInfo) => {
+    return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
   }
 
   /**
@@ -403,7 +405,7 @@ export default class NetworkLogs {
       }
     }
 
-    if (!this.filterFn({ ...preRequest, matchedIntercept })) {
+    if (!this._filter({ ...preRequest, matchedIntercept })) {
       this.unloggedPreRequests.push(preRequest)
 
       return

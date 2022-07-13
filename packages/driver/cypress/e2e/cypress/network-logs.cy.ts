@@ -522,7 +522,7 @@ describe('Network Logs', () => {
       let logs: Cypress.Log[] = []
 
       beforeEach(() => {
-        Cypress.NetworkLogs.filter()
+        Cypress.NetworkLogs.filter = Cypress.NetworkLogs.defaultFilter
 
         logs = []
         cy.on('log:added', (log) => {
@@ -552,7 +552,7 @@ describe('Network Logs', () => {
       }
 
       it('can filter out XHR', () => {
-        Cypress.NetworkLogs.filter((req) => req.resourceType !== 'xhr')
+        Cypress.NetworkLogs.filter = (req) => req.resourceType !== 'xhr'
         sendXhr()
         .then(() => {
           expect(logs).to.have.length(0)
@@ -560,15 +560,15 @@ describe('Network Logs', () => {
       })
 
       it('can filter out fetch', () => {
-        Cypress.NetworkLogs.filter((req) => req.resourceType !== 'fetch')
+        Cypress.NetworkLogs.filter = (req) => req.resourceType !== 'fetch'
         sendFetch()
         .then(() => {
           expect(logs).to.have.length(0)
         })
       })
 
-      it('can not filter out intercept', () => {
-        Cypress.NetworkLogs.filter((req) => false)
+      it('can filter out intercept', () => {
+        Cypress.NetworkLogs.filter = (req) => !req.matchedIntercept
 
         cy.intercept('/foo-fetch', 'boo')
         .then(sendFetch)

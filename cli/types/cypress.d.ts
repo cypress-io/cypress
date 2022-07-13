@@ -206,6 +206,16 @@ declare namespace Cypress {
    */
   type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
+  type NetworkLogsFilterFn = (req: {
+    requestId: string
+    method: HttpMethod
+    url: string
+    headers: { [key: string]: string | string[] }
+    resourceType: 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+    originalResourceType: string | undefined
+    matchedIntercept: boolean
+  }) => boolean
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -602,21 +612,17 @@ declare namespace Cypress {
 
     NetworkLogs: {
       /**
-       * Reset the filter rules for network logs to the default (all XHRs and fetches are logged)
+       * The default rules for network log filtering:
+       * 1. Display all XHRs and fetch requests
+       * 2. Display all requests matched by a `cy.intercept()` route
        */
-      filter(): void
+      readonly defaultFilter: NetworkLogsFilterFn
       /**
        * Set custom filtering rules for network logs.
+       * @default Cypress.NetworkLogs.defaultFilter
        * @param filterFn a function that returns true if the request should be logged and false otherwise
        */
-      filter(filterFn: (req: {
-        requestId: string
-        method: HttpMethod
-        url: string
-        headers: { [key: string]: string | string[] }
-        resourceType: 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
-        originalResourceType: string | undefined
-      }) => boolean): void
+      filter: NetworkLogsFilterFn
     }
 
     /**
