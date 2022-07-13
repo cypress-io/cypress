@@ -27,7 +27,7 @@ type ProjectConfigManagerOptions = {
   handlers: IpcHandler[]
   hasCypressEnvFile: boolean
   eventRegistrar: EventRegistrar
-  onError: (cypressError: CypressError, title?: string | undefined) => void
+  onError: (cypressError: CypressError) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => Promise<void>
   refreshLifecycle: () => Promise<void>
@@ -312,7 +312,7 @@ export class ProjectConfigManager {
 
   onLoadError = async (error: any) => {
     await this.closeWatchers()
-    this.options.onError(error, 'Cypress configuration error')
+    this.options.onError(error)
   }
 
   private watchFiles (paths: string[]) {
