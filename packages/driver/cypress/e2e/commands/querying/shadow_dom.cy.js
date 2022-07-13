@@ -2,7 +2,7 @@ const helpers = require('../../../support/helpers')
 
 const { _ } = Cypress
 
-describe('src/cy/commands/querying - shadow dom', () => {
+describe('src/cy/commands/shadow', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
   })

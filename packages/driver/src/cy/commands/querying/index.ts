@@ -1,11 +1,15 @@
+import * as Contains from './contains'
 import * as Focused from './focused'
-import * as Querying from './querying'
+import * as Get from './get'
 import * as Root from './root'
+import * as Shadow from './shadow'
 import * as Within from './within'
 
 export {
+  Contains,
   Focused,
-  Querying,
+  Get,
   Root,
+  Shadow,
   Within,
 }
