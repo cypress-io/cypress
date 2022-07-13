@@ -413,7 +413,6 @@ commands:
             yarn check-node-version
       - run:
           name: Check Node
-          shell: powershell.exe -ExecutionPolicy Bypass
           command: |
             source ./scripts/ensure-node.sh
             yarn check-node-version
