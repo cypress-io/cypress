@@ -1,10 +1,10 @@
 <template>
   <div
-    class="rounded h-auto outline-none border-1 text-center
+    class="rounded h-auto outline-none border-1 border-gray-100 text-center
       relative block group
       children:hyphens-manual"
     :class="{
-      'bg-gray-50 border-gray-100 cursor-default': disabled,
+      'bg-gray-50 cursor-default': disabled,
       'cursor-pointer focus-within-default hocus-default': !disabled
     }"
     data-cy="card"
