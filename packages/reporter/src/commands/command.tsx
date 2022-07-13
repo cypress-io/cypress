@@ -20,6 +20,7 @@ import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
+import SessionPill from './sessionPill'
 
 const md = new Markdown()
 
@@ -344,6 +345,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
+                {isSessionCommand && <SessionPill {...model.renderProps} />}
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>

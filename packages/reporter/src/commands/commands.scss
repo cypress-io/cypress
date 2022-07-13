@@ -22,8 +22,8 @@
 
     .command-method,
     .command-message {
-      color: $gray-200;
-      font-weight: 700;
+      color: $gray-500;
+      font-style: italic;
     }
   }
 
@@ -79,7 +79,8 @@
     }
 
     .command-alias,
-    .command-interceptions {
+    .command-interceptions,
+    .command-session-status {
       border-radius: 4px;
       color: $white;
       display: inline-block;
@@ -93,7 +94,10 @@
       text-overflow: ellipsis;
       vertical-align: text-top;
       white-space: nowrap;
+    }
 
+    .command-alias,
+    .command-interceptions {
       &.route {
         background-color: $teal-500;
       }
@@ -111,6 +115,27 @@
       &.has-multiple-interceptions {
         border-radius: 4px 0 0 4px;
         padding: 0 2px 0 4px;
+      }
+    }
+
+    .command-session-status {
+      font-size: 12px;
+      font-weight: 500;
+
+      &.creating, &.created {
+        background-color: $jade-500;
+      }
+
+      &.restoring, &.restored {
+        background-color: $indigo-500;
+      }
+
+      &.recreating, &.recreated {
+        background-color: $orange-500;
+      }
+
+      &.failed {
+        background-color: $red-500;
       }
     }
 
@@ -187,6 +212,7 @@
     margin-left: 0;
     overflow: hidden;
     width: 100%;
+    font-weight: 600;
 
     .command-aliases,
     .command-message {
@@ -224,7 +250,6 @@
   .command-method {
     font-size: 12px;
     margin-right: 12px;
-    font-weight: 600;
     min-width: fit-content;
   }
 
@@ -351,7 +376,6 @@
       color: $gray-500;
 
       strong {
-        font-weight: 600;
         margin: 0 3px;
       }
     }

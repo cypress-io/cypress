@@ -19,12 +19,16 @@ export interface RenderProps {
   wentToOrigin?: boolean
 }
 
+export interface SessionRenderProps {
+  status: 'new' | 'restored' | 'recreated' | 'failed'
+}
+
 export interface CommandProps extends InstrumentProps {
   err?: ErrProps
   event?: boolean
   number?: number
   numElements: number
-  renderProps?: RenderProps
+  renderProps?: RenderProps | SessionRenderProps
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
@@ -86,11 +90,17 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
+        // nested system group has nested commands
         (this.group && this.type === 'system' && this.hasChildren) ||
-        (this.hasChildren && !this.event && this.type !== 'system') ||
-        _.some(this.children, (v) => v.hasChildren) ||
+        // command has nested commands
+        (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
+        // command has nested commands with children
+        (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
+        // last nested command is open
         _.last(this.children)?.isOpen ||
+        // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
+        // at least one nested command failed
         _.some(this.children, (v) => v.state === 'failed')
       )
     )
