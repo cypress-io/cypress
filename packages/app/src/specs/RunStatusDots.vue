@@ -11,7 +11,7 @@
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
-      :href="latestRun?.url || '#'"
+      :href="dashboardUrl"
       :use-default-hocus="false"
     >
       <div
@@ -49,7 +49,7 @@
     >
       <ExternalLink
         v-if="latestRun"
-        :href="latestRun.url ?? '#'"
+        :href="dashboardUrl"
         :use-default-hocus="false"
       >
         <SpecRunSummary
@@ -77,6 +77,7 @@ import QueuedIcon from '~icons/cy/queued-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
@@ -193,6 +194,20 @@ const latestDot = computed(() => {
     default:
       return { icon: PlaceholderIcon, spin: false, status: 'PLACEHOLDER' }
   }
+})
+
+const dashboardUrl = computed(() => {
+  if (latestRun.value?.url) {
+    return getUrlWithParams({
+      url: latestRun.value.url,
+      params: {
+        utm_medium: 'Specs Latest Runs Dots',
+        utm_campaign: latestDot.value.status,
+      },
+    })
+  }
+
+  return '#'
 })
 
 </script>
