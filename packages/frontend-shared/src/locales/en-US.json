@@ -553,7 +553,7 @@
       },
       "unauthorized": {
         "title": "Request access to view the recorded runs",
-        "description": "This is a private project that you do not current have access to. Please request access from the project owner in order to view the list of runs.",
+        "description": "This is a private project that you do not currently have access to. Please request access from the project owner in order to view the list of runs.",
         "button": "Request Access"
       },
       "unauthorizedRequested": {

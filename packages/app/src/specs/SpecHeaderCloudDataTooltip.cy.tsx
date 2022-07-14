@@ -1,11 +1,11 @@
-import { SpecHeaderCloudDataTooltipFragmentDoc, SpecHeaderCloudDataTooltip_RequestAccessDocument } from '../generated/graphql-test'
+import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import { get, set } from 'lodash'
 import { defaultMessages } from '@cy/i18n'
 
-describe('SpecHeaderCloudDataTooltip', () => {
+describe('<SpecHeaderCloudDataTooltip />', () => {
   function mountWithStatus (
-    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
+    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED',
     mode: string,
     msgKeys: {
       header: string
@@ -28,10 +28,6 @@ describe('SpecHeaderCloudDataTooltip', () => {
             break
           case 'NOT_FOUND':
             set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectNotFound')
-            break
-          case 'ACCESS_REQUESTED':
-            set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectUnauthorized')
-            set(ctx, 'currentProject.cloudProject.hasRequestedAccess', true)
             break
           case 'UNAUTHORIZED':
             set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectUnauthorized')
@@ -130,48 +126,6 @@ describe('SpecHeaderCloudDataTooltip', () => {
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
-
-          cy.percySnapshot()
-        })
-
-        it('should update to "Request Sent" when button is triggered', () => {
-          cy.stubMutationResolver(SpecHeaderCloudDataTooltip_RequestAccessDocument, (defineResult) => {
-            return defineResult({
-              cloudProjectRequestAccess: {
-                __typename: 'CloudProjectUnauthorized',
-                message: 'msg',
-                hasRequestedAccess: true,
-              },
-            })
-          })
-
-          cy.get('.v-popper').trigger('mouseenter')
-
-          cy.findByTestId('request-access-button')
-          .should('be.visible')
-          .click()
-
-          cy.findByTestId('access-requested-button')
-          .should('be.visible')
-          .should('be.disabled')
-        })
-      })
-
-      context('access requested', () => {
-        beforeEach(() => {
-          mountWithStatus('ACCESS_REQUESTED', mode, msgKeys)
-        })
-
-        it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
-
-          cy.findByTestId('cloud-data-tooltip-content')
-          .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
-
-          cy.findByTestId('access-requested-button')
-          .should('be.visible')
-          .should('be.disabled')
 
           cy.percySnapshot()
         })
