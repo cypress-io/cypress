@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { uri } from '@packages/network'
+import * as uri from '@packages/network/lib/uri'
 
 export const hideKeys = (token?: string | number | boolean) => {
   if (!token) {
