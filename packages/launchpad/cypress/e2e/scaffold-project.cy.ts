@@ -45,10 +45,10 @@ function scaffoldAndOpenE2EProject (opts: {
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
   // Going through the loading of config
-  cy.get('[data-cy="loading-spinner"]')
-  cy.get('[data-cy="loading-spinner"]').should('not.exist')
+  cy.findByTestId('loading-spinner')
+  cy.findByTestId('loading-spinner').should('not.exist')
   // No errrors were encountered
-  cy.get('[data-testid="error-header"]').should('not.exist')
+  cy.findByTestId('error-header').should('not.exist')
   // Asserts that we've made it through the flow
   cy.contains('Choose a Browser')
 }

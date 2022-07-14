@@ -3,12 +3,6 @@ import BaseError from './BaseError.vue'
 import { BaseErrorFragmentDoc } from '../../../../launchpad/src/generated/graphql-test'
 import dedent from 'dedent'
 
-// Selectors
-const headerSelector = 'h1[data-testid=error-header]'
-const messageSelector = '[data-testid=error-message]'
-const retryButtonSelector = 'button[data-testid=error-retry-button]'
-const docsButtonSelector = 'a[data-testid=error-docs-button]'
-
 // Constants
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
@@ -23,11 +17,11 @@ describe('<BaseError />', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       render: (gqlVal) => <BaseError gql={gqlVal} showButtons={false} />,
     })
-    .get(headerSelector)
+    .findByTestId('error-header')
     .should('contain.text', cy.gqlStub.ErrorWrapper.title)
-    .get(messageSelector)
+    .findByTestId('error-message')
     .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/\`/g, '').slice(0, 10))
-    .get(retryButtonSelector)
+    .findByTestId('error-retry-button')
     .should('not.exist')
   })
 
@@ -47,31 +41,34 @@ describe('<BaseError />', () => {
 
     it('renders the retry button and docs button', () => {
       mountFragmentWithError()
-      cy.contains(retryButtonSelector, cy.i18n.launchpadErrors.generic.retryButton)
-      cy.get(docsButtonSelector).should('exist')
+      cy.findByTestId('error-retry-button').contains(cy.i18n.launchpadErrors.generic.retryButton)
+      cy.findByTestId('error-docs-button').should('exist')
     })
 
     it('renders the expected docs button for unknown errors', () => {
       mountFragmentWithError({ errorStack: 'UNKNOWN ERROR' })
-      cy.contains(docsButtonSelector, docsButton.docsHomepage.text)
+      cy.findByTestId('error-docs-button')
+      .contains(docsButton.docsHomepage.text)
       .should('have.attr', 'href', docsButton.docsHomepage.link)
     })
 
     it('renders the expected docs button for dashboard errors', () => {
       mountFragmentWithError({ errorType: 'DASHBOARD_GRAPHQL_ERROR' })
-      cy.contains(docsButtonSelector, docsButton.dashboardGuide.text)
+      cy.findByTestId('error-docs-button')
+      .contains(docsButton.dashboardGuide.text)
       .should('have.attr', 'href', docsButton.dashboardGuide.link)
     })
 
     it('renders the expected docs button for errors that are known and unrelated to the dashboard', () => {
       mountFragmentWithError({ errorType: 'CONFIG_VALIDATION_ERROR' })
-      cy.contains(docsButtonSelector, docsButton.configGuide.text)
+      cy.findByTestId('error-docs-button')
+      .contains(docsButton.configGuide.text)
       .should('have.attr', 'href', docsButton.configGuide.link)
     })
 
     it(`emits a 'retry' event when clicked`, () => {
       mountFragmentWithError()
-      cy.get(retryButtonSelector)
+      cy.findByTestId('error-retry-button')
       .should('not.be.disabled')
       .click()
       .click()
@@ -84,8 +81,8 @@ describe('<BaseError />', () => {
         render: (gqlVal) => <BaseError gql={gqlVal} showButtons={false} />,
       })
 
-      cy.get(retryButtonSelector).should('not.exist')
-      cy.get(docsButtonSelector).should('not.exist')
+      cy.findByTestId('error-retry-button').should('not.exist')
+      cy.findByTestId('error-docs-button').should('not.exist')
     })
   })
 
@@ -95,12 +92,12 @@ describe('<BaseError />', () => {
         result.isUserCodeError = false
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
-    }).then(() => {
-      cy.get('[data-cy=stack-open-true]').should('not.exist')
-      cy.contains(cy.i18n.launchpadErrors.generic.stackTraceLabel).click()
-      cy.contains('Error: foobar').should('be.visible')
-      cy.get('[data-cy=stack-open-true]')
     })
+
+    cy.findByTestId('stack-open-true').should('not.exist')
+    cy.contains(cy.i18n.launchpadErrors.generic.stackTraceLabel).click()
+    cy.contains('Error: foobar').should('be.visible')
+    cy.findByTestId('stack-open-true')
   })
 
   it('renders custom error messages and headers with props', () => {

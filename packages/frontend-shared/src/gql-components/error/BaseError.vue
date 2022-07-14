@@ -8,7 +8,7 @@
         <h1
           v-if="baseError.title"
           class="font-medium leading-snug text-32px text-gray-900"
-          data-testid="error-header"
+          data-cy="error-header"
         >
           <slot name="header">
             {{ baseError.title }}
@@ -21,7 +21,7 @@
         >
           <Button
             variant="outline"
-            data-testid="error-retry-button"
+            data-cy="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
             @click="emit('retry', baseError.id)"
@@ -31,7 +31,7 @@
 
           <Button
             variant="outline"
-            data-testid="error-docs-button"
+            data-cy="error-docs-button"
             :prefix-icon="BookIcon"
             prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
@@ -58,7 +58,7 @@
             <div
               ref="markdownTarget"
               class="text-red-500"
-              data-testid="error-message"
+              data-cy="error-message"
               v-html="markdown"
             />
             <ErrorCodeFrame
@@ -93,7 +93,7 @@
                 </p>
               </template>
               <pre
-                data-testid="error-header"
+                data-cy="error-header"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
                 v-html="baseError.errorStack"
               />
