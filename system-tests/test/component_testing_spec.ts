@@ -89,10 +89,6 @@ describe(`React major versions with Vite`, function () {
   }
 })
 
-// TODO: Get these to pass.
-// React 18 works fine, but the module resolution is messy due to
-// how we use symlinks in system-tests, causing the `import('react-dom/client')
-// to incorrectly resolve to `cypress/cli/react/dist`
 describe(`React major versions with Webpack`, function () {
   systemTests.setup()
 
