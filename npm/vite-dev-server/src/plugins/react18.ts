@@ -30,7 +30,9 @@ export const React18 = (projectRoot: string): Plugin => {
         return
       }
 
-      const isCypressReact = id.includes('cypress-react.esm-bundler.js')
+      // TODO: Why do we need to check against cypress-react (dev mode, system tests)
+      // AND cypress_react (production)?
+      const isCypressReact = ['cypress-react.esm-bundler.js', 'cypress_react.js'].includes(id)
 
       if (isCypressReact) {
         // remove problematic code via transform!
