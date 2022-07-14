@@ -6,3 +6,8 @@ it('works', () => {
   mount(<App />)
   cy.contains('Learn React')
 })
+
+it('works with cy.mount custom command', () => {
+  cy.mount(<App />)
+  cy.contains('Learn React')
+})

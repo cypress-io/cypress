@@ -7,3 +7,9 @@ it('renders hello world', () => {
   // Click on the header here to ensure that the AUT is interactable. This ensures that the dev server overlay is not displaying
   cy.get('h1').contains('Hello World').click()
 })
+
+it('renders hello world with cy.mount', () => {
+  cy.mount(<App />)
+  // Click on the header here to ensure that the AUT is interactable. This ensures that the dev server overlay is not displaying
+  cy.get('h1').contains('Hello World').click()
+})
