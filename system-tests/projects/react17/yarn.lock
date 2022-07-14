@@ -2239,7 +2239,7 @@ posix-character-classes@^0.1.0:
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
   integrity sha512-xTgYBc3fuo7Yt7JbiuFxSYGToMoz8fLoE6TC9Wx1P/u+LfeThMOAqmuyECnlBaaJb+u1m9hHiXUEtwW4OzfUJg==
 
-postcss@^8.4.13:
+postcss@^8.4.12:
   version "8.4.14"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.14.tgz#ee9274d5622b4858c1007a74d76e42e56fd21caf"
   integrity sha512-E398TUmfAYFPBSdzgeieK2Y1+1cpdxJx8yXbK/m57nRhKSmk1GB2tO4lbLBtlkfPQTDKfe4Xqv1ASWPpayPEig==
@@ -2886,13 +2886,13 @@ util@^0.11.0:
   dependencies:
     inherits "2.0.3"
 
-vite@^2.8.0:
-  version "2.9.12"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-2.9.12.tgz#b1d636b0a8ac636afe9d83e3792d4895509a941b"
-  integrity sha512-suxC36dQo9Rq1qMB2qiRorNJtJAdxguu5TMvBHOc/F370KvqAe9t48vYp+/TbPKRNrMh/J55tOUmkuIqstZaew==
+vite@2.9.2:
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-2.9.2.tgz#bf233b96c77beae7c4a4674d76ece678588620f3"
+  integrity sha512-ScbfYsiG1N/xE2TnZWYWJ8aOFBQovEl4VLU+0dktxqXvqdAvcTOEUM5YqwaBkmNHSHUGHLPd92tuXFQ35wDkVw==
   dependencies:
     esbuild "^0.14.27"
-    postcss "^8.4.13"
+    postcss "^8.4.12"
     resolve "^1.22.0"
     rollup "^2.59.0"
   optionalDependencies:
