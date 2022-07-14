@@ -144,7 +144,7 @@
     <div
       v-if="docsMenuVariant === 'main'"
       data-cy="docs-menu-container"
-      class="flex p-16px gap-24px docs-menu-flex-direction"
+      class="flex p-16px gap-24px flex-col md:flex-row"
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
@@ -358,15 +358,3 @@ const changelogLink = (version) => {
 }
 
 </script>
-
-<style>
-.docs-menu-flex-direction {
-  flex-direction: column;
-}
-
-@media(min-width: 768px) {
-  .docs-menu-flex-direction {
-    flex-direction: row;
-  }
-}
-</style>
