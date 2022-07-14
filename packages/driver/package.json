@@ -20,6 +20,7 @@
     "@cypress/what-is-circular": "1.0.1",
     "@packages/config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
+    "@packages/rewriter": "0.0.0-development",
     "@packages/runner": "0.0.0-development",
     "@packages/runner-shared": "0.0.0-development",
     "@packages/server": "0.0.0-development",

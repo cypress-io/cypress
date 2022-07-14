@@ -2,6 +2,7 @@ declare global {
   interface Window {
     Element: typeof Element
     HTMLElement: typeof HTMLElement
+    HTMLFormElement: typeof HTMLFormElement
     HTMLInputElement: typeof HTMLInputElement
     HTMLSelectElement: typeof HTMLSelectElement
     HTMLButtonElement: typeof HTMLButtonElement

@@ -248,9 +248,9 @@ describe('http/util/regex-rewriter', () => {
       expect(regexRewriter.strip(original)).to.eq(expected)
     })
 
-    it('replaces additional obstructive code with the "useModifyObstructiveThirdPartyCode" set', () => {
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
       expect(regexRewriter.strip(originalWithExpandedModifyObstructiveCode, {
-        useModifyObstructiveThirdPartyCode: true,
+        modifyObstructiveThirdPartyCode: true,
       })).to.eq(expectedWithExpandedModifyObstructiveCode)
     })
 
@@ -378,8 +378,8 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       .value() as unknown as typeof libs
 
       _.each(libs, (url, lib) => {
-        [false, true].forEach((useModifyObstructiveThirdPartyCode) => {
-          it(`does not alter code from: '${lib}', with useModifyObstructiveThirdPartyCode set to ${useModifyObstructiveThirdPartyCode}`, function () {
+        [false, true].forEach((modifyObstructiveThirdPartyCode) => {
+          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, function () {
             this.timeout(10000)
 
             const pathToLib = `/tmp/${lib}`
@@ -400,7 +400,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
             .catch(downloadFile)
             .then((libCode: string) => {
               let stripped = regexRewriter.strip(libCode, {
-                useModifyObstructiveThirdPartyCode,
+                modifyObstructiveThirdPartyCode,
               })
               // nothing should have changed!
 
@@ -453,11 +453,11 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       replacer.end()
     })
 
-    it('replaces additional obstructive code with the "useModifyObstructiveThirdPartyCode" set', (done) => {
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', (done) => {
       const haystacks = originalWithExpandedModifyObstructiveCode.split('\n')
 
       const replacer = regexRewriter.stripStream({
-        useModifyObstructiveThirdPartyCode: true,
+        modifyObstructiveThirdPartyCode: true,
       })
 
       replacer.pipe(concatStream({ encoding: 'string' }, (str) => {

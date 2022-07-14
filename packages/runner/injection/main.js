@@ -1,4 +1,3 @@
-/* global Element */
 /**
  * This is the entry point for the script that gets injected into
  * the AUT. It gets bundled on its own and injected into the <head>
@@ -9,25 +8,12 @@
  */
 
 import { createTimers } from './timers'
-import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
 
 const Cypress = window.Cypress = parent.Cypress
 
 if (!Cypress) {
   throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
-}
-
-if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
-  const originalSetAttribute = Element.prototype.setAttribute
-
-  Element.prototype.setAttribute = function (qualifiedName, value) {
-    if (qualifiedName === 'integrity') {
-      qualifiedName = STRIPPED_INTEGRITY_TAG
-    }
-
-    return originalSetAttribute.apply(this, [qualifiedName, value])
-  }
 }
 
 // We wrap timers in the injection code because if we do it in the driver (like

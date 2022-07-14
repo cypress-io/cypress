@@ -1,4 +1,3 @@
-/* global Element */
 /**
  * This is the entry point for the script that gets injected into
  * the AUT on a secondary origin. It gets bundled on its own and injected
@@ -9,8 +8,6 @@
  */
 
 import { createTimers } from './timers'
-import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
-import { patchDocumentCookie } from './cookies'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -42,24 +39,6 @@ const findCypress = () => {
 }
 
 const Cypress = findCypress()
-
-if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
-  const originalSetAttribute = Element.prototype.setAttribute
-
-  Element.prototype.setAttribute = function (qualifiedName, value) {
-    if (qualifiedName === 'integrity') {
-      qualifiedName = STRIPPED_INTEGRITY_TAG
-    }
-
-    if (qualifiedName === 'target' && value === '_top') {
-      value = '_self'
-    }
-
-    return originalSetAttribute.apply(this, [qualifiedName, value])
-  }
-}
-
-patchDocumentCookie(Cypress)
 
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
