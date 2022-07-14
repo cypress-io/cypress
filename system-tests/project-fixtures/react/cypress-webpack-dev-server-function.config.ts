@@ -9,6 +9,5 @@ export default defineConfig({
       ...devServerOptions,
       framework: 'react',
     }),
-    supportFile: false
   }
 })
