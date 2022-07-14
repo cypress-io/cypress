@@ -36,10 +36,14 @@
         v-else
         stroke-color="gray-500"
         fill-color="gray-900"
+        hover-stroke-color="gray-300"
+        hover-fill-color="gray-800"
+        focus-stroke-color="gray-300"
+        focus-fill-color="gray-800"
+        interactive-colors-on-group
         class="flex-shrink-0
         h-24px m-12px w-24px
-        children:transition children:duration-300
-        group-hover:(icon-dark-gray-300 icon-light-gray-800) group-focus:(icon-dark-gray-300 icon-light-gray-800) "
+        children:transition children:duration-300"
       />
       <span
         :class="[active ? 'text-indigo-300' : 'text-gray-500 group-hocus:text-gray-300']"
