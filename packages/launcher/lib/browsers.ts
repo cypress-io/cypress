@@ -43,6 +43,7 @@ export function launch (
   })
 
   proc.stderr.on('data', (buf) => {
+    // here
     debug('%s stderr: %s', browser.name, String(buf).trim())
   })
 

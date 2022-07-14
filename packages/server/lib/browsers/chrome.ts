@@ -284,6 +284,19 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
+const _handleCrash = (launchedBrowser, client) => {
+  debug('listen for clinet')
+
+  launchedBrowser.stderr.on('data', (buf) => {
+    debug('EMILY stderr: %s', String(buf).trim())
+  })
+
+  client.on('Inspector.targetCrashed', async (info) => {
+    debug('crash %o', info)
+    client = await browserCriClient.resetBrowserTargets()
+  })
+}
+
 const _handleDownloads = async function (client, dir, automation) {
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
@@ -679,6 +692,8 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
+    _handleCrash(launchedBrowser, pageCriClient)
+
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     await pageCriClient.send('Page.enable')
@@ -694,6 +709,8 @@ export = {
       await this._handlePausedRequests(pageCriClient)
       _listenForFrameTreeChanges(pageCriClient)
     }
+
+    console.log('EMILY launchedBrowser', launchedBrowser)
 
     // return the launched browser process
     // with additional method to close the remote connection

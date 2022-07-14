@@ -64,7 +64,13 @@ export namespace CRIWrapper {
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
     cri._ws.on('message', (data) => {
-      data = _
+      const parsedData = JSON.parse(data)
+
+      if (parsedData.method === 'Inspector.targetCrashed') {
+        console.log('EMILY IT CRASHED!!!')
+      }
+
+      const transformedData = _
       .chain(JSON.parse(data))
       .tap((data) => {
         ([
@@ -87,9 +93,17 @@ const maybeDebugCdpMessages = (cri) => {
       })
       .value()
 
-      debugVerboseReceive('received CDP message %o', data)
+      debugVerboseReceive('received CDP message %o', transformedData)
     })
   }
+
+  cri._ws.on('error', (err) => {
+    debugVerboseReceive('received CDP error %o', err)
+  })
+
+  cri._ws.on('close', (code) => {
+    debugVerboseReceive('received CDP close %o', code)
+  })
 
   if (debugVerboseSend.enabled) {
     const send = cri._ws.send
@@ -154,6 +168,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
     } catch (err) {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
+      debug('error reconnecting %o', cdpError)
       // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
       cdpError.isFatalApiErr = true
       onAsynchronousError(cdpError)
@@ -178,6 +193,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
     // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
     cri._notifier.on('disconnect', reconnect)
+    cri._notifier.on('Inspector.targetCrashed', reconnect)
   }
 
   await connect()
@@ -185,6 +201,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
   client = {
     targetId: target,
     async send (command: CRIWrapper.Command, params?: object) {
+      debug(command)
       const enqueue = () => {
         return new Promise((resolve, reject) => {
           enqueuedCommands.push({ command, params, p: { resolve, reject } })
@@ -219,6 +236,8 @@ export const create = async (target: string, onAsynchronousError: Function, host
         }
       }
 
+      debug('not connected.....enqueue', { command, params })
+
       return enqueue()
     },
     on (eventName, cb) {
@@ -228,6 +247,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
       return cri.on(eventName, cb)
     },
     close () {
+      debug('closing CDP')
       closed = true
 
       return cri.close()

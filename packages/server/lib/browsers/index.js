@@ -175,6 +175,10 @@ module.exports = {
 
         instance = i
 
+        instance.once('error', (err) => {
+          console.log('EMILY - error', err)
+        })
+
         // TODO: normalizing opening and closing / exiting
         // so that there is a default for each browser but
         // enable the browser to configure the interface

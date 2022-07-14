@@ -138,6 +138,7 @@ export class OpenProject {
     const { onBrowserClose } = options
 
     options.onBrowserClose = () => {
+      console.log('on browser close')
       if (spec && spec.absolute) {
         preprocessor.removeFile(spec.absolute, cfg)
       }
@@ -181,11 +182,15 @@ export class OpenProject {
             await this.resetBrowserState()
           }
 
+          console.log('browser next spec')
+
           // If we do not launch the browser,
           // we tell it that we are ready
           // to receive the next spec
           return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
         }
+
+        console.log('browser open')
 
         return browsers.open(browser, options, automation, this._ctx)
       })
@@ -195,6 +200,8 @@ export class OpenProject {
   }
 
   closeBrowser () {
+    console.log('close browser')
+
     return browsers.close()
   }
 
