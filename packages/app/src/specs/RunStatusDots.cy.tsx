@@ -125,4 +125,14 @@ describe('<RunStatusDots />', () => {
       cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
     })
   })
+
+  it('builds href with UTM params', () => {
+    const runs = fakeRuns(['PASSED'])
+
+    mountWithRuns(runs)
+
+    cy.get('a')
+    .should('have.attr', 'href')
+    .and('contain', 'utm_campaign=PASSED')
+  })
 })
