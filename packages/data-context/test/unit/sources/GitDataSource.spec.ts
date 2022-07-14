@@ -100,6 +100,7 @@ describe('GitDataSource', () => {
   })
 
   it(`handles files with special characters on ${os.platform()}`, async () => {
+    // Validates handling of edge cases from https://github.com/cypress-io/cypress/issues/22454
     let filepaths = [
       'file withSpace.cy.js',
       'file~WithTilde.cy.js',

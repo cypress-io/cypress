@@ -340,14 +340,15 @@ export class GitDataSource {
   async #getInfoPosix (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
     const paths = absolutePaths
-    .map((x) => x.replace(/\"/g, '\\"'))
-    .map((x) => `"${path.resolve(x)}"`).join(' ')
+    .map((p) => path.resolve(p))
+    .map((p) => p.replace(/\"/g, '\\"'))
+    .map((p) => `"${p}"`).join(' ')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
     // no need to use a for loop for a single file
     // IFS is needed to handle paths with white space.
-    const cmd = absolutePaths.length === 1
-      ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
+    const cmd = paths.length === 1
+      ? `${GIT_LOG_COMMAND} ${paths[0]}`
       : `IFS=$'\n'; for file in ${paths}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
     debug('executing command: `%s`', cmd)
