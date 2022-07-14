@@ -675,7 +675,7 @@ describe('http/response-middleware', function () {
           })
         })
 
-        ;['text/html', 'application/xhtml+xml', 'application/javascript', 'application/x-javascript', 'text/javascript'].forEach((MIMEType) => {
+        ;['text/html', 'application/javascript', 'application/x-javascript', 'text/javascript'].forEach((MIMEType) => {
           it(`removes security for ${MIMEType} MIME when "experimentalModifyObstructiveThirdPartyCode" is true, regardless of injection or request origin.`, () => {
             prepareContext({
               req: {
@@ -684,12 +684,8 @@ describe('http/response-middleware', function () {
               },
               incomingRes: {
                 headers: {
-                  // simplest way to make injection expected
                   'content-type': `${MIMEType}`,
                 },
-              },
-              res: {
-                wantsInjection: 'partial',
               },
               config: {
                 experimentalModifyObstructiveThirdPartyCode: true,
@@ -700,6 +696,30 @@ describe('http/response-middleware', function () {
             .then(() => {
               expect(ctx.res.wantsSecurityRemoved).to.be.true
             })
+          })
+        })
+
+        it(`removes security when the request will render html when "experimentalModifyObstructiveThirdPartyCode" is true, regardless of injection or request origin.`, () => {
+          prepareContext({
+            renderedHTMLOrigins: {},
+            getRenderedHTMLOrigins () {
+              return this.renderedHTMLOrigins
+            },
+            req: {
+              proxiedUrl: 'http://www.some-third-party-script-or-html.com/',
+              isAUTFrame: false,
+              headers: {
+                'accept': ['text/html', 'application/xhtml+xml'],
+              },
+            },
+            config: {
+              experimentalModifyObstructiveThirdPartyCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
           })
         })
       })

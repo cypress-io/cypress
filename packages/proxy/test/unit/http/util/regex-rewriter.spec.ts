@@ -168,14 +168,20 @@ const expected = `\
 </html>\
 `
 
-const originalWithExpandedModifyObstructiveCode = `\
+const originalWithModifyObstructiveThirdPartyCode = `\
 <html>
   <body>
     <script type="text/javascript">
-      if (e.self==e.top) run()
+      if (e.self == e.top) run()
       if (a.self===a.top) run()
       if (f.top===g.self) run()
       if (g.top==g.self) run()
+      if (e.self != e.top) run()
+      if (a.self!==a.top) run()
+      if (f.top!==g.self) run()
+      if (g.top!=g.self) run()
+      if (h.foo === h.top) run()
+      if (i.top === i.foo) run()
     </script>
     <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
     <script type="text/javascript" integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
@@ -205,14 +211,20 @@ const originalWithExpandedModifyObstructiveCode = `\
 </html>\
 `
 
-const expectedWithExpandedModifyObstructiveCode = `\
+const expectedWithModifyObstructiveThirdPartyCode = `\
 <html>
   <body>
     <script type="text/javascript">
-      if (e.self==e.self) run()
+      if (e.self == e.self) run()
       if (a.self===a.self) run()
       if (f.self===g.self) run()
       if (g.self==g.self) run()
+      if (e.self != e.self) run()
+      if (a.self!==a.self) run()
+      if (f.self!==g.self) run()
+      if (g.self!=g.self) run()
+      if (h.foo === h.top) run()
+      if (i.top === i.foo) run()
     </script>
     <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
     <script type="text/javascript" cypress-stripped-integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
@@ -224,7 +236,7 @@ const expectedWithExpandedModifyObstructiveCode = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
+        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
         document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
     <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
@@ -235,7 +247,7 @@ const expectedWithExpandedModifyObstructiveCode = `\
       dynamicIntegrityScript.rel = "stylesheet"
       dynamicIntegrityScript.href = 'integrity.css'
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
-      dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
       document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   </body>
@@ -249,9 +261,9 @@ describe('http/util/regex-rewriter', () => {
     })
 
     it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
-      expect(regexRewriter.strip(originalWithExpandedModifyObstructiveCode, {
+      expect(regexRewriter.strip(originalWithModifyObstructiveThirdPartyCode, {
         modifyObstructiveThirdPartyCode: true,
-      })).to.eq(expectedWithExpandedModifyObstructiveCode)
+      })).to.eq(expectedWithModifyObstructiveThirdPartyCode)
     })
 
     it('replaces jira window getter', () => {
@@ -454,7 +466,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
     })
 
     it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', (done) => {
-      const haystacks = originalWithExpandedModifyObstructiveCode.split('\n')
+      const haystacks = originalWithModifyObstructiveThirdPartyCode.split('\n')
 
       const replacer = regexRewriter.stripStream({
         modifyObstructiveThirdPartyCode: true,
@@ -464,7 +476,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         const string = str.toString().trim()
 
         try {
-          expect(string).to.eq(expectedWithExpandedModifyObstructiveCode)
+          expect(string).to.eq(expectedWithModifyObstructiveThirdPartyCode)
 
           done()
         } catch (err) {
