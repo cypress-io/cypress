@@ -13,9 +13,7 @@ const topIsSelfEqualityRe = /(?<=[a-zA-z]\.self==[a-zA-z]\.)top|(?<=[a-zA-z]\.se
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
 
-// since regex lookbehinds must be a fixed quantifier, we cannot match on script/link tags and need to look ahead to known values
-// this means we might be striping link integrity when we don't need to, especially link tags
-const integrityTagLookAheadRe = /(?<=\s)integrity(?==(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))|^integrity$/g
+const integrityTagReplacementRe = new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)(=(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))`, 'g')
 
 export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
@@ -30,7 +28,7 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   if (modifyObstructiveThirdPartyCode) {
     return rewrittenHTML
     .replace(topIsSelfEqualityRe, 'self')
-    .replace(integrityTagLookAheadRe, STRIPPED_INTEGRITY_TAG)
+    .replace(integrityTagReplacementRe, `${STRIPPED_INTEGRITY_TAG}$2`)
   }
 
   return rewrittenHTML
@@ -50,7 +48,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterUnMinifiedRe,
         ...(modifyObstructiveThirdPartyCode ? [
           topIsSelfEqualityRe,
-          integrityTagLookAheadRe,
+          integrityTagReplacementRe,
         ] : []),
       ],
       [
@@ -61,7 +59,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         ...(modifyObstructiveThirdPartyCode ? [
           'self',
-          STRIPPED_INTEGRITY_TAG,
+          `${STRIPPED_INTEGRITY_TAG}$2`,
         ] : []),
       ],
     ),
