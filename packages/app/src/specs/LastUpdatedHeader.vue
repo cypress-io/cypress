@@ -4,13 +4,13 @@
     :is-interactive="true"
     show-group="last-updated-header"
   >
-    <div
-      class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
-      tabindex="0"
+    <button
+      type="button"
+      class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4 font-medium"
       data-cy="last-updated-header"
     >
       {{ t('specPage.lastUpdated.header') }}
-    </div>
+    </button>
     <template
       #popper
     >
