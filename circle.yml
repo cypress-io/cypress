@@ -2060,41 +2060,7 @@ jobs:
       - run:
           name: Scaffold full TypeScript project 🏗
           working_directory: <<parameters.wd>>
-          command: npx @bahmutov/cly@1 init --typescript
-      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
-      - run:
-          name: Update example spec
-          working_directory: <<parameters.wd>>
-          command: |
-            mkdir cypress/e2e
-            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
-      - run:
-          name: Scaffold new config file
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo "export default {
-                    e2e: {
-                      setupNodeEvents (on, config) {
-                        on('task', {
-                          log (x) {
-                            console.log(x)
-
-                            return null
-                          },
-                        })
-
-                        return config
-                      },
-                    },
-                  }" > cypress.config.ts
-      - run:
-          name: Rename support file
-          working_directory: <<parameters.wd>>
-          command: mv cypress/support/index.ts cypress/support/e2e.js
+          command: npx @bahmutov/cly@1.9.0 init --typescript
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2262,27 +2228,7 @@ jobs:
       - run:
           name: Add Cypress demo
           working_directory: test-binary
-          command: npx @bahmutov/cly init
-      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.js` when Cypress v10 is released.
-      - run:
-          name: Update example spec
-          working_directory: test-binary
-          command: |
-            mkdir cypress/e2e
-            mv cypress/integration/spec.js cypress/e2e/spec.cy.js
-      - run:
-          name: Scaffold new config file
-          working_directory: test-binary
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo 'module.exports = { e2e: {} }' > cypress.config.js
-      - run:
-          name: Rename support file
-          working_directory: test-binary
-          command: mv cypress/support/index.js cypress/support/e2e.js
+          command: npx @bahmutov/cly@1.9.0 init
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -2390,22 +2336,22 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2418,7 +2364,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install          
     - run-app-component-tests-chrome:
-        context: [test-runner:launchpad-tests, test-runner:percy]
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
@@ -2712,7 +2658,7 @@ windows-workflow: &windows-workflow
         name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 
@@ -2720,7 +2666,7 @@ windows-workflow: &windows-workflow
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: test-runner:launchpad-tests
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
 

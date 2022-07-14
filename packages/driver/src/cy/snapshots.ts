@@ -1,5 +1,7 @@
 import $ from 'jquery'
 import _ from 'lodash'
+import type { $Cy } from '../cypress/cy'
+import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
 
@@ -7,7 +9,7 @@ export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
 export const FINAL_SNAPSHOT_NAME = 'final state'
 
-export const create = ($$, state) => {
+export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const snapshotsCss = createSnapshotsCSS($$, state)
   const snapshotsMap = new WeakMap()
   const snapshotDocument = new Document()
@@ -296,7 +298,4 @@ export const create = ($$, state) => {
   }
 }
 
-export interface ISnapshots extends Omit<
-  ReturnType<typeof create>,
-  'onCssModified' | 'onBeforeWindowLoad'
-> {}
+export interface ISnapshots extends ReturnType<typeof create> {}
