@@ -121,6 +121,7 @@
     .command-session-status {
       font-size: 12px;
       font-weight: 500;
+      max-height: 16px;
 
       &.creating, &.created {
         background-color: $jade-500;

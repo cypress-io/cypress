@@ -20,7 +20,7 @@ export interface RenderProps {
 }
 
 export interface SessionRenderProps {
-  status: 'new' | 'restored' | 'recreated' | 'failed'
+  status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
 }
 
 export interface CommandProps extends InstrumentProps {

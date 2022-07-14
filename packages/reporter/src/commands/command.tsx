@@ -13,14 +13,13 @@ import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
-import CommandModel, { RenderProps } from './command-model'
+import CommandModel, { RenderProps, SessionRenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
 import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
-import SessionPill from './sessionPill'
 
 const md = new Markdown()
 
@@ -209,6 +208,15 @@ const Aliases = observer(({ model }: AliasesProps) => {
     </span>
   )
 })
+
+// indicator specific to cy.session() that represents if a
+// session was created, restored, recreated or failed to
+// allow a quick-glance overview of which command flow ran
+const SessionPill = ({ status }: SessionRenderProps) => (
+  <span className={cs(['command-session-status', status])}>
+    {status}
+  </span>
+)
 
 interface MessageProps {
   model: CommandModel
@@ -472,6 +480,6 @@ class Command extends Component<Props> {
   }
 }
 
-export { Aliases, AliasesReferences, Message, Progress }
+export { Aliases, AliasesReferences, Message, Progress, SessionPill }
 
 export default Command
