@@ -140,17 +140,17 @@ export default function (Commands, Cypress, cy) {
       }
 
       function restoreSession (existingSession) {
-        logGroup(Cypress, {
-          name: 'session',
-          displayName: 'Restore saved session',
-          message: '',
-          type: 'system',
-        }, () => {
-          return cy.then(async () => {
-            _log.set({ consoleProps: () => getConsoleProps(existingSession) })
-
-            await sessions.setSessionData(existingSession)
+        return cy.then(async () => {
+          Cypress.log({
+            name: 'session',
+            displayName: 'Restore saved session',
+            message: '',
+            type: 'system',
           })
+
+          _log.set({ consoleProps: () => getConsoleProps(existingSession) })
+
+          await sessions.setSessionData(existingSession)
         })
       }
 

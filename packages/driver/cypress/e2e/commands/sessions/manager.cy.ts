@@ -118,10 +118,9 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
   describe('.clearActiveSessions()', () => {
     it('handles when no active sessions have been set', () => {
-      const CypressSpy = cy.stub(CypressInstance, 'log')
       const cySpy = cy.stub(cy, 'state').callThrough().withArgs('activeSessions')
 
-      const sessionsManager = new SessionsManager(CypressSpy, cy)
+      const sessionsManager = new SessionsManager(CypressInstance, cy)
 
       sessionsManager.clearActiveSessions()
       const calls = cySpy.getCalls()
@@ -145,10 +144,9 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         },
       }
 
-      const CypressSpy = cy.stub(CypressInstance, 'log')
       const cySpy = cy.stub(cy, 'state').callThrough().withArgs('activeSessions').returns(existingSessions)
 
-      const sessionsManager = new SessionsManager(CypressSpy, cy)
+      const sessionsManager = new SessionsManager(CypressInstance, cy)
 
       sessionsManager.clearActiveSessions()
       const calls = cySpy.getCalls()
@@ -246,10 +244,8 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
     })
 
-    // FIXME: stub issue
-    it.skip('sessions.clearAllSavedSessions()', async () => {
-      cy.stub(CypressInstance, 'backend').withArgs('clear:session').resolves(null)
-      // cy.stub(CypressInstance, 'log')
+    it('sessions.clearAllSavedSessions()', async () => {
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:session').resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')
@@ -257,7 +253,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       await sessionsManager.sessions.clearAllSavedSessions()
 
       expect(sessionsSpy).to.be.calledOnce
-      expect(CypressInstance).to.be.calledOnceWith('clear:session', null)
+      expect(cypressSpy).to.be.calledOnceWith('clear:session', null)
     })
 
     it('.clearCurrentSessionData()', async () => {
@@ -270,7 +266,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(window.localStorage).of.have.lengthOf(1)
       expect(window.sessionStorage).of.have.lengthOf(1)
 
-      CypressInstance = cy.stub(CypressInstance, 'log')
+      CypressInstance.log = cy.stub()
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
 
       const clearStorageSpy = cy.stub(sessionsManager.sessions, 'clearStorage')
@@ -284,10 +280,10 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(window.sessionStorage).of.have.lengthOf(0)
     })
 
-    // FIXME: stub issue
-    it.skip('sessions.saveSessionData', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').withArgs('save:session').resolves(null)
-      const sessionsManager = new SessionsManager(cypressSpy, cy)
+    it('sessions.saveSessionData', async () => {
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('save:session').resolves(null)
+
+      const sessionsManager = new SessionsManager(CypressInstance, cy)
       const sessionsSpy = cy.stub(sessionsManager, 'setActiveSession')
 
       const setup = cy.stub()
@@ -298,7 +294,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(sessionsSpy).to.be.calledOnce
       expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
 
-      expect(cypressSpy).to.be.calledOnceWith('save:session', null)
+      expect(cypressSpy).to.be.calledOnceWith('save:session')
     })
 
     // TODO:

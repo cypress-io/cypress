@@ -18,7 +18,7 @@ const getLogProperties = (displayName) => {
     event: 'true',
     state: 'passed',
     type: 'system',
-    snapshot: 'false',
+    snapshot: false,
   }
 }
 
@@ -47,8 +47,6 @@ export default class SessionsManager {
   }
 
   clearActiveSessions = () => {
-    this.Cypress.log(getLogProperties('Clear active sessions'))
-
     const curSessions = this.cy.state('activeSessions') || {}
     const clearedSessions: ActiveSessions = _.mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
 
@@ -150,8 +148,6 @@ export default class SessionsManager {
     },
 
     saveSessionData: async (data) => {
-      this.Cypress.log(getLogProperties('Save cookies, localStorage and sessionStorage'))
-
       this.setActiveSession({ [data.id]: data })
 
       // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
@@ -160,8 +156,6 @@ export default class SessionsManager {
     },
 
     setSessionData: async (data) => {
-      this.Cypress.log(getLogProperties('Apply cookies, localStorage and sessionStorage'))
-
       const allHtmlOrigins = await this.getAllHtmlOrigins()
 
       let _localStorage = data.localStorage || []
