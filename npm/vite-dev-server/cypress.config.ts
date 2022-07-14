@@ -1,4 +1,8 @@
 import { defineConfig } from 'cypress'
+// load the environment variables from the local .env file
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -7,7 +11,7 @@ export default defineConfig({
     defaultCommandTimeout: 10000, // these take a bit longer b/c they're e2e open mode test
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
-        throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')
+        throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. This env is require for cypress-in-cypress testing.')
       }
 
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing

@@ -1,6 +1,10 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
+// load the environment variables from the local .env file
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 const CYPRESS_INTERNAL_DEV_PROJECT_ID = getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'sehy69')
@@ -45,7 +49,7 @@ export default defineConfig({
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
-        throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')
+        throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. This env is require for cypress-in-cypress testing.')
       }
 
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
