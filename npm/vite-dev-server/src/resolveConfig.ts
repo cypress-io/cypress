@@ -5,6 +5,7 @@
  */
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
+import major from 'semver/functions/major'
 import { relative, resolve } from 'pathe'
 import type { InlineConfig } from 'vite'
 import path from 'path'
@@ -15,6 +16,18 @@ import { Cypress, CypressInspect, React18 } from './plugins/index'
 import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
+
+export function usingReactWithLegacyAPI (projectRoot: string) {
+  try {
+    // using React?
+    const reactPath = require.resolve('react', { paths: [projectRoot] })
+
+    // is it <= 17?
+    return major(require(reactPath).version) <= 17
+  } catch (e) {
+    return false
+  }
+}
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
   const { specs, cypressConfig, viteConfig: viteOverrides } = config
@@ -46,6 +59,13 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     paths: [root],
   })))
 
+  const exclude: string[] = []
+
+  if (usingReactWithLegacyAPI(cypressConfig.projectRoot)) {
+    debug('exclude react-dom/client for backwards compat')
+    exclude.push('react-dom/client')
+  }
+
   const viteBaseConfig: InlineConfig = {
     root,
     base: `${cypressConfig.devServerPublicPathRoute}/`,
@@ -69,6 +89,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
           },
         ],
       },
+      exclude,
       entries: [
         ...specs.map((s) => relative(root, s.relative)),
         ...(cypressConfig.supportFile ? [resolve(root, cypressConfig.supportFile)] : []),

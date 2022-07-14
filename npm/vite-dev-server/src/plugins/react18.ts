@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
-import path from 'path'
 import debugLib from 'debug'
+import { usingReactWithLegacyAPI } from '../resolveConfig'
 
 const debug = debugLib('cypress:vite-dev-server:plugins:react18')
 
@@ -15,22 +15,26 @@ const debug = debugLib('cypress:vite-dev-server:plugins:react18')
  * and will fail during this step if react-dom/client does not exist (React <= 17).
  *
  * To avoid this error and seamlessly support React 17 and 18 side by side we simply
- * stub out the dynamic react-dom/client import and return a placeholder module.
+ * remove the react-dom/client import when using older version by rewriting the bundle using
+ * Rollup's transform API: https://rollupjs.org/guide/en/#transform (Vite using Rollup internally).
  */
+
 export const React18 = (projectRoot: string): Plugin => {
   return {
-    name: 'cypress:missing-react-dom-client',
-    resolveId (source: string) {
-      debug('source is %s', source)
-      if (source === 'react-dom/client') {
-        try {
-          return require.resolve('react-dom/client', { paths: [projectRoot] })
-        } catch (e) {
-          debug('error resolving %s, falling back to client/reactDomClientPlaceholder.js', source)
+    name: 'cypress:rewrite-react-dom-import',
+    enforce: 'pre',
+    transform (code, id) {
+      const isUsingLegacyApi = usingReactWithLegacyAPI(projectRoot)
 
-          // This is not a react 18 project, need to stub out to avoid error
-          return path.resolve(__dirname, '..', '..', 'client', 'reactDomClientPlaceholder.js')
-        }
+      if (!isUsingLegacyApi) {
+        return
+      }
+
+      const isCypressReact = id.includes('cypress-react.esm-bundler.js')
+
+      if (isCypressReact) {
+        // remove problematic code via transform!
+        return code.replace('react-dom/client', 'react-dom')
       }
     },
   }
