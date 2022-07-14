@@ -1,5 +1,8 @@
 import type { Plugin } from 'vite'
 import path from 'path'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:vite-dev-server:plugins:react18')
 
 /**
  * React 18 has changed it's API.
@@ -18,10 +21,13 @@ export const React18 = (projectRoot: string): Plugin => {
   return {
     name: 'cypress:missing-react-dom-client',
     resolveId (source: string) {
+      debug('source is %s', source)
       if (source === 'react-dom/client') {
         try {
           return require.resolve('react-dom/client', { paths: [projectRoot] })
         } catch (e) {
+          debug('error resolving %s, falling back to client/reactDomClientPlaceholder.js', source)
+
           // This is not a react 18 project, need to stub out to avoid error
           return path.resolve(__dirname, '..', '..', 'client', 'reactDomClientPlaceholder.js')
         }
