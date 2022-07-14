@@ -164,7 +164,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
 
     // Try again while the config is still invalid
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.findByRole('button', { name: 'Try again' }).should('exist').click()
 
     // Wait until config error is on screen again
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
@@ -173,7 +173,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.findByRole('button', { name: 'Try again' }).should('exist').click()
 
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
