@@ -12,12 +12,10 @@
     <component
       :is="latestRun? ExternalLink : 'div'"
       :href="dashboardUrl"
-      :use-default-hocus="false"
     >
       <div
         class="flex justify-end items-center"
         data-cy="run-status-dots"
-        tabindex="0"
       >
         <div
           v-for="(dot,i) in dotClasses"
