@@ -339,10 +339,9 @@ export class GitDataSource {
 
   async #getInfoPosix (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
+    // Escape any quotes within the filepath, then surround with quotes
     const paths = absolutePaths
-    .map((p) => path.resolve(p))
-    .map((p) => p.replace(/\"/g, '\\"'))
-    .map((p) => `"${p}"`).join(' ')
+    .map((p) => `"${path.resolve(p).replace(/\"/g, '\\"')}"`).join(' ')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
     // no need to use a for loop for a single file

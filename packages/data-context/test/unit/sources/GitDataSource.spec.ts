@@ -9,6 +9,7 @@ import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
 import { GitDataSource, GitInfo } from '../../../src/sources/GitDataSource'
+import { toPosix } from '../../../src/util/file'
 
 describe('GitDataSource', () => {
   let git: ReturnType<typeof simpleGit>
@@ -49,9 +50,9 @@ describe('GitDataSource', () => {
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js').replace(/\\/g, '/')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js').replace(/\\/g, '/')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js').replace(/\\/g, '/')
+    const fooSpec = toPosix(path.join(e2eFolder, 'foo.cy.js'))
+    const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
+    const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
 
     gitInfo = new GitDataSource({
       isRunMode: false,
@@ -122,7 +123,7 @@ describe('GitDataSource', () => {
 
     filepaths = filepaths
     .map((filename) => path.join(e2eFolder, filename))
-    .map((filepath) => filepath.replace(/\\/g, '/'))
+    .map((filepath) => toPosix(filepath))
 
     gitInfo = new GitDataSource({
       isRunMode: false,
