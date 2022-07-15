@@ -99,6 +99,53 @@ const snapshotConsoleLogs = function (name) {
   return snapshot(name, stripAnsi(args))
 }
 
+function mockEE () {
+  const ee = new EE()
+
+  ee.kill = () => {
+    // ughh, would be nice to test logic inside the launcher
+    // that cleans up after the browser exit
+    // like calling client.close() if available to let the
+    // browser free any resources
+    return ee.emit('exit')
+  }
+
+  ee.destroy = () => {
+    return ee.emit('closed')
+  }
+
+  ee.isDestroyed = () => {
+    return false
+  }
+
+  ee.loadURL = () => {}
+  ee.focusOnWebView = () => {}
+  ee.webContents = {
+    debugger: {
+      on: sinon.stub(),
+      attach: sinon.stub(),
+      sendCommand: sinon.stub().resolves(),
+    },
+    getOSProcessId: sinon.stub(),
+    setUserAgent: sinon.stub(),
+    session: {
+      clearCache: sinon.stub().resolves(),
+      setProxy: sinon.stub().resolves(),
+      setUserAgent: sinon.stub(),
+      on: sinon.stub(),
+      removeListener: sinon.stub(),
+      webRequest: {
+        onBeforeSendHeaders () {},
+      },
+    },
+  }
+
+  ee.maximize = sinon.stub
+  ee.setSize = sinon.stub
+
+  return ee
+}
+
 let ctx
 
 describe('lib/cypress', () => {
@@ -909,48 +956,7 @@ describe('lib/cypress', () => {
       beforeEach(() => {
         browsers.open.restore()
 
-        const ee = new EE()
-
-        ee.kill = () => {
-          // ughh, would be nice to test logic inside the launcher
-          // that cleans up after the browser exit
-          // like calling client.close() if available to let the
-          // browser free any resources
-          return ee.emit('exit')
-        }
-
-        ee.destroy = () => {
-          return ee.emit('closed')
-        }
-
-        ee.isDestroyed = () => {
-          return false
-        }
-
-        ee.loadURL = () => {}
-        ee.focusOnWebView = () => {}
-        ee.webContents = {
-          debugger: {
-            on: sinon.stub(),
-            attach: sinon.stub(),
-            sendCommand: sinon.stub().resolves(),
-          },
-          getOSProcessId: sinon.stub(),
-          setUserAgent: sinon.stub(),
-          session: {
-            clearCache: sinon.stub().resolves(),
-            setProxy: sinon.stub().resolves(),
-            setUserAgent: sinon.stub(),
-            on: sinon.stub(),
-            removeListener: sinon.stub(),
-            webRequest: {
-              onBeforeSendHeaders () {},
-            },
-          },
-        }
-
-        ee.maximize = sinon.stub
-        ee.setSize = sinon.stub
+        const ee = mockEE()
 
         sinon.stub(launch, 'launch').returns(ee)
         sinon.stub(Windows, 'create').returns(ee)
@@ -1140,9 +1146,52 @@ describe('lib/cypress', () => {
   context('--record', () => {
     beforeEach(function () {
       sinon.stub(api, 'createRun').resolves()
+      const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      createInstanceStub.onFirstCall().resolves({
+        spec: 'cypress/e2e/app.cy.js',
+        runs: [{}],
+        runId: '1',
+        claimedInstances: 1,
+        totalInstances: 1,
+        groupId: 1,
+        platform: 'linux',
+        machineId: 1,
+      })
+
+      createInstanceStub.onSecondCall().resolves({
+        spec: null,
+        runs: [{}],
+        runId: '1',
+        claimedInstances: 1,
+        totalInstances: 1,
+        groupId: 1,
+        platform: 'linux',
+        machineId: 1,
+      })
+
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
+
+      sinon.stub(runMode, 'waitForBrowserToConnect').resolves({
+        stats: {
+          tests: 1,
+          passes: 2,
+          failures: 3,
+          pending: 4,
+          skipped: 5,
+          wallClockDuration: 6,
+        },
+        tests: [],
+        hooks: [],
+        video: 'path/to/video',
+        shouldUploadVideo: true,
+        screenshots: [],
+        config: {},
+        spec: {},
+      })
+
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: {
           tests: 1,
@@ -1332,6 +1381,33 @@ describe('lib/cypress', () => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
         return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1')
+      })
+    })
+
+    beforeEach(() => {
+      browsers.open.restore()
+
+      const ee = mockEE()
+
+      sinon.stub(launch, 'launch').returns(ee)
+      sinon.stub(Windows, 'create').returns(ee)
+    })
+
+    it('does not truncate a really long dashboard url', function () {
+      api.createRun.resolves({
+        warnings: [],
+        runUrl: `http://dashboard.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
+      })
+
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        return snapshotConsoleLogs('Long Dashboard URL')
       })
     })
 
