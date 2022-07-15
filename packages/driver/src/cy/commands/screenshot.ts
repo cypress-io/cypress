@@ -135,9 +135,7 @@ const scrollOverrides = (win: Window, doc: Document) => {
   // and don't want the page size to change once we start
   // https://github.com/cypress-io/cypress/issues/6099
 
-  // Window.Event is private and also deprecated. See https://developer.mozilla.org/en-US/docs/Web/API/Window/event.
-  // @ts-ignore
-  win.dispatchEvent(new win.Event('scroll'))
+  win.dispatchEvent(new Event('scroll'))
 
   return () => {
     doc.documentElement.style.overflow = originalOverflow
