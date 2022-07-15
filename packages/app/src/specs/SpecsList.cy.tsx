@@ -126,7 +126,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
       it('should display last updated column', () => {
         cy.findByTestId('last-updated-header').as('header')
-        cy.get('@header').should('be.visible').and('have.text', 'Last updated')
+        cy.get('@header').should('be.visible').and('contain', 'Last updated')
       })
 
       context('when screen is wide', { viewportWidth: 1200 }, () => {
