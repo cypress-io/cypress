@@ -1,23 +1,33 @@
 <template>
   <div
-    class="h-full grid gap-9px git-info-row items-center"
-    :class="{'grid-cols-[16px,auto]': classes.icon}"
+    class="h-full grid grid-col-1 git-info-row justify-start items-center"
     data-cy="git-info-row"
   >
     <Tooltip
       v-if="classes.icon"
       :key="props.gql?.statusType ?? undefined"
       placement="top"
-      class="h-full grid items-center"
+      class="h-full truncate"
+      data-cy="tooltip"
     >
-      <component
-        :is="classes.icon"
-        :class="classes.iconClasses"
-      />
+      <button class="flex h-full w-full gap-9px justify-start items-center">
+        <div>
+          <component
+            :is="classes.icon"
+            :class="classes.iconClasses"
+            :data-cy="classes.testId"
+          />
+        </div>
+        <div
+          class="text-gray-700 overflow-hidden truncate"
+        >
+          {{ props.gql?.lastModifiedHumanReadable ?? '' }}
+        </div>
+      </button>
       <template
         #popper
       >
-        <div>
+        <div data-cy="git-info-tooltip">
           <p class="max-w-sm text-sm truncate overflow-hidden">
             {{ tooltipMainText }}
           </p>
@@ -31,6 +41,7 @@
       </template>
     </Tooltip>
     <div
+      v-else
       class="text-gray-700 overflow-hidden truncate"
     >
       {{ props.gql?.lastModifiedHumanReadable ?? '' }}
@@ -70,14 +81,17 @@ const classes = computed(() => {
     created: {
       icon: DocumentIconPlus,
       iconClasses: 'icon-dark-jade-400 icon-light-jade-50',
+      testId: 'created-icon',
     },
     modified: {
       icon: DocumentIconPlusMinus,
       iconClasses: 'icon-dark-orange-400 icon-light-orange-50',
+      testId: 'modified-icon',
     },
     unmodified: {
       icon: CommitIcon,
       iconClasses: 'icon-light-gray-500',
+      testId: 'unmodified-icon',
     },
     noGitInfo: {},
   }[props.gql?.statusType || 'unmodified']

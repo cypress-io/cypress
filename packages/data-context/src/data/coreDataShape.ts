@@ -18,7 +18,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
-  savedState?: SavedStateShape
+  savedState?: () => Promise<Maybe<SavedStateShape>>
 }
 
 export interface DevStateShape {
@@ -35,6 +35,7 @@ export interface SavedStateShape {
   firstOpened?: number | null
   lastOpened?: number | null
   promptsShown?: object | null
+  lastProjectId?: string | null
 }
 
 export interface ConfigChildProcessShape {
@@ -53,7 +54,7 @@ export interface ConfigChildProcessShape {
 }
 
 export interface AppDataShape {
-  isInGlobalMode: boolean
+  isGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
@@ -181,7 +182,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshState: null,
     },
     app: {
-      isInGlobalMode: Boolean(modeOptions.global),
+      isGlobalMode: Boolean(modeOptions.global),
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,
