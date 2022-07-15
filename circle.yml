@@ -315,6 +315,7 @@ commands:
       - run:
           name: Install Node Modules
           command: |
+            source ./scripts/ensure-node.sh
             # avoid installing Percy's Chromium every time we use @percy/cli
             # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
             PERCY_POSTINSTALL_BROWSER=true \
