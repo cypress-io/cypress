@@ -386,7 +386,9 @@ commands:
           ## See the following information
           ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-          command: yarn check-terminal
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-terminal
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
