@@ -69,7 +69,6 @@
     "unplugin-vue-components": "^0.15.4",
     "vite": "3.0.3",
     "vite-plugin-components": "0.11.3",
-    "vite-plugin-windicss": "^1.4.7",
     "vite-svg-loader": "3.1.2",
     "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0",
@@ -77,7 +76,7 @@
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
     "vue-tsc": "^0.3.0",
-    "windicss-analysis": "^0.3.4",
+    "windicss-analysis": "^0.3.5",
     "wonka": "^4.0.15"
   },
   "module": "es2020",
