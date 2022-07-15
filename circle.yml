@@ -2104,6 +2104,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 786
           command: npm run test:ci:firefox
 
   test-binary-against-recipes-chrome:
@@ -2111,6 +2112,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 786
           command: npm run test:ci:chrome
 
   test-binary-against-recipes:
@@ -2118,6 +2120,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 786
           command: npm run test:ci
 
   # This is a special job. It allows you to test the current
