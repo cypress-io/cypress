@@ -16,12 +16,10 @@ import {
   setPluginResolvedOn,
   mergeDefaults,
 } from './utils'
-import type { Config } from './types'
 
 const debug = Debug('cypress:config:project')
 
-// TODO: Config -> SetupFullConfigOptions
-export function setupFullConfigWithDefaults (obj: Config = {}) {
+export function setupFullConfigWithDefaults (obj: any = {}): any {
   debug('setting config object %o', obj)
   let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
@@ -41,8 +39,7 @@ export function setupFullConfigWithDefaults (obj: Config = {}) {
   return mergeDefaults(config, options, cliConfig)
 }
 
-// TODO: Config -> Partial<Cypress.ConfigOptions>
-export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: Config, testingType: TestingType) {
+export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, testingType: TestingType) {
   if (!modifiedConfig) {
     modifiedConfig = {}
   }

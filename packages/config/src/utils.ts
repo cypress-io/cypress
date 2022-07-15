@@ -19,16 +19,7 @@ export const hideKeys = (token?: string | number | boolean) => {
   ].join('...')
 }
 
-interface ConfigUrl {
-  port?: number
-  baseUrl?: string
-  clientRoute?: string
-  reporterRoute?: string
-  namespace?: string
-  xhrRoute?: string
-}
-
-export function setUrls (obj: ConfigUrl) {
+export function setUrls (obj: any) {
   obj = _.clone(obj)
 
   // TODO: rename this to be proxyServer
