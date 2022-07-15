@@ -31,7 +31,7 @@ describe('nextHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = await nextHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await nextHandler({
       framework: 'next',
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
     } as WebpackDevServerConfig)
@@ -39,6 +39,9 @@ describe('nextHandler', function () {
     expectWatchOverrides(webpackConfig)
     expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
+
+    expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 
   it('sources from a next-11 project', async () => {
@@ -46,7 +49,7 @@ describe('nextHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = await nextHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await nextHandler({
       framework: 'next',
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
     } as WebpackDevServerConfig)
@@ -54,6 +57,27 @@ describe('nextHandler', function () {
     expectWatchOverrides(webpackConfig)
     expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
+
+    expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
+  })
+
+  it('sources from a next-11-webpack-4 project', async () => {
+    const projectRoot = await scaffoldMigrationProject('next-11-webpack-4')
+
+    process.chdir(projectRoot)
+
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await nextHandler({
+      framework: 'next',
+      cypressConfig: { projectRoot, cypressBinaryRoot: __dirname } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
+
+    expectWatchOverrides(webpackConfig)
+    expectPagesDir(webpackConfig, projectRoot)
+    expectWebpackSpan(webpackConfig)
+
+    expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
