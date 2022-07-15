@@ -27,7 +27,7 @@
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="props.dismissible ? IconActionDelete : null"
           :suffix-button-class="classes.suffixButtonClass"
-          :suffix-icon-class="classes.suffixIconColor"
+          :suffix-icon-color="classes.suffixIconColor"
           data-cy="alert"
           class="rounded min-w-200px p-16px"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
