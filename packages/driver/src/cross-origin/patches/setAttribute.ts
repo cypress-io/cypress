@@ -1,13 +1,23 @@
 import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
 
 export const patchElementIntegrity = (window: Window) => {
-  const originalSetAttribute = window.Element.prototype.setAttribute
+  const originalFormElementSetAttribute = window.HTMLFormElement.prototype.setAttribute
 
-  window.Element.prototype.setAttribute = function (qualifiedName, value) {
+  window.HTMLFormElement.prototype.setAttribute = function (qualifiedName, value) {
     if (qualifiedName === 'integrity') {
       qualifiedName = STRIPPED_INTEGRITY_TAG
     }
 
-    return originalSetAttribute.apply(this, [qualifiedName, value])
+    return originalFormElementSetAttribute.apply(this, [qualifiedName, value])
+  }
+
+  const originalAnchorElementSetAttribute = window.HTMLAnchorElement.prototype.setAttribute
+
+  window.HTMLAnchorElement.prototype.setAttribute = function (qualifiedName, value) {
+    if (qualifiedName === 'integrity') {
+      qualifiedName = STRIPPED_INTEGRITY_TAG
+    }
+
+    return originalAnchorElementSetAttribute.apply(this, [qualifiedName, value])
   }
 }

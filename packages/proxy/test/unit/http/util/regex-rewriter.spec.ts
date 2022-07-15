@@ -171,7 +171,79 @@ const expected = `\
 const originalWithModifyObstructiveThirdPartyCode = `\
 <html>
   <body>
+    top1
+    settop
+    settopbox
+    parent1
+    grandparent
+    grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
+
+    <div style="left: 1500px; top: 0px;"></div>
+    <div style="left: 1500px; top : 0px;"></div>
+    <div style="left: 1500px; top  : 0px;"></div>
+
+    parent()
+    foo.parent()
+    top()
+    foo.top()
+    foo("parent")
+    foo("top")
+
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
+
+    parent.bar
+
     <script type="text/javascript">
+      if (top != self) run()
+      if (top!=self) run()
+      if (self !== top) run()
+      if (self!==top) run()
+      if (self === top) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
+      if (top.location!=self.location&&(top.location.href=self.location.href)) run()
+      if (top.location != self.location) run()
+      if (top.location != location) run()
+      if (self.location != top.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
+      if (parent.frames.length > 0) run()
+      if (parent.framesStyle) run()
+      if (window != top) run()
+      if (window.top !== window.self) run()
+      if (window.top!==window.self) run()
+      if (window.self != window.top) run()
+      if (window.top != window.self) run()
+      if (window["top"] != window["parent"]) run()
+      if (window['top'] != window['parent']) run()
+      if (window["top"] != self['parent']) run()
+      if (parent && parent != window) run()
+      if (parent && parent != self) run()
+      if (parent && window != parent) run()
+      if (parent && self != parent) run()
+      if (myself != parent) run()
+      if (parent && parent.frames && parent.frames.length > 0) run()
+      if ((self.parent && !(self.parent === self)) && (self.parent.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (top===self) return
+      if (top==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
       if (e.self == e.top) run()
       if (a.self===a.top) run()
       if (f.top===g.self) run()
@@ -214,7 +286,79 @@ const originalWithModifyObstructiveThirdPartyCode = `\
 const expectedWithModifyObstructiveThirdPartyCode = `\
 <html>
   <body>
+    top1
+    settop
+    settopbox
+    parent1
+    grandparent
+    grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
+
+    <div style="left: 1500px; top: 0px;"></div>
+    <div style="left: 1500px; top : 0px;"></div>
+    <div style="left: 1500px; top  : 0px;"></div>
+
+    parent()
+    foo.parent()
+    top()
+    foo.top()
+    foo("parent")
+    foo("top")
+
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
+
+    parent.bar
+
     <script type="text/javascript">
+      if (self != self) run()
+      if (self!=self) run()
+      if (self !== self) run()
+      if (self!==self) run()
+      if (self === self) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
+      if (self.location!=self.location&&(self.location.href=self.location.href)) run()
+      if (self.location != self.location) run()
+      if (self.location != location) run()
+      if (self.location != self.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
+      if (self.frames.length > 0) run()
+      if (parent.framesStyle) run()
+      if (window != self) run()
+      if (window.self !== window.self) run()
+      if (window.self!==window.self) run()
+      if (window.self != window.self) run()
+      if (window.self != window.self) run()
+      if (window["self"] != window["self"]) run()
+      if (window['self'] != window['self']) run()
+      if (window["self"] != self['self']) run()
+      if (parent && self != window) run()
+      if (parent && self != self) run()
+      if (parent && window != self) run()
+      if (parent && self != self) run()
+      if (myself != parent) run()
+      if (parent && self.frames && self.frames.length > 0) run()
+      if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (self===self) return
+      if (self==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
       if (e.self == e.self) run()
       if (a.self===a.self) run()
       if (f.self===g.self) run()
