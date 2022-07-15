@@ -874,7 +874,7 @@ commands:
       - run:
           # Ensure we're installing the node-version for the cloned repo
           command: |
-            if [[ -f .node-version ]]
+            if [[ -f .node-version ]]; then
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/<< pipeline.git.branch >>/scripts/ensure-node.sh --output ci-ensure-node.sh
               source ./ci-ensure-node.sh 
             fi
