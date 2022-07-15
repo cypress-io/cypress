@@ -6,6 +6,8 @@ import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import EventEmitter from 'events'
+import { Readable } from 'stream'
+import * as rewriter from '../../../lib/http/util/rewriter'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -985,6 +987,235 @@ describe('http/response-middleware', function () {
       return {
         expiryTime: () => 0,
         ...props,
+      }
+    }
+  })
+
+  describe('MaybeInjectHtml', function () {
+    const { MaybeInjectHtml } = ResponseMiddleware
+    let ctx
+    let htmlStub
+
+    beforeEach(() => {
+      htmlStub = sinon.spy(rewriter, 'html')
+    })
+
+    afterEach(() => {
+      htmlStub.restore()
+    })
+
+    it('modifyObstructiveThirdPartyCode is true for secondary requests', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+      })
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': 'foobar.com',
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': true,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
+      prepareContext({})
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': '127.0.0.1',
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://127.0.0.1:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false when experimental flag is false', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+      })
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': 'foobar.com',
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          wantsInjection: 'full',
+          wantsSecurityRemoved: true,
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+  })
+
+  describe('MaybeRemoveSecurity', function () {
+    const { MaybeRemoveSecurity } = ResponseMiddleware
+    let ctx
+    let securityStub
+
+    beforeEach(() => {
+      securityStub = sinon.spy(rewriter, 'security')
+    })
+
+    afterEach(() => {
+      securityStub.restore()
+    })
+
+    it('modifyObstructiveThirdPartyCode is true for secondary requests', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+      })
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': true,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
+      prepareContext({})
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://127.0.0.1:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false when experimental flag is false', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+      })
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          wantsInjection: 'full',
+          wantsSecurityRemoved: true,
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
