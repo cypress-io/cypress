@@ -20,7 +20,7 @@ describe('@cypress/webpack-dev-server', function () {
           snapshot: true,
           expectedExitCode: 3,
           onStdout: (stdout) => {
-            return stripAnsi(systemTests.normalizeWebpackErrors(stdout))
+            return systemTests.normalizeWebpackErrors(stripAnsi(stdout))
           },
         })
       })

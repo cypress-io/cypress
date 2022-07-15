@@ -49,6 +49,7 @@ packlist({ path: currentPackageDir })
 
   // After everything is copied, let's update the Cypress cli package.json['exports'] map.
   const isModule = currentPackageConfig.type === 'module'
+  const types = currentPackageConfig.types
 
   const cliPackageConfig = require(path.join(cliPath, 'package.json'))
 
@@ -63,6 +64,11 @@ packlist({ path: currentPackageDir })
   if (!isModule) {
     // ./react/dist/cypress-react-cjs.js, etc
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
+  }
+
+  if (types) {
+    // ./react/dist/cypress-react-cjs.js, etc
+    subPackageExports.types = `./${exportName}/${types}`
   }
 
   if (!cliPackageConfig.files.includes(exportName)) {
