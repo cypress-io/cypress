@@ -2640,11 +2640,16 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 
 windows-workflow: &windows-workflow
   jobs:
+    - windows-ci-hold:
+        type: approval
+
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
         resource_class: windows.large
         only-cache-for-root-user: true
+        requires:
+          - windows-ci-hold
 
     - build:
         name: windows-build
