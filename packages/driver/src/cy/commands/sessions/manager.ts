@@ -137,7 +137,11 @@ export default class SessionsManager {
     },
 
     clearCurrentSessionData: async () => {
-      this.Cypress.log(getLogProperties('Clear cookies, localStorage and sessionStorage'))
+      // this prevents a log occurring when we clear session in-between tests
+      if (this.cy.state('duringUserTestExecution')) {
+        this.Cypress.log(getLogProperties('Clear cookies, localStorage and sessionStorage'))
+      }
+
       window.localStorage.clear()
       window.sessionStorage.clear()
 
