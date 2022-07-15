@@ -25,7 +25,7 @@ async function resetReporter () {
 function setupReporter () {
   const $reporterRoot = getReporterElement()
 
-  if (hasInitializeReporter) return
+  if (hasInitializeReporter || !$reporterRoot) return
 
   renderReporter($reporterRoot, getMobxRunnerStore(), getEventManager())
 
