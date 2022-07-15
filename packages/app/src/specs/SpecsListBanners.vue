@@ -82,7 +82,7 @@
           bg
           class="bg-purple-50 text-purple-500"
         >
-          projectId: "{{ props.gql.currentProject.projectId }}"
+          projectId: "{{ props.gql.currentProject?.projectId }}"
         </CodeTag>
       </i18n-t>
     </p>
@@ -99,7 +99,7 @@
     v-if="showProjectRequestAccess"
     v-model="showProjectRequestAccess"
     data-cy="project-request-access-alert"
-    status="info"
+    status="warning"
     :title="t('runs.errors.unauthorized.title')"
     class="mb-16px"
     :icon="WarningIcon"

@@ -126,7 +126,7 @@ export class GraphQLDataSource {
     }
 
     // If it's a node, we can query as a Node field and push down the result that way
-    if (info.parentType.getInterfaces().some((i) => i.name === 'Node') && result.id) {
+    if (info.parentType.getInterfaces().some((i) => i.name === 'Node')) {
       this.#pushFragment({ ctx, info, source, result }, true)
 
       return
