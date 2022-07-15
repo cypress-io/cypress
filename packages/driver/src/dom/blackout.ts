@@ -32,11 +32,12 @@ function addBlackoutForElement ($body, $el) {
   $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
 }
 
-function addBlackouts ($body, selector) {
+function addBlackouts ($body, $container, selector) {
   let $el
 
   try {
-    $el = $body.find(selector)
+    // only scope blacked out elements to to screenshotted element, not necessarily the whole body
+    $el = $container.find(selector)
     if (!$el.length) return
   } catch (err) {
     // if it's an invalid selector, just ignore it
