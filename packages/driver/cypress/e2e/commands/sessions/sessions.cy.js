@@ -174,7 +174,6 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(consoleProps).to.deep.eq({
           Command: 'session',
-          Snapshot: 'The snapshot is missing. Displaying current state of the DOM.',
           id: 'session-1',
           table: [],
         })

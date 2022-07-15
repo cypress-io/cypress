@@ -237,7 +237,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface IFocused extends Omit<
-  ReturnType<typeof create>,
-  'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> {}
+export interface IFocused extends ReturnType<typeof create> {}
