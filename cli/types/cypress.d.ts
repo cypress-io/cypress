@@ -2950,7 +2950,7 @@ declare namespace Cypress {
     /**
      * Hosts mappings to IP addresses.
      */
-    hosts: null | string[]
+    hosts: null | {[key: string]: string}
     /**
      * Whether Cypress was launched via 'cypress open' (interactive mode)
      */
