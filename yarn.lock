@@ -2431,10 +2431,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-9.0.1.tgz#c27b391d8457d1e893f1eddeaf5e5412d12ffbb5"
   integrity sha512-6It2EVfGskxZCQhuykrfnALg7oVeiI6KclWSmGDqB0AiInVrTGB9Jp9i4/Ad21u9Jde/voVQz6eFX/eSg/UsPA==
 
-"@cypress-design/css@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.5.1.tgz#fcac35b30cb113eb8f5e5c390887768a4a194b29"
-  integrity sha512-/cIXRNRFErCcC7z4HOkh5jHyu7xGiYWTrpeTbazJF3kxR1OtT0vm2ZWROqs5fkTGBe/m+IYydPMLrGkwHBYUoQ==
+"@cypress-design/css@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.5.2.tgz#bcb43bb2d6f872de8691d6acb546680b335ea757"
+  integrity sha512-ZuHdhbcCgEfKuggGYS4AkSGfkB2ZCsWewBYUNH/U+oYnkhDITgaSMKp0RWfBWrnqqyhD2mTYx8gNRWCNQ7tw8w==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
     lodash "^4.17.21"
@@ -2442,19 +2442,19 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/icon-registry@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.4.1.tgz#6864261d7e6a1037cdac5a2841f3c25ad28f66c9"
-  integrity sha512-SxEbe3covGoU4XGdq3hJTBUKZ/55c/pgyP4KzGDl6PaOjFMP4Yp7TnCV6sxFqCsFY1OAGIlLWpfCOCX6g7nWPA==
+"@cypress-design/icon-registry@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.4.2.tgz#bc2d913208acb33b5dfb1d8f6d7929b153e32ba0"
+  integrity sha512-iyH5xFc2abpwVPTEjoJ2ILIQy79DaR6ata76HAk9NHPWVUwG/yUPEzvp3m2T8IqgebNEuTtl4mBHM/u+jycxng==
   dependencies:
     camelcase "^6.3.0"
 
-"@cypress-design/vue-icon@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.4.1.tgz#b20865d3338453ea0b9678662625acf0c607843f"
-  integrity sha512-1wG/S5+bCxm6hZQBNw3jZ35yoSVuXVmiK4Y+hrz9iVOl4DFiyzBPo0TxyWe2tzoFamShrl6f7oqLicpK6A0iOQ==
+"@cypress-design/vue-icon@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.4.2.tgz#3574a749efbdaf83f48251108c016c3d383160bd"
+  integrity sha512-i7YWizC/c1LFdxVZSbyTIOrj4LeiIxypemCXdygacmvogQS2buBC+CovqCMFAzKqnfBZUBGiQajMWWM5rzIduw==
   dependencies:
-    "@cypress-design/icon-registry" "^0.4.1"
+    "@cypress-design/icon-registry" "^0.4.2"
 
 "@cypress/browserify-preprocessor@3.0.0":
   version "3.0.0"

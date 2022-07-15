@@ -17,11 +17,11 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@cypress-design/vue-icon": "^0.4.1"
+    "@cypress-design/vue-icon": "^0.4.2"
   },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
-    "@cypress-design/css": "^0.5.1",
+    "@cypress-design/css": "^0.5.2",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/json": "1.1.368",

@@ -18,7 +18,7 @@
     "watch": "echo \"run 'yarn dev' from the root\" && exit 1"
   },
   "dependencies": {
-    "@cypress-design/vue-icon": "^0.4.1"
+    "@cypress-design/vue-icon": "^0.4.2"
   },
   "devDependencies": {
     "@graphql-typed-document-node/core": "^3.1.0",
