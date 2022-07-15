@@ -50,7 +50,7 @@
   "engines": {
     "node": ">=8"
   },
-  "types": "dist",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
