@@ -31,7 +31,6 @@
     "@types/jquery.scrollto": "1.4.29",
     "@types/mocha": "^8.0.3",
     "@types/sinonjs__fake-timers": "8.1.1",
-    "@types/underscore.string": "0.0.38",
     "angular": "1.8.0",
     "basic-auth": "2.0.1",
     "blob-util": "2.0.2",

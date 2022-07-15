@@ -10,24 +10,24 @@ import url, { URL } from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
-const DEFAULT_PROTOCOL_PORTS = {
+const DEFAULT_PROTOCOL_PORTS: Record<string, string> = {
   'https:': '443',
   'http:': '80',
 }
 
 const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS)
 
-const portIsDefault = (port) => {
+const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
 
-const parseClone = (urlObject) => {
+const parseClone = (urlObject: any) => {
   return url.parse(_.clone(urlObject))
 }
 
 export const parse = url.parse
 
-export function stripProtocolAndDefaultPorts (urlToCheck) {
+export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   // grab host which is 'hostname:port' only
   const { host, hostname, port } = url.parse(urlToCheck)
 
@@ -41,7 +41,7 @@ export function stripProtocolAndDefaultPorts (urlToCheck) {
   return host
 }
 
-export function removePort (urlObject) {
+export function removePort (urlObject: any) {
   const parsed = parseClone(urlObject)
 
   // set host to undefined else url.format(...) will ignore the port property
@@ -55,7 +55,7 @@ export function removePort (urlObject) {
   return parsed
 }
 
-export function removeDefaultPort (urlToCheck) {
+export function removeDefaultPort (urlToCheck: any) {
   let parsed = parseClone(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
@@ -65,7 +65,7 @@ export function removeDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function addDefaultPort (urlToCheck) {
+export function addDefaultPort (urlToCheck: any) {
   const parsed = parseClone(urlToCheck)
 
   if (!parsed.port) {
@@ -74,7 +74,7 @@ export function addDefaultPort (urlToCheck) {
     /* @ts-ignore */
     delete parsed.host
     if (parsed.protocol) {
-      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
+      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]!
     } else {
       /* @ts-ignore */
       delete parsed.port
@@ -84,7 +84,7 @@ export function addDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function getPath (urlToCheck) {
+export function getPath (urlToCheck: string) {
   return url.parse(urlToCheck).path
 }
 

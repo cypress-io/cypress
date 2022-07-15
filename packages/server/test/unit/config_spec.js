@@ -6,8 +6,6 @@ const { stripIndent } = require('common-tags')
 const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
 
-const configUtil = require(`../../lib/util/config`)
-
 describe('lib/config', () => {
   before(function () {
     this.env = process.env
@@ -978,40 +976,6 @@ describe('lib/config', () => {
 
           return this.expectValidationFails('clientCertificates[0].ca[0] to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
-      })
-    })
-  })
-
-  context('.getProcessEnvVars', () => {
-    ['cypress_', 'CYPRESS_'].forEach((key) => {
-      it(`reduces key: ${key}`, () => {
-        const obj = {
-          cypress_host: 'http://localhost:8888',
-          foo: 'bar',
-          env: '123',
-        }
-
-        obj[`${key}version`] = '0.12.0'
-
-        expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
-          host: 'http://localhost:8888',
-          version: '0.12.0',
-        })
-      })
-    })
-
-    it('does not merge reserved environment variables', () => {
-      const obj = {
-        CYPRESS_INTERNAL_ENV: 'production',
-        CYPRESS_FOO: 'bar',
-        CYPRESS_CRASH_REPORTS: '0',
-        CYPRESS_PROJECT_ID: 'abc123',
-      }
-
-      expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
-        FOO: 'bar',
-        PROJECT_ID: 'abc123',
-        CRASH_REPORTS: 0,
       })
     })
   })

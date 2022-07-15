@@ -4,9 +4,8 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
+const { getBreakingRootKeys, getPublicConfigKeys, coerce } = require('@packages/config')
 
-const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
 
@@ -139,6 +138,7 @@ const tryJSONParse = (str) => {
 }
 
 const JSONOrCoerce = (str) => {
+  coerce
   // valid JSON? horray
   const parsed = tryJSONParse(str)
 
@@ -157,7 +157,7 @@ const JSONOrCoerce = (str) => {
   }
 
   // nupe :-(
-  return coerceUtil.coerce(str)
+  return coerce(str)
 }
 
 const sanitizeAndConvertNestedArgs = (str, argName) => {
@@ -389,7 +389,7 @@ module.exports = {
       // bypassed the cli
       cwd: process.cwd(),
     })
-    .mapValues(coerceUtil.coerce)
+    .mapValues(coerce)
     .value()
 
     debug('argv parsed: %o', options)

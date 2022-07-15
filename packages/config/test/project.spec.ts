@@ -1,3 +1,0 @@
-describe('config/src/project', () => {
-
-})

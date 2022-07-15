@@ -4,7 +4,6 @@ import fs from 'fs-extra'
 import _ from 'lodash'
 import path from 'path'
 
-import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from '@packages/server/lib/util/config'
 import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
@@ -22,7 +21,7 @@ import {
   validate,
   validateNoBreakingConfig,
 } from '../browser'
-import { hideKeys, setUrls } from '../utils'
+import { hideKeys, setUrls, coerce } from '../utils'
 import { options } from '../options'
 
 const debug = Debug('cypress:config:project:utils')
@@ -37,7 +36,20 @@ const hideSpecialVals = function (val: string, key: string) {
 
 // an object with a few utility methods for easy stubbing from unit tests
 export const utils = {
-  getProcessEnvVars,
+  getProcessEnvVars (obj: NodeJS.ProcessEnv) {
+    return _.reduce(obj, (memo: Record<string, string>, value: string | undefined, key: string) => {
+      if (!value) {
+        return memo
+      }
+
+      if (isCypressEnvLike(key)) {
+        memo[removeEnvPrefix(key)] = coerce(value)
+      }
+
+      return memo
+    }, {})
+  },
+
   resolveModule (name: string) {
     return require.resolve(name)
   },
@@ -67,6 +79,30 @@ export const utils = {
       return null
     })
   },
+}
+
+const CYPRESS_ENV_PREFIX = 'CYPRESS_'
+
+const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
+
+export const CYPRESS_RESERVED_ENV_VARS = [
+  'CYPRESS_INTERNAL_ENV',
+]
+
+export const CYPRESS_SPECIAL_ENV_VARS = [
+  'RECORD_KEY',
+]
+
+const isCypressEnvLike = (key: string) => {
+  return _.chain(key)
+  .invoke('toUpperCase')
+  .startsWith(CYPRESS_ENV_PREFIX)
+  .value() &&
+  !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
+}
+
+const removeEnvPrefix = (key: string) => {
+  return key.slice(CYPRESS_ENV_PREFIX_LENGTH)
 }
 
 export function parseEnv (cfg: Config, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {

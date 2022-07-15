@@ -56,6 +56,59 @@ describe('config/src/project/utils', () => {
     })
   })
 
+  context('.getProcessEnvVars', () => {
+    it('returns process envs prefixed with cypress', () => {
+      const envs = {
+        CYPRESS_BASE_URL: 'value',
+        RANDOM_ENV: 'ignored',
+      } as unknown as NodeJS.ProcessEnv
+
+      expect(utils.getProcessEnvVars(envs)).to.deep.eq({
+        BASE_URL: 'value',
+      })
+    })
+
+    it('does not return CYPRESS_RESERVED_ENV_VARS', () => {
+      const envs = {
+        CYPRESS_INTERNAL_ENV: 'value',
+      } as unknown as NodeJS.ProcessEnv
+
+      expect(utils.getProcessEnvVars(envs)).to.deep.eq({})
+    });
+
+    ['cypress_', 'CYPRESS_'].forEach((key) => {
+      it(`reduces key: ${key}`, () => {
+        const obj = {
+          cypress_host: 'http://localhost:8888',
+          foo: 'bar',
+          env: '123',
+        } as unknown as NodeJS.ProcessEnv
+
+        obj[`${key}version`] = '0.12.0'
+
+        expect(utils.getProcessEnvVars(obj)).to.deep.eq({
+          host: 'http://localhost:8888',
+          version: '0.12.0',
+        })
+      })
+    })
+
+    it('does not merge reserved environment variables', () => {
+      const obj = {
+        CYPRESS_INTERNAL_ENV: 'production',
+        CYPRESS_FOO: 'bar',
+        CYPRESS_CRASH_REPORTS: '0',
+        CYPRESS_PROJECT_ID: 'abc123',
+      } as NodeJS.ProcessEnv
+
+      expect(utils.getProcessEnvVars(obj)).to.deep.eq({
+        FOO: 'bar',
+        PROJECT_ID: 'abc123',
+        CRASH_REPORTS: 0,
+      })
+    })
+  })
+
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
       sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar');
