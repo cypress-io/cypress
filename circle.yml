@@ -877,11 +877,14 @@ commands:
             if [[ -f .node-version ]]; then
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/<< pipeline.git.branch >>/scripts/ensure-node.sh --output ci-ensure-node.sh
               source ./ci-ensure-node.sh 
+            else 
+              echo '' > ci-ensure-node.sh
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
+            source ./ci-ensure-node.sh
             if [[ -f yarn.lock ]]; then
               yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
@@ -910,11 +913,14 @@ commands:
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
-          command: npx cypress version
+          command: |
+            source ./ci-ensure-node.sh
+            npx cypress version
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: |
+            source ./ci-ensure-node.sh
             [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - when:
           condition: <<parameters.build-project>>
@@ -923,15 +929,20 @@ commands:
               name: Build 🏗 (maybe)
               working_directory: /tmp/<<parameters.repo>>
               command: |
+                source ./ci-ensure-node.sh
                 [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: <<parameters.server-start-command>>
+          command: |
+            source ./ci-ensure-node.sh
+            <<parameters.server-start-command>>
           background: true
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+          command: |
+            source ./ci-ensure-node.sh
+            npx wait-on <<parameters.wait-on>> --timeout 120000
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - when:
@@ -961,14 +972,18 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>>
       - store-npm-logs
 
   wait-on-circle-jobs:
