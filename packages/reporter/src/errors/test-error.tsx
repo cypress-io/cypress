@@ -12,6 +12,7 @@ import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
 import Command from '../commands/command-model'
+import { formattedMessage } from '../commands/command'
 
 import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
 import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
@@ -52,10 +53,6 @@ const TestError = observer((props: TestErrorProps) => {
     e.stopPropagation()
 
     onPrint()
-  }
-
-  const formattedMessage = (message?: string) => {
-    return message ? md.renderInline(message) : ''
   }
 
   const { err } = props.model

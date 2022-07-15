@@ -143,7 +143,8 @@
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
-      class="flex p-16px gap-24px"
+      data-cy="docs-menu-container"
+      class="flex p-16px gap-24px flex-col md:flex-row"
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
