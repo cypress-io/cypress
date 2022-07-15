@@ -69,9 +69,9 @@
     "vite-svg-loader": "3.1.2",
     "vue": "3.2.31",
     "vue-i18n": "9.2.0-beta.7",
-    "vue-tsc": "^0.38.5",
+    "vue-tsc": "^0.3.0",
     "vue3-file-selector": "^1.0.1",
-    "windicss-analysis": "^0.3.5",
+    "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
   },
   "files": [
