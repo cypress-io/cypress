@@ -2640,7 +2640,9 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 
 windows-workflow: &windows-workflow
   jobs:
-    - windows-ci-hold:
+    - ci-hold:
+        <<: *full-windows-workflow-filters
+        name: windows-ci-hold
         type: approval
 
     - node_modules_install:
