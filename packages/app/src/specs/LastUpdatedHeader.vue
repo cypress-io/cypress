@@ -6,10 +6,11 @@
   >
     <button
       type="button"
-      class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4 font-medium"
+      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
       data-cy="last-updated-header"
     >
       {{ t('specPage.lastUpdated.header') }}
+      <i-cy-action-question-mark-outline_x16 class="ml-1 icon-dark-gray-600" />
     </button>
     <template
       #popper

@@ -6,7 +6,7 @@
   >
     <button
       type="button"
-      class="cursor-default font-medium decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
     >
       <span
         class="hidden lg:flex"
@@ -16,6 +16,7 @@
         class="lg:hidden"
         data-cy="short-header-text"
       >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
+      <i-cy-action-question-mark-outline_x16 class="ml-1 icon-dark-gray-600" />
     </button>
     <template
       #popper
