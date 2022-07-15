@@ -158,11 +158,6 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         expect(logs[6].get()).to.contain({
-          displayName: 'Save cookies, localStorage and sessionStorage',
-          group: createNewSessionGroup.id,
-        })
-
-        expect(logs[7].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
@@ -241,24 +236,19 @@ describe('cy.session', { retries: 0 }, () => {
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[6].get()).to.contain({
-          displayName: 'Save cookies, localStorage and sessionStorage',
-          group: createNewSessionGroup.id,
-        })
-
-        const validateSessionGroup = logs[7].get()
+        const validateSessionGroup = logs[6].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate session',
           group: sessionGroupId,
         })
 
-        expect(logs[8].get()).to.deep.contain({
+        expect(logs[7].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[9].get()).to.contain({
+        expect(logs[8].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
@@ -311,19 +301,14 @@ describe('cy.session', { retries: 0 }, () => {
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[6].get()).to.contain({
-            displayName: 'Save cookies, localStorage and sessionStorage',
-            group: createNewSessionGroup.id,
-          })
-
-          const validateSessionGroup = logs[7].get()
+          const validateSessionGroup = logs[6].get()
 
           expect(validateSessionGroup).to.contain({
             displayName: 'Validate session',
             group: sessionGroupId,
           })
 
-          expect(logs[8].get()).to.deep.contain({
+          expect(logs[7].get()).to.deep.contain({
             alias: ['validateSession'],
             group: validateSessionGroup.id,
           })
@@ -386,16 +371,10 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(restoreSavedSessionGroup).to.contain({
           displayName: 'Restore saved session',
-          groupStart: true,
           group: sessionGroupId,
         })
 
         expect(logs[4].get()).to.contain({
-          displayName: 'Apply cookies, localStorage and sessionStorage',
-          group: restoreSavedSessionGroup.id,
-        })
-
-        expect(logs[5].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
@@ -451,28 +430,22 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(restoreSavedSessionGroup).to.contain({
           displayName: 'Restore saved session',
-          groupStart: true,
           group: sessionGroupId,
         })
 
-        expect(logs[4].get()).to.contain({
-          displayName: 'Apply cookies, localStorage and sessionStorage',
-          group: restoreSavedSessionGroup.id,
-        })
-
-        const validateSessionGroup = logs[5].get()
+        const validateSessionGroup = logs[4].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate session',
           group: sessionGroupId,
         })
 
-        expect(logs[6].get()).to.deep.contain({
+        expect(logs[5].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[7].get()).to.contain({
+        expect(logs[6].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
@@ -533,45 +506,39 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(restoreSavedSessionGroup).to.contain({
           displayName: 'Restore saved session',
-          groupStart: true,
           group: sessionGroupId,
         })
 
-        expect(logs[4].get()).to.contain({
-          displayName: 'Apply cookies, localStorage and sessionStorage',
-          group: restoreSavedSessionGroup.id,
-        })
-
-        const validateSessionGroup = logs[5].get()
+        const validateSessionGroup = logs[4].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate session',
           group: sessionGroupId,
         })
 
-        expect(logs[6].get()).to.deep.contain({
+        expect(logs[5].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[7].get()).to.deep.contain({
+        expect(logs[6].get()).to.deep.contain({
           showError: true,
           group: validateSessionGroup.id,
         })
 
-        expect(logs[7].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
+        expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-        expect(logs[8].get()).to.contain({
+        expect(logs[7].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
 
-        expect(logs[9].get()).to.contain({
+        expect(logs[8].get()).to.contain({
           displayName: 'Clear cookies, localStorage and sessionStorage',
           group: sessionGroupId,
         })
 
-        const createNewSessionGroup = logs[10].get()
+        const createNewSessionGroup = logs[9].get()
 
         expect(createNewSessionGroup).to.contain({
           displayName: 'Recreate session',
@@ -579,34 +546,29 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[11].get()).to.deep.contain({
+        expect(logs[10].get()).to.deep.contain({
           alias: ['setupSession'],
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[12].get()).to.contain({
+        expect(logs[11].get()).to.contain({
           name: 'Clear page',
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[13].get()).to.contain({
-          displayName: 'Save cookies, localStorage and sessionStorage',
-          group: createNewSessionGroup.id,
-        })
-
-        const secondValidateSessionGroup = logs[14].get()
+        const secondValidateSessionGroup = logs[12].get()
 
         expect(secondValidateSessionGroup).to.contain({
           displayName: 'Validate session',
           group: sessionGroupId,
         })
 
-        expect(logs[15].get()).to.deep.contain({
+        expect(logs[13].get()).to.deep.contain({
           alias: ['validateSession'],
           group: secondValidateSessionGroup.id,
         })
 
-        expect(logs[16].get()).to.contain({
+        expect(logs[14].get()).to.contain({
           name: 'Clear page',
           group: sessionGroupId,
         })
@@ -657,45 +619,39 @@ describe('cy.session', { retries: 0 }, () => {
 
           expect(restoreSavedSessionGroup).to.contain({
             displayName: 'Restore saved session',
-            groupStart: true,
             group: sessionGroupId,
           })
 
-          expect(logs[4].get()).to.contain({
-            displayName: 'Apply cookies, localStorage and sessionStorage',
-            group: restoreSavedSessionGroup.id,
-          })
-
-          const validateSessionGroup = logs[5].get()
+          const validateSessionGroup = logs[4].get()
 
           expect(validateSessionGroup).to.contain({
             displayName: 'Validate session',
             group: sessionGroupId,
           })
 
-          expect(logs[6].get()).to.deep.contain({
+          expect(logs[5].get()).to.deep.contain({
             alias: ['validateSession'],
             group: validateSessionGroup.id,
           })
 
-          expect(logs[7].get()).to.deep.contain({
+          expect(logs[6].get()).to.deep.contain({
             showError: true,
             group: validateSessionGroup.id,
           })
 
-          expect(logs[7].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
+          expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-          expect(logs[8].get()).to.contain({
+          expect(logs[7].get()).to.contain({
             name: 'Clear page',
             group: sessionGroupId,
           })
 
-          expect(logs[9].get()).to.contain({
+          expect(logs[8].get()).to.contain({
             displayName: 'Clear cookies, localStorage and sessionStorage',
             group: sessionGroupId,
           })
 
-          const createNewSessionGroup = logs[10].get()
+          const createNewSessionGroup = logs[9].get()
 
           expect(createNewSessionGroup).to.contain({
             displayName: 'Recreate session',
@@ -703,29 +659,24 @@ describe('cy.session', { retries: 0 }, () => {
             group: sessionGroupId,
           })
 
-          expect(logs[11].get()).to.deep.contain({
+          expect(logs[10].get()).to.deep.contain({
             alias: ['setupSession'],
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[12].get()).to.contain({
+          expect(logs[11].get()).to.contain({
             name: 'Clear page',
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[13].get()).to.contain({
-            displayName: 'Save cookies, localStorage and sessionStorage',
-            group: createNewSessionGroup.id,
-          })
-
-          const secondValidateSessionGroup = logs[14].get()
+          const secondValidateSessionGroup = logs[12].get()
 
           expect(secondValidateSessionGroup).to.contain({
             displayName: 'Validate session',
             group: sessionGroupId,
           })
 
-          expect(logs[15].get()).to.deep.contain({
+          expect(logs[13].get()).to.deep.contain({
             alias: ['validateSession'],
             group: secondValidateSessionGroup.id,
           })
