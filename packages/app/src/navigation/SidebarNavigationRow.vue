@@ -24,6 +24,7 @@
       <component
         :is="icon"
         v-if="active"
+        size="24"
         stroke-color="indigo-300"
         fill-color="indigo-700"
         class="flex-shrink-0
@@ -34,6 +35,7 @@
       <component
         :is="icon"
         v-else
+        size="24"
         stroke-color="gray-500"
         fill-color="gray-900"
         hover-stroke-color="gray-300"

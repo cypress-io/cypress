@@ -95,7 +95,7 @@ import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
-  IconViewList,
+  IconTechnologyTestResults,
   IconObjectGear,
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
@@ -111,7 +111,7 @@ const { t } = useI18n()
 
 const navigation = [
   { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
-  { name: 'Runs', icon: IconViewList, href: '/runs' },
+  { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
   { name: 'Settings', icon: IconObjectGear, href: '/settings' },
 ] as const
 
