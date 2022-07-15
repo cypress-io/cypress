@@ -162,6 +162,44 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
   })
 
+  context('responsive design', () => {
+    beforeEach(() => {
+      cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+        onResult: (result) => {
+          result.currentProject = null
+        },
+        render: (gqlVal) => (
+          <div class="border-current border-1 h-700px resize overflow-auto">
+            <HeaderBarContent gql={gqlVal} />
+          </div>
+        ),
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/21842
+    it('shows docs menu correctly on small viewports', () => {
+      // Simulate the small viewport.
+      cy.viewport(767, 800)
+
+      // show docs menu
+      cy.contains('button', text.docsMenu.docsHeading).click()
+
+      // docs menu flex direction is column when viewport width is small
+      cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'column')
+    })
+
+    it('shows docs menu correctly on wider viewports', () => {
+      // Change the viewport size to wide.
+      cy.viewport(768, 800)
+
+      // show docs menu
+      cy.contains('button', text.docsMenu.docsHeading).click()
+
+      // docs menu flex direction is row when viewport width is big enough.
+      cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'row')
+    })
+  })
+
   it('does not show hint when on latest version of Cypress', () => {
     mountFragmentWithData({
       versions: {
