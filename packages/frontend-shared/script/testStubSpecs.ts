@@ -1,4 +1,4 @@
-import * as JustMyLuck from 'just-my-luck'
+import JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import dayjs from 'dayjs'
@@ -19,9 +19,6 @@ const setupSeeds = () => {
 }
 
 setupSeeds()
-
-// TODO BEFORE MERGE, REMOVE
-beforeEach(() => setupSeeds)
 
 /**
  * Component Naming Fixtures
