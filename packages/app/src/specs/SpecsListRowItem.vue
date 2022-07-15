@@ -27,7 +27,7 @@
         <div>
           <slot name="latest-runs" />
         </div>
-        <div class="invisible md:col-span-2 md:visible">
+        <div class="hidden md:col-span-2 md:block">
           <slot name="average-duration" />
         </div>
       </template>

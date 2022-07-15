@@ -68,7 +68,7 @@ describe('Error handling', () => {
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
 
-      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs'].forEach((idiomaticConfigFile) => {
+      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts', 'vite.config.cts'].forEach((idiomaticConfigFile) => {
         cy.contains(idiomaticConfigFile)
       })
 
