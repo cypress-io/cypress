@@ -68,8 +68,6 @@ const props = defineProps<{
 
 const showModal = ref(false)
 
-// const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
-
 const { debouncedSearchString, search } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
 
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
