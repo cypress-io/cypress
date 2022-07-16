@@ -13,8 +13,10 @@ export function useSpecFilter () {
   const saveSpecFilter = useMutation(SpecsList_SetSpecFilterDocument)
 
   function setSpecFilter (specFilter: string) {
-    specStore.setSpecFilter(specFilter)
-    saveSpecFilter.executeMutation({ specFilter })
+    if (specStore.specFilter !== specFilter) {
+      specStore.setSpecFilter(specFilter)
+      saveSpecFilter.executeMutation({ specFilter })
+    }
   }
 
   return {
