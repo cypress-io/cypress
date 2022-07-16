@@ -7,8 +7,7 @@
       @click="input?.focus()"
     >
       <div
-        class="flex h-full inset-y-0 w-32px absolute items-center"
-        @mousedown.prevent.stop
+        class="flex h-full inset-y-0 w-32px absolute items-center pointer-events-none"
       >
         <i-cy-magnifying-glass_x16
           :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
@@ -40,7 +39,7 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-4px left-24px text-gray-500 select-none absolute"
+        class="cursor-text font-light bottom-4px left-24px text-gray-500 pointer-events-none absolute"
         :class="{
           'sr-only': inputFocused || props.search
         }"
