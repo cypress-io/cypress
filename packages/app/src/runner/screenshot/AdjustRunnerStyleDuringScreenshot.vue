@@ -1,7 +1,7 @@
 <template>
   <div
     :style="style"
-    :class="screenshotStore.isScreenshotting ? '' : 'border-l-1'"
+    :class="screenshotStore.isScreenshotting || isRunMode ? '' : 'border-l-1'"
   >
     <slot />
   </div>
@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useScreenshotStore } from '../../store/screenshot-store'
+import { useScreenshotStore } from '../../store'
 import { runnerConstants } from '../runner-constants'
 
 const screenshotStore = useScreenshotStore()

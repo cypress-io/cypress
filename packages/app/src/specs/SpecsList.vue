@@ -127,7 +127,7 @@
     >
       <div
         v-bind="wrapperProps"
-        class="divide-y-1 children:h-40px"
+        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
       >
         <SpecsListRowItem
           v-for="row in list"
