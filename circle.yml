@@ -941,7 +941,6 @@ commands:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
           command: |
-            source ./ci-ensure-node.sh
             npx wait-on <<parameters.wait-on>> --timeout 120000
       - windows-install-chrome:
           browser: <<parameters.browser>>
