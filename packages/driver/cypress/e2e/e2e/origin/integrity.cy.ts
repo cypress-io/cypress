@@ -20,7 +20,7 @@ describe('Integrity Preservation', () => {
   let templateExecutor: TemplateExecutor
 
   before(() => {
-    // Before running out tests, we need to build out digests to inject into our HTML ejs template
+    // Before running our tests, we need to build out digests to inject into our HTML ejs template
     // so we can set the integrity tag appropriately for the digest.
 
     // This requires building digests for the integrity JS file that the regex-rewriter will rewrite.

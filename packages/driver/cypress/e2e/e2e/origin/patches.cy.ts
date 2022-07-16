@@ -18,12 +18,14 @@ describe('src/cross-origin/patches', () => {
   })
 
   context('setAttribute', () => {
-    it('renames integrity to cypress-stripped-integrity for HTMLFormElement', () => {
+    it('renames integrity to cypress-stripped-integrity for HTMLScriptElement', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.get('form').then(($form) => {
-          $form.attr('integrity', 'sha-123')
-          expect($form.attr('integrity')).to.be.undefined
-          expect($form.attr('cypress-stripped-integrity')).to.equal('sha-123')
+        cy.window().then((win: Window) => {
+          const script = win.document.createElement('script')
+
+          script.setAttribute('integrity', 'sha-123')
+          expect(script.getAttribute('integrity')).to.be.null
+          expect(script.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
         })
       })
     })

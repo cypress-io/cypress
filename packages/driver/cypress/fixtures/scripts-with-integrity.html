@@ -30,7 +30,7 @@
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
       dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
       // the actual integrity of the file is: <%=data.integrityValue%>
-      dynamicIntegrityScript.setAttribute('integrity', " <%=data.integrityValue%>")
+      dynamicIntegrityScript.setAttribute('integrity', "<%=data.integrityValue%>")
       
       document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
