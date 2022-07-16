@@ -119,8 +119,7 @@
   "exports": {
     ".": {
       "import": "./index.mjs",
-      "require": "./index.js",
-      "types": "./types/index.d.ts"
+      "require": "./index.js"
     },
     "./vue": {
       "import": "./vue/dist/cypress-vue.esm-bundler.js",
@@ -128,8 +127,7 @@
     },
     "./vue2": {
       "import": "./vue2/dist/cypress-vue2.esm-bundler.js",
-      "require": "./vue2/dist/cypress-vue2.cjs.js",
-      "types": "./vue2/dist/index.d.ts"
+      "require": "./vue2/dist/cypress-vue2.cjs.js"
     },
     "./package.json": {
       "import": "./package.json",
@@ -137,12 +135,10 @@
     },
     "./react": {
       "import": "./react/dist/cypress-react.esm-bundler.js",
-      "require": "./react/dist/cypress-react.cjs.js",
-      "types": "./react/dist/index.d.ts"
+      "require": "./react/dist/cypress-react.cjs.js"
     },
     "./mount-utils": {
-      "require": "./mount-utils/dist/index.js",
-      "types": "./mount-utils/dist/index.d.ts"
+      "require": "./mount-utils/dist/index.js"
     }
   },
   "workspaces": {
