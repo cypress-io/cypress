@@ -222,6 +222,33 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
     })
+
+    it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+      cy.openProject('cypress-in-cypress')
+      cy.startAppServer()
+      cy.withCtx(async (ctx, o) => {
+        const config = await ctx.project.getConfig()
+
+        o.sinon.stub(ctx.project, 'getConfig').resolves({
+          ...config,
+          env: {
+            ...config.env,
+            NO_COMMAND_LOG: 1,
+          },
+        })
+      })
+
+      cy.visitApp()
+      cy.contains('dom-content.spec').click()
+
+      cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
+      cy.findByLabelText('Stats').should('not.exist')
+      cy.findByTestId('specs-list-panel').should('not.be.visible')
+      cy.findByTestId('reporter-panel').should('not.be.visible')
+      cy.findByTestId('sidebar').should('be.visible')
+    })
   })
 
   it('restarts browser if there is a change on the config file affecting the browser', () => {
