@@ -247,15 +247,12 @@ import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
 import { useSpecFilter } from '../composables/useSpecFilter'
-import { useSpecStore } from '../store'
 
 const route = useRoute()
 const { t } = useI18n()
 
 const isOnline = useOnline()
 const isOffline = ref(false)
-
-const { setSpecFilter } = useSpecFilter()
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
@@ -364,18 +361,9 @@ const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
 )
 
-const specStore = useSpecStore()
-
-const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
-
-if (!specStore.specFilter && savedFilterForCurrentProject) {
-  specStore.setSpecFilter(savedFilterForCurrentProject.value)
-}
-
-const search = ref(specStore.specFilter)
+const { debouncedSearchString, search } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
 
 const specsListInputRef = ref<HTMLInputElement>()
-const debouncedSearchString = useDebounce(search, 200)
 
 const specsListInputRefFn = () => specsListInputRef
 
@@ -387,7 +375,7 @@ function handleClear () {
 const specs = computed(() => {
   const fuzzyFoundSpecs = cachedSpecs.value.map(makeFuzzyFoundSpec)
 
-  if (!debouncedSearchString.value) {
+  if (!debouncedSearchString?.value) {
     return fuzzyFoundSpecs
   }
 
@@ -428,11 +416,10 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
-watch(() => debouncedSearchString.value, () => {
+watch(() => debouncedSearchString?.value, () => {
   // If you are scrolled down the virtual list and the search filter changes,
-// reset scroll position to top of list
+  // reset scroll position to top of list
   scrollTo(0)
-  setSpecFilter(debouncedSearchString.value ?? '')
 })
 
 function getIdIfDirectory (row) {

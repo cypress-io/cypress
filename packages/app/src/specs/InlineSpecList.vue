@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
@@ -30,8 +30,6 @@ import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
-import { useDebounce } from '@vueuse/core'
-import { useSpecStore } from '../store'
 import { useSpecFilter } from '../composables/useSpecFilter'
 
 gql`
@@ -70,18 +68,10 @@ const props = defineProps<{
 
 const showModal = ref(false)
 
-const specStore = useSpecStore()
+// const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
 
-const { setSpecFilter } = useSpecFilter()
+const { debouncedSearchString, search } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
 
-const savedFilterForCurrentProject = computed(() => props.gql.currentProject?.savedState?.specFilter)
-
-if (!specStore.specFilter && savedFilterForCurrentProject) {
-  specStore.setSpecFilter(savedFilterForCurrentProject.value)
-}
-
-const search = ref(specStore.specFilter)
-const debouncedSearchString = useDebounce(search, 200)
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
@@ -90,10 +80,6 @@ const specs = computed<FuzzyFoundSpec[]>(() => {
   if (!debouncedSearchString.value) return specs
 
   return fuzzySortSpecs(specs, debouncedSearchString.value)
-})
-
-watch(() => debouncedSearchString.value, () => {
-  setSpecFilter(debouncedSearchString.value ?? '')
 })
 
 </script>
