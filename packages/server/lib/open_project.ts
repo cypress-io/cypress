@@ -272,6 +272,9 @@ export class OpenProject {
       },
     })
 
+    // This was previously in the ProjectBase constructor but is now async
+    await this._ctx.lifecycleManager.setCurrentProject(path)
+
     try {
       await this.projectBase.initializeConfig()
 
