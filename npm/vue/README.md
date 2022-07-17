@@ -19,6 +19,7 @@ This package allows you to use the [Cypress](https://www.cypress.io/) test runne
 It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
+- If you need to access the underlying Vue Test Utils API, you can do so by importing it: `import { VueTestUtils } from 'cypress/vue'`.
 
 ### How is this different from @cypress/vue2?
 Cypress packages the current version of Vue under @cypress/vue, and older versions under separate package names. Use [@cypress/vue2](cypress-vue2-npm-url) if you're still using vue@2, and this package if you're on vue@3.
