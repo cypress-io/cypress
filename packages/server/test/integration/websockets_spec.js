@@ -25,13 +25,13 @@ let ctx
 describe('Web Sockets', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
     return ctx.lifecycleManager.getFullInitialConfig({ port: cyPort })
     .then((cfg) => {

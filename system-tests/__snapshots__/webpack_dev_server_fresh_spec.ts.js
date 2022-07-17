@@ -1,5 +1,5 @@
 exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds3-react 1'] = `
-ℹ ｢wds｣: Project is running at http://localhost:XXXX/webpack-dev-server/
+ℹ ｢wds｣: Project is running at http://localhost:xxxx/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
 
@@ -451,7 +451,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 `
 
 exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds3-react 1'] = `
-ℹ ｢wds｣: Project is running at http://localhost:XXXX/webpack-dev-server/
+ℹ ｢wds｣: Project is running at http://localhost:xxxx/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
 
@@ -690,8 +690,8 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-11 assets
-52 modules
+10 assets
+58 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -704,7 +704,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   10 |
       [stack trace lines]
 
-webpack 5.70.0 compiled with 1 error in XXXX ms
+webpack x.x.x compiled with x errors in xxx ms
 
 
   ✓ renders hello world

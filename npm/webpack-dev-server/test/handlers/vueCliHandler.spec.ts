@@ -13,12 +13,16 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = vueCliHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = vueCliHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'vue-cli',
     } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
     expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('@vue/cli-service')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 
   it('sources from a @vue/cli-service@4.x project with Vue 2', async () => {
@@ -26,11 +30,15 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = vueCliHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = vueCliHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'vue-cli',
     } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
     expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('@vue/cli-service')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
   })
 })

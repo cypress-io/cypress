@@ -1134,6 +1134,8 @@ const systemTests = {
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
     // TODO: Not sure why the above regexp is not capturing this on CI - works fine locally (Ubuntu 20)
     .replace('../../cy-system-tests-node-modules/webpack5_wds4-react/node_modules/babel-loader/lib/index.js', '[..]')
+    .replace(/Project is running at http:\/\/localhost:\d+/g, 'Project is running at http://localhost:xxxx')
+    .replace(/webpack.*compiled with.*in \d+ ms/g, 'webpack x.x.x compiled with x errors in xxx ms')
   },
 
   normalizeRuns (runs) {
