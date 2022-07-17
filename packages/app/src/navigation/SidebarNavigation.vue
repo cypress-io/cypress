@@ -103,6 +103,7 @@ import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.pn
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
+import { useWindowSize } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -140,6 +141,8 @@ query SideBarNavigation {
 }
 `
 
+const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
+
 const query = useQuery({ query: SideBarNavigationDocument })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
@@ -148,12 +151,14 @@ const bindingsOpen = ref(false)
 
 const route = useRoute()
 
-const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpandedAllowed !== false)
+const navIsAlwaysCollapsed = computed(() => width.value >= NAV_EXPAND_MIN_SCREEN_WIDTH && route.meta?.navBarExpandedAllowed !== false)
 
 const isNavBarExpanded = ref(true)
 
+const { width } = useWindowSize()
+
 watchEffect(() => {
-  if (route.meta?.navBarExpandedAllowed === false) {
+  if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     isNavBarExpanded.value = false
   } else {
     isNavBarExpanded.value = query.data?.value?.localSettings.preferences.isSideNavigationOpen ?? true
@@ -161,7 +166,7 @@ watchEffect(() => {
 })
 
 const toggleNavbarIfAllowed = () => {
-  if (route.meta?.navBarExpandedAllowed === false) {
+  if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     return
   }
 

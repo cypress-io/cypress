@@ -357,7 +357,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts: string[] | null = []) {
+  createHosts (hosts: {[key: string]: string} | null = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })

@@ -337,7 +337,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     }
   }
 
-  const before = ($el) => {
+  const before = ($body, $container) => {
     return Promise.try(() => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
@@ -349,11 +349,11 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
       // could fail if iframe is cross-origin, so fail gracefully
       try {
         if (disableTimersAndAnimations) {
-          $dom.addCssAnimationDisabler($el)
+          $dom.addCssAnimationDisabler($body)
         }
 
         _.each(getBlackout(screenshotConfig), (selector) => {
-          $dom.addBlackouts($el, selector)
+          $dom.addBlackouts($body, $container, selector)
         })
       } catch (err) {
         /* eslint-disable no-console */
@@ -366,14 +366,14 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     })
   }
 
-  const after = ($el) => {
+  const after = ($body) => {
     // could fail if iframe is cross-origin, so fail gracefully
     try {
       if (disableTimersAndAnimations) {
-        $dom.removeCssAnimationDisabler($el)
+        $dom.removeCssAnimationDisabler($body)
       }
 
-      $dom.removeBlackouts($el)
+      $dom.removeBlackouts($body)
     } catch (err) {
       /* eslint-disable no-console */
       console.error('Failed to modify app dom:')
@@ -417,7 +417,11 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     ? subject
     : $dom.wrap(state('document').documentElement)
 
-  return before($el)
+  // get the current body of the AUT to accurately calculate screenshot blackouts
+  // as well as properly enable/disable CSS animations while screenshotting is happening
+  const $body = Cypress.$('body')
+
+  return before($body, $el)
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -444,7 +448,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
 
     return props
   })
-  .finally(() => after($el))
+  .finally(() => after($body))
 }
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
