@@ -1,15 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Type } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { Type } from "@angular/core";
 import {
   ComponentFixture,
   getTestBed,
   TestBed,
   TestModuleMetadata,
-} from '@angular/core/testing';
+} from "@angular/core/testing";
 import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+} from "@angular/platform-browser-dynamic/testing";
 
 export interface TestBedConfig<T extends object> extends TestModuleMetadata {
   // this extends the normal angular TestBed config
@@ -37,7 +37,12 @@ export function bootstrapModule<T extends object>(
     testModuleMetaData.imports = [];
   }
 
-  testModuleMetaData.declarations.push(component);
+  // We cannot push standalone components into declarations
+  if (isStandaloneComponent(component)) {
+    testModuleMetaData.imports.push(component);
+  } else {
+    testModuleMetaData.declarations.push(component);
+  }
 
   if (!testModuleMetaData.imports.includes(CommonModule)) {
     testModuleMetaData.imports.push(CommonModule);
@@ -104,6 +109,10 @@ export function setupComponent<T extends object>(
   }
 
   return component;
+}
+
+function isStandaloneComponent(component: any): boolean {
+  return component.ɵcmp.standalone;
 }
 
 export function mount<T extends object>(
