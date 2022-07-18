@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import type * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
@@ -41,14 +41,24 @@ const injectStyles = (options: MountOptions) => {
  **/
 export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => _mount('mount', jsx, options)
 
-let lastMountedReactDom: (typeof ReactDOM) | undefined
+export let lastMountedReactDom: (typeof ReactDOM) | undefined
 
 /**
  * @see `mount`
  * @param type The type of mount executed
  * @param rerenderKey If specified, use the provided key rather than generating a new one
  */
-const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string): globalThis.Cypress.Chainable<MountReturn> => {
+export const _mount = (
+  type: 'mount' | 'rerender',
+  jsx: React.ReactNode,
+  options: MountOptions = {},
+  rerenderKey?: string,
+  internalMountOptions?: InternalMountOptions,
+): globalThis.Cypress.Chainable<MountReturn> => {
+  if (!internalMountOptions) {
+    throw Error('internalMountOptions must be provided with `render` and `reactDom` parameters')
+  }
+
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -63,7 +73,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   return cy
   .then(injectStyles(options))
   .then(() => {
-    const reactDomToUse = options.ReactDom || ReactDOM
+    const reactDomToUse = internalMountOptions.reactDom
 
     lastMountedReactDom = reactDomToUse
 
@@ -96,7 +106,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       children: React.ReactNode
     }).children
 
-    reactDomToUse.render(reactComponent, el)
+    internalMountOptions.render(reactComponent, el, reactDomToUse)
 
     if (options.log !== false) {
       Cypress.log({
@@ -123,8 +133,12 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
       .then(() => {
         return cy.wrap<MountReturn>({
           component: userComponent,
-          rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+          rerender: (newComponent) => _mount('rerender', newComponent, options, key, internalMountOptions),
+          unmount: (...args) => {
+            console.log('ok')
+
+            return internalMountOptions.unmount(...args)
+          },
         }, { log: false })
       })
       // by waiting, we delaying test execution for the next tick of event loop
@@ -152,16 +166,42 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   })
   ```
  */
-// @ts-ignore
-export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
+export interface UnmountArgs {
+  log: boolean
+  boundComponentMessage?: string
+}
 
-const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
+// @ts-ignore
+export const unmount = (options: UnmountArgs = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
+
+export interface InternalUnmountOptionsReactLegacy {
+  unmount: (el: HTMLElement) => boolean
+}
+
+export interface InternalUnmountOptionsReact18 {
+  unmount: () => boolean
+}
+
+export type InternalUnmountOptionsReact16 = InternalUnmountOptionsReactLegacy
+
+export type InternalUnmountOptionsReact17 = InternalUnmountOptionsReactLegacy
+
+type InternalUnmountOptions =
+  InternalUnmountOptionsReactLegacy
+  | InternalUnmountOptionsReact16
+  | InternalUnmountOptionsReact17
+  | InternalUnmountOptionsReact18
+
+export const _unmount = (options: UnmountArgs, internalUnmountOptions: InternalUnmountOptions) => {
   return cy.then(() => {
     return cy.get(ROOT_SELECTOR, { log: false }).then(($el) => {
+      console.log(lastMountedReactDom, $el[0])
       if (lastMountedReactDom) {
-        const wasUnmounted = lastMountedReactDom.unmountComponentAtNode($el[0])
+        internalUnmountOptions.unmount($el[0])
+        const wasUnmounted = internalUnmountOptions.unmount($el[0])
 
         if (wasUnmounted && options.log) {
+          console.log('log!')
           Cypress.log({
             name: 'unmount',
             type: 'parent',
@@ -249,6 +289,18 @@ export interface MountReactComponentOptions {
   strict: boolean
 }
 
+export interface InternalMountOptions {
+  reactDom: typeof ReactDOM
+  render: (
+    reactComponent: ReturnType<typeof React.createElement>,
+    el: HTMLElement,
+    reactDomToUse: typeof ReactDOM
+  ) => void
+  unmount: (options: UnmountArgs) => void
+
+  // globalThis.Cypress.Chainable<MountReturn>
+}
+
 export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
 
 export interface MountReturn {
@@ -266,7 +318,7 @@ export interface MountReturn {
    * @see `unmount`
    */
   // @ts-ignore
-  unmount: () => globalThis.Cypress.Chainable<JQuery<HTMLElement>>
+  unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }
 
 /**
