@@ -403,13 +403,6 @@ commands:
       # installing NVM will use git+ssh, so update known_hosts
       - update_known_hosts
       - run:
-          name: Update NVM for Windows with node 16.14.2 fix
-          command: |
-            [[ $PLATFORM == 'windows' ]] && \
-            curl -L -O https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip && \
-            tar -xvf nvm-noinstall.zip -C C:/ProgramData/nvm || \
-            [[ $PLATFORM != 'windows' ]] 
-      - run:
           name: Install Node
           command: |
             node_version=$(cat .node-version)
@@ -1044,6 +1037,7 @@ commands:
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
             fi
+            source ./scripts/ensure-node.sh
             node --version
             yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
@@ -1057,6 +1051,7 @@ commands:
                 sudo apt-get update && sudo apt-get install -y zip
               fi
             fi
+            source ./scripts/ensure-node.sh
             yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
