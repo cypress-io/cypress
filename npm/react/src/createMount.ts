@@ -139,7 +139,6 @@ export const makeMountFn = (
 export const makeUnmountFn = (options: UnmountArgs, internalUnmountOptions: InternalUnmountOptions) => {
   return cy.then(() => {
     return cy.get(ROOT_SELECTOR, { log: false }).then(($el) => {
-      console.log(lastMountedReactDom, $el[0])
       if (lastMountedReactDom) {
         internalUnmountOptions.unmount($el[0])
         const wasUnmounted = internalUnmountOptions.unmount($el[0])
