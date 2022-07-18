@@ -107,7 +107,10 @@
     "mount-utils",
     "vue",
     "react",
-    "vue2"
+    "vue2",
+    "react18",
+    "react17",
+    "react16"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -142,19 +145,19 @@
       "types": "./react/dist/index.d.ts"
     },
     "./react16": {
-      "import": "./react/dist/cypress-react16.esm-bundler.js",
-      "require": "./react/dist/cypress-react16.cjs.js",
-      "types": "./react/dist/react16.d.ts"
+      "import": "./react16/dist/cypress-react.esm-bundler.js",
+      "require": "./react16/dist/cypress-react.cjs.js",
+      "types": "./react16/dist/index.d.ts"
     },
     "./react17": {
-      "import": "./react/dist/cypress-react17.esm-bundler.js",
-      "require": "./react/dist/cypress-react17.cjs.js",
-      "types": "./react/dist/react17.d.ts"
+      "import": "./react17/dist/cypress-react.esm-bundler.js",
+      "require": "./react17/dist/cypress-react.cjs.js",
+      "types": "./react17/dist/index.d.ts"
     },
     "./react18": {
-      "import": "./react/dist/cypress-react18.esm-bundler.js",
-      "require": "./react/dist/cypress-react18.cjs.js",
-      "types": "./react/dist/react18.d.ts"
+      "import": "./react18/dist/cypress-react.esm-bundler.js",
+      "require": "./react18/dist/cypress-react.cjs.js",
+      "types": "./react18/dist/index.d.ts"
     },
     "./mount-utils": {
       "require": "./mount-utils/dist/index.js",

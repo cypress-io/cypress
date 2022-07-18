@@ -17,23 +17,13 @@ function createEntry (options) {
     format,
     input,
     isBrowser,
-    name,
   } = options
-
-  const renameBundleForReactVersion = (bundle) => {
-    if (!name) {
-      return bundle
-    }
-
-    return bundle.replace('react', name)
-  }
 
   const config = {
     input,
     external: [
       'react',
       'react-dom',
-      'react-dom/client',
     ],
     plugins: [
       resolve(), commonjs(),
@@ -41,33 +31,31 @@ function createEntry (options) {
     output: {
       banner,
       name: 'CypressReact',
-      file: renameBundleForReactVersion(pkg.unpkg, name),
+      file: pkg.unpkg,
       format,
       globals: {
         react: 'React',
         'react-dom': 'ReactDOM',
-        'react-dom/client': 'ReactDOM/client',
       },
     },
   }
 
   if (format === 'es') {
-    config.output.file = renameBundleForReactVersion(pkg.module, name)
-
+    config.output.file = pkg.module
     if (isBrowser) {
-      config.output.file = renameBundleForReactVersion(pkg.unpkg, name)
+      config.output.file = pkg.unpkg
     }
   }
 
   if (format === 'cjs') {
-    config.output.file = renameBundleForReactVersion(pkg.main, name)
+    config.output.file = pkg.main
   }
 
   console.log(`Building ${format}: ${config.output.file}`)
 
   config.plugins.push(
     ts({
-      check: true,
+      check: format === 'es' && isBrowser,
       tsconfigOverride: {
         compilerOptions: {
           declaration: format === 'es',
@@ -82,28 +70,9 @@ function createEntry (options) {
   return config
 }
 
-const entries = []
-
-for (const config of [
-  { format: 'cjs' },
-  { format: 'es', isBrowser: false },
-  { format: 'es', isBrowser: true },
-  { format: 'iife', isBrowser: true },
-]) {
-  entries.push(
-    // Legacy API - `import { mount } from 'cypress/react'
-    // Works with React 16 and 17.
-    createEntry({ ...config, input: 'src/index.ts', name: 'react' }),
-
-    // React 16
-    createEntry({ ...config, input: 'src/react16.ts', name: 'react16' }),
-
-    // React 17
-    createEntry({ ...config, input: 'src/react17.ts', name: 'react17' }),
-
-    // React 18
-    createEntry({ ...config, input: 'src/react18.ts', name: 'react18' }),
-  )
-}
-
-export default entries
+export default [
+  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: false }),
+  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
+  createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
+  createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
+]
