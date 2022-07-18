@@ -154,6 +154,7 @@
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
     "reconnectProjectButton": "Reconnect your project",
+    "unauthorizedBannerTitle": "Request access to project",
     "requestAccessButton": "Request access",
     "requestSentButton": "Request sent",
     "rows": {

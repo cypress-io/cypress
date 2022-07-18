@@ -69,7 +69,7 @@
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
           <RequestAccessButton
-            v-if="cloudProjectType === 'CloudProjectUnauthorized'"
+            v-else-if="projectConnectionStatus === 'UNAUTHORIZED'"
             :gql="props.gql"
           />
         </div>
@@ -146,8 +146,6 @@ const props = defineProps<{
   gql: SpecHeaderCloudDataTooltipFragment
   mode: CloudDataTooltipMode
 }>()
-
-const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
 
 gql`
 fragment SpecHeaderCloudDataTooltip on Query {

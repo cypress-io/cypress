@@ -1,5 +1,5 @@
 import { defaultMessages } from '@cy/i18n'
-import { RequestAccessButton_RequestAccessDocument, RequestAccessButton_AccessRequestedDocument } from '../generated/graphql'
+import { RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import { RequestAccessButtonFragmentDoc } from '../generated/graphql-test'
 import RequestAccessButton from './RequestAccessButton.vue'
 
@@ -38,7 +38,6 @@ describe('<RequestAccessButton />', () => {
 
     it('triggers mutation on button click', () => {
       const requestAccessMutationTracker = cy.stub()
-      const accessRequestedMutationTracker = cy.stub()
 
       cy.remoteGraphQLIntercept
       cy.stubMutationResolver(RequestAccessButton_RequestAccessDocument, (defineResult) => {
@@ -53,29 +52,10 @@ describe('<RequestAccessButton />', () => {
         })
       })
 
-      cy.stubMutationResolver(RequestAccessButton_AccessRequestedDocument, (defineResult) => {
-        accessRequestedMutationTracker()
-
-        return defineResult({
-          refetchRemote: {
-            currentProject: {
-              __typename: 'CurrentProject',
-              id: 'abc123',
-              cloudProject: {
-                __typename: 'CloudProjectUnauthorized',
-                message: 'test',
-                hasRequestedAccess: true,
-              },
-            },
-          },
-        })
-      })
-
       cy.get(requestAccessButtonSelector)
       .click()
       .then(() => {
         expect(requestAccessMutationTracker).to.have.been.called
-        expect(accessRequestedMutationTracker).to.have.been.called
       })
     })
   })

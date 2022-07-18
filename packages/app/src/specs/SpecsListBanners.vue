@@ -80,7 +80,7 @@
       >
         <CodeTag
           bg
-          class="bg-purple-50 text-purple-500"
+          class="bg-warning-100"
         >
           projectId: "{{ props.gql.currentProject?.projectId }}"
         </CodeTag>
@@ -100,13 +100,13 @@
     v-model="showProjectRequestAccess"
     data-cy="project-request-access-alert"
     status="warning"
-    :title="t('runs.errors.unauthorized.title')"
+    :title="t('specPage.unauthorizedBannerTitle')"
     class="mb-16px"
     :icon="WarningIcon"
     dismissible
   >
     <p class="mb-24px">
-      {{ t('runs.errors.unauthorized.description') }}
+      {{ props.hasRequestedAccess ? t('runs.errors.unauthorizedRequested.description') : t('runs.errors.unauthorized.description') }}
     </p>
     <RequestAccessButton :gql="props.gql" />
   </Alert>

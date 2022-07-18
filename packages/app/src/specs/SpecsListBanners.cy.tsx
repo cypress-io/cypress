@@ -20,8 +20,6 @@ describe('<SpecsListBanners />', () => {
       cy.findByTestId(AlertCloseBtnSelector).click()
 
       cy.findByTestId(AlertSelector).should('not.exist')
-
-      cy.percySnapshot()
     })
   }
 
@@ -146,6 +144,35 @@ describe('<SpecsListBanners />', () => {
           }
         },
         render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} />,
+      })
+    })
+
+    validateBaseRender()
+    validateCloseControl()
+    validateCloseOnPropChange(visible)
+    validateReopenOnPropChange(visible)
+  })
+
+  describe('project unauthorized - access requested', () => {
+    const visible: any = ref(true)
+
+    beforeEach(() => {
+      visible.value = true
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        onResult: (result) => {
+          result.currentProject = {
+            __typename: 'CurrentProject',
+            id: 'abc123',
+            projectId: 'abc123',
+            cloudProject: {
+              __typename: 'CloudProjectUnauthorized',
+              message: 'test',
+              hasRequestedAccess: true,
+            },
+          }
+        },
+        render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} hasRequestedAccess />,
       })
     })
 
