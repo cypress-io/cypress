@@ -61,14 +61,14 @@ describe('lib/config', () => {
   })
 
   context('.get', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'
 
       sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
-      this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+      await this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
       this.ctx.lifecycleManager.setCurrentTestingType('e2e')
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
