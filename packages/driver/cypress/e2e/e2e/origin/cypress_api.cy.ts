@@ -206,7 +206,7 @@ describe('cy.origin Cypress API', () => {
         })
       })
       .then(() => {
-        assertLogLength(logs, 3)
+        assertLogLength(logs, 2)
         expect(logs[1].get('name')).to.equal('log')
         expect(logs[1].get('message')).to.equal('test log')
       })

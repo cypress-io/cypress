@@ -25,7 +25,7 @@ describe('cy.origin logging', () => {
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
       expect(invokeLog.group).to.equal(originLog.id)
-      expect(newUrlLog.group).to.equal(originLog.id)
+      expect(newUrlLog.group).to.equal(undefined)
       expect(logLog.group).to.be.undefined // ensure the group has ended
     })
   })
@@ -104,7 +104,7 @@ describe('cy.origin logging', () => {
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
       expect(invokeLog.group).to.equal(originLog.id)
-      expect(newUrlLog.group).to.equal(originLog.id)
+      expect(newUrlLog.group).to.equal(undefined)
       expect(failingGetLog.group).to.equal(originLog.id)
 
       done()
@@ -137,7 +137,7 @@ describe('cy.origin logging', () => {
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
       expect(invokeLog.group).to.equal(originLog.id)
-      expect(newUrlLog.group).to.equal(originLog.id)
+      expect(newUrlLog.group).to.equal(undefined)
 
       done()
     })

@@ -166,7 +166,6 @@ const attachToWindow = (autWindow: Window) => {
       return Cypress.action('app:form:submitted', e)
     },
     async onBeforeUnload (e) {
-      // debugger
       Cypress.specBridgeCommunicator.toPrimary('before:unload')
 
       // We need to sync this state value prior to changing stability otherwise we will erroneously log a loading event.

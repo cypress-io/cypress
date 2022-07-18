@@ -48,8 +48,8 @@ describe('cy.origin yields', () => {
 
   it('errors if a cy command is present and it returns a sync value', (done) => {
     cy.on('fail', (err) => {
-      assertLogLength(logs, 5)
-      expect(logs[4].get('error')).to.eq(err)
+      assertLogLength(logs, 6)
+      expect(logs[5].get('error')).to.eq(err)
       expect(err.message).to.include('`cy.origin()` failed because you are mixing up async and sync code.')
 
       done()

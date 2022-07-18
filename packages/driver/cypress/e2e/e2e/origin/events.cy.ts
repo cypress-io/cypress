@@ -6,12 +6,16 @@ describe('cy.origin', () => {
     })
 
     cy.window().its('testPrimaryOriginBeforeLoad').should('be.true')
-    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+    // Needs to be declared before the visit
     cy.origin('http://foobar.com:3500', () => {
       cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
         win.testSecondaryWindowBeforeLoad = true
       })
+    })
 
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+    cy.origin('http://foobar.com:3500', () => {
       cy.window().its('testSecondaryWindowBeforeLoad').should('be.true')
       cy.window().its('testPrimaryOriginBeforeLoad').should('be.undefined')
       cy

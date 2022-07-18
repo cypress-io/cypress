@@ -92,9 +92,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
           cy.state('currentActiveOriginPolicy', undefined)
-          if (!readyForOriginFailed) {
-            Cypress.backend('cross:origin:finished', location.originPolicy)
-          }
 
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
@@ -180,8 +177,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
             // Attach the spec bridge to the window to be tested.
             communicator.toSpecBridge(originPolicy, 'attach:to:window')
-
-            await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin

@@ -380,20 +380,23 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('window').location.href
-    const count = getRedirectionCount(href)
-    const limit = config('redirectionLimit')
+    // Sometimes we don't have a window when loading. TODO need to investigate what to do when this happens.
+    if (state('window')) {
+      const href = state('window').location.href
+      const count = getRedirectionCount(href)
+      const limit = config('redirectionLimit')
 
-    if (count === limit) {
-      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-        args: {
-          href,
-          limit,
-        },
-      })
+      if (count === limit) {
+        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+          args: {
+            href,
+            limit,
+          },
+        })
+      }
+
+      updateRedirectionCount(href)
     }
-
-    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 
