@@ -30,12 +30,14 @@ describe('src/cross-origin/patches', () => {
       })
     })
 
-    it('renames integrity to cypress-stripped-integrity for HTMLAnchorElement', () => {
+    it('renames integrity to cypress-stripped-integrity for HTMLLinkElement', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.get('a[data-cy="hashChange"]').then(($anchor) => {
-          $anchor.attr('integrity', 'sha-123')
-          expect($anchor.attr('integrity')).to.be.undefined
-          expect($anchor.attr('cypress-stripped-integrity')).to.equal('sha-123')
+        cy.window().then((win: Window) => {
+          const script = win.document.createElement('link')
+
+          script.setAttribute('integrity', 'sha-123')
+          expect(script.getAttribute('integrity')).to.be.null
+          expect(script.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
         })
       })
     })

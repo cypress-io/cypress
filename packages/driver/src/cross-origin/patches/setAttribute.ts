@@ -11,9 +11,9 @@ export const patchElementIntegrity = (window: Window) => {
     return originalFormElementSetAttribute.apply(this, [qualifiedName, value])
   }
 
-  const originalAnchorElementSetAttribute = window.HTMLAnchorElement.prototype.setAttribute
+  const originalAnchorElementSetAttribute = window.HTMLLinkElement.prototype.setAttribute
 
-  window.HTMLAnchorElement.prototype.setAttribute = function (qualifiedName, value) {
+  window.HTMLLinkElement.prototype.setAttribute = function (qualifiedName, value) {
     if (qualifiedName === 'integrity') {
       qualifiedName = STRIPPED_INTEGRITY_TAG
     }
