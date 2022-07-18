@@ -126,7 +126,7 @@ export class GraphQLDataSource {
     }
 
     // If it's a node, we can query as a Node field and push down the result that way
-    if (info.parentType.getInterfaces().some((i) => i.name === 'Node')) {
+    if (info.parentType.getInterfaces().some((i) => i.name === 'Node') && (result.id || ['CloudProjectUnauthorized', 'CloudProjectNotFound'].includes(result.__typename))) {
       this.#pushFragment({ ctx, info, source, result }, true)
 
       return
