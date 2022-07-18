@@ -23,13 +23,11 @@ export { globalPubSub }
 
 let ctx: DataContext | null = null
 
-// globalPubSub.on('cleanup', clearCtx)
-
-/**
- * Shouldn't ever be called from runtime code, primarily for test situations where we need to
- */
-export function clearCtx () {
-  ctx = null
+export async function clearCtx () {
+  if (ctx) {
+    await ctx.destroy()
+    ctx = null
+  }
 }
 
 export function hasCtx () {
