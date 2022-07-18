@@ -7,7 +7,7 @@ const { fs } = require('./util/fs')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
 const errors = require('./errors')
-const { isResolvedConfigPropDefault } = require('@package/config')
+const { isResolvedConfigPropDefault } = require('@packages/config')
 
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
