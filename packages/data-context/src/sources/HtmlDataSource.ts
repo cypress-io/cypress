@@ -91,6 +91,7 @@ export class HtmlDataSource {
       projectName: this.ctx.lifecycleManager.projectTitle,
       namespace: cfg.namespace || '__cypress-string',
       base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
+      hideCommandLog: cfg.env?.NO_COMMAND_LOG === 1,
     }
   }
 

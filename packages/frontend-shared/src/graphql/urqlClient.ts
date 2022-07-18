@@ -106,6 +106,7 @@ declare global {
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
+      hideCommandLog: boolean
     }
   }
 }

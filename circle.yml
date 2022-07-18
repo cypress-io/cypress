@@ -37,8 +37,9 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - equal: [ 'zachw/issue-22525', << pipeline.git.branch >> ]
     - matches:
-          pattern: "zachw/issue-22525"
+          pattern: "-release$"
           value: << pipeline.git.branch >>
 
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
@@ -58,16 +59,16 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
     - false
     # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
-# windows is slow in CI, so we only run a certain set of tests on each commit
+# windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
-fullWindowsWorkflowFilters: &full-windows-workflow-filters
-  filters:
-    branches:
-      only:
-      - develop
-      - 'linux-arm64'
-      - '*-release'
-      - 'win*'
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -537,7 +538,7 @@ commands:
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
               CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -562,7 +563,7 @@ commands:
 
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
@@ -570,7 +571,7 @@ commands:
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
@@ -1213,7 +1214,7 @@ jobs:
             run-vite-dev-server-integration-tests
       - run:
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize
 
   cli-visual-tests:
@@ -1235,7 +1236,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1580,7 +1581,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1603,7 +1604,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1625,7 +1626,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -2671,14 +2672,12 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - lint:
-        <<: *full-windows-workflow-filters
         name: windows-lint
         executor: windows
         requires:
           - windows-build
 
     - unit-tests:
-        <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
         resource_class: windows.large
@@ -2686,7 +2685,6 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
-        <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
         resource_class: windows.large
@@ -2717,3 +2715,4 @@ workflows:
     <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
+    <<: *windows-workflow-filters

@@ -289,7 +289,7 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher ({
+  async startSpecWatcher ({
     projectRoot,
     testingType,
     specPattern,
@@ -297,7 +297,7 @@ export class ProjectDataSource {
     excludeSpecPattern,
     additionalIgnorePattern,
   }: FindSpecs<string[]>) {
-    this.stopSpecWatcher()
+    await this.stopSpecWatcher()
 
     // Early return the spec watcher if we're in run mode, we do not want to
     // init a lot of files watchers that are unneeded
@@ -455,16 +455,16 @@ export class ProjectDataSource {
     return false
   }
 
-  destroy () {
-    this.stopSpecWatcher()
+  async destroy () {
+    await this.stopSpecWatcher()
   }
 
-  stopSpecWatcher () {
+  async stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this._specWatcher.close().catch(() => {})
+    await this._specWatcher.close().catch(() => {})
     this._specWatcher = null
   }
 

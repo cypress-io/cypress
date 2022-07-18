@@ -55,14 +55,18 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
     expectEslintModifications(webpackConfig)
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('react-scripts')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
   })
 
   it('sources the config from react-scripts v5', async () => {
@@ -70,8 +74,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
@@ -79,6 +84,9 @@ describe('createReactAppHandler', function () {
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
     expectReactScriptsFiveModifications(webpackConfig)
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('react-scripts')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 
   it('sources the config from ejected cra', async () => {
@@ -86,8 +94,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
@@ -95,5 +104,8 @@ describe('createReactAppHandler', function () {
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
     expectReactScriptsFiveModifications(webpackConfig)
+
+    expect(sourceWebpackModulesResult.framework).to.be.null
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 })

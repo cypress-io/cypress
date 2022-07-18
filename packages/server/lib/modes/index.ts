@@ -1,4 +1,4 @@
-import { clearCtx, setCtx } from '@packages/data-context'
+import { setCtx } from '@packages/data-context'
 import _ from 'lodash'
 
 import { makeDataContext } from '../makeDataContext'
@@ -12,9 +12,6 @@ export = (mode, options) => {
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
-
-  // When we're in testing mode, this is setup automatically as a beforeEach
-  clearCtx()
 
   if (mode === 'run') {
     _.defaults(options, {

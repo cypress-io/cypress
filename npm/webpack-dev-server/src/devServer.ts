@@ -25,7 +25,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
+export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
 
 /**
  * @internal
