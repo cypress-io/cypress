@@ -100,13 +100,13 @@ before(function () {
 
 const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
 
-before(() => {
-  clearCtx()
+before(async () => {
+  await clearCtx()
   setCtx(makeDataContext({}))
 })
 
-beforeEach(function () {
-  clearCtx()
+beforeEach(async function () {
+  await clearCtx()
   setCtx(makeDataContext({}))
   this.originalEnv = originalEnv
 
@@ -125,7 +125,7 @@ afterEach(async () => {
     console.error('CAUGHT ERROR calling ctx._reset:')
     console.error(e)
   }
-  clearCtx()
+  await clearCtx()
   sinon.restore()
 
   nock.cleanAll()
