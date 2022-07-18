@@ -27,6 +27,7 @@ function createEntry (options) {
     external: [
       'react',
       'react-dom',
+      'react-dom/client',
     ],
     plugins: [
       resolve(),
