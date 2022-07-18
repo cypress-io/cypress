@@ -1249,7 +1249,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   // TODO: make string[] more
   private pushSubject (name, args, prevSubject: string[], chainerId) {
-    const subject = this.subjectForChainer(chainerId)
+    const subject = this.currentSubject(chainerId)
 
     if (prevSubject) {
       // make sure our current subject is valid for
@@ -1262,10 +1262,53 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return args
   }
 
-  subjectForChainer (chainerId: string) {
-    return (this.state('subject') || {})[chainerId]
+  /*
+   * Use `currentSubject()` to get the subject. It reads from cy.state('subjects'), but the format and details of
+   * determining this should be considered an internal implementation detail of Cypress, subject to change at any time.
+   *
+   * Currently, state('subjects') is an object, mapping chainerIds to the current subject for that chainer. For
+   * example, it might look like:
+   *
+   * {
+   *   'chainer2': 'foobar',
+   *   'chainer4': <input>,
+   * }
+   *
+   * Do not read this directly; Prefer currentSubject() instead.
+   */
+  currentSubject (chainerId = this.state('chainerId')) {
+    return (this.state('subjects') || {})[chainerId]
   }
 
+  /*
+   * Cypress executes commands asynchronously, and those commands can contain other commands - this means that there
+   * are times when an outer chainer might have as its subject the (as of yet unresolved) return value of the inner
+   * chain of commands.
+   *
+   * cy.state('subjectLinks') is where we store that connection. The exact contents should be considered an internal
+   * implementation detail - do not read or alter it directly, but prefer the public interface (linkSubject and
+   * breakSubjectLinksToCurrentChainer).
+   *
+   * In the current implementation, subjectLinks might look like:
+   * {
+   *   'chainer4': 'chainer2',
+   * }
+   *
+   * indicating that when we eventually resolve the subject of chainer4, it should *also* be used as the subject for
+   * chainer2 - for example, `cy.then(() => { return cy.get('foo') }).log()`. The inner chainer (chainer4,
+   * `cy.get('foo')`) is linked to the outer chainer (chainer2) - when we eventually .get('foo'), the resolved value
+   * becomes the new subject for the outer chainer.
+   *
+   * Whenever we are in the middle of resolving one chainer and a new one is created, Cypress links the inner chainer
+   * to the outer one. This is *usually* desireable, allowing simple constructs like
+   * `cy.then(() => { return cy.get('foo') }).log()` to function intuitively.
+   *
+   * But you don't always want to use the inner chainer's subject for the outer chainer. Consider:
+   * `cy.then(() => { cy.get('foo').click(); return 'success' }).log()`
+   *
+   * In this case, we want to break the connection between the inner chainer and the outer one, so that we can
+   * instead use the return value as the new subject. Is this case, you'll want cy.breakSubjectLinksToCurrentChainer().
+   */
   linkSubject (fromChainerId, toChainerId) {
     const links = this.state('subjectLinks') || {}
 
@@ -1273,6 +1316,14 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.state('subjectLinks', links)
   }
 
+  /*
+   * You should call breakSubjectLinksToCurrentChainer() when the following are *both* true:
+   *   1. A command callback may contain cypress commands.
+   *   2. You do not want to use the subject of those commands as the new subject of the parent command chain.
+   *
+   * In this case, call the function directly before returning the new subject, after any new cypress commands have
+   * been added to the queue. See `cy.linkSubject()` for more details about how links are created.
+   */
   breakSubjectLinksToCurrentChainer () {
     const chainerId = this.state('chainerId')
     const links = this.state('subjectLinks') || {}
@@ -1280,11 +1331,20 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.state('subjectLinks', _.omitBy(links, (l) => l === chainerId))
   }
 
+  /*
+   * setSubjectForChainer should be considered an internal implementation detail of Cypress. Do not use it directly
+   * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
+   * elsewhere, consider carefully before adding additional uses.
+   *
+   * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the final
+   * (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the new
+   * subject for any chainers it's linked to (see cy.linkSubject for details on that process).
+   */
   setSubjectForChainer (chainerId: string, subject: any) {
-    const cySubject = this.state('subject') || {}
+    const cySubject = this.state('subjects') || {}
 
     cySubject[chainerId] = subject
-    this.state('subject', cySubject)
+    this.state('subjects', cySubject)
 
     const links = this.state('subjectLinks') || {}
 

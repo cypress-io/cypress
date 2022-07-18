@@ -168,7 +168,7 @@ const defaults = function (state: StateFunc, config, obj) {
     if (_.isFunction(obj.type)) {
       const chainerId = current && current.get('chainerId')
 
-      obj.type = obj.type(current, (state('subject') || {})[chainerId])
+      obj.type = obj.type(current, (state('subjects') || {})[chainerId])
     }
   }
 
