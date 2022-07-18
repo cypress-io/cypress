@@ -8,10 +8,13 @@ import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, getCtx } from '@packages/data-context'
+import { DataContext, globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import type { LaunchArgs, PlatformName } from '@packages/types'
 import { EventEmitter } from 'events'
+import debugLib from 'debug'
 import Events from '../gui/events'
+
+const debug = debugLib('cypress:server:interactive')
 
 const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
@@ -169,6 +172,37 @@ export = {
       app.whenReady(),
       makeGraphQLServer(),
     ])
+
+    // Before the electron app quits, we interrupt and ensure the current
+    // DataContext is completely destroyed prior to quitting the process.
+    // Parts of the DataContext teardown are asynchronous, particularly the
+    // closing of open file watchers, and not awaiting these can cause
+    // the electron process to throw.
+    // https://github.com/cypress-io/cypress/issues/22026
+
+    app.once('will-quit', (event: Event) => {
+      // We must call synchronously call preventDefault on the will-quit event
+      // to halt the current quit lifecycle
+      event.preventDefault()
+
+      debug('clearing DataContext prior to quit')
+
+      // We use setImmediate to guarantee that app.quit will be called asynchronously;
+      // synchronously calling app.quit in the will-quit handler prevent the subsequent
+      // close from occurring
+      setImmediate(async () => {
+        try {
+          await clearCtx()
+        } catch (e) {
+          // Silently handle clearCtx errors, we still need to quit the app
+          debug(`DataContext cleared with error: ${e?.message}`)
+        }
+
+        debug('DataContext cleared, quitting app')
+
+        app.quit()
+      })
+    })
 
     return this.ready(options, port)
   },

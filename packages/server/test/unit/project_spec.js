@@ -23,7 +23,7 @@ let ctx
 
 // NOTE: todo: come back to this
 describe.skip('lib/project-base', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     Fixtures.scaffold()
 
@@ -39,7 +39,7 @@ describe.skip('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {
