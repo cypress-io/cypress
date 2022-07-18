@@ -37,9 +37,9 @@ export function makeDefaultWebpackConfig (
     },
     plugins: [
       new HtmlWebpackPlugin({
-        // Todo: Add indexHtmlFile when it gets added as a config property
         template: indexHtmlFile,
-      }) as any,
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+      }),
     ],
   } as any
 

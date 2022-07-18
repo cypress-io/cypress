@@ -1,10 +1,21 @@
 import "zone.js";
+import "zone.js/testing";
 
 /**
  * @hack fixes "Mocha has already been patched with Zone" error.
  */
 // @ts-ignore
-global.Mocha["__zone_patch__"] = false;
+window.Mocha["__zone_patch__"] = false;
 
-import "zone.js/testing";
-import '../../src/styles.scss'
+import { mount } from './angular-mount'
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      mount: typeof mount
+    }
+  }
+}
+
+
+Cypress.Commands.add('mount', mount);

@@ -80,6 +80,8 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
     },
   )
 
+  delete webpackConfig.entry
+
   return webpackConfig
 }
 
