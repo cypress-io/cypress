@@ -685,6 +685,7 @@ class $Cypress {
         this.emit('internal:window:load', {
           type: 'same:origin',
           window: args[0],
+          url: args[1],
         })
 
         return this.emit('window:load', args[0])

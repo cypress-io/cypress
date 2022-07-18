@@ -1,5 +1,25 @@
 describe('basic login', () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary origin, login and redirect back to site.
+
+  it('attaches to an origin at any time', () => {
+    cy.visit('/fixtures/auth/index.html')
+    cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+    cy.log('derp')
+    cy.origin('http://www.idp.com:3500', () => {
+      cy.get('[data-cy="login-idp"]')
+    })
+  })
+
+  it('cross origin navigation', () => {
+    cy.visit('/fixtures/auth/index.html') // Establishes primary origin
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+  })
+
+  it('same origin navigation', () => {
+    cy.visit('http://www.idp.com:3500/fixtures/auth/index.html') // Establishes primary origin
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+  })
+
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin

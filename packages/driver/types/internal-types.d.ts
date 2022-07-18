@@ -29,6 +29,7 @@ declare namespace Cypress {
     configure: (config: Cypress.ObjectLike) => void
     isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
+    cy: $Cy
   }
 
   interface CypressUtils {

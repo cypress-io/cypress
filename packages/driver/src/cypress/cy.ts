@@ -51,8 +51,7 @@ const getContentWindow = ($autIframe) => {
 
 const setWindowDocumentProps = function (contentWindow, state) {
   state('window', contentWindow)
-
-  return state('document', contentWindow.document)
+  state('document', contentWindow.document)
 }
 
 function __stackReplacementMarker (fn, ctx, args) {
@@ -152,8 +151,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
-  isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
-  whenStableOrAnticipatingCrossOriginResponse: IStability['whenStableOrAnticipatingCrossOriginResponse']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
@@ -164,6 +161,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
 
   getRemoteLocation: ILocation['getRemoteLocation']
+  getCrossOriginRemoteLocation: ILocation['getCrossOriginRemoteLocation']
 
   fireBlur: IFocused['fireBlur']
   fireFocus: IFocused['fireFocus']
@@ -264,8 +262,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
-    this.isAnticipatingCrossOriginResponseFor = stability.isAnticipatingCrossOriginResponseFor
-    this.whenStableOrAnticipatingCrossOriginResponse = stability.whenStableOrAnticipatingCrossOriginResponse
 
     const assertions = createAssertions(Cypress, this)
 
@@ -288,6 +284,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const location = createLocation(state)
 
     this.getRemoteLocation = location.getRemoteLocation
+    this.getCrossOriginRemoteLocation = location.getCrossOriginRemoteLocation
 
     const focused = createFocused(state)
 
@@ -532,7 +529,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // when we find ourselves in a cross origin situation, then our
     // proxy has not injected Cypress.action('window:before:load')
     // so Cypress.onBeforeAppWindowLoad() was never called
-    return $autIframe.on('load', () => {
+    return $autIframe.on('load', async () => {
       if (historyNavigationTriggeredHashChange(this.state)) {
         // Skip load event.
         // Chromium 97+ triggers fires iframe onload for cross-origin-initiated same-document
@@ -549,24 +546,44 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       try {
         const autWindow = getContentWindow($autIframe)
 
-        setWindowDocumentProps(autWindow, this.state)
+        let isSameOrigin
 
-        // we may need to update the url now
-        this.urlNavigationEvent('load')
+        try {
+          autWindow.location.origin
+          isSameOrigin = true
+        } catch (err: any) {
+          if (!this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
+            throw err
+          }
 
-        // we normally DONT need to reapply contentWindow listeners
-        // because they would have been automatically applied during
-        // onBeforeAppWindowLoad, but in the case where we visited
-        // about:blank in a visit, we do need these
-        this.contentWindowListeners(autWindow)
+          isSameOrigin = false
+        }
+
+        if (isSameOrigin) {
+          setWindowDocumentProps(autWindow, this.state)
+
+          // we may need to update the url now
+          this.urlNavigationEvent('load')
+
+          // we normally DON'T need to reapply contentWindow listeners
+          // because they would have been automatically applied during
+          // onBeforeAppWindowLoad, but in the case where we visited
+          // about:blank in a visit, we do need these
+          this.contentWindowListeners(autWindow)
+        } else {
+          this.state('window', autWindow)
+          // we may need to update the url now
+          this.urlNavigationEvent('load')
+        }
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
         // there is a cross-origin error and the cy.origin API is
         // not utilized
         try {
-          this.Cypress.action('app:window:load', this.state('window'))
-          const remoteLocation = this.getRemoteLocation()
+          const remoteLocation = await this.getCrossOriginRemoteLocation()
+
+          this.Cypress.action('app:window:load', this.state('window'), remoteLocation.href)
 
           cy.state('autOrigin', remoteLocation.originPolicy)
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
@@ -595,13 +612,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         // we failed setting the remote window props which
         // means the page navigated to a different origin
-
-        // With cross-origin support, this is an expected error that may or may
-        // not be bad, we will rely on the page load timeout to throw if we
-        // don't end up where we expect to be.
-        if (this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
-          return
-        }
 
         let e = err
 

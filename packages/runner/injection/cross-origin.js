@@ -19,7 +19,7 @@ const findCypress = () => {
       if (frame.Cypress) {
         // If the ending $ is included in the template string, it breaks transpilation
         // eslint-disable-next-line no-useless-concat
-        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replaceAll('.', '\\.') }` + '$')
+        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replace(/\./gm, '\\.') }` + '$')
 
         // Compare the locations origin policy without pulling in more dependencies.
         // Compare host, protocol and test that the window's host ends with the frame's host.
@@ -39,19 +39,28 @@ const findCypress = () => {
   }
 }
 
+// Event listener to echo back the current location of the iframe
+window.addEventListener('message', (event) => {
+  if (event.data === 'cypress-location') {
+    event.ports[0].postMessage(window.location.href)
+  }
+})
+
 const Cypress = findCypress()
 
-patchDocumentCookie(Cypress)
+if (Cypress) {
+  patchDocumentCookie(Cypress)
 
-// the timers are wrapped in the injection code similar to the primary origin
-const timers = createTimers()
+  // the timers are wrapped in the injection code similar to the primary origin
+  const timers = createTimers()
 
-Cypress.removeAllListeners('app:timers:reset')
-Cypress.removeAllListeners('app:timers:pause')
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
 
-Cypress.on('app:timers:reset', timers.reset)
-Cypress.on('app:timers:pause', timers.pause)
+  Cypress.on('app:timers:reset', timers.reset)
+  Cypress.on('app:timers:pause', timers.pause)
 
-timers.wrap()
+  timers.wrap()
 
-Cypress.action('app:window:before:load', window)
+  Cypress.action('app:window:before:load', window)
+}

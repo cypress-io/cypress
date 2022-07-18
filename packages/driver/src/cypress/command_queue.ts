@@ -141,11 +141,11 @@ export class CommandQueue extends Queue<$Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
+    return this.stability.whenStable(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
-    }, command)
+    })
     .then((args) => {
       // store this if we enqueue new commands
       // to check for promise violations
@@ -290,18 +290,11 @@ export class CommandQueue extends Queue<$Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
-        // If we're enabled experimentalSessionAndOrigin we no longer have to wait for stability at the end of the command queue.
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          Cypress.action('cy:command:queue:end')
-
-          return null
-        }
-
         // we need to wait after all commands have
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
+        return this.stability.whenStable(() => {
           Cypress.action('cy:command:queue:end')
 
           return null

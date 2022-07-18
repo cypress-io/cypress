@@ -63,9 +63,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     })
   }
 
-  // We remain in an anticipating state until either a load even happens or a timeout.
-  cy.isAnticipatingCrossOriginResponseFor(undefined)
-
   // By default origins is just this location.
   let originPolicies = [$Location.create(location.href).originPolicy]
 
@@ -156,13 +153,13 @@ const aboutBlank = (cy, win) => {
   })
 }
 
-const navigationChanged = (Cypress, cy, state, source, arg) => {
+const navigationChanged = async (Cypress, cy, state, source, arg) => {
   // get the current url of our remote application
-  const url = cy.getRemoteLocation('href')
+  const url = await cy.getCrossOriginRemoteLocation('href')
 
   debug('navigation changed:', url)
 
-  // dont trigger for empty url's or about:blank
+  // don't trigger for empty url's or about:blank
   if (_.isEmpty(url) || (url === 'about:blank')) {
     return
   }
@@ -208,6 +205,11 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // don't output a command log for 'load' or 'before:load' events
   // return if source in command
   if (knownCommandCausedInstability) {
+    return
+  }
+
+  // Navigation changed events will be logged by the primary cypress instance.
+  if (Cypress.isCrossOriginSpecBridge) {
     return
   }
 
@@ -396,39 +398,18 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
-      const onWindowLoad = (win) => {
+      const onWindowLoad = ({ url }) => {
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
 
-        if (win.location.href === 'about:blank') {
+        if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
           options._log.set({ message: '', name: 'Clear Page', type: 'system' }).snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }
-
-        resolve()
-      }
-
-      const onCrossOriginWindowLoad = ({ url }) => {
-        options._log.set('message', '--page loaded--').snapshot().end()
-
-        // Updating the URL state, This is done to display the new url event when we return to the primary origin
-        let urls = state('urls') || []
-        let urlPosition = state('urlPosition')
-
-        if (urlPosition === undefined) {
-          urlPosition = -1
-        }
-
-        urls.push(url)
-        urlPosition = urlPosition + 1
-
-        state('urls', urls)
-        state('url', url)
-        state('urlPosition', urlPosition)
 
         resolve()
       }
@@ -442,9 +423,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       const onInternalWindowLoad = (details) => {
         switch (details.type) {
           case 'same:origin':
-            return onWindowLoad(details.window)
-          case 'cross:origin':
-            return onCrossOriginWindowLoad(details)
+            return onWindowLoad(details)
           case 'cross:origin:failure':
             return onCrossOriginFailure(details.error)
           default:
@@ -1123,8 +1102,10 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // if the origin currently matches
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy) {
-            previouslyVisitedLocation = remote
+          if (remote.originPolicy === existing.originPolicy || previouslyVisitedLocation) {
+            if (!previouslyVisitedLocation) {
+              previouslyVisitedLocation = remote
+            }
 
             url = $Location.fullyQualifyUrl(url)
 

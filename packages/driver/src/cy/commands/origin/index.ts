@@ -24,33 +24,7 @@ const normalizeOrigin = (urlOrDomain) => {
 }
 
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
-  let timeoutId
-
   const communicator = Cypress.primaryOriginCommunicator
-
-  communicator.on('delaying:html', (request) => {
-    // when a cross origin request is detected by the proxy, it holds it up
-    // to provide time for the spec bridge to be set up. normally, the queue
-    // will not continue until the page is stable, but this signals it to go
-    // ahead because we're anticipating a cross origin request
-    cy.isAnticipatingCrossOriginResponseFor(request)
-    const location = $Location.create(request.href)
-
-    // If this event has occurred while a cy.origin command is running with
-    // the same origin policy, do not set the time out and allow cy.origin
-    // to handle the ready for origin event
-    if (cy.state('currentActiveOriginPolicy') === location.originPolicy) {
-      return
-    }
-
-    // If we haven't seen a cy.origin and cleared the timeout within 300ms,
-    // go ahead and inform the server to release the response.
-    // This typically happens during a redirect where the user does
-    // not have a cy.origin for the intermediary origin.
-    timeoutId = setTimeout(() => {
-      Cypress.backend('cross:origin:release:html')
-    }, 300)
-  })
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
@@ -59,7 +33,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       // store the invocation stack in the case that `cy.origin` errors
       communicator.userInvocationStack = userInvocationStack
 
-      clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // origin run, so it can't have its own timeout
       cy.clearTimeout()
@@ -94,9 +67,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       const validator = new Validator({
         log,
-        onFailure: () => {
-          Cypress.backend('cross:origin:release:html')
-        },
+        onFailure: () => {},
       })
 
       validator.validate({
@@ -162,10 +133,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         communicator.once('ran:origin:fn', (details) => {
           const { subject, unserializableSubjectType, err, finished } = details
 
-          // lets the proxy know to allow the response for the secondary
-          // origin html through, so the page will finish loading
-          Cypress.backend('cross:origin:release:html')
-
           if (err) {
             if (err?.name === 'ReferenceError') {
               const wrappedErr = $errUtils.errByPath('origin.ran_origin_fn_reference_error', {
@@ -211,6 +178,9 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
               env: preprocessEnv(Cypress.env()),
             })
 
+            // Attach the spec bridge to the window to be tested.
+            communicator.toSpecBridge(originPolicy, 'attach:to:window')
+
             await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
 
             // once the secondary origin page loads, send along the
@@ -239,9 +209,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
-              // Release the request if 'run:origin:fn' fails
-              Cypress.backend('cross:origin:release:html')
-
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })

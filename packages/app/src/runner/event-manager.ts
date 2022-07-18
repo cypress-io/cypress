@@ -8,7 +8,6 @@ import type { AutomationElementId, FileDetails } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 
@@ -603,28 +602,17 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
-      // Sync stable if the expected origin has loaded.
-      // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already
-      // established spec bridge, but one that is not the current or next cy.origin command.
-      if (cy.state('latestActiveOriginPolicy') === originPolicy) {
-        // We remain in an anticipating state until either a load even happens or a timeout.
-        cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
-        cy.isAnticipatingCrossOriginResponseFor(undefined)
-        cy.isStable(true, 'load')
-        // Prints out the newly loaded URL
-        Cypress.emit('internal:window:load', { type: 'cross:origin', url })
-        // Re-broadcast to any other specBridges.
-        Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url })
-      }
+    // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
+    Cypress.primaryOriginCommunicator.on('sync:duringUserTestExecution', (__unused, originPolicy) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:duringUserTestExecution', cy.state('duringUserTestExecution'))
     })
 
-    Cypress.primaryOriginCommunicator.on('before:unload', () => {
+    Cypress.primaryOriginCommunicator.on('before:unload', (__unused, originPolicy) => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
       // Unstable is unstable regardless of where it initiated from.
       cy.state('isStable', false)
       // Re-broadcast to any other specBridges.
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', originPolicy)
     })
 
     Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {

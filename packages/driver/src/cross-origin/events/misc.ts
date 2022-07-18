@@ -20,7 +20,10 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   })
 
   // Listen for any unload events in other origins, if any have unloaded we should also become unstable.
-  Cypress.specBridgeCommunicator.on('before:unload', () => {
-    cy.state('isStable', false)
+  Cypress.specBridgeCommunicator.on('before:unload', (originPolicy) => {
+    // If the unload event originated from this spec bridge, isStable is already being handled.
+    if (window.location.origin !== originPolicy) {
+      cy.state('isStable', false)
+    }
   })
 }
