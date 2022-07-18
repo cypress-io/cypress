@@ -17,7 +17,7 @@ import CommandModel, { RenderProps, SessionRenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
 import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
-import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+// import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
@@ -26,10 +26,13 @@ const md = new Markdown()
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
-const invisibleMessage = (model: CommandModel) => {
-  return model.numElements > 1 ?
-    'One or more matched elements are not visible.' :
+const visibleMessage = (model: CommandModel) => {
+  // const elements = `${model.numElements} matched elements.`
+  const hidden = model.numElements > 1 ?
+    `${model.visible} of ${model.numElements} elements that matched are visible.` :
     'This element is not visible.'
+
+  return hidden
 }
 
 const numberOfChildrenMessage = (numChildren, event?: boolean) => {
@@ -354,17 +357,12 @@ class Command extends Component<Props> {
               </span>
               <span className='command-controls'>
                 {isSessionCommand && <SessionPill {...model.renderProps} />}
-                {!model.visible && (
-                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                    <span>
-                      <HiddenIcon className='command-invisible' />
-                    </span>
-                  </Tooltip>
-                )}
+
                 {displayNumOfElements && (
-                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                  <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
+                    {/* <Tooltip placement='top' title={invisibleMessage(model)}`${model.numElements} matched elements`} className='cy-tooltip'> */}
                     <span className={cs('num-elements', 'command-num-elements')}>
-                      {model.numElements}
+                      {model.visible}/{model.numElements}
                     </span>
                   </Tooltip>
                 )}

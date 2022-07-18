@@ -447,7 +447,8 @@ export class Log {
     this.obj = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
-      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
+      visible: this.get('visible') ?? $el.filter(':visible').length,
+      // invisible: this.get('invisible') ?? $el.length !== $el.filter(':visible').length,
     }
 
     return this.set(this.obj, { silent: true })

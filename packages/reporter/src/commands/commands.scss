@@ -13,6 +13,7 @@
 
   .command {
     min-height: 28px;
+    font-style: normal;
   }
 
   // System Command Styles
@@ -71,7 +72,7 @@
     }
 
     .command-interceptions {
-      font-style: normal;
+      // font-style: normal;
 
       .status {
         font-weight: 600;
@@ -82,9 +83,11 @@
     .command-interceptions,
     .command-session-status {
       border-radius: 4px;
-      color: $white;
+      color: rgba($white, .8);
       display: inline-block;
-      font-family: $font-sans;
+      font-family: $monospace;
+      // font-family: $font-sans;
+      // font-style: normal;
       font-size: 10px;
       margin-left: 5px;
       line-height: 16px;
@@ -98,17 +101,14 @@
 
     .command-alias,
     .command-interceptions {
-      &.route {
-        background-color: $teal-500;
-      }
-
       &.dom {
         background-color: $indigo-500;
       }
 
+      &.route,
       &.agent,
       &.primitive {
-        background-color: $red-500;
+        background-color: $teal-500;
       }
 
       &.has-multiple-aliases,
@@ -561,12 +561,15 @@
   // additional styles on top of the shared.scss styles
   .num-children,
   .num-elements {
-    background-color: $gray-600;
+    // background-color: $gray-800;
+    background-color: rgba($gray-600, .25);
     border-radius: 4px;
-    color: $black;
+    color: $gray-100;
+    // color: $black;
     display: inline-block;
-    font-family: $font-sans;
+    font-family: $monospace;
     font-style: normal;
+    font-weight: 500;
     font-size: 10px;
     line-height: 1.5;
     padding: 0px 5px !important;

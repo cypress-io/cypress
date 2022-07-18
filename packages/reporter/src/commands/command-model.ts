@@ -30,7 +30,7 @@ export interface CommandProps extends InstrumentProps {
   numElements: number
   renderProps?: RenderProps | SessionRenderProps
   timeout?: number
-  visible?: boolean
+  visible?: number
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
@@ -49,7 +49,7 @@ export default class Command extends Instrument {
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable visible?: boolean
+  @observable visible?: number
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
   @observable hookId: string
@@ -153,7 +153,7 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
-    this.visible = props.visible === undefined || props.visible
+    this.visible = props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
