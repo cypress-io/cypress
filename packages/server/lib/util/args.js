@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
+const { getInvalidRootOptions, getPublicConfigKeys } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -325,7 +325,7 @@ const parseSpecArgv = (pattern) => {
  * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
  */
 const nestInvalidRootOptions = (config) => {
-  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
+  getInvalidRootOptions().forEach(({ name, testingTypes }) => {
     if (config[name] && testingTypes) {
       testingTypes.forEach((testingType) => {
         if (!config[testingType]) {
