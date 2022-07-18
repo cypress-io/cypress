@@ -3,6 +3,7 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
+const DataContext = require('@packages/data-context')
 const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
 const Events = require(`../../../lib/gui/events`)
@@ -195,6 +196,66 @@ describe('gui/interactive', () => {
 
       return interactiveMode.run(opts).then(() => {
         expect(interactiveMode.ready).to.be.calledWith(opts)
+      })
+    })
+
+    describe('data context management', () => {
+      let willQuitHandler
+      let clearCtxImmediateCallback
+
+      let mockEvent = {
+        preventDefault: sinon.stub(),
+      }
+
+      let performAssertions = () => {
+        const opts = {}
+
+        return interactiveMode.run(opts).then(() => {
+          expect(interactiveMode.ready).to.be.calledWith(opts)
+        }).then(async () => {
+          expect(willQuitHandler).to.be.defined
+
+          willQuitHandler(mockEvent)
+          expect(mockEvent.preventDefault).to.have.been.called
+          expect(clearCtxImmediateCallback).to.be.defined
+
+          await clearCtxImmediateCallback()
+
+          expect(DataContext.clearCtx).to.have.been.called
+          expect(electron.app.quit).to.have.been.called
+        })
+      }
+
+      beforeEach(() => {
+        willQuitHandler = undefined
+        clearCtxImmediateCallback = undefined
+
+        sinon.stub(interactiveMode, 'ready')
+        sinon.stub(electron.app, 'once').callsFake((eventName, handler) => {
+          if (eventName === 'will-quit') {
+            willQuitHandler = handler
+          }
+        })
+
+        sinon.stub(global, 'setImmediate').callsFake((callback) => {
+          // we intercept the setImmediate call so we can synchronously
+          // execute the callback in the test and await its result
+          clearCtxImmediateCallback = callback
+        })
+
+        electron.app.quit = sinon.stub()
+      })
+
+      it('uses will-quit listener to destroy DataContext before exiting', () => {
+        sinon.stub(DataContext, 'clearCtx').resolves()
+
+        return performAssertions()
+      })
+
+      it('still quits if destroying DataContext throws error', () => {
+        sinon.stub(DataContext, 'clearCtx').rejects()
+
+        return performAssertions()
       })
     })
   })
