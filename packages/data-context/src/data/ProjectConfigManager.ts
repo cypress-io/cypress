@@ -27,7 +27,7 @@ type ProjectConfigManagerOptions = {
   handlers: IpcHandler[]
   hasCypressEnvFile: boolean
   eventRegistrar: EventRegistrar
-  onError: (cypressError: CypressError, title?: string | undefined) => void
+  onError: (cypressError: CypressError) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => Promise<void>
   refreshLifecycle: () => Promise<void>
@@ -106,7 +106,7 @@ export class ProjectConfigManager {
       this._state = 'loadingConfig'
 
       // Clean things up for a new load
-      this.closeWatchers()
+      await this.closeWatchers()
       this._cachedLoadConfig = undefined
       this._cachedFullConfig = undefined
 
@@ -137,7 +137,7 @@ export class ProjectConfigManager {
       }
 
       this._state = 'errored'
-      this.closeWatchers()
+      await this.closeWatchers()
 
       throw error
     } finally {
@@ -177,7 +177,7 @@ export class ProjectConfigManager {
         this._eventsIpc.cleanupIpc()
       }
 
-      this.closeWatchers()
+      await this.closeWatchers()
 
       throw error
     } finally {
@@ -310,9 +310,9 @@ export class ProjectConfigManager {
     )
   }
 
-  onLoadError = (error: any) => {
-    this.closeWatchers()
-    this.options.onError(error, 'Cypress configuration error')
+  onLoadError = async (error: any) => {
+    await this.closeWatchers()
+    this.options.onError(error)
   }
 
   private watchFiles (paths: string[]) {
@@ -495,17 +495,18 @@ export class ProjectConfigManager {
     return true
   }
 
-  private closeWatchers () {
-    for (const watcher of this._watchers.values()) {
-      // We don't care if there's an error while closing the watcher,
-      // the watch listener on our end is already removed synchronously by chokidar
-      watcher.close().catch((e) => {})
-    }
+  private async closeWatchers () {
+    await Promise.all(Array.from(this._watchers).map((watcher) => {
+      return watcher.close().catch((error) => {
+        // Watcher close errors are ignored, we cannot meaningfully handle these
+      })
+    }))
+
     this._watchers = new Set()
     this._pathToWatcherRecord = {}
   }
 
-  destroy () {
+  async destroy () {
     if (this._eventsIpc) {
       this._eventsIpc.cleanupIpc()
     }
@@ -514,6 +515,6 @@ export class ProjectConfigManager {
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
     this._registeredEventsTarget = undefined
-    this.closeWatchers()
+    await this.closeWatchers()
   }
 }

@@ -23,7 +23,7 @@ const { sinon } = require('../spec_helper')
 let ctx
 
 describe('lib/socket', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     ctx.coreData.activeBrowser = {
       path: 'path-to-browser-one',
@@ -38,7 +38,7 @@ describe('lib/socket', () => {
 
     this.server = new ServerE2E()
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
