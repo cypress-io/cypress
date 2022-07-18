@@ -6,7 +6,14 @@ import debugLib from 'debug'
 import path from 'path'
 import _ from 'lodash'
 import chokidar from 'chokidar'
-import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
+import {
+  validate as validateConfig,
+  validateNoBreakingConfigLaunchpad,
+  validateNoBreakingConfigRoot,
+  validateNoBreakingTestingTypeConfig,
+  setupFullConfigWithDefaults,
+  updateWithPluginValues,
+} from '@packages/config'
 import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
@@ -233,7 +240,7 @@ export class ProjectConfigManager {
     const cypressEnv = await this.loadCypressEnvFile()
     const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.ctx.modeOptions)
 
-    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
+    const finalConfig = this._cachedFullConfig = updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
 
     // Check if the config file has a before:browser:launch task, and if it's the case
     // we should restart the browser if it is open
@@ -397,7 +404,7 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await this.options.ctx._apis.configApi.setupFullConfigWithDefaults({
+    let fullConfig = await setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,

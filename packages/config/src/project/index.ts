@@ -19,7 +19,8 @@ import {
 
 const debug = Debug('cypress:config:project')
 
-export function setupFullConfigWithDefaults (obj: any = {}): any {
+// TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
+export function setupFullConfigWithDefaults (obj: any = {}): Promise<FullConfig> {
   debug('setting config object %o', obj)
   let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
@@ -36,10 +37,13 @@ export function setupFullConfigWithDefaults (obj: any = {}): any {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
+  // @ts-ignore
   return mergeDefaults(config, options, cliConfig)
 }
 
-export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, testingType: TestingType) {
+// TODO: update types from data-context/src/data/ProjectLifecycleManager.ts
+// updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>, testingType: TestingType): FullConfig
+export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, testingType: TestingType): FullConfig {
   if (!modifiedConfig) {
     modifiedConfig = {}
   }
