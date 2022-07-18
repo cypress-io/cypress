@@ -79,7 +79,7 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite.config.ts',
-        spec: 'src/App.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -93,13 +93,11 @@ describe(`React major versions with Webpack`, function () {
   systemTests.setup()
 
   for (const majorVersion of REACT_MAJOR_VERSIONS) {
-    // TODO: Test for React 18 fails with "react was not found" error when running
-    // in system test, but works as expected with binary.
     it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
-        spec: 'src/App.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
