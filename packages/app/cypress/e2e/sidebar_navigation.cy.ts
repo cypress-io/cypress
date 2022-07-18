@@ -1,6 +1,6 @@
 import type { SinonStub } from 'sinon'
 
-describe('Sidebar Navigation', () => {
+describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
   context('accessibility', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')

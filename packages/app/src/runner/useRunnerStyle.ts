@@ -33,10 +33,17 @@ export const useRunnerStyle = () => {
   const containerWidth = computed(() => {
     const miscBorders = 4
     const containerMinimum = 50
-    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+
+    // start with just the margin since all other elements that take up width
+    // might not be there
+    let nonAutWidth = autMargin * 2
 
     if (window.__CYPRESS_MODE__ === 'open') {
       nonAutWidth += collapsedNavBarWidth
+    }
+
+    if (!window.__CYPRESS_CONFIG__.hideCommandLog) {
+      nonAutWidth += reporterWidth.value + specListWidth.value + miscBorders
     }
 
     const containerWidth = windowWidth.value - nonAutWidth

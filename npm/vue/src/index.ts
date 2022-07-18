@@ -1,16 +1,46 @@
 /* eslint-disable no-redeclare */
 /// <reference types="cypress" />
-import { ComponentPublicInstance, VNodeProps, AllowedComponentProps,
-  ComponentCustomProps, ExtractPropTypes, ExtractDefaultPropTypes,
-  Component, DefineComponent, FunctionalComponent, ComputedOptions,
-  MethodOptions, ComponentOptionsMixin, EmitsOptions, ComponentOptionsWithObjectProps, ComponentPropsOptions, ComponentOptionsWithArrayProps, ComponentOptionsWithoutProps } from 'vue'
-import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
+import type {
+  ComponentPublicInstance,
+  VNodeProps,
+  AllowedComponentProps,
+  ComponentCustomProps,
+  ExtractPropTypes,
+  ExtractDefaultPropTypes,
+  DefineComponent,
+  FunctionalComponent,
+  ComputedOptions,
+  MethodOptions,
+  ComponentOptionsMixin,
+  EmitsOptions,
+  ComponentOptionsWithObjectProps,
+  ComponentPropsOptions,
+  ComponentOptionsWithArrayProps,
+  ComponentOptionsWithoutProps,
+} from 'vue'
+import type { MountingOptions, VueWrapper } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
   StyleOptions,
   getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
+
+import * as _VueTestUtils from '@vue/test-utils'
+
+const {
+  // We do not expose the `mount` from VueTestUtils, instead, we wrap it and expose a
+  // Cypress-compatible `mount` API.
+  mount: VTUmount,
+  // We do not expose shallowMount. It doesn't make much sense in the context of Cypress.
+  // It might be useful for people who like to migrate some Test Utils tests to Cypress,
+  // so if we decide it is useful to expose, just remove the next line, and it will be
+  // available on the `VueTestUtils` import.
+  shallowMount,
+  ...VueTestUtils
+} = _VueTestUtils
+
+export { VueTestUtils }
 
 const DEFAULT_COMP_NAME = 'unknown'
 
