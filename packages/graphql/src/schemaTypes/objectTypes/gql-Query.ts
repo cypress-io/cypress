@@ -79,7 +79,7 @@ export const Query = objectType({
 
     t.nonNull.boolean('isGlobalMode', {
       description: 'Whether the app is in global mode or not',
-      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.global),
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.global || !ctx.currentProject),
     })
 
     t.nonNull.field('authState', {
