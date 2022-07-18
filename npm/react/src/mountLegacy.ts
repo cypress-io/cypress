@@ -1,15 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {
-  _mount,
-  _unmount,
+  makeMountFn,
+  makeUnmountFn,
   lastMountedReactDom,
-} from './mount'
+} from './createMount'
 import type {
   MountOptions,
   InternalMountOptions,
-  InternalUnmountOptionsReact17,
-} from './mount'
+  InternalUnmountOptionsReact16,
+} from './types'
 
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
   const internalOptions: InternalMountOptions = {
@@ -20,15 +20,15 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
     unmount,
   }
 
-  return _mount('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
+  return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
 export function unmount (options = { log: true }) {
-  const internalOptions: InternalUnmountOptionsReact17 = {
+  const internalOptions: InternalUnmountOptionsReact16 = {
     unmount: (el) => {
       return (lastMountedReactDom || ReactDOM).unmountComponentAtNode(el)
     },
   }
 
-  return _unmount(options, internalOptions)
+  return makeUnmountFn(options, internalOptions)
 }

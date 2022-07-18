@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { mount } from './mount'
+import { mount } from './mountLegacy'
 
 type MountHookResult<T> = {
   readonly current: T | null | undefined
