@@ -1,8 +1,11 @@
-import ts from 'rollup-plugin-typescript2'
-import resolve from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+// CommonJS to easily share across packages
+const typescript = require('@rollup/plugin-typescript')
+const { default: resolve } = require('@rollup/plugin-node-resolve')
+const commonjs = require('@rollup/plugin-commonjs')
+const fs = require('fs')
 
-import pkg from './package.json'
+// eslint-disable-next-line no-restricted-syntax
+const pkg = JSON.parse(fs.readFileSync('./package.json'), 'utf-8')
 
 const banner = `
 /**
@@ -26,7 +29,9 @@ function createEntry (options) {
       'react-dom',
     ],
     plugins: [
-      resolve(), commonjs(),
+      resolve(),
+      commonjs(),
+      typescript({ tsconfig: './tsconfig.json' }),
     ],
     output: {
       banner,
@@ -36,6 +41,7 @@ function createEntry (options) {
       globals: {
         react: 'React',
         'react-dom': 'ReactDOM',
+        'react-dom/client': 'ReactDOM/client',
       },
     },
   }
@@ -51,26 +57,13 @@ function createEntry (options) {
     config.output.file = pkg.main
   }
 
+  // eslint-disable-next-line no-console
   console.log(`Building ${format}: ${config.output.file}`)
-
-  config.plugins.push(
-    ts({
-      check: format === 'es' && isBrowser,
-      tsconfigOverride: {
-        compilerOptions: {
-          declaration: format === 'es',
-          target: 'es5', // not sure what this should be?
-          module: format === 'cjs' ? 'es2015' : 'esnext',
-        },
-        exclude: ['tests'],
-      },
-    }),
-  )
 
   return config
 }
 
-export default [
+module.exports = [
   createEntry({ format: 'es', input: 'src/index.ts', isBrowser: false }),
   createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
