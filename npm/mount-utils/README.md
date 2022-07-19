@@ -9,6 +9,13 @@ It is used in:
 - [`@cypress/react`](https://github.com/cypress-io/cypress/tree/develop/npm/react)
 - [`@cypress/vue`](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
 
+## Compatibility
+
+| @cypress/mount-utils | cypress |
+| -------------------- | ------- |
+| <= v1                | <= v9   |
+| >= v2                | >= v10  |
+
 ## Changelog
 
 [Changelog](./CHANGELOG.md)
