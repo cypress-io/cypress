@@ -16,15 +16,8 @@
   }
 
   // System Command Styles
-  .command-type-system.command-is-event {
+  .command-type-system {
     user-select: none;
-    font-style: unset;
-
-    .command-method,
-    .command-message {
-      color: $gray-500;
-      font-style: italic;
-    }
   }
 
   // Event Styles
@@ -78,97 +71,12 @@
       }
     }
 
-    .command-alias,
-    .command-interceptions,
-    .command-session-status {
-      border-radius: 4px;
-      color: $white;
-      display: inline-block;
-      font-family: $font-sans;
-      font-size: 10px;
-      margin-left: 5px;
-      line-height: 16px;
-      max-width: 200px;
-      overflow: hidden;
-      padding: 0 4px;
-      text-overflow: ellipsis;
-      vertical-align: text-top;
-      white-space: nowrap;
-    }
-
-    .command-alias,
-    .command-interceptions {
-      &.route {
-        background-color: $teal-500;
-      }
-
-      &.dom {
-        background-color: $indigo-500;
-      }
-
-      &.agent,
-      &.primitive {
-        background-color: $red-500;
-      }
-
-      &.has-multiple-aliases,
-      &.has-multiple-interceptions {
-        border-radius: 4px 0 0 4px;
-        padding: 0 2px 0 4px;
-      }
-    }
-
-    .command-session-status {
-      font-size: 12px;
-      font-weight: 500;
-      max-height: 16px;
-
-      &.creating, &.created {
-        background-color: $jade-500;
-      }
-
-      &.restoring, &.restored {
-        background-color: $indigo-500;
-      }
-
-      &.recreating, &.recreated {
-        background-color: $orange-500;
-      }
-
-      &.failed {
-        background-color: $red-500;
-      }
-    }
-
     // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
       white-space: nowrap;
   
       > {
         display: inline-block;
-      }
-    }
-
-    .command-alias-count,
-    .command-interceptions-count {
-      border-radius: 0 4px 4px 0;
-      color: $white;
-      display: inline-block;
-      line-height: 16px;
-      padding: 0 4px;
-      vertical-align: text-top;
-
-      &.route {
-        background-color: $teal-400;
-      }
-
-      &.dom {
-        background-color: $indigo-400;
-      }
-
-      &.agent,
-      &.primitive {
-        background-color: $red-400;
       }
     }
 
@@ -266,7 +174,7 @@
       color: $gray-700;
     }
   
-    &:not(.command-is-event) .command-method {
+    &:not(.command-is-event, .command-type-system) .command-method {
       color: $gray-200;
     }
 
@@ -320,12 +228,15 @@
   }
 
   .command-state-failed {
-    border-left: 2px solid $fail;
-    background-color: $err-header-background;
     color: $err-header-text;
 
-    &.command-is-interactive:hover {
-      background: rgba($red-400, 0.3);
+    &:not(.command-type-system) {
+      border-left: 2px solid $fail;
+      background-color: $err-header-background;
+          
+      &.command-is-interactive:hover {
+        background: rgba($red-400, 0.3);
+      }
     }
 
     .command-number-column,
@@ -340,17 +251,6 @@
       .command-group-block {
         border-color: $err-header-text;
       }
-    }
-  }
-
-  .command-state-warn {
-    font-style: unset;
-    background-color: $warn-background;
-    border-left: 2px solid $orange-700;
-    color: $warn-text;
-
-    &.command-is-interactive:hover {
-      background-color: $warn-header-background;
     }
   }
 
@@ -473,6 +373,7 @@
     padding-top: 4px;
 
     svg {
+      color: rgba($gray-600, .25);
       color: $gray-600;
       vertical-align: text-top;
     }
@@ -561,12 +462,13 @@
   // additional styles on top of the shared.scss styles
   .num-children,
   .num-elements {
-    background-color: $gray-600;
+    background-color: rgba($gray-600, .25);
     border-radius: 4px;
-    color: $black;
+    color: $gray-100;
     display: inline-block;
-    font-family: $font-sans;
+    font-family: $monospace;
     font-style: normal;
+    font-weight: 500;
     font-size: 10px;
     line-height: 1.5;
     padding: 0px 5px !important;

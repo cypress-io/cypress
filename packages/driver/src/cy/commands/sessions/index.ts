@@ -166,13 +166,14 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Validate session',
           message: '',
           type: 'system',
-        }, () => {
+        }, (validateLog) => {
           return cy.then(async () => {
             const onSuccess = () => {
               return isValidSession
             }
 
             const onFail = (err) => {
+              validateLog.set({ state: 'failed' })
               _log.set({ renderProps: { status: 'failed' } })
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {

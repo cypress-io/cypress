@@ -15,7 +15,6 @@ const validateSetupSessionGroup = (isNewSession = true) => {
   const groupText = isNewSession ? 'Create new session' : 'Recreate session'
 
   cy.contains(groupText).closest('.command').as('setupSession')
-
   cy.get('@setupSession').find('.command-expander-is-open')
   cy.get('@setupSession').find('.command-alias').contains('runSetup')
 
@@ -51,7 +50,7 @@ describe('runner/cypress sessions.ui.spec', {
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('blank_session')
-      cy.contains('created')
+      cy.contains('CREATED')
 
       validateSetupSessionGroup()
     })
@@ -59,7 +58,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.percySnapshot()
 
     cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
-    cy.get('.command').should('have.length', 3)
+    cy.get('.command').should('have.length', 2)
   })
 
   it('creates new session with validation', () => {
@@ -74,7 +73,7 @@ describe('runner/cypress sessions.ui.spec', {
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('blank_session')
-      cy.contains('created')
+      cy.contains('CREATED')
 
       validateSetupSessionGroup()
 
@@ -93,7 +92,7 @@ describe('runner/cypress sessions.ui.spec', {
 
     cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
 
-    cy.get('.command').should('have.length', 3)
+    cy.get('.command').should('have.length', 2)
   })
 
   it('creates new session and fails validation', () => {
@@ -107,7 +106,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.command-name-session')
     .within(() => {
       cy.contains('blank_session')
-      cy.contains('failed')
+      cy.contains('FAILED')
 
       validateSetupSessionGroup()
 
@@ -139,7 +138,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.log('validate new session was created in first test')
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
-      cy.get('.command-name-session').contains('created')
+      cy.get('.command-name-session').contains('CREATED')
     })
 
     cy.log('validate saved session was used in second test')
@@ -150,7 +149,7 @@ describe('runner/cypress sessions.ui.spec', {
       .within(() => {
         cy.get('.command-expander').first().click()
         cy.contains('user1')
-        cy.contains('restored')
+        cy.contains('RESTORED')
 
         cy.get('.command-name-Clear-page').should('have.length', 2)
 
@@ -173,7 +172,7 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session').get('.command-expander').first().click()
 
-      cy.get('.command').should('have.length', 3)
+      cy.get('.command').should('have.length', 2)
     })
   })
 
@@ -189,7 +188,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.get('.command-name-session').contains('created')
+      cy.get('.command-name-session').contains('CREATED')
     })
 
     cy.log('validate saved session was used in second test')
@@ -200,7 +199,7 @@ describe('runner/cypress sessions.ui.spec', {
       .within(() => {
         cy.get('.command-expander').first().click()
         cy.contains('user1')
-        cy.contains('recreated')
+        cy.contains('RECREATED')
 
         cy.contains('Restore saved session')
 
@@ -230,7 +229,7 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session').get('.command-expander').first().click()
 
-      cy.get('.command').should('have.length', 3)
+      cy.get('.command').should('have.length', 2)
     })
   })
 
@@ -246,7 +245,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.get('.command-name-session').contains('created')
+      cy.get('.command-name-session').contains('CREATED')
     })
 
     cy.log('validate saved session was used in second test')
@@ -255,7 +254,7 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session')
       .within(() => {
-        cy.contains('failed')
+        cy.contains('FAILED')
 
         cy.contains('Restore saved session')
 

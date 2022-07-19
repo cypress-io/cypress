@@ -1,0 +1,76 @@
+.reporter-tag {
+  border-radius: 4px;
+  color: rgba($white, .8);
+  display: inline-block;
+  font-family: $monospace;
+  font-size: 10px;
+  font-style: normal;
+  // margin-left: 5px;
+  line-height: 16px;
+  max-width: 200px;
+  overflow: hidden;
+  padding: 0 4px;
+  text-overflow: ellipsis;
+  vertical-align: text-top;
+  white-space: nowrap;
+
+  &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
+  &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
+  &.primitive { // default
+    background-color: $teal-500;
+  }
+
+  &.dom { // alias for dom reference
+    background-color: $indigo-500;
+  }
+
+  &.creating, &.created {
+    background-color: rgba($gray-600, .25);
+    color: $jade-500;
+    max-height: 16px;
+  }
+
+  &.restoring, &.restored {
+    background-color: rgba($gray-600, .25);
+    color: $indigo-500;
+    max-height: 16px;
+  }
+
+  &.recreating, &.recreated {
+    background-color: rgba($gray-600, .25);
+    color: $orange-500;
+    max-height: 16px;
+  }
+
+  &.failed {
+    background-color: $red-500;
+    max-height: 16px;
+  }
+
+  &.reporter-tag-has-count {
+    border-radius: 4px 0 0 4px;
+    padding: 0 2px 0 4px;
+  }
+}
+ 
+.reporter-tag-count {
+  border-radius: 0 4px 4px 0;
+  color: rgba($white, .8);
+  font-family: $monospace;
+  font-size: 10px;
+  font-style: normal;
+  display: inline-block;
+  line-height: 16px;
+  padding: 0 4px;
+  vertical-align: text-top;
+
+  &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
+  &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
+  &.primitive { // default
+    background-color: $teal-400;
+  }
+
+  &.dom { // alias for dom reference
+    background-color: $indigo-400;
+  }
+}

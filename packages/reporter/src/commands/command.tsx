@@ -9,11 +9,12 @@ import Tooltip from '@cypress/react-tooltip'
 import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
+import Tag from '../lib/tag'
 import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
-import CommandModel, { RenderProps, SessionRenderProps } from './command-model'
+import CommandModel, { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
 import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
@@ -96,27 +97,16 @@ interface AliasReferenceProps {
 
 const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
   const showCount = shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)
-  const alias = (
-    <span className={cs('command-alias', model.aliasType, { 'has-multiple-aliases': showCount })}>
-      @{aliasObj.name}
-    </span>
-  )
-
-  if (showCount) {
-    return (
-      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`} className='cy-tooltip'>
-        <span>
-          {alias}
-          <span className={cs(model.aliasType, 'command-alias-count')}>{aliasObj.cardinal}</span>
-        </span>
-      </Tooltip>
-    )
-  }
+  const toolTipMessage = showCount ? `Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'` : `Found an alias for: '${aliasObj.name}'`
 
   return (
-    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`} className='cy-tooltip'>
-      {alias}
-    </Tooltip>
+    <Tag
+      content={`@${aliasObj.name}`}
+      count={showCount ? aliasObj.cardinal : null}
+      type={model.aliasType}
+      tooltipMessage={toolTipMessage}
+      customClassName='command-alias'
+    />
   )
 })
 
@@ -168,28 +158,17 @@ const Interceptions = observer(({ interceptions, wentToOrigin, status }: RenderP
   const count = interceptions.length
   const displayAlias = interceptions[count - 1].alias
 
-  const intercepts = (
-    <span className={cs('command-interceptions', 'route', { 'has-multiple-interceptions': count > 1 })}>
-      {status && <span className='status'>{status} </span>}
-      {displayAlias || <em className='no-alias'>no alias</em>}
-    </span>
-  )
-
-  if (count > 1) {
-    return (
-      <Tooltip placement='top' title={interceptsTitle} className='cy-tooltip'>
-        <span>
-          {intercepts}
-          <span className={'command-interceptions-count route'}> {count}</span>
-        </span>
-      </Tooltip>
-    )
-  }
-
   return (
-    <Tooltip placement='top' title={interceptsTitle} className='cy-tooltip'>
-      {intercepts}
-    </Tooltip>
+    <Tag
+      content={<>
+        {status && <span className='status'>{status} </span>}
+        {displayAlias || <em className='no-alias'>no alias</em>}
+      </>}
+      count={count > 1 ? count : null}
+      type='route'
+      tooltipMessage={interceptsTitle}
+      customClassName='command-interceptions'
+    />
   )
 })
 
@@ -212,25 +191,18 @@ const Aliases = observer(({ model }: AliasesProps) => {
         }
 
         return (
-          <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`} className='cy-tooltip'>
-            <span className={cs('command-alias', `${model.aliasType}`)}>
-              {aliases.join(', ')}
-            </span>
-          </Tooltip>
+          <Tag
+            key={alias}
+            content={aliases.join(', ')}
+            type={model.aliasType}
+            tooltipMessage={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`}
+            customClassName='command-alias'
+          />
         )
       })}
     </span>
   )
 })
-
-// indicator specific to cy.session() that represents if a
-// session was created, restored, recreated or failed to
-// allow a quick-glance overview of which command flow ran
-const SessionPill = ({ status }: SessionRenderProps) => (
-  <span className={cs(['command-session-status', status])}>
-    {status}
-  </span>
-)
 
 interface MessageProps {
   model: CommandModel
@@ -367,7 +339,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
-                {isSessionCommand && <SessionPill {...model.renderProps} />}
+                {isSessionCommand && <Tag content={model.renderProps.status?.toUpperCase()} type={model.renderProps.status} />}
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
@@ -494,6 +466,6 @@ class Command extends Component<Props> {
   }
 }
 
-export { Aliases, AliasesReferences, Message, Progress, SessionPill }
+export { Aliases, AliasesReferences, Message, Progress }
 
 export default Command
