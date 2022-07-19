@@ -180,7 +180,7 @@
     "jscodeshift": "0.7.0",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lerna": "3.20.2",
+    "lerna": "3.22.1",
     "lint-staged": "11.1.2",
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
