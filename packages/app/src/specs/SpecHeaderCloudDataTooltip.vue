@@ -16,13 +16,13 @@
         class="lg:hidden"
         data-cy="short-header-text"
       >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
-      <i-cy-action-question-mark-outline_x16 class="ml-1 icon-dark-gray-600" />
+      <i-cy-circle-bg-question-mark_x16 class="ml-1 icon-dark-indigo-500 icon-light-indigo-100" />
     </button>
     <template
       #popper
     >
       <div
-        class="flex flex-col mx-4 text-sm text-center py-4 px-2 items-center"
+        class="flex flex-col border-t-indigo-400 border-t-4px text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div

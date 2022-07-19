@@ -10,13 +10,13 @@
       data-cy="last-updated-header"
     >
       {{ t('specPage.lastUpdated.header') }}
-      <i-cy-action-question-mark-outline_x16 class="ml-1 icon-dark-gray-600" />
+      <i-cy-circle-bg-question-mark_x16 class="ml-1 icon-dark-indigo-500 icon-light-indigo-100" />
     </button>
     <template
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center max-w-300px p-4 items-center"
+        class="flex flex-col border-t-indigo-400 border-t-4px text-sm text-center max-w-300px p-4 items-center"
       >
         <i18n-t
           v-if="props.isGitAvailable"

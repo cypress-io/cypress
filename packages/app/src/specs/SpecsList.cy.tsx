@@ -172,8 +172,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
 
-        cy.viewport(500, 850)
-        cy.percySnapshot('narrowest')
+        // Specs List has a min width of ~650px in the app, so there's no need to snapshot below that
         cy.viewport(650, 850)
         cy.percySnapshot('narrow')
         cy.viewport(800, 850)
