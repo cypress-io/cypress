@@ -39,7 +39,7 @@
     "chokidar-cli": "2.1.0",
     "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
-    "deps-ok": "1.2.1",
+    "deps-ok": "1.4.1",
     "eslint": "7.22.0",
     "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.1",
