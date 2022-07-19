@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - issue-22147-nohoist
+        - global-mode-issue
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - equal: [ 'global-mode-issue', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +45,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -58,16 +57,15 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
     - false
     # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
-# windows is slow in CI, so we only run a certain set of tests on each commit
+# windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
-fullWindowsWorkflowFilters: &full-windows-workflow-filters
-  filters:
-    branches:
-      only:
-      - develop
-      - 'linux-arm64'
-      - '*-release'
-      - 'win*'
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -128,7 +126,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-22147-nohoist" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "global-mode-issue" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -657,7 +655,7 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: 
+      - run:
           name: 'Verify Mocha Results'
           command: |
             source ./scripts/ensure-node.sh
@@ -1613,7 +1611,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs      
+      - store-npm-logs
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -1635,7 +1633,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs            
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
@@ -2362,7 +2360,7 @@ linux-x64-workflow: &linux-x64-workflow
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install          
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2671,14 +2669,12 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - lint:
-        <<: *full-windows-workflow-filters
         name: windows-lint
         executor: windows
         requires:
           - windows-build
 
     - unit-tests:
-        <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
         resource_class: windows.large
@@ -2686,7 +2682,6 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
-        <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
         resource_class: windows.large
@@ -2717,3 +2712,4 @@ workflows:
     <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
+    <<: *windows-workflow-filters
