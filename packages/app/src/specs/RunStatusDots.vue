@@ -11,13 +11,11 @@
   >
     <component
       :is="latestRun? ExternalLink : 'div'"
-      :href="latestRun?.url || '#'"
-      :use-default-hocus="false"
+      :href="dashboardUrl"
     >
       <div
         class="flex justify-end items-center"
         data-cy="run-status-dots"
-        tabindex="0"
       >
         <div
           v-for="(dot,i) in dotClasses"
@@ -49,7 +47,7 @@
     >
       <ExternalLink
         v-if="latestRun"
-        :href="latestRun.url ?? '#'"
+        :href="dashboardUrl"
         :use-default-hocus="false"
       >
         <SpecRunSummary
@@ -77,6 +75,7 @@ import QueuedIcon from '~icons/cy/queued-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
@@ -139,9 +138,9 @@ const runs = computed(() => {
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
 
-  if (runs.value && runs.value.length > 0) {
-    // skip the 0th index as it represents the latest run and dotClasses
-    // is meant to represent the 3 prior runs.
+  // If there's more than one run (the latest) we can attempt to determine the status of previous runs
+  if (runs.value && runs.value.length > 1) {
+    // Loop thru runs starting @ index 1 (most recent prior run) and continue up to the 3rd prior run if available (index 4)
     for (let i = 1; i < Math.min(runs.value.length, 4); i++) {
       statuses[i - 1] = runs.value[i]?.status ?? ''
     }
@@ -195,12 +194,26 @@ const latestDot = computed(() => {
   }
 })
 
+const dashboardUrl = computed(() => {
+  if (latestRun.value?.url) {
+    return getUrlWithParams({
+      url: latestRun.value.url,
+      params: {
+        utm_medium: 'Specs Latest Runs Dots',
+        utm_campaign: latestDot.value.status,
+      },
+    })
+  }
+
+  return '#'
+})
+
 </script>
 
 <style lang="scss">
 .RunStatusDots_Tooltip {
   .v-popper__arrow-container {
-    margin-left: 13px;
+    margin-left: 14px;
   }
 }
 </style>

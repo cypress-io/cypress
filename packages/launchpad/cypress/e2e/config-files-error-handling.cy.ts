@@ -158,6 +158,7 @@ describe('Launchpad: Error System Tests', () => {
   })
 
   it(`clears the error correctly after first 'try again' attempt`, () => {
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
     cy.scaffoldProject('config-with-ts-syntax-error')
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
@@ -165,6 +166,8 @@ describe('Launchpad: Error System Tests', () => {
 
     // Try again while the config is still invalid
     cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.wait('@resetErrorsAndLoadConfig')
 
     // Wait until config error is on screen again
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)

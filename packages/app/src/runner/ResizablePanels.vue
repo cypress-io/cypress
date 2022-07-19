@@ -4,11 +4,11 @@
     class="flex"
     :class="{
       'select-none': panel1IsDragging || panel2IsDragging,
-      'overflow-x-hidden': isFirefox
     }"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
+    <!-- using v-show to preserve state since panel1 is collapsible/expandable by the user from the UI -->
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
@@ -26,7 +26,7 @@
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
-
+    <!-- using v-show to preserve state since panel2 is collapsible/expandable during screenshots -->
     <div
       v-show="showPanel2"
       data-cy="reporter-panel"
@@ -207,8 +207,5 @@ watchEffect(() => {
     emit('panelWidthUpdated', { panel: 'panel1', width: cachedPanel1Width.value })
   }
 })
-
-// TODO: UNIFY-1704 - avoid special case for FF
-const isFirefox = window.__CYPRESS_BROWSER__?.family === 'firefox'
 
 </script>

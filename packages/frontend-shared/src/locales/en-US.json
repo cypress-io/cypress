@@ -33,7 +33,7 @@
       "dismissAriaLabel": "Dismiss"
     },
     "specPattern": {
-      "matches": "{0} Matches"
+      "matches": "No Matches | {n} Match | {n} Matches"
     },
     "specPatternModal": {
       "title": "Spec pattern settings"
@@ -357,8 +357,8 @@
       "content": {
         "e2eTitle": "End-to-end Tests",
         "e2eBullet1": "Visit URLs via",
-        "e2eBullet2": "Test flows and functionality across multiple pages.",
-        "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
+        "e2eBullet2": "Test flows and functionality across multiple pages",
+        "e2eBullet3": "Ideal for testing integrated flows in CD workflows",
         "componentTitle": "Component Tests",
         "ctBullet1": "Import components via",
         "ctBullet2": "Test individual components of a design system in isolation",
