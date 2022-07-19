@@ -402,7 +402,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
     const promise = new Promise((resolve) => {
       const onWindowLoad = ({ url }) => {
-        // this prevents a log occurring when we navigate to about:blank inbetween tests
+        // this prevents a log occurring when we navigate to about:blank in between tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
