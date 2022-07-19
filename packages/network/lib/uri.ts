@@ -15,6 +15,8 @@ const DEFAULT_PROTOCOL_PORTS = {
   'http:': '80',
 } as const
 
+type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
+
 const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
 const portIsDefault = (port: string | null) => {
@@ -74,7 +76,7 @@ export function addDefaultPort (urlToCheck: any) {
     /* @ts-ignore */
     delete parsed.host
     if (parsed.protocol) {
-      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]!
+      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
     } else {
       /* @ts-ignore */
       delete parsed.port
