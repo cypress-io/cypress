@@ -198,9 +198,14 @@ export interface ResetOptionsResult {
   e2eServerPort?: number | null
 }
 
-function openGlobalMode (argv?: string[]) {
+export interface OpenGlobalModeOptions {
+  argv?: string[]
+  byFlag?: boolean
+}
+
+function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   return logInternal({ name: 'openGlobalMode', message: '' }, () => {
-    return taskInternal('__internal_openGlobal', argv)
+    return taskInternal('__internal_openGlobal', options)
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -237,7 +242,6 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
-        // @ts-expect-error - errors b/c it's a private method
         const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
         const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 

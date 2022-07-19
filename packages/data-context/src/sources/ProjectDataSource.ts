@@ -19,6 +19,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
@@ -288,7 +289,7 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher ({
+  async startSpecWatcher ({
     projectRoot,
     testingType,
     specPattern,
@@ -296,7 +297,7 @@ export class ProjectDataSource {
     excludeSpecPattern,
     additionalIgnorePattern,
   }: FindSpecs<string[]>) {
-    this.stopSpecWatcher()
+    await this.stopSpecWatcher()
 
     // Early return the spec watcher if we're in run mode, we do not want to
     // init a lot of files watchers that are unneeded
@@ -454,16 +455,16 @@ export class ProjectDataSource {
     return false
   }
 
-  destroy () {
-    this.stopSpecWatcher()
+  async destroy () {
+    await this.stopSpecWatcher()
   }
 
-  stopSpecWatcher () {
+  async stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this._specWatcher.close().catch(() => {})
+    await this._specWatcher.close().catch(() => {})
     this._specWatcher = null
   }
 
@@ -535,5 +536,23 @@ export class ProjectDataSource {
     }
 
     return _.isEqual(specPattern, [component])
+  }
+
+  async maybeGetProjectId (source: ProjectShape) {
+    // If this is the currently active project, we can look at the project id
+    if (source.projectRoot === this.ctx.currentProject) {
+      return await this.projectId()
+    }
+
+    // Get the saved state & resolve the lastProjectId
+    const savedState = await source.savedState?.()
+
+    if (savedState?.lastProjectId) {
+      return savedState.lastProjectId
+    }
+
+    // Otherwise, we can try to derive the projectId by reading it from the config file
+    // (implement this in the future, if we ever want to display runs for a project in global mode)
+    return null
   }
 }

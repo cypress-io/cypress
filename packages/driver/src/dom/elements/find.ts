@@ -161,7 +161,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
 /**
  * By XY Coordinate
  */
-export const elementFromPoint = (doc, x, y) => {
+export const elementFromPoint = (doc, x, y): HTMLElement => {
   // first try the native elementFromPoint method
   let elFromPoint = doc.elementFromPoint(x, y)
 
@@ -247,6 +247,10 @@ export const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
+      if (elem.type === 'submit' && elem.tagName === 'INPUT') {
+        return text.test(elem.value)
+      }
+
       const testText = normalizeWhitespaces(elem)
 
       return text.test(testText)
