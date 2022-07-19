@@ -874,8 +874,8 @@ commands:
           command: |
             if [[ -f .node-version ]]; then
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/<< pipeline.git.branch >>/scripts/ensure-node.sh --output ci-ensure-node.sh
-              source ./ci-ensure-node.sh 
             else 
+              # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
           working_directory: /tmp/<<parameters.repo>>
@@ -1067,10 +1067,14 @@ commands:
     steps:
       - run:
           name: Bump NPM version
-          command: yarn get-next-version --npm
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn get-next-version --npm
       - run:
           name: Build NPM package
-          command: yarn build --scope cypress
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build --scope cypress
       - run:
           name: Copy Re-exported NPM Packages
           command: node ./scripts/post-build.js
@@ -1087,7 +1091,9 @@ commands:
           steps:
             - run:
                 name: list NPM package contents
-                command: yarn workspace cypress size
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
