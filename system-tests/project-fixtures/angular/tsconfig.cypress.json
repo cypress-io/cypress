@@ -4,7 +4,6 @@
     "outDir": "./out-tsc/cy",
     "allowSyntheticDefaultImports": true,
     "types": [
-      "node",
       "cypress"
     ]
   },

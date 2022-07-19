@@ -16,10 +16,6 @@ import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
 
-type AngularConfigOptions = { jitMode: boolean }
-
-type OptionsConfig = AngularConfigOptions
-
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
@@ -28,7 +24,6 @@ export type WebpackDevServerConfig = {
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack,
-  options?: OptionsConfig
 }
 
 export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular'] as const

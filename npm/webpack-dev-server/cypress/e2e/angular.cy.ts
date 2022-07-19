@@ -2,8 +2,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-// Angular 12 does not work... yet
-const WEBPACK_REACT: ProjectFixtureDir[] = [/** 'angular-12', */'angular-13', 'angular-14']
+const WEBPACK_REACT: ProjectFixtureDir[] = ['angular-13', 'angular-14']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []
