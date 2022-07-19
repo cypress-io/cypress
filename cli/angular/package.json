@@ -1,0 +1,70 @@
+{
+  "name": "@cypress/angular",
+  "version": "0.0.0-development",
+  "description": "Test Angular Components using Cypress",
+  "main": "dist/cypress-angular.esm-bundler.js",
+  "scripts": {
+    "build": "rimraf dist && rollup -c rollup.config.js",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
+    "build-prod": "yarn build",
+    "cy:open": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run --component",
+    "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "test": "yarn cy:run",
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@angular/common": "^14.0.6",
+    "@angular/core": "^14.0.6",
+    "@angular/platform-browser-dynamic": "^14.0.6",
+    "@rollup/plugin-node-resolve": "^11.1.1",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "typescript": "^4.2.3"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=13",
+    "@angular/core": ">=13",
+    "@angular/platform-browser-dynamic": ">=13"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/angular/#readme",
+  "author": "Jordan Powell",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
+  "keywords": [
+    "angular",
+    "cypress",
+    "cypress-io",
+    "test",
+    "testing"
+  ],
+  "contributors": [
+    {
+      "name": "Jordan Powell",
+      "social": "@jordanpowell88"
+    },
+    {
+      "name": "Zach Williams",
+      "social": "@ZachJW34"
+    }
+  ],
+  "module": "dist/cypress-angular.esm-bundler.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "standard": {
+    "globals": [
+      "Cypress",
+      "cy",
+      "expect"
+    ]
+  }
+}
