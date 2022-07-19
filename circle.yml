@@ -36,7 +36,6 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - equal: [ 'zachw/issue-22525', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -46,7 +45,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +63,6 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -658,7 +655,7 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: 
+      - run:
           name: 'Verify Mocha Results'
           command: |
             source ./scripts/ensure-node.sh
@@ -1614,7 +1611,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs      
+      - store-npm-logs
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -1636,7 +1633,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs            
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
@@ -2363,7 +2360,7 @@ linux-x64-workflow: &linux-x64-workflow
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install          
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true

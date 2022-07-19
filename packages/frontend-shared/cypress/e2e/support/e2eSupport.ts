@@ -198,9 +198,14 @@ export interface ResetOptionsResult {
   e2eServerPort?: number | null
 }
 
-function openGlobalMode (argv?: string[]) {
+export interface OpenGlobalModeOptions {
+  argv?: string[]
+  byFlag?: boolean
+}
+
+function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   return logInternal({ name: 'openGlobalMode', message: '' }, () => {
-    return taskInternal('__internal_openGlobal', argv)
+    return taskInternal('__internal_openGlobal', options)
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
