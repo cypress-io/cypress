@@ -10,12 +10,12 @@ import url, { URL } from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
-const DEFAULT_PROTOCOL_PORTS: Record<string, string> = {
+const DEFAULT_PROTOCOL_PORTS = {
   'https:': '443',
   'http:': '80',
-}
+} as const
 
-const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS)
+const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
 const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
