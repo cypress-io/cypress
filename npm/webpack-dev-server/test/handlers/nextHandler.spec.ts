@@ -39,6 +39,17 @@ const expectGlobalStyleOverrides = (webpackConfig: Configuration) => {
   cssRules.forEach((rule) => expect(rule.issuer).to.be.undefined)
 }
 
+const expectCacheOverrides = (webpackConfig: Configuration, projectRoot: string) => {
+  const cache: any = webpackConfig.cache
+
+  // No cache for Webpack 4
+  if (!cache || !cache.cacheDirectory) {
+    return
+  }
+
+  expect(cache.cacheDirectory).eq(path.join(projectRoot, '.next', 'cache', 'cypress-webpack'))
+}
+
 describe('nextHandler', function () {
   // can take a while since we install node_modules
   this.timeout(1000 * 60)
@@ -57,6 +68,7 @@ describe('nextHandler', function () {
     expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
     expectGlobalStyleOverrides(webpackConfig)
+    expectCacheOverrides(webpackConfig, projectRoot)
 
     expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
     expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
@@ -76,6 +88,7 @@ describe('nextHandler', function () {
     expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
     expectGlobalStyleOverrides(webpackConfig)
+    expectCacheOverrides(webpackConfig, projectRoot)
 
     expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
     expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
@@ -95,6 +108,7 @@ describe('nextHandler', function () {
     expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
     expectGlobalStyleOverrides(webpackConfig)
+    expectCacheOverrides(webpackConfig, projectRoot)
 
     expect(sourceWebpackModulesResult.webpack.importPath).to.include('next')
     expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
