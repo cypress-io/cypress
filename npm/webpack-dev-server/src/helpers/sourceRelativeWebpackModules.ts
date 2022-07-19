@@ -1,6 +1,6 @@
 import Module from 'module'
 import path from 'path'
-import type { WebpackDevServerConfig } from '../devServer'
+import type { WebpackDevServerConfig, ALL_FRAMEWORKS } from '../devServer'
 import debugFn from 'debug'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
@@ -56,7 +56,18 @@ export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
   })
 }
 
-// Source the users framework from the provided projectRoot. The framework, if available, will server
+type FrameworkWebpackMapper = { [Property in typeof ALL_FRAMEWORKS[number]]: string | undefined }
+
+const frameworkWebpackMapper: FrameworkWebpackMapper = {
+  'create-react-app': 'react-scripts',
+  'vue-cli': '@vue/cli-service',
+  'nuxt': '@nuxt/webpack',
+  react: undefined,
+  vue: undefined,
+  next: 'next',
+}
+
+// Source the users framework from the provided projectRoot. The framework, if available, will serve
 // as the resolve base for webpack dependency resolution.
 export function sourceFramework (config: WebpackDevServerConfig): SourcedDependency | null {
   debug('Framework: Attempting to source framework for %s', config.cypressConfig.projectRoot)
@@ -66,10 +77,18 @@ export function sourceFramework (config: WebpackDevServerConfig): SourcedDepende
     return null
   }
 
+  const sourceOfWebpack = frameworkWebpackMapper[config.framework]
+
+  if (!sourceOfWebpack) {
+    debug('Not a higher-order framework so webpack dependencies should be resolvable from projectRoot')
+
+    return null
+  }
+
   const framework = { } as SourcedDependency
 
   try {
-    const frameworkJsonPath = require.resolve(`${config.framework}/package.json`, {
+    const frameworkJsonPath = require.resolve(`${sourceOfWebpack}/package.json`, {
       paths: [config.cypressConfig.projectRoot],
     })
     const frameworkPathRoot = path.dirname(frameworkJsonPath)

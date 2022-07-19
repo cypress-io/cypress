@@ -1,5 +1,7 @@
 import type { SinonStub } from 'sinon'
 
+const SidebarSettingsLinkSelector = '[data-cy="sidebar-link-settings-page"]'
+
 describe('App: Settings', () => {
   before(() => {
     cy.scaffoldProject('todos', { timeout: 50 * 1000 })
@@ -12,7 +14,7 @@ describe('App: Settings', () => {
   it('visits settings page', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
-    cy.findByText('Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
 
     cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
     cy.findByText('Device Settings').should('be.visible')
@@ -22,7 +24,7 @@ describe('App: Settings', () => {
   it('shows a button to log in if user is not connected', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
-    cy.findByText('Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Project Settings').click()
     cy.get('button').contains('Log In')
   })
@@ -35,7 +37,7 @@ describe('App: Settings', () => {
 
       cy.startAppServer('e2e')
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
       cy.get('[data-cy="code-box"]').should('contain', 'fromCli')
@@ -51,7 +53,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Record Key').should('be.visible')
     })
@@ -61,7 +63,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Dashboard Settings').click()
       cy.get('[data-cy="code-box"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
@@ -99,7 +101,7 @@ describe('App: Settings', () => {
       cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
-      cy.findByTestId('sidebar-link-settings-page').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.contains('Dashboard Settings').click()
       // Assert the data is not there before it arrives
       cy.contains('Record Key').should('not.exist')
@@ -139,7 +141,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.findByTestId('sidebar-link-settings-page').click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('2 Matches')
       cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
@@ -157,7 +159,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('41 Matches')
       cy.get('[data-cy="spec-pattern"]').contains('tests/**/*')
@@ -168,7 +170,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="settings-experiments"]').within(() => {
         cy.validateExternalLink({
@@ -231,7 +233,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="config-code"]').contains('{')
     })
@@ -241,7 +243,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
@@ -284,7 +286,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
@@ -410,7 +412,7 @@ describe('App: Settings without cloud', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
-    cy.findByText('Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Dashboard Settings').click()
     cy.findByText('Project ID').should('exist')
     cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
@@ -422,7 +424,7 @@ describe('App: Settings without cloud', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
-    cy.findByText('Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Project Settings').click()
 
     cy.get('[data-cy=config-code]').within(() => {

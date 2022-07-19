@@ -8,7 +8,8 @@ import pDefer from 'p-defer'
 import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
-import { GitDataSource } from '../../../src/sources/GitDataSource'
+import { GitDataSource, GitInfo } from '../../../src/sources/GitDataSource'
+import { toPosix } from '../../../src/util/file'
 
 describe('GitDataSource', () => {
   let git: ReturnType<typeof simpleGit>
@@ -49,9 +50,9 @@ describe('GitDataSource', () => {
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
+    const fooSpec = toPosix(path.join(e2eFolder, 'foo.cy.js'))
+    const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
+    const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
 
     gitInfo = new GitDataSource({
       isRunMode: false,
@@ -97,6 +98,65 @@ describe('GitDataSource', () => {
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.to.be.undefined
     expect(modified.lastModifiedTimestamp).not.to.be.undefined
+  })
+
+  it(`handles files with special characters on ${os.platform()}`, async () => {
+    // Validates handling of edge cases from https://github.com/cypress-io/cypress/issues/22454
+    let filepaths = [
+      'file withSpace.cy.js',
+      'file~WithTilde.cy.js',
+      'file-withHyphen.cy.js',
+      'file_withUnderscore.cy.js',
+      'file;WithSemicolon.cy.js',
+      'file,withComma.cy.js',
+      'file@withAtSymbol.cy.js',
+      'file^withCarat.cy.js',
+      'file=withEqual.cy.js',
+      'file+withPlus.cy.js',
+      'file\'withOneSingleQuote.cy.js',
+    ]
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filepaths.push('file"withOneDoubleQuote.cy.js')
+    }
+
+    filepaths = filepaths
+    .map((filename) => path.join(e2eFolder, filename))
+    .map((filepath) => toPosix(filepath))
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: sinon.stub(),
+      onGitInfoChange: sinon.stub(),
+      onError: sinon.stub(),
+    })
+
+    for (let filepath of filepaths) {
+      fs.createFileSync(filepath)
+    }
+
+    gitInfo.setSpecs(filepaths)
+
+    let results: (GitInfo | null)[] = []
+
+    do {
+      results = await Promise.all(filepaths.map(function (filepath) {
+        return gitInfo.gitInfoFor(filepath)
+      }))
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } while (results.some((r) => r == null))
+
+    expect(results).to.have.lengthOf(filepaths.length)
+
+    filepaths.forEach((filepath, index) => {
+      const result = results[index]
+
+      expect(result?.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+      expect(result?.statusType).to.eql('created')
+    })
   })
 
   it(`watches switching branches on ${os.platform()}`, async () => {
