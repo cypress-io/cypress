@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
+import { pathToFileURL } from 'url'
 
 const dynamicImport = new Function('specifier', 'return import(specifier)')
 
@@ -62,7 +63,9 @@ async function getAngularCliModules (projectRoot: string) {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
 
-      return dynamicImport(depPath)
+      const url = pathToFileURL(depPath).href
+
+      return dynamicImport(url)
     } catch (e) {
       throw new Error(`Could not resolve ${dep}`)
     }
