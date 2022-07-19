@@ -33,7 +33,7 @@
       "dismissAriaLabel": "Dismiss"
     },
     "specPattern": {
-      "matches": "{0} Matches"
+      "matches": "No Matches | {n} Match | {n} Matches"
     },
     "specPatternModal": {
       "title": "Spec pattern settings"
