@@ -78,8 +78,8 @@ export const Query = objectType({
     })
 
     t.nonNull.boolean('isGlobalMode', {
-      description: 'Whether the app is in global mode or not. This is based off the presence of a current project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.',
-      resolve: (source, args, ctx) => !ctx.currentProject,
+      description: 'Whether the app is in global mode or not. This is based off the presence of a project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.',
+      resolve: (source, args, ctx) => !ctx.modeOptions.project,
     })
 
     t.nonNull.field('authState', {
