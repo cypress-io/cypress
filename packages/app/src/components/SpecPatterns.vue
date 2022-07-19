@@ -3,13 +3,7 @@
     <div class="flex p-16px items-center justify-between">
       <FileMatchIndicator :variant="props.variant">
         <span v-if="props.variant === 'info'">specPattern</span>
-        <i18n-t
-          v-else
-          scope="global"
-          keypath="components.specPattern.matches"
-        >
-          {{ props.gql.specs.length }}
-        </i18n-t>
+        <span v-else>{{ t('components.specPattern.matches', props.gql.specs.length) }}</span>
       </FileMatchIndicator>
       <OpenConfigFileInIDE
         v-slot="{onClick}"
@@ -41,6 +35,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
+import { useI18n } from 'vue-i18n'
 import type { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
@@ -58,6 +53,7 @@ fragment SpecPatterns on CurrentProject {
 }
 `
 
+const { t } = useI18n()
 const props = defineProps<{
   gql: SpecPatternsFragment
   variant?: 'default' | 'info'

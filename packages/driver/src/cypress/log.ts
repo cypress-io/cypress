@@ -181,6 +181,7 @@ const defaults = function (state: StateFunc, config, obj) {
 
     const t = $utils.getTestFromRunnable(runnable)
 
+    // @ts-ignore
     return t._currentRetry || 0
   }
 

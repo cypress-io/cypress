@@ -29,11 +29,11 @@ describe('App: Spec List (E2E)', () => {
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
     cy.findByTestId('sidebar').within(() => {
-      cy.findByText('Specs').should('be.visible')
-      cy.findByText('Specs').click()
+      cy.findByTestId('sidebar-link-specs-page').should('be.visible')
+      cy.findByTestId('sidebar-link-specs-page').click()
     })
 
-    cy.get('[data-selected="true"]').contains('Specs').should('be.visible')
+    cy.findByTestId('sidebar-link-specs-page').find('[data-selected="true"]').should('be.visible')
   })
 
   it('displays the App Top Nav', () => {
