@@ -32,9 +32,6 @@ import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
-import { cookieJar } from './cookie-jar'
-import type { Automation } from './automation/automation'
-import type { AutomationCookie } from './automation/cookies'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -102,7 +99,6 @@ export interface OpenServerOptions {
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getAutomation: () => Automation
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
@@ -180,14 +176,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.socket.toDriver('cross:origin:delaying:html', request)
     })
-
-    this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
-        this._eventBus.emit('cross:origin:automation:cookies:received')
-      })
-
-      this.socket.toDriver('cross:origin:automation:cookies', cookies)
-    })
   }
 
   abstract createServer (
@@ -198,7 +186,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   open (config: Cfg, {
     getSpec,
-    getAutomation,
     getCurrentBrowser,
     onError,
     onWarning,
@@ -225,7 +212,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({ config, getAutomation, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
+    this.createNetworkProxy({ config, getCurrentBrowser, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
 
     if (config.experimentalSourceRewriting) {
       createInitialWorkers()
@@ -318,7 +305,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, getAutomation, remoteStates, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, getCurrentBrowser, remoteStates, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -328,10 +315,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy = new NetworkProxy({
       config,
       shouldCorrelatePreRequests,
-      getAutomation,
+      getCurrentBrowser,
       remoteStates,
       getFileServerToken,
-      getCookieJar: () => cookieJar,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,

@@ -2,7 +2,6 @@ import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
-
 import { isListening } from './util/ensure-url'
 import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 
@@ -74,8 +73,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium) {
-        return auth.start(onMessage, utmSource, utmMedium)
+      logIn (onMessage, utmCode) {
+        return auth.start(onMessage, utmCode)
       },
       logOut () {
         return user.logOut()
@@ -94,15 +93,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       insertProjectToCache (projectRoot: string) {
         return cache.insertProject(projectRoot)
       },
-      async getProjectRootsFromCache () {
-        return cache.getProjectRoots().then((roots) => {
-          return Promise.all(roots.map(async (projectRoot: string) => {
-            return {
-              projectRoot,
-              savedState: () => savedState.create(projectRoot).then((s) => s.get()),
-            }
-          }))
-        })
+      getProjectRootsFromCache () {
+        return cache.getProjectRoots()
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()
@@ -153,9 +145,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
             [slug]: Date.now(),
           },
         })
-      },
-      makeProjectSavedState (projectRoot: string) {
-        return () => savedState.create(projectRoot).then((s) => s.get())
       },
       getDevServer () {
         return devServer

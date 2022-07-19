@@ -7,7 +7,6 @@ import cwd from './cwd'
 import FileUtil from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
-import { globalPubSub } from '@packages/data-context'
 
 const debug = Debug('cypress:server:saved_state')
 
@@ -84,7 +83,7 @@ const normalizeAndAllowSet = (set, key, value) => {
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.ts`)
+    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
   return set(_.pick(valueObject, allowedKeys))
@@ -114,10 +113,6 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
     debug('making new state file around %s', fullStatePath)
     const stateFile = new FileUtil({
       path: fullStatePath,
-    })
-
-    globalPubSub.on('test:cleanup', () => {
-      stateFile.__resetForTest()
     })
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)

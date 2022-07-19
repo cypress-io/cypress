@@ -152,8 +152,7 @@ describe('Launchpad: Global Mode', () => {
 
     it('updates breadcrumb when selecting a project and navigating back', () => {
       const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
-        // The timeout is increased to account for variability in configuration load times in CI.
-        return cy.findByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
       }
 
       const resetSpies = () => {

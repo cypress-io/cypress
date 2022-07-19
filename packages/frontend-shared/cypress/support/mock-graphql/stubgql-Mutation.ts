@@ -1,4 +1,4 @@
-import type { Mutation, RemoteFetchable } from '../generated/test-graphql-types.gen'
+import type { Mutation } from '../generated/test-graphql-types.gen'
 
 import type { MaybeResolver } from './clientTestUtils'
 import { createTestCurrentProject, createTestGlobalProject } from './stubgql-Project'
@@ -6,10 +6,6 @@ import { createTestCurrentProject, createTestGlobalProject } from './stubgql-Pro
 // `path` is externalized, so we use a simple implementation of `path.basename` here
 function basename (path: string) {
   return path.split(/[/\\]/).slice(-1)[0]
-}
-
-const atob = global.atob ?? function atob (str: string) {
-  return Buffer.from(str, 'base64').toString('utf8')
 }
 
 export const stubMutation: MaybeResolver<Mutation> = {
@@ -122,21 +118,5 @@ export const stubMutation: MaybeResolver<Mutation> = {
     ctx.localSettings.preferences.isSideNavigationOpen = true
 
     return {}
-  },
-  loadRemoteFetchables (source, args, ctx) {
-    return args.ids.map((id) => {
-      const [__typename, hash] = atob(id).split(':')
-
-      const rf: RemoteFetchable & {__typename: string} = {
-        id,
-        fetchingStatus: 'FETCHING',
-        operation: '',
-        operationHash: hash,
-        operationVariables: {},
-        __typename,
-      }
-
-      return rf
-    })
   },
 }

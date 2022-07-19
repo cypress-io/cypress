@@ -38,7 +38,7 @@
   </RunsError>
   <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized'">
     <RunsError
-      v-if="hasRequestedAccess"
+      v-if="currentProject.cloudProject.hasRequestedAccess"
       icon="access"
       :button-text="t('runs.errors.unauthorizedRequested.button')"
       :button-icon="SendIcon"
@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import RunsError from './RunsError.vue'
 import { RunsErrorRenderer_RequestAccessDocument } from '../generated/graphql'
@@ -126,27 +126,13 @@ mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
 }
 `
 
-const hasRequestedAccess = ref(false)
-
-onMounted(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    hasRequestedAccess.value = props.gql.currentProject.cloudProject.hasRequestedAccess ?? false
-  }
-})
-
 const requestAccessMutation = useMutation(RunsErrorRenderer_RequestAccessDocument)
 
-async function requestAccess () {
+function requestAccess () {
   const projectId = props.gql.currentProject?.projectId
 
   if (projectId) {
-    const result = await requestAccessMutation.executeMutation({ projectId })
-
-    if (result.data?.cloudProjectRequestAccess?.__typename === 'CloudProjectUnauthorized') {
-      hasRequestedAccess.value = result.data.cloudProjectRequestAccess.hasRequestedAccess ?? false
-    } else {
-      hasRequestedAccess.value = false
-    }
+    requestAccessMutation.executeMutation({ projectId })
   }
 }
 

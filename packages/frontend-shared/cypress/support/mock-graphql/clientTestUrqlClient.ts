@@ -63,13 +63,13 @@ export function testUrqlClient (context: ClientTestContext,
               }
 
               if (onResult) {
-                if (result.data?.testFragmentMember) {
+                if (result.data.testFragmentMember) {
                   const val = onResult(result.data.testFragmentMember, context)
 
                   if (val !== undefined) {
                     result.data.testFragmentMember = val
                   }
-                } else if (result.data?.testFragmentMemberList) {
+                } else if (result.data.testFragmentMemberList) {
                   const val = onResult(result.data.testFragmentMemberList, context)
 
                   if (val !== undefined) {

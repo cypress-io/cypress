@@ -15,7 +15,7 @@ const RANDOM_STRING = 'a'.repeat(32)
 const PORT = 9001
 const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
 const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
-const FULL_LOGIN_URL_UTM = `https://foo.invalid/login.html?utm_source=UTM%20Source&utm_medium=UTM%20Medium&utm_campaign=Log%20In&port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
+const FULL_LOGIN_URL_UTM = `https://foo.invalid/login.html?utm_source=Test%20Runner&utm_medium=GUI%20Tab&utm_campaign=Log%20In&port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 
 describe('lib/gui/auth', function () {
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('lib/gui/auth', function () {
     })
 
     it('uses utm code to form a trackable URL', function () {
-      return auth._internal.buildFullLoginUrl(BASE_URL, this.server, 'UTM Source', 'UTM Medium')
+      return auth._internal.buildFullLoginUrl(BASE_URL, this.server, 'GUI Tab')
       .then((url) => {
         expect(url).to.eq(FULL_LOGIN_URL_UTM)
       })

@@ -84,9 +84,6 @@ module.exports = {
     return tx.set({ PROJECTS: projects })
   },
 
-  /**
-   * @return {Promise<string[]>}
-   */
   getProjectRoots () {
     return fileUtil.transaction((tx) => {
       return this._getProjects(tx).then((projects) => {

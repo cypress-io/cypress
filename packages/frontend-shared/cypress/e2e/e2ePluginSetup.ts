@@ -174,7 +174,6 @@ async function makeE2ETasks () {
      */
     async __internal__beforeEach () {
       testState = {}
-      await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
@@ -215,7 +214,7 @@ async function makeE2ETasks () {
 
           if (remoteGraphQLIntercept) {
             try {
-              result = await Promise.resolve(remoteGraphQLIntercept({
+              result = await remoteGraphQLIntercept({
                 operationName,
                 variables,
                 document,
@@ -223,7 +222,7 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState))
+              }, testState)
             } catch (e) {
               const err = e as Error
 

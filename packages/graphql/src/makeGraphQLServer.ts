@@ -151,8 +151,6 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
     const operation = JSON.parse(payload) as GraphQLSocketPayload
     const context = getCtx()
     const document = parse(operation.query)
-
-    DataContext.addActiveRequest()
     const result = await execute({
       operationName: operation.operationName,
       variableValues: operation.variables,
@@ -169,8 +167,6 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
     callback(result)
   } catch (e) {
     callback({ data: null, errors: [e] })
-  } finally {
-    DataContext.finishActiveRequest()
   }
 }
 
@@ -234,14 +230,10 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
       const date = new Date()
       const prefix = `${args.operationName ?? '(anonymous)'}`
 
-      DataContext.addActiveRequest()
-
       return Promise.resolve(execute(args)).then((val) => {
         debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
 
         return val
-      }).finally(() => {
-        DataContext.finishActiveRequest()
       })
     },
   }

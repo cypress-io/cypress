@@ -81,20 +81,12 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       mountingOptions?.global?.plugins?.push(pluginFn())
     })
 
-    let queryVariablesSegment = ''
-
-    if (options.variableTypes) {
-      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `\$${name}: ${type}`).join(',')
-      queryVariablesSegment = `(${queryVariablesSegment})`
-    }
-
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {
         const result = useQuery({
-          variables: options.variables,
           query: `
-            query MountFragmentTest${queryVariablesSegment} {
+            query MountFragmentTest {
               ${fieldName} {
                 ...${(source.definitions[0] as FragmentDefinitionNode).name.value}
               }
@@ -169,16 +161,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 }
 
 type MountFragmentConfig<T extends TypedDocumentNode<any, any>> = {
-  /**
-   * Dictionary of GQL variable names to their GQL data type (String, Boolean!, etc)
-   * for any variables that are used in the fragment.
-   * This should be used in conjunction with `variables`
-   */
-  variableTypes?: Record<keyof VariablesOf<T>, string>
-  /**
-   * Dictionary of variable names to their values for any variables that are used in the
-   * fragment. This should be used in conjunction with `variableTypes`
-   */
   variables?: VariablesOf<T>
   /**
    * When we are mounting a GraphQL Fragment, we can use `onResult`
@@ -198,7 +180,6 @@ type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
    * @default 2
    */
   count?: number
-  variableTypes?: Record<keyof VariablesOf<T>, string>
   variables?: VariablesOf<T>
   render: (frag: Exclude<ResultOf<T>, undefined>[]) => JSX.Element
   onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void

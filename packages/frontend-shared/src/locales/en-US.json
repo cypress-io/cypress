@@ -119,62 +119,16 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
-    "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
-    "lastUpdated": {
-      "header": "Last updated",
-      "tooltip": {
-        "gitStatus": "Git status",
-        "gitInfo": "git info",
-        "gitInfoAvailable": "{0} of the spec files within this project",
-        "gitInfoUnavailable": "Cypress is unable to detect {0} for this project and has defaulted to showing file system data instead"
-      }
-    },
-    "latestRuns": {
-      "header": "Latest runs",
-      "headerShort": "Runs",
-      "tooltip": {
-        "connected": "The {0} in the Cypress Dashboard",
-        "notConnected": "Connect to the Cypress Dashboard to see the {0}",
-        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0}",
-        "linkText": "status of your latest runs"
-      }
-    },
-    "averageDuration": {
-      "header": "Average duration",
-      "headerShort": "Duration",
-      "tooltip": {
-        "connected": "The {0} of your latest runs in the Cypress Dashboard",
-        "notConnected": "Connect to the Cypress Dashboard to see the {0} of your latest runs",
-        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0} of your latest runs",
-        "linkText": "average spec durations"
-      }
-    },
-    "connectProjectButton": "Connect your project",
-    "dashboardLoginButton": "Log in to the Dashboard",
-    "reconnectProjectButton": "Reconnect your project",
-    "requestAccessButton": "Request access",
-    "requestSentButton": "Request sent",
+    "lastUpdatedHeader": "Last updated",
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
     "noResultsMessage": "No specs matched your search:",
-    "noSpecError": {
-      "title": "Spec not found",
-      "intro": "There is no spec matching the following location:",
-      "explainer": "It is possible that the file has been moved or deleted. Please choose from the list of specs below."
-    },
-    "offlineWarning": {
-      "title": "No internet connection",
-      "explainer": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from the Cypress Dashboard."
-    },
-    "fetchFailedWarning": {
-      "title": "Lost connection",
-      "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
-      "explainer2": "Please refresh the page to try again and visit our {0} if this behavior continues.",
-      "refreshButton": "Try again"
-    }
+    "noSpecErrorTitle": "Spec not found",
+    "noSpecErrorIntro": "There is no spec matching the following location:",
+    "noSpecErrorExplainer": "It is possible that the file has been moved or deleted. Please choose from the list of specs below."
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -427,7 +381,7 @@
       "errorNotFound": "Project not found",
       "errorNotFoundButton": "Connect it again",
       "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
-      "errorNotLoggedInButton": "Log in to the Cypress Dashboard"
+      "errorNotLoggedInButton": "Log in to Cypress Dashboard"
     },
     "project": {
       "title": "Project Settings",

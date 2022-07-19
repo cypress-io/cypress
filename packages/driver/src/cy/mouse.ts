@@ -8,13 +8,8 @@ import debugFn from 'debug'
 import type { StateFunc } from '../cypress/state'
 import type { IFocused } from './focused'
 import type { ICypress } from '../cypress'
-import type { ElViewportPostion } from '../dom/coordinates'
 
 const debug = debugFn('cypress:driver:mouse')
-
-export type ForceEl = false | HTMLElement
-
-export type MouseCoords = { x?: number, y?: number}
 
 /**
  * @typedef Coords
@@ -23,7 +18,7 @@ export type MouseCoords = { x?: number, y?: number}
  * @property {Document} doc
  */
 
-const getLastHoveredEl = (state: StateFunc): HTMLElement | null => {
+const getLastHoveredEl = (state): HTMLElement | null => {
   let lastHoveredEl = state('mouseLastHoveredEl')
   const lastHoveredElAttached = lastHoveredEl && $elements.isAttachedEl(lastHoveredEl)
 
@@ -45,7 +40,7 @@ const defaultPointerDownUpOptions = {
   pressure: 0.5,
 }
 
-const getMouseCoords = (state: StateFunc) => {
+const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
@@ -210,7 +205,11 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       }, modifiersEventOptions, coordsEventOptions)
     },
 
-    move (fromElViewport: ElViewportPostion, forceEl?: ForceEl) {
+    /**
+     * @param {Coords} coords
+     * @param {HTMLElement} forceEl
+     */
+    move (fromElViewport, forceEl?) {
       debug('mouse.move', fromElViewport)
 
       const lastHoveredEl = getLastHoveredEl(state)
@@ -242,7 +241,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * - send move events to elToHover (bubbles)
      * - elLastHovered = elToHover
      */
-    _moveEvents (el: HTMLElement, coords: ElViewportPostion) {
+    _moveEvents (el, coords) {
       // events are not fired on disabled elements, so we don't have to take that into account
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
@@ -387,7 +386,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * @param {Coords} coords
      * @returns {HTMLElement}
      */
-    getElAtCoords ({ x, y, doc }: ElViewportPostion) {
+    getElAtCoords ({ x, y, doc }) {
       const el = $dom.elementFromPoint(doc, x, y)
 
       return el

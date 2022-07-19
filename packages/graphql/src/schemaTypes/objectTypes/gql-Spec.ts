@@ -47,25 +47,5 @@ export const Spec = objectType({
         return ctx.lifecycleManager.git?.gitInfoFor(source.absolute) ?? null
       },
     })
-
-    t.remoteField('cloudSpec', {
-      type: 'CloudProjectSpecResult',
-      remoteQueryField: 'cloudSpecByPath',
-      shouldEagerFetch: () => false, // defaults to false to be fully lazy and rely on the UI to fetch as needed
-      queryArgs: async (source, args, ctx) => {
-        const projectId = await ctx.project.projectId()
-        const fromBranch = ctx.lifecycleManager.git?.currentBranch
-
-        if (!projectId) {
-          return false
-        }
-
-        return {
-          projectSlug: projectId,
-          specPath: source.relative,
-          fromBranch,
-        }
-      },
-    })
   },
 })

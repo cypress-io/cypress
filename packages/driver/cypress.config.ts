@@ -5,7 +5,6 @@ export default defineConfig({
   'hosts': {
     '*.foobar.com': '127.0.0.1',
     '*.idp.com': '127.0.0.1',
-    'localalias': '127.0.0.1',
   },
   'reporter': 'cypress-multi-reporters',
   'reporterOptions': {

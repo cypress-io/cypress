@@ -33,7 +33,6 @@ namespace CypressConfigTests {
   Cypress.config().baseUrl // $ExpectType string | null
 
   // setters
-  Cypress.config('baseUrl', '.') // $ExpectType void
   Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
   Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
   Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void

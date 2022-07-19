@@ -221,8 +221,7 @@ describe('Sidebar Navigation', () => {
 
     it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
-
-      cy.findByTestId('sidebar-link-runs-page').should('have.text', 'Runs').should('be.visible').click()
+      cy.findByText('Runs').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
       cy.get('.router-link-active').findByText('Runs').should('be.visible')
     })

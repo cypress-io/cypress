@@ -1,5 +1,5 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
+import { list, objectType, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
 
@@ -85,44 +85,18 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
-    t.nonNull.field('pushFragment', {
+    t.field('pushFragment', {
       description: 'When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache',
-      type: list(nonNull(objectType({
+      type: list(objectType({
         name: 'PushFragmentPayload',
         definition (t) {
           t.nonNull.string('target')
           t.nonNull.json('fragment')
-          t.json('data', {
-            description: 'Raw data associated with the fragment to be written into the cache',
-          })
-
-          t.json('variables', {
-            description: 'Variables associated with the fragment',
-          })
-
-          t.json('errors', {
-            description: 'Any errors encountered when executing the operation',
-          })
-
-          t.boolean('invalidateCache', {
-            description: 'If present, indicates we need to invalidate the client-side cache',
-          })
+          t.json('data')
         },
-      }))),
+      })),
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('pushFragment', { sendInitial: false }),
       resolve: (source: PushFragmentData[], args, ctx) => source,
-    })
-
-    t.string('startPollingForSpecs', {
-      args: {
-        projectId: stringArg(),
-        branchName: stringArg(),
-      },
-      description: 'Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates',
-      subscribe: (source, args, ctx) => {
-        return ctx.remotePolling.subscribeAndPoll(args.branchName, args.projectId)
-      },
-      resolve: (o: string | null) => o,
     })
   },
 })

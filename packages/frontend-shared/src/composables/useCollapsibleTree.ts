@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 export type RawNode <T> = {
-  id: string
   name: string
   children: RawNode<T>[]
 }
@@ -24,12 +23,6 @@ export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
 export interface UseCollapsibleTreeOptions {
   expandInitially?: boolean
   dropRoot?: boolean
-  /**
-   * Provide a long-lived cache to preserve directory collapse state across tree re-builds.
-   * This can be useful when row data is updating but doesn't represent a change to the
-   * structure of the tree.
-   */
-  cache?: Map<string, boolean>
 }
 
 function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | null, acc: UseCollapsibleTreeNode<T>[] = []) {
@@ -45,26 +38,12 @@ function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | n
 }
 
 export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> => {
-  const { cache, expandInitially } = options
   const treeNode = rawNode as UseCollapsibleTreeNode<T>
   const roots = parent ? collectRoots<T>(parent) : []
-  const [expanded, toggle] = useToggle(cache?.get(rawNode.id) ?? !!expandInitially)
-
+  const [expanded, toggle] = useToggle(!!options.expandInitially)
   const hidden = computed(() => {
     return !!roots.find((r) => r.expanded.value === false)
   })
-
-  const wrappedToggle = (value?: boolean): boolean => {
-    const originalState = expanded.value
-    const newValue = toggle(value)
-
-    // If this is a non-hidden directory then watch for expansion changes and register them into the cache if one was provided
-    if (!!cache && !hidden.value && rawNode.children?.length) {
-      cache.set(rawNode.id, !originalState)
-    }
-
-    return newValue
-  }
 
   return {
     ...treeNode,
@@ -72,7 +51,7 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
     parent,
     hidden,
     expanded,
-    toggle: wrappedToggle,
+    toggle,
   }
 }
 
@@ -113,7 +92,7 @@ function sortTree<T extends RawNode<T>> (tree: T) {
 }
 
 export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: UseCollapsibleTreeOptions = {}) {
-  options.expandInitially = options.expandInitially ?? true
+  options.expandInitially = options.expandInitially || true
   sortTree(tree)
   const collapsibleTree = buildTree<T>(tree, options)
 

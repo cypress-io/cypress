@@ -145,7 +145,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
-const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userInvocationStack?: string | false) => {
+const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 
@@ -153,7 +153,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
 
     // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
     // otherwise use our polyfill on top.Error
-    const captureStackTrace: ErrorConstructor['captureStackTrace'] = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
+    const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
 
     captureStackTrace(newErr, captureUserInvocationStack)
 
@@ -161,7 +161,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
     // leaving nothing beyond the error message. If we get back a single line
     // (just the error message with no stack trace), then use the original value
     // instead of the trimmed one.
-    if (newErr.stack!.match('\n')) {
+    if (newErr.stack.match('\n')) {
       userInvocationStack = newErr.stack
     }
   }

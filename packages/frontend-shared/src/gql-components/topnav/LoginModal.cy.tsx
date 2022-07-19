@@ -31,7 +31,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
-    render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+    render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
   })
 }
 
@@ -39,7 +39,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   describe('progress communication', () => {
     it('renders and reaches "opening browser" status', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
@@ -59,7 +59,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => {
           gqlVal.authState.browserOpened = true
 
-          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>
+          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>
         },
       })
 
@@ -90,7 +90,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         },
         render: (gqlVal) =>
           (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} modelValue={true}/>
           </div>),
       })
 
@@ -118,7 +118,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           gqlVal.authState.message = errorText
 
           return (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} {...methods} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} modelValue={true} {...methods}/>
           </div>)
         },
       })
@@ -158,7 +158,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('renders correct components if there is no internet connection', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
 
       cy.goOffline()
@@ -171,7 +171,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
 
       cy.goOffline()

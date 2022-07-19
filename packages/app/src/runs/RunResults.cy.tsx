@@ -14,8 +14,8 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
             result[key] = res[key]
           })
         },
-        render (props) {
-          return <RunResults gql={props} />
+        render (gql) {
+          return <RunResults gql={gql} />
         },
       })
 

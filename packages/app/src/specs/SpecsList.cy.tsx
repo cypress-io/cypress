@@ -2,39 +2,38 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
+function mountWithTestingType (testingType: TestingTypeEnum) {
+  cy.mountFragment(Specs_SpecsListFragmentDoc, {
+    onResult: (ctx) => {
+      if (!ctx.currentProject) throw new Error('need current project')
+
+      ctx.currentProject.currentTestingType = testingType
+
+      return ctx
+    },
+    render: (gqlVal) => {
+      return <SpecsList gql={gqlVal} />
+    },
+  })
+}
+
+let specs: Array<SpecsListFragment> = []
+
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
-  let specs: Array<SpecsListFragment>
-
-  function mountWithTestingType (testingType: TestingTypeEnum | undefined) {
-    specs = []
-    const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
-
-    cy.mountFragment(Specs_SpecsListFragmentDoc, {
-      variableTypes: {
-        hasBranch: 'Boolean',
-      },
-      variables: {
-        hasBranch: true,
-      },
-      onResult: (ctx) => {
-        if (!ctx.currentProject) throw new Error('need current project')
-
-        specs = ctx.currentProject?.specs || []
-        if (testingType) {
-          ctx.currentProject.currentTestingType = testingType
-        }
-
-        return ctx
-      },
-      render: (gqlVal) => {
-        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
-      },
-    })
-  }
-
   context('when testingType is unset', () => {
     beforeEach(() => {
-      mountWithTestingType(undefined)
+      const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
+
+      cy.mountFragment(Specs_SpecsListFragmentDoc, {
+        onResult: (ctx) => {
+          specs = ctx.currentProject?.specs || []
+
+          return ctx
+        },
+        render: (gqlVal) => {
+          return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
+        },
+      })
     })
 
     it('should filter specs', () => {
@@ -120,51 +119,6 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
     })
-
-    describe('column headers', () => {
-      // Spec name (first) column is handled by type-specific tests below
-
-      it('should display last updated column', () => {
-        cy.findByTestId('last-updated-header').as('header')
-        cy.get('@header').should('be.visible').and('have.text', 'Last updated')
-      })
-
-      context('when screen is wide', { viewportWidth: 1200 }, () => {
-        it('should display latest runs column with full text', () => {
-          cy.findByTestId('latest-runs-header').within(() => {
-            cy.findByTestId('short-header-text').should('not.be.visible')
-            cy.findByTestId('full-header-text').should('be.visible')
-            .and('have.text', 'Latest runs')
-          })
-        })
-
-        it('should display average duration column with full text', () => {
-          cy.findByTestId('average-duration-header').within(() => {
-            cy.findByTestId('short-header-text').should('not.be.visible')
-            cy.findByTestId('full-header-text').should('be.visible')
-            .and('have.text', 'Average duration')
-          })
-        })
-      })
-
-      context('when screen is narrow', { viewportWidth: 800 }, () => {
-        it('should display latest runs column with short text', () => {
-          cy.findByTestId('latest-runs-header').within(() => {
-            cy.findByTestId('full-header-text').should('not.be.visible')
-            cy.findByTestId('short-header-text').should('be.visible')
-            .and('have.text', 'Runs')
-          })
-        })
-
-        it('should display average duration column with full text', () => {
-          cy.findByTestId('average-duration-header').within(() => {
-            cy.findByTestId('full-header-text').should('not.be.visible')
-            cy.findByTestId('short-header-text').should('be.visible')
-            .and('have.text', 'Duration')
-          })
-        })
-      })
-    })
   })
 
   context('when testingType is e2e', () => {
@@ -173,7 +127,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the e2e testing header', () => {
-      cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
+      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'E2E specs')
     })
   })
 
@@ -183,7 +137,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the component testing header', () => {
-      cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
+      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'Component specs')
     })
   })
 })

@@ -1,3 +1,4 @@
+/* globals cy */
 import _ from 'lodash'
 
 import $errUtils from '../cypress/error_utils'
@@ -5,7 +6,7 @@ import type { StateFunc } from '../cypress/state'
 
 const validAliasApiRe = /^(\d+|all)$/
 
-const xhrNotWaitedOnByIndex = (state: StateFunc, alias: string, index: number, prop: 'requests' | 'responses') => {
+const xhrNotWaitedOnByIndex = (state, alias, index, prop) => {
   // find the last request or response
   // which hasnt already been used.
   let xhrs = state(prop) || []
@@ -27,7 +28,7 @@ const xhrNotWaitedOnByIndex = (state: StateFunc, alias: string, index: number, p
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (state: StateFunc) => ({
-  getIndexedXhrByAlias (alias: string, index: number) {
+  getIndexedXhrByAlias (alias, index) {
     let prop
     let str
 
@@ -59,7 +60,7 @@ export const create = (state: StateFunc) => ({
   getRequestsByAlias (alias) {
     let prop
 
-    if (_.indexOf(alias, '.') === -1 || _.keys(state('aliases')).includes(alias)) {
+    if (_.indexOf(alias, '.') === -1 || _.keys(cy.state('aliases')).includes(alias)) {
       prop = null
     } else {
       // potentially valid prop

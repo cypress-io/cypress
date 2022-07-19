@@ -226,7 +226,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "viewportWidth",
   "waitForAnimations",
   "watchForFileChanges",
-  "specPattern",
   "browsers",
   "hosts",
   "isInteractive",

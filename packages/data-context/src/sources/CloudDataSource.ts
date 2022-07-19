@@ -3,11 +3,10 @@ import pkg from '@packages/root'
 import debugLib from 'debug'
 import { cacheExchange, Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
-import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
+import { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, print } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -25,7 +24,7 @@ import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
 import { pathToArray } from 'graphql/jsutils/Path'
 
-export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
+export type CloudDataResponse = ExecutionResult & Partial<OperationResult> & { executing?: Promise<ExecutionResult & Partial<OperationResult>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
@@ -41,15 +40,12 @@ type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
 export interface CloudExecuteQuery {
-  operation: string
-  operationHash?: string
-  operationDoc: DocumentNode
-  operationVariables: any
+  document: DocumentNode
+  variables: any
 }
 
 export interface CloudExecuteRemote extends CloudExecuteQuery {
-  fieldName: string
-  operationType?: OperationTypeNode
+  operationType: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
 }
@@ -65,12 +61,6 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
-  /**
-   * Triggered when we have an initial stale response that is not fulfilled
-   * by an additional fetch to the server. This means we've gotten into a bad state
-   * and we need to clear both the server & client side cache
-   */
-  invalidateClientUrqlCache(): void
 }
 
 /**
@@ -80,7 +70,6 @@ export interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
-  #lastCache?: string
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
@@ -106,29 +95,11 @@ export class CloudDataSource {
           // @ts-ignore
           schema: urqlSchema,
           ...urqlCacheKeys,
+          resolvers: {},
           updates: {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
                 cache.invalidate(...args)
-              },
-              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
-                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
-                  if (value instanceof Map) {
-                    const reducer = (obj: any, mapKey: any) => {
-                      obj[mapKey] = value.get(mapKey)
-
-                      return obj
-                    }
-
-                    return [...value.keys()].sort().reduce(reducer, {})
-                  }
-
-                  if (value instanceof Set) {
-                    return [...value].sort()
-                  }
-
-                  return value
-                })
               },
             },
           },
@@ -154,6 +125,10 @@ export class CloudDataSource {
     })
   }
 
+  isLoadingRemote (config: CloudExecuteRemote) {
+    return Boolean(this.#pendingPromises.get(this.#hashRemoteRequest(config)))
+  }
+
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
     return delegateToSchema({
       operation: 'query',
@@ -174,11 +149,7 @@ export class CloudDataSource {
   #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
-    return `${config.operationHash ?? this.#sha1(config.operation)}-${stringifyVariables(config.operationVariables)}`
-  }
-
-  #sha1 (str: string) {
-    return crypto.createHash('sha1').update(str).digest('hex')
+    return `${print(config.document)}-${stringifyVariables(config.variables)}`
   }
 
   #formatWithErrors = async (data: OperationResult<any, any>) => {
@@ -196,7 +167,6 @@ export class CloudDataSource {
       errors: data.error?.graphQLErrors,
     }
   }
-
   #maybeQueueDeferredExecute (config: CloudExecuteRemote, initialResult?: OperationResult) {
     const stableKey = this.#hashRemoteRequest(config)
 
@@ -206,24 +176,9 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
-    .then(async (op) => {
+    loading = this.#cloudUrqlClient.query(config.document, config.variables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
+    .then((op) => {
       this.#pendingPromises.delete(stableKey)
-
-      // If we have an initial result, by this point we expect that the query should be fully resolved in the cache.
-      // If it's not, it means that we need to clear the cache on the client/server, otherwise it's going to fall into
-      // an infinite loop trying to resolve the stale data. This likely only happens in contrived test cases, but
-      // it's good to handle regardless.
-      if (initialResult) {
-        const eagerResult = this.readFromCache(config)
-
-        if (eagerResult?.stale) {
-          await this.invalidate({ __typename: 'Query' })
-          this.params.invalidateClientUrqlCache()
-
-          return op
-        }
-      }
 
       if (initialResult && !_.isEqual(op.data, initialResult.data)) {
         debug('Different Query Value %j, %j', op.data, initialResult.data)
@@ -250,13 +205,9 @@ export class CloudDataSource {
   }
 
   hasResolved (config: CloudExecuteQuery) {
-    const eagerResult = this.#cloudUrqlClient.readQuery(config.operationDoc, config.operationVariables)
+    const eagerResult = this.#cloudUrqlClient.readQuery(config.document, config.variables)
 
     return Boolean(eagerResult)
-  }
-
-  readFromCache (config: CloudExecuteQuery) {
-    return this.#cloudUrqlClient.readQuery(config.operationDoc, config.operationVariables)
   }
 
   /**
@@ -264,18 +215,18 @@ export class CloudDataSource {
    * so we can respond quickly on first-load if we have data. Since this is ultimately being used
    * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
    */
-  executeRemoteGraphQL <T = any> (config: CloudExecuteRemote): Promise<CloudDataResponse<T>> | CloudDataResponse<T> {
+  executeRemoteGraphQL (config: CloudExecuteRemote): Promise<CloudDataResponse> | CloudDataResponse {
     // We do not want unauthenticated requests to hit the remote schema
     if (!this.#user) {
       return { data: null }
     }
 
     if (config.operationType === 'mutation') {
-      return this.#cloudUrqlClient.mutation(config.operationDoc, config.operationVariables).toPromise().then(this.#formatWithErrors)
+      return this.#cloudUrqlClient.mutation(config.document, config.variables).toPromise().then(this.#formatWithErrors)
     }
 
     // First, we check the cache to see if we have the data to fulfill this query
-    const eagerResult = this.readFromCache(config)
+    const eagerResult = this.#cloudUrqlClient.readQuery(config.document, config.variables)
 
     // If we do have a synchronous result, return it, and determine if we want to check for
     // updates to this field
@@ -307,29 +258,10 @@ export class CloudDataSource {
     `, { args }, {
       fetchOptions: {
         headers: {
-          // Not urgent, but a nice-to-have, replace this with an exchange to
-          // be more explicit about filtering out this request, rather than looking at headers
-          // in the in the "fetch" exchange
+          // TODO: replace this with an exhange to filter out this request
           INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
         },
       },
     }).toPromise()
-  }
-
-  async getCache () {
-    await this.#cloudUrqlClient.mutation(`
-      mutation Internal_showUrqlCache { 
-        _showUrqlCache
-      }
-    `, { }, {
-      fetchOptions: {
-        headers: {
-          // Same note as above on the "invalidate", we could make this a bit clearer
-          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
-        },
-      },
-    }).toPromise()
-
-    return JSON.parse(this.#lastCache ?? '')
   }
 }

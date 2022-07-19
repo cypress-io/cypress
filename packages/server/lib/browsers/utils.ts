@@ -3,7 +3,8 @@ import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
-import * as plugins from '../plugins'
+// @ts-ignore
+import plugins from '../plugins'
 import { getError } from '@packages/errors'
 
 const path = require('path')

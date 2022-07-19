@@ -51,8 +51,6 @@ export async function createConfigString (cfg: LegacyCypressConfigJson, options:
   const newConfig = reduceConfig(cfg, options)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
-  debug('creating cypress.config from newConfig %o relativePluginPath %s options %o', newConfig, relativePluginPath, options)
-
   return createCypressConfig(newConfig, relativePluginPath, options)
 }
 
@@ -190,67 +188,6 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-// Returns path of `pluginsFile` relative to projectRoot
-// Considers cases of:
-// 1. `pluginsFile` pointing to a directory containing an index file
-// 2. `pluginsFile` pointing to a file
-//
-// Example:
-// - projectRoot
-// --- cypress
-// ----- plugins
-// -------- index.js
-// Both { "pluginsFile": "cypress/plugins"} and { "pluginsFile": "cypress/plugins/index.js" } are valid.
-//
-// Will return `cypress/plugins/index.js` for both cases.
-export async function getLegacyPluginsCustomFilePath (projectRoot: string, pluginPath: string): Promise<string> {
-  debug('looking for pluginPath %s in projectRoot %s', pluginPath, projectRoot)
-
-  const pluginLoc = path.join(projectRoot, pluginPath)
-
-  debug('fs.stats on %s', pluginLoc)
-
-  let stats: fs.Stats
-
-  try {
-    stats = await fs.stat(pluginLoc)
-  } catch (e) {
-    throw Error(`Looked for pluginsFile at ${pluginPath}, but it was not found.`)
-  }
-
-  if (stats.isFile()) {
-    debug('found pluginsFile %s', pluginLoc)
-
-    return pluginPath
-  }
-
-  if (stats.isDirectory()) {
-    // Although you are supposed to pass a file to `pluginsFile`, we also supported
-    // passing a directory containing an `index` file.
-    // If pluginsFile is a directory, see if there is an index.{js,ts} and grab that.
-    // {
-    //    "pluginsFile": "plugins"
-    // }
-    // Where cypress/plugins contains an `index.{js,ts,coffee...}` but NOT `index.d.ts`.
-    const ls = await fs.readdir(pluginLoc)
-    const indexFile = ls.find((file) => file.startsWith('index.') && !file.endsWith('.d.ts'))
-
-    debug('pluginsFile was a directory containing %o, looks like we want %s', ls, indexFile)
-
-    if (indexFile) {
-      const pathToIndex = path.join(pluginPath, indexFile)
-
-      debug('found pluginsFile %s', pathToIndex)
-
-      return pathToIndex
-    }
-  }
-
-  debug('error, could not find path to pluginsFile!')
-
-  throw Error(`Could not find pluginsFile. Received projectRoot ${projectRoot} and pluginPath: ${pluginPath}`)
-}
-
 async function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
   if (createConfigOptions.shouldAddCustomE2ESpecPattern && !options.specPattern) {
     options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
@@ -264,7 +201,8 @@ async function createE2ETemplate (pluginPath: string | undefined, createConfigOp
     `
   }
 
-  let relPluginsPath: string
+  const pluginFile = await fs.readFile(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
+  let relPluginsPath
 
   const startsWithDotSlash = new RegExp(/^.\//)
 
@@ -273,9 +211,6 @@ async function createE2ETemplate (pluginPath: string | undefined, createConfigOp
   } else {
     relPluginsPath = `'./${pluginPath}'`
   }
-
-  const legacyPluginFileLoc = await getLegacyPluginsCustomFilePath(createConfigOptions.projectRoot, pluginPath)
-  const pluginFile = await fs.readFile(path.join(createConfigOptions.projectRoot, legacyPluginFileLoc), 'utf8')
 
   const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require(${relPluginsPath}).default(on, config)`

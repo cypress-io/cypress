@@ -37,7 +37,6 @@ import { EventEmitter2 } from 'eventemitter2'
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
 import type { StateFunc } from './state'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -123,17 +122,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-interface ICyFocused extends Omit<
-  IFocused,
-  'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> {}
-
-interface ICySnapshots extends Omit<
-  ISnapshots,
-  'onCssModified' | 'onBeforeWindowLoad'
-> {}
-
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ICySnapshots, ICyFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -205,19 +194,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
 
-  resetTimer: ReturnType<typeof createTimer>['reset']
-  overrides: IOverrides
-
   // Private methods
+  resetTimer: ReturnType<typeof createTimer>['reset']
 
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
 
+  onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
+  overrides: IOverrides
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
@@ -358,11 +347,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.detachDom = snapshots.detachDom
     this.getStyles = snapshots.getStyles
 
+    this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy)
 
     setTopOnError(Cypress, this)
 
@@ -373,30 +363,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
       this.enqueue(attrs)
-    })
-
-    Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      const existingCookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
-
-      this.state('cross:origin:automation:cookies', existingCookies.concat(cookies))
-
-      Cypress.backend('cross:origin:automation:cookies:received')
-    })
-
-    Cypress.on('before:stability:release', (stable: boolean) => {
-      const cookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
-
-      if (!stable || !cookies.length) return
-
-      // reset the state cookies before setting them via automation in case
-      // any more get set in the interim
-      state('cross:origin:automation:cookies', [])
-
-      // this will be awaited before any stability-reliant actions
-      return Cypress.automation('add:cookies', cookies)
-      .catch(() => {
-        // errors here can be ignored as they're not user-actionable
-      })
     })
   }
 
@@ -1104,6 +1070,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // reset the nestedIndex back to null
     this.state('nestedIndex', null)
+
+    // also reset recentlyReady back to null
+    this.state('recentlyReady', null)
 
     // and forcibly move the index needle to the
     // end in case we have after / afterEach hooks

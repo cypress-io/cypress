@@ -66,17 +66,6 @@ type CachedUser implements Node {
 }
 
 """
-Represents a pollable status for clients to know when refetching data is required.
-"""
-type CloudLatestRunUpdateSpecData {
-  """DateTime of the latest update in a project."""
-  mostRecentUpdate: DateTime
-
-  """Recommended seconds to wait before next poll."""
-  pollingInterval: Int
-}
-
-"""
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
 type CloudOrganization implements Node {
@@ -200,60 +189,6 @@ type CloudProjectNotFound {
 
 union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUnauthorized
 
-type CloudProjectSpec implements Node {
-  """Average duration the spec takes to run"""
-  averageDuration(
-    """
-    The branch to measure average duration against. This will fallback to the closest branch with data.
-    """
-    fromBranch: String!
-  ): Float
-
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
-  id: ID!
-  isConsideredFlaky(
-    """The branch to measure flakiness against"""
-    fromBranch: String!
-  ): Boolean
-
-  """
-  Current DateTime on the server. Used in connection with CloudLatestRunUpdateSpecData.
-  """
-  retrievedAt: DateTime
-
-  """Shortened spec path"""
-  specPath: String
-
-  """Runs this spec has been involved with."""
-  specRuns(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """
-    The branch to filter on for the specs. This will fallback to the closest branch with data.
-    """
-    fromBranch: String!
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): CloudSpecRunConnection
-}
-
-"""Unable to find cloud spec in project"""
-type CloudProjectSpecNotFound {
-  """an error message"""
-  message: String!
-  retrievedAt: DateTime
-}
-
-union CloudProjectSpecResult = CloudProjectSpec | CloudProjectSpecNotFound | CloudProjectUnauthorized
-
 """Unauthorized access"""
 type CloudProjectUnauthorized {
   """does the user have a requested access pending"""
@@ -277,12 +212,10 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  completedAt: DateTime
   createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
-  runNumber: Int
   status: CloudRunStatus
   tags: [CloudRunTag]
 
@@ -372,84 +305,6 @@ type CloudRunTag implements Node {
   name: String
 }
 
-"""
-A Recorded run of a given spec from the Test Runner, typically to the cloud
-"""
-type CloudSpecRun implements Node {
-  """When the run was completed"""
-  completedAt: DateTime
-
-  """When the run was created"""
-  createdAt: DateTime
-
-  """Amount of groups this spec was run in"""
-  groupCount: Int
-
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
-  id: ID!
-
-  """Incremental run number assigned"""
-  runNumber: Int
-
-  """
-  Aggregate information about how long the spec took to run in the groups
-  """
-  specDuration: SpecDataAggregate
-
-  """Most important status for the spec shared between all groups"""
-  status: CloudSpecStatus
-
-  """Aggregate information about how many tests failed in the groups"""
-  testsFailed: SpecDataAggregate
-
-  """Aggregate information about how many tests passed in the groups"""
-  testsPassed: SpecDataAggregate
-
-  """Aggregate information about how many tests are pending in the groups"""
-  testsPending: SpecDataAggregate
-
-  """Aggregate information about how many tests were skipped in the groups"""
-  testsSkipped: SpecDataAggregate
-
-  """A link to the run overview page filtered by spec"""
-  url: String
-}
-
-type CloudSpecRunConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [CloudSpecRunEdge!]!
-
-  """Flattened list of CloudSpecRun type"""
-  nodes: [CloudSpecRun!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type CloudSpecRunEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: CloudSpecRun!
-}
-
-"""Possible check status of the spec within a run"""
-enum CloudSpecStatus {
-  CANCELLED
-  ERRORED
-  FAILED
-  NOTESTS
-  PASSED
-  RUNNING
-  TIMEDOUT
-  UNCLAIMED
-}
-
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -531,15 +386,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """The remote associated project from Cypress Dashboard"""
   cloudProject: CloudProjectResult
-
-  """
-  A refetchable remote field implementation to fetch the cloudProject,
-  this can safely be used when rendering a list of projects
-  """
-  cloudProjectRemote(
-    """A globally unique name for this field"""
-    name: String!
-  ): RemoteFetchableCloudProjectResult
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
@@ -927,15 +773,6 @@ enum GitInfoStatusType {
 
 """A project which exists on the filesystem but has not been opened"""
 type GlobalProject implements Node & ProjectLike {
-  """
-  A refetchable remote field implementation to fetch the cloudProject,
-  this can safely be used when rendering a list of projects
-  """
-  cloudProjectRemote(
-    """A globally unique name for this field"""
-    name: String!
-  ): RemoteFetchableCloudProjectResult
-
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
@@ -1123,9 +960,6 @@ type Mutation {
   """Used internally to update the URQL cache in the CloudDataSource"""
   _cloudCacheInvalidate(args: JSON): Boolean
 
-  """Internal use only, clears the cloud cache"""
-  _showUrqlCache: JSON
-
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1179,14 +1013,8 @@ type Mutation {
     id: ID!
   ): CurrentProject
 
-  """Fetches the remote data for a RemoteFetchable ID"""
-  loadRemoteFetchables(
-    """The identifier for the RemoteFetchable we are loading"""
-    ids: [ID!]!
-  ): [RemoteFetchable]!
-
   """Auth with Cypress Dashboard"""
-  login(utmMedium: String!, utmSource: String!): Query
+  login: Query
 
   """Log out of Cypress Dashboard"""
   logout: Query
@@ -1336,15 +1164,6 @@ enum PluginsState {
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
 interface ProjectLike {
-  """
-  A refetchable remote field implementation to fetch the cloudProject,
-  this can safely be used when rendering a list of projects
-  """
-  cloudProjectRemote(
-    """A globally unique name for this field"""
-    name: String!
-  ): RemoteFetchableCloudProjectResult
-
   """Used to associate project with Cypress dashboard"""
   projectId: String
 
@@ -1360,19 +1179,9 @@ type ProjectPreferences {
 }
 
 type PushFragmentPayload {
-  """Raw data associated with the fragment to be written into the cache"""
   data: JSON
-
-  """Any errors encountered when executing the operation"""
-  errors: JSON
   fragment: JSON!
-
-  """If present, indicates we need to invalidate the client-side cache"""
-  invalidateCache: Boolean
   target: String!
-
-  """Variables associated with the fragment"""
-  variables: JSON
 }
 
 """The root "Query" type containing all entry fields for our querying"""
@@ -1381,22 +1190,6 @@ type Query {
   authState: AuthState!
   baseError: ErrorWrapper
   cachedUser: CachedUser
-
-  """
-  Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.
-  """
-  cloudLatestRunUpdateSpecData(
-    """
-    Clients active branch to search for builds. This will fallback to the closest branch with data.
-    """
-    commitBranch: String!
-
-    """A list of Project slugs"""
-    projectSlug: String!
-
-    """Datetime since the fetched data"""
-    sinceDateTime: DateTime
-  ): CloudLatestRunUpdateSpecData
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
@@ -1418,15 +1211,6 @@ type Query {
     """A list of Project slugs"""
     slugs: [String!]!
   ): [CloudProjectResult]
-
-  """Gets a set of specs on a given project and branch"""
-  cloudSpecByPath(
-    """Slug of the project to which the set of specs belong"""
-    projectSlug: String!
-
-    """The spec path to find"""
-    specPath: String!
-  ): CloudProjectSpecResult
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
@@ -1471,110 +1255,6 @@ type Query {
   wizard: Wizard!
 }
 
-"""
-Represents a container for a piece of remote data stitched into the graph
-"""
-interface RemoteFetchable implements Node {
-  """The raw data response when resolving the data"""
-  dataRaw: JSON
-
-  """JSON representation of the error response"""
-  error: JSON
-
-  """The current fetching status of the fetchable data"""
-  fetchingStatus: RemoteFetchableStatus!
-
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
-  id: ID!
-
-  """Prints the full operation sent for this query, for debugging purposes"""
-  operation: String!
-
-  """The hash of the operation, for debugging purposes"""
-  operationHash: String!
-
-  """The variables passed to the operation, for debugging purposes"""
-  operationVariables: JSON!
-}
-
-"""
-Wrapper for the resolution remote RemoteFetchableCloudProjectResult data
-"""
-type RemoteFetchableCloudProjectResult implements Node & RemoteFetchable {
-  """Data resolved for the RemoteFetchableCloudProjectResult from the cloud"""
-  data: CloudProjectResult
-
-  """The raw data response when resolving the data"""
-  dataRaw: JSON
-
-  """JSON representation of the error response"""
-  error: JSON
-
-  """The current fetching status of the fetchable data"""
-  fetchingStatus: RemoteFetchableStatus!
-
-  """
-  This ID is generated based on hashes of the queried data, and should be passed to the loadRemoteFetchables mutation to initiate loading the remote data
-  """
-  id: ID!
-
-  """Prints the full operation sent for this query, for debugging purposes"""
-  operation: String!
-
-  """The hash of the operation, for debugging purposes"""
-  operationHash: String!
-
-  """The variables passed to the operation, for debugging purposes"""
-  operationVariables: JSON!
-}
-
-"""
-Wrapper for the resolution remote RemoteFetchableCloudProjectSpecResult data
-"""
-type RemoteFetchableCloudProjectSpecResult implements Node & RemoteFetchable {
-  """
-  Data resolved for the RemoteFetchableCloudProjectSpecResult from the cloud
-  """
-  data: CloudProjectSpecResult
-
-  """The raw data response when resolving the data"""
-  dataRaw: JSON
-
-  """JSON representation of the error response"""
-  error: JSON
-
-  """The current fetching status of the fetchable data"""
-  fetchingStatus: RemoteFetchableStatus!
-
-  """
-  This ID is generated based on hashes of the queried data, and should be passed to the loadRemoteFetchables mutation to initiate loading the remote data
-  """
-  id: ID!
-
-  """Prints the full operation sent for this query, for debugging purposes"""
-  operation: String!
-
-  """The hash of the operation, for debugging purposes"""
-  operationHash: String!
-
-  """The variables passed to the operation, for debugging purposes"""
-  operationVariables: JSON!
-}
-
-enum RemoteFetchableStatus {
-  """Errored while fetching"""
-  ERRORED
-
-  """We have loaded the remote data"""
-  FETCHED
-
-  """Currently fetching"""
-  FETCHING
-
-  """Has not been fetched yet"""
-  NOT_FETCHED
-}
-
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
   """Info about the file we just scaffolded"""
@@ -1596,12 +1276,6 @@ type Spec implements Node {
 
   """Full name of spec file (e.g. MySpec.test.tsx)"""
   baseName: String!
-
-  """Wrapper for resolving remote data associated with this field"""
-  cloudSpec(
-    """A globally unique name for this field"""
-    name: String!
-  ): RemoteFetchableCloudProjectSpecResult
 
   """The file extension (e.g. tsx, jsx)"""
   fileExtension: String!
@@ -1628,15 +1302,6 @@ type Spec implements Node {
 
   """Type of spec (e.g. component | integration)"""
   specType: SpecType!
-}
-
-"""Aggregate data from multiple groups for a spec run"""
-type SpecDataAggregate {
-  """Maximum value in the groups"""
-  max: Int
-
-  """Minimum value in the groups"""
-  min: Int
 }
 
 enum SpecType {
@@ -1676,15 +1341,10 @@ type Subscription {
   """
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
-  pushFragment: [PushFragmentPayload!]!
+  pushFragment: [PushFragmentPayload]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
-
-  """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
-  """
-  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

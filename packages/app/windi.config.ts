@@ -1,5 +1,4 @@
-/**
- * This file is used for vscode plugin autocompletion of windi colors
- */
+import { defaultConfig } from '@packages/frontend-shared/windi.config'
+import { defineConfig } from 'windicss/helpers'
 
-export { default } from '@packages/frontend-shared/windi.config'
+export default defineConfig(defaultConfig)

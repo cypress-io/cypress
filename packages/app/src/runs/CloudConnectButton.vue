@@ -10,7 +10,6 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
-    utm-medium="Runs Tab"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"

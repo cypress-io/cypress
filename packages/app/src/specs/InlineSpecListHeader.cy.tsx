@@ -10,6 +10,7 @@ describe('InlineSpecListHeader', () => {
     cy.wrap(search).as('search')
 
     const methods = {
+      search: search.value,
       'onUpdate:search': (val: string) => {
         search.value = val
       },
@@ -18,7 +19,7 @@ describe('InlineSpecListHeader', () => {
 
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        <InlineSpecListHeader {...methods} search={search.value} resultCount={resultCount} />
+        <InlineSpecListHeader {...methods} resultCount={resultCount} />
       </div>))
   }
 
@@ -27,7 +28,6 @@ describe('InlineSpecListHeader', () => {
     const searchString = 'my/component.cy.tsx'
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
-    // `force` necessary due to the field label being overlaid on top of the input
     .type(searchString, { delay: 0, force: true })
     .get('@search').its('value').should('eq', searchString)
   })
@@ -38,21 +38,6 @@ describe('InlineSpecListHeader', () => {
     .click()
     .get('@new-spec')
     .should('have.been.called')
-  })
-
-  it('clears search field when clear button is clicked', () => {
-    mountWithResultCount(0)
-
-    cy.findByTestId('clear-search-button')
-    .should('not.exist')
-
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
-    // `force` necessary due to the field label being overlaid on top of the input
-    .type('abcd', { delay: 0, force: true })
-    .get('@search').its('value').should('eq', 'abcd')
-
-    cy.findByTestId('clear-search-button').click()
-    cy.get('@search').its('value').should('eq', '')
   })
 
   it('exposes the result count correctly to assistive tech', () => {

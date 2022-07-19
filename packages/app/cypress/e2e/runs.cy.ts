@@ -10,7 +10,7 @@ function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') 
 
   // make sure there are no runs found for the project ID
   cy.remoteGraphQLIntercept(async (obj) => {
-    if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
+    if (obj.result.data?.cloudProjectBySlug) {
       obj.result.data.cloudProjectBySlug.runs.nodes = []
     }
 
@@ -136,7 +136,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
           }
@@ -597,6 +597,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       let cloudData: any
 
       cy.loginUser()
+      cy.visitApp()
+
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
           cloudData = obj.result
@@ -608,10 +610,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.visitApp()
-
       cy.findByTestId('sidebar-link-runs-page').click()
-
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
       cy.percySnapshot()
 
