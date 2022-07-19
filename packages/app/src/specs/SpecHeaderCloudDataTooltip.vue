@@ -22,7 +22,7 @@
       #popper
     >
       <div
-        class="flex flex-col border-t-indigo-400 border-t-4px text-sm text-center p-4 items-center"
+        class="flex flex-col text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div
