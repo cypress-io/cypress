@@ -11,7 +11,7 @@ const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
 }
 
-function addBlackoutForElement ($body, $el) {
+function addBlackoutForElement ($body: JQuery<HTMLBodyElement>, $el: JQuery<HTMLElement>) {
   const dimensions = $dimensions.getElementDimensions($el)
   const width = dimensions.widthWithBorder
   const height = dimensions.heightWithBorder
@@ -32,8 +32,8 @@ function addBlackoutForElement ($body, $el) {
   $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
 }
 
-function addBlackouts ($body, $container, selector) {
-  let $el
+function addBlackouts ($body: JQuery<HTMLBodyElement>, $container: JQuery<HTMLElement>, selector: string) {
+  let $el: JQuery<HTMLElement>
 
   try {
     // only scope blacked out elements to to screenshotted element, not necessarily the whole body
@@ -49,7 +49,7 @@ function addBlackouts ($body, $container, selector) {
   })
 }
 
-function removeBlackouts ($body) {
+function removeBlackouts ($body: JQuery<HTMLBodyElement>) {
   $body.find('.__cypress-blackout').remove()
 }
 
