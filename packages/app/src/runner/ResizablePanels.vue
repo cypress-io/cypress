@@ -8,6 +8,7 @@
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
+    <!-- using v-show to preserve state since panel1 is collapsible/expandable by the user from the UI -->
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
@@ -25,7 +26,7 @@
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
-
+    <!-- using v-show to preserve state since panel2 is collapsible/expandable during screenshots -->
     <div
       v-show="showPanel2"
       data-cy="reporter-panel"

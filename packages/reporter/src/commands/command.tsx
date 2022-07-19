@@ -25,7 +25,21 @@ const md = new Markdown()
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
+
+export const formattedMessage = (message: string) => {
+  if (!message) return ''
+
+  const searchText = ['to match', 'to equal']
+  const regex = new RegExp(searchText.join('|'))
+  const split = message.split(regex)
+  const matchingText = searchText.find((text) => message.includes(text))
+  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
+  const converted = md.renderInline(textToConvert)
+  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+
+  return [converted, ...assertion].join(' ')
+}
+
 const invisibleMessage = (model: CommandModel) => {
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :

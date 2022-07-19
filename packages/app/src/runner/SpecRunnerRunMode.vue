@@ -17,7 +17,7 @@
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
       :show-panel1="false"
-      :show-panel2="!screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -26,6 +26,7 @@
           class="h-full"
         >
           <div
+            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -84,10 +85,6 @@ import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 
-// See TODO comments within the template block of this file.
-// import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-// import AutomationMissing from './automation/AutomationMissing.vue'
-
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
@@ -109,6 +106,8 @@ const {
   startSpecWatcher,
   cleanupRunner,
 } = useEventManager()
+
+const hideCommandLog = runnerUiStore.hideCommandLog
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
