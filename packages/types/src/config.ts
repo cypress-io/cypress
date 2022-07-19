@@ -21,7 +21,7 @@ export type ResolvedConfigurationOptions = Partial<{
 // (eg from plugin, env, default etc...)
 // which is used for showing the config in the UI.
 export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions> {
-  additionalIgnorePattern?: string
+  additionalIgnorePattern?: string | string[]
   resolved: ResolvedConfigurationOptions
 }
 
