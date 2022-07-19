@@ -1,5 +1,5 @@
 import React from 'react'
-import Command, { SessionPill } from './command'
+import Command from './command'
 import CommandModel from './command-model'
 
 describe('commands', () => {
@@ -14,21 +14,12 @@ describe('commands', () => {
       'failed',
     ]
 
-    it('sessionPill', () => {
-      cy.mount(
-        <div className='command-wrapper'>
-          {statusList.map((status) => <SessionPill status={status} />)}
-        </div>,
-      )
-
-      cy.percySnapshot()
-    })
-
-    it('sessionPill in command', () => {
+    it('session status in command', () => {
       cy.mount(
         <div>
           {statusList.map((status, index) => (
             <Command
+              key={status}
               model={
                 new CommandModel({
                   name: 'session',

@@ -8,7 +8,7 @@ describe('persist saved sessions between spec reruns', () => {
 
     if (!top.count) {
       return cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
+        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('CREATED')
         top.count++
 
         // this simulates interactive/open mode
@@ -26,7 +26,7 @@ describe('persist saved sessions between spec reruns', () => {
     cy.$$('.runnable-active', top.document)[0].click()
 
     cy.wrap(null).should(() => {
-      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('restored')
+      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('RESTORED')
     })
   })
 })

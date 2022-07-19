@@ -10,7 +10,7 @@ describe('after running spec with saved session', () => {
     })
 
     return cy.wrap(null).should(() => {
-      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
+      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('CREATED')
     })
   })
 })
