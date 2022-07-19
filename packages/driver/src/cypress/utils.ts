@@ -312,8 +312,8 @@ export default {
     return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
   },
 
-  getTestFromRunnable (r) {
-    return r.ctx.currentTest || r
+  getTestFromRunnable (r: Mocha.Runnable) {
+    return r.ctx?.currentTest || r
   },
 
   memoize (func, cacheInstance = new Map()) {

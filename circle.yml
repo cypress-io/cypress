@@ -667,7 +667,7 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: 
+      - run:
           name: 'Verify Mocha Results'
           command: |
             source ./scripts/ensure-node.sh
@@ -1653,7 +1653,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs      
+      - store-npm-logs
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -1675,7 +1675,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs            
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
@@ -2408,7 +2408,7 @@ linux-x64-workflow: &linux-x64-workflow
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install          
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2460,9 +2460,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-cypress-schematic:
         requires:
           - build
-    # # This release definition must be updated with any new jobs
-    # # Any attempts to automate this are welcome
-    # # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
         context: test-runner:npm-release
         requires:
@@ -2510,8 +2510,8 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
 
-    # # various testing scenarios, like building full binary
-    # # and testing it on a real project
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
     - test-against-staging:
         context: test-runner:record-tests
         <<: *mainBuildFilters
