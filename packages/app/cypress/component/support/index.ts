@@ -24,6 +24,7 @@ import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
 import type { Pinia } from 'pinia'
 import 'cypress-real-events/support'
+
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 
 let pinia: Pinia
@@ -44,6 +45,6 @@ beforeEach(() => {
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
 
-installCustomPercyCommand()
+installCustomPercyCommand({ component: true })
 
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))

@@ -2,6 +2,7 @@
 
 import '@percy/cypress'
 import type { SnapshotOptions } from '@percy/core'
+import 'cypress-axe'
 
 export interface CustomSnapshotOptions extends SnapshotOptions{
   /**
@@ -189,7 +190,7 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'] } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides, component }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], component?: boolean } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -202,6 +203,48 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
    *   precedence over the global override defined when the command was installed.
    */
   const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
+    if (component) {
+      Cypress.Commands.add('injectAxe', () => {
+        // this is a work around for the issue with require.resolve
+        // described here: https://github.com/component-driven/cypress-axe/issues/134
+        cy.window({ log: false }).then((window) => {
+          const axe = require('axe-core/axe.js')
+          const script = window.document.createElement('script')
+
+          script.innerHTML = axe.source
+          window.document.head.appendChild(script)
+        })
+      })
+    }
+
+    cy.injectAxe()
+
+    if (component) {
+      cy.configureAxe({
+        rules: [
+          {
+            id: 'html-has-lang',
+            enabled: false,
+          },
+          {
+            id: 'landmark-one-main',
+            enabled: false,
+          },
+          {
+            id: 'page-has-heading-one',
+            enabled: false,
+          },
+          {
+            id: 'region',
+            enabled: false,
+          },
+        ],
+      })
+    }
+
+    // passing undefined so that we can set the final boolean to ignore failures for now
+    cy.checkA11y(undefined, undefined, undefined, true)
+
     if (name && typeof name === 'object') {
       options = name
       name = undefined
