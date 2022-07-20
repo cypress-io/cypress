@@ -151,6 +151,15 @@
         "linkText": "average spec durations"
       }
     },
+    "flaky": {
+      "badgeLabel": "Flaky",
+      "severityLow": "Low",
+      "severityMedium": "Medium",
+      "severityHigh": "High",
+      "flakyRate": "{0}% flaky rate",
+      "flakyRuns": "{0} flaky runs / {1} total",
+      "lastFlaky": "Last flaky {0} runs ago"
+    },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
     "reconnectProjectButton": "Reconnect your project",

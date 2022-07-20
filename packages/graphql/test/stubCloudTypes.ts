@@ -21,7 +21,10 @@ import type {
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
+  CloudProjectSpec,
+  CloudProjectSpecResult,
   CloudRunStatus,
+  CloudSpecRun,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -207,6 +210,25 @@ export function createCloudOrganization (config: Partial<CloudOrganization>): Re
   return indexNode(cloudOrgData)
 }
 
+export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>): Required<CloudProjectSpec> {
+  const specResult: Required<CloudProjectSpec> = {
+    ...testNodeId('CloudProjectSpec'),
+    averageDuration: 1234,
+    isConsideredFlaky: false,
+    retrievedAt: new Date().toISOString(),
+    specPath: '/test.cy.ts',
+    specRuns: {
+      __typename: 'CloudSpecRunConnection' as const,
+      pageInfo: {} as any,
+      edges: [] as any,
+      nodes: [] as CloudSpecRun[],
+    },
+    ...config,
+  }
+
+  return indexNode(specResult)
+}
+
 export const CloudRecordKeyStubs = {
   e2eProject: createCloudRecordKey({}),
   componentProject: createCloudRecordKey({}),
@@ -278,6 +300,7 @@ export const CloudProjectStubs = {
     cloudProjectSettingsUrl: 'http:/test.cloud/component/settings',
     cloudProjectUrl: 'http:/test.cloud/component/settings',
   }),
+  specResult: createCloudProjectSpecResult({}),
 } as const
 
 interface CloudTypesContext {
@@ -324,5 +347,10 @@ export const CloudQuery: MaybeResolver<Query> = {
   },
   cloudNodesByIds ({ ids }) {
     return ids.map((id) => nodeRegistry[id] ?? null)
+  },
+  cloudSpecByPath ({ path }) {
+    return createCloudProjectSpecResult({
+      specPath: path,
+    })
   },
 }
