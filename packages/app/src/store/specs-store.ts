@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 export interface SpecState {
   activeSpec: SpecFile | null | undefined
+  activeSpecs: Array<SpecFile> | []
 }
 
 export const useSpecStore = defineStore({
@@ -11,12 +12,16 @@ export const useSpecStore = defineStore({
   state (): SpecState {
     return {
       activeSpec: undefined,
+      activeSpecs: [],
     }
   },
 
   actions: {
     setActiveSpec (activeSpec: SpecFile | null) {
       this.activeSpec = activeSpec
+    },
+    setActiveSpecs (activeSpecs: Array<SpecFile> | []) {
+      this.activeSpecs = activeSpecs
     },
   },
 })
