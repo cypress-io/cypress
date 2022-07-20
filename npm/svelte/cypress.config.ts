@@ -13,7 +13,7 @@ export default defineConfig({
   component: {
     devServer: {
       bundler: 'vite',
-      framework: 'vue',
+      framework: 'svelte',
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
