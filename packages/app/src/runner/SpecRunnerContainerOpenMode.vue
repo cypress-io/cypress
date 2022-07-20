@@ -1,6 +1,6 @@
 <template>
   <SpecRunnerOpenMode
-    v-if="initialized && specStore.activeSpec"
+    v-if="initialized && specStore.activeSpecs"
     :gql="props.gql"
   />
 </template>
