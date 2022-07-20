@@ -8,13 +8,16 @@ import {
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-// when we mount a Vue component, we add it to the global Cypress object
-// so here we extend the global Cypress namespace and its Cypress interface
+// when we mount a Svelte component, we add it to the global Cypress object
+// so here we extend the global Cypress namespace and its Cypress interface.
+// Svelte users are used to using $set and $destroy to trigger the Svelte reactivity engine.
+// We have parallels to this in Cypress.vueWrapper.
 declare global {
   // eslint-disable-next-line no-redeclare
   namespace Cypress {
     interface Cypress {
-      svelteComponent: any // TODO, types
+      // TODO, types
+      svelteComponent: any
     }
   }
 }
@@ -138,7 +141,7 @@ function getComponentDisplayName (componentOptions: any): string {
  * Helper function for mounting a component quickly in test hooks.
  * @example
  *  import {mountCallback} from '@cypress/svelte'
- *  beforeEach(mountVue(component, options))
+ *  beforeEach(mountSvelte(component, options))
  */
 export function mountCallback (
   component: any,
