@@ -67,8 +67,6 @@ export function getEventManager () {
   return _eventManager
 }
 
-window.getEventManager = getEventManager
-
 let _autIframeModel: AutIframe
 
 /**
@@ -171,7 +169,7 @@ function teardownSpec () {
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
-let isTorndown = false
+let isTornDown = false
 
 /**
  * Called when navigating away from the runner page.
@@ -184,7 +182,7 @@ export async function teardown () {
   _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
-  isTorndown = true
+  isTornDown = true
 }
 
 /**
@@ -352,11 +350,11 @@ export function getRunnerConfigFromWindow () {
 async function initialize () {
   await dfd.promise
 
-  isTorndown = false
+  isTornDown = false
 
   const config = getRunnerConfigFromWindow()
 
-  if (isTorndown) {
+  if (isTornDown) {
     return
   }
 
