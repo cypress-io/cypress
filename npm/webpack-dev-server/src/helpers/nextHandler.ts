@@ -288,7 +288,7 @@ function allowGlobalStylesImports (webpackConfig: Configuration) {
 // Our modifications of the Next webpack config can corrupt the cache used for local development.
 // We separate the cache used for CT from the normal cache (".next/cache/webpack" -> ".next/cache/cypress-webpack") so they don't interfere with each other
 function changeNextCachePath (webpackConfig: Configuration) {
-  if (webpackConfig.cache && typeof webpackConfig.cache === 'object' && ('cacheDirectory' in webpackConfig.cache) && webpackConfig.cache.cacheDirectory) {
+  if (typeof webpackConfig.cache === 'object' && ('cacheDirectory' in webpackConfig.cache) && webpackConfig.cache.cacheDirectory) {
     const { cacheDirectory } = webpackConfig.cache
 
     webpackConfig.cache.cacheDirectory = cacheDirectory.replace(/webpack$/, 'cypress-webpack')
