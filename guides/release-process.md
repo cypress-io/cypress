@@ -185,7 +185,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 24. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's `master`. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
-    - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld/issues/2)
+    - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
     - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)
     - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose)
