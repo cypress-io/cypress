@@ -1,7 +1,7 @@
 <template>
-  <ExternalLink
+  <div
     :href="dashboardUrl"
-    class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center hocus:no-underline"
+    class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
     :class="accentClass"
     data-cy="flaky-spec-summary"
   >
@@ -25,12 +25,11 @@
       <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', [totalFlakyRuns, totalRuns]) }}</span>
       <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', [lastFlaky]) }}</span>
     </div>
-  </ExternalLink>
+  </div>
 </template>
 
 <script setup lang="ts">
 
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { computed, FunctionalComponent, ref, shallowRef, watch } from 'vue'
 import { useI18n } from '@cy/i18n'
 import SpecNameDisplay from '../SpecNameDisplay.vue'
