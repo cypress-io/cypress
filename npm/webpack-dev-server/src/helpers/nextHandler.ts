@@ -261,6 +261,10 @@ function watchEntryPoint (webpackConfig: Configuration) {
   }
 }
 
+// We are matching the Next.js regex rules exactly. If we were writing our own loader, we could
+// condense these regex rules into a single rule but we need the regex.source to be identical to what
+// we get from Next.js webpack config
+// see: https://github.com/vercel/next.js/blob/20486c159d8538a337da6b07b0b4490a3a0d6b91/packages/next/build/webpack/config/blocks/css/index.ts#L18
 const globalCssRe = [/(?<!\.module)\.css$/, /(?<!\.module)\.(scss|sass)$/]
 const globalCssModulesRe = [/\.module\.css$/, /\.module\.(scss|sass)$/]
 
