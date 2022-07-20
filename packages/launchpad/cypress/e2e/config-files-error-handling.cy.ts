@@ -147,8 +147,33 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.percySnapshot()
+
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'module.exports = { e2e: { supportFile: false } }')
+      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.get('h1').should('contain', 'Welcome to Cypress')
+  })
+
+  it(`clears the error correctly after first 'try again' attempt`, () => {
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
+    cy.scaffoldProject('config-with-ts-syntax-error')
+    cy.openProject('config-with-ts-syntax-error')
+    cy.visitLaunchpad()
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+
+    // Try again while the config is still invalid
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.wait('@resetErrorsAndLoadConfig')
+
+    // Wait until config error is on screen again
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()

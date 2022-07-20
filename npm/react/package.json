@@ -14,9 +14,6 @@
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
-  "dependencies": {
-    "debug": "^4.3.2"
-  },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",

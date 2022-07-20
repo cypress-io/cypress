@@ -2,38 +2,39 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-function mountWithTestingType (testingType: TestingTypeEnum) {
-  cy.mountFragment(Specs_SpecsListFragmentDoc, {
-    onResult: (ctx) => {
-      if (!ctx.currentProject) throw new Error('need current project')
-
-      ctx.currentProject.currentTestingType = testingType
-
-      return ctx
-    },
-    render: (gqlVal) => {
-      return <SpecsList gql={gqlVal} />
-    },
-  })
-}
-
-let specs: Array<SpecsListFragment> = []
-
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
+  let specs: Array<SpecsListFragment>
+
+  function mountWithTestingType (testingType: TestingTypeEnum | undefined) {
+    specs = []
+    const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
+
+    cy.mountFragment(Specs_SpecsListFragmentDoc, {
+      variableTypes: {
+        hasBranch: 'Boolean',
+      },
+      variables: {
+        hasBranch: true,
+      },
+      onResult: (ctx) => {
+        if (!ctx.currentProject) throw new Error('need current project')
+
+        specs = ctx.currentProject?.specs || []
+        if (testingType) {
+          ctx.currentProject.currentTestingType = testingType
+        }
+
+        return ctx
+      },
+      render: (gqlVal) => {
+        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
+      },
+    })
+  }
+
   context('when testingType is unset', () => {
     beforeEach(() => {
-      const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
-
-      cy.mountFragment(Specs_SpecsListFragmentDoc, {
-        onResult: (ctx) => {
-          specs = ctx.currentProject?.specs || []
-
-          return ctx
-        },
-        render: (gqlVal) => {
-          return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
-        },
-      })
+      mountWithTestingType(undefined)
     })
 
     it('should filter specs', () => {
@@ -93,7 +94,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.get('@specsListInput').clear()
 
       directories.forEach((dir) => {
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
+        cy.contains('button[data-cy="row-directory-depth-0"]', new RegExp(`^${dir}`))
         .should('have.attr', 'aria-expanded', 'true')
         .click()
         .should('have.attr', 'aria-expanded', 'false')
@@ -119,6 +120,69 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
     })
+
+    describe('responsive behavior', () => {
+      // Spec name (first) column is handled by type-specific tests below
+
+      it('should display last updated column', () => {
+        cy.findByTestId('last-updated-header').as('header')
+        cy.get('@header').should('be.visible').and('contain', 'Last updated')
+      })
+
+      context('when screen is wide', { viewportWidth: 1200 }, () => {
+        it('should display latest runs column with full text', () => {
+          cy.findByTestId('latest-runs-header').within(() => {
+            cy.findByTestId('short-header-text').should('not.be.visible')
+            cy.findByTestId('full-header-text').should('be.visible')
+            .and('have.text', 'Latest runs')
+          })
+        })
+
+        it('should display average duration column with full text', () => {
+          cy.findByTestId('average-duration-header').within(() => {
+            cy.findByTestId('short-header-text').should('not.be.visible')
+            cy.findByTestId('full-header-text').should('be.visible')
+            .and('have.text', 'Average duration')
+          })
+        })
+      })
+
+      context('when screen is narrow', { viewportWidth: 800 }, () => {
+        it('should display latest runs column with short text', () => {
+          cy.findByTestId('latest-runs-header').within(() => {
+            cy.findByTestId('full-header-text').should('not.be.visible')
+            cy.findByTestId('short-header-text').should('be.visible')
+            .and('have.text', 'Runs')
+          })
+        })
+
+        it('should display average duration column with full text', () => {
+          cy.findByTestId('average-duration-header').within(() => {
+            cy.findByTestId('full-header-text').should('not.be.visible')
+            cy.findByTestId('short-header-text').should('be.visible')
+            .and('have.text', 'Duration')
+          })
+        })
+      })
+
+      it('displays the list as expected visually at various widths', () => {
+        cy.get('[data-cy="spec-list-file"]')
+        .should('have.length.above', 2)
+        .should('have.length.below', specs.length)
+
+        cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
+
+        // Specs List has a min width of ~650px in the app, so there's no need to snapshot below that
+        cy.viewport(650, 850)
+        cy.percySnapshot('narrow')
+        cy.viewport(800, 850)
+        cy.percySnapshot('medium')
+        cy.viewport(1200, 850)
+        cy.percySnapshot('wide')
+        cy.viewport(2000, 850)
+        cy.percySnapshot('widest')
+      })
+    })
   })
 
   context('when testingType is e2e', () => {
@@ -127,7 +191,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the e2e testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'E2E specs')
+      cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
     })
   })
 
@@ -137,7 +201,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the component testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'Component specs')
+      cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
     })
   })
 })

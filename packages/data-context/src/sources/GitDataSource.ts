@@ -156,18 +156,18 @@ export class GitDataSource {
     return this.#currentBranch
   }
 
-  destroy () {
+  async destroy () {
     this.#destroyed = true
     if (this.#intervalTimer) {
       clearTimeout(this.#intervalTimer)
     }
 
-    this.#destroyWatcher(this.#gitBaseDirWatcher)
+    await this.#destroyWatcher(this.#gitBaseDirWatcher)
   }
 
-  #destroyWatcher (watcher?: chokidar.FSWatcher) {
+  async #destroyWatcher (watcher?: chokidar.FSWatcher) {
     // Can't do anything actionable with these errors
-    watcher?.close().catch((e) => {})
+    await watcher?.close().catch((e) => {})
   }
 
   async #loadAndWatchCurrentBranch () {
@@ -339,19 +339,21 @@ export class GitDataSource {
 
   async #getInfoPosix (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
-    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
+    // Escape any quotes within the filepath, then surround with quotes
+    const paths = absolutePaths
+    .map((p) => `"${path.resolve(p).replace(/\"/g, '\\"')}"`).join(' ')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
     // no need to use a for loop for a single file
     // IFS is needed to handle paths with white space.
-    const cmd = absolutePaths.length === 1
-      ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
-      : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
+    const cmd = paths.length === 1
+      ? `${GIT_LOG_COMMAND} ${paths[0]}`
+      : `IFS=$'\n'; for file in ${paths}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
-    debug('executing command `%s`:', cmd)
-    debug('gitBaseDir `%s`:', this.#gitBaseDir)
+    debug('executing command: `%s`', cmd)
+    debug('cwd: `%s`', this.#gitBaseDir)
 
-    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash', cwd: this.#gitBaseDir })
+    const result = await execa(cmd, { shell: true, cwd: this.#gitBaseDir })
     const stdout = result.stdout.split('\n')
 
     if (result.exitCode !== 0) {
@@ -367,9 +369,21 @@ export class GitDataSource {
   }
 
   async #getInfoWindows (absolutePaths: readonly string[]) {
+    debug('getting git info for %o:', absolutePaths)
     const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
+
+    debug('executing command: `%s`', cmd)
+    debug('cwd: `%s`', this.config.projectRoot)
+
+    const subprocess = execa(cmd, { shell: true, cwd: this.config.projectRoot })
+    let result
+
+    try {
+      result = await subprocess
+    } catch (err) {
+      result = err
+    }
 
     const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 

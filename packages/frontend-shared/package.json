@@ -13,6 +13,7 @@
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
+    "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package"
   },
   "dependencies": {},
@@ -47,7 +48,7 @@
     "dayjs": "^1.9.3",
     "fake-uuid": "^1.0.0",
     "faker": "5.5.3",
-    "floating-vue": "2.0.0-beta.16",
+    "floating-vue": "2.0.0-beta.17",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",

@@ -33,10 +33,17 @@ export const useRunnerStyle = () => {
   const containerWidth = computed(() => {
     const miscBorders = 4
     const containerMinimum = 50
-    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+
+    // start with just the margin since all other elements that take up width
+    // might not be there
+    let nonAutWidth = autMargin * 2
 
     if (window.__CYPRESS_MODE__ === 'open') {
       nonAutWidth += collapsedNavBarWidth
+    }
+
+    if (!window.__CYPRESS_CONFIG__.hideCommandLog) {
+      nonAutWidth += reporterWidth.value + specListWidth.value + miscBorders
     }
 
     const containerWidth = windowWidth.value - nonAutWidth
@@ -62,10 +69,15 @@ export const useRunnerStyle = () => {
   })
 
   const viewportStyle = computed(() => {
+    // in the below styles, `position: absolute` is required to avoid certain edge cases
+    // that can happen with overflow (mainly, in Firefox, but not always)
+    // see this issue for details: https://github.com/cypress-io/cypress/issues/21881
+
     let style = `
     width: ${autStore.viewportDimensions.width}px;
     height: ${autStore.viewportDimensions.height}px;
     transform: scale(${scale.value});
+    position: absolute;
     `
 
     // to keep the AUT iframe centered during scaling, we need to calculate the difference between
