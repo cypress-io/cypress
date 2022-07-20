@@ -874,6 +874,7 @@ enum FrontendFrameworkEnum {
   nuxtjs
   react
   reactscripts
+  svelte
   vue2
   vue3
   vueclivue2

@@ -107,7 +107,8 @@
     "mount-utils",
     "vue",
     "react",
-    "vue2"
+    "vue2",
+    "svelte"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -140,6 +141,11 @@
       "import": "./react/dist/cypress-react.esm-bundler.js",
       "require": "./react/dist/cypress-react.cjs.js",
       "types": "./react/dist/index.d.ts"
+    },
+    "./svelte": {
+      "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
+      "require": "./svelte/dist/cypress-svelte.cjs.js",
+      "types": "./svelte/dist/index.d.ts"
     },
     "./mount-utils": {
       "require": "./mount-utils/dist/index.js",

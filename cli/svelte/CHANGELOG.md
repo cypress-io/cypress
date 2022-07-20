@@ -1,0 +1,1 @@
+# Initial Release [@cypress/svelte-v1.0.0] (2022-07-18)

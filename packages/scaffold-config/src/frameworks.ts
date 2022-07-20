@@ -145,6 +145,24 @@ export const WIZARD_FRAMEWORKS = [
     ].join(' '.repeat(8))),
   },
   {
+    type: 'svelte',
+    configFramework: 'svelte',
+    category: 'library',
+    name: 'Svelte.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_SVELTE],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        getBundlerDependency(bundler, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_SVELTE, projectPath),
+      ]
+    },
+    codeGenFramework: 'svelte',
+    mountModule: 'cypress/svelte',
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
+  {
     type: 'nuxtjs',
     configFramework: 'nuxt',
     category: 'template',
