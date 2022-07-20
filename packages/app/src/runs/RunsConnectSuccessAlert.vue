@@ -5,9 +5,10 @@
     class="mb-24px"
     dismissible
     :title="t('runs.connectSuccessAlert.title')"
+    no-icon
   >
     <p class="flex px-16px pt-16px leading-24px md:items-center">
-      <i-cy-arrow-outline-right_x16 class="h-16px mr-8px w-16px inline align-middle icon-dark-jade-500 mt-4px md:mt-0" />
+      <i-cy-arrow-outline-right_x16 class="h-16px mt-4px mr-8px w-16px inline align-middle icon-dark-jade-500 md:mt-0" />
       <span>
         <i18n-t
           scope="global"
@@ -23,7 +24,7 @@
       </span>
     </p>
     <p class="flex px-16px pt-16px pb-16px leading-24px md:items-center">
-      <i-cy-arrow-outline-right_x16 class="h-16px mr-8px w-16px inline align-middle icon-dark-jade-500 mt-4px md:mt-0" />
+      <i-cy-arrow-outline-right_x16 class="h-16px mt-4px mr-8px w-16px inline align-middle icon-dark-jade-500 md:mt-0" />
       <span>
         <i18n-t
           scope="global"

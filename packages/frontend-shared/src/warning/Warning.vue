@@ -6,7 +6,6 @@
     data-cy="warning-alert"
     icon-classes="icon-dark-orange-400 h-16px w-16px"
     :title="title"
-    :icon="ErrorOutlineIcon"
   >
     <div
       ref="markdownTarget"
@@ -25,7 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
 import Button from '@cy/components/Button.vue'

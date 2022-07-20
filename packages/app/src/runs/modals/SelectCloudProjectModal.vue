@@ -23,7 +23,6 @@
         status="error"
         :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
         class="mb-16px"
-        :icon="WarningIcon"
         :dismissible="isInternalServerError"
       >
         <p v-if="!isInternalServerError">
@@ -198,7 +197,6 @@ import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
-import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
 
 const { t } = useI18n()

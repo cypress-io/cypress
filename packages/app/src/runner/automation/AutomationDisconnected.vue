@@ -3,7 +3,6 @@
     <Alert
       :title="t('runner.automation.disconnected.title')"
       status="warning"
-      :icon="ErrorOutlineIcon"
       :dismissible="false"
       class="w-full max-w-600px"
     >
@@ -41,7 +40,6 @@ import { useMutation } from '@urql/vue'
 import { AutomationDisconnected_RelaunchBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Alert from '@cy/components/Alert.vue'
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const { t } = useI18n()
 

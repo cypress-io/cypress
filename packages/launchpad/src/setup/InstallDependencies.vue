@@ -15,7 +15,6 @@
       <Alert
         v-model="showSuccessAlert"
         class="w-full"
-        :icon="CircleCheck"
         :title="t('setupWizard.installDependencies.installationAlertSuccess')"
         status="success"
         dismissible
@@ -32,7 +31,6 @@ import ManualInstall from './ManualInstall.vue'
 import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from '../generated/graphql'
-import CircleCheck from '~icons/cy/circle-check_x16.svg'
 
 import {
   InstallDependencies_ScaffoldFilesDocument,

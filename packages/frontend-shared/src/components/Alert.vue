@@ -91,7 +91,8 @@ export type AlertClasses = {
 import AlertHeader from './AlertHeader.vue'
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed, useSlots } from 'vue'
-import { IconActionDelete, IconChevronDownSmall } from '@cypress-design/vue-icon'
+import { IconActionDelete, IconChevronDownSmall,
+  IconActionQuestionMarkCircle, IconCheckmarkOutline, IconWarningCircle } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import Collapsible from './Collapsible.vue'
 
@@ -114,6 +115,7 @@ const props = withDefaults(defineProps<{
   iconClasses?: string
   maxHeight?: string
   overflow?: boolean
+  noIcon?: boolean
 }>(), {
   title: undefined,
   modelValue: true,
@@ -166,6 +168,14 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
   },
 }
 
+const alertIcons: Record<AlertStatus, FunctionalComponent<SVGAttributes, {}> | undefined> = {
+  default: undefined,
+  info: IconActionQuestionMarkCircle,
+  warning: IconWarningCircle,
+  error: IconWarningCircle,
+  success: IconCheckmarkOutline,
+}
+
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],
@@ -177,7 +187,12 @@ const canCollapse = computed(() => slots.default && props.collapsible)
 const initiallyOpen = computed(() => slots.default && !props.collapsible)
 
 const prefix = computed(() => {
-  if (props.icon) return { classes: props.iconClasses, icon: props.icon }
+  if (!props.noIcon) {
+    return {
+      classes: props.iconClasses,
+      icon: props.icon || alertIcons[props.status],
+    }
+  }
 
   if (canCollapse.value) {
     return {

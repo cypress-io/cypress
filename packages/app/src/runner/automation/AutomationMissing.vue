@@ -3,7 +3,6 @@
     <Alert
       :title="t('runner.automation.missing.title')"
       status="warning"
-      :icon="ErrorOutlineIcon"
       :dismissible="false"
       :overflow="false"
       class="w-full max-w-600px"
@@ -56,8 +55,7 @@ import type { AutomationMissingFragment } from '../../generated/graphql'
 import SpecRunnerDropdown from '../SpecRunnerDropdown.vue'
 import { ref } from 'vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import Alert from '../../../../frontend-shared/src/components/Alert.vue'
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
+import Alert from '@cy/components/Alert.vue'
 
 const { t } = useI18n()
 

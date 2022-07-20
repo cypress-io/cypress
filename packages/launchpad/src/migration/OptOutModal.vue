@@ -7,7 +7,6 @@
     <Alert
       status="warning"
       :title="t('migration.renameAuto.modal.warning')"
-      :icon="WarningIcon"
       icon-classes="icon-dark-orange-400"
     />
     <MigrationTitle
@@ -116,7 +115,6 @@ import Button from '@cy/components/Button.vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Radio from '@cy/components/Radio.vue'
-import WarningIcon from '~icons/cy/warning_x16.svg'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'

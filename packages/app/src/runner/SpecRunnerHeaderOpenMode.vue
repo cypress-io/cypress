@@ -133,6 +133,7 @@
       v-model="showAlert"
       status="success"
       dismissible
+      no-icon
     >
       <template #title>
         <ExternalLink href="https://on.cypress.io/mount">

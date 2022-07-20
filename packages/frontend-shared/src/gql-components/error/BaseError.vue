@@ -50,7 +50,6 @@
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
           header-class="bg-red-100 text-red-600 rounded-b-none"
-          :icon="ErrorOutlineIcon"
           icon-classes="icon-dark-red-400"
           max-height="none"
         >
@@ -118,7 +117,6 @@ import Alert from '@cy/components/Alert.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { useMarkdown } from '../../composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
 import BookIcon from '~icons/cy/book_x16'
 
