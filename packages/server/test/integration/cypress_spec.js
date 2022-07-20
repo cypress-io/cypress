@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('@tooling/system-tests')
-const SystemTests = require('@tooling/system-tests/lib/system-tests')
+const { normalizeStdout } = require('@tooling/system-tests/lib/normalizeStdout')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const pkg = require('@packages/root')
@@ -97,7 +97,7 @@ const snapshotConsoleLogs = function (name) {
   // so must switch back to original
   process.chdir(previousCwd)
 
-  const snap = SystemTests.default.normalizeStdout(stripAnsi(args))
+  const snap = normalizeStdout(stripAnsi(args))
 
   return snapshot(name, snap)
 }
