@@ -139,6 +139,7 @@ export class VersionsDataSource {
       'x-os-name': os.platform(),
       'x-arch': os.arch(),
       'x-initial-launch': String(this._initialLaunch),
+      'x-logged-in': String(!!this.ctx.user),
     }
 
     if (this._currentTestingType) {

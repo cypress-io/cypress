@@ -10,7 +10,7 @@
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "preprojects:yarn:install": "yarn clean-deps",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
-    "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
+    "test": "node ./scripts/run.js --glob-in-dir={test,test-binary}",
     "test:ci": "node ./scripts/run.js",
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
