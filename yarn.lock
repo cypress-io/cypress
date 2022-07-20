@@ -2872,15 +2872,30 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-9.0.1.tgz#c27b391d8457d1e893f1eddeaf5e5412d12ffbb5"
   integrity sha512-6It2EVfGskxZCQhuykrfnALg7oVeiI6KclWSmGDqB0AiInVrTGB9Jp9i4/Ad21u9Jde/voVQz6eFX/eSg/UsPA==
 
-"@cypress-design/css@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.4.1.tgz#40c73462a1b8a04a2d045cef43d5e2480c3bbf2f"
-  integrity sha512-ycyrNcqm9Cy0+IrhVa7Ef9dSv+B/p69T0Sw6zhLDxHwq4S0YxtFgE4zf8R7O4SbR8vlU/YpV5GSQhaXCFLsQXg==
+"@cypress-design/css@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.5.2.tgz#bcb43bb2d6f872de8691d6acb546680b335ea757"
+  integrity sha512-ZuHdhbcCgEfKuggGYS4AkSGfkB2ZCsWewBYUNH/U+oYnkhDITgaSMKp0RWfBWrnqqyhD2mTYx8gNRWCNQ7tw8w==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
+    lodash "^4.17.21"
     vite-plugin-windicss "^1.8.4"
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
+
+"@cypress-design/icon-registry@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.4.2.tgz#bc2d913208acb33b5dfb1d8f6d7929b153e32ba0"
+  integrity sha512-iyH5xFc2abpwVPTEjoJ2ILIQy79DaR6ata76HAk9NHPWVUwG/yUPEzvp3m2T8IqgebNEuTtl4mBHM/u+jycxng==
+  dependencies:
+    camelcase "^6.3.0"
+
+"@cypress-design/vue-icon@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.4.2.tgz#3574a749efbdaf83f48251108c016c3d383160bd"
+  integrity sha512-i7YWizC/c1LFdxVZSbyTIOrj4LeiIxypemCXdygacmvogQS2buBC+CovqCMFAzKqnfBZUBGiQajMWWM5rzIduw==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.4.2"
 
 "@cypress/browserify-preprocessor@3.0.0":
   version "3.0.0"
@@ -12735,7 +12750,7 @@ camelcase@^4.0.0, camelcase@^4.1.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
   integrity sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
 
-camelcase@^6.0.0, camelcase@^6.2.0:
+camelcase@^6.0.0, camelcase@^6.2.0, camelcase@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
@@ -37403,7 +37418,7 @@ vite-plugin-windicss@1.2.4:
     debug "^4.3.2"
     windicss "^3.1.4"
 
-vite-plugin-windicss@^1.4.7, vite-plugin-windicss@^1.8.4:
+vite-plugin-windicss@^1.8.4:
   version "1.8.4"
   resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-1.8.4.tgz#98430706691d54d6b9bf43ac0e3c74dd26b10664"
   integrity sha512-LSZAO8BZn3x406GRbYX5t5ONXXJVdqiQtN1qrznLA/Dy5/NzZVhfcrL6N1qEYYO7HsCDT4pLAjTzObvDnM9Y8A==

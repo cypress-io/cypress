@@ -16,10 +16,12 @@
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@cypress-design/vue-icon": "^0.4.2"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
-    "@cypress-design/css": "0.4.1",
+    "@cypress-design/css": "^0.5.2",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/json": "1.1.368",
@@ -67,7 +69,6 @@
     "unplugin-vue-components": "^0.15.4",
     "vite": "2.9.0-beta.3",
     "vite-plugin-components": "0.11.3",
-    "vite-plugin-windicss": "^1.4.7",
     "vite-svg-loader": "3.1.2",
     "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0",
