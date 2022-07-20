@@ -23,7 +23,7 @@
     <div class="relative shrink">
       <slot
         name="suffixIcon"
-        v-bind="{ ariaLabel: suffixIconAriaLabel, buttonClasses: suffixButtonClass, iconColor: suffixIconColor, onClick: onSuffixIconClicked }"
+        v-bind="{ ariaLabel: suffixIconAriaLabel, buttonClasses: suffixButtonClass, iconClasses: suffixIconClass, onClick: onSuffixIconClicked }"
       >
         <button
           v-if="suffixIcon"
@@ -36,7 +36,7 @@
           <component
             :is="suffixIcon"
             class="h-16px w-16px"
-            :stroke-color="suffixIconColor"
+            :class="suffixIconClass"
           />
         </button>
       </slot>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const emit = defineEmits<{
   (eventName: 'suffixIconClicked'): void
@@ -54,12 +54,12 @@ const emit = defineEmits<{
 /* eslint-disable vue/require-default-prop */
 defineProps<{
   title: string
-  prefixIcon?: FunctionalComponent | null
-  suffixIcon?: FunctionalComponent | null
+  prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null
+  suffixIcon?: FunctionalComponent<SVGAttributes, {}> | null
   suffixIconAriaLabel?: string
   alertClass?: string
   prefixIconClass?: string
-  suffixIconColor?: string
+  suffixIconClass?: string
   headerClass?: string
   suffixButtonClass?: string
 }>()
