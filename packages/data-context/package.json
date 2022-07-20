@@ -23,6 +23,7 @@
     "@urql/exchange-graphcache": "4.3.6",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
+    "create-cypress-tests": "0.0.0-development",
     "cross-fetch": "^3.1.4",
     "dataloader": "^2.0.0",
     "dayjs": "^1.9.3",

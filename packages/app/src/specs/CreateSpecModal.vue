@@ -20,6 +20,7 @@
         v-if="generator"
         :key="`${generator.id}-${iteration}`"
         v-model:title="title"
+        :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
         :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
@@ -77,6 +78,10 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
+    codeGenGlobs {
+      id
+      component
+    }
     ...EmptyGenerator
   }
 }
@@ -103,6 +108,14 @@ const helpLink = computed(() => {
 
 const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
+})
+
+const codeGenGlob = computed(() => {
+  if (!generator.value) {
+    return null
+  }
+
+  return props.gql.currentProject?.codeGenGlobs[generator.value.id]
 })
 
 const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
