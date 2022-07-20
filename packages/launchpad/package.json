@@ -17,9 +17,7 @@
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
-  "dependencies": {
-    "@cypress-design/vue-icon": "^0.4.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",

@@ -16,9 +16,7 @@
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package"
   },
-  "dependencies": {
-    "@cypress-design/vue-icon": "^0.4.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@cypress-design/css": "^0.5.2",
