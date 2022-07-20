@@ -1,6 +1,6 @@
 <template>
   <SpecRunnerOpenMode
-    v-if="initialized && specStore.activeSpecs"
+    v-if="initialized && specStore.activeSpecs.length"
     :gql="props.gql"
   />
 </template>
@@ -32,7 +32,7 @@ watchSpecs(specs)
 
 specStore.$subscribe((mutation, state) => {
   const queryFile = getPathForPlatform(route.query.file as string)
-  const shouldRedirect = route.name === 'SpecRunner' && queryFile && state.activeSpec === null
+  const shouldRedirect = route.name === 'SpecRunner' && queryFile && !state.activeSpecs.length
 
   if (shouldRedirect) {
     router.push({

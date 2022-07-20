@@ -18,9 +18,11 @@ export const useSpecStore = defineStore({
 
   actions: {
     setActiveSpec (activeSpec: SpecFile | null) {
+      console.log('trying to set active spec')
       this.activeSpec = activeSpec
     },
     setActiveSpecs (activeSpecs: Array<SpecFile> | []) {
+      console.log('trying to set active specs')
       this.activeSpecs = activeSpecs
     },
   },

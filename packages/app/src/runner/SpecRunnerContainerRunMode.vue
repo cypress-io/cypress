@@ -1,5 +1,5 @@
 <template>
-  <div v-if="specStore.activeSpec">
+  <div v-if="specStore.activeSpecs.length">
     <SpecRunnerRunMode v-if="initialized" />
   </div>
 

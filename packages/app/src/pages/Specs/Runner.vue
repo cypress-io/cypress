@@ -98,7 +98,7 @@ const configChangeHandler: SubscriptionHandlerArg<any, any> = (
     throw Error(`Did not get expected serveConfig from subscription`)
   }
 
-  if (!initialLoad && specStore.activeSpec) {
+  if (!initialLoad && specStore.activeSpecs.length) {
     try {
       // Update the config used by the runner with the new one.
       window.__CYPRESS_CONFIG__ = next.configChange.serveConfig

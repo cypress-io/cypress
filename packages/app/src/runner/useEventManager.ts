@@ -10,20 +10,20 @@ export function useEventManager () {
   const specStore = useSpecStore()
 
   function runSpec () {
-    if (!specStore.activeSpec) {
+    if (!specStore.activeSpecs.length) {
       throw Error(`Cannot run spec when specStore.active spec is null or undefined!`)
     }
 
     autStore.setScriptError(null)
-    UnifiedRunnerAPI.executeSpec(specStore.activeSpec)
+    UnifiedRunnerAPI.executeSpec(specStore.activeSpecs.length[0])
   }
 
   function initializeRunnerLifecycleEvents () {
     // these events do not use GraphQL
     eventManager.on('restart', () => {
       // If we get the event to restart but have already navigated away from the runner, don't execute the spec
-      if (specStore.activeSpec) {
-        runSpec()
+      if (specStore.activeSpecs.length) {
+        runSpec() // rachel
       }
     })
 
@@ -43,8 +43,8 @@ export function useEventManager () {
   }
 
   const startSpecWatcher = () => {
-    return watch(() => specStore.activeSpec, () => {
-      if (specStore.activeSpec) {
+    return watch(() => specStore.activeSpecs.length, () => {
+      if (specStore.activeSpecs.length) {
         runSpec()
       }
     }, { immediate: true, flush: 'post' })

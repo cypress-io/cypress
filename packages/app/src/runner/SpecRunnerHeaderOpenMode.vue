@@ -216,7 +216,7 @@ const togglePlayground = () => _togglePlayground(autIframe)
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.activeBrowser })
 
-const activeSpecPath = specStore.activeSpec?.absolute
+const activeSpecPath = specStore.activeSpecs.length ? specStore.activeSpecs[0].absolute : undefined
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
