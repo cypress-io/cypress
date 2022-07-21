@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import { mount } from './angular-mount'
 
 declare global {

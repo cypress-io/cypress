@@ -141,7 +141,7 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
     includePaths.push(polyfills)
   }
 
-  const cypressTypes = getProjectFilePath('node_modules', 'cypress', 'types', '*.d.ts')
+  const cypressTypes = getProjectFilePath('node_modules', 'cypress', 'types', 'index.d.ts')
 
   includePaths.push(cypressTypes)
 
