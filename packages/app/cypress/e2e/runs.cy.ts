@@ -674,9 +674,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
@@ -684,6 +681,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
+
+      cy.loginUser()
+      cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
 
