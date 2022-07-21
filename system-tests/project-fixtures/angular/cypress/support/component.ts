@@ -1,11 +1,4 @@
-import "zone.js";
-import "zone.js/testing";
-
-/**
- * @hack fixes "Mocha has already been patched with Zone" error.
- */
-// @ts-ignore
-window.Mocha["__zone_patch__"] = false;
+/// <reference types="cypress" />
 
 import { mount } from './angular-mount'
 
