@@ -48,6 +48,14 @@
     "testing"
   ],
   "module": "dist/cypress-react.esm-bundler.js",
+  "workspaces": {
+    "nohoist": [
+      "react",
+      "react-dom",
+      "@types/react",
+      "@types/react-dom"
+    ]
+  },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
