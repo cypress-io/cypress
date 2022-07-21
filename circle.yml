@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - global-mode-issue
+        - lmiller/react-adapters
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,6 +39,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'global-mode-issue', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
+          pattern: "lmiller/react-adapters"
           value: << pipeline.git.branch >>
 
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
@@ -126,7 +127,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "global-mode-issue" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "lmiller/react-adapters" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
