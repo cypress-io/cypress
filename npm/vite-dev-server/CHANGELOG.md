@@ -1,3 +1,35 @@
+# [@cypress/vite-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.3...@cypress/vite-dev-server-v3.0.0) (2022-06-13)
+
+
+### Bug Fixes
+
+* issue with compilation failures in component testing ([#21599](https://github.com/cypress-io/cypress/issues/21599)) ([f2bce02](https://github.com/cypress-io/cypress/commit/f2bce02f5dcab7a73a2a1b8e102518d706a29c25))
+* restart dev-server on config change ([#21212](https://github.com/cypress-io/cypress/issues/21212)) ([00a0f5a](https://github.com/cypress-io/cypress/commit/00a0f5a0e905fdfe5ef9f8ba71f915ed20ca4b72))
+* sanitize internal vite plugins ([#22055](https://github.com/cypress-io/cypress/issues/22055)) ([3b5a245](https://github.com/cypress-io/cypress/commit/3b5a245ec4aa9bf9f348fbc4bc2f0decc7c4a692))
+* supportFile path and supportFile false for vite on windows ([#21156](https://github.com/cypress-io/cypress/issues/21156)) ([dd180c8](https://github.com/cypress-io/cypress/commit/dd180c89b27546b0c96cc3f4fb4e75d983c8003e))
+* UNIFY-1774 error if component config is not sourced for webpack/vite ([#21563](https://github.com/cypress-io/cypress/issues/21563)) ([566a7b1](https://github.com/cypress-io/cypress/commit/566a7b1feb0fc1a8f1ccf83a23d8ad7a94409a6b))
+* use resolved port for vite ([#21490](https://github.com/cypress-io/cypress/issues/21490)) ([630e422](https://github.com/cypress-io/cypress/commit/630e4220ca5ebbaa8c39044b86d434510b3a0f1b))
+* wire up scaffolded indexHtml to dev servers ([#20453](https://github.com/cypress-io/cypress/issues/20453)) ([3a8797e](https://github.com/cypress-io/cypress/commit/3a8797e54db9fd0ef93a14ddc71c138ba8251e53))
+
+
+### chore
+
+* prep npm packages for use with Cypress v10 ([b924d08](https://github.com/cypress-io/cypress/commit/b924d086ee2e2ccc93303731e001b2c9e9d0af17))
+
+
+### Features
+
+* index.html configurability ([#18242](https://github.com/cypress-io/cypress/issues/18242)) ([745b3ac](https://github.com/cypress-io/cypress/commit/745b3ac4518302983522daedf817623334feae5b))
+* Set up cypress in cypress ([#19602](https://github.com/cypress-io/cypress/issues/19602)) ([ed51bcb](https://github.com/cypress-io/cypress/commit/ed51bcbdda480f90bef557f06c297098f1897499))
+* Update vite dev dependency ([#17489](https://github.com/cypress-io/cypress/issues/17489)) ([e2f395e](https://github.com/cypress-io/cypress/commit/e2f395e330f384993ed1116469102a5315a21270)), closes [#17551](https://github.com/cypress-io/cypress/issues/17551)
+* swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
+* Update "@vitejs/plugin-vue" dev dependency ([#18514](https://github.com/cypress-io/cypress/issues/18514)) ([9a2e550](https://github.com/cypress-io/cypress/commit/9a2e55071d5b6dcfd97ff750b80548b834b94d30))
+
+
+### BREAKING CHANGES
+
+* new version of packages for Cypress v10
+
 # [@cypress/vite-dev-server-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.2...@cypress/vite-dev-server-v2.2.3) (2022-05-10)
 
 

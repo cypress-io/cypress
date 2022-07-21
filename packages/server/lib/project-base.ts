@@ -19,13 +19,13 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
-import { fs } from './util/fs'
 import system from './util/system'
 import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
 export interface Cfg extends ReceivedCypressOptions {
+  projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
@@ -37,7 +37,7 @@ export interface Cfg extends ReceivedCypressOptions {
   }
   e2e: Partial<Cfg>
   component: Partial<Cfg>
-  additionalIgnorePattern?: string
+  additionalIgnorePattern?: string | string[]
 }
 
 const localCwd = process.cwd()
@@ -104,8 +104,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       onWarning: this.ctx.onWarning,
       ...options,
     }
-
-    this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
   }
 
   protected ensureProp = ensureProp
@@ -161,6 +159,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
+      getAutomation: () => this.automation,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
       onError: this.options.onError,
@@ -198,8 +197,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     // save the last time they opened the project
     // along with the first time they opened it
     const now = Date.now()
+
     const stateToSave = {
       lastOpened: now,
+      lastProjectId: cfg.projectId ?? null,
     } as any
 
     if (!cfg.state || !cfg.state.firstOpened) {
@@ -519,10 +520,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     cfg.state = await state.get()
 
     return cfg
-  }
-
-  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
-    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
 
   // These methods are not related to start server/sockets/runners

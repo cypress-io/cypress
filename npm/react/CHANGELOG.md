@@ -1,3 +1,28 @@
+# [@cypress/react-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.5...@cypress/react-v6.0.0) (2022-06-13)
+
+
+### Bug Fixes
+
+* **react:** link to rerender example ([#19020](https://github.com/cypress-io/cypress/issues/19020)) ([552d3a1](https://github.com/cypress-io/cypress/commit/552d3a1c0073dae0bd1da0fc9fa8d140ec4f38dc))
+
+
+### chore
+
+* prep npm packages for use with Cypress v10 ([b924d08](https://github.com/cypress-io/cypress/commit/b924d086ee2e2ccc93303731e001b2c9e9d0af17))
+
+
+### Features
+
+* embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
+* remove testFiles reference ([#20565](https://github.com/cypress-io/cypress/issues/20565)) ([5670344](https://github.com/cypress-io/cypress/commit/567034459089d9d53dfab5556cb9369fb335c3db))
+* swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
+* update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
+
+
+### BREAKING CHANGES
+
+* new version of packages for Cypress v10
+
 # [@cypress/react-v5.12.5](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.4...@cypress/react-v5.12.5) (2022-05-17)
 
 

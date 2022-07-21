@@ -1,3 +1,5 @@
+import { getUtmSource } from './getUtmSource'
+
 export type LinkWithParams = {
   url: string
   params: { [key: string]: string }
@@ -5,18 +7,30 @@ export type LinkWithParams = {
 
 export const getUrlWithParams = (link: LinkWithParams) => {
   let result = link.url
-  const hasUtmParams = Object.keys(link.params).some((param) => param.startsWith('utm_'))
+  const paramNames = Object.keys(link.params)
 
-  if (hasUtmParams) {
-    // __CYPRESS_MODE__ is only set on the window in th browser app -
-    // checking this allows us to know if links are clicked in the browser app or the launchpad
-    const utm_source = window.__CYPRESS_MODE__ ? 'Binary: App' : 'Binary: Launchpad'
+  if (paramNames.length > 0) {
+    const hasUtmParams = paramNames.some((param) => param.startsWith('utm_'))
 
-    link.params.utm_source = utm_source
-  }
+    if (hasUtmParams) {
+      link.params.utm_source = getUtmSource()
+    }
 
-  if (link.params) {
-    result += `?${new URLSearchParams(link.params).toString()}`
+    let url: string
+    let searchParams: URLSearchParams
+
+    if (link.url.includes('?')) {
+      // If input URL already includes params we should preserve them
+      url = link.url.substring(0, link.url.indexOf('?'))
+      searchParams = new URLSearchParams(link.url.substring(link.url.indexOf('?')))
+    } else {
+      url = link.url
+      searchParams = new URLSearchParams()
+    }
+
+    Object.entries(link.params).forEach(([key, value]) => searchParams.append(key, value))
+
+    result = `${url}?${searchParams.toString()}`
   }
 
   return result

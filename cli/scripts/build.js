@@ -31,6 +31,7 @@ function preparePackageForNpmRelease (json) {
   delete json['private']
   // no need to include "nyc" code coverage settings
   delete json.nyc
+  delete json.workspaces
 
   _.extend(json, {
     version,

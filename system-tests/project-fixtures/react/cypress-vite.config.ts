@@ -15,9 +15,6 @@ export default defineConfig({
     devServer: {
       framework: 'react',
       bundler: 'vite',
-      viteConfig: {
-        logLevel: 'silent'
-      },
     },
   },
   // These tests should run quickly / fail quickly,

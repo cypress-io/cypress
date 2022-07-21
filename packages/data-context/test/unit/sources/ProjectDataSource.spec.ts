@@ -477,11 +477,13 @@ describe('_makeSpecWatcher', () => {
   const SPEC_FILE_ABC = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'abc.ts')
 
   const writeFiles = () => {
-    ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo')
-    ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo')
-    ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo')
-    ctx.actions.file.writeFileInProject(SPEC_FILE3, '// foo')
-    ctx.actions.file.writeFileInProject(SPEC_FILE_ABC, '// foo')
+    return Promise.all([
+      ctx.actions.file.writeFileInProject(SUPPORT_FILE, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE2, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE3, '// foo'),
+      ctx.actions.file.writeFileInProject(SPEC_FILE_ABC, '// foo'),
+    ])
   }
 
   it('watch for changes on files based on the specPattern', async function () {
@@ -499,7 +501,7 @@ describe('_makeSpecWatcher', () => {
     specWatcher.on('add', (filePath) => allFiles.add(filePath))
     specWatcher.on('change', (filePath) => allFiles.add(filePath))
 
-    writeFiles()
+    await writeFiles()
 
     let attempt = 0
 
@@ -531,7 +533,7 @@ describe('_makeSpecWatcher', () => {
     specWatcher.on('add', (filePath) => allFiles.add(filePath))
     specWatcher.on('change', (filePath) => allFiles.add(filePath))
 
-    writeFiles()
+    await writeFiles()
 
     let attempt = 0
 
@@ -563,16 +565,11 @@ describe('_makeSpecWatcher', () => {
 
     specWatcher.on('add', (filePath) => allFiles.add(filePath))
     specWatcher.on('change', (filePath) => allFiles.add(filePath))
+    specWatcher.on('unlink', (filePath) => allFiles.delete(filePath))
 
-    writeFiles()
-
+    await writeFiles()
     await ctx.actions.file.removeFileInProject(SPEC_FILE1)
-
-    let attempt = 0
-
-    while (allFiles.size < 3 && attempt++ <= 100) {
-      await delay(10)
-    }
+    await delay(1000)
 
     expect(Array.from(allFiles).sort()).to.eql([
       SPEC_FILE_ABC,
@@ -639,17 +636,17 @@ describe('startSpecWatcher', () => {
   })
 
   describe('open mode', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       ctx = createTestDataContext('open')
 
       ctx.coreData.currentProject = projectRoot
     })
 
-    it('throws if no current project defined', () => {
+    it('throws if no current project defined', async () => {
       ctx.coreData.currentProject = null
 
-      expect(() => {
-        return ctx.project.startSpecWatcher({
+      try {
+        await ctx.project.startSpecWatcher({
           projectRoot,
           testingType: 'e2e',
           specPattern: ['**/*.{cy,spec}.{ts,js}'],
@@ -657,10 +654,14 @@ describe('startSpecWatcher', () => {
           excludeSpecPattern: ['**/ignore.spec.ts'],
           additionalIgnorePattern: [],
         })
-      }).to.throw()
+      } catch (error) {
+        return
+      }
+
+      throw new Error('Should have thrown error')
     })
 
-    it('creates file watcher based on given config properties', () => {
+    it('creates file watcher based on given config properties', async () => {
       const onStub = sinon.stub()
 
       sinon.stub(chokidar, 'watch').callsFake(() => {
@@ -680,7 +681,7 @@ describe('startSpecWatcher', () => {
         return handleFsChange as _.DebouncedFunc<any>
       })
 
-      ctx.project.startSpecWatcher({
+      await ctx.project.startSpecWatcher({
         projectRoot,
         testingType: 'e2e',
         specPattern: ['**/*.{cy,spec}.{ts,js}'],
@@ -737,7 +738,7 @@ describe('startSpecWatcher', () => {
         additionalIgnorePattern: [],
       }
 
-      ctx.project.startSpecWatcher(watchOptions)
+      await ctx.project.startSpecWatcher(watchOptions)
 
       // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
       ctx.project.setSpecs(mockFoundSpecs)

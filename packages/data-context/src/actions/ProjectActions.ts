@@ -5,7 +5,7 @@ import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { ProjectShape } from '../data/coreDataShape'
+import type { Maybe, ProjectShape, SavedStateShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
@@ -24,7 +24,7 @@ export interface ProjectApiShape {
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
-  getProjectRootsFromCache(): Promise<string[]>
+  getProjectRootsFromCache(): Promise<ProjectShape[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
@@ -36,6 +36,7 @@ export interface ProjectApiShape {
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
+  makeProjectSavedState(projectRoot: string): () => Promise<Maybe<SavedStateShape>>
   getDevServer (): {
     updateSpecs(specs: FoundSpec[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
@@ -92,7 +93,7 @@ export class ProjectActions {
       d.app.browserStatus = 'closed'
     })
 
-    this.ctx.lifecycleManager.clearCurrentProject()
+    await this.ctx.lifecycleManager.clearCurrentProject()
     resetIssuedWarnings()
     await this.api.closeActiveProject()
   }
@@ -127,13 +128,13 @@ export class ProjectActions {
     await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
 
     await this.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    await this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
 
   // Temporary: remove after other refactor lands
-  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
-    this.ctx.lifecycleManager.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+  async setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
+    await this.ctx.lifecycleManager.clearCurrentProject()
+    await this.ctx.lifecycleManager.setCurrentProject(projectRoot)
     this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
@@ -142,7 +143,9 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.projects = projectRoots.map((projectRoot) => ({ projectRoot }))
+    this.ctx.update((d) => {
+      d.app.projects = [...projectRoots]
+    })
 
     return this.projects
   }
@@ -413,7 +416,7 @@ export class ProjectActions {
 
     this.ctx.actions.project.setSpecs(specs)
 
-    this.ctx.project.startSpecWatcher({
+    await this.ctx.project.startSpecWatcher({
       projectRoot,
       testingType,
       specPattern,

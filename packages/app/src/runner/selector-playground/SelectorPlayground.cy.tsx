@@ -181,4 +181,10 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-print"]').blur()
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
   })
+
+  it('ensures input autocomplete is disabled', () => {
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]').should('have.attr', 'autocomplete', 'off')
+  })
 })

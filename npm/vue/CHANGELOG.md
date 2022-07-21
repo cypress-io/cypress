@@ -1,3 +1,30 @@
+# [@cypress/vue-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.2...@cypress/vue-v4.0.0) (2022-06-13)
+
+
+### Bug Fixes
+
+* display cy.mount command log ([#21500](https://github.com/cypress-io/cypress/issues/21500)) ([140b4ba](https://github.com/cypress-io/cypress/commit/140b4ba2110243712a614a39b2408c30cce4d0b1))
+* Doc changes around vue2 ([#21066](https://github.com/cypress-io/cypress/issues/21066)) ([17905a7](https://github.com/cypress-io/cypress/commit/17905a79ee5106b0d72c8e74bb717fcd7b796dee))
+
+
+### chore
+
+* prep npm packages for use with Cypress v10 ([b924d08](https://github.com/cypress-io/cypress/commit/b924d086ee2e2ccc93303731e001b2c9e9d0af17))
+
+
+### Features
+
+* Update "typescript" dev dependency ([e977b60](https://github.com/cypress-io/cypress/commit/e977b60521b863a227eb37189ab1b3081af00d9f))
+* embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
+* swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
+* update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
+* Update "@vue/test-utils" dependency ([#20956](https://github.com/cypress-io/cypress/issues/20956)) ([57659c4](https://github.com/cypress-io/cypress/commit/57659c42468591265143aae2ff06bae4e440085f))
+
+
+### BREAKING CHANGES
+
+* new version of packages for Cypress v10
+
 # [@cypress/vue-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.1...@cypress/vue-v3.1.2) (2022-05-03)
 
 

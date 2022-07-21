@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-properties */
 require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
@@ -8,6 +7,7 @@ const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('@tooling/system-tests')
+const { normalizeStdout } = require('@tooling/system-tests/lib/normalizeStdout')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const pkg = require('@packages/root')
@@ -43,7 +43,7 @@ const system = require(`../../lib/util/system`)
 const appData = require(`../../lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
-const { getCtx } = require(`../../lib/makeDataContext`)
+const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 
 const TYPICAL_BROWSERS = [
@@ -97,7 +97,56 @@ const snapshotConsoleLogs = function (name) {
   // so must switch back to original
   process.chdir(previousCwd)
 
-  return snapshot(name, stripAnsi(args))
+  const snap = normalizeStdout(stripAnsi(args))
+
+  return snapshot(name, snap)
+}
+
+function mockEE () {
+  const ee = new EE()
+
+  ee.kill = () => {
+    // ughh, would be nice to test logic inside the launcher
+    // that cleans up after the browser exit
+    // like calling client.close() if available to let the
+    // browser free any resources
+    return ee.emit('exit')
+  }
+
+  ee.destroy = () => {
+    return ee.emit('closed')
+  }
+
+  ee.isDestroyed = () => {
+    return false
+  }
+
+  ee.loadURL = () => {}
+  ee.focusOnWebView = () => {}
+  ee.webContents = {
+    debugger: {
+      on: sinon.stub(),
+      attach: sinon.stub(),
+      sendCommand: sinon.stub().resolves(),
+    },
+    getOSProcessId: sinon.stub(),
+    setUserAgent: sinon.stub(),
+    session: {
+      clearCache: sinon.stub().resolves(),
+      setProxy: sinon.stub().resolves(),
+      setUserAgent: sinon.stub(),
+      on: sinon.stub(),
+      removeListener: sinon.stub(),
+      webRequest: {
+        onBeforeSendHeaders () {},
+      },
+    },
+  }
+
+  ee.maximize = sinon.stub
+  ee.setSize = sinon.stub
+
+  return ee
 }
 
 let ctx
@@ -105,12 +154,12 @@ let ctx
 describe('lib/cypress', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     process.chdir(previousCwd)
     this.timeout(8000)
 
-    cache.__removeSync()
+    await cache.remove()
 
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
@@ -241,7 +290,7 @@ describe('lib/cypress', () => {
   })
 
   context('invalid config', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.win = {
         on: sinon.stub(),
         webContents: {
@@ -249,6 +298,7 @@ describe('lib/cypress', () => {
         },
       }
 
+      await clearCtx()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
     })
@@ -285,7 +335,9 @@ describe('lib/cypress', () => {
   })
 
   context('--run-project', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await clearCtx()
+
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
@@ -450,58 +502,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out support + files if they do not exist', function () {
-      const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
-
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
-
-      return ctx.lifecycleManager.getFullInitialConfig()
-      .then(() => {
-        return fs.rmdir(supportFolder, { recursive: true })
-      }).then(() => {
-        return fs.statAsync(supportFolder)
-      })
-      .then(() => {
-        throw new Error('supportFolder should not exist!')
-      }).catch({ code: 'ENOENT' }, () => {
-        return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
-      }).then(() => {
-        return fs.statAsync(supportFolder)
-      }).then(() => {
-        throw new Error('supportFolder should not exist!')
-      }).catch((err) => {
-        expect(err.code).eq('ENOENT')
-      })
-    })
-
-    // NOTE: Removal of fixtures is not supported in new flow
-    it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
-
-      ctx.lifecycleManager.getFullInitialConfig()
-      .then((cfg) => {
-        this.cfg = cfg
-
-        return fs.statAsync(this.cfg.fixturesFolder)
-      }).then(() => {
-        return settings.read(this.idsPath)
-      }).then((json) => {
-        json.fixturesFolder = false
-
-        return settings.writeForTesting(this.idsPath, json)
-      }).then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
-        return fs.statAsync(this.cfg.fixturesFolder)
-        .then(() => {
-          throw new Error('fixturesFolder should not exist!')
-        }).catch(() => {
-          return done()
-        })
-      })
-    })
-
-    it('runs project headlessly and displays gui', function () {
+    it('runs project headed and displays gui', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
@@ -533,10 +534,12 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('can change the reporter with cypress.config.js', function () {
+    it('can change the reporter with cypress.config.js', async function () {
       sinon.spy(Reporter, 'create')
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
+
+      setCtx(makeDataContext({}))
 
       return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
@@ -547,7 +550,9 @@ describe('lib/cypress', () => {
         json.reporter = 'dot'
 
         return settings.writeForTesting(this.idsPath, json)
-      }).then(() => {
+      }).then(async () => {
+        await clearCtx()
+
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
@@ -728,13 +733,12 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: test this
-    it.skip('logs error and exits when project has cypress.config.js syntax error', function () {
+    it('logs error and exits when project has cypress.config.js syntax error', function () {
       return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
+        this.expectExitWithErr('CONFIG_FILE_REQUIRE_ERROR', this.todosPath)
       })
     })
 
@@ -938,48 +942,7 @@ describe('lib/cypress', () => {
       beforeEach(() => {
         browsers.open.restore()
 
-        const ee = new EE()
-
-        ee.kill = () => {
-          // ughh, would be nice to test logic inside the launcher
-          // that cleans up after the browser exit
-          // like calling client.close() if available to let the
-          // browser free any resources
-          return ee.emit('exit')
-        }
-
-        ee.destroy = () => {
-          return ee.emit('closed')
-        }
-
-        ee.isDestroyed = () => {
-          return false
-        }
-
-        ee.loadURL = () => {}
-        ee.focusOnWebView = () => {}
-        ee.webContents = {
-          debugger: {
-            on: sinon.stub(),
-            attach: sinon.stub(),
-            sendCommand: sinon.stub().resolves(),
-          },
-          getOSProcessId: sinon.stub(),
-          setUserAgent: sinon.stub(),
-          session: {
-            clearCache: sinon.stub().resolves(),
-            setProxy: sinon.stub().resolves(),
-            setUserAgent: sinon.stub(),
-            on: sinon.stub(),
-            removeListener: sinon.stub(),
-            webRequest: {
-              onBeforeSendHeaders () {},
-            },
-          },
-        }
-
-        ee.maximize = sinon.stub
-        ee.setSize = sinon.stub
+        const ee = mockEE()
 
         sinon.stub(launch, 'launch').returns(ee)
         sinon.stub(Windows, 'create').returns(ee)
@@ -1144,8 +1107,7 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      // TODO: fix
-      it.skip(`with a custom config file fails when it doesn't exist`, function () {
+      it(`with a custom config file fails when it doesn't exist`, function () {
         this.filename = 'abcdefgh.test.js'
 
         return fs.statAsync(path.join(this.todosPath, this.filename))
@@ -1168,11 +1130,56 @@ describe('lib/cypress', () => {
   // most record mode logic is covered in e2e tests.
   // we only need to cover the edge cases / warnings
   context('--record', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
+      await clearCtx()
+
       sinon.stub(api, 'createRun').resolves()
+      const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      createInstanceStub.onFirstCall().resolves({
+        spec: 'cypress/e2e/app.cy.js',
+        runs: [{}],
+        runId: '1',
+        claimedInstances: 1,
+        totalInstances: 1,
+        groupId: 1,
+        platform: 'linux',
+        machineId: 1,
+      })
+
+      createInstanceStub.onSecondCall().resolves({
+        spec: null,
+        runs: [{}],
+        runId: '1',
+        claimedInstances: 1,
+        totalInstances: 1,
+        groupId: 1,
+        platform: 'linux',
+        machineId: 1,
+      })
+
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
+
+      sinon.stub(runMode, 'waitForBrowserToConnect').resolves({
+        stats: {
+          tests: 1,
+          passes: 2,
+          failures: 3,
+          pending: 4,
+          skipped: 5,
+          wallClockDuration: 6,
+        },
+        tests: [],
+        hooks: [],
+        video: 'path/to/video',
+        shouldUploadVideo: true,
+        screenshots: [],
+        config: {},
+        spec: {},
+      })
+
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: {
           tests: 1,
@@ -1362,6 +1369,33 @@ describe('lib/cypress', () => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
         return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1')
+      })
+    })
+
+    beforeEach(() => {
+      browsers.open.restore()
+
+      const ee = mockEE()
+
+      sinon.stub(launch, 'launch').returns(ee)
+      sinon.stub(Windows, 'create').returns(ee)
+    })
+
+    it('does not truncate a really long dashboard url', function () {
+      api.createRun.resolves({
+        warnings: [],
+        runUrl: `http://dashboard.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
+      })
+
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        return snapshotConsoleLogs('Long Dashboard URL')
       })
     })
 
@@ -1594,13 +1628,15 @@ describe('lib/cypress', () => {
   })
 
   context('interactive', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.win = {
         on: sinon.stub(),
         webContents: {
           on: sinon.stub(),
         },
       }
+
+      await clearCtx()
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
@@ -1636,7 +1672,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('passes filtered options to Project#open and sets cli config', function () {
+    it('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
@@ -1645,7 +1681,9 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+      setCtx(makeDataContext({}))
+
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => ctx.lifecycleManager.getFullInitialConfig())
@@ -1656,7 +1694,9 @@ describe('lib/cypress', () => {
         const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, ...rest } = json
 
         return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, excludeSpecPattern } })
-      }).then(() => {
+      }).then(async () => {
+        await clearCtx()
+
         return cypress.start([
           '--port=2121',
           '--config',
@@ -1730,65 +1770,12 @@ describe('lib/cypress', () => {
         })
       })
     })
-
-    // NOTE: skipped because we want to ensure this is captured in v10
-    it.skip('sends warning when baseUrl cannot be verified', function () {
-      const bus = new EE()
-      const event = { sender: { send: sinon.stub() } }
-      const warning = { message: 'Blah blah baseUrl blah blah' }
-
-      sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
-
-      return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
-      .then(() => {
-        const options = Events.start.firstCall.args[0]
-
-        Events.handleEvent(options, bus, event, 123, 'on:project:warning')
-
-        return Events.handleEvent(options, bus, event, 123, 'open:project', this.todosPath)
-      }).then(() => {
-        expect(event.sender.send.withArgs('response').firstCall.args[1].data).to.eql(warning)
-      })
-    })
-
-    describe('--config-file', () => {
-      beforeEach(function () {
-        this.filename = 'foo.bar.baz.asdf.quux.json'
-        this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
-      })
-
-      // TODO: (tgriesser) needs a system test, the mocking here no longer is correct
-      it.skip('reads config from a custom config file', function () {
-        const bus = new EE()
-
-        return fs.writeJson(path.join(this.pristinePath, this.filename), {
-          env: { foo: 'bar' },
-          port: 2020,
-        }).then(() => {
-          return cypress.start([
-          `--config-file=${this.filename}`,
-          ])
-          .then(() => {
-            const options = Events.start.firstCall.args[0]
-
-            return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
-          })
-          .then(() => {
-            expect(this.open).to.be.called
-
-            const cfg = this.open.getCall(0).args[0]
-
-            expect(cfg.env.foo).to.equal('bar')
-
-            expect(cfg.port).to.equal(2020)
-          })
-        })
-      })
-    })
   })
 
   context('--cwd', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await clearCtx()
+
       errors.warning.restore()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(interactiveMode, 'ready').resolves()
@@ -1811,7 +1798,8 @@ describe('lib/cypress', () => {
   })
 
   context('no args', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await clearCtx()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(interactiveMode, 'ready').resolves()
     })

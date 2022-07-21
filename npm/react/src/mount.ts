@@ -322,6 +322,15 @@ export declare namespace Cypress {
   }
 }
 
+// Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this
+// by creating an explicit function/import that the user can register in their 'component.js' support file,
+// such as:
+//    import 'cypress/<my-framework>/support'
+// or
+//    import { registerCT } from 'cypress/<my-framework>'
+//    registerCT()
+// Note: This would be a breaking change
+
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js

@@ -133,6 +133,16 @@ describe('driver/src/cypress/cy', () => {
         expect(userInvocationStack).to.include('.cy.js')
       })
     })
+
+    it('supports cy.state(\'subject\') for backwards compatability', () => {
+      cy.stub(Cypress.utils, 'warning')
+      const a = {}
+
+      cy.wrap(a).then(() => {
+        expect(cy.state('subject')).to.equal(a)
+        expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.currentSubject()` instead.')
+      })
+    })
   })
 
   context('custom commands', () => {

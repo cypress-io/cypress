@@ -64,6 +64,94 @@ describe('<CreateSpecModal />', () => {
   })
 })
 
+describe('Modal Text Input', () => {
+  it('focuses text input and selects file name by default', () => {
+    const show = ref(true)
+
+    cy.mount(() => (<div>
+      <CreateSpecModal
+        gql={{
+          currentProject: {
+            id: 'id',
+            currentTestingType: 'component',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
+            config: [{
+              field: 'e2e',
+              value: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }, {
+              field: 'component',
+              value: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }],
+            specs: [],
+            fileExtensionToUse: 'js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
+          },
+        }}
+        show={show.value}
+        onClose={() => show.value = false}
+      />
+    </div>))
+
+    cy.focused().as('specNameInput')
+
+    // focused should yield the input element since it should be auto-focused
+    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/ComponentName.cy.js')
+
+    // only the file name should be focused, so backspacing should erase the whole file name
+    cy.get('@specNameInput').type('{backspace}')
+
+    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/.cy.js')
+  })
+
+  it('focuses text input but does not select if default file name does not match regex', () => {
+    const show = ref(true)
+
+    cy.mount(() => (<div>
+      <CreateSpecModal
+        gql={{
+          currentProject: {
+            id: 'id',
+            currentTestingType: 'component',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
+            config: [{
+              field: 'e2e',
+              value: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }, {
+              field: 'component',
+              value: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }],
+            specs: [],
+            fileExtensionToUse: 'js',
+            defaultSpecFileName: 'this/path/does/not/produce/regex/match-',
+          },
+        }}
+        show={show.value}
+        onClose={() => show.value = false}
+      />
+    </div>))
+
+    cy.focused().as('specNameInput')
+
+    // focused should yield the input element since it should be auto-focused
+    cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match-')
+
+    // nothing should be selected, so backspacing should only delete the last character in the file path
+    cy.get('@specNameInput').type('{backspace}')
+
+    cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match')
+  })
+})
+
 describe('playground', () => {
   it('can be opened and closed via the show prop', () => {
     const show = ref(false)

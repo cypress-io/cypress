@@ -68,7 +68,7 @@ describe('Error handling', () => {
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
 
-      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs'].forEach((idiomaticConfigFile) => {
+      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts', 'vite.config.cts'].forEach((idiomaticConfigFile) => {
         cy.contains(idiomaticConfigFile)
       })
 
@@ -79,8 +79,8 @@ describe('Error handling', () => {
 
       cy.contains('Choose a Browser').should('not.exist')
 
-      cy.withCtx((ctx) => {
-        ctx.actions.file.writeFileInProject('cypress.config.ts', `
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.ts', `
           import { defineConfig } from 'cypress'
           import { defineConfig as viteConfig } from 'vite'
           export default defineConfig({

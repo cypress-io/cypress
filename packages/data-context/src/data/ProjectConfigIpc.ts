@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
-import { autoBindDebug, hasTypeScriptInstalled } from '../util'
+import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 
@@ -17,7 +17,7 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
 const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
-const tsNode = require.resolve('@packages/server/lib/plugins/child/register_ts_node')
+const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -68,6 +68,10 @@ export class ProjectConfigIpc extends EventEmitter {
     })
 
     return autoBindDebug(this)
+  }
+
+  get childProcessPid () {
+    return this._childProcess?.pid
   }
 
   // TODO: options => Cypress.TestingTypeOptions
@@ -124,6 +128,7 @@ export class ProjectConfigIpc extends EventEmitter {
       let resolved = false
 
       this._childProcess.on('error', (err) => {
+        debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
@@ -135,6 +140,7 @@ export class ProjectConfigIpc extends EventEmitter {
        * but it's not.
        */
       this.on('childProcess:unhandledError', (err) => {
+        debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
@@ -146,6 +152,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('loadConfig:error', (err) => {
+        debug('error loading config %s', err)
         this.killChildProcess()
         reject(err)
       })
@@ -246,6 +253,8 @@ export class ProjectConfigIpc extends EventEmitter {
     let isProjectUsingESModules = false
 
     try {
+      // TODO: convert this to async FS methods
+      // eslint-disable-next-line no-restricted-syntax
       const pkgJson = fs.readJsonSync(path.join(this.projectRoot, 'package.json'))
 
       isProjectUsingESModules = pkgJson.type === 'module'
@@ -283,7 +292,7 @@ export class ProjectConfigIpc extends EventEmitter {
         // We do NOT use the `--loader` flag because we have some additional
         // custom logic for ts-node when used with CommonJS that needs to be evaluated
         // so we need to load and evaluate the hook first using the `--require` module API.
-        const tsNodeLoader = `--require ${tsNode}`
+        const tsNodeLoader = `--require "${tsNode}"`
 
         if (childOptions.env.NODE_OPTIONS) {
           childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
@@ -296,9 +305,7 @@ export class ProjectConfigIpc extends EventEmitter {
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
     }
 
-    const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
-
-    return proc
+    return fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
   }
 
   private handleChildProcessError (err: any, ipc: ProjectConfigIpc, resolved: boolean, reject: (reason?: any) => void) {

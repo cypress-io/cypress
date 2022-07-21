@@ -1,10 +1,10 @@
 <template>
   <div
-    class="rounded h-auto outline-none border-1 text-center
+    class="rounded h-auto outline-none border-1 border-gray-100 text-center
       relative block group
       children:hyphens-manual"
     :class="{
-      'bg-gray-50 border-gray-100 cursor-default': disabled,
+      'bg-gray-50 cursor-default': disabled,
       'cursor-pointer focus-within-default hocus-default': !disabled
     }"
     data-cy="card"
@@ -40,9 +40,10 @@
     <!-- this button can be focused via tab key and allows card hocus styles to appear
     as well as allows a keyboard user to "activate" the card with spacebar or enter keys -->
     <button
-      class="font-medium mx-8px mb-8px text-indigo-500 text-18px leading-24px focus:outline-transparent"
+      class="font-medium mx-8px mb-8px text-18px leading-24px focus:outline-transparent"
       :class="{
-        'text-gray-700 cursor-default': disabled
+        'text-gray-700 cursor-default': disabled,
+        'text-indigo-500': !disabled
       }"
       :disabled="disabled"
     >

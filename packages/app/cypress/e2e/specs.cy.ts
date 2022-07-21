@@ -61,7 +61,7 @@ describe('App: Specs', () => {
         }).should('be.visible').within(() => {
           cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
           cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
-          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="file-match-indicator"]').contains('No Matches')
           cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
         })
 
@@ -95,7 +95,7 @@ describe('App: Specs', () => {
 
         const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
-        it('scaffolds example files when card is clicked', () => {
+        it('scaffolds example files when card is clicked', { viewportHeight: 1200 }, () => {
           cy.get('@ScaffoldCard').click()
 
           cy.findByRole('dialog', {
@@ -320,7 +320,7 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
@@ -423,7 +423,7 @@ describe('App: Specs', () => {
 
         it('generates spec with file name that does not contain a known spec extension', () => {
           cy.withCtx(async (ctx) => {
-            let config = ctx.actions.file.readFileInProject('cypress.config.js')
+            let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
             config = config.replace(
                 `specPattern: 'src/**/*.{cy,spec}.{js,jsx}'`,
@@ -652,7 +652,7 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
@@ -700,7 +700,7 @@ describe('App: Specs', () => {
 
       it('generates spec with file name that does not contain a known spec extension', () => {
         cy.withCtx(async (ctx) => {
-          let config = ctx.actions.file.readFileInProject('cypress.config.js')
+          let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
           config = config.replace(
               `specPattern: 'src/specs-folder/*.cy.{js,jsx}'`,

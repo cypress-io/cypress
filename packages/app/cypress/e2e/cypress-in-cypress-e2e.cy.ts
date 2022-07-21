@@ -98,13 +98,13 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('redirects to the specs list with error if a spec is not found when navigating', () => {
-    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const { title, intro, explainer } = defaultMessages.specPage.noSpecError
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
     cy.visitApp(`/specs/runner?file=${badFilePath}`)
-    cy.contains(noSpecErrorTitle).should('be.visible')
-    cy.contains(noSpecErrorIntro).should('be.visible')
-    cy.contains(noSpecErrorExplainer).should('be.visible')
+    cy.contains(title).should('be.visible')
+    cy.contains(intro).should('be.visible')
+    cy.contains(explainer).should('be.visible')
     cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
     cy.location()
     .its('href')
@@ -114,11 +114,11 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     // should clear after reload
     cy.reload()
-    cy.contains(noSpecErrorTitle).should('not.exist')
+    cy.contains(title).should('not.exist')
   })
 
   it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
-    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const { title, intro, explainer } = defaultMessages.specPage.noSpecError
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
@@ -129,9 +129,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.withCtx((ctx, o) => {
       ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
     }, { path: goodFilePath }).then(() => {
-      cy.contains(noSpecErrorTitle).should('be.visible')
-      cy.contains(noSpecErrorIntro).should('be.visible')
-      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(title).should('be.visible')
+      cy.contains(intro).should('be.visible')
+      cy.contains(explainer).should('be.visible')
       cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
@@ -259,8 +259,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       }).invoke('connected').should('be.true')
     })
 
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject(o.path, `
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `
 describe('Dom Content', () => {
   it('renders the new test content', () => {
     cy.visit('cypress/e2e/dom-content.html')
