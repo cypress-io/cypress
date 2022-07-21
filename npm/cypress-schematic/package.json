@@ -33,7 +33,7 @@
     "chai": "4.2.0",
     "cypress": "0.0.0-development",
     "mocha": "3.5.3",
-    "typescript": "~4.2.4"
+    "typescript": "4.7.4"
   },
   "peerDependencies": {
     "@angular/cli": ">=12",

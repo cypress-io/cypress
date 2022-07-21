@@ -9,6 +9,6 @@
     "awesome-typescript-loader": "5.2.1",
     "babel-loader": "8.1.0",
     "cypress": "file:../../../cli/build",
-    "typescript": "3.9.2"
+    "typescript": "4.7.4"
   }
 }
