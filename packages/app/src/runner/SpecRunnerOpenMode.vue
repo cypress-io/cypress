@@ -38,18 +38,18 @@
             id="reporter-inline-specs-list"
             :gql="props.gql"
           />
-        </HideDuringScreenshotOrRunMode>
-      </template>
-      <template #panel2>
-        <HideDuringScreenshot
-          class="h-full"
-        >
           <ChooseExternalEditorModal
             :open="runnerUiStore.showChooseExternalEditorModal"
             :gql="props.gql"
             @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
             @selected="openFile"
           />
+        </HideDuringScreenshotOrRunMode>
+      </template>
+      <template #panel2>
+        <HideDuringScreenshot
+          class="h-full"
+        >
           <div
             v-if="!hideCommandLog"
             v-once

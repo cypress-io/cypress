@@ -10,7 +10,7 @@
   >
     <!-- using v-show to preserve state since panel1 is collapsible/expandable by the user from the UI -->
     <div
-      v-if="showPanel1"
+      v-show="showPanel1"
       data-cy="specs-list-panel"
       class="h-full flex-shrink-0 z-20 relative"
       :style="{width: `${panel1Width}px`}"
