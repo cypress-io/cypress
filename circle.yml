@@ -38,7 +38,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'global-mode-issue', << pipeline.git.branch >> ]
     - matches:
-          pattern: "-release$"
           pattern: "lmiller/react-adapters"
           value: << pipeline.git.branch >>
 
