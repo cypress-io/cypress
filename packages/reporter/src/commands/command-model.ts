@@ -90,8 +90,6 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
-        // nested system group has nested commands
-        (this.group && this.type === 'system' && this.hasChildren) ||
         // command has nested commands
         (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
         // command has nested commands with children

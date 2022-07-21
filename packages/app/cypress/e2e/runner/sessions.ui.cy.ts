@@ -15,7 +15,7 @@ const validateSetupSessionGroup = (isNewSession = true) => {
   const groupText = isNewSession ? 'Create new session' : 'Recreate session'
 
   cy.contains(groupText).closest('.command').as('setupSession')
-  cy.get('@setupSession').find('.command-expander-is-open')
+  cy.get('@setupSession').find('.command-expander').click()
   cy.get('@setupSession').find('.command-alias').contains('runSetup')
 
   return cy.contains(groupText)
@@ -83,7 +83,8 @@ describe('runner/cypress sessions.ui.spec', {
       .closest('.command').as('validateSession')
 
       cy.get('@validateSession')
-      .find('.command-expander-is-open')
+      .find('.command-expander')
+      .click()
 
       cy.get('@validateSession')
       .find('.command-alias')
@@ -164,7 +165,8 @@ describe('runner/cypress sessions.ui.spec', {
 
         cy.get('@validateSession')
         .find('.command-expander')
-        .should('have.class', 'command-expander-is-open')
+        .should('not.have.class', 'command-expander-is-open')
+        .click()
 
         cy.get('@validateSession')
         .find('.command-alias')
@@ -204,21 +206,26 @@ describe('runner/cypress sessions.ui.spec', {
         cy.contains('recreated')
 
         cy.contains('Restore saved session')
+        .parent()
+        .closest('.command')
+        .next()
+        .contains('Validate session')
+        .closest('.command').as('firstValidateSession')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
 
-        cy.get('.command-name-Clear-page').should('have.length', 4)
-
-        cy.contains('Validate session')
+        cy.get('.command-name-Clear-page').should('have.length', 3)
 
         validateSetupSessionGroup(false)
 
         cy.contains('Validate session')
-        .closest('.command').as('validateSession')
+        .closest('.command').as('secondValidateSession')
 
-        cy.get('@validateSession')
+        cy.get('@secondValidateSession')
         .find('.command-expander')
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('@validateSession')
+        cy.get('@secondValidateSession')
         .find('.command-alias')
         .contains('runValidation')
       })
@@ -268,7 +275,7 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-expander')
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('.command-name-Clear-page').should('have.length', 3)
+        cy.get('.command-name-Clear-page').should('have.length', 2)
 
         validateSetupSessionGroup(false)
         .parent()
