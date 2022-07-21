@@ -18,6 +18,7 @@
     "debug": "4.3.3",
     "find-up": "6.3.0",
     "local-pkg": "0.4.1",
+    "node-html-parser": "5.3.3",
     "pathe": "0.2.0"
   },
   "devDependencies": {
