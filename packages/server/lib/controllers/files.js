@@ -2,7 +2,6 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
-const glob = require('../util/glob')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
@@ -18,22 +17,24 @@ module.exports = {
 
     return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
-      return this.getSupportFile(config)
-      .then((js) => {
-        const allFilesToSend = js.concat(specs)
+      const supportFileJs = this.getSupportFile(config)
+      const allFilesToSend = specs
 
-        debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+      if (supportFileJs) {
+        allFilesToSend.push(supportFileJs)
+      }
 
-        const iframeOptions = {
-          title: this.getTitle(test),
-          domain: remoteStates.getPrimary().domainName,
-          scripts: JSON.stringify(allFilesToSend),
-        }
+      debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-        debug('iframe %s options %o', test, iframeOptions)
+      const iframeOptions = {
+        title: this.getTitle(test),
+        domain: remoteStates.getPrimary().domainName,
+        scripts: JSON.stringify(allFilesToSend),
+      }
 
-        return res.render(iframePath, iframeOptions)
-      })
+      debug('iframe %s options %o', test, iframeOptions)
+
+      return res.render(iframePath, iframeOptions)
     })
   },
 
@@ -161,36 +162,10 @@ module.exports = {
   getSupportFile (config) {
     const { projectRoot, supportFile, namespace } = config
 
-    let files = []
-
-    if (supportFile !== false) {
-      files = [supportFile]
+    if (!supportFile) {
+      return
     }
 
-    // TODO: there shouldn't be any reason
-    // why we need to re-map these. its due
-    // to the javascripts array but that should
-    // probably be mapped during the config
-    const paths = _.map(files, (file) => {
-      return path.resolve(projectRoot, file)
-    })
-
-    return Promise
-    .map(paths, (p) => {
-      // is the path a glob?
-      if (!glob.hasMagic(p)) {
-        return p
-      }
-
-      // handle both relative + absolute paths
-      // by simply resolving the path from projectRoot
-      p = path.resolve(projectRoot, p)
-
-      return glob(p, { nodir: true })
-    }).then(_.flatten)
-    .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot, namespace)
-    })
+    return this.prepareForBrowser(supportFile, projectRoot, namespace)
   },
-
 }
