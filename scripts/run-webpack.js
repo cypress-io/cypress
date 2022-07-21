@@ -29,4 +29,9 @@ function buildCommand () {
 
 const program = buildCommand()
 
-cp.execSync(program, { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS } })
+try {
+  cp.execSync(program, { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS } })
+} catch (e) {
+  // eslint-disable-next-line no-console
+  console.log(`Error executing ${program}. Error: `, e)
+}

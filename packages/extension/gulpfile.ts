@@ -52,10 +52,10 @@ const build = gulp.series(
     icons,
     logos,
     manifest,
-    background,
     html,
     css,
   ),
+  background,
 )
 
 const watchBuild = () => {
