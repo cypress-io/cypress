@@ -1,11 +1,9 @@
 // CommonJS to easily share across packages
-const typescript = require('@rollup/plugin-typescript')
+const ts = require('rollup-plugin-typescript2')
 const { default: resolve } = require('@rollup/plugin-node-resolve')
 const commonjs = require('@rollup/plugin-commonjs')
-const fs = require('fs')
 
-// eslint-disable-next-line no-restricted-syntax
-const pkg = JSON.parse(fs.readFileSync('./package.json'), 'utf-8')
+const pkg = require('./package.json')
 
 const banner = `
 /**
@@ -31,7 +29,17 @@ function createEntry (options) {
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json' }),
+      ts({
+        check: format === 'es',
+        tsconfigOverride: {
+          compilerOptions: {
+            declaration: format === 'es',
+            target: 'es5',
+            module: format === 'cjs' ? 'es2015' : 'esnext',
+          },
+          exclude: ['tests'],
+        },
+      }),
     ],
     output: {
       banner,
@@ -61,6 +69,6 @@ function createEntry (options) {
 }
 
 module.exports = [
-  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: false }),
-  createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
+  createEntry({ format: 'es', input: 'src/index.ts' }),
+  createEntry({ format: 'cjs', input: 'src/index.ts' }),
 ]
