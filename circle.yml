@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - zachw/issue-22525
+        - global-mode-issue
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'zachw/issue-22525', << pipeline.git.branch >> ]
+    - equal: [ 'global-mode-issue', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -126,7 +126,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "zachw/issue-22525" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "global-mode-issue" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
