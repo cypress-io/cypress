@@ -218,6 +218,24 @@ class $Cypress {
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({}) as unknown as StateFunc
+
+    /*
+     * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.
+     * While we usually consider cy.state() to be internal, in the case of cy.state('subject'),
+     * cypress-testing-library, one of our most popular plugins, relies on it.
+     * https://github.com/testing-library/cypress-testing-library/blob/1af9f2f28b2ca62936da8a8acca81fc87e2192f7/src/utils.js#L9
+     *
+     * Therefore, we've added this shim to continue to support them. The library is actively maintained, so this
+     * shouldn't need to stick around too long (written 07/22).
+     */
+    Object.defineProperty(this.state(), 'subject', {
+      get: () => {
+        $errUtils.warnByPath('subject.state_subject_deprecated')
+
+        return cy.currentSubject()
+      },
+    })
+
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
@@ -639,9 +657,6 @@ class $Cypress {
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
-
-      case 'cy:next:subject:prepared':
-        return this.emit('next:subject:prepared', ...args)
 
       case 'cy:collect:run:state':
         return this.emitThen('collect:run:state')
