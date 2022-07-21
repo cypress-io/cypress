@@ -45,6 +45,6 @@ beforeEach(() => {
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
 
-installCustomPercyCommand({ component: true })
+installCustomPercyCommand({ isComponentTesting: true })
 
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))

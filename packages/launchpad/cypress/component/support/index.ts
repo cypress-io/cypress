@@ -33,4 +33,5 @@ installCustomPercyCommand({
       $el.attr('style', 'animation: none !important')
     },
   },
+  isComponentTesting: true,
 })
