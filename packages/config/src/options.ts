@@ -434,8 +434,8 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // having the final config that has the e2e property flattened/compacted
     // we may not be able to get the value to ignore.
     name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
-    validation: validate.isString,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
+    validation: validate.isStringOrArrayOfStrings,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {

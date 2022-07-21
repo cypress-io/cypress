@@ -318,8 +318,8 @@ exports['Long Dashboard URL'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    10.3.0                                                                             │
-  │ Browser:    Electron 99 (headless)                                                             │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app.cy.js)                                                                │
   │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
   │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false                           │
@@ -341,9 +341,9 @@ exports['Long Dashboard URL'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖                                             6ms        1        2        3        4        5 │
+  │ ✖                                           XX:XX        1        2        3        4        5 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                       6ms        1        2        3        4        5  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        2        3        4        5  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
