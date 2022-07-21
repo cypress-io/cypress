@@ -1,3 +1,4 @@
+import { getEventManager } from '../../../../src/runner'
 import type { CypressInCypressMochaEvent } from '../../../../src/runner/event-manager'
 import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
@@ -166,7 +167,7 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
   })
 
   const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
-    win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
+    getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
       const data = sanitizeMochaEvents(args)
 
       bus.emit('assert:cypress:in:cypress', data)

@@ -22,7 +22,8 @@ describe('rerun state bugs', () => {
         Cypress.config('isTextTerminal', false)
 
         // cause a rerun event to occur by triggering a hash change
-        window.top.dispatchEvent(new Event('test:trigger:rerun'))
+        // window.top.dispatchEvent(new Event('test:trigger:rerun'))
+        top.location.reload()
       } else if (window.top.runCount === 2) {
         // Second time, do nothing, with mocha events still disabled
       } else {
