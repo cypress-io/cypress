@@ -6,7 +6,7 @@
   >
     <button
       type="button"
-      class="cursor-default font-medium decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
     >
       <span
         class="hidden lg:flex"
@@ -16,12 +16,13 @@
         class="lg:hidden"
         data-cy="short-header-text"
       >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
+      <i-cy-circle-bg-question-mark_x16 class="ml-1 icon-dark-indigo-500 icon-light-indigo-100" />
     </button>
     <template
       #popper
     >
       <div
-        class="flex flex-col mx-4 text-sm text-center py-4 px-2 items-center"
+        class="flex flex-col text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div

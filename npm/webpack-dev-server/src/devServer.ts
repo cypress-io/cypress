@@ -99,9 +99,11 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   })
 }
 
-export type PresetHandlerResult = { frameworkConfig?: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
+export type PresetHandlerResult = { frameworkConfig: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
 
-async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
+
+async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
   switch (devServerConfig.framework) {
     case 'create-react-app':
       return createReactAppHandler(devServerConfig)
