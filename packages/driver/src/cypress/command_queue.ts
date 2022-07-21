@@ -56,6 +56,40 @@ const commandRunningFailed = (Cypress, state, err) => {
   })
 }
 
+async function retrySelector (command: $Command, ret: any, isCy) {
+  if ($utils.isPromiseLike(ret) && !isCy(ret)) {
+    $errUtils.throwErrByPath(
+      'selector_command.returned_promise', {
+        args: { name: command.get('name') },
+      },
+    )
+  }
+
+  if (!_.isFunction(ret)) {
+    $errUtils.throwErrByPath(
+      'selector_command.returned_non_function', {
+        args: { name: command.get('name'), returned: ret },
+      },
+    )
+  }
+
+  const onRetry = () => {
+    try {
+      ret(cy.currentSubject(command.get('chainerId')))
+    } catch (err) {
+      if (err.retry === false) {
+        throw err
+      }
+    }
+  }
+
+  const options = {
+    timeout: command.get('timeout'),
+  }
+
+  return cy.retry(onRetry, options)
+}
+
 export class CommandQueue extends Queue<$Command> {
   state: StateFunc
   timeout: $Cy['timeout']
@@ -130,6 +164,9 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   private runCommand (command: $Command) {
+    const isSelector = command.get('selector')
+    const name = command.get('name')
+
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
     // prior to ever making it through our first
@@ -146,13 +183,24 @@ export class CommandQueue extends Queue<$Command> {
 
       return command.get('args')
     }, command)
-    .then((args) => {
+    .then(async (args) => {
       // store this if we enqueue new commands
       // to check for promise violations
       let ret
       let enqueuedCmd
 
       const commandEnqueued = (obj) => {
+        if (isSelector && !obj.selector) {
+          $errUtils.throwErrByPath(
+            'selector_command.invoked_action', {
+              args: {
+                name,
+                action: obj.name,
+              },
+            },
+          )
+        }
+
         return enqueuedCmd = obj
       }
 
@@ -170,6 +218,15 @@ export class CommandQueue extends Queue<$Command> {
       // run the command's fn with runnable's context
       try {
         ret = __stackReplacementMarker(command.get('fn'), args)
+
+        // Selectors return a function which takes the current subject and returns the next
+        // subject. We invoke this once immediately, to verify that the subject exists.
+        // The function itself remains return value of the command - it's what gets added to
+        // the subject chain.
+
+        if (isSelector) {
+          await retrySelector(command, ret, this.isCy)
+        }
       } catch (err) {
         throw err
       } finally {
@@ -190,7 +247,7 @@ export class CommandQueue extends Queue<$Command> {
         $errUtils.throwErrByPath(
           'miscellaneous.command_returned_promise_and_commands', {
             args: {
-              current: command.get('name'),
+              current: name,
               called: enqueuedCmd.name,
             },
           },
@@ -207,10 +264,7 @@ export class CommandQueue extends Queue<$Command> {
         // or an undefined value then throw
         $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
-            args: {
-              current: command.get('name'),
-              returned: ret,
-            },
+            args: { current: name, returned: ret },
           },
         )
       }
@@ -249,7 +303,18 @@ export class CommandQueue extends Queue<$Command> {
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
-      cy.setSubjectForChainer(command.get('chainerId'), subject)
+      if (isSelector) {
+        // For selectors, the "subject" here is the command's return value, which is a function which
+        // accepts a subject and returns a subject, and can be re-invoked at any time.
+
+        // We add the command name here to make debugging easier; It should not be used functionally.
+        subject.commandName = name
+        cy.addSelectorToChainer(command.get('chainerId'), subject)
+      } else {
+        // For action commands, the "subject" here is the command's return value, which replaces
+        // the current subject chain. We cannot re-invoke action commands - the return value here is "final".
+        cy.setSubjectForChainer(command.get('chainerId'), subject)
+      }
 
       return subject
     })

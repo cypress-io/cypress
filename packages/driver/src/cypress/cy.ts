@@ -725,12 +725,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
-      const injected = _.isFunction(onInjectCommand)
 
-      if (injected) {
-        if (onInjectCommand.call(cy, name, ...args) === false) {
-          return
-        }
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+        return
       }
 
       cy.enqueue({
@@ -739,7 +736,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         type,
         chainerId: chainer.chainerId,
         userInvocationStack,
-        injected,
         fn: firstCall ? cyFn : chainerFn,
       })
     }
@@ -791,6 +787,72 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
+        cy.runQueue()
+      }
+
+      return chainer
+    }
+  }
+
+  addSelector ({ name, fn, prevSubject }) {
+    const cy = this
+
+    const cyFn = function (chainerId, ...args) {
+      return fn.apply(cy.runnableCtx(name), args)
+    }
+
+    cyFn.originalFn = fn
+
+    const callback = (chainer, userInvocationStack, args) => {
+      // dont enqueue / inject any new commands if
+      // onInjectCommand returns false
+      const onInjectCommand = cy.state('onInjectCommand')
+
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+        return
+      }
+
+      // Selectors are functions that accept args (which is called once each time the command is used in the spec
+      // file), which return a function that accepts the subject (which is potentially called any number of times).
+      // The outer function is used to store any needed state needed by a particular instance of the command, while
+      // inner one (selectorFn, right here) is the one that determines the next subject.
+
+      // We enqueue the outer function as the "cypress command". When it returns, we immediately invoke the inner
+      // function, retrying it in the normal loop until it succeeds. Once it passes the first time, it is added
+      // to the current chainer's subject chain.
+
+      // See command_queue.ts for more details.
+      cy.enqueue({
+        name,
+        args,
+        type: 'dual',
+        chainerId: chainer.chainerId,
+        userInvocationStack,
+        fn: cyFn,
+        selector: true,
+      })
+    }
+
+    $Chainer.add(name, callback)
+
+    cy[name] = function (...args) {
+      cy.ensureRunnable(name)
+
+      // this is the first call on cypress
+      // so create a new chainer instance
+      const chainer = new $Chainer(cy.specWindow)
+
+      if (cy.state('chainerId')) {
+        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
+      }
+
+      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+
+      callback(chainer, userInvocationStack, args, true)
+
+      // if we're the first call onto a cy
+      // command, then kick off the run
+      if (!cy.state('promise')) {
         cy.runQueue()
       }
 
@@ -1251,7 +1313,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private pushSubject (name, args, prevSubject: string[], chainerId) {
     const subject = this.currentSubject(chainerId)
 
-    if (prevSubject) {
+    if (prevSubject !== undefined) {
       // make sure our current subject is valid for
       // what we expect in this command
       this.ensureSubjectByType(subject, prevSubject)
@@ -1266,18 +1328,32 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * Use `currentSubject()` to get the subject. It reads from cy.state('subjects'), but the format and details of
    * determining this should be considered an internal implementation detail of Cypress, subject to change at any time.
    *
-   * Currently, state('subjects') is an object, mapping chainerIds to the current subject for that chainer. For
-   * example, it might look like:
+   * Currently, state('subjects') is an object, mapping chainerIds to the current subject and selectors for that
+   * chainer. For example, it might look like:
    *
    * {
-   *   'chainer2': 'foobar',
-   *   'chainer4': <input>,
+   *   'ch-http://localhost:3500-2': ['foobar'],
+   *   'ch-http://localhost:3500-4': [<input>],
+   *   'ch-http://localhost:3500-4': [undefined, f(), f()],
    * }
    *
-   * Do not read this directly; Prefer currentSubject() instead.
+   * Do not read cy.state('subjects') directly; This is what currentSubject() is for, turning this structure into a
+   * usable subject.
    */
   currentSubject (chainerId = this.state('chainerId')) {
-    return (this.state('subjects') || {})[chainerId]
+    const subjectChain = (this.state('subjects') || {})[chainerId]
+
+    if (!subjectChain) {
+      return undefined
+    }
+
+    let subject = subjectChain[0]
+
+    for (let i = 1; i < subjectChain.length; i++) {
+      subject = subjectChain[i](subject)
+    }
+
+    return subject
   }
 
   /*
@@ -1291,12 +1367,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    *
    * In the current implementation, subjectLinks might look like:
    * {
-   *   'chainer4': 'chainer2',
+   *   'ch-http://localhost:3500-4': 'ch-http://localhost:3500-2',
    * }
    *
-   * indicating that when we eventually resolve the subject of chainer4, it should *also* be used as the subject for
-   * chainer2 - for example, `cy.then(() => { return cy.get('foo') }).log()`. The inner chainer (chainer4,
-   * `cy.get('foo')`) is linked to the outer chainer (chainer2) - when we eventually .get('foo'), the resolved value
+   * indicating that when we eventually resolve the subject of ch--4, it should *also* be used as the subject for
+   * ch--2 - for example, `cy.then(() => { return cy.get('foo') }).log()`. The inner chainer (ch--4,
+   * `cy.get('foo')`) is linked to the outer chainer (ch--2) - when we eventually .get('foo'), the resolved value
    * becomes the new subject for the outer chainer.
    *
    * Whenever we are in the middle of resolving one chainer and a new one is created, Cypress links the inner chainer
@@ -1309,10 +1385,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * In this case, we want to break the connection between the inner chainer and the outer one, so that we can
    * instead use the return value as the new subject. Is this case, you'll want cy.breakSubjectLinksToCurrentChainer().
    */
-  linkSubject (fromChainerId, toChainerId) {
+  linkSubject (childChainerId, parentChainerId) {
     const links = this.state('subjectLinks') || {}
 
-    links[fromChainerId] = toChainerId
+    links[childChainerId] = parentChainerId
     this.state('subjectLinks', links)
   }
 
@@ -1334,22 +1410,46 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   /*
    * setSubjectForChainer should be considered an internal implementation detail of Cypress. Do not use it directly
    * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
-   * elsewhere, consider carefully before adding additional uses.
+   * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
    *
-   * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the final
-   * (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the new
-   * subject for any chainers it's linked to (see cy.linkSubject for details on that process).
+   * The command_queue calls setSubjectForChainer after an action command has finished resolving, when we have the
+   * final (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the
+   * new subject for any chainers it's linked to (see cy.linkSubject for details on that process).
    */
   setSubjectForChainer (chainerId: string, subject: any) {
-    const cySubject = this.state('subjects') || {}
+    const cySubjects = this.state('subjects') || {}
 
-    cySubject[chainerId] = subject
-    this.state('subjects', cySubject)
+    cySubjects[chainerId] = [subject]
+    this.state('subjects', cySubjects)
 
     const links = this.state('subjectLinks') || {}
 
     if (links[chainerId]) {
       this.setSubjectForChainer(links[chainerId], subject)
+    }
+  }
+
+  /*
+   * addSelectorToChainer should be considered an internal implementation detail of Cypress. Do not use it directly
+   * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
+   * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
+   *
+   * The command_queue calls addSelectorToChainer after a selector command returns a function. This function is
+   * is appended to the subject chain (which begins with 'undefined' if no previous subject exists), and used
+   * to resolve cy.currentSubject() as needed.
+   */
+  addSelectorToChainer (chainerId: string, selectorFn: (subject: any) => any) {
+    const cySubjects = this.state('subjects') || {}
+
+    const subject = cySubjects[chainerId] || [undefined]
+
+    subject.push(selectorFn)
+    cySubjects[chainerId] = subject
+
+    const links = this.state('subjectLinks') || {}
+
+    if (links[chainerId]) {
+      this.addSelectorToChainer(links[chainerId], selectorFn)
     }
   }
 

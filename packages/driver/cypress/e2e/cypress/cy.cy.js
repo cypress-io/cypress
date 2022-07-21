@@ -490,4 +490,75 @@ describe('driver/src/cypress/cy', () => {
       cy.bar()
     })
   })
+
+  context('selectors', () => {
+    const emptySelector = (args) => (subject) => {}
+
+    it('allows parent or child use when prevSubject is null', () => {
+      Cypress.Commands.overwriteSelector('aSelector', null, emptySelector)
+
+      cy.aSelector()
+      cy.get('body').aSelector()
+    })
+
+    it('should not allow previous subjects when prevSubject is false', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.aSelector()` failed because it does not accept a subject.')
+        expect(err.message).to.include('The previous command that ran was:\n\n  > `cy.get()`')
+        done()
+      })
+
+      Cypress.Commands.overwriteSelector('aSelector', false, emptySelector)
+
+      cy.get('body').aSelector()
+    })
+
+    it('requires a previous subject when prevSubject is true', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.aSelector()` failed because it requires a subject')
+        done()
+      })
+
+      Cypress.Commands.overwriteSelector('aSelector', true, emptySelector)
+      cy.aSelector()
+    })
+
+    it('throws when selectors return a promise', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.aSelector()` failed because you returned a promise from a selector.\n\nSelectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.')
+        done()
+      })
+
+      Cypress.Commands.overwriteSelector('aSelector', false, () => Promise.resolve())
+      cy.aSelector()
+    })
+
+    it('throws when a selector returns a non-function value', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.aSelector()` failed because you returned a value other than a function from a selector.\n\nSelectors must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
+        done()
+      })
+
+      Cypress.Commands.overwriteSelector('aSelector', false, () => 1)
+      cy.aSelector()
+    })
+
+    it('throws when an action is invoked inside a selector', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.aSelector()` failed because you invoked an action command inside a selector.\n\nSelectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.\n\nThe action command invoked was:\n\n  > `cy.visit()`')
+        done()
+      })
+
+      Cypress.Commands.overwriteSelector('aSelector', false, () => cy.visit('/'))
+      cy.aSelector()
+    })
+
+    // TODO: Make this work. Setting aside for now.
+    it.skip('does allow selectors to use other selectors', () => {
+      Cypress.Commands.overwriteSelector('aSelector', false, () => cy.bSelector())
+      Cypress.Commands.overwriteSelector('bSelector', false, () => {})
+
+      cy.aSelector()
+    })
+  })
 })

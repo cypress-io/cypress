@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import $Command from '../../cypress/command'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
@@ -24,22 +23,6 @@ export default (Commands, Cypress, cy, state) => {
     },
 
     log (msg, ...args) {
-      // https://github.com/cypress-io/cypress/issues/8084
-      // The return value of cy.log() corrupts the command stack, so cy.then() returned the wrong value
-      // when cy.log() is used inside it.
-      // The code below restore the stack when cy.log() is injected in cy.then().
-      if (state('current').get('injected')) {
-        const restoreCmdIndex = state('index') + 1
-
-        cy.queue.insert(restoreCmdIndex, $Command.create({
-          args: [cy.currentSubject()],
-          name: 'log-restore',
-          fn: (subject) => subject,
-        }))
-
-        state('index', restoreCmdIndex)
-      }
-
       Cypress.log({
         end: true,
         snapshot: true,

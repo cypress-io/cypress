@@ -859,6 +859,10 @@ export default {
       message: '`Cypress.Commands.add()` cannot create a new command named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
+    invalid_new_selector: {
+      message: '`Cypress.Commands.addSelector()` is used to create new commands, but `{{name}}` is an existing Cypress command or is reserved internally by Cypress.\n\nUnlike action commands, selectors cannot overwrite existing commands - please choose a new name.',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
@@ -1640,6 +1644,37 @@ export default {
     },
   },
 
+  selector_command: {
+    docsUrl: 'https://on.cypress.io/custom-commands',
+
+    returned_promise (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you returned a promise from a selector.
+
+        Selectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.`
+    },
+    invoked_action (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you invoked an action command inside a selector.
+
+        Selectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.
+
+        The action command invoked was:
+
+          > ${cmd(obj.action)}`
+    },
+    returned_non_function (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you returned a value other than a function from a selector.
+
+        Selectors must be synchronous functions that return a function.
+
+        The returned value was:
+
+          > \`${obj.returned}\``
+    },
+  },
+
   selector_playground: {
     defaults_invalid_arg: {
       message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
@@ -1797,6 +1832,18 @@ export default {
   },
 
   subject: {
+    is_null (obj) {
+      return stripIndent`\
+        ${cmd(obj.name)} failed because it requires a subject, but didn't receive one. This usually happens because you're trying to use a child selector as if it were a parent.`
+    },
+    not_null (obj) {
+      return stripIndent`\
+        ${cmd(obj.name)} failed because it does not accept a subject. This usually happens because you're trying to use a parent selector as if it were a child.
+
+        The previous command that ran was:
+
+          > ${cmd(obj.previous)}`
+    },
     not_dom (obj) {
       return stripIndent`\
         ${cmd(obj.name)} failed because it requires a valid DOM object.

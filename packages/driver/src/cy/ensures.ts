@@ -41,6 +41,18 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       case 'window':
         return ensureWindow(subject, name)
 
+      case false:
+        return ensureNull(subject, name)
+      case true:
+        // TODO: Removed this conditional while refactoring cy.as() to alias selectors.
+        // It has subject: true to indicate that it's a child command, but the actual subject can be undefined
+        // when aliasing cy.intercept (which returns undefined).
+        if (cmd.get('selector')) {
+          return ensureNotNull(subject, name)
+        }
+
+        return
+
       default:
         return
     }
@@ -49,7 +61,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   const ensureSubjectByType = (subject, type) => {
     const current = state('current')
 
-    let types: string[] = [].concat(type)
+    let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
     // here then just return cuz we good to go
@@ -91,6 +103,26 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       }
 
       throw err
+    }
+  }
+
+  const ensureNull = (subject, name) => {
+    // Null or undefined
+    if (subject != null) {
+      const previous = state('current').get('prev').get('name')
+
+      $errUtils.throwErrByPath('subject.not_null', {
+        args: { name, previous },
+      })
+    }
+  }
+
+  const ensureNotNull = (subject, name) => {
+    // Not null or undefined
+    if (subject == null) {
+      $errUtils.throwErrByPath('subject.is_null', {
+        args: { name },
+      })
     }
   }
 

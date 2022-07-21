@@ -11,7 +11,6 @@ const createCommand = (props = {}) => {
     type: 'parent',
     chainerId: _.uniqueId('ch'),
     userInvocationStack: '',
-    injected: false,
     fn () {},
   }, props))
 }
