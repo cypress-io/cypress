@@ -14,17 +14,9 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
   debug('resolved next.js webpack config %o', webpackConfig)
 
   checkSWC(webpackConfig, devServerConfig.cypressConfig)
-
-  // Next webpack compiler ignored watching any node_modules changes, but we need to watch
-  // for changes to 'dist/browser.js' in order to detect new specs that have been added
-  if (webpackConfig.watchOptions && Array.isArray(webpackConfig.watchOptions.ignored)) {
-    webpackConfig.watchOptions = {
-      ...webpackConfig.watchOptions,
-      ignored: [...webpackConfig.watchOptions.ignored.filter((pattern: string) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
-    }
-
-    debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
-  }
+  watchEntryPoint(webpackConfig)
+  allowGlobalStylesImports(webpackConfig)
+  changeNextCachePath(webpackConfig)
 
   return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceNextWebpackDeps(devServerConfig) }
 }
@@ -254,4 +246,57 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
   }
 
   return webpack
+}
+
+// Next webpack compiler ignored watching any node_modules changes, but we need to watch
+// for changes to 'dist/browser.js' in order to detect new specs that have been added
+function watchEntryPoint (webpackConfig: Configuration) {
+  if (webpackConfig.watchOptions && Array.isArray(webpackConfig.watchOptions.ignored)) {
+    webpackConfig.watchOptions = {
+      ...webpackConfig.watchOptions,
+      ignored: [...webpackConfig.watchOptions.ignored.filter((pattern: string) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
+    }
+
+    debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
+  }
+}
+
+// We are matching the Next.js regex rules exactly. If we were writing our own loader, we could
+// condense these regex rules into a single rule but we need the regex.source to be identical to what
+// we get from Next.js webpack config
+// see: https://github.com/vercel/next.js/blob/20486c159d8538a337da6b07b0b4490a3a0d6b91/packages/next/build/webpack/config/blocks/css/index.ts#L18
+const globalCssRe = [/(?<!\.module)\.css$/, /(?<!\.module)\.(scss|sass)$/]
+const globalCssModulesRe = [/\.module\.css$/, /\.module\.(scss|sass)$/]
+
+export const allCssTests = [...globalCssRe, ...globalCssModulesRe]
+
+// Next does not allow global styles to be loaded outside of the main <App /> component.
+// We want users to be able to import the global styles into their component support file so we
+// delete the "issuer" from the rules that process css/scss files.
+// see: https://github.com/cypress-io/cypress/issues/22525
+// Motivated by: https://github.com/bem/next-global-css
+function allowGlobalStylesImports (webpackConfig: Configuration) {
+  const rules = webpackConfig.module?.rules || []
+
+  for (const rule of rules) {
+    if (typeof rule !== 'string' && rule.oneOf) {
+      for (const oneOf of rule.oneOf) {
+        if (oneOf.test && allCssTests.some((re) => re.source === (oneOf as any).test?.source)) {
+          delete oneOf.issuer
+        }
+      }
+    }
+  }
+}
+
+// Our modifications of the Next webpack config can corrupt the cache used for local development.
+// We separate the cache used for CT from the normal cache (".next/cache/webpack" -> ".next/cache/cypress-webpack") so they don't interfere with each other
+function changeNextCachePath (webpackConfig: Configuration) {
+  if (typeof webpackConfig.cache === 'object' && ('cacheDirectory' in webpackConfig.cache) && webpackConfig.cache.cacheDirectory) {
+    const { cacheDirectory } = webpackConfig.cache
+
+    webpackConfig.cache.cacheDirectory = cacheDirectory.replace(/webpack$/, 'cypress-webpack')
+
+    debug('Changing Next cache path from %s to %s', cacheDirectory, webpackConfig.cache.cacheDirectory)
+  }
 }
