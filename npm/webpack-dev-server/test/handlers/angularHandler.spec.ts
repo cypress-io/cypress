@@ -148,7 +148,7 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
       toPosix(path.join(projectRoot, 'src/polyfills.ts')),
-      toPosix(path.join(projectRoot, 'node_modules/cypress/types/*.d.ts')),
+      toPosix(path.join(projectRoot, 'node_modules/cypress/types/index.d.ts')),
     ],
   })
 
@@ -167,6 +167,6 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
   expect(tsConfig.include).to.deep.equal([
     toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
     toPosix(supportFile),
-    toPosix(path.join(projectRoot, 'node_modules/cypress/types/*.d.ts')),
+    toPosix(path.join(projectRoot, 'node_modules/cypress/types/index.d.ts')),
   ])
 }
