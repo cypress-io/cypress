@@ -1,9 +1,9 @@
+import * as fs from 'fs-extra'
+import { tmpdir } from 'os'
+import * as path from 'path'
+import { pathToFileURL } from 'url'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
-import { pathToFileURL } from 'url'
-import { tmpdir } from 'os'
-import { join } from 'path'
-import * as fs from 'fs-extra'
 
 export type AngularJsonProjectConfig = {
   projectType: string
@@ -127,12 +127,12 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
 
   const specPattern = Array.isArray(cypressConfig.specPattern) ? cypressConfig.specPattern : [cypressConfig.specPattern]
 
-  const getProjectFilePath = (...fileParts: string[]): string => join(projectRoot, ...fileParts)
+  const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(projectRoot, ...fileParts))
 
   const includePaths = [...specPattern.map((pattern) => getProjectFilePath(pattern))]
 
   if (cypressConfig.supportFile) {
-    includePaths.push(cypressConfig.supportFile)
+    includePaths.push(toPosix(cypressConfig.supportFile))
   }
 
   if (projectConfig.architect.build.options.polyfills) {
@@ -145,17 +145,16 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
 
   includePaths.push(cypressTypes)
 
-  const tsConfigContent = `{
-  "extends": "${getProjectFilePath('tsconfig.json')}",
-  "compilerOptions": {
-    "outDir": "${getProjectFilePath('out-tsc/cy')}",
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "${projectRoot}"
-  },
-  "include": [${includePaths.map((x: string) => `"${x}"`).join(', ')}]
-}`
+  const tsConfigContent = JSON.stringify({
+    extends: getProjectFilePath('tsconfig.json'),
+    compilerOptions: {
+      outDir: getProjectFilePath('out-tsc/cy'),
+      allowSyntheticDefaultImports: true,
+    },
+    include: includePaths,
+  })
 
-  const tsConfigPath = join(await getTempDir(), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
@@ -163,7 +162,7 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
 }
 
 export async function getTempDir (): Promise<string> {
-  const cypressTempDir = join(tmpdir(), 'cypress-angular-ct')
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
 
   await fs.ensureDir(cypressTempDir)
 
@@ -234,3 +233,5 @@ function createFakeContext (projectRoot: string, defaultProject: string, default
 
   return context
 }
+
+export const toPosix = (filePath: string) => filePath.split(path.sep).join(path.posix.sep)

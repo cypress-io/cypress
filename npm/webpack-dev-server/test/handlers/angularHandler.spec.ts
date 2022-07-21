@@ -1,12 +1,21 @@
-import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 import chai, { expect } from 'chai'
-import { angularHandler, getAngularJson, getAngularCliModules, AngularJsonProjectConfig, getAngularBuildOptions, generateTsConfig, getTempDir } from '../../src/helpers/angularHandler'
-import { WebpackDevServerConfig } from '../../src/devServer'
-import * as path from 'path'
-import * as fs from 'fs-extra'
-import '../support'
 import chaiPromise from 'chai-as-promised'
+import * as fs from 'fs-extra'
 import cloneDeep from 'lodash/cloneDeep'
+import * as path from 'path'
+import { WebpackDevServerConfig } from '../../src/devServer'
+import {
+  angularHandler,
+  AngularJsonProjectConfig,
+  generateTsConfig,
+  getAngularBuildOptions,
+  getAngularCliModules,
+  getAngularJson,
+  getTempDir,
+  toPosix,
+} from '../../src/helpers/angularHandler'
+import '../support'
+import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 
 chai.use(chaiPromise)
 
@@ -30,6 +39,60 @@ const projectConfig: AngularJsonProjectConfig = {
     },
   },
 }
+
+describe('angularHandler', function () {
+  this.timeout(1000 * 60)
+
+  it('sources the config from angular-13', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-13')
+
+    process.chdir(projectRoot)
+
+    const devServerConfig = {
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+      } as Cypress.PluginConfigOptions,
+      framework: 'angular',
+    } as WebpackDevServerConfig
+
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
+
+    expect(webpackConfig).to.exist
+    expect((webpackConfig?.entry as any).main).to.be.undefined
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
+
+    await expectLoadsAngularJson(projectRoot)
+    await expectLoadsAngularCLiModules(projectRoot)
+    await expectGeneratesTsConfig(devServerConfig)
+    expectLoadsAngularBuildOptions()
+  })
+
+  it('sources the config from angular-14', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-14')
+
+    process.chdir(projectRoot)
+
+    const devServerConfig = {
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+      } as Cypress.PluginConfigOptions,
+      framework: 'angular',
+    } as WebpackDevServerConfig
+
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
+
+    expect(webpackConfig).to.exist
+    expect((webpackConfig?.entry as any).main).to.be.undefined
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
+
+    await expectLoadsAngularJson(projectRoot)
+    await expectLoadsAngularCLiModules(projectRoot)
+    await expectGeneratesTsConfig(devServerConfig)
+    expectLoadsAngularBuildOptions()
+  })
+})
 
 const expectLoadsAngularJson = async (projectRoot: string) => {
   const angularJson = await getAngularJson(projectRoot)
@@ -77,16 +140,15 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
   let tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
   expect(tsConfig).to.deep.eq({
-    extends: path.join(projectRoot, 'tsconfig.json'),
+    extends: toPosix(path.join(projectRoot, 'tsconfig.json')),
     compilerOptions: {
-      outDir: path.join(projectRoot, 'out-tsc/cy'),
+      outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
       allowSyntheticDefaultImports: true,
-      baseUrl: projectRoot,
     },
     include: [
-      path.join(projectRoot, 'src/**/*.cy.ts'),
-      path.join(projectRoot, 'src/polyfills.ts'),
-      path.join(projectRoot, 'node_modules/cypress/types/*.d.ts'),
+      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join(projectRoot, 'src/polyfills.ts')),
+      toPosix(path.join(projectRoot, 'node_modules/cypress/types/*.d.ts')),
     ],
   })
 
@@ -95,7 +157,7 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
   delete modifiedProjectConfig.architect.build.options.polyfills
 
   const modifiedDevServerConfig = cloneDeep(devServerConfig)
-  const supportFile = path.join(projectRoot, 'cypress/support/component.ts')
+  const supportFile = path.join(projectRoot, 'cypress', 'support', 'component.ts')
 
   modifiedDevServerConfig.cypressConfig.supportFile = supportFile
 
@@ -103,62 +165,8 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
   tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
   expect(tsConfig.include).to.deep.equal([
-    path.join(projectRoot, 'src/**/*.cy.ts'),
-    supportFile,
-    path.join(projectRoot, 'node_modules/cypress/types/*.d.ts'),
+    toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+    toPosix(supportFile),
+    toPosix(path.join(projectRoot, 'node_modules/cypress/types/*.d.ts')),
   ])
 }
-
-describe('createReactAppHandler', function () {
-  this.timeout(1000 * 60)
-
-  it('sources the config from angular-13', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-13')
-
-    process.chdir(projectRoot)
-
-    const devServerConfig = {
-      cypressConfig: {
-        projectRoot,
-        specPattern: 'src/**/*.cy.ts',
-      } as Cypress.PluginConfigOptions,
-      framework: 'angular',
-    } as WebpackDevServerConfig
-
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
-
-    expect(webpackConfig).to.exist
-    expect((webpackConfig?.entry as any).main).to.be.undefined
-    expect(sourceWebpackModulesResult.framework?.importPath).to.include('@angular-devkit/build-angular')
-
-    await expectLoadsAngularJson(projectRoot)
-    await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig)
-    expectLoadsAngularBuildOptions()
-  })
-
-  it('sources the config from angular-14', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-14')
-
-    process.chdir(projectRoot)
-
-    const devServerConfig = {
-      cypressConfig: {
-        projectRoot,
-        specPattern: 'src/**/*.cy.ts',
-      } as Cypress.PluginConfigOptions,
-      framework: 'angular',
-    } as WebpackDevServerConfig
-
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
-
-    expect(webpackConfig).to.exist
-    expect((webpackConfig?.entry as any).main).to.be.undefined
-    expect(sourceWebpackModulesResult.framework?.importPath).to.include('@angular-devkit/build-angular')
-
-    await expectLoadsAngularJson(projectRoot)
-    await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig)
-    expectLoadsAngularBuildOptions()
-  })
-})
