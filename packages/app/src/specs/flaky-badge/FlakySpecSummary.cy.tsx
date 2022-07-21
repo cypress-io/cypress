@@ -1,7 +1,7 @@
 import FlakySpecSummary from './FlakySpecSummary.vue'
 
 describe('<FlakySpecSummary />', () => {
-  it('playground', () => {
+  it('low severity', () => {
     cy.mount(
       <FlakySpecSummary
         specName="test"
@@ -14,6 +14,10 @@ describe('<FlakySpecSummary />', () => {
       />,
     )
 
+    cy.percySnapshot()
+  })
+
+  it('medium severity', () => {
     cy.mount(
       <FlakySpecSummary
         specName="test"
@@ -26,6 +30,10 @@ describe('<FlakySpecSummary />', () => {
       />,
     )
 
+    cy.percySnapshot()
+  })
+
+  it('high severity', () => {
     cy.mount(
       <FlakySpecSummary
         specName="test"
@@ -37,6 +45,8 @@ describe('<FlakySpecSummary />', () => {
         dashboardUrl="#"
       />,
     )
+
+    cy.percySnapshot()
   })
 
   describe('flaky rate percentages', () => {

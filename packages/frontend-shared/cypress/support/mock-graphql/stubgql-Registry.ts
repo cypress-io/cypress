@@ -20,7 +20,6 @@ export const GQLStubRegistry = {
   Query: stubQuery,
   CloudOrganization: CloudOrganizationStubs.cyOrg,
   CloudProject: CloudProjectStubs.componentProject,
-  CloudProjectSpecResult: CloudProjectStubs.specResult,
   CloudRun: CloudRunStubs.allPassing,
   CloudRecordKey: CloudRecordKeyStubs.componentProject,
   CloudUser: CloudUserStubs.me,

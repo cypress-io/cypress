@@ -1,6 +1,5 @@
 <template>
   <div
-    :href="dashboardUrl"
     class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
     :class="accentClass"
     data-cy="flaky-spec-summary"
