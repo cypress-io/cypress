@@ -3,15 +3,7 @@
 
 ### Bug Fixes
 
-* open browser at correct time during lifecycle ([#19572](https://github.com/cypress-io/cypress/issues/19572)) ([bfc032a](https://github.com/cypress-io/cypress/commit/bfc032a2d42d0726b8a4a86aab1584bd4e69c3f0))
-* scaffold correct config file ([#19776](https://github.com/cypress-io/cypress/issues/19776)) ([8f32960](https://github.com/cypress-io/cypress/commit/8f32960ef803f539f065d41f01fff33bfe33ed5d))
-* scope config to current testing type ([#20677](https://github.com/cypress-io/cypress/issues/20677)) ([61f7cfc](https://github.com/cypress-io/cypress/commit/61f7cfc59284a2938e0a1c15d74ee75215ba5f8b))
-* terminal error message for non migrated config ([#21467](https://github.com/cypress-io/cypress/issues/21467)) ([3274da7](https://github.com/cypress-io/cypress/commit/3274da7842f5ef1ddad62b1c630d0ff9120e4289))
-* update scaffold template to use correct path ([#20047](https://github.com/cypress-io/cypress/issues/20047)) ([6e80359](https://github.com/cypress-io/cypress/commit/6e803597a379222cf936e5977c8314d693ee1912))
-* wire up scaffolded indexHtml to dev servers ([#20453](https://github.com/cypress-io/cypress/issues/20453)) ([3a8797e](https://github.com/cypress-io/cypress/commit/3a8797e54db9fd0ef93a14ddc71c138ba8251e53))
 * **react:** link to rerender example ([#19020](https://github.com/cypress-io/cypress/issues/19020)) ([552d3a1](https://github.com/cypress-io/cypress/commit/552d3a1c0073dae0bd1da0fc9fa8d140ec4f38dc))
-* **unified-desktop-gui branch:** initial installation on windows ([#18247](https://github.com/cypress-io/cypress/issues/18247)) ([8614e97](https://github.com/cypress-io/cypress/commit/8614e978029bcbf7155b7ae98ac54feb11f2e7f3))
-* **unify:** improve dev server config ergonomics ([#19957](https://github.com/cypress-io/cypress/issues/19957)) ([6a402a7](https://github.com/cypress-io/cypress/commit/6a402a70767f53e4c5ea54490a03a9983b2be10f))
 
 
 ### chore
@@ -21,21 +13,10 @@
 
 ### Features
 
-* add devServer to config file ([#18962](https://github.com/cypress-io/cypress/issues/18962)) ([2573375](https://github.com/cypress-io/cypress/commit/2573375b5b6616efd2d213a94cd55fd8e0385864))
-* Add typings for new devServer config ([#18797](https://github.com/cypress-io/cypress/issues/18797)) ([e018a14](https://github.com/cypress-io/cypress/commit/e018a14c211bfcbdc4568a9a737f14f5c1686e35))
-* Deprecate run-ct / open-ct, and update all examples to use --ct instead ([#18422](https://github.com/cypress-io/cypress/issues/18422)) ([196e8f6](https://github.com/cypress-io/cypress/commit/196e8f62cc6d27974f235945cb5700624b3dae41))
 * embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
-* index.html configurability and storybook support ([#18242](https://github.com/cypress-io/cypress/issues/18242)) ([745b3ac](https://github.com/cypress-io/cypress/commit/745b3ac4518302983522daedf817623334feae5b))
-* ProjectLifecycleManager & general launchpad cleanup ([#19347](https://github.com/cypress-io/cypress/issues/19347)) ([4626f74](https://github.com/cypress-io/cypress/commit/4626f7481c9904fec484aa167a02e0197a3095c4))
 * remove testFiles reference ([#20565](https://github.com/cypress-io/cypress/issues/20565)) ([5670344](https://github.com/cypress-io/cypress/commit/567034459089d9d53dfab5556cb9369fb335c3db))
-* support specPattern, deprecate integrationFolder and componentFolder ([#19319](https://github.com/cypress-io/cypress/issues/19319)) ([792980a](https://github.com/cypress-io/cypress/commit/792980ac12746ef47b9c944ebe4c6c353a187ab2))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 * update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
-* Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
-* use devServer instad of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
-* Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
-* use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
-* validate specPattern root level ([#19980](https://github.com/cypress-io/cypress/issues/19980)) ([5d52758](https://github.com/cypress-io/cypress/commit/5d52758d82c47033803c69c7858fc786a900faaf))
 
 
 ### BREAKING CHANGES
