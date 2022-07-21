@@ -1793,7 +1793,7 @@ jobs:
           command: yarn workspace @cypress/angular build
       - run:
           name: Run tests
-          command: yarn test-ci
+          command: yarn test
           working_directory: npm/angular
       - store_test_results:
           path: npm/angular/test_results
