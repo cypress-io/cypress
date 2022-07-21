@@ -22,7 +22,7 @@
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
-        :type="props.gql.currentProject?.currentTestingType"
+        :type="props.gql.currentProject?.currentTestingType === 'component' ? 'componentEmpty' : props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
         @restart="currentGeneratorId = undefined; iteration++"
@@ -118,7 +118,7 @@ const codeGenGlob = computed(() => {
   return props.gql.currentProject?.codeGenGlobs[generator.value.id]
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType, props.gql.currentProject?.codeGenGlobs.component)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 

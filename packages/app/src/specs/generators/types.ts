@@ -12,6 +12,7 @@ export interface SpecGenerator {
   card: Component
   entry: Component
   matches: (testingType?: TestingType | null) => boolean
+  show: (codeGenGlob?: string) => boolean
   disabled: (currentProject?: CurrentProject | null) => boolean | void
   id: GeneratorId
 }

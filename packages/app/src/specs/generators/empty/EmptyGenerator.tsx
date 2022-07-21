@@ -7,5 +7,6 @@ export const EmptyGenerator: SpecGenerator = {
   entry: EmptyGeneratorCardStepOne,
   matches: () => true,
   disabled: () => false,
+  show: (codeGenGlob) => codeGenGlob !== '*.vue',
   id: 'empty',
 }
