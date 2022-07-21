@@ -69,7 +69,7 @@ describe('component testing projects', function () {
   })
 })
 
-const REACT_MAJOR_VERSIONS = ['16', '17', '18'] as const
+const REACT_MAJOR_VERSIONS = ['17', '18'] as const
 
 describe(`React major versions with Vite`, function () {
   systemTests.setup()

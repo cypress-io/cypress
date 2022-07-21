@@ -6,7 +6,7 @@ export interface UnmountArgs {
   boundComponentMessage?: string
 }
 
-export interface InternalUnmountOptionsReactLegacy {
+export interface InternalUnmountOptionsReact {
   unmount: (el: HTMLElement) => boolean
 }
 
@@ -14,14 +14,8 @@ export interface InternalUnmountOptionsReact18 {
   unmount: () => boolean
 }
 
-export type InternalUnmountOptionsReact16 = InternalUnmountOptionsReactLegacy
-
-export type InternalUnmountOptionsReact17 = InternalUnmountOptionsReactLegacy
-
 export type InternalUnmountOptions =
-  InternalUnmountOptionsReactLegacy
-  | InternalUnmountOptionsReact16
-  | InternalUnmountOptionsReact17
+  InternalUnmountOptionsReact
   | InternalUnmountOptionsReact18
 
 export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>

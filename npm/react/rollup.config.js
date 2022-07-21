@@ -19,7 +19,6 @@ function createEntry (options) {
   const {
     format,
     input,
-    isBrowser,
   } = options
 
   const config = {
@@ -49,9 +48,6 @@ function createEntry (options) {
 
   if (format === 'es') {
     config.output.file = pkg.module
-    if (isBrowser) {
-      config.output.file = pkg.unpkg
-    }
   }
 
   if (format === 'cjs') {
@@ -66,7 +62,5 @@ function createEntry (options) {
 
 module.exports = [
   createEntry({ format: 'es', input: 'src/index.ts', isBrowser: false }),
-  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
-  createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
 ]

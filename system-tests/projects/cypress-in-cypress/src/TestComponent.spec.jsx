@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress/react17'
+import { mount } from 'cypress/react'
 
 describe('TestComponent', () => {
   it('renders the test component', () => {
