@@ -21,6 +21,7 @@
   }
 
   // Event Styles
+  .command-type-system,
   .command-is-event {
     font-style: italic;
 
@@ -104,11 +105,15 @@
 
   .command-pin-target.command-group {
     border-left: 1px dotted $gray-600;
+    border-image-slice: 0 0 0 1;
+    border-image-source: repeating-linear-gradient(0deg, transparent, $gray-600, $gray-600 4px);
     padding-left: 12px;
     min-height: 28px;
 
     .command-group-block {
       border-left: 1px dotted $gray-600;
+      border-image-slice: 0 0 0 1;
+      border-image-source: repeating-linear-gradient(0deg, transparent, $gray-600, $gray-600 4px);
       width: 11px;
       min-height: 28px;
       min-width: 11px;
@@ -247,9 +252,11 @@
 
     .command-group {
       border-color: $err-header-text;
+      border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
 
       .command-group-block {
         border-color: $err-header-text;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
       }
     }
   }

@@ -100,8 +100,8 @@ export default class Command extends Instrument {
         _.last(this.children)?.isOpen ||
         // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
-        // at least one nested command failed
-        _.some(this.children, (v) => v.state === 'failed')
+        // at last nested command failed
+        _.last(this.children)?.state === 'failed'
       )
     )
   }

@@ -42,6 +42,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session.cy.js',
+      passCount: 1,
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
@@ -50,7 +51,7 @@ describe('runner/cypress sessions.ui.spec', {
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('blank_session')
-      cy.contains('CREATED')
+      cy.contains('created')
 
       validateSetupSessionGroup()
     })
@@ -65,6 +66,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session_with_validation.cy.js',
+      passCount: 1,
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
@@ -73,7 +75,7 @@ describe('runner/cypress sessions.ui.spec', {
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('blank_session')
-      cy.contains('CREATED')
+      cy.contains('created')
 
       validateSetupSessionGroup()
 
@@ -99,6 +101,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session_and_fails_validation.cy.js',
+      failCount: 1,
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
@@ -106,7 +109,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.command-name-session')
     .within(() => {
       cy.contains('blank_session')
-      cy.contains('FAILED')
+      cy.contains('failed')
 
       validateSetupSessionGroup()
 
@@ -131,6 +134,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/restores_saved_session.cy.js',
+      passCount: 2,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -138,7 +142,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.log('validate new session was created in first test')
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
-      cy.get('.command-name-session').contains('CREATED')
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -149,7 +153,7 @@ describe('runner/cypress sessions.ui.spec', {
       .within(() => {
         cy.get('.command-expander').first().click()
         cy.contains('user1')
-        cy.contains('RESTORED')
+        cy.contains('restored')
 
         cy.get('.command-name-Clear-page').should('have.length', 2)
 
@@ -160,9 +164,6 @@ describe('runner/cypress sessions.ui.spec', {
 
         cy.get('@validateSession')
         .find('.command-expander')
-        // FIXME: this validation group does not align with the
-        // with Create new session's validation group behavior
-        // should be 'not.have.class' to align
         .should('have.class', 'command-expander-is-open')
 
         cy.get('@validateSession')
@@ -180,6 +181,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/recreates_session.cy.js',
+      passCount: 2,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -188,7 +190,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.get('.command-name-session').contains('CREATED')
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -199,7 +201,7 @@ describe('runner/cypress sessions.ui.spec', {
       .within(() => {
         cy.get('.command-expander').first().click()
         cy.contains('user1')
-        cy.contains('RECREATED')
+        cy.contains('recreated')
 
         cy.contains('Restore saved session')
 
@@ -214,9 +216,6 @@ describe('runner/cypress sessions.ui.spec', {
 
         cy.get('@validateSession')
         .find('.command-expander')
-        // FIXME: this validation group does not align with the
-        // with Create new session's validation group behavior
-        // should be 'not.have.class' to align
         .should('have.class', 'command-expander-is-open')
 
         cy.get('@validateSession')
@@ -237,6 +236,8 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/recreates_session_and_fails_validation.cy.js',
+      passCount: 1,
+      failCount: 1,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -245,7 +246,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.get('.command-name-session').contains('CREATED')
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -254,13 +255,20 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session')
       .within(() => {
-        cy.contains('FAILED')
+        cy.contains('failed')
 
         cy.contains('Restore saved session')
+        .parent()
+        .closest('.command')
+        .next()
+        .contains('Validate session')
+        .closest('.command').as('firstValidateSession')
+
+        cy.get('@firstValidateSession')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
 
         cy.get('.command-name-Clear-page').should('have.length', 3)
-
-        cy.contains('Validate session')
 
         validateSetupSessionGroup(false)
         .parent()
@@ -271,7 +279,6 @@ describe('runner/cypress sessions.ui.spec', {
 
         cy.get('@secondValidateSession')
         .find('.command-expander')
-        // should be 'not.have.class' to align
         .should('have.class', 'command-expander-is-open')
 
         cy.get('@secondValidateSession')
@@ -288,6 +295,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/multiple_sessions.cy.js',
+      passCount: 1,
     })
 
     validateSessionsInstrumentPanel(['user1', 'user2'])

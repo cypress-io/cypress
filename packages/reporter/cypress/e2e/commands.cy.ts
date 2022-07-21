@@ -546,7 +546,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .percySnapshot()
       })
 
-      it('group is closed by default when last nested command failed', () => {
+      it('group is open by default when last nested command failed', () => {
         addCommand(runner, {
           name: 'log',
           message: 'chained log example',
@@ -657,6 +657,175 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .get('.cy-tooltip').should('have.text', '5 logs currently hidden')
 
         cy.percySnapshot()
+      })
+
+      describe('session group', () => {
+        it('closed when nested logs that pass', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            groupLevel: 2,
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'passed',
+            group: nestedSessionGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('not.have.class', 'command-expander-is-open')
+            .click()
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that are passing are closed by default')
+              cy.get('.command-expander')
+              .should('not.have.class', 'command-expander-is-open')
+              .click()
+
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
+
+        it('closed when nested logs has failures but last log is successful', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            state: 'failed',
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'failed',
+            groupLevel: 2,
+            group: nestedSessionGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'passed',
+            group: nestedGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('not.have.class', 'command-expander-is-open')
+            .click()
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that have failed are open by default')
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
+
+        it('open when last log has failed', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'failed',
+            groupLevel: 2,
+            group: nestedSessionGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('have.class', 'command-expander-is-open')
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that have failed are open by default')
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
       })
     })
 

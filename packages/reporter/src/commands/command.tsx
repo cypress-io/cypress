@@ -339,7 +339,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
-                {isSessionCommand && <Tag content={model.renderProps.status?.toUpperCase()} type={model.renderProps.status} />}
+                {isSessionCommand && <Tag content={model.renderProps.status} type={model.renderProps.status === 'failed' ? 'failed' : 'passed'} />}
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>

@@ -10,12 +10,7 @@ describe('Tag', () => {
   ]
 
   const statuses = [
-    'creating',
-    'created',
-    'restoring',
-    'restored',
-    'recreating',
-    'recreated',
+    'passed',
     'failed',
   ]
 

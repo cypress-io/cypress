@@ -3,7 +3,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 export interface Props {
-  type: 'route' | 'agent' | 'dom' | 'primitive' | 'creating' | 'created' | 'restoring' | 'restored' | 'recreating' | 'recreated' | 'fail'
+  type: 'route' | 'agent' | 'dom' | 'primitive' | 'passed' | 'failed'
   content: React.Component | string
   count?: number
   tooltipMessage?: React.Component | string
@@ -17,8 +17,12 @@ const Tag = ({
   tooltipMessage,
   type,
 }: Props) => {
+  if (!content) {
+    return null
+  }
+
   let tag = (
-    <span className={cs('reporter-tag', type, { 'reporter-tag-has-count': count }, customClassName)}>
+    <span className={cs('reporter-tag', 'reporter-tag-content', type, { 'reporter-tag-has-count': count }, customClassName)}>
       {content}
     </span>
   )
@@ -29,7 +33,7 @@ const Tag = ({
     tag = (
       <span>
         {tag}
-        <span className={cs('reporter-tag-count', type, customCountClass)}>{count}</span>
+        <span className={cs('reporter-tag', 'reporter-tag-count', type, customCountClass)}>{count}</span>
       </span>
     )
   }

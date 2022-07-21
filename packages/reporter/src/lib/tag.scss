@@ -1,11 +1,12 @@
 .reporter-tag {
   border-radius: 4px;
-  color: rgba($white, .8);
+  color: $white;
   display: inline-block;
   font-family: $monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
-  // margin-left: 5px;
+  font-weight: 400;
+  height: 16px;
   line-height: 16px;
   max-width: 200px;
   overflow: hidden;
@@ -13,7 +14,9 @@
   text-overflow: ellipsis;
   vertical-align: text-top;
   white-space: nowrap;
+}
 
+.reporter-tag.reporter-tag-content {
   &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
   &.primitive { // default
@@ -24,27 +27,15 @@
     background-color: $indigo-500;
   }
 
-  &.creating, &.created {
-    background-color: rgba($gray-600, .25);
-    color: $jade-500;
-    max-height: 16px;
-  }
-
-  &.restoring, &.restored {
-    background-color: rgba($gray-600, .25);
-    color: $indigo-500;
-    max-height: 16px;
-  }
-
-  &.recreating, &.recreated {
-    background-color: rgba($gray-600, .25);
-    color: $orange-500;
-    max-height: 16px;
+  &.passed {
+    background-color: $gray-900;
+    color: $jade-300;
+    font-weight: 500;
   }
 
   &.failed {
     background-color: $red-500;
-    max-height: 16px;
+    font-weight: 500;
   }
 
   &.reporter-tag-has-count {
@@ -53,16 +44,8 @@
   }
 }
  
-.reporter-tag-count {
+.reporter-tag.reporter-tag-count {
   border-radius: 0 4px 4px 0;
-  color: rgba($white, .8);
-  font-family: $monospace;
-  font-size: 10px;
-  font-style: normal;
-  display: inline-block;
-  line-height: 16px;
-  padding: 0 4px;
-  vertical-align: text-top;
 
   &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
