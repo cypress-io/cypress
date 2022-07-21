@@ -7,6 +7,6 @@
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "@testing-library/cypress": "8.0.2",
     "typescript": "4.7.4",
-    "vite": "2.7.10"
+    "vite": "3.0.2"
   }
 }

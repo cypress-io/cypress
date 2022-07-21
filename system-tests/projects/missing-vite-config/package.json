@@ -4,6 +4,6 @@
   "private": true,
   "devDependencies": {
     "typescript": "4.7.4",
-    "vite": "^2.8.0"
+    "vite": "3.0.2"
   }
 }

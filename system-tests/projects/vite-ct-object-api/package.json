@@ -6,6 +6,6 @@
     "@testing-library/cypress": "8.0.2",
     "ansi-regex": "4.1.1",
     "typescript": "4.7.4",
-    "vite": "2.7.10"
+    "vite": "3.0.2"
   }
 }

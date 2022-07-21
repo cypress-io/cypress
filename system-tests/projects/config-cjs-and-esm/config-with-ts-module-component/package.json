@@ -3,7 +3,7 @@
     "@cypress/vite-dev-server": "^2.0.0",
     "find-up": "6.3.0",
     "typescript": "4.7.4",
-    "vite": "2.8.6"
+    "vite": "3.0.2"
   },
   "type": "module",
   "projectFixtureDirectory": "simple_passing"

@@ -14,7 +14,7 @@
     "@vitejs/plugin-vue": "^2.2.0",
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "typescript": "4.7.4",
-    "vite": "^2.8.0",
+    "vite": "3.0.2",
     "vue-tsc": "^0.29.8"
   }
 }
