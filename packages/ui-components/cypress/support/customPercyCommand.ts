@@ -55,6 +55,52 @@ declare global {
   }
 }
 
+function setupAxeAndCheckA11y (isComponentTesting?: boolean) {
+  if (isComponentTesting) {
+    Cypress.Commands.add('injectAxe', () => {
+      // this is a work around for the issue with require.resolve in CT
+      // described here: https://github.com/component-driven/cypress-axe/issues/134
+      cy.window({ log: false }).then((window) => {
+        const axe = require('axe-core/axe.js')
+        const script = window.document.createElement('script')
+
+        script.innerHTML = axe.source
+        window.document.head.appendChild(script)
+      })
+    })
+  }
+
+  cy.injectAxe()
+
+  if (isComponentTesting) {
+    // since components are isolated fragments, right off the bat
+    // there are some things we should avoid checking
+    cy.configureAxe({
+      rules: [
+        {
+          id: 'html-has-lang',
+          enabled: false,
+        },
+        {
+          id: 'landmark-one-main',
+          enabled: false,
+        },
+        {
+          id: 'page-has-heading-one',
+          enabled: false,
+        },
+        {
+          id: 'region',
+          enabled: false,
+        },
+      ],
+    })
+  }
+
+  // passing undefined here so that we can set the final boolean to ignore failures for now
+  cy.checkA11y(undefined, undefined, undefined, true)
+}
+
 class ElementOverrideManager {
   private mutationStack: Array<MutationRecord> | undefined = undefined
 
@@ -190,7 +236,7 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides, component }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], component?: boolean } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides, isComponentTesting }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -203,47 +249,9 @@ export const installCustomPercyCommand = ({ before, elementOverrides, component 
    *   precedence over the global override defined when the command was installed.
    */
   const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
-    if (component) {
-      Cypress.Commands.add('injectAxe', () => {
-        // this is a work around for the issue with require.resolve
-        // described here: https://github.com/component-driven/cypress-axe/issues/134
-        cy.window({ log: false }).then((window) => {
-          const axe = require('axe-core/axe.js')
-          const script = window.document.createElement('script')
-
-          script.innerHTML = axe.source
-          window.document.head.appendChild(script)
-        })
-      })
-    }
-
-    cy.injectAxe()
-
-    if (component) {
-      cy.configureAxe({
-        rules: [
-          {
-            id: 'html-has-lang',
-            enabled: false,
-          },
-          {
-            id: 'landmark-one-main',
-            enabled: false,
-          },
-          {
-            id: 'page-has-heading-one',
-            enabled: false,
-          },
-          {
-            id: 'region',
-            enabled: false,
-          },
-        ],
-      })
-    }
-
-    // passing undefined so that we can set the final boolean to ignore failures for now
-    cy.checkA11y(undefined, undefined, undefined, true)
+    // since Percy snapshots represent visually unique states in the application
+    // doing an accessibility check here should cover a lot of states that might be
+    setupAxeAndCheckA11y(isComponentTesting)
 
     if (name && typeof name === 'object') {
       options = name
