@@ -1,5 +1,5 @@
 import React from 'react'
-import Tag from './Tag'
+import Tag from './tag'
 
 describe('Tag', () => {
   const aliases = [

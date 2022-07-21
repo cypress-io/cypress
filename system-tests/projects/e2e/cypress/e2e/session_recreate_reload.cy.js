@@ -20,7 +20,7 @@ describe('recreates session on spec reload in open mode', () => {
 
     if (!top.count) {
       return cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('CREATED')
+        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
         top.count++
 
         // this simulates interactive/open mode
@@ -36,7 +36,7 @@ describe('recreates session on spec reload in open mode', () => {
     }
 
     cy.wrap(null).should(() => {
-      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('RECREATED')
+      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('recreated')
     })
   })
 })

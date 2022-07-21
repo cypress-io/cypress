@@ -21,7 +21,7 @@ const Tag = ({
     return null
   }
 
-  let tag = (
+  let tagContent = (
     <span className={cs('reporter-tag', 'reporter-tag-content', type, { 'reporter-tag-has-count': count }, customClassName)}>
       {content}
     </span>
@@ -30,21 +30,21 @@ const Tag = ({
   if (count) {
     const customCountClass = customClassName ? `${customClassName}-count` : undefined
 
-    tag = (
+    tagContent = (
       <span>
-        {tag}
+        {tagContent}
         <span className={cs('reporter-tag', 'reporter-tag-count', type, customCountClass)}>{count}</span>
       </span>
     )
   }
 
   if (!tooltipMessage) {
-    return tag
+    return tagContent
   }
 
   return (
     <Tooltip placement='top' title={tooltipMessage} className='cy-tooltip'>
-      {tag}
+      {tagContent}
     </Tooltip>
   )
 }
