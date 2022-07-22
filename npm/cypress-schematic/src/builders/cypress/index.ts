@@ -83,10 +83,10 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   }
 
   if (userOptions.configFile === undefined) {
-    options.config = {}
+    options.config = { e2e: { baseUrl: userOptions.devServerBaseUrl as string } }
   }
 
-  options.config = { ...options.config, baseUrl: userOptions.devServerBaseUrl }
+  options.config = { ...options.config }
 
   const { watch, headless } = userOptions
 
