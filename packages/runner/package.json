@@ -21,6 +21,7 @@
     "@packages/icons": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
+    "@packages/rewriter": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "babel-plugin-prismjs": "1.0.2",

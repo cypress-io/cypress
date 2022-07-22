@@ -2850,6 +2850,15 @@ declare namespace Cypress {
      */
     experimentalSessionAndOrigin: boolean
     /**
+     * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
+     * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
+     * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
+     * This option has no impact on experimentalSourceRewriting and is only used with the
+     * non-experimental source rewriter.
+     * @see https://on.cypress.io/configuration#experimentalModifyObstructiveThirdPartyCode
+     */
+    experimentalModifyObstructiveThirdPartyCode: boolean
+    /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
