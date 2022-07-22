@@ -92,7 +92,7 @@ export function mount (
 
     const component = Cypress.svelteComponent = new ComponentConstructor({
       target: componentNode,
-      options,
+      ...options,
     })
 
     Cypress.svelteComponent = component
