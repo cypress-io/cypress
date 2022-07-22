@@ -36,7 +36,6 @@ export function useSpecFilter (savedFilter?: string) {
   setSpecFilter(search.value)
 
   return {
-    setSpecFilter,
     search,
     debouncedSearchString,
   }

@@ -154,11 +154,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           },
         })
       },
-      async setSpecFilter (specFilter) {
-        await openProject.getProject()
-        ?.saveState({
-          specFilter,
-        })
+      setSpecFilter (specFilter) {
+        return openProject.getProject()?.saveState({ specFilter })
       },
       makeProjectSavedState (projectRoot: string) {
         return () => savedState.create(projectRoot).then((s) => s.get())
