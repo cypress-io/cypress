@@ -20,6 +20,8 @@ export const generatorList: SpecGenerator[] = [
   EmptyGenerator,
 ]
 
-export const getFilteredGeneratorList = (testingType?: TestingType | null, codeGenGlob?: string) => computed(() => generatorList.filter((g) => g.matches(testingType) && (g.show === undefined ? true : g.show(codeGenGlob))))
+export const getFilteredGeneratorList = (testingType?: TestingType | null, codeGenGlob?: string) => {
+  return computed(() => generatorList.filter((g) => g.matches(testingType) && (g.show === undefined ? true : g.show(codeGenGlob))))
+}
 
 export const generators = keyBy(generatorList, 'id') as Record<GeneratorId, SpecGenerator>

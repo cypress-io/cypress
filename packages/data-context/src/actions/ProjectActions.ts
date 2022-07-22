@@ -358,7 +358,7 @@ export class ProjectActions {
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
+      { templateDir: templates[codeGenOptions.templateKey], target: path.parse(codeGenPath).dir },
       codeGenOptions,
     )
 

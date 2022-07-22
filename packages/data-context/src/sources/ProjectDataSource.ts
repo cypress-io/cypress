@@ -1,8 +1,7 @@
 import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
-import { scanFSForAvailableDependency } from 'create-cypress-tests'
+import { detectFramework } from '@packages/scaffold-config'
 import minimatch from 'minimatch'
 import _ from 'lodash'
 import path from 'path'
@@ -480,31 +479,12 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  frameworkLoader = this.ctx.loader<string, typeof WIZARD_FRAMEWORKS[number] | null>((projectRoots) => {
-    return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
-  })
-
-  private guessFramework (projectRoot: string) {
-    const guess = WIZARD_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
-        (acc, dep) => ({ ...acc, [dep]: '*' }),
-        {},
-      )
-
-      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
-    })
-
-    return guess ?? null
-  }
-
   async getCodeGenGlobs () {
     assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
-    // const framework = this.guessFramework(this.ctx.currentProject)
-
-    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
+    const framework = detectFramework(this.ctx.currentProject || '').framework
 
     return {
       component: framework?.glob ?? looseComponentGlob,

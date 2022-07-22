@@ -1,9 +1,8 @@
 import assert from 'assert'
 import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
-import { camelCase, capitalize } from 'lodash'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
-import type { CodeGenFramework } from '@packages/scaffold-config'
+import { detectFramework, WizardFrontendFramework } from '@packages/scaffold-config'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -20,14 +19,14 @@ interface CodeGenOptions {
 //   Button.foo.js  -> Button.foo-copy-1.js
 export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
-type ComponentExtension = '.js' | '.ts' | '.jsx' | '.tsx'
+type ComponentExtension = '.cy.js' | '.cy.ts' | '.cy.jsx' | '.cy.tsx'
+type TemplateKey = 'e2e' | 'componentEmpty' | 'vue2Component' | 'vue3Component'
 export class SpecOptions {
   private parsedPath: ParsedPath;
-  private projectRoot: string;
   private parsedErroredCodegenCandidate?: ParsedPath
 
   private getFrontendFramework () {
-    return this.ctx.project.frameworkLoader.load(this.projectRoot)
+    return detectFramework(this.ctx.currentProject || '').framework
   }
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
@@ -37,9 +36,6 @@ export class SpecOptions {
     if (options.erroredCodegenCandidate) {
       this.parsedErroredCodegenCandidate = this.ctx.path.parse(options.erroredCodegenCandidate)
     }
-
-    // Should always be defined
-    this.projectRoot = this.ctx.currentProject
   }
 
   async getCodeGenOptions () {
@@ -47,33 +43,30 @@ export class SpecOptions {
       return this.getComponentCodeGenOptions()
     }
 
-    // console.log('RETURNING DEFAULT OPTIONS')
-
     return {
       codeGenType: this.options.codeGenType,
-      fileName: await this.getFilename(),
+      fileName: await this.buildFileName(),
+      templateKey: this.options.codeGenType as TemplateKey,
     }
   }
 
   private async getComponentCodeGenOptions () {
     const frontendFramework = await this.getFrontendFramework()
 
-    // console.log({ frontendFramework })
-
     if (!frontendFramework) {
       throw new Error('Cannot generate a spec without a framework')
     }
 
-    const framework = frontendFramework.codeGenFramework
-
-    if (framework !== 'vue') {
+    // This only works for Vue right now. If the framework is not Vue, we're generating an empty component test
+    if (frontendFramework.codeGenFramework !== 'vue') {
       return {
         codeGenType: this.options.codeGenType,
-        fileName: await this.getFilename(),
+        fileName: await this.buildFileName(),
+        templateKey: 'componentEmpty' as TemplateKey,
       }
     }
 
-    const frameworkOptions = await this.getFrameworkComponentOptions(framework)
+    const frameworkOptions = await this.getFrameworkComponentOptions(frontendFramework)
 
     return frameworkOptions
   }
@@ -90,29 +83,20 @@ export class SpecOptions {
     return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
   }
 
-  private async getFrameworkComponentOptions (framework: CodeGenFramework) {
-    const componentName = capitalize(camelCase(this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name))
+  private async getFrameworkComponentOptions (framework: WizardFrontendFramework) {
+    const componentName = this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name
 
     const componentPath = this.relativePath()
 
-    const frameworkOptions = {
-      // react: {
-      //   imports: ['import React from "react"', 'import { mount } from "@cypress/react"', `import ${componentName} from "${componentPath}"`],
-      //   componentName,
-      //   docsLink: '// see: https://on.cypress.io/component-testing',
-      //   mount: `mount(<${componentName} />)`,
-      //   fileName: await this.getFilename(),
-      // },
-      vue: {
-        imports: ['import { mount } from "@cypress/vue"', `import ${componentName} from "${componentPath}"`],
-        componentName,
-        docsLink: '// see: https://vue-test-utils.vuejs.org/',
-        mount: `mount(${componentName}, { props: {} })`,
-        fileName: await this.getFilename(await this.getVueExtension()),
-      },
-    } as const
+    const templateKey: TemplateKey = framework.mountModule === 'cypress/vue' ? 'vue3Component' : 'vue2Component'
 
-    return frameworkOptions[framework]
+    return {
+      componentName,
+      componentPath,
+      mountModule: framework.mountModule,
+      fileName: await this.buildComponentSpecFilename(await this.getVueExtension()),
+      templateKey,
+    }
   }
 
   private async getVueExtension (): Promise<ComponentExtension> {
@@ -123,7 +107,7 @@ export class SpecOptions {
 
       return fileContent.includes('lang="ts"') ? '.cy.ts' : '.cy.js'
     } catch (e) {
-      const validExtensions = ['cy.js', '.jsx', '.ts', '.tsx']
+      const validExtensions = ['cy.js', '.cy.jsx', '.cy.ts', '.cy.tsx']
       const possibleExtension = this.parsedPath.ext
 
       if (validExtensions.includes(possibleExtension)) {
@@ -146,37 +130,39 @@ export class SpecOptions {
     return foundSpecExtension || ''
   }
 
-  private async getFilename (overrideExt?: string) {
-    // console.log('OVERRIDE EXT', overrideExt)
+  private async buildComponentSpecFilename (specExt: string) {
     const { dir, base, ext } = this.parsedPath
-    let cyWithExt
-    let name
+    const cyWithExt = this.getSpecExtension() + specExt
+    const name = base.slice(0, -ext.length)
 
-    if (overrideExt) {
-      cyWithExt = this.getSpecExtension() + overrideExt
-      name = base.slice(0, -ext.length)
-    } else {
-      cyWithExt = this.getSpecExtension() + ext
-      name = base.slice(0, -cyWithExt.length)
-    }
+    return this.getFinalFileName(dir, name, cyWithExt, this.ctx.path.join(dir, `${name}${cyWithExt}`))
+  }
 
+  private async buildFileName () {
+    const { dir, base, ext } = this.parsedPath
+
+    const cyWithExt = this.getSpecExtension() + ext
+    const name = base.slice(0, -cyWithExt.length)
+
+    return this.getFinalFileName(dir, name, cyWithExt, this.ctx.path.join(dir, `${name}${cyWithExt}`))
+  }
+
+  private async getFinalFileName (dir: string, name: string, cyWithExt: string, fileToTry: string) {
     // At this point, for a filePath of `/foo/bar/baz.cy.js`
     // - name = `baz`
     // - cyWithExt = `.cy.js`
-    let fileToTry = this.ctx.path.join(dir, `${name}${cyWithExt}`)
-
-    // console.log({ name, dir, base, ext, cyWithExt, fileToTry })
+    let finalFileName = fileToTry
 
     let i = 0
 
-    while (await this.fileExists(fileToTry)) {
-      fileToTry = this.ctx.path.join(
+    while (await this.fileExists(finalFileName)) {
+      finalFileName = this.ctx.path.join(
         dir,
         `${name}-copy-${++i}${cyWithExt}`,
       )
     }
 
-    return this.ctx.path.parse(fileToTry).base
+    return this.ctx.path.parse(finalFileName).base
   }
 
   private async fileExists (absolute: string) {

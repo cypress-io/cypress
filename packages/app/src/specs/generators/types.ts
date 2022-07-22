@@ -1,7 +1,7 @@
 import type { TestingType } from '@packages/types'
 import type { Component } from 'vue'
 
-export type GeneratorId = 'component' | 'empty' | 'scaffold' | 'story'
+export type GeneratorId = 'component' | 'empty' | 'scaffold'
 
 type CurrentProject = {
   readonly __typename?: 'CurrentProject' | undefined

@@ -50,6 +50,10 @@ fragment CreateSpecContent on Query {
   ...CreateSpecCards
   currentProject {
     id
+    codeGenGlobs {
+      id
+      component
+    }
     ...SpecPatternModal
   }
 }
@@ -59,7 +63,7 @@ const props = defineProps<{
   gql: CreateSpecContentFragment
 }>()
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType, props.gql.currentProject?.codeGenGlobs.component)
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal', id: string): void

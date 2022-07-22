@@ -1,0 +1,12 @@
+---
+fileName: <%= fileName %>
+---
+
+import <%- componentName %> from "<%- componentPath %>"
+
+describe('<<%=componentName%> />', () => {
+  it('renders', () => {
+    // see: https://vue-test-utils.vuejs.org/
+    cy.mount(<%- componentName %>, { propsData: {} })
+  })
+})
