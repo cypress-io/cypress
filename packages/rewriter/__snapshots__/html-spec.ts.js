@@ -1,17 +1,17 @@
 exports['html rewriter .rewriteHtmlJs strips SRI 1'] = `
-<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">
+<script type="text/javascript" cypress-stripped-integrity="foo" src="bar">
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 2'] = `
-<script type="text/javascript" cypress:stripped-integrity="foo" src="bar"/>
+<script type="text/javascript" cypress-stripped-integrity="foo" src="bar"/>
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 3'] = `
-<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">foo</script>
+<script type="text/javascript" cypress-stripped-integrity="foo" src="bar">foo</script>
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 4'] = `
-<script foo:bar="baz" cypress:stripped-integrity="foo" src="bar">
+<script foo:bar="baz" cypress-stripped-integrity="foo" src="bar">
 `
 
 exports['html rewriter .rewriteHtmlJs rewrites a real-ish document with sourcemaps for inline js 1'] = {

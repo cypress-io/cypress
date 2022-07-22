@@ -1,5 +1,6 @@
 import find from 'lodash/find'
 import type RewritingStream from 'parse5-html-rewriting-stream'
+import { STRIPPED_INTEGRITY_TAG } from './constants.json'
 import * as js from './js'
 
 export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite?: js.DeferSourceMapRewriteFn) {
@@ -29,7 +30,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
     const sriAttr = find(startTag.attrs, { name: 'integrity' })
 
     if (sriAttr) {
-      sriAttr.name = 'cypress:stripped-integrity'
+      sriAttr.name = STRIPPED_INTEGRITY_TAG
     }
 
     return rewriter.emitStartTag(startTag)

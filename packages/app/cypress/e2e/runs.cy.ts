@@ -94,9 +94,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
@@ -104,6 +101,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
+
+      cy.loginUser()
+      cy.visitApp()
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
@@ -132,9 +132,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept(async (obj) => {
         if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
@@ -144,6 +141,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
+
+      cy.loginUser()
+      cy.visitApp()
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
@@ -161,10 +161,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
-
-      cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           const nodes = obj.result.data.cloudViewer.organizations.nodes
@@ -174,6 +170,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
+
+      cy.loginUser()
+      cy.visitApp()
 
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
@@ -675,9 +674,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.loginUser()
-      cy.visitApp()
-
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
@@ -685,6 +681,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
+
+      cy.loginUser()
+      cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
 

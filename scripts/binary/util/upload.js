@@ -80,20 +80,20 @@ const getDesktopUrl = function (version, osName, zipName) {
 }
 
 // purges desktop application url from Cloudflare cache
-const purgeDesktopAppFromCache = function ({ version, platform, zipName }) {
+const purgeDesktopAppFromCache = function ({ version, platformArch, zipName }) {
   la(check.unemptyString(version), 'missing desktop version', version)
-  la(check.unemptyString(platform), 'missing platform', platform)
+  la(check.unemptyString(platformArch), 'missing platformArch', platformArch)
   la(check.unemptyString(zipName), 'missing zip filename')
   la(check.extension('zip', zipName),
     'zip filename should end with .zip', zipName)
 
-  const osName = getUploadNameByOsAndArch(platform)
-
-  la(check.unemptyString(osName), 'missing osName', osName)
-  const url = getDesktopUrl(version, osName, zipName)
+  const url = getDesktopUrl(version, platformArch, zipName)
 
   return purgeCloudflareCache(url)
 }
+
+// all architectures we are building the test runner for
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 
 // purges links to desktop app for all platforms
 // for a given version
@@ -101,17 +101,12 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
   la(check.unemptyString(version), 'missing desktop version', version)
   la(check.unemptyString(zipName), 'missing zipName', zipName)
 
-  const platforms = ['darwin', 'linux', 'win32']
-
   console.log(`purging all desktop links for version ${version} from Cloudflare`)
 
-  return Promise.mapSeries(platforms, (platform) => {
-    return purgeDesktopAppFromCache({ version, platform, zipName })
+  return Promise.mapSeries(validPlatformArchs, (platformArch) => {
+    return purgeDesktopAppFromCache({ version, platformArch, zipName })
   })
 }
-
-// all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
