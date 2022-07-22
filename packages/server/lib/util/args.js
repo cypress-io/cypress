@@ -138,7 +138,6 @@ const tryJSONParse = (str) => {
 }
 
 const JSONOrCoerce = (str) => {
-  coerce
   // valid JSON? horray
   const parsed = tryJSONParse(str)
 
