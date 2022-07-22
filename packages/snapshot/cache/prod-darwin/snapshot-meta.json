@@ -1,5 +1,8 @@
 {
   "norewrite": [
+    "./coffee-script/lib/coffee-script/helpers.js",
+    "./coffeescript/lib/coffee-script/helpers.js",
+    "./cson-parser/node_modules/coffee-script/lib/coffee-script/helpers.js",
     "./evil-dns/evil-dns.js",
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
@@ -31,6 +34,7 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/signal-exit/index.js",
+    "./prettier/index.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
@@ -3843,5 +3847,5 @@
     "./packages/types/src/warning.ts"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c94a761061fa922c99d26e2ad20146f2c5ff084d8ec64bc441f206377d2c7048"
+  "deferredHash": "769f3ca2256a0352d9a129ccf15fb9f6f63beaa060443dad76b3d96d4327c89b"
 }

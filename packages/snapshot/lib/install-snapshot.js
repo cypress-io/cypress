@@ -88,8 +88,6 @@ function getSnapshotGenerator ({
 
       // resuls in recursive call to __get_fs2__
       'packages/https-proxy/lib/ca.js',
-
-      'node_modules/time-require/src/timeRequire.js',
     ],
   })
 }

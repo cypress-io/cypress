@@ -37323,7 +37323,7 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
 
 "v8-snapshot@git+ssh://git@github.com:cypress-io/v8-snapshot#dev":
   version "0.9.0"
-  resolved "git+ssh://git@github.com:cypress-io/v8-snapshot#e3c962c242ee5f19714dac6ddf4a53a52bf1beba"
+  resolved "git+ssh://git@github.com:cypress-io/v8-snapshot#ca331c1d867b134b56007520d5b9a43711e93e34"
   dependencies:
     "@thlorenz/electron-mksnapshot" "^0.1.0"
     ansi-colors "^4.1.1"
