@@ -5,5 +5,9 @@
   "main": "./snapshot.js",
   "dependencies": {
     "v8-snapshot": "git+ssh://git@github.com:cypress-io/v8-snapshot#dev"
-  }
+  },
+  "files": [
+    "lib",
+    "snapconfig.js"
+  ]
 }
