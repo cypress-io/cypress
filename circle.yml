@@ -23,7 +23,7 @@ defaults: &defaults
     LINES: 24
 
     USE_SNAPSHOT: 1
-    PROJECT_BASE_DIR: $PWD
+    PROJECT_BASE_DIR: $CIRCLE_WORKING_DIRECTORY
 
 mainBuildFilters: &mainBuildFilters
   filters:
