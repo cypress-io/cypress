@@ -67,6 +67,15 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  // TODO: Enable once dev-server handler and mount has been merged
+  systemTests.it.skip('angular-cli-configured', {
+    project: 'angular-cli-configured',
+    testingType: 'component',
+    spec: 'src/components/app.component.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 const REACT_MAJOR_VERSIONS = ['17', '18'] as const

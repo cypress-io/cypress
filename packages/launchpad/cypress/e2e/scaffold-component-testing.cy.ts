@@ -107,4 +107,17 @@ describe('scaffolding component testing', {
       verifyConfigFile(`cypress.config.js`)
     })
   })
+
+  context('angular-cli-unconfigured', () => {
+    it('scaffolds component testing for Nuxt 2', () => {
+      startSetupFor('angular-cli-unconfigured')
+
+      // should detect correctly
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', /Angular\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
+      cy.contains('button', 'Next Step').click()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.ts`)
+    })
+  })
 })

@@ -217,4 +217,25 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
+  {
+    type: 'angular',
+    configFramework: 'angular',
+    category: 'template',
+    name: 'Angular',
+    detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+      ]
+    },
+    codeGenFramework: 'angular',
+    mountModule: 'cypress/angular',
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
 ] as const
