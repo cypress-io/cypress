@@ -46,7 +46,7 @@ function runCypress (
     }),
     switchMap((options: CypressBuilderOptions) => {
       return (options.devServerTarget
-        ? startDevServer({ devServerTarget: options.devServerTarget as string, watch: options.watch, context }).pipe(
+        ? startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context }).pipe(
           map((devServerBaseUrl: string) => options.baseUrl || devServerBaseUrl),
         )
         : of(options.baseUrl)
@@ -86,7 +86,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
     options.config = {}
   }
 
-  options.config = { ...options.config, baseUrl: userOptions.devServerBaseUrl as string }
+  options.config = { ...options.config, baseUrl: userOptions.devServerBaseUrl }
 
   const { watch, headless } = userOptions
 
