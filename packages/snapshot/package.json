@@ -1,0 +1,9 @@
+{
+  "name": "@packages/snapshot",
+  "version": "0.0.0",
+  "description": "Scripts related to snapshotting the app.",
+  "main": "./snapshot.js",
+  "dependencies": {
+    "v8-snapshot": "git+ssh://git@github.com:cypress-io/v8-snapshot#dev"
+  }
+}

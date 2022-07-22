@@ -12,14 +12,17 @@
   },
   "dependencies": {
     "debug": "^4.3.2",
+    "dirt-simple-file-cache": "^0.4.0",
     "ts-node": "^10.2.1",
     "tslib": "2.3.1",
-    "typescript-cached-transpile": "^0.0.6"
+    "typescript-cached-transpile": "^0.0.6",
+    "v8-snapshot": "git+ssh://git@github.com:cypress-io/v8-snapshot#dev"
   },
   "devDependencies": {
     "rimraf": "3.0.2"
   },
   "files": [
+    "hook-require.js",
     "register.js",
     "registerDir.js"
   ]

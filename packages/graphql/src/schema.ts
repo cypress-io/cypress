@@ -8,8 +8,11 @@ import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDe
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
+// @ts-ignore
+const { default: _, ...types } = schemaTypes
+
 export const graphqlSchema = makeSchema({
-  types: schemaTypes,
+  types,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
   outputs: {

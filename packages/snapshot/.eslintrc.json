@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/tests"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "plugins": [
+    "cypress"
+  ]
+}

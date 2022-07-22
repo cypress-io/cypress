@@ -1,3 +1,5 @@
+require('@packages/ts/register')
+
 process.title = 'Cypress: Config Manager'
 
 require('../../util/suppress_warnings').suppress()
