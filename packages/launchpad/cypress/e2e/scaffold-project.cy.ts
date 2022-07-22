@@ -77,7 +77,7 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
 
-  cy.contains('React.js(detected)').click()
+  cy.contains('Pick a framework').click()
   cy.contains(opts.framework).click()
   if (opts.bundler) {
     cy.contains('Webpack(detected)').click()
