@@ -9,7 +9,7 @@ describe('<FlakySpecSummary />', () => {
         severity="low"
         totalFlakyRuns={4}
         totalRuns={50}
-        lastFlaky={15}
+        runsSinceLastFlake={15}
         dashboardUrl="#"
       />,
     )
@@ -25,7 +25,7 @@ describe('<FlakySpecSummary />', () => {
         severity="medium"
         totalFlakyRuns={14}
         totalRuns={50}
-        lastFlaky={5}
+        runsSinceLastFlake={5}
         dashboardUrl="#"
       />,
     )
@@ -41,7 +41,7 @@ describe('<FlakySpecSummary />', () => {
         severity="high"
         totalFlakyRuns={24}
         totalRuns={50}
-        lastFlaky={2}
+        runsSinceLastFlake={2}
         dashboardUrl="#"
       />,
     )
@@ -58,7 +58,7 @@ describe('<FlakySpecSummary />', () => {
           severity="high"
           totalFlakyRuns={888}
           totalRuns={1000}
-          lastFlaky={2}
+          runsSinceLastFlake={2}
           dashboardUrl="#"
         />,
       )
@@ -74,7 +74,7 @@ describe('<FlakySpecSummary />', () => {
           severity="high"
           totalFlakyRuns={999}
           totalRuns={1000}
-          lastFlaky={2}
+          runsSinceLastFlake={2}
           dashboardUrl="#"
         />,
       )

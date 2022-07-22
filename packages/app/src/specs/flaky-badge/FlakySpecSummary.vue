@@ -22,7 +22,7 @@
 
     <div class="w-full grid text-gray-700 text-size-14px gap-2 grid-cols-2 justify-items-center">
       <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', [totalFlakyRuns, totalRuns]) }}</span>
-      <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', [lastFlaky]) }}</span>
+      <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', [runsSinceLastFlake]) }}</span>
     </div>
   </div>
 </template>
@@ -44,7 +44,7 @@ const props = defineProps<{
   severity: 'low' | 'medium' | 'high'
   totalFlakyRuns: number
   totalRuns: number
-  lastFlaky: number
+  runsSinceLastFlake: number
   dashboardUrl: string
 }>()
 
@@ -55,7 +55,8 @@ const flakyRate = computed(() => {
 
   const rawRate = props.totalFlakyRuns / props.totalRuns * 100
 
-  if (rawRate >= 99 && rawRate < 100) {
+  // Only display 100 if rawRate is actually 100 (do not round to 100)
+  if (rawRate > 99 && rawRate < 100) {
     return 99
   }
 
