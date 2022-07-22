@@ -62,7 +62,6 @@ const props = defineProps<{
   gql: RequestAccessButtonFragment
 }>()
 
-const projectId = computed(() => props.gql.currentProject?.projectId)
 const hasRequestedAccess = computed(() => props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject?.cloudProject?.hasRequestedAccess)
 
 const projectConnectionStatus = computed(() => {
@@ -76,8 +75,10 @@ const projectConnectionStatus = computed(() => {
 const requestAccessMutation = useMutation(RequestAccessButton_RequestAccessDocument)
 
 async function requestAccess () {
-  if (projectId.value) {
-    await requestAccessMutation.executeMutation({ projectId: projectId.value })
+  const projectId = props.gql.currentProject?.projectId
+
+  if (projectId) {
+    await requestAccessMutation.executeMutation({ projectId })
   }
 }
 

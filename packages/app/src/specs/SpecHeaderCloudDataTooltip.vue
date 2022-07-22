@@ -179,9 +179,13 @@ const projectConnectionStatus = computed(() => {
 })
 
 const tooltipTextKey = computed(() => {
-  if (projectConnectionStatus.value === 'CONNECTED') return VALUES[props.mode].connected
+  if (projectConnectionStatus.value === 'CONNECTED') {
+    return VALUES[props.mode].connected
+  }
 
-  if (['UNAUTHORIZED'].includes(projectConnectionStatus.value)) return VALUES[props.mode].noAccess
+  if (projectConnectionStatus.value === 'UNAUTHORIZED') {
+    return VALUES[props.mode].noAccess
+  }
 
   return VALUES[props.mode].notConnected
 })
