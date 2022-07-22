@@ -1,7 +1,7 @@
 <template>
   <div
     class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
-    :class="accentClass"
+    :class="severity?.accentClass"
     data-cy="flaky-spec-summary"
   >
     <SpecNameDisplay
@@ -9,11 +9,11 @@
       :spec-file-extension="specExtension"
     />
     <div class="flex flex-row w-full text-size-14px justify-center items-center">
-      <component :is="severityIcon" />
+      <component :is="severity?.icon" />
       <span
         class="font-medium ml-2"
-        :class="textClass"
-      >{{ severityLabel }}</span>
+        :class="severity?.textClass"
+      >{{ severity?.label }}</span>
       <span
         class="ml-4"
         data-cy="flaky-rate"
@@ -29,13 +29,12 @@
 
 <script setup lang="ts">
 
-import { computed, FunctionalComponent, ref, shallowRef, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import SpecNameDisplay from '../SpecNameDisplay.vue'
 import LowRateIcon from '~icons/cy/rate-low_x16'
 import MediumRateIcon from '~icons/cy/rate-medium_x16'
 import HighRateIcon from '~icons/cy/rate-high_x16'
-import ceil from 'lodash/ceil'
 
 const { t } = useI18n()
 
@@ -49,10 +48,6 @@ const props = defineProps<{
   dashboardUrl: string
 }>()
 
-const accentClass = ref<string | null>(null)
-const textClass = ref<string | null>(null)
-const severityLabel = ref<string | null>(null)
-const severityIcon = shallowRef<FunctionalComponent | null>(null)
 const flakyRate = computed(() => {
   if (props.totalFlakyRuns <= 0 || props.totalRuns <= 0) {
     return 0
@@ -60,36 +55,39 @@ const flakyRate = computed(() => {
 
   const rawRate = props.totalFlakyRuns / props.totalRuns * 100
 
-  if (rawRate > 99 && rawRate < 100) {
+  if (rawRate >= 99 && rawRate < 100) {
     return 99
   }
 
-  return ceil(rawRate)
+  return Math.ceil(rawRate)
 })
 
-watch(() => props.severity, (severityValue) => {
-  switch (severityValue) {
+const severity = computed(() => {
+  switch (props.severity) {
     case 'low':
-      accentClass.value = 'border-t-orange-400'
-      textClass.value = 'text-orange-400'
-      severityLabel.value = t('specPage.flaky.severityLow')
-      severityIcon.value = LowRateIcon
-      break
+      return {
+        accentClass: 'border-t-orange-400',
+        textClass: 'text-orange-400',
+        label: t('specPage.flaky.severityLow'),
+        icon: LowRateIcon,
+      }
     case 'medium':
-      accentClass.value = 'border-t-orange-500'
-      textClass.value = 'text-orange-500'
-      severityLabel.value = t('specPage.flaky.severityMedium')
-      severityIcon.value = MediumRateIcon
-      break
+      return {
+        accentClass: 'border-t-orange-500',
+        textClass: 'text-orange-500',
+        label: t('specPage.flaky.severityMedium'),
+        icon: MediumRateIcon,
+      }
     case 'high':
-      accentClass.value = 'border-t-orange-600'
-      textClass.value = 'text-orange-600'
-      severityLabel.value = t('specPage.flaky.severityHigh')
-      severityIcon.value = HighRateIcon
-      break
+      return {
+        accentClass: 'border-t-orange-600',
+        textClass: 'text-orange-600',
+        label: t('specPage.flaky.severityHigh'),
+        icon: HighRateIcon,
+      }
     default:
-      break
+      return undefined
   }
-}, { immediate: true })
+})
 
 </script>
