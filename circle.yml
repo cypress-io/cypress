@@ -23,6 +23,7 @@ defaults: &defaults
     LINES: 24
 
     USE_SNAPSHOT: 1
+    PROJECT_BASE_DIR: ~/cypress
 
 mainBuildFilters: &mainBuildFilters
   filters:
