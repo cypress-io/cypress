@@ -157,8 +157,8 @@
       "severityMedium": "Medium",
       "severityHigh": "High",
       "flakyRate": "{0}% flaky rate",
-      "flakyRuns": "{0} flaky runs / {1} total | {0} flaky run / {1} total | {0} flaky runs / {1} total",
-      "lastFlaky": "Last flaky {0} runs ago | Last flaky {0} run ago | Last flaky {0} runs ago"
+      "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
+      "lastFlaky": "Last flaky {runsSinceLastFlake} runs ago | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
     },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",

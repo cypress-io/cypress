@@ -82,4 +82,57 @@ describe('<FlakySpecSummary />', () => {
       cy.findByTestId('flaky-rate').should('have.text', '99% flaky rate')
     })
   })
+
+  describe('pluralization', () => {
+    it('should handle zero flaky runs and zero runs since last flake', () => {
+      cy.mount(
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="high"
+          totalFlakyRuns={0}
+          totalRuns={1000}
+          runsSinceLastFlake={0}
+          dashboardUrl="#"
+        />,
+      )
+
+      cy.findByTestId('flaky-runs').should('have.text', '0 flaky runs / 1000 total')
+      cy.findByTestId('last-flaky').should('have.text', 'Last flaky 0 runs ago')
+    })
+
+    it('should handle 1 flaky run and 1 run since last flake', () => {
+      cy.mount(
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="high"
+          totalFlakyRuns={1}
+          totalRuns={1000}
+          runsSinceLastFlake={1}
+          dashboardUrl="#"
+        />,
+      )
+
+      cy.findByTestId('flaky-runs').should('have.text', '1 flaky run / 1000 total')
+      cy.findByTestId('last-flaky').should('have.text', 'Last flaky 1 run ago')
+    })
+
+    it('should handle multiple flaky runs and multiple runs since last flake', () => {
+      cy.mount(
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="high"
+          totalFlakyRuns={2}
+          totalRuns={1000}
+          runsSinceLastFlake={2}
+          dashboardUrl="#"
+        />,
+      )
+
+      cy.findByTestId('flaky-runs').should('have.text', '2 flaky runs / 1000 total')
+      cy.findByTestId('last-flaky').should('have.text', 'Last flaky 2 runs ago')
+    })
+  })
 })

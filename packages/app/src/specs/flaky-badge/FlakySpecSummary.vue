@@ -21,8 +21,8 @@
     </div>
 
     <div class="w-full grid text-gray-700 text-size-14px gap-2 grid-cols-2 justify-items-center">
-      <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', [totalFlakyRuns, totalRuns]) }}</span>
-      <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', [runsSinceLastFlake]) }}</span>
+      <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
+      <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', { count: runsSinceLastFlake, runsSinceLastFlake }) }}</span>
     </div>
   </div>
 </template>
