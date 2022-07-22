@@ -23,7 +23,7 @@ export type WebpackDevServerConfig = {
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
-  webpackConfig?: unknown // Derived from the user's webpack,
+  webpackConfig?: unknown // Derived from the user's webpack
 }
 
 export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular'] as const

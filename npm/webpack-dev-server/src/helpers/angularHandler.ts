@@ -77,6 +77,9 @@ async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConf
 }
 
 export function getAngularBuildOptions (projectConfig: AngularJsonProjectConfig, tsConfig: string) {
+  // Default options are derived from the @angular-devkit/build-angular browser builder, with some options from
+  // the serve builder thrown in for development.
+  // see: https://github.com/angular/angular-cli/blob/main/packages/angular_devkit/build_angular/src/builders/browser/schema.json
   return {
     outputPath: 'dist/angular-app',
     assets: [],
