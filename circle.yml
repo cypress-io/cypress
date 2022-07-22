@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - angular-webpack-handler
+        - tbiethman/electron-19
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'angular-webpack-handler', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'angular-webpack-handler', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'angular-webpack-handler', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -129,7 +129,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "angular-webpack-handler" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/electron-19" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
