@@ -5,8 +5,7 @@
   font-family: $monospace;
   font-size: 12px;
   font-style: normal;
-  font-weight: 400;
-  height: 16px;
+  font-weight: 500;
   line-height: 16px;
   max-width: 200px;
   overflow: hidden;
@@ -20,7 +19,7 @@
   &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
   &.primitive { // default
-    background-color: $teal-500;
+    background-color: $purple-500;
   }
 
   &.dom { // alias for dom reference
@@ -28,9 +27,9 @@
   }
 
   &.passed {
-    background-color: $gray-900;
+    background-color: $gray-1000;
+    border: $gray-900 1px solid;
     color: $jade-300;
-    font-weight: 500;
   }
 
   &.failed {
@@ -56,4 +55,8 @@
   &.dom { // alias for dom reference
     background-color: $indigo-400;
   }
+}
+
+.command-wrapper:hover > .command-pin-target > .command-wrapper-text > .command-controls > .reporter-tag.passed {
+  border-color: $gray-700;
 }
