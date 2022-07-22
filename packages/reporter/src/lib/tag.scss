@@ -49,7 +49,7 @@
   &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
   &.primitive { // default
-    background-color: $teal-400;
+    background-color: $purple-400;
   }
 
   &.dom { // alias for dom reference
