@@ -37,9 +37,10 @@ export function makeDefaultWebpackConfig (
     },
     plugins: [
       new HtmlWebpackPlugin({
-        // Todo: Add indexHtmlFile when it gets added as a config property
         template: indexHtmlFile,
-      }) as any,
+        // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+      }),
     ],
   } as any
 

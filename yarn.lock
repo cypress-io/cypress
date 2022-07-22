@@ -14714,6 +14714,11 @@ crypto-browserify@^3.0.0, crypto-browserify@^3.11.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
+crypto-js@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
+  integrity sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==
+
 crypto-random-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
@@ -15292,7 +15297,7 @@ dayjs@1.10.4, dayjs@^1.10.3, dayjs@^1.10.4, dayjs@^1.9.3:
 de-indent@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/de-indent/-/de-indent-1.0.2.tgz#b2038e846dc33baa5796128d0804b455b8c1e21d"
-  integrity sha1-sgOOhG3DO6pXlhKNCAS0VbjB4h0=
+  integrity sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==
 
 debounce@^1.2.0:
   version "1.2.1"
@@ -26960,9 +26965,9 @@ node-abi@^2.7.0:
     semver "^5.4.1"
 
 node-abi@^3.3.0:
-  version "3.15.0"
-  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.15.0.tgz#cd9ac8c58328129b49998cc6fa16aa5506152716"
-  integrity sha512-Ic6z/j6I9RLm4ov7npo1I48UQr2BEyFCqh6p7S1dhEx9jPO0GPGq/e2Rb7x7DroQrmiVMz/Bw1vJm9sPAl2nxA==
+  version "3.22.0"
+  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.22.0.tgz#00b8250e86a0816576258227edbce7bbe0039362"
+  integrity sha512-u4uAs/4Zzmp/jjsD9cyFYDXeISfUWaAVWshPmDZOFOv4Xl4SbzTXm53I04C2uRueYJ+0t5PEtLH/owbn2Npf/w==
   dependencies:
     semver "^7.3.5"
 
@@ -30367,9 +30372,9 @@ prebuild-install@^5.2.4, prebuild-install@^5.3.5:
     which-pm-runs "^1.0.0"
 
 prebuild-install@^7.0.0:
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-7.1.0.tgz#991b6ac16c81591ba40a6d5de93fb33673ac1370"
-  integrity sha512-CNcMgI1xBypOyGqjp3wOc8AAo1nMhZS3Cwd3iHIxOdAUbb+YxdNuM4Z5iIrZ8RLvOsf3F3bl7b7xGq6DjQoNYA==
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-7.1.1.tgz#de97d5b34a70a0c81334fd24641f2a1702352e45"
+  integrity sha512-jAXscXWMcCK8GgCoHOfIr0ODh5ai8mj63L2nWrjuAgXE6tDyYGnx4/8o/rCgU+B4JSyZBKbeZqzhtwtC3ovxjw==
   dependencies:
     detect-libc "^2.0.0"
     expand-template "^2.0.3"
@@ -30378,7 +30383,6 @@ prebuild-install@^7.0.0:
     mkdirp-classic "^0.5.3"
     napi-build-utils "^1.0.1"
     node-abi "^3.3.0"
-    npmlog "^4.0.1"
     pump "^3.0.0"
     rc "^1.2.7"
     simple-get "^4.0.0"
