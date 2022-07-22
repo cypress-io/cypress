@@ -142,6 +142,13 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
 
+  // avoid race condition when webpack prints this at a non-deterministic timing
+  const wdsFailedMsg = 'ℹ ｢wdm｣: Failed to compile.'
+
+  if (str.includes(wdsFailedMsg)) {
+    str = str.split('\n').filter((line) => !line.includes(wdsFailedMsg)).join('\n')
+  }
+
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
