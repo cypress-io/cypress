@@ -65,6 +65,7 @@ const frameworkWebpackMapper: FrameworkWebpackMapper = {
   react: undefined,
   vue: undefined,
   next: 'next',
+  'angular': '@angular-devkit/build-angular',
 }
 
 // Source the users framework from the provided projectRoot. The framework, if available, will serve
