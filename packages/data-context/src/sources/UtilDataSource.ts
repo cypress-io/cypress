@@ -1,4 +1,3 @@
-import DataLoader from 'dataloader'
 import fetch from 'cross-fetch'
 import type { DataContext } from '../DataContext'
 
@@ -13,16 +12,6 @@ const { agent } = require('@packages/network')
  */
 export class UtilDataSource {
   constructor (private ctx: DataContext) {}
-
-  private _allLoaders: DataLoader<any, any>[] = []
-
-  loader = <K, V, C = K>(batchLoadFn: DataLoader.BatchLoadFn<K, V>) => {
-    const loader = new DataLoader<K, V, C>(batchLoadFn, { cache: false })
-
-    this._allLoaders.push(loader)
-
-    return loader
-  }
 
   fetch (input: RequestInfo | URL, init?: RequestInit) {
     // @ts-ignore agent isn't a part of cross-fetch's API since it's not a part of the browser's fetch but it is a part of node-fetch
