@@ -21,7 +21,7 @@ module.exports = {
       const allFilesToSend = specs
 
       if (supportFileJs) {
-        allFilesToSend.push(supportFileJs)
+        allFilesToSend.unshift(supportFileJs)
       }
 
       debug('all files to send %o', _.map(allFilesToSend, 'relative'))
