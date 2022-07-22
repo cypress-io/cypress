@@ -1501,6 +1501,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13').should('have.value', '1959-09-13T10:12:13')
       })
 
+      it('can use fractions of a second', () => {
+        cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13.456').should('have.value', '1959-09-13T10:12:13.456')
+      })
+
       it('overwrites existing value', () => {
         cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
