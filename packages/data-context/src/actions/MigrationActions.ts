@@ -93,7 +93,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const childOptions: ForkOptions = {
       stdio: 'inherit',
       cwd: path.dirname(cwd),
-      env: _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF'),
+      env: _.omit(process.env, ['CYPRESS_INTERNAL_E2E_TESTING_SELF', 'USE_SNAPSHOT']),
     }
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
