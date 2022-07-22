@@ -212,6 +212,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
+    name: 'experimentalModifyObstructiveThirdPartyCode',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
