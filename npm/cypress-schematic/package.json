@@ -12,32 +12,38 @@
     "launch12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic && cd ..",
     "launch:test12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic --e2eUpdate && cd ..",
     "link:sandbox12": "yarn link && cd sandbox12 && yarn link @cypress/schematic",
+    "clean14": "git checkout HEAD -- sandbox14 && git clean -f -d sandbox14",
+    "launch14": "yarn link:sandbox14 && cd sandbox14 && ng add @cypress/schematic && cd ..",
+    "launch:test14": "yarn link:sandbox14 && cd sandbox14 && ng add @cypress/schematic --e2eUpdate && cd ..",
+    "link:sandbox14": "yarn link && cd sandbox14 && yarn link @cypress/schematic",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
-    "test:e2e:sandbox12": "cd sandbox12 && ng run sandbox:cypress-run",
-    "unlink:sandbox12": "cd sandbox12 && yarn unlink @cypress/schematic && cd .. && yarn unlink"
+    "test:e2e:sandbox12": "cd sandbox12 && ng run sandbox12:cypress-run",
+    "unlink:sandbox12": "cd sandbox12 && yarn unlink @cypress/schematic && cd .. && yarn unlink",
+    "test:e2e:sandbox14": "cd sandbox14 && ng run sandbox14:cypress-run",
+    "unlink:sandbox14": "cd sandbox14 && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1202.10",
-    "@angular-devkit/core": "^12.2.17",
-    "@angular-devkit/schematics": "^12.2.17",
-    "@schematics/angular": "^12.2.17",
+    "@angular-devkit/architect": "^0.1401.0",
+    "@angular-devkit/core": "^14.1.0",
+    "@angular-devkit/schematics": "^14.1.0",
+    "@schematics/angular": "^14.1.0",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^12.2.17",
-    "@angular/cli": "^12.2.17",
+    "@angular-devkit/schematics-cli": "^14.1.0",
+    "@angular/cli": "^14.1.0",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
-    "@types/node": "^12.11.1",
+    "@types/node": "^18.0.6",
     "chai": "4.2.0",
-    "cypress": "0.0.0-development",
+    "cypress": "latest",
     "mocha": "3.5.3",
-    "typescript": "~4.2.4"
+    "typescript": "~4.7.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=12",
-    "@angular/core": ">=12"
+    "@angular/cli": ">=14.1.0",
+    "@angular/core": ">=14.1.0"
   },
   "license": "MIT",
   "repository": {
