@@ -2,9 +2,12 @@
 
 // @ts-check
 
+const path = require('path')
 const { createConfig } = require('@packages/snapshot')
 const env = process.env.CYPRESS_ENV === 'production' ? 'prod' : 'dev'
 const config = createConfig(env)
+
+process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirname, '..', '..')
 
 const isDev = env === 'dev'
 
