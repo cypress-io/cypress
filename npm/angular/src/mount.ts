@@ -203,9 +203,16 @@ export function mount<T extends object> (
 
   const fixture = setupFixture(component, testBed, autoDetectChanges)
 
-  return cy.wrap({
-    fixture,
-    testBed,
-    component: setupComponent(config, fixture),
+  return cy.then(() => {
+    Cypress.log({
+      name: 'mount',
+      message: component.name,
+    })
+
+    return cy.wrap({
+      fixture,
+      testBed,
+      component: setupComponent(config, fixture),
+    }, { log: false })
   })
 }
