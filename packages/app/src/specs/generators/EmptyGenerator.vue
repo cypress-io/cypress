@@ -93,7 +93,7 @@
             query: {
               file: result.file.relative?.replace(/\\/g, '/')
             },
-            params: props.type === 'componentEmpty'
+            params: props.type === 'component'
               ? {
                 shouldShowTroubleRenderingAlert: true
               }
@@ -141,7 +141,7 @@ import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 const props = defineProps<{
   title: string
   gql: EmptyGeneratorFragment
-  type: 'e2e' | 'componentEmpty'
+  type: 'e2e' | 'component'
   specFileName: string
   erroredCodegenCandidate?: string
   /** is there any other generator available when clicking "Back" */
