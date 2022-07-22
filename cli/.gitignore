@@ -17,5 +17,5 @@ build
 # the sync-exported-npm-with-cli.js script
 vue
 vue2
-react
+react*
 mount-utils
