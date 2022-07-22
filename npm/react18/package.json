@@ -13,11 +13,11 @@
     "@cypress/react": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
-    "@types/react": "18.0.6",
-    "@types/react-dom": "18.0.6",
+    "@types/react": "^16",
+    "@types/react-dom": "^16",
     "cypress": "0.0.0-development",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "^16",
+    "react-dom": "^16",
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.2.3"
@@ -48,14 +48,6 @@
     "testing"
   ],
   "module": "dist/cypress-react.esm-bundler.js",
-  "workspaces": {
-    "nohoist": [
-      "react",
-      "react-dom",
-      "@types/react",
-      "@types/react-dom"
-    ]
-  },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
