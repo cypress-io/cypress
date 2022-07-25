@@ -34052,11 +34052,6 @@ snapbuild-linux-arm64@0.0.133:
   resolved "https://registry.yarnpkg.com/snapbuild-linux-arm64/-/snapbuild-linux-arm64-0.0.133.tgz#5d9b981ce6086d891b8ffdf003cd673631058444"
   integrity sha512-jJU8eW3qnr/MSj0HFOi0mQOhX3T4nn0oDA2TPOT0Ip6j9xk/5YttTijWskULiUYn6feWTITVobNkNkwlhIPy+A==
 
-snapbuild-linux-arm@0.0.133:
-  version "0.0.133"
-  resolved "https://registry.yarnpkg.com/snapbuild-linux-arm/-/snapbuild-linux-arm-0.0.133.tgz#4f18d4f5d8a98f25e6d1648af7f78592e76380c8"
-  integrity sha512-3kTmlShcav7sa3gjyZceRVuFAMt+N3hQPz3DNR+y1bkdl2RsnDEv7/qQQ1KC5tc61C2E7geLuoTm7jxtock8kg==
-
 snapbuild-linux-mips64le@0.0.133:
   version "0.0.133"
   resolved "https://registry.yarnpkg.com/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-0.0.133.tgz#dbcbe193287e660666f7b4dfa751c7124049919e"
@@ -34072,15 +34067,9 @@ snapbuild-windows-32@0.0.133:
   resolved "https://registry.yarnpkg.com/snapbuild-windows-32/-/snapbuild-windows-32-0.0.133.tgz#848be4b7764363036901eb56a0f6dc76b07dcb9b"
   integrity sha512-AhQVYyo3aH5rAHfDHPg9PWYeIWLb+lvwuC5MfJzSKdL81r6TzIxD+xZab6KYWfGmZiXlnHAN37gRDuPeNehCeg==
 
-snapbuild-windows-64@0.0.133:
+"snapbuild@git+ssh://git@github.com:ryanthemanuel/snapbuild":
   version "0.0.133"
-  resolved "https://registry.yarnpkg.com/snapbuild-windows-64/-/snapbuild-windows-64-0.0.133.tgz#2ff05c63f738cf90894df9400906f951f1d8b575"
-  integrity sha512-0Y2I4w2HYbmtEghkolcg1YNPvReejYNruXVf5EGpZbTluNU2KcKOKiY6U4P0o1tYBAMDErbxZRVT6Re1gi9Dpw==
-
-snapbuild@^0.0.133:
-  version "0.0.133"
-  resolved "https://registry.yarnpkg.com/snapbuild/-/snapbuild-0.0.133.tgz#43613b71cf02b3972acb47cd584704783393044b"
-  integrity sha512-7OV73uguHY5Q4xO96IbVlAr7H+mi8ygHnaLH1zWIfWJSyfOBgTH0DIk8UiSSgkboDTCTIGG2Nm4SNsg7nOsu+A==
+  resolved "git+ssh://git@github.com:ryanthemanuel/snapbuild#a864bbd2f6e41d0c4674507f048f403537f8aced"
   optionalDependencies:
     snapbuild-android-arm64 "0.0.133"
     snapbuild-darwin-64 "0.0.133"
@@ -34088,12 +34077,10 @@ snapbuild@^0.0.133:
     snapbuild-freebsd-arm64 "0.0.133"
     snapbuild-linux-32 "0.0.133"
     snapbuild-linux-64 "0.0.133"
-    snapbuild-linux-arm "0.0.133"
     snapbuild-linux-arm64 "0.0.133"
     snapbuild-linux-mips64le "0.0.133"
     snapbuild-linux-ppc64le "0.0.133"
     snapbuild-windows-32 "0.0.133"
-    snapbuild-windows-64 "0.0.133"
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
@@ -37323,7 +37310,7 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
 
 "v8-snapshot@git+ssh://git@github.com:cypress-io/v8-snapshot#dev":
   version "0.9.0"
-  resolved "git+ssh://git@github.com:cypress-io/v8-snapshot#ca331c1d867b134b56007520d5b9a43711e93e34"
+  resolved "git+ssh://git@github.com:cypress-io/v8-snapshot#dc8394ace11d287f163db1f5c3884363427d5546"
   dependencies:
     "@thlorenz/electron-mksnapshot" "^0.1.0"
     ansi-colors "^4.1.1"
@@ -37331,7 +37318,7 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
     debug "^4.1.1"
     packherd "^0.9.0"
     resolve-from "^5.0.0"
-    snapbuild "^0.0.133"
+    snapbuild "git+ssh://git@github.com:ryanthemanuel/snapbuild"
     source-map-js "^0.6.2"
     supports-color "^8.1.1"
     terser "^5.3.2"
