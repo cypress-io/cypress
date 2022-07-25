@@ -8,7 +8,7 @@
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
-    "test": "echo 'ok'"
+    "check-ts": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
