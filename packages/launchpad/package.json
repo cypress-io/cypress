@@ -49,6 +49,7 @@
     "cypress-real-events": "1.6.0",
     "dedent": "^0.7.0",
     "disparity": "^3.0.0",
+    "engine.io-client": "3.5.2",
     "fs-extra": "8.1.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
