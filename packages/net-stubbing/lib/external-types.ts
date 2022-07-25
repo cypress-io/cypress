@@ -1,5 +1,5 @@
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
-export type Method =
+type Method =
     | 'ACL'
     | 'BIND'
     | 'CHECKOUT'
@@ -68,9 +68,8 @@ export type Method =
     | 'unlink'
     | 'unlock'
     | 'unsubscribe'
-
 export namespace CyHttpMessages {
-  interface BaseMessage {
+  export interface BaseMessage {
     /**
      * The body of the HTTP message.
      * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
@@ -83,7 +82,7 @@ export namespace CyHttpMessages {
     headers: { [key: string]: string | string[] }
   }
 
-  type IncomingResponse = BaseMessage & {
+  export type IncomingResponse = BaseMessage & {
     /**
      * The HTTP status code of the response.
      */
@@ -102,7 +101,7 @@ export namespace CyHttpMessages {
     delay?: number
   }
 
-  type IncomingHttpResponse = IncomingResponse & {
+  export type IncomingHttpResponse = IncomingResponse & {
     /**
      * Continue the HTTP response, merging the supplied values with the real response.
      */
@@ -123,7 +122,7 @@ export namespace CyHttpMessages {
     setThrottle: (throttleKbps: number) => IncomingHttpResponse
   }
 
-  type IncomingRequest = BaseMessage & {
+  export type IncomingRequest = BaseMessage & {
     /**
      * Request HTTP method (GET, POST, ...).
      */
@@ -157,7 +156,7 @@ export namespace CyHttpMessages {
     alias?: string
   }
 
-  interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
+  export interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
     /**
      * Destroy the request and respond with a network error.
      */
@@ -191,11 +190,11 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  interface ResponseComplete {
+  export interface ResponseComplete {
     finalResBody?: BaseMessage['body']
   }
 
-  interface NetworkError {
+  export interface NetworkError {
     error: any
   }
 }
@@ -242,7 +241,7 @@ export interface Subscription {
   skip?: boolean
 }
 
-export interface RequestEvents {
+interface RequestEvents {
   /**
    * Emitted before `response` and before any `req.continue` handlers.
    * Modifications to `res` will be applied to the incoming response.
@@ -438,7 +437,7 @@ export interface GenericStaticResponse<Fixture, Body> {
  */
 export type StringMatcher = GlobPattern | RegExp
 
-export interface WaitOptions {
+interface WaitOptions {
   /**
    * Displays the command in the Command Log
    *
