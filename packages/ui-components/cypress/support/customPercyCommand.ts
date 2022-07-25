@@ -249,10 +249,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides, isComponen
    *   precedence over the global override defined when the command was installed.
    */
   const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
-    // since Percy snapshots represent visually unique states in the application
-    // doing an accessibility check here should cover a lot of states that might be
-    setupAxeAndCheckA11y(isComponentTesting)
-
     if (name && typeof name === 'object') {
       options = name
       name = undefined
@@ -290,6 +286,11 @@ export const installCustomPercyCommand = ({ before, elementOverrides, isComponen
     // that is representative of the snapshot that would be taken by Percy and can be
     // used for validation during development.
     if (Cypress.config().isInteractive) {
+      // since Percy snapshots represent visually unique states in the application
+      // doing an accessibility check here should cover all situations that need to a11y checks
+
+      setupAxeAndCheckA11y(isComponentTesting)
+
       return applySnapshotMutations({
         ...snapshotMutationOptions,
         log: 'percy: skipping snapshot in interactive mode',
