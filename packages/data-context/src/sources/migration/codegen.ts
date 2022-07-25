@@ -536,6 +536,7 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: Testi
 function formatWithBundledBabel (config: string) {
   const ast = parse(config)
 
+  // @ts-ignore - babel/types need to be updated to work with TypeScript 4.7.x
   let { code } = generate(ast, {}, config)
   // By default babel generates imports like this:
   // const {
