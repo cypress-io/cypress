@@ -75,7 +75,7 @@ shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
 
 // copy experimental network stubbing type definitions
 // so users can import: `import 'cypress/types/net-stubbing'`
-fs.copySync(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.d.ts')
+fs.copySync(resolvePkg('@packages/net-stubbing/lib/external-types.d.ts'), 'types/net-stubbing.d.ts')
 
 // https://github.com/cypress-io/cypress/issues/18069
 // To avoid type clashes, some files should be commented out entirely by patch-package

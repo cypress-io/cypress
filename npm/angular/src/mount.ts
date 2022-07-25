@@ -1,3 +1,12 @@
+import 'zone.js'
+
+/**
+ * @hack fixes "Mocha has already been patched with Zone" error.
+ */
+// @ts-ignore
+window.Mocha['__zone_patch__'] = false
+import 'zone.js/testing'
+
 import { CommonModule } from '@angular/common'
 import { Type } from '@angular/core'
 import {
@@ -200,19 +209,17 @@ export function mount<T extends object> (
   autoDetectChanges = true,
 ): Cypress.Chainable<MountResponse<T>> {
   const testBed: TestBed = initTestBed(component, config)
-
   const fixture = setupFixture(component, testBed, autoDetectChanges)
+  const componentInstance = setupComponent(config, fixture)
 
-  return cy.then(() => {
-    Cypress.log({
-      name: 'mount',
-      message: component.name,
-    })
-
-    return cy.wrap({
-      fixture,
-      testBed,
-      component: setupComponent(config, fixture),
-    }, { log: false })
+  Cypress.log({
+    name: 'mount',
+    message: component.name,
   })
+
+  return cy.wrap({
+    fixture,
+    testBed,
+    component: componentInstance,
+  }, { log: false })
 }

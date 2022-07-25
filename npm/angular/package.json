@@ -2,32 +2,27 @@
   "name": "@cypress/angular",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
-  "main": "dist/cypress-angular.esm-bundler.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
+    "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
-    "cy:open": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run --component",
-    "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "test": "echo 'ok'",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "test": "echo 'ok'"
   },
   "dependencies": {},
   "devDependencies": {
     "@angular/common": "^14.0.6",
     "@angular/core": "^14.0.6",
     "@angular/platform-browser-dynamic": "^14.0.6",
-    "@rollup/plugin-node-resolve": "^11.1.1",
-    "cypress": "0.0.0-development",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "~4.2.3"
+    "typescript": "~4.2.3",
+    "zone.js": "~0.11.4"
   },
   "peerDependencies": {
     "@angular/common": ">=13",
     "@angular/core": ">=13",
     "@angular/platform-browser-dynamic": ">=13",
-    "@cypress/webpack-dev-server": "*"
+    "zone.js": ">=0.11.0"
   },
   "files": [
     "dist"
@@ -58,7 +53,7 @@
       "social": "@ZachJW34"
     }
   ],
-  "module": "dist/cypress-angular.esm-bundler.js",
+  "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
   },

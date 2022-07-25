@@ -152,8 +152,8 @@
       "types": "./mount-utils/dist/index.d.ts"
     },
     "./angular": {
-      "import": "./angular/dist/cypress-angular.esm-bundler.js",
-      "require": "./angular/dist/cypress-angular.esm-bundler.js",
+      "import": "./angular/dist/index.js",
+      "require": "./angular/dist/index.js",
       "types": "./angular/dist/index.d.ts"
     }
   },
