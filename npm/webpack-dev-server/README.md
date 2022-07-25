@@ -2,7 +2,9 @@
 
 Implements the APIs for the object-syntax of the Cypress Component-testing "webpack dev server".
 
-Object syntax:
+> **Note:** This package is bundled with the Cypress binary and should not need to be installed separately. See the [Component Framework Configuration Docs](https://docs.cypress.io/guides/component-testing/component-framework-configuration) for setting up component testing with webpack. The `devServer` function signature is for advanced use-cases.
+
+Object API:
 
 ```ts
 import { defineConfig } from 'cypress'
@@ -18,7 +20,7 @@ export default defineConfig({
 })
 ```
 
-Function syntax:
+Function API:
 
 ```ts
 import { devServer } from '@cypress/webpack-dev-server'
@@ -26,10 +28,10 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   component: {
-    devServer(cypressConfig) {
+    devServer(devServerConfig) {
       return devServer({
-        cypressConfig,
-        framework: 'react',
+        ...devServerConfig,
+        framework: 'create-react-app',
         webpackConfig: require('./webpack.config.js')
       })
     }
@@ -39,7 +41,7 @@ export default defineConfig({
 
 ## Testing
 
-Unit tests can be run with `npm test`. Integration tests can be run with `yarn cypress:run`
+Unit tests can be run with `yarn test`. Integration tests can be run with `yarn cypress:run`
 
 This module should be primarily covered by system-tests / open-mode tests. All system-tests directories should be created using the notation:
 
@@ -60,6 +62,17 @@ From there, we check the "framework" field to source or define any known webpack
 
 We then merge the sourced config with the user's webpack config, and layer on our own transforms, and provide this to a webpack instance. The webpack instance used to create a webpack-dev-server, which is returned.
 
-## Changelog
+## Compatibility
 
-[Changelog](./CHANGELOG.md)
+| @cypress/webpack-dev-server | cypress |
+| --------------------------- | ------- |
+| <= v1                       | <= v9   |
+| >= v2                       | >= v10  |
+
+## License
+
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
+
+This project is licensed under the terms of the [MIT license](/LICENSE).
+
+## [Changelog](./CHANGELOG.md)

@@ -61,14 +61,14 @@ describe('lib/config', () => {
   })
 
   context('.get', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'
 
       sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
-      this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+      await this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
       this.ctx.lifecycleManager.setCurrentTestingType('e2e')
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
@@ -1485,6 +1485,7 @@ describe('lib/config', () => {
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
@@ -1570,6 +1571,7 @@ describe('lib/config', () => {
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },

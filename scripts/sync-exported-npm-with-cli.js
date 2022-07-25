@@ -5,13 +5,9 @@
  * However, the Cypress binary will also ship an export for `cypress/react` that's guaranteed to work
  * with this version of the binary
  */
-const shell = require('shelljs')
 const path = require('path')
 const packlist = require('npm-packlist')
-const fs = require('fs')
-
-shell.set('-v') // verbose
-shell.set('-e') // any error is fatal
+const fs = require('fs-extra')
 
 // This script will be run in a postbuild task for each npm package
 // that will be re-exported by Cypress
@@ -34,21 +30,21 @@ packlist({ path: currentPackageDir })
   const outDir = path.join(cliPath, exportName)
 
   // 3. For each file, mkdir if not exists, and then copy the dist'd assets over
-  // Shell is synchronous by default, but we don't actually need to await for the results
   // to write to the `cliPackageConfig` at the end
   files.forEach((f) => {
     // mkdir if not exists
     const { dir } = path.parse(f)
 
     if (dir) {
-      shell.mkdir('-p', path.join(outDir, dir))
+      fs.mkdirSync(path.join(outDir, dir), { recursive: true })
     }
 
-    shell.cp(path.join(currentPackageDir, f), path.join(outDir, f))
+    fs.cpSync(path.join(currentPackageDir, f), path.join(outDir, f))
   })
 
   // After everything is copied, let's update the Cypress cli package.json['exports'] map.
   const isModule = currentPackageConfig.type === 'module'
+  const types = currentPackageConfig.types
 
   const cliPackageConfig = require(path.join(cliPath, 'package.json'))
 
@@ -63,6 +59,11 @@ packlist({ path: currentPackageDir })
   if (!isModule) {
     // ./react/dist/cypress-react-cjs.js, etc
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
+  }
+
+  if (types) {
+    // ./react/dist/cypress-react-cjs.js, etc
+    subPackageExports.types = `./${exportName}/${types}`
   }
 
   if (!cliPackageConfig.files.includes(exportName)) {

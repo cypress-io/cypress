@@ -4,9 +4,9 @@
     :is-interactive="true"
     :show-group="VALUES[mode].header"
   >
-    <div
-      class="cursor-default decoration-dotted underline underline-gray-300 underline-offset-4"
-      tabindex="0"
+    <button
+      type="button"
+      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
     >
       <span
         class="hidden lg:flex"
@@ -16,17 +16,18 @@
         class="lg:hidden"
         data-cy="short-header-text"
       >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
-    </div>
+      <i-cy-circle-bg-question-mark_x16 class="ml-1 icon-dark-indigo-500 icon-light-indigo-100" />
+    </button>
     <template
       #popper
     >
       <div
-        class="flex flex-col mx-4 text-sm text-center p-4 items-center"
+        class="flex flex-col text-sm text-center p-4 items-center"
         data-cy="cloud-data-tooltip-content"
       >
         <div
-          :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"
-          class="max-w-235px"
+          :class="{'my-2': projectConnectionStatus!== 'CONNECTED'}"
+          class="max-w-300px"
         >
           <i18n-t
             scope="global"
