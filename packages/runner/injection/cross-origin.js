@@ -8,7 +8,6 @@
  */
 
 import { createTimers } from './timers'
-import { patchDocumentCookie } from './cookies'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -40,8 +39,6 @@ const findCypress = () => {
 }
 
 const Cypress = findCypress()
-
-patchDocumentCookie(Cypress)
 
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
