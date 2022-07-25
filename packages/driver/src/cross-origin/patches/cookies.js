@@ -1,5 +1,3 @@
-/* global document */
-
 // document.cookie monkey-patching
 // -------------------------------
 // We monkey-patch document.cookie when in a cross-origin injection, because
@@ -15,7 +13,7 @@
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const patchDocumentCookie = (Cypress) => {
+export const patchDocumentCookie = (Cypress, window) => {
   const setAutomationCookie = (toughCookie) => {
     const { superDomain } = Cypress.Location.create(window.location.href)
     const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
@@ -29,7 +27,7 @@ export const patchDocumentCookie = (Cypress) => {
 
   let documentCookieValue = ''
 
-  Object.defineProperty(document, 'cookie', {
+  Object.defineProperty(window.document, 'cookie', {
     get () {
       return documentCookieValue
     },

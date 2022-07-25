@@ -107,7 +107,8 @@
     "mount-utils",
     "vue",
     "react",
-    "vue2"
+    "vue2",
+    "react18"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -140,6 +141,11 @@
       "import": "./react/dist/cypress-react.esm-bundler.js",
       "require": "./react/dist/cypress-react.cjs.js",
       "types": "./react/dist/index.d.ts"
+    },
+    "./react18": {
+      "import": "./react18/dist/cypress-react.esm-bundler.js",
+      "require": "./react18/dist/cypress-react.cjs.js",
+      "types": "./react18/dist/index.d.ts"
     },
     "./mount-utils": {
       "require": "./mount-utils/dist/index.js",
