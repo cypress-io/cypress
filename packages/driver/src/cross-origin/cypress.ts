@@ -43,7 +43,7 @@ const createCypress = () => {
       // if true, this is the correct specbridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
-      Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', finalSnapshot)
+      Cypress.specBridgeCommunicator.toPrimary('snapshot:final:generated', finalSnapshot)
     }
   })
 
