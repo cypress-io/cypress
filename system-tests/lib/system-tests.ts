@@ -22,7 +22,7 @@ require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
-const fsExtra = require('fs-extra')
+const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
@@ -174,7 +174,7 @@ type ExecOptions = {
   /**
    * Run Cypress with run groups.
    */
-  grofsup?: string
+  group?: string
   /**
    * Run Cypress with a CI build ID.
    */
@@ -413,7 +413,7 @@ const copy = function () {
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
     const copy = (src, dest) => {
-      return fsExtra.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
     }
 
     // copy each of the screenshots and videos
