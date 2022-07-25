@@ -47,6 +47,19 @@ const createCypress = () => {
     }
   })
 
+  Cypress.specBridgeCommunicator.on('generate:snapshot:for:log', ({ name, id }) => {
+    // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
+    let requestedCrossOriginSnapshot = {}
+
+    // don't attempt to take snapshots after the spec bridge has been unloaded. Instead, send an empty snapshot back to the primary
+    // to display current state of dom
+    if (cy.state('document') !== undefined) {
+      requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
+    }
+
+    Cypress.specBridgeCommunicator.toPrimary(`snapshot:for:log:generated:${id}`, requestedCrossOriginSnapshot)
+  })
+
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 

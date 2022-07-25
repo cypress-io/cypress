@@ -341,6 +341,34 @@ export class Log {
     return _.pick(this.attributes, args)
   }
 
+  private addSnapshot (snapshot, options, shouldRebindSnapshotFn = true) {
+    const snapshots = this.get('snapshots') || []
+
+    // don't add snapshot if we couldn't create one, which can happen
+    // if the snapshotting process errors
+    // https://github.com/cypress-io/cypress/issues/15816
+    if (snapshot) {
+    // insert at index 'at' or whatever is the next position
+      snapshots[options.at || snapshots.length] = snapshot
+    }
+
+    this.set('snapshots', snapshots)
+
+    if (options.next && shouldRebindSnapshotFn) {
+      const originalLogSnapshotFn = this.snapshot
+
+      this.snapshot = function () {
+      // restore the original snapshot function
+        this.snapshot = originalLogSnapshotFn
+
+        // call orig fn with next as name
+        return originalLogSnapshotFn.call(this, options.next)
+      }
+    }
+
+    return this
+  }
+
   snapshot (name?, options: any = {}) {
     // bail early and don't snapshot if we're in headless mode
     // or we're not storing tests
@@ -353,31 +381,27 @@ export class Log {
       next: null,
     })
 
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+    if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
+      const activeSpecBridgeOriginPolicyIfApplicable = this.state('currentActiveOriginPolicy') || undefined
+      // @ts-ignore
+      const { originPolicy: originPolicyThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
 
-    const snapshots = this.get('snapshots') || []
+      if (activeSpecBridgeOriginPolicyIfApplicable && activeSpecBridgeOriginPolicyIfApplicable === originPolicyThatIsSoonToBeOrIsActive) {
+        Cypress.emit('request:snapshot:from:spec:bridge', {
+          log: this,
+          name,
+          options,
+          specBridge: activeSpecBridgeOriginPolicyIfApplicable,
+          addSnapshot: this.addSnapshot,
+        })
 
-    // don't add snapshot if we couldn't create one, which can happen
-    // if the snapshotting process errors
-    // https://github.com/cypress-io/cypress/issues/15816
-    if (snapshot) {
-      // insert at index 'at' or whatever is the next position
-      snapshots[options.at || snapshots.length] = snapshot
-    }
-
-    this.set('snapshots', snapshots)
-
-    if (options.next) {
-      const fn = this.snapshot
-
-      this.snapshot = function () {
-        // restore the fn
-        this.snapshot = fn
-
-        // call orig fn with next as name
-        return fn.call(this, options.next)
+        return this
       }
     }
+
+    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+
+    this.addSnapshot(snapshot, options)
 
     return this
   }
