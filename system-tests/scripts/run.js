@@ -21,9 +21,9 @@ if (run[0] && run[0].includes('--inspect-brk')) {
 
 if (options['glob-in-dir']) {
   if (run[0]) {
-    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
+    // run = path.join(options['glob-in-dir'], '**', `*${run[0]}*`)
   } else {
-    run = [path.join(options['glob-in-dir'], '**')]
+    // run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
