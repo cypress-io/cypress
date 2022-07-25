@@ -1,8 +1,6 @@
 'use strict'
 // @ts-check
 
-const runAgainstExperimentDirectory = process.env.RUN_AGAINST_EXPERIMENT_DIRECTORY != null
-
 const path = require('path')
 const fs = require('fs').promises
 
@@ -135,24 +133,22 @@ module.exports = async function installSnapshot (
     await snapshotGenerator.createScript()
     const { v8ContextFile } = await snapshotGenerator.makeSnapshot()
 
-    if (!runAgainstExperimentDirectory) {
-      const cypressAppSnapshotFile = path.join(
-        cypressAppSnapshotDir,
-        v8ContextFile,
-      )
+    const cypressAppSnapshotFile = path.join(
+      cypressAppSnapshotDir,
+      v8ContextFile,
+    )
 
-      // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
-      await fs.copyFile(
-        path.join(projectBaseDir, v8ContextFile),
-        cypressAppSnapshotFile,
-      )
+    // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
+    await fs.copyFile(
+      path.join(projectBaseDir, v8ContextFile),
+      cypressAppSnapshotFile,
+    )
 
-      logDebug('Copied snapshot to "%s"', cypressAppSnapshotFile)
-    } else {
-      snapshotGenerator.installSnapshot()
-    }
+    logDebug('Copied snapshot to "%s"', cypressAppSnapshotFile)
 
     logInfo('Done generating snapshot')
+
+    return cypressAppSnapshotFile
   } catch (err) {
     prettyPrintError(err, projectBaseDir)
     throw err

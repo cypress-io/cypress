@@ -72,7 +72,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false } = options
+  const { platform, version, skipSigning = true, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -101,6 +101,11 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
       cwd: CY_ROOT_DIR,
     })
   }
+
+  const config = require('@packages/snapshot/snapconfig')('prod')
+  const setup = require('@packages/snapshot/lib/setup')
+  const sourceSnapshotFileLocation = await setup(config)
+  const targetSnapshotFileLocation = path.join(meta.buildDir(), path.relative(path.resolve('packages', 'electron', 'dist', 'Cypress'), sourceSnapshotFileLocation))
 
   // Copy Packages: We want to copy the package.json, files, and output
   log('#copyAllToDist')
@@ -173,6 +178,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
+const path = require('path')
+process.env.PROJECT_BASE_DIR = path.resolve(__dirname)
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 require('./packages/server')\
 `)
@@ -258,6 +265,9 @@ require('./packages/server')\
       throw e
     }
   }
+
+  log(`copying ${sourceSnapshotFileLocation} to ${targetSnapshotFileLocation}`)
+  fs.copySync(sourceSnapshotFileLocation, targetSnapshotFileLocation)
 
   await checkMaxPathLength()
 

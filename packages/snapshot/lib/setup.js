@@ -13,7 +13,9 @@ module.exports = async function setup (config) {
   const meta = await genMeta(config)
 
   await genEntry(config)
-  await installSnapshot(config, meta.resolverMap)
+  const snapshotFileLocation = await installSnapshot(config, meta.resolverMap)
 
   await saveMetaFileToPrev(config)
+
+  return snapshotFileLocation
 }
