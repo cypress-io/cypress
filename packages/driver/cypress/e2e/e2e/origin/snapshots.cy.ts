@@ -6,7 +6,7 @@ describe('cy.origin - snapshots', () => {
     return Array.from(logMap.values()).find((log: any) => {
       const props = log.get()
 
-      return props.displayName === displayName && props.url === url
+      return props.displayName === displayName && (props?.consoleProps?.URL === url || props?.consoleProps()?.URL === url)
     })
   }
   let logs: Map<string, any>
