@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run --spec \"cypress/e2e/*/*\",\"cypress/e2e/*/!(origin|sessions)/**/*\"",

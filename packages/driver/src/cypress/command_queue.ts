@@ -65,7 +65,15 @@ export class CommandQueue extends Queue<$Command> {
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
 
-  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
+  constructor (
+    state: StateFunc,
+    timeout: $Cy['timeout'],
+    stability: IStability,
+    cleanup: $Cy['cleanup'],
+    fail: $Cy['fail'],
+    isCy: $Cy['isCy'],
+    clearTimeout: ITimeouts['clearTimeout'],
+  ) {
     super()
     this.state = state
     this.timeout = timeout

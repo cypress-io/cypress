@@ -223,7 +223,7 @@ export default {
             errProps: {
               appendToStack: {
                 title: 'From Cypress Internals',
-                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack!),
               } },
           })
         }
