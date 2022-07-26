@@ -94,7 +94,15 @@
               :extension="row.data.data?.specFileExtension || ''"
               :indexes="row.data.data?.fileIndexes"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
-            />
+            >
+              <span class="ml-2 inline-block">
+                <FlakyInformation
+                  :project-gql="props.gql.currentProject"
+                  :spec-gql="row.data.data"
+                  :cloud-spec-gql="row.data.data?.cloudSpec"
+                />
+              </span>
+            </SpecItem>
 
             <RowDirectory
               v-else
@@ -188,7 +196,7 @@ import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
-import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -263,8 +271,10 @@ fragment SpecsList on Spec {
     id
     fetchingStatus
     ...AverageDuration
+    ...FlakyInformationCloudSpec
     ...RunStatusDots
   }
+  ...FlakyInformationSpec
 }
 `
 
@@ -286,6 +296,7 @@ fragment Specs_SpecsList on Query {
     }
     config
     ...SpecPatternModal
+    ...FlakyInformationProject
   }
   ...SpecHeaderCloudDataTooltip
   ...SpecsListBanners
@@ -399,20 +410,7 @@ const refetch = async (ids: string[]) => {
   }
 }
 
-type CloudSpecItem = {
-  fetchingStatus?: RemoteFetchableStatus
-  data?: {
-    __typename?: 'CloudProjectSpec'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectSpecNotFound'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectUnauthorized'
-  } | null
-}
-
-function shouldRefetch (item: CloudSpecItem) {
+function shouldRefetch (item: NonNullCloudSpec) {
   if (isOffline.value) {
     // Offline, no need to refetch
 

@@ -10,7 +10,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={4}
         totalRuns={50}
         runsSinceLastFlake={15}
-        dashboardUrl="#"
       />,
     )
 
@@ -26,7 +25,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={14}
         totalRuns={50}
         runsSinceLastFlake={5}
-        dashboardUrl="#"
       />,
     )
 
@@ -42,7 +40,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={24}
         totalRuns={50}
         runsSinceLastFlake={2}
-        dashboardUrl="#"
       />,
     )
 
@@ -76,7 +73,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={888}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 
@@ -92,7 +88,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={999}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 
@@ -110,7 +105,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={0}
           totalRuns={1000}
           runsSinceLastFlake={0}
-          dashboardUrl="#"
         />,
       )
 
@@ -127,7 +121,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={1}
           totalRuns={1000}
           runsSinceLastFlake={1}
-          dashboardUrl="#"
         />,
       )
 
@@ -144,7 +137,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={2}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 

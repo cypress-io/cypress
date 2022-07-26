@@ -39,25 +39,25 @@ import HighRateIcon from '~icons/cy/rate-high_x16'
 const { t } = useI18n()
 
 const SEVERITIES = {
-  'default': {
+  DEFAULT: {
     accentClass: 'border-t-orange-400',
     textClass: null,
     label: null,
     icon: null,
   },
-  'low': {
+  LOW: {
     accentClass: 'border-t-orange-400',
     textClass: 'text-orange-400',
     label: t('specPage.flaky.severityLow'),
     icon: LowRateIcon,
   },
-  'medium': {
+  MEDIUM: {
     accentClass: 'border-t-orange-500',
     textClass: 'text-orange-500',
     label: t('specPage.flaky.severityMedium'),
     icon: MediumRateIcon,
   },
-  'high': {
+  HIGH: {
     accentClass: 'border-t-orange-600',
     textClass: 'text-orange-600',
     label: t('specPage.flaky.severityHigh'),
@@ -68,11 +68,10 @@ const SEVERITIES = {
 const props = defineProps<{
   specName: string
   specExtension: string
-  severity: 'low' | 'medium' | 'high'
+  severity: string
   totalFlakyRuns: number
   totalRuns: number
   runsSinceLastFlake: number
-  dashboardUrl: string
 }>()
 
 const flakyRate = computed(() => {
@@ -90,6 +89,6 @@ const flakyRate = computed(() => {
   return Math.ceil(rawRate)
 })
 
-const severity = computed(() => SEVERITIES[props.severity] || SEVERITIES.default)
+const severity = computed(() => SEVERITIES[props.severity?.toUpperCase()] || SEVERITIES.DEFAULT)
 
 </script>
