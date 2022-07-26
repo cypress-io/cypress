@@ -34,11 +34,11 @@ export interface TestBedConfig<T extends object> extends TestModuleMetadata {
    * @example
    * import { ButtonComponent } from 'button/button.component'
    * it('renders a button with Save text', () => {
-   *  cy.mount(ButtonComponent, { inputs: { text: 'Save' }})
+   *  cy.mount(ButtonComponent, { componentProperties: { text: 'Save' }})
    *  cy.get('button').contains('Save')
    * })
    */
-  inputs?: Partial<{ [P in keyof T]: T[P] }>
+  componentProperties?: Partial<{ [P in keyof T]: T[P] }>
 }
 
 /**
@@ -82,7 +82,7 @@ function bootstrapModule<T extends object> (
   component: Type<T>,
   config: TestBedConfig<T>,
 ): TestBedConfig<T> {
-  const { inputs, ...testModuleMetaData } = config
+  const { componentProperties, ...testModuleMetaData } = config
 
   if (!testModuleMetaData.declarations) {
     testModuleMetaData.declarations = []
@@ -164,7 +164,7 @@ function setupFixture<T extends object> (
 }
 
 /**
- * Gets the componentInstance and Object.assigns any inputs() passed in the TestBedConfig
+ * Gets the componentInstance and Object.assigns any componentProperties() passed in the TestBedConfig
  *
  * @param {TestBedConfig} config TestBed configuration passed into the mount function
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
@@ -176,8 +176,8 @@ function setupComponent<T extends object> (
 ): T {
   let component: T = fixture.componentInstance
 
-  if (config?.inputs) {
-    component = Object.assign(component, config.inputs)
+  if (config?.componentProperties) {
+    component = Object.assign(component, config.componentProperties)
   }
 
   return component

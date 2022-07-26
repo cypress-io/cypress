@@ -75,7 +75,7 @@ for (const project of WEBPACK_REACT) {
 
       cy.contains('mount.cy.ts').click()
       cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 5)
+      cy.get('.passed > .num').should('contain', 6)
     })
   })
 }
