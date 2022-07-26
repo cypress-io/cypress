@@ -10,7 +10,7 @@ import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
-import { cookieJar } from './cookie-jar'
+import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
 import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
@@ -271,6 +271,9 @@ export class OpenProject {
         testingType,
       },
     })
+
+    // This was previously in the ProjectBase constructor but is now async
+    await this._ctx.lifecycleManager.setCurrentProject(path)
 
     try {
       await this.projectBase.initializeConfig()

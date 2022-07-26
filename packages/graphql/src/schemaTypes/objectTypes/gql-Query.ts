@@ -77,14 +77,9 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.appData.projects,
     })
 
-    t.nonNull.boolean('isInGlobalMode', {
-      description: 'Whether the app is in global mode or not',
-      resolve: (source, args, ctx) => !ctx.currentProject,
-    })
-
-    t.nonNull.boolean('projectRootFromCI', {
-      description: 'Whether the project was specified from the --project flag',
-      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
+    t.nonNull.boolean('isGlobalMode', {
+      description: 'Whether the app is in global mode or not. This is based off the presence of a project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.',
+      resolve: (source, args, ctx) => !ctx.modeOptions.project,
     })
 
     t.nonNull.field('authState', {

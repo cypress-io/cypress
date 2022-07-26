@@ -24,7 +24,7 @@
       <BaseError
         v-if="query.data.value?.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        @retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />

@@ -2,7 +2,7 @@ import path from 'path'
 import execa from 'execa'
 import _ from 'lodash'
 
-import type { CyTaskResult, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -87,6 +87,7 @@ async function makeE2ETasks () {
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')
+  const cliUtil = require('../../../../cli/lib/util')
   const cliOpen = require('../../../../cli/lib/exec/open')
 
   // Remove all the fixtures when the plugin starts
@@ -111,7 +112,7 @@ async function makeE2ETasks () {
 
   const cachedCwd = process.cwd()
 
-  clearCtx()
+  await clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const launchpadPort = await makeGraphQLServer()
@@ -358,12 +359,18 @@ async function makeE2ETasks () {
       return Fixtures.projectPath(opts.projectName)
     },
     __internal_scaffoldProject,
-    async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
-      const openArgv = ['--global', ...argv]
+    async __internal_openGlobal ({ argv = [], byFlag = true }: OpenGlobalModeOptions): Promise<ResetOptionsResult> {
+      let isInstalledGloballyStub
+
+      if (byFlag) {
+        argv.unshift('--global')
+      } else {
+        isInstalledGloballyStub = sinon.stub(cliUtil, 'isInstalledGlobally').returns(true)
+      }
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
-      const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
+      const cliOptions = await cli.parseOpenCommand(['open', ...argv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
       const modeOptions = { ...argUtils.toObject(processedArgv), invokedFromCli: true }
 
@@ -372,6 +379,8 @@ async function makeE2ETasks () {
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()
+
+      isInstalledGloballyStub?.restore()
 
       return {
         modeOptions,

@@ -359,7 +359,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
@@ -368,9 +368,9 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
         cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')

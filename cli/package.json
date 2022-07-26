@@ -87,7 +87,7 @@
     "mocha": "6.2.2",
     "mock-fs": "5.1.1",
     "mocked-env": "1.3.2",
-    "nock": "13.0.7",
+    "nock": "13.2.9",
     "postinstall-postinstall": "2.1.0",
     "proxyquire": "2.1.3",
     "resolve-pkg": "2.0.0",
@@ -107,7 +107,8 @@
     "mount-utils",
     "vue",
     "react",
-    "vue2"
+    "vue2",
+    "react18"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -119,15 +120,18 @@
   "exports": {
     ".": {
       "import": "./index.mjs",
-      "require": "./index.js"
+      "require": "./index.js",
+      "types": "./types/index.d.ts"
     },
     "./vue": {
       "import": "./vue/dist/cypress-vue.esm-bundler.js",
-      "require": "./vue/dist/cypress-vue.cjs.js"
+      "require": "./vue/dist/cypress-vue.cjs.js",
+      "types": "./vue/dist/index.d.ts"
     },
     "./vue2": {
       "import": "./vue2/dist/cypress-vue2.esm-bundler.js",
-      "require": "./vue2/dist/cypress-vue2.cjs.js"
+      "require": "./vue2/dist/cypress-vue2.cjs.js",
+      "types": "./vue2/dist/index.d.ts"
     },
     "./package.json": {
       "import": "./package.json",
@@ -135,10 +139,17 @@
     },
     "./react": {
       "import": "./react/dist/cypress-react.esm-bundler.js",
-      "require": "./react/dist/cypress-react.cjs.js"
+      "require": "./react/dist/cypress-react.cjs.js",
+      "types": "./react/dist/index.d.ts"
+    },
+    "./react18": {
+      "import": "./react18/dist/cypress-react.esm-bundler.js",
+      "require": "./react18/dist/cypress-react.cjs.js",
+      "types": "./react18/dist/index.d.ts"
     },
     "./mount-utils": {
-      "require": "./mount-utils/dist/index.js"
+      "require": "./mount-utils/dist/index.js",
+      "types": "./mount-utils/dist/index.d.ts"
     }
   },
   "workspaces": {

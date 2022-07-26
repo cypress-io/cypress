@@ -16,7 +16,7 @@ const isWindows = () => {
 let ctx
 
 describe('lib/fixture', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     FixturesHelper.scaffold()
 
@@ -25,7 +25,7 @@ describe('lib/fixture', () => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
@@ -175,10 +175,10 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     })
 
     // https://github.com/cypress-io/cypress/issues/3739
-    it('can load a fixture with no extension when a same-named folder also exists', () => {
+    it('can load a fixture with no extension when a same-named folder also exists', async () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
 
       return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {

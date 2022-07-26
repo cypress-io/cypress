@@ -1442,8 +1442,10 @@ type Query {
   """
   invokedFromCli: Boolean!
 
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
+  """
+  Whether the app is in global mode or not. This is based off the presence of a project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.
+  """
+  isGlobalMode: Boolean!
 
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
@@ -1451,9 +1453,6 @@ type Query {
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
-
-  """Whether the project was specified from the --project flag"""
-  projectRootFromCI: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

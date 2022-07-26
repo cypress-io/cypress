@@ -7,15 +7,15 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx)                                                                     │
+  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
+  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 4)
+  Running:  App.cy.jsx                                                                      (1 of 5)
 
 
   ✓ renders hello world
@@ -46,7 +46,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 4)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
 
 
   1) An uncaught error was detected outside of a test
@@ -98,7 +98,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 4)
+  Running:  MissingReact.cy.jsx                                                             (3 of 5)
 
 
   1) is missing React
@@ -146,7 +146,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 4)
+  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
 
 
   1) is missing React in this file
@@ -188,6 +188,39 @@ When Cypress detects uncaught errors originating from your test code it will aut
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4       (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Unmount.cy.jsx                                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4                  (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -202,8 +235,10 @@ When Cypress detects uncaught errors originating from your test code it will aut
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 4 failed (75%)                      XX:XX        4        1        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
 
 
 `
@@ -217,15 +252,15 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx)                                                                     │
+  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
+  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 4)
+  Running:  App.cy.jsx                                                                      (1 of 5)
 
 
   ✓ renders hello world
@@ -256,7 +291,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 4)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
 
 
   1) An uncaught error was detected outside of a test
@@ -308,7 +343,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 4)
+  Running:  MissingReact.cy.jsx                                                             (3 of 5)
 
 
   1) is missing React
@@ -356,7 +391,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 4)
+  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
 
 
   1) is missing React in this file
@@ -398,6 +433,39 @@ When Cypress detects uncaught errors originating from your test code it will aut
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4       (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Unmount.cy.jsx                                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4                  (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -412,8 +480,10 @@ When Cypress detects uncaught errors originating from your test code it will aut
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 4 failed (75%)                      XX:XX        4        1        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
 
 
 `

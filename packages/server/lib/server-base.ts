@@ -32,7 +32,7 @@ import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
-import { cookieJar } from './cookie-jar'
+import { cookieJar } from './util/cookies'
 import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
 
@@ -357,7 +357,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts: string[] | null = []) {
+  createHosts (hosts: {[key: string]: string} | null = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })

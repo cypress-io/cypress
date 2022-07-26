@@ -10,22 +10,23 @@ These tests run in CI in Electron, Chrome, and Firefox under the `system-tests` 
 ## Running System Tests
 
 ```bash
-yarn test <path/to/test>
-yarn test test/async_timeouts_spec.js
-## or
-yarn test async_timeouts ## shorthand, uses globbing to find spec
+yarn test # runs all tests
+## or use globbing to find spec in folders as defined in "glob-in-dir" param in package.json
+yarn test screenshot*element # runs screenshot_element_capture_spec.js
+yarn test screenshot # runs screenshot_element_capture_spec.js, screenshot_fullpage_capture_spec.js, ..., etc.
+
 ```
 
 To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the test command. Live reloading due to spec changes should also work:
 
 ```sh
-yarn test test/go_spec.js --browser chrome --no-exit
+yarn test go_spec.js --browser chrome --no-exit
 ```
 
 To debug the Cypress process under test, you can pass `--cypress-inspect-brk`:
 
 ```sh
-yarn test test/go_spec.js --browser chrome --no-exit --cypress-inspect-brk
+yarn test go_spec.js --browser chrome --no-exit --cypress-inspect-brk
 ```
 
 ## Developing Tests

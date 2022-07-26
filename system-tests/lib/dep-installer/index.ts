@@ -278,7 +278,6 @@ export async function scaffoldCommonNodeModules () {
     // Used for import { defineConfig } from 'cypress'
     'cypress',
     '@cypress/code-coverage',
-    '@cypress/react',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
@@ -294,7 +293,6 @@ export async function scaffoldCommonNodeModules () {
     'lazy-ass',
     'lodash',
     'proxyquire',
-    'react',
     'semver',
     'systeminformation',
     'tslib',

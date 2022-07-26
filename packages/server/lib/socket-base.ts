@@ -16,7 +16,7 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar } from './cookie-jar'
+import { cookieJar } from './util/cookies'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 import path from 'path'

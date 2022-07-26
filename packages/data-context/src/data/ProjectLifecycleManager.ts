@@ -89,21 +89,16 @@ export class ProjectLifecycleManager {
 
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
-    if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject)
-    }
 
-    process.on('exit', this.onProcessExit)
+    if (ctx.coreData.currentProject) {
+      this._setCurrentProject(ctx.coreData.currentProject)
+    }
 
     return autoBindDebug(this)
   }
 
   get git () {
     return this.ctx.coreData.currentProjectGitInfo
-  }
-
-  private onProcessExit = () => {
-    this.resetInternalState()
   }
 
   async getProjectId (): Promise<string | null> {
@@ -185,8 +180,8 @@ export class ProjectLifecycleManager {
     return this._configManager?.eventProcessPid
   }
 
-  clearCurrentProject () {
-    this.resetInternalState()
+  async clearCurrentProject () {
+    await this.resetInternalState()
     this._initializedProject = undefined
     this._projectRoot = undefined
   }
@@ -215,13 +210,7 @@ export class ProjectLifecycleManager {
       handlers: getServerPluginHandlers(),
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       eventRegistrar: this._eventRegistrar,
-      onError: (cypressError, title) => {
-        if (this.ctx.isRunMode && this._pendingInitialize) {
-          this._pendingInitialize.reject(cypressError)
-        } else {
-          this.ctx.onError(cypressError, title)
-        }
-      },
+      onError: this.onLoadError,
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
@@ -391,22 +380,9 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  /**
-   * When we set the current project, we need to cleanup the
-   * previous project that might have existed. We use this as the
-   * single location we should use to set the `projectRoot`, because
-   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
-   * is already the same, otherwise it'll do the necessary cleanup
-   */
-  setCurrentProject (projectRoot: string) {
-    if (this._projectRoot === projectRoot) {
-      return
-    }
-
+  private _setCurrentProject (projectRoot: string) {
     this._projectRoot = projectRoot
     this._initializedProject = undefined
-
-    this.resetInternalState()
 
     this._configManager = this.createConfigManager()
 
@@ -441,6 +417,23 @@ export class ProjectLifecycleManager {
     if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
+  }
+
+  /**
+   * When we set the current project, we need to cleanup the
+   * previous project that might have existed. We use this as the
+   * single location we should use to set the `projectRoot`, because
+   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
+   * is already the same, otherwise it'll do the necessary cleanup
+   */
+  async setCurrentProject (projectRoot: string) {
+    if (this._projectRoot === projectRoot) {
+      return
+    }
+
+    await this.resetInternalState()
+
+    this._setCurrentProject(projectRoot)
   }
 
   /**
@@ -551,14 +544,14 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private resetInternalState () {
+  private async resetInternalState () {
     if (this._configManager) {
-      this._configManager.destroy()
+      await this._configManager.destroy()
       this._configManager = undefined
     }
 
-    this.ctx.coreData.currentProjectGitInfo?.destroy()
-    this.ctx.project.destroy()
+    await this.ctx.coreData.currentProjectGitInfo?.destroy()
+    await this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
     this._cachedFullConfig = undefined
@@ -580,9 +573,9 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  reinitializeCypress () {
+  async reinitializeCypress () {
     resetPluginHandlers()
-    this.resetInternalState()
+    await this.resetInternalState()
   }
 
   registerEvent (event: string, callback: Function) {
@@ -717,10 +710,8 @@ export class ProjectLifecycleManager {
     }
   }
 
-  destroy () {
-    this.resetInternalState()
-    // @ts-ignore
-    process.removeListener('exit', this.onProcessExit)
+  async destroy () {
+    await this.resetInternalState()
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
@@ -797,9 +788,9 @@ export class ProjectLifecycleManager {
    * centrally in the e2e tests, as well as notify the "pending initialization"
    * for run mode
    */
-  private onLoadError = (err: any) => {
-    if (this.ctx.isRunMode && this._configManager) {
-      this._configManager.onLoadError(err)
+  onLoadError = (err: CypressError) => {
+    if (this.ctx.isRunMode && this._pendingInitialize) {
+      this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
     }

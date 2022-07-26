@@ -33,7 +33,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.error.clearError(args.id)
-        await ctx.lifecycleManager.refreshLifecycle()
+        await ctx.lifecycleManager.refreshLifecycle().catch((e) => ctx.lifecycleManager.onLoadError(e))
 
         return {}
       },
