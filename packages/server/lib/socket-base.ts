@@ -14,6 +14,7 @@ import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
+import runEvents from './plugins/run_events'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
@@ -161,7 +162,6 @@ export class SocketBase {
       onRequest () {},
       onResolveUrl () {},
       onFocusTests () {},
-      onSpecChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
@@ -337,8 +337,24 @@ export class SocketBase {
 
       // TODO: what to do about runner disconnections?
 
-      socket.on('spec:changed', (spec) => {
-        return options.onSpecChanged(spec)
+      socket.on('run:start', (spec, done) => {
+        if (!config.isInteractive || config.experimentalInteractiveRunEvents) {
+          runEvents.execute('before:spec', config, spec)
+        }
+
+        if (done) {
+          done()
+        }
+      })
+
+      socket.on('run:end', (spec, done) => {
+        if (!config.isInteractive || config.experimentalInteractiveRunEvents) {
+          runEvents.execute('after:spec', config, spec)
+        }
+
+        if (done) {
+          done()
+        }
       })
 
       socket.on('app:connect', (socketId) => {

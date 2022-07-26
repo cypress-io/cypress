@@ -1,13 +1,10 @@
 require('../spec_helper')
 
-const Bluebird = require('bluebird')
 const browsers = require(`../../lib/browsers`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`../../lib/plugins/preprocessor`)
-const runEvents = require(`../../lib/plugins/run_events`)
 const Fixtures = require('@tooling/system-tests')
-const delay = require('lodash/delay')
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -116,117 +113,6 @@ describe('lib/open_project', () => {
     })
 
     describe('spec events', function () {
-      this.beforeEach(function () {
-        sinon.stub(runEvents, 'execute').resolves()
-      })
-
-      it('executes before:spec if in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).to.be.calledWith('before:spec', this.config, this.spec)
-        })
-      })
-
-      it('does not execute before:spec if not in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = true
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
-      it('does not execute before:spec if experimental flag is not enabled', function () {
-        this.config.experimentalInteractiveRunEvents = false
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
-      it('executes after:spec on browser close if in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
-
-        return openProject.launch(this.browser, this.spec, { onBrowserClose })
-        .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
-        })
-      })
-
-      it('does not execute after:spec on browser close if not in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = true
-        const onBrowserClose = () => Bluebird.resolve()
-
-        return openProject.launch(this.browser, this.spec, { onBrowserClose })
-        .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
-      })
-
-      it('does not execute after:spec on browser close if experimental flag is not enabled', function () {
-        this.config.experimentalInteractiveRunEvents = false
-        this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
-
-        return openProject.launch(this.browser, this.spec, { onBrowserClose })
-        .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
-      })
-
-      it('does not execute after:spec on browser close if the project is no longer open', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
-
-        return openProject.launch(this.browser, this.spec, { onBrowserClose })
-        .then(() => {
-          openProject.__reset()
-
-          return browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
-      })
-
-      it('sends after:spec errors through onError option', function () {
-        const err = new Error('thrown from after:spec handler')
-
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-        runEvents.execute.withArgs('after:spec').rejects(err)
-
-        return openProject.launch(this.browser, this.spec, { onError: this.onError })
-        .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .then(() => {
-          return new Bluebird((res) => {
-            delay(() => {
-              expect(runEvents.execute).to.be.calledWith('after:spec')
-              expect(this.onError).to.be.calledWith(err)
-              res()
-            }, 100)
-          })
-        })
-      })
-
       it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
         await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)

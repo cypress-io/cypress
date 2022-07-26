@@ -72,7 +72,6 @@ export interface OpenProjectLaunchOptions {
   // Optional callbacks used for triggering events via the web socket
   onReloadBrowser?: WebSocketOptionsCallback
   onFocusTests?: WebSocketOptionsCallback
-  onSpecChanged?: WebSocketOptionsCallback
   onSavedStateChanged?: WebSocketOptionsCallback
   onChange?: WebSocketOptionsCallback
   onError?: (err: Error) => void

@@ -1168,7 +1168,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, shouldKeepTabOpen } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1217,8 +1217,6 @@ module.exports = {
         .tapCatch(() => videoCaptureFailed = true)
         .catch(warnVideoRecordingFailed)
       }
-
-      await runEvents.execute('after:spec', config, spec, results)
 
       const videoExists = videoName ? await fs.pathExists(videoName) : false
 
@@ -1452,19 +1450,16 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, spec)
-    .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and
     // finishes running all of the tests.
     // we're using an event emitter interface
     // to gracefully handle this in promise land
-      return this.maybeStartVideoRecording({
-        spec,
-        browser,
-        video: options.video,
-        videosFolder: options.videosFolder,
-      })
+    return this.maybeStartVideoRecording({
+      spec,
+      browser,
+      video: options.video,
+      videosFolder: options.videosFolder,
     })
     .then((videoRecordProps = {}) => {
       return Promise.props({

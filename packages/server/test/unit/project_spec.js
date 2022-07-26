@@ -276,7 +276,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(this.project.startWebsockets).to.be.calledWith({
           onReloadBrowser: undefined,
           onFocusTests,
-          onSpecChanged: undefined,
         }, {
           socketIoCookie: '__socket',
           namespace: '__cypress',

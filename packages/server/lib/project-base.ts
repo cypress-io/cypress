@@ -210,7 +210,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.startWebsockets({
       onReloadBrowser: this.options.onReloadBrowser,
       onFocusTests: this.options.onFocusTests,
-      onSpecChanged: this.options.onSpecChanged,
     }, {
       socketIoCookie: cfg.socketIoCookie,
       namespace: cfg.namespace,
@@ -353,7 +352,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
-      onSpecChanged: options.onSpecChanged,
       onSavedStateChanged: (state: any) => this.saveState(state),
 
       onCaptureVideoFrames: (data: any) => {

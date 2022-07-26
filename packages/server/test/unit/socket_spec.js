@@ -12,6 +12,7 @@ const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
 const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
+const runEvents = require(`../../lib/plugins/run_events`)
 const { fs } = require(`../../lib/util/fs`)
 
 const Fixtures = require('@tooling/system-tests')
@@ -595,6 +596,54 @@ describe('lib/socket', () => {
 
         it('returns true when runner is connected', function () {
           expect(this.socket.isRunnerSocketConnected()).to.eq(true)
+        })
+      })
+    })
+
+    context('#specEvents', function () {
+      beforeEach(function () {
+        this.executeRun = sinon.stub(runEvents, 'execute')
+      })
+
+      const spec = {
+        baseName: 'spec.cy.js',
+        foo: 'bar',
+      }
+
+      it('emits before:spec and after:spec events in run mode', function (done) {
+        this.cfg.isInteractive = false
+        this.cfg.experimentalInteractiveRunEvents = false
+
+        this.client
+        this.client.emit('run:start', spec)
+        this.client.emit('run:end', spec, () => {
+          expect(this.executeRun).to.be.calledWith('before:spec', this.cfg, spec)
+          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec)
+          done()
+        })
+      })
+
+      it('emits before:spec and after:spec events in open mode when experimentalInteractiveRunEvents is true', function (done) {
+        this.cfg.isInteractive = true
+        this.cfg.experimentalInteractiveRunEvents = true
+
+        this.client
+        this.client.emit('run:start', spec)
+        this.client.emit('run:end', spec, () => {
+          expect(this.executeRun).to.be.calledWith('before:spec', this.cfg, spec)
+          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec)
+          done()
+        })
+      })
+
+      it('does not emit before:spec and after:spec events in open mode when experimentalInteractiveRunEvents is false', function (done) {
+        this.cfg.isInteractive = true
+        this.cfg.experimentalInteractiveRunEvents = false
+
+        this.client.emit('run:start', spec)
+        this.client.emit('run:end', spec, () => {
+          expect(this.executeRun).not.to.be.called
+          done()
         })
       })
     })

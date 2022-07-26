@@ -413,7 +413,7 @@ class $Cypress {
 
       case 'runner:start':
         // mocha runner has begun running the tests
-        this.emit('run:start')
+        this.emit('run:start', this.spec)
 
         if (this.runner.getResumedAtTestIndex() !== null) {
           return
@@ -437,7 +437,7 @@ class $Cypress {
         // and does not do the usual cleanup so that means
         // we have to fire the test:after:hooks and
         // test:after:run events ourselves
-        this.emit('run:end')
+        this.emit('run:end', this.spec)
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
 

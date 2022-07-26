@@ -8,7 +8,6 @@ import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
-import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
@@ -127,25 +126,12 @@ export class OpenProject {
       })
     }
 
-    const afterSpec = () => {
-      if (!this.projectBase || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) {
-        return Bluebird.resolve()
-      }
-
-      return runEvents.execute('after:spec', cfg, spec)
-    }
-
     const { onBrowserClose } = options
 
     options.onBrowserClose = () => {
       if (spec && spec.absolute) {
         preprocessor.removeFile(spec.absolute, cfg)
       }
-
-      afterSpec()
-      .catch((err) => {
-        this.projectBase?.options.onError?.(err)
-      })
 
       if (onBrowserClose) {
         return onBrowserClose()
@@ -162,10 +148,6 @@ export class OpenProject {
       )
 
       return Bluebird.try(() => {
-        if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-          return runEvents.execute('before:spec', cfg, spec)
-        }
-
         // clear cookies and all session data before each spec
         cookieJar.removeAllCookies()
         session.clearSessions()

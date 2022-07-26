@@ -35,7 +35,7 @@ interface AddGlobalListenerOptions {
 
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame run:start run:end'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
@@ -803,10 +803,6 @@ export class EventManager {
 
   off (event: string, listener: (...args: any[]) => void) {
     this.localBus.off(event, listener)
-  }
-
-  notifyRunningSpec (specFile) {
-    this.ws.emit('spec:changed', specFile)
   }
 
   notifyCrossOriginBridgeReady (originPolicy) {
