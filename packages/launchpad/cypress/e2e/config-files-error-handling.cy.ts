@@ -316,12 +316,16 @@ describe('setupNodeEvents', () => {
     cy.log('Fix error and validate it reloads configuration')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      await ctx.actions.file.writeFileInProject('cypress.config.js',
+        `module.exports = {
+          devServer: () => ({ port: '3000' })
+        }`)
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('contain.text', 'Welcome to Cypress!')
   })
 })
