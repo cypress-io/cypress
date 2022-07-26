@@ -36,6 +36,8 @@ import * as Popups from './popups'
 
 import * as Navigation from './navigation'
 
+import { addCommand as NetStubbing } from '../net-stubbing'
+
 import * as Querying from './querying'
 
 import * as Request from './request'
@@ -74,6 +76,7 @@ export const allCommands = {
   Origin,
   Popups,
   Navigation,
+  NetStubbing,
   ...Querying,
   Request,
   Sessions,

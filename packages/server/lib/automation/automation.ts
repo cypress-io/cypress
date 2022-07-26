@@ -97,6 +97,7 @@ export class Automation {
     })
   }
 
+  // Cypress.automation() events
   normalize (message, data, automate?) {
     return Bluebird.try(() => {
       switch (message) {

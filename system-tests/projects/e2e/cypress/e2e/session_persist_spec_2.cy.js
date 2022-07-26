@@ -1,6 +1,6 @@
 /**
  * This is part 2 of the session persist spec
- * This part makes sure session data is cleared inbetween specs in run mode
+ * This part makes sure session data is cleared in-between specs in run mode
  */
 
 describe('after running spec with saved session', () => {

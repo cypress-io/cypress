@@ -11,7 +11,6 @@
  * The entry point for the webpack bundle is `runner-ct/main.tsx`.
  * Any time you need to consume some existing code, add it to the `window.UnifiedRunner`
  * namespace there, and access it with `window.UnifiedRunner`.
- *
  */
 import { watchEffect } from 'vue'
 import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
@@ -304,7 +303,6 @@ function runSpecE2E (spec: SpecFile) {
 
   // create new AUT
   const autIframe = getAutIframeModel()
-
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // Remove the spec bridge iframe

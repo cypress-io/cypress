@@ -21,16 +21,20 @@ const clearLocalStorage = (state, keys) => {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  // this MUST be prepended before anything else
-  Cypress.prependListener('test:before:run', () => {
-    try {
-      // this may fail if the current
-      // window is bound to another origin
-      return clearLocalStorage(state, [])
-    } catch (error) {
-      return null
-    }
-  })
+  // TODO: once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
+  // session data (cookies / local storage / session storage) to reset functionality
+  if (!Cypress.config('experimentalSessionAndOrigin') && Cypress.config('testIsolation')) {
+    // this MUST be prepended before anything else
+    Cypress.prependListener('test:before:run', function clearLocalStorage () {
+      try {
+        // this may fail if the current
+        // window is bound to another origin
+        return clearLocalStorage(state, [])
+      } catch (error) {
+        return null
+      }
+    })
+  }
 
   Commands.addAll({
     clearLocalStorage (keys, options: Partial<Cypress.Loggable> = {}) {
