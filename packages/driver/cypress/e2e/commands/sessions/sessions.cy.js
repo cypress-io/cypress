@@ -576,7 +576,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('recreates existing session with failed validation flow', () => {
-      it('fails to Recreating session and logs correctly', function (done) {
+      it('fails to recreate session and logs correctly', function (done) {
         setupTestContext()
         cy.log('Creating new session for test')
         cy.session('session-1', setup, { validate })
