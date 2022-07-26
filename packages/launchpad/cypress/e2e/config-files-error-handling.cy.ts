@@ -294,4 +294,34 @@ describe('setupNodeEvents', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
+
+  it('handles a devServer function returning wrong structure', () => {
+    cy.scaffoldProject('dev-server-invalid')
+
+    // sets the current project to enable writeFileInProject
+    cy.openProject('dev-server-invalid')
+
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingtype=component]').click()
+
+    cy.get('body')
+    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .and('contain.text', 'The returned value of the devServer function is not valid.')
+
+    cy.get('[data-cy="collapsible-header"]')
+    .should('have.attr', 'aria-expanded', 'true')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+
+    cy.log('Fix error and validate it reloads configuration')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.get('body')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+  })
 })
