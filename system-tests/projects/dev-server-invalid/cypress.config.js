@@ -1,7 +1,7 @@
 module.exports = {
   retries: null,
   component: {
-    supportFile: 'cypress/component/support/component.js',
+    supportFile: false,
     devServer (cypressConfig) {},
     indexHtmlFile: 'cypress/component/support/component-index.html',
   },
