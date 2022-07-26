@@ -1,4 +1,5 @@
 {
+  "extends": "../ts/tsconfig.json",
   "compilerOptions": {
     /* Basic Options */
     "target": "es2015",
@@ -27,7 +28,7 @@
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
     /* Strict Type-Checking Options */
     // "traceResolution": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     /**
@@ -54,6 +55,14 @@
     "experimentalDecorators": true
     // "noResolve": true
   },
+  "include": [
+    "./lib/*.ts",
+    "./src*.ts",
+    "./src*.tsx",
+    "./unified-runner.ts",
+    "./index.d.ts",
+    "./../ts/index.d.ts"
+  ],
   "exclude": [
     "dist",
     "test"

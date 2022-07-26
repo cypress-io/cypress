@@ -4,7 +4,7 @@ import $Cypress from '@packages/driver'
 import {
   StudioRecorder,
   dom,
-} from '@packages/runner-shared'
+} from './src/shared'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
 import * as MobX from 'mobx'

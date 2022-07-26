@@ -7,7 +7,8 @@ import { getPathToDist } from '@packages/resolve-dist'
 const debug = Debug('cypress:server:routes-ct')
 
 const serveChunk = (req: Request, res: Response, clientRoute: string) => {
-  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(clientRoute, ''))
+  // let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(clientRoute, ''))
+  let pathToFile = getPathToDist('runner', req.originalUrl.replace(clientRoute, ''))
 
   return send(req, pathToFile).pipe(res)
 }

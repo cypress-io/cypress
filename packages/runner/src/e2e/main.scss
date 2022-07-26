@@ -9,5 +9,5 @@ $cy-tooltip-class: 'cy-tooltip';
 // NOTA: no need to import scss files in their components
 @import '../../runner/src/!(lib)*/**/!(selector-playground|assertions-menu|main).scss';
 
-@import '../../ui-components/src/dropdown';
-@import '../../reporter/src/main-runner';
+@import '../../../ui-components/src/dropdown';
+@import '../../../reporter/src/main-runner';
