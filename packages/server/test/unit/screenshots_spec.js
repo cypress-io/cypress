@@ -570,18 +570,6 @@ describe('lib/screenshots', () => {
     })
   })
 
-  context('.copy', () => {
-    it('doesnt yell over ENOENT errors', () => {
-      return screenshots.copy('/does/not/exist', '/foo/bar/baz')
-    })
-
-    it('copies src to des with {overwrite: true}', () => {
-      sinon.stub(fs, 'copyAsync').withArgs('foo', 'bar', { overwrite: true }).resolves()
-
-      return screenshots.copy('foo', 'bar')
-    })
-  })
-
   context('.getPath', () => {
     beforeEach(() => {
       sinon.stub(fs, 'outputFileAsync').resolves()
