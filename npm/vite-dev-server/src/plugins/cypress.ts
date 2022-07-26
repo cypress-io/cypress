@@ -2,7 +2,7 @@ import debugFn from 'debug'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
-import { parse } from 'node-html-parser'
+import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
@@ -63,8 +63,7 @@ export const Cypress = (
       const root = parse(html)
 
       const scriptTagsToInject = root.childNodes.filter((node) => {
-        // @ts-ignore
-        return node.rawTagName === 'script'
+        return node instanceof HTMLElement && node.rawTagName === 'script'
       })
 
       const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
