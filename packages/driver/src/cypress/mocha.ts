@@ -257,7 +257,7 @@ const patchHookRetries = () => {
       })
 
       // so this error doesn't cause a retry
-      getTestFromRunnable(this)._retries = -1
+      getTestFromRunnable(this).retries(-1)
 
       throw err
     }

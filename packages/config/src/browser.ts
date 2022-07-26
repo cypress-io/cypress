@@ -137,7 +137,13 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: string) => void) => {
+interface ValidationResult {
+  key: any
+  type: any
+  value: any
+}
+
+export const validate = (cfg: any, onErr: (property: string | ValidationResult) => void) => {
   debug('validating configuration')
 
   return _.each(cfg, (value, key) => {
