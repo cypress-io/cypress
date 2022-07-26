@@ -1,7 +1,0 @@
-{
-  "name": "@test-project/dev-server-invalid",
-  "version": "0.0.0-test",
-  "private": true,
-  "dependencies": {},
-  "devDependencies": {}
-}
