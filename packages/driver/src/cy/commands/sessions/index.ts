@@ -223,6 +223,8 @@ export default function (Commands, Cypress, cy) {
               $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
 
               cy.fail(err)
+
+              return
             }
 
             return validate(existingSession, onSuccess, onFail)
