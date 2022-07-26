@@ -109,7 +109,7 @@ describe('scaffolding component testing', {
   })
 
   context('angular-cli-unconfigured', () => {
-    it('scaffolds component testing for Nuxt 2', () => {
+    it('scaffolds component testing for Angular', () => {
       startSetupFor('angular-cli-unconfigured')
 
       // should detect correctly

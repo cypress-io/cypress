@@ -79,6 +79,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'vueclivue2',
@@ -98,6 +99,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'vueclivue3',
@@ -117,6 +119,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'nextjs',
@@ -143,6 +146,7 @@ export const WIZARD_FRAMEWORKS = [
       `<!-- Used by Next.js to inject CSS. -->\n`,
       `<div id="__next_css__DO_NOT_USE__"></div>`,
     ].join(' '.repeat(8))),
+    specPattern: undefined,
   },
   {
     type: 'nuxtjs',
@@ -161,6 +165,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/vue2',
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'vue2',
@@ -179,6 +184,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'vue3',
@@ -197,6 +203,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'react',
@@ -216,6 +223,7 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: undefined,
   },
   {
     type: 'angular',
@@ -237,5 +245,6 @@ export const WIZARD_FRAMEWORKS = [
     mountModule: 'cypress/angular',
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: '**/*.cy.ts',
   },
 ] as const
