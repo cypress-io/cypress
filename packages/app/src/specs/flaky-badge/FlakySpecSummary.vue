@@ -1,7 +1,7 @@
 <template>
   <div
     class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
-    :class="severity?.accentClass"
+    :class="severity.accentClass"
     data-cy="flaky-spec-summary"
   >
     <SpecNameDisplay
@@ -9,10 +9,10 @@
       :spec-file-extension="specExtension"
     />
     <div class="flex flex-row w-full text-size-14px justify-center items-center">
-      <component :is="severity?.icon" />
+      <component :is="severity.icon" />
       <span
         class="font-medium ml-2"
-        :class="severity?.textClass"
+        :class="severity.textClass"
       >{{ severity?.label }}</span>
       <span
         class="ml-4"
@@ -38,6 +38,33 @@ import HighRateIcon from '~icons/cy/rate-high_x16'
 
 const { t } = useI18n()
 
+const SEVERITIES = {
+  'default': {
+    accentClass: 'border-t-orange-400',
+    textClass: null,
+    label: null,
+    icon: null,
+  },
+  'low': {
+    accentClass: 'border-t-orange-400',
+    textClass: 'text-orange-400',
+    label: t('specPage.flaky.severityLow'),
+    icon: LowRateIcon,
+  },
+  'medium': {
+    accentClass: 'border-t-orange-500',
+    textClass: 'text-orange-500',
+    label: t('specPage.flaky.severityMedium'),
+    icon: MediumRateIcon,
+  },
+  'high': {
+    accentClass: 'border-t-orange-600',
+    textClass: 'text-orange-600',
+    label: t('specPage.flaky.severityHigh'),
+    icon: HighRateIcon,
+  },
+}
+
 const props = defineProps<{
   specName: string
   specExtension: string
@@ -53,7 +80,7 @@ const flakyRate = computed(() => {
     return 0
   }
 
-  const rawRate = props.totalFlakyRuns / props.totalRuns * 100
+  const rawRate = (props.totalFlakyRuns / props.totalRuns) * 100
 
   // Only display 100 if rawRate is actually 100 (do not round to 100)
   if (rawRate > 99 && rawRate < 100) {
@@ -63,32 +90,6 @@ const flakyRate = computed(() => {
   return Math.ceil(rawRate)
 })
 
-const severity = computed(() => {
-  switch (props.severity) {
-    case 'low':
-      return {
-        accentClass: 'border-t-orange-400',
-        textClass: 'text-orange-400',
-        label: t('specPage.flaky.severityLow'),
-        icon: LowRateIcon,
-      }
-    case 'medium':
-      return {
-        accentClass: 'border-t-orange-500',
-        textClass: 'text-orange-500',
-        label: t('specPage.flaky.severityMedium'),
-        icon: MediumRateIcon,
-      }
-    case 'high':
-      return {
-        accentClass: 'border-t-orange-600',
-        textClass: 'text-orange-600',
-        label: t('specPage.flaky.severityHigh'),
-        icon: HighRateIcon,
-      }
-    default:
-      return undefined
-  }
-})
+const severity = computed(() => SEVERITIES[props.severity] || SEVERITIES.default)
 
 </script>

@@ -49,6 +49,23 @@ describe('<FlakySpecSummary />', () => {
     cy.percySnapshot()
   })
 
+  it('fallback state', () => {
+    // Ensure component handles malformed/incomplete data without blowing up
+    cy.mount(
+      <FlakySpecSummary
+        specName="test"
+        specExtension=".cy.tsx"
+        severity={'unknown_value' as any}
+        totalFlakyRuns={null as any}
+        totalRuns={null as any}
+        runsSinceLastFlake={null as any}
+        dashboardUrl={null as any}
+      />,
+    )
+
+    cy.percySnapshot()
+  })
+
   describe('flaky rate percentages', () => {
     it('should round up to next integer if less than 99%', () => {
       cy.mount(

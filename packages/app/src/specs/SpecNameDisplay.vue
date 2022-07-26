@@ -4,13 +4,13 @@
     data-cy="spec-filename"
     :title="specFileName + specFileExtension"
   >
-    <span class="font-semibold text-gray-800">{{ props.specFileName }}</span><span class="text-gray-600">{{ props.specFileExtension }}</span>
+    <span class="font-semibold text-gray-800">{{ specFileName }}</span><span class="text-gray-600">{{ specFileExtension }}</span>
   </div>
 </template>
 
 <script lang="ts" setup>
 
-const props = defineProps<{
+defineProps<{
   specFileName: string
   specFileExtension: string
 }>()
