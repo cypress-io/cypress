@@ -19,7 +19,7 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.fixture('foo.bar.baz.json').then((fooBarBaz) => {
-      cy.intercept('GET', '/foo.bar.baz.json', { body: fooBarBaz })
+      cy.intercept('GET', '/foo.bar.baz.json', { body: fooBarBaz }).as('fooBarBaz')
     })
 
     cy.visit('/fixtures/primary-origin.html')
@@ -28,9 +28,11 @@ describe('cy.origin - snapshots', () => {
 
   it('verifies XHR requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
+      // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
+      // @ts-ignore
+      Cypress.config('isInteractive', true)
       cy.get(`[data-cy="assertion-header"]`).should('exist')
-      // have some wait time to allow for the xhr/fetch requests to settle
-      cy.wait(200)
+      cy.wait('@fooBarBaz')
     })
 
     cy.shouldWithTimeout(() => {
@@ -48,9 +50,11 @@ describe('cy.origin - snapshots', () => {
 
   it('verifies fetch requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
+      // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
+      // @ts-ignore
+      Cypress.config('isInteractive', true)
       cy.get(`[data-cy="assertion-header"]`).should('exist')
-      // have some wait time to allow for the xhr/fetch requests to settle
-      cy.wait(200)
+      cy.wait('@fooBarBaz')
     })
 
     cy.shouldWithTimeout(() => {
@@ -85,9 +89,11 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.origin('http://barbaz.com:3500', () => {
+      // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
+      // @ts-ignore
+      Cypress.config('isInteractive', true)
       cy.get(`[data-cy="assertion-header"]`).should('exist')
-      // have some wait time to allow for the xhr/fetch requests to settle
-      cy.wait(200)
+      cy.wait('@fooBarBaz')
     })
   })
 })
