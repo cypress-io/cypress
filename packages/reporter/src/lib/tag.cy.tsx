@@ -10,8 +10,12 @@ describe('Tag', () => {
   ]
 
   const statuses = [
-    'passed',
-    'failed',
+    'successful-status',
+    'failed-status',
+  ]
+
+  const misc = [
+    'count',
   ]
 
   const MockCommandContainer = ({ children }) => (
@@ -32,6 +36,12 @@ describe('Tag', () => {
         ))}
         <h2 style={{ paddingBottom: '5px' }}>Status Tags:</h2>
         {statuses.map((type) => (
+          <div key={type} style={{ height: '20px' }}>
+            <Tag content={type} type={type} />
+          </div>
+        ))}
+        <h2 style={{ paddingBottom: '5px' }}>Misc Tags:</h2>
+        {misc.map((type) => (
           <div key={type} style={{ height: '20px' }}>
             <Tag content={type} type={type} />
           </div>

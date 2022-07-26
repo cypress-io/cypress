@@ -3,10 +3,10 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 export interface Props {
-  type: 'route' | 'agent' | 'dom' | 'primitive' | 'passed' | 'failed'
-  content: React.Component | string
+  type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status'
+  content: React.ReactNode | string
   count?: number
-  tooltipMessage?: React.Component | string
+  tooltipMessage?: React.ReactNode | string
   customClassName?: string
 }
 

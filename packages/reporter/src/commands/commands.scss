@@ -1,3 +1,9 @@
+@mixin nested-command-dashes($color) {
+  border-left: 1px dotted $color;
+  border-image-slice: 0 0 0 1;
+  border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 4px);
+}
+
 .reporter {
   // rendered within ../hooks/hooks.tsx
   .commands-container {
@@ -74,15 +80,17 @@
 
     // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
+      margin-left: 0;
       white-space: nowrap;
   
-      > {
+      > * {
         display: inline-block;
+        margin-left: 2px;
       }
-    }
-
-    .num-children.has-alias {
-      margin-left: 2px;
+    
+      > *:first-child {
+        margin-left: 0;
+      }
     }
   }
 
@@ -104,16 +112,12 @@
   }
 
   .command-pin-target.command-group {
-    border-left: 1px dotted $gray-600;
-    border-image-slice: 0 0 0 1;
-    border-image-source: repeating-linear-gradient(0deg, transparent, $gray-600, $gray-600 4px);
+    @include nested-command-dashes($gray-600);
     padding-left: 12px;
     min-height: 28px;
 
     .command-group-block {
-      border-left: 1px dotted $gray-600;
-      border-image-slice: 0 0 0 1;
-      border-image-source: repeating-linear-gradient(0deg, transparent, $gray-600, $gray-600 4px);
+      @include nested-command-dashes($gray-600);
       width: 11px;
       min-height: 28px;
       min-width: 11px;
@@ -252,11 +256,11 @@
 
     .command-group {
       border-color: $err-header-text;
-      border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+      @include nested-command-dashes($err-header-text);
 
       .command-group-block {
         border-color: $err-header-text;
-        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+        @include nested-command-dashes($err-header-text);
       }
     }
   }
@@ -394,6 +398,15 @@
     label {
       font-size: 85%;
     }
+
+    > * {
+      display: inline-block;
+      margin-left: 2px;
+    }
+  
+    > *:first-child {
+      margin-left: 0;
+    }
   }
 
   .command-error {
@@ -465,20 +478,5 @@
     min-height: 28px;
     padding: 9px;
   }
-
-  // additional styles on top of the shared.scss styles
-  .num-children,
-  .num-elements {
-    background-color: rgba($gray-600, .25);
-    border-radius: 4px;
-    color: $gray-100;
-    display: inline-block;
-    font-family: $monospace;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 10px;
-    line-height: 1.5;
-    padding: 0px 5px !important;
-    vertical-align: text-top;
-  }
 }
+

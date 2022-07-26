@@ -102,8 +102,8 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: Ali
   return (
     <Tag
       content={`@${aliasObj.name}`}
-      count={showCount ? aliasObj.cardinal : null}
       type={model.aliasType}
+      count={showCount ? aliasObj.cardinal : undefined}
       tooltipMessage={toolTipMessage}
       customClassName='command-alias'
     />
@@ -164,7 +164,7 @@ const Interceptions = observer(({ interceptions, wentToOrigin, status }: RenderP
         {status && <span className='status'>{status} </span>}
         {displayAlias || <em className='no-alias'>no alias</em>}
       </>}
-      count={count > 1 ? count : null}
+      count={count > 1 ? count : undefined}
       type='route'
       tooltipMessage={interceptsTitle}
       customClassName='command-interceptions'
@@ -339,7 +339,12 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
-                {isSessionCommand && <Tag content={model.renderProps.status} type={model.renderProps.status === 'failed' ? 'failed' : 'passed'} />}
+                {isSessionCommand && (
+                  <Tag
+                    content={model.renderProps.status}
+                    type={`${model.renderProps.status === 'failed' ? 'failed' : 'successful'}-status`}
+                  />
+                )}
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
@@ -348,21 +353,23 @@ class Command extends Component<Props> {
                   </Tooltip>
                 )}
                 {displayNumOfElements && (
-                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                    <span className={cs('num-elements', 'command-num-elements')}>
-                      {model.numElements}
-                    </span>
-                  </Tooltip>
+                  <Tag
+                    content={model.numElements.toString()}
+                    type='count'
+                    tooltipMessage={`${model.numElements} matched elements`}
+                    customClassName='num-elements'
+                  />
                 )}
                 <span className='alias-container'>
                   <Interceptions {...model.renderProps} />
                   <Aliases model={model} />
                   {displayNumOfChildren && (
-                    <Tooltip placement='top' title={numberOfChildrenMessage(model.numChildren, model.event)} className='cy-tooltip'>
-                      <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
-                        {model.numChildren}
-                      </span>
-                    </Tooltip>
+                    <Tag
+                      content={model.numChildren}
+                      type='count'
+                      tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
+                      customClassName='num-children'
+                    />
                   )}
                 </span>
               </span>

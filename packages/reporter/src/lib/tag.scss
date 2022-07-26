@@ -1,6 +1,6 @@
 .reporter-tag {
   border-radius: 4px;
-  color: $white;
+  color: $gray-100;
   display: inline-block;
   font-family: $monospace;
   font-size: 12px;
@@ -27,13 +27,17 @@
     background-color: $indigo-500;
   }
 
-  &.passed {
+  &.count { // num of children or num of element tag
+    background-color: rgba($gray-600, .25);
+  }
+  
+  &.successful-status {
     background-color: $gray-1000;
     border: $gray-900 1px solid;
     color: $jade-300;
   }
 
-  &.failed {
+  &.failed-status {
     background-color: $red-500;
     font-weight: 500;
   }
@@ -58,6 +62,6 @@
   }
 }
 
-.command-wrapper:hover > .command-pin-target > .command-wrapper-text > .command-controls > .reporter-tag.passed {
+.command-wrapper:hover > .command-pin-target > .command-wrapper-text > .command-controls > .reporter-tag.successful-status {
   border-color: $gray-700;
 }

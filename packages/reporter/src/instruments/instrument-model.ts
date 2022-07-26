@@ -12,28 +12,30 @@ export type Alias = string | Array<string> | null | AliasObject | Array<AliasObj
 export interface InstrumentProps {
   id: number
   alias?: Alias
-  aliasType?: string | null
+  aliasType?: 'agent' | 'dom' | 'primitive' | 'route'
   displayName?: string
   name?: string
   message?: string
+  // agent / route / session - instrument panel log type
+  // parent / child / system - command log type
   type?: 'agent' | 'parent' | 'child' | 'system' | 'route' | 'session'
   testCurrentRetry?: number
-  state?: TestState | null
+  state: TestState
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
   testId: string
 }
 
 export default class Log {
-  @observable.ref alias?: Alias = null
-  @observable aliasType?: string | null = null
+  @observable.ref alias?: Alias
+  @observable aliasType?: string
   @observable displayName?: string
   @observable id?: number
   @observable name?: string
   @observable message?: string
   @observable type?: string
-  @observable state?: string | null
-  @observable.ref referencesAlias?: Alias = null
+  @observable state: string
+  @observable.ref referencesAlias?: Alias
 
   constructor (props: InstrumentProps) {
     this.id = props.id
