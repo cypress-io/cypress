@@ -59,7 +59,7 @@
     "rollup-plugin-polyfill-node": "^0.7.0",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.15.2",
-    "vite": "3.0.2",
+    "vite": "3.0.3",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-pages": "0.18.1",
     "vite-plugin-vue-layouts": "0.6.0",

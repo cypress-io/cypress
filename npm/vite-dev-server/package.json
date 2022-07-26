@@ -27,7 +27,7 @@
     "mocha": "^9.2.2",
     "sinon": "^13.0.1",
     "ts-node": "^10.2.1",
-    "vite": "3.0.2",
+    "vite": "3.0.3",
     "vite-plugin-inspect": "0.4.3"
   },
   "files": [
