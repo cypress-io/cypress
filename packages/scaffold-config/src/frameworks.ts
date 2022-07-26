@@ -243,7 +243,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'angular',
     mountModule: 'cypress/angular',
-    supportStatus: 'alpha',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',
   },
