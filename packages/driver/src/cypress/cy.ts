@@ -221,7 +221,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
-  private selectorFns: Record<string, Function> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -643,6 +642,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const s = this.state()
 
       const backup = {
+        test,
         window: s.window,
         document: s.document,
         $autIframe: s.$autIframe,
@@ -940,7 +940,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.state('promise', undefined)
     this.state('hookId', hookId)
     this.state('runnable', runnable)
-    this.state('test', $utils.getTestFromRunnable(runnable))
     this.state('ctx', runnable.ctx)
 
     const { fn } = runnable

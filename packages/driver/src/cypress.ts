@@ -246,6 +246,7 @@ class $Cypress {
 
           const errMsg = $errUtils.errByPath(errPath, {
             errProperty,
+            level: this.state('runnable')?.type || this.state('test')._testConfig.applied,
           })
 
           throw new (this.state('specWindow').Error)(errMsg)

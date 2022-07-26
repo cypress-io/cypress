@@ -482,11 +482,11 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   let hasTests = false
 
   // only loop until we find the first test
-  findTestInSuite(suite, (test) => {
+  findTestInSuite(suite, (_test) => {
     return hasTests = true
   })
 
-  // if we dont have any tests then bail
+  // if we don't have any tests then bail
   // unless we're using studio to add to the root suite
   if (!hasTests && getOnlySuiteId() !== 'r1') {
     return
