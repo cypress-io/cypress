@@ -1,7 +1,7 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
-  getRouteForRequest,
+  getRoutesForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
 import { expect } from 'chai'
@@ -216,12 +216,11 @@ describe('intercept-request', function () {
         proxiedUrl: 'http://bar.baz/foo?_',
       }
 
-      let prevRoute: BackendRoute
-      let e: string[] = []
+      const e: string[] = []
 
       // @ts-ignore
-      while ((prevRoute = getRouteForRequest(routes, req, prevRoute))) {
-        e.push(prevRoute.id)
+      for (const route of getRoutesForRequest(routes, req)) {
+        e.push(route.id)
       }
 
       expect(e).to.deep.eq(['1', '3', '4', '4', '2'])
