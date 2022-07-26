@@ -370,7 +370,7 @@ const renderSummaryTable = (runUrl) => {
 
         const ms = duration.format(stats.wallClockDuration || 0)
 
-        const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
+        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
 
         if (run.skippedSpec) {
           return table2.push([
@@ -1333,7 +1333,7 @@ module.exports = {
 
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
-        displaySpecHeader(spec.baseName, index + 1, length, estimated)
+        displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
       return this.runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
