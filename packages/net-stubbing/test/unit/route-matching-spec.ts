@@ -201,6 +201,13 @@ describe('intercept-request', function () {
             pathname: '/foo',
           },
         },
+        // Deliberately add the same route twice, reproduction for issue #22693
+        {
+          id: '4',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
       ]
 
       const req: Partial<CypressIncomingRequest> = {
@@ -217,7 +224,7 @@ describe('intercept-request', function () {
         e.push(prevRoute.id)
       }
 
-      expect(e).to.deep.eq(['1', '3', '4', '2'])
+      expect(e).to.deep.eq(['1', '3', '4', '4', '2'])
     })
   })
 })

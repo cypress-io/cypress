@@ -130,7 +130,7 @@ export function getRouteForRequest (routes: BackendRoute[], req: CypressIncoming
   // First, match the oldest matching route handler with `middleware: true`.
   // Then, match the newest matching route handler.
   const orderedRoutes = middleware.concat(handlers.reverse())
-  const possibleRoutes = prevRoute ? orderedRoutes.slice(_.findIndex(orderedRoutes, prevRoute) + 1) : orderedRoutes
+  const possibleRoutes = prevRoute ? orderedRoutes.slice(orderedRoutes.indexOf(prevRoute) + 1) : orderedRoutes
 
   for (const route of possibleRoutes) {
     if (!route.disabled && _doesRouteMatch(route.routeMatcher, req)) {
