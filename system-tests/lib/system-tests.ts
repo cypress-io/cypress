@@ -22,6 +22,7 @@ require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
+const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
@@ -31,8 +32,6 @@ const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
-const screenshots = require(`@packages/server/lib/screenshots`)
-const videoCapture = require(`@packages/server/lib/video_capture`)
 const settings = require(`@packages/server/lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
@@ -413,18 +412,16 @@ const copy = function () {
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
+    const copy = (src, dest) => {
+      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+    }
+
     // copy each of the screenshots and videos
     // to artifacts using each basename of the folders
-    return Bluebird.join(
-      screenshots.copy(
-        screenshotsFolder,
-        path.join(ca, path.basename(screenshotsFolder)),
-      ),
-      videoCapture.copy(
-        videosFolder,
-        path.join(ca, path.basename(videosFolder)),
-      ),
-    )
+    return Promise.all([
+      copy(screenshotsFolder, path.join(ca, path.basename(screenshotsFolder))),
+      copy(videosFolder, path.join(ca, path.basename(videosFolder))),
+    ])
   }
 }
 
