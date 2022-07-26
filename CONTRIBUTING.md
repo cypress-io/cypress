@@ -287,6 +287,7 @@ Here is a list of the npm packages in this repository:
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
  | [create-cypress-tests](./npm/create-cypress-tests)     | `@cypress/create-cypress-tests`    | Tooling to scaffold Cypress configuration and demo test files. |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
+ | [normalize-obstructive-user-agent](./npm/normalize-obstructive-user-agent)           | `@cypress/normalize-obstructive-user-agent`       | Modifies Obstructive user agents that might be contributing to access or authentication issues          |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
  | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |

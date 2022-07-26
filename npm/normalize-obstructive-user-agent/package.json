@@ -1,0 +1,47 @@
+{
+  "name": "@cypress/normalize-obstructive-user-agent",
+  "version": "0.0.0-development",
+  "description": "Official Cypress plugin to normalize obstructive user agents to appear as common or expected user agents",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
+    "watch": "tsc -w",
+    "cypress:open": "cypress open",
+    "prepublish": "tsc"
+  },
+  "devDependencies": {
+    "cypress": "^10.3.1",
+    "typescript": "^4.2.3"
+  },
+  "peerDependencies": {
+    "cypress": ">=10.3.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=16.13.2",
+    "yarn": ">=1.17.3"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/obstructive-user-agent#readme",
+  "author": "Cypress E2E Auth Team",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "keywords": [
+    "cypress",
+    "e2e",
+    "authentication",
+    "auth",
+    "google",
+    "microsoft",
+    "testing",
+    "electron",
+    "automation"
+  ]
+}
