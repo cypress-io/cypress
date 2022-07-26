@@ -1791,14 +1791,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/angular build
-      - run:
-          name: Run tests
-          command: yarn test-ci
-          working_directory: npm/angular
-      - store_test_results:
-          path: npm/angular/test_results
-      - store_artifacts:
-          path: npm/angular/test_results
       - store-npm-logs
 
   npm-react:
