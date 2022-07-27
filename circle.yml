@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - tgriesser/chore/fix-release
+        - matth/fix/hang-investigation
 
 defaults: &defaults
   parallelism: 1
@@ -43,6 +44,7 @@ onlyMainBranches: &onlyMainBranches
       only:
         - develop
         - tgriesser/chore/fix-release
+        - matth/fix/hang-investigation
   requires:
     - create-build-artifacts
 
@@ -1482,7 +1484,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" && "$CIRCLE_BRANCH" != "matth/fix/hang-investigation" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2119,6 +2121,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - build
     - test-kitchensink:
@@ -2131,6 +2134,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - build
     - create-build-artifacts:
@@ -2181,6 +2185,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2189,6 +2194,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2198,6 +2204,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - create-build-artifacts
 
@@ -2223,6 +2230,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - create-build-artifacts
 
@@ -2295,6 +2303,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - darwin-create-build-artifacts
 
@@ -2307,6 +2316,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - tgriesser/chore/fix-release
+              - matth/fix/hang-investigation
         requires:
           - darwin-create-build-artifacts
 
