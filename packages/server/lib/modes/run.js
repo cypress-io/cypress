@@ -1463,9 +1463,6 @@ module.exports = {
 
     const screenshots = []
 
-    console.log({ config })
-    // throw Error('asdfsa')
-
     return runEvents.execute('before:spec', config, spec)
     .then(() => {
     // we know we're done running headlessly
