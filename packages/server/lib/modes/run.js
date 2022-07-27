@@ -776,6 +776,12 @@ module.exports = {
 
   displayRunStarting,
 
+  navigateToNextSpec (spec) {
+    debug('navigating to next spec')
+
+    return openProject.changeUrlToSpec(spec)
+  },
+
   exitEarly (err) {
     debug('set early exit error: %s', err.stack)
 
@@ -1103,6 +1109,13 @@ module.exports = {
 
     options.setScreenshotMetadata = (data) => {
       return this.currentSetScreenshotMetadata(data)
+    }
+
+    if (options.testingType === 'component' && !options.isFirstSpec) {
+      // If we do not launch the browser,
+      // we tell it that we are ready
+      // to receive the next spec
+      return Promise.resolve(this.navigateToNextSpec(options.spec))
     }
 
     const wait = () => {
@@ -1496,8 +1509,9 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          testingType: options.testingType,
+          isFirstSpec,
           shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
-          // TODO(tim): investigate the socket disconnect
         }),
       })
     })
