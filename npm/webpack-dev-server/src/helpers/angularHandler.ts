@@ -153,6 +153,7 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
     compilerOptions: {
       outDir: getProjectFilePath('out-tsc/cy'),
       allowSyntheticDefaultImports: true,
+      skipLibCheck: true,
     },
     include: includePaths,
   })
