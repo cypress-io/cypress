@@ -470,6 +470,114 @@ describe('lib/browsers/electron', () => {
         })
       })
     })
+
+    describe('setUserAgentOverride with experimentalSessionAndOrigin', () => {
+      let userAgent
+
+      beforeEach(function () {
+        userAgent = ''
+        this.win.webContents.debugger.sendCommand = sinon.stub().withArgs('Browser.getVersion').callsFake(() => {
+          return {
+            userAgent,
+          }
+        })
+      })
+
+      describe('disabled', function () {
+        it('does not attempt to replace the user agent', function () {
+          this.options.experimentalSessionAndOrigin = false
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.not.be.calledWithMatch('Network.setUserAgentOverride')
+          })
+        })
+      })
+
+      describe('enabled and attempts to replace obstructive user agent string containing:', function () {
+        beforeEach(function () {
+          this.options.experimentalSessionAndOrigin = true
+        })
+
+        it('versioned cypress', function () {
+          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+            })
+          })
+        })
+
+        it('development cypress', function () {
+          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+            })
+          })
+        })
+
+        it('older Windows user agent', function () {
+          userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) electron/1.0.0 Chrome/53.0.2785.113 Electron/1.4.3 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36',
+            })
+          })
+        })
+
+        it('newer Windows user agent', function () {
+          userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Electron/10.4.7 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36',
+            })
+          })
+        })
+
+        it('Linux user agent', function () {
+          userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Electron/9.0.5 Safari/E7FBAF'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF',
+            })
+          })
+        })
+
+        it('older MacOS user agent', function () {
+          // this user agent containing Cypress was actually a common UA found on a website for Electron purposes...
+          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/8.3.0 Chrome/91.0.4472.124 Electron/13.1.7 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            })
+          })
+        })
+
+        it('newer MacOS user agent', function () {
+          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
+              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+            })
+          })
+        })
+      })
+    })
   })
 
   context('._render', () => {

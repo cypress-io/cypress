@@ -58,6 +58,20 @@ const _getAutomation = async function (win, options, parent) {
 
   const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
 
+  // Only pertains to e2e code as experimentalSessionAndOrigin is enforced only as an e2e config option
+  // @see https://github.com/cypress-io/cypress/issues/22953
+  if (options.experimentalSessionAndOrigin) {
+    const { userAgent } = await sendCommand('Browser.getVersion')
+    // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
+    const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
+
+    sendCommand('Network.setUserAgentOverride', {
+      userAgent: modifiedNonObstructiveUserAgent,
+    }).catch((e) => {
+      debug('failed to set user agent override in electron', e.message)
+    })
+  }
+
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {
