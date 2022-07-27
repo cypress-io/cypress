@@ -14,7 +14,7 @@ export default function (Commands, Cypress, cy, state) {
 
       prev.set('alias', str)
 
-      const noLogFromPreviousCommandisAlreadyAliased = () => {
+      const noLogFromPreviousCommandIsAlreadyAliased = () => {
         return _.every(prev.get('logs'), (log) => {
           return log.get('alias') !== str
         })
@@ -34,7 +34,7 @@ export default function (Commands, Cypress, cy, state) {
         // to the previous command's logs by looping through
         // all of its logs and making sure none of them are
         // set to this alias
-        if (noLogFromPreviousCommandisAlreadyAliased()) {
+        if (noLogFromPreviousCommandIsAlreadyAliased()) {
           log.set({
             alias: str,
             aliasType: $dom.isElement(subject) ? 'dom' : 'primitive',
