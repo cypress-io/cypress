@@ -11,7 +11,6 @@ require('./environment')
 
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
-const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 
 const warning = (code, args) => {
@@ -25,21 +24,6 @@ const exit = (code = 0) => {
   debug('about to exit with code', code)
 
   return process.exit(code)
-}
-
-const showWarningForInvalidConfig = (options) => {
-  const publicConfigKeys = getPublicConfigKeys()
-  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!publicConfigKeys.find((configKey) => configKey === option)) {
-      invalid.push(option)
-    }
-
-    return invalid
-  }, [])
-
-  if (invalidConfigOptions.length && options.invokedFromCli) {
-    return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
-  }
 }
 
 const exit0 = () => {
@@ -102,11 +86,10 @@ module.exports = {
           return resolve({ totalFailed: code })
         }
 
-        const args = require('./util/args').toArray(options)
+        const args = argsUtils.toArray(options)
 
         debug('electron open arguments %o', args)
 
-        // const mainEntryFile = require.main.filename
         const serverMain = require('./cwd')()
 
         return cypressElectron.open(serverMain, args, fn)
@@ -125,8 +108,6 @@ module.exports = {
 
     try {
       options = argsUtils.toObject(argv)
-
-      showWarningForInvalidConfig(options)
     } catch (argumentsError) {
       debug('could not parse CLI arguments: %o', argv)
 

@@ -398,7 +398,10 @@ export class ProjectConfigManager {
 
     // TODO: Convert this to be synchronous, it's just FS checks
     let fullConfig = await this.options.ctx._apis.configApi.setupFullConfigWithDefaults({
-      cliConfig: options.config ?? {},
+      cliConfig: options.config ? {
+        config: options.config,
+        resolveConfig: options.resolvedConfig,
+      } : {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
       config: _.cloneDeep(configFileContents),

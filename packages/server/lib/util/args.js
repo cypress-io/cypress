@@ -4,7 +4,8 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
+const { getInvalidRootOptions, getRootConfigKeys, validateConfiguration } = require('@packages/config')
+const { resolveConfigValues } = require('@packages/config/src/resolve')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -158,6 +159,30 @@ const JSONOrCoerce = (str) => {
 
   // nupe :-(
   return coerceUtil.coerce(str)
+}
+
+const showWarningForInvalidConfig = (options) => {
+  if (!options.invokedFromCli) {
+    return
+  }
+
+  const validationResult = validateConfiguration(options.config)
+
+  const invalidOptions = require('lodash').reduce(validationResult, (invalid, result, configLevel) => {
+    if (result.invalidOptions.length) {
+      result.invalidOptions.forEach(({ name }) => {
+        const scopedName = configLevel === 'root' ? name : `${configLevel}.${name}`
+
+        invalid.push(scopedName)
+      })
+    }
+
+    return invalid
+  }, [])
+
+  if (invalidOptions.length) {
+    return errors.warning('INVALID_CONFIG_OPTION', invalidOptions)
+  }
 }
 
 const sanitizeAndConvertNestedArgs = (str, argName) => {
@@ -325,7 +350,7 @@ const parseSpecArgv = (pattern) => {
  * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
  */
 const nestInvalidRootOptions = (config) => {
-  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
+  getInvalidRootOptions().forEach(({ name, testingTypes }) => {
     if (config[name] && testingTypes) {
       testingTypes.forEach((testingType) => {
         if (!config[testingType]) {
@@ -394,7 +419,7 @@ module.exports = {
 
     debug('argv parsed: %o', options)
 
-    // throw new Error()
+    // debug(getInvalidRootOptions())
 
     // if we are updating we may have to pluck out the
     // appPath + execPath from the options._ because
@@ -489,7 +514,7 @@ module.exports = {
     nestInvalidRootOptions(options.config, testingType)
 
     // get a list of the available config keys
-    const configKeys = getPublicConfigKeys()
+    const configKeys = getRootConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)
@@ -521,6 +546,10 @@ module.exports = {
     }
 
     debug('argv options: %o', options)
+
+    showWarningForInvalidConfig(options.config)
+
+    options.resolvedConfig = resolveConfigValues(config, 'cli')
 
     return options
   },

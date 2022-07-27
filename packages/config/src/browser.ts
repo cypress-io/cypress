@@ -1,17 +1,20 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
-import type { BreakingOption, BreakingOptionErrorKey } from './options'
-import type { TestingType } from '@packages/types'
+import errors from '@packages/errors'
+import { getInvalidRootOptions, defaultSpecPattern, options, breakingOptions, breakingRootOptions, getInvalidRootOptions, getInvalidTestingTypeOptions, testingTypeBreakingOptions, getTestingTypeConfigOptions } from './options'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
+
+import type { TestingType } from '@packages/types'
+import type { ConfigOption, BreakingOption, BreakingOptionErrorKey, RuntimeConfigOption } from './options'
 
 export {
   defaultSpecPattern,
   validation,
   options,
   breakingOptions,
+  getInvalidRootOptions,
   BreakingOption,
   BreakingOptionErrorKey,
 }
@@ -33,7 +36,7 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
+const rootConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
@@ -118,8 +121,8 @@ export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
   return { ...defaultsForRuntime, ...defaultsForRuntime[runtimeOptions.testingType] }
 }
 
-export const getPublicConfigKeys = () => {
-  return publicConfigKeys
+export const getRootConfigKeys = () => {
+  return rootConfigKeys
 }
 
 export const matchesConfigKey = (key: string) => {
@@ -209,4 +212,79 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
   }
 
   return restartOnChange
+}
+
+const _validateConfig = (allowedConfig: Array<ConfigOption|RuntimeConfigOption>, invalidConfig: Array<BreakingOption>, config: Record<string, any>): ValidationResult => {
+  const allowed: Record<string, ConfigOption> = _(allowedConfig).reject({ isInternal: true }).chain().keyBy('name').value()
+  const invalid: Record<string, BreakingOption> = _(invalidConfig).chain().keyBy('name').value()
+
+  const invalidOptions: Array<BreakingOption> = []
+  const invalidConfigurationValues: Array<BreakingOption> = []
+
+  _.each(config, (value, configKey) => {
+    if (!allowed.hasOwnProperty(configKey)) {
+      if (invalid.hasOwnProperty(configKey)) {
+        invalidOptions.push(invalid[configKey] as BreakingOption)
+
+        return
+      }
+
+      invalidOptions.push({
+        name: configKey,
+        errorKey: 'INVALID_CONFIG_OPTION',
+        isWarning: true,
+      })
+
+      return
+    }
+
+    const { validation, defaultValue } = allowed[configKey] as ConfigOption
+
+    // key has a validation rule & value different from the default
+    if (validation && value !== defaultValue) {
+      const result = validation(configKey, value)
+
+      if (result !== true) {
+        invalidConfigurationValues.push(result)
+      }
+    }
+  })
+
+  return {
+    invalidOptions,
+    invalidConfigurationValues,
+  }
+}
+
+const CONFIG_LEVELS = ['root', 'e2e', 'component'] as const
+
+type ConfigLevels = typeof CONFIG_LEVELS[number]
+
+const TESTING_TYPES = ['e2e', 'component'] as const
+
+type ValidationResult = {
+  invalidOptions: Array<BreakingOption>
+  invalidConfigurationValues: Array<BreakingOption>
+}
+
+type ValidationRecord = Record<ConfigLevels, ValidationResult>
+
+export const collectValidationResults = (config: Record<string, any>, level: ConfigLevels = 'root'): ValidationRecord | ValidationResult => {
+  if (level !== 'root') {
+    return _validateConfig(getTestingTypeConfigOptions(level), getInvalidTestingTypeOptions(level), config)
+  }
+
+  const result: any = {
+    root: _validateConfig(options, getInvalidRootOptions().concat(breakingOptions), config),
+  }
+
+  TESTING_TYPES.forEach((testingType: ConfigLevels) => {
+    result[`${testingType}`] = collectValidationResults(config[`${testingType}`], testingType)
+  })
+
+  return result as ValidationRecord
+}
+
+export const validateConfiguration = (config: Record<string, any>) => {
+  return collectValidationResults(config)
 }

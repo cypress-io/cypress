@@ -8,6 +8,7 @@ import pkg from '@packages/root'
 export type BreakingOptionErrorKey =
   | 'COMPONENT_FOLDER_REMOVED'
   | 'INTEGRATION_FOLDER_REMOVED'
+  | 'CONFIG_FILE_AVOID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT'
@@ -21,15 +22,18 @@ export type BreakingOptionErrorKey =
   | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
   | 'EXPERIMENTAL_STUDIO_REMOVED'
   | 'FIREFOX_GC_INTERVAL_REMOVED'
+  | 'INVALID_CONFIG_OPTION'
   | 'NODE_VERSION_DEPRECATION_SYSTEM'
   | 'NODE_VERSION_DEPRECATION_BUNDLED'
   | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
   | 'RENAMED_CONFIG_OPTION'
   | 'TEST_FILES_RENAMED'
 
-type TestingType = 'e2e' | 'component'
+const TESTING_TYPES = ['e2e', 'component'] as const
 
-interface ResolvedConfigOption {
+type TestingType = typeof TESTING_TYPES[number]
+
+export interface ConfigOption {
   name: string
   defaultValue?: any
   validation: Function
@@ -40,10 +44,12 @@ interface ResolvedConfigOption {
    */
   canUpdateDuringTestTime?: boolean
   specificTestingType?: TestingType
+  // option is a test-type specific option that can be set at the root level
+  allowSettingOnRoot?: boolean
   requireRestartOnChange?: 'server' | 'browser'
 }
 
-interface RuntimeConfigOption {
+export interface RuntimeConfigOption {
   name: string
   defaultValue: any
   validation: Function
@@ -86,16 +92,34 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
-const isValidConfig = (key: string, config: any) => {
-  const status = validate.isPlainObject(key, config)
+export const getTestingTypeConfigOptions = (testingType: string) => {
+  return [
+    ...rootConfigOptions,
+    ...testingTypeConfigOptions,
+    ...getTestingTypeSpecificConfigOptions(testingType),
+  ]
+}
 
-  if (status !== true) {
-    return status
+const getTestingTypeSpecificConfigOptions = (testingType: string) => {
+  return testingType === 'component' ? componentSpecificConfigOptions : e2eSpecificConfigOptions
+}
+
+export const isValidTestingTypeConfig = (testingType: string, config: any): ErrResult | true => {
+  const result = validate.isPlainObject(testingType, config)
+
+  if (result !== true) {
+    return result
   }
 
-  for (const rule of options) {
+  const allOpts = [
+    ...rootConfigOptions,
+    ...testingTypeConfigOptions,
+    ...getTestingTypeSpecificConfigOptions(testingType),
+  ]
+
+  for (const rule of allOpts) {
     if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name])
 
       if (status !== true) {
         return status
@@ -111,6 +135,71 @@ export const defaultSpecPattern = {
   component: '**/*.cy.{js,jsx,ts,tsx}',
 }
 
+const testingTypeConfigOptions: Array<ConfigOption> = [
+  {
+    name: 'excludeSpecPattern',
+    validation: validate.isStringOrArrayOfStrings,
+    canUpdateDuringTestTime: true,
+  }, {
+    name: 'slowTestThreshold',
+    validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
+  }, {
+    name: 'specPattern',
+    validation: validate.isStringOrArrayOfStrings,
+    canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'supportFile',
+    validation: validate.isStringOrFalse,
+    canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'viewportHeight',
+    validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
+    allowSettingOnRoot: true,
+  }, {
+    name: 'viewportWidth',
+    validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
+    allowSettingOnRoot: true,
+  },
+]
+
+const e2eSpecificConfigOptions: Array<ConfigOption> = [
+  {
+    name: 'baseUrl',
+    validation: validate.isFullyQualifiedUrl,
+    canUpdateDuringTestTime: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalSessionAndOrigin',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    canUpdateDuringTestTime: false,
+  }, {
+    name: 'testIsolation',
+    validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
+    isExperimental: true,
+  },
+]
+
+const componentSpecificConfigOptions: Array<ConfigOption> = [
+  {
+    name: 'indexHtmlFile',
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
+  },
+  // TODO: add validation around this configuration option
+  // {
+  //   name: 'devServer',
+  //   canUpdateDuringTestTime: false,
+  // },
+]
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -119,7 +208,7 @@ export const defaultSpecPattern = {
 
 // TODO - add boolean attribute to indicate read-only / static vs mutable options
 // that can be updated during test executions
-const resolvedOptions: Array<ResolvedConfigOption> = [
+const rootConfigOptions: Array<ConfigOption> = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
@@ -155,12 +244,21 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'component',
-    // runner-ct overrides
+    // component testing specific configuration values
     defaultValue: {
-      specPattern: defaultSpecPattern.component,
+      additionalIgnorePattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+      excludeSpecPattern: [
+        '**/__snapshots__/*',
+        '**/__image_snapshots__/*',
+      ],
       indexHtmlFile: 'cypress/support/component-index.html',
+      slowTestThreshold: 250,
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+      supportFile: 'cypress/support/component.{js,jsx,ts,tsx}',
+      viewportHeight: 500,
+      viewportWidth: 500,
     },
-    validation: isValidConfig,
+    validation: isValidTestingTypeConfig,
     canUpdateDuringTestTime: false,
   }, {
     name: 'defaultCommandTimeout',
@@ -176,11 +274,18 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
-    // e2e runner overrides
+    // e2e testing specific configuration values
     defaultValue: {
-      specPattern: defaultSpecPattern.e2e,
+      baseUrl: null,
+      excludeSpecPattern: '*.hot-update.js',
+      slowTestThreshold: 10000,
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+      supportFile: 'cypress/support/e2e.{js,jsx,ts,tsx}',
+      testIsolation: false,
+      viewportHeight: 660,
+      viewportWidth: 1000,
     },
-    validation: isValidConfig,
+    validation: isValidTestingTypeConfig,
     canUpdateDuringTestTime: false,
   }, {
     name: 'env',
@@ -239,12 +344,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
-  }, {
-    name: 'excludeSpecPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: true,
-  }, {
+  },
+  // {
+  //   name: 'excludeSpecPattern',
+  //   defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
+  //   validation: validate.isStringOrArrayOfStrings,
+  //   canUpdateDuringTestTime: true,
+  // },
+  {
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -344,24 +451,28 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
-  }, {
-    name: 'slowTestThreshold',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
-    validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
-  }, {
+  },
+  // {
+  //   name: 'slowTestThreshold',
+  //   defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
+  //   validation: validate.isNumber,
+  //   canUpdateDuringTestTime: true,
+  // },
+  {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'supportFile',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
-    validation: validate.isStringOrFalse,
-    canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'supportFolder',
+  },
+  // {
+  //   name: 'supportFile',
+  //   defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
+  //   validation: validate.isStringOrFalse,
+  //   canUpdateDuringTestTime: false,
+  //   requireRestartOnChange: 'server',
+  // },
+  {
+    name: 'supportFolder', // deprecated / removed in 10.x
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
@@ -426,12 +537,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   },
-  // Possibly add a defaultValue for specPattern https://github.com/cypress-io/cypress/issues/22507
-  {
-    name: 'specPattern',
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
-  },
+  // // Possibly add a defaultValue for specPattern https://github.com/cypress-io/cypress/issues/22507
+  // {
+  //   name: 'specPattern',
+  //   validation: validate.isStringOrArrayOfStrings,
+  //   canUpdateDuringTestTime: false,
+  // },
 ]
 
 const runtimeOptions: Array<RuntimeConfigOption> = [
@@ -553,19 +664,66 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   },
 ]
 
-export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
-  ...resolvedOptions,
+export const options: Array<ConfigOption | RuntimeConfigOption> = [
+  ...rootConfigOptions,
   ...runtimeOptions,
 ]
 
-// These properties are going to be added to the resolved properties of the
-// config, but do not mean that are valid config properties coming from the user.
-export const additionalOptionsToResolveConfig = [
-  {
-    name: 'specPattern',
-    isInternal: false,
-  },
-]
+export const getInvalidRootOptions = (): Array<BreakingOption> => {
+  const invalidTestingTypeOptsOnRoot = TESTING_TYPES.map((type) => {
+    return getTestingTypeSpecificConfigOptions(type).map((opt) => {
+      return {
+        name: opt.name,
+        testingTypes: [type],
+        errorKey: `CONFIG_FILE_INVALID_ROOT_CONFIG_${type.toUpperCase()}`,
+        isWarning: false,
+      } as BreakingOption
+    })
+  }).reduce((prev, curr) => prev.concat(curr))
+
+  return testingTypeConfigOptions.map((opt) => {
+    if (opt?.allowSettingOnRoot) {
+      return {
+        name: opt.name,
+        errorKey: 'CONFIG_FILE_AVOID_ROOT_CONFIG',
+        isWarning: true,
+      } as BreakingOption
+    }
+
+    return {
+      ...opt,
+      errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+      testingTypes: TESTING_TYPES,
+      isWarning: false,
+    } as BreakingOption
+  }).concat(invalidTestingTypeOptsOnRoot)
+}
+
+export const getInvalidTestingTypeOptions = (testingType: TestingType, checkingRootConfig: boolean = false): Array<BreakingOption> => {
+  // return TestingTypes.filter((type) => type !== testingType)
+  // .map((type) => {
+  //   return getTestingTypeConfigOptions(testingType as TestingType).map((opt) => {
+  //     return {
+  //       name: opt.name,
+  //       errorKey: `CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_${type.toUpperCase()}`,
+  //       isWarning: false,
+  //       testingType,
+  //     } as BreakingOption
+  //   })
+  // }).reduce((prev, curr) => prev.concat(curr))
+
+  // validate the wrong test-specific options aren't on the testing-specific level
+  const errorKey = `CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_${testingType.toUpperCase()}`
+  const invalidTestingTypeOptions = testingType === 'component' ? e2eSpecificConfigOptions : componentSpecificConfigOptions
+
+  return invalidTestingTypeOptions.map((opt) => {
+    return {
+      name: opt.name,
+      errorKey,
+      isWarning: false,
+    } as BreakingOption
+  })
+}
 
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config

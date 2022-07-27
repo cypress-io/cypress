@@ -353,7 +353,7 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(configUtils.getPublicConfigKeys())
+  .pick(configUtils.getRootConfigKeys())
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
