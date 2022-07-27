@@ -226,6 +226,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
+    name: 'experimentalSingleTabRunMode',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,

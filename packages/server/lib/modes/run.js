@@ -1111,7 +1111,7 @@ module.exports = {
       return this.currentSetScreenshotMetadata(data)
     }
 
-    if (options.testingType === 'component' && !options.isFirstSpec) {
+    if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
       // If we do not launch the browser,
       // we tell it that we are ready
       // to receive the next spec
@@ -1257,17 +1257,15 @@ module.exports = {
         }
       }
 
-      // Close the browser if the environment variable is set to do so
-      // if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
-      //   debug('attempting to close the browser')
-      //   await openProject.closeBrowser()
-      // } else {
-      debug('attempting to close the browser tab')
-      await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
-      // }
+      if (!config.experimentalSingleTabRunMode) {
+        debug('attempting to close the browser tab')
 
-      debug('resetting server state')
-      openProject.projectBase.server.reset()
+        await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+
+        debug('resetting server state')
+
+        openProject.projectBase.server.reset()
+      }
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1465,6 +1463,9 @@ module.exports = {
 
     const screenshots = []
 
+    console.log({ config })
+    // throw Error('asdfsa')
+
     return runEvents.execute('before:spec', config, spec)
     .then(() => {
     // we know we're done running headlessly
@@ -1511,6 +1512,7 @@ module.exports = {
           projectRoot: options.projectRoot,
           testingType: options.testingType,
           isFirstSpec,
+          experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
           shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
         }),
       })
