@@ -192,8 +192,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       // @ts-ignore
       const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
 
-      // TODO: verify that this is covered by tests
-      return !!iterator.next().value
+      return !iterator.next().done
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
