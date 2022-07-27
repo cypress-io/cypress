@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- NOTE: This is an EJS template used by the origin/integrity.cy.ts to test regex rewriting integrity -->
+<!-- using this fixture without compiling and rendering the template will cause errors -->
+<html>
+  <head>
+    <title>DOM Fixture</title>
+  </head>
+  <body>
+    <h1 data-cy="integrity-header">Integrity Scripts</h1>
+  </body>
+  <% if(data && data.staticLinkInjection) { %>
+    <!-- static link injection -->
+    <!-- the actual integrity of the file is: <%=data.integrityValue%> -->
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css" integrity="<%=data.integrityValue%>">
+  <% } %>
+
+  <% if(data && data.staticScriptInjection) { %>
+    <!-- static script injection -->
+    <!-- the actual integrity of the file is: <%=data.integrityValue%> -->
+    <script id="static-set-integrity-script" type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="<%=data.integrityValue%>"></script>
+  <% } %>
+
+  <% if(data && data.dynamicScriptInjection) { %>
+    <!-- dynamic script injection-->
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-script'
+      dynamicIntegrityScript.type = 'text/javascript'
+      dynamicIntegrityScript.src = 'integrity.js'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+      // the actual integrity of the file is: <%=data.integrityValue%>
+      dynamicIntegrityScript.setAttribute('integrity', "<%=data.integrityValue%>")
+      
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+  <% } %>
+
+  <% if(data && data.dynamicLinkInjection) { %>
+    <!-- dynamic link injection -->
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      // the actual integrity of the file is: <%=data.integrityValue%>
+      dynamicIntegrityScript.setAttribute('integrity', "<%=data.integrityValue%>")
+      
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+  <% } %>
+</html>

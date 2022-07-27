@@ -203,7 +203,7 @@ describe('lib/api', () => {
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs')
-      .socketDelay(5000)
+      .delayConnection(5000)
       .reply(200, {})
 
       return api.createRun({
@@ -316,7 +316,7 @@ describe('lib/api', () => {
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs/run-id-123/instances')
-      .socketDelay(5000)
+      .delayConnection(5000)
       .reply(200, {})
 
       return api.createInstance({
@@ -419,7 +419,7 @@ describe('lib/api', () => {
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests')
-      .socketDelay(5000)
+      .delayConnection(5000)
       .reply(200, {})
 
       return api.postInstanceTests({
@@ -523,7 +523,7 @@ describe('lib/api', () => {
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/results')
-      .socketDelay(5000)
+      .delayConnection(5000)
       .reply(200, {})
 
       return api.postInstanceResults({
@@ -616,7 +616,7 @@ describe('lib/api', () => {
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123/stdout')
-      .socketDelay(5000)
+      .delayConnection(5000)
       .reply(200, {})
 
       return api.updateInstanceStdout({
