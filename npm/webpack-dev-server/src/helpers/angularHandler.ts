@@ -31,18 +31,25 @@ type AngularJson = {
 const dynamicImport = new Function('specifier', 'return import(specifier)')
 
 export async function angularHandler (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
-  const webpackConfig = await getAngularCliWebpackConfig(devServerConfig)
+  const webpackModules = sourceDefaultWebpackDependencies(devServerConfig)
 
-  return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
+  if (!webpackModules.framework) {
+    throw new Error('Could not find framework dependencies')
+  }
+
+  const majorAngularVersion = Number(webpackModules.framework.packageJson.version.split('.')[0])
+
+  const webpackConfig = await getAngularCliWebpackConfig(devServerConfig, majorAngularVersion)
+
+  return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: webpackModules }
 }
 
-async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConfig) {
+async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConfig, majorAngularVersion: number) {
   const { projectRoot } = devServerConfig.cypressConfig
 
   const {
     generateBrowserWebpackConfigFromContext,
-    getCommonConfig,
-    getStylesConfig,
+    webpackGenerators,
   } = await getAngularCliModules(projectRoot)
 
   const angularJson = await getAngularJson(projectRoot)
@@ -65,10 +72,19 @@ async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConf
 
   const context = createFakeContext(projectRoot, defaultProject, defaultProjectConfig)
 
+  let webpackGeneratorFn
+
+  if (majorAngularVersion === 12) {
+    webpackGeneratorFn = (wco: any) => [webpackGenerators.getCommonConfig(wco), webpackGenerators.getBrowserConfig(wco), webpackGenerators.getStylesConfig(wco), webpackGenerators.getStatsConfig(wco), webpackGenerators.getTypeScriptConfig(wco)]
+  } else {
+    webpackGeneratorFn = (wco: any) => [webpackGenerators.getCommonConfig(wco), webpackGenerators.getStylesConfig(wco)]
+  }
+
   const { config } = await generateBrowserWebpackConfigFromContext(
     buildOptions,
     context,
-    (wco: any) => [getCommonConfig(wco), getStylesConfig(wco)],
+    webpackGeneratorFn,
+    { differentialLoadingNeeded: false },
   )
 
   delete config.entry.main
@@ -154,6 +170,10 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
       outDir: getProjectFilePath('out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
+      target: 'es6',
+    },
+    angularCompilerOptions: {
+      enableIvy: false,
     },
     include: includePaths,
   })
@@ -176,12 +196,10 @@ export async function getTempDir (): Promise<string> {
 export async function getAngularCliModules (projectRoot: string) {
   const [
     { generateBrowserWebpackConfigFromContext },
-    { getCommonConfig },
-    { getStylesConfig },
+    webpackGenerators,
   ] = await Promise.all([
     '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
-    '@angular-devkit/build-angular/src/webpack/configs/common.js',
-    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+    '@angular-devkit/build-angular/src/webpack/configs',
   ].map((dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
@@ -196,8 +214,7 @@ export async function getAngularCliModules (projectRoot: string) {
 
   return {
     generateBrowserWebpackConfigFromContext,
-    getCommonConfig,
-    getStylesConfig,
+    webpackGenerators,
   }
 }
 
@@ -217,7 +234,7 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
 
 function createFakeContext (projectRoot: string, defaultProject: string, defaultProjectConfig: any) {
   const logger = {
-    createChild: () => ({}),
+    createChild: () => ({ warn: () => {} }),
   }
 
   const context = {
