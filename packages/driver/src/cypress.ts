@@ -437,7 +437,8 @@ class $Cypress {
         // and does not do the usual cleanup so that means
         // we have to fire the test:after:hooks and
         // test:after:run events ourselves
-        this.emit('run:end', this.spec)
+
+        this.emit('run:end', this.spec, { stats: args[1] })
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
 

@@ -610,34 +610,36 @@ describe('lib/socket', () => {
         foo: 'bar',
       }
 
+      const stats = { baz: 'ball' }
+
       it('emits before:spec and after:spec events in run mode', function (done) {
-        this.cfg.isInteractive = false
+        this.cfg.isTextTerminal = true
         this.cfg.experimentalInteractiveRunEvents = false
 
         this.client
         this.client.emit('run:start', spec)
-        this.client.emit('run:end', spec, () => {
+        this.client.emit('run:end', spec, stats, () => {
           expect(this.executeRun).to.be.calledWith('before:spec', this.cfg, spec)
-          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec)
+          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec, stats)
           done()
         })
       })
 
       it('emits before:spec and after:spec events in open mode when experimentalInteractiveRunEvents is true', function (done) {
-        this.cfg.isInteractive = true
+        this.cfg.isTextTerminal = false
         this.cfg.experimentalInteractiveRunEvents = true
 
         this.client
         this.client.emit('run:start', spec)
-        this.client.emit('run:end', spec, () => {
+        this.client.emit('run:end', spec, stats, () => {
           expect(this.executeRun).to.be.calledWith('before:spec', this.cfg, spec)
-          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec)
+          expect(this.executeRun).to.be.calledWith('after:spec', this.cfg, spec, stats)
           done()
         })
       })
 
       it('does not emit before:spec and after:spec events in open mode when experimentalInteractiveRunEvents is false', function (done) {
-        this.cfg.isInteractive = true
+        this.cfg.isTextTerminal = false
         this.cfg.experimentalInteractiveRunEvents = false
 
         this.client.emit('run:start', spec)

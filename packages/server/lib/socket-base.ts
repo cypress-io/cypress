@@ -338,7 +338,7 @@ export class SocketBase {
       // TODO: what to do about runner disconnections?
 
       socket.on('run:start', (spec, done) => {
-        if (!config.isInteractive || config.experimentalInteractiveRunEvents) {
+        if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
           runEvents.execute('before:spec', config, spec)
         }
 
@@ -347,9 +347,9 @@ export class SocketBase {
         }
       })
 
-      socket.on('run:end', (spec, done) => {
-        if (!config.isInteractive || config.experimentalInteractiveRunEvents) {
-          runEvents.execute('after:spec', config, spec)
+      socket.on('run:end', (spec, stats, done) => {
+        if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+          runEvents.execute('after:spec', config, spec, stats)
         }
 
         if (done) {

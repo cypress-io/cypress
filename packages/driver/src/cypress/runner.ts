@@ -809,7 +809,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   _runner.on('end', () => {
     return Cypress.action('runner:end', {
       end: new Date(),
-    })
+    }, _runner.stats)
   })
 
   _runner.on('suite', (suite) => {
