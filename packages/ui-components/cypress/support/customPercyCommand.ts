@@ -97,6 +97,8 @@ function setupAxeAndCheckA11y (isComponentTesting?: boolean) {
     })
   }
 
+  Cypress.log({ displayName: '♿️ Accessibility Check ♿️' })
+
   // passing undefined here so that we can set the final boolean to ignore failures for now
   cy.checkA11y(undefined, undefined, undefined, true)
 }
