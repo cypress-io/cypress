@@ -144,6 +144,7 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
     compilerOptions: {
       outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
       allowSyntheticDefaultImports: true,
+      skipLibCheck: true,
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),

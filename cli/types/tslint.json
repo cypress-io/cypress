@@ -38,7 +38,10 @@
       "./mocha/*",
       "./minimatch/*",
       "./sinon/**/*",
-      "./sinon-chai/*"
+      "./sinon-chai/*",
+      // Copied from net-stubbing and renamed to a declaration file. Since it's not originally
+      // a declaration file, we need to exclude it from linting.
+      "./net-stubbing.d.ts"
     ]
   }
 }
