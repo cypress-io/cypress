@@ -62,6 +62,7 @@ const _getAutomation = function (win, options, parent) {
         return fn(message, data)
       }
 
+      debug('Calling screencastOps electron')
       await sendCommand('Page.startScreencast', screencastOpts)
 
       const ret = await fn(message, data)
@@ -104,6 +105,7 @@ const _maybeRecordVideo = function (webContents, options) {
       }
     })
 
+    debug('Calling screencastOps electron')
     await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
   }
 }

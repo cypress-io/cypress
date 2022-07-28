@@ -774,6 +774,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         .value()
 
         const responseDidFail = {}
+        let errorHangingBrowser
         const response = await _postInstanceTests({
           runId,
           instanceId,
@@ -786,11 +787,14 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
         .catch((err) => {
           onError(err)
+          errorHangingBrowser = err
 
           return responseDidFail
         })
 
         if (response === responseDidFail) {
+          debug('Response did fail, hanging browser %o', { response, errorHangingBrowser })
+
           // dont call the cb, let the browser hang until it's killed
           return
         }
