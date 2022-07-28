@@ -11,6 +11,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
+import { DependencyToInstall, inPkgJson, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -146,15 +147,56 @@ export class ProjectConfigManager {
     }
   }
 
-  loadTestingType () {
+  async loadTestingType () {
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
+      try {
+        await this.setupNodeEvents(this._cachedLoadConfig)
+
+        if (typeof this._cachedLoadConfig?.initialConfig?.component?.devServer === 'object') {
+          this.checkDependenciesForComponentTesting(this._cachedLoadConfig?.initialConfig?.component?.devServer)
+        }
+      } catch (e) {
+        this.onLoadError(e)
+      }
     }
+  }
+
+  checkDependenciesForComponentTesting (devServerOptions: Cypress.DevServerConfigOptions) {
+    const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
+    const framework = WIZARD_FRAMEWORKS.find((x) => x.type === devServerOptions.framework)
+
+    // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
+    // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
+    const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
+
+    if (bundler) {
+      const result = inPkgJson(bundler, this.options.projectRoot)
+
+      if (!result.satisfied) {
+        unsupportedDeps.set(result.dependency.type, result)
+      }
+    }
+
+    if (framework && bundler?.type) {
+      for (const dep of framework.dependencies(bundler.type, this.options.projectRoot)) {
+        const res = inPkgJson(dep.dependency, this.options.projectRoot)
+
+        if (!res.satisfied) {
+          unsupportedDeps.set(res.dependency.type, res)
+        }
+      }
+    }
+
+    if (unsupportedDeps.size === 0) {
+      return
+    }
+
+    this.options.ctx.onWarning(getError('COMPONENT_TESTING_MISMATCHED_DEPENDENCIES', Array.from(unsupportedDeps.values())))
   }
 
   private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {

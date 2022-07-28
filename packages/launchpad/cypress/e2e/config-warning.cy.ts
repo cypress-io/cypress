@@ -111,3 +111,18 @@ describe('experimentalStudio', () => {
     cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
   })
 })
+
+describe('component testing dependency warnings', () => {
+  it('works', () => {
+    cy.scaffoldProject('component-testing-outdated-depenencies')
+    cy.addProject('component-testing-outdated-depenencies')
+    cy.openGlobalMode()
+    cy.visitLaunchpad()
+    cy.contains('component-testing-outdated-depenencies').click()
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.get('a').contains('Projects').click()
+    // cy.contains('[data-cy="project-card"]', 'component-testing-outdated-depenencies').click()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy="warning-alert"]').should('exist').should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
+  })
+})
