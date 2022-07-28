@@ -120,6 +120,8 @@ const expectLoadsAngularBuildOptions = () => {
   expect(buildOptions.aot).to.be.false
   expect(buildOptions.optimization).to.be.false
   expect(buildOptions.tsConfig).to.equal(tsConfig)
+  expect(buildOptions.outputHashing).to.equal('none')
+  expect(buildOptions.budgets).to.be.undefined
 
   const modifiedProjectConfig = cloneDeep(projectConfig)
 
