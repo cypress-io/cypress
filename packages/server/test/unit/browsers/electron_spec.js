@@ -494,7 +494,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.not.be.calledWithMatch('Network.setUserAgentOverride')
+            expect(electron._setUserAgent).not.to.be.called
           })
         })
       })
@@ -504,14 +504,24 @@ describe('lib/browsers/electron', () => {
           this.options.experimentalSessionAndOrigin = true
         })
 
+        it('does not attempt to replace the user agent if the user passes in an explicit user agent', function () {
+          userAgent = 'barbaz'
+          this.options.experimentalSessionAndOrigin = false
+          this.options.userAgent = 'foobar'
+
+          return electron._launch(this.win, this.url, this.automation, this.options)
+          .then(() => {
+            expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foobar')
+            expect(electron._setUserAgent).not.to.be.calledWith(this.win.webContents, 'barbaz')
+          })
+        })
+
         it('versioned cypress', function () {
           userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
           })
         })
 
@@ -520,9 +530,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
           })
         })
 
@@ -531,9 +539,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36')
           })
         })
 
@@ -542,9 +548,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36')
           })
         })
 
@@ -553,9 +557,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF')
           })
         })
 
@@ -565,9 +567,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
           })
         })
 
@@ -576,9 +576,7 @@ describe('lib/browsers/electron', () => {
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
-            expect(this.win.webContents.debugger.sendCommand).to.be.calledWithMatch('Network.setUserAgentOverride', {
-              userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
-            })
+            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
           })
         })
       })
