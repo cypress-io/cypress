@@ -423,9 +423,11 @@ module.exports = {
   },
 
   _getUserAgent (webContents) {
-    debug('getting user agent')
+    const userAgent = webContents.session.getUserAgent()
 
-    return webContents.session.getUserAgent()
+    debug('found user agent: %s', userAgent)
+
+    return userAgent
   },
 
   _setUserAgent (webContents, userAgent) {
