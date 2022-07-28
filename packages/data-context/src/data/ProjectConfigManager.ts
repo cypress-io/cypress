@@ -155,7 +155,11 @@ export class ProjectConfigManager {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig)
-      .then(() => this.checkDependenciesForComponentTesting())
+      .then(() => {
+        if (this._testingType === 'component') {
+          this.checkDependenciesForComponentTesting()
+        }
+      })
       .catch(this.onLoadError)
     }
   }
