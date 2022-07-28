@@ -5,8 +5,9 @@ const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const minimist = require('minimist')
-const argsUtil = require(`../../../lib/util/args`)
-const getWindowsProxyUtil = require(`../../../lib/util/get-windows-proxy`)
+const errors = require('../../../lib/errors')
+const argsUtil = require('../../../lib/util/args')
+const getWindowsProxyUtil = require('../../../lib/util/get-windows-proxy')
 
 const cwd = process.cwd()
 
@@ -392,11 +393,17 @@ describe('lib/util/args', () => {
     })
 
     it('allows config properties', function () {
-      const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
+      const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file,baseUrl=https://url.com,component={"indexHtmlFile":"index.html"}')
 
       expect(options.config.port).to.eq(1111)
+
+      expect(options).not.to.have.property('baseUrl')
+      expect(options.config.e2e.baseUrl).to.eq('https://url.com')
+      expect(options.config.component).not.to.have.property('baseUrl')
+
       expect(options.config.e2e.supportFile).to.eq('path/to/support_file')
       expect(options.config.component.supportFile).to.eq('path/to/support_file')
+      expect(options.config.component.indexHtmlFile).to.eq('index.html')
 
       expect(options).not.to.have.property('foo')
       expect(options.config).not.to.have.property('supportFile')
@@ -410,6 +417,19 @@ describe('lib/util/args', () => {
       options = this.setup('--port', 2222)
 
       expect(options.config.port).to.eq(2222)
+    })
+
+    it('warns if invalid configuration options when invoked from CLI', function () {
+      console.log(errors)
+      sinon.stub(errors, 'warning')
+      const options = this.setup('--config', 'foo=bar,bar=foo,baseUrl=https://url.com,e2e={"indexHtmlFile":"index.html"}', '--cwd', cwd)
+
+      expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION', ['foo', 'bar', 'e2e.indexHtmlFile'])
+      expect(options.config).not.to.have.property('baseUrl')
+      expect(options.config.e2e).to.have.property('baseUrl')
+      expect(options.config.e2e).to.have.property('indexHtmlFile')
+      expect(options).not.to.have.property('foo')
+      expect(options).not.to.have.property('bar')
     })
 
     it('throws if config string cannot be parsed', function () {

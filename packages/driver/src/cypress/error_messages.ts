@@ -274,11 +274,11 @@ export default {
       message: `The config override passed to your {{level}}-level override has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_cypress_config_override: {
-      message: `\`Cypress.config()\` cannot override \`{{errProperty}}\` from the {{level}} level.`,
+    invalid_cypress_config_api_override: {
+      message: `\`Cypress.config()\` cannot override \`{{configOptionName}}\` from the {{level}} level.`,
     },
     invalid_test_config_override: {
-      message: `Cypress test configuration cannot override \`{{errProperty}}\` from the {{level}} level.`,
+      message: `Cypress test configuration cannot override \`{{configOptionName}}\` from the {{level}} level.`,
     },
   },
 

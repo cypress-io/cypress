@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
+const { getInvalidRootOptions, getRootConfigKeys, validateConfiguration } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -314,6 +314,24 @@ const parseSpecArgv = (pattern) => {
   return [...partial, sanitizeFinalPath(carry)]
 }
 
+const showWarningForInvalidConfig = (options) => {
+  if (!options.invokedFromCli) {
+    return
+  }
+
+  const result = validateConfiguration(options.config)
+
+  const invalidOptions = _.map(result.invalidOptions, ({ name, configLevel }) => {
+    const scopedName = configLevel === 'root' ? name : `${configLevel}.${name}`
+
+    return scopedName
+  }, [])
+
+  if (invalidOptions.length) {
+    return errors.warning('INVALID_CONFIG_OPTION', invalidOptions)
+  }
+}
+
 /*
  * Certain config options (such as specPattern) are invalid at the root,
  * and can only be used inside a testing type. We want to be convenient
@@ -325,7 +343,7 @@ const parseSpecArgv = (pattern) => {
  * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
  */
 const nestInvalidRootOptions = (config) => {
-  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
+  getInvalidRootOptions().forEach(({ name, testingTypes }) => {
     if (config[name] && testingTypes) {
       testingTypes.forEach((testingType) => {
         if (!config[testingType]) {
@@ -393,8 +411,6 @@ module.exports = {
     .value()
 
     debug('argv parsed: %o', options)
-
-    // throw new Error()
 
     // if we are updating we may have to pluck out the
     // appPath + execPath from the options._ because
@@ -489,7 +505,7 @@ module.exports = {
     nestInvalidRootOptions(options.config, testingType)
 
     // get a list of the available config keys
-    const configKeys = getPublicConfigKeys()
+    const configKeys = getRootConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)
@@ -521,6 +537,8 @@ module.exports = {
     }
 
     debug('argv options: %o', options)
+
+    showWarningForInvalidConfig(options)
 
     return options
   },

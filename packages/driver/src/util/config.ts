@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import { options } from '@packages/config'
 import { preprocessForSerialization } from './serialization'
+import { getTestingTypeConfigOptions } from '@packages/config/src/updated_options'
 
 /**
  * Mutates the config/env object serialized from the other origin to omit read-only values
@@ -12,8 +12,12 @@ import { preprocessForSerialization } from './serialization'
  * @returns a reference to the config/env object passed in
  */
 const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => {
+  const options = getTestingTypeConfigOptions(Cypress.testingType)
+
   Object.keys(objectLikeConfig).forEach((key) => {
-    if (options.find((option) => option.name === key)?.canUpdateDuringTestTime === false) {
+    const { overrideLevels = 'never' } = options.find((option) => option.name === key) || {}
+
+    if (overrideLevels === 'never') {
       delete objectLikeConfig[key]
     }
   })

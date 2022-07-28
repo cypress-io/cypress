@@ -1092,7 +1092,7 @@ describe('lib/config', () => {
       this.defaults = (prop, value, cfg = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return config.mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options)
+        return config.mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, { ...options, testingType: options.testingType || 'e2e' })
         .then((mergedConfig) => {
           expect(mergedConfig[prop]).to.deep.eq(value)
         })
@@ -1469,6 +1469,7 @@ describe('lib/config', () => {
         const options = {
           reporter: 'json',
           port: 1234,
+          testingType: 'e2e',
         }
 
         return config.mergeDefaults(obj, options)
@@ -1489,6 +1490,7 @@ describe('lib/config', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1512,10 +1514,12 @@ describe('lib/config', () => {
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
+            testIsolation: { value: false, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1555,6 +1559,7 @@ describe('lib/config', () => {
           env: {
             baz: 'baz',
           },
+          testingType: 'e2e',
         }
 
         return config.mergeDefaults(obj, options)
@@ -1574,6 +1579,7 @@ describe('lib/config', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1620,9 +1626,11 @@ describe('lib/config', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
+            specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
+            testIsolation: { value: false, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },

@@ -111,7 +111,7 @@ export function mergeDefaults (
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configUtils.allowed({ ...cliConfig, ...options }))
+  .chain(configUtils.allowed({ ...cliConfig, ...options }, testingType))
   .omit('env')
   .omit('browsers')
   .each((val: any, key) => {
@@ -138,21 +138,22 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
+  config = {
+    ...config,
+    ...config[testingType],
+  }
+
   const defaultsForRuntime = configUtils.getDefaultValues(options)
 
   _.defaultsDeep(config, defaultsForRuntime)
 
   let additionalIgnorePattern = config.additionalIgnorePattern
 
-  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+  if (testingType === 'component' && config.e2e && config.e2e.specPattern) {
     additionalIgnorePattern = config.e2e.specPattern
   }
 
-  config = {
-    ...config,
-    ...config[options.testingType],
-    additionalIgnorePattern,
-  }
+  config.additionalIgnorePattern = additionalIgnorePattern || []
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -176,7 +177,7 @@ export function mergeDefaults (
     config.numTestsKeptInMemory = 0
   }
 
-  config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
+  config = setResolvedConfigValues(config, defaultsForRuntime, resolved, testingType)
 
   if (config.port) {
     config = setUrls(config)
@@ -198,8 +199,6 @@ export function mergeDefaults (
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
   debug('validate that there is no breaking config options before setupNodeEvents')
-
-  const { testingType } = options
 
   function makeConfigError (cyError: CypressError) {
     cyError.name = `Obsolete option used in config object`
@@ -227,10 +226,10 @@ export function mergeDefaults (
   return setSupportFileAndFolder(config)
 }
 
-export function setResolvedConfigValues (config, defaults, resolved) {
+export function setResolvedConfigValues (config, defaults, resolved, testingType) {
   const obj = _.clone(config)
 
-  obj.resolved = resolveConfigValues(config, defaults, resolved)
+  obj.resolved = resolveConfigValues(config, defaults, resolved, testingType)
   debug('resolved config is %o', obj.resolved.browsers)
 
   return obj
@@ -349,11 +348,11 @@ export function updateWithPluginValues (cfg, overrides, testingType: TestingType
 // combines the default configuration object with values specified in the
 // configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
-export function resolveConfigValues (config, defaults, resolved = {}) {
+export function resolveConfigValues (config, defaults, resolved = {}, testingType) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(configUtils.getPublicConfigKeys())
+  .pick(configUtils.getConfigKeys(testingType))
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
