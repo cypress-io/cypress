@@ -238,7 +238,7 @@ class $Cypress {
 
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      const validationLevel = this.state('runnable') ? 'testTime' : this.state('test')._testConfig.applied
+      const validationLevel = this.state('runnable') ? 'testTime' : this.state('test')?._testConfig?.applied || 'beforeSpec'
 
       const validationResult = validateConfiguration(config, validationLevel, this.testingType)
 
@@ -246,7 +246,7 @@ class $Cypress {
         const enforceConfigOverrideRules = this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig
         const errMsg = $errUtils.errByPath(invalidOpt.errorKey, {
           configOptionName: invalidOpt.name,
-          level: this.state('runnable')?.type || this.state('test')._testConfig.applied,
+          level: this.state('runnable')?.type || this.state('test')?._testConfig?.applied,
         })
 
         if (enforceConfigOverrideRules) {

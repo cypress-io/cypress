@@ -291,7 +291,7 @@ export const collectValidationResults = (config: Record<string, any>, validation
   return result as ValidationRecord
 }
 
-const validationLevels = ['configFile', 'pluginMerge', 'suite', 'test', 'testTime'] as const
+const validationLevels = ['configFile', 'pluginMerge', 'beforeSpec', 'suite', 'test', 'testTime'] as const
 
 type ValidationLevels = typeof validationLevels
 

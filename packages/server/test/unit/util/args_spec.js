@@ -420,7 +420,6 @@ describe('lib/util/args', () => {
     })
 
     it('warns if invalid configuration options when invoked from CLI', function () {
-      console.log(errors)
       sinon.stub(errors, 'warning')
       const options = this.setup('--config', 'foo=bar,bar=foo,baseUrl=https://url.com,e2e={"indexHtmlFile":"index.html"}', '--cwd', cwd)
 
