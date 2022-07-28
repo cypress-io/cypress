@@ -1,9 +1,21 @@
 top.count = top.count || 0
 
-describe('persist saved sessions between spec reruns', () => {
+// @see https://github.com/cypress-io/cypress/issues/17805
+describe('recreates session on spec reload in open mode', () => {
   it('sets session', () => {
+    let validateFlag = false
+
     cy.session('persist_session', () => {
-      cy.setCookie('cookieName', 'cookieValue')
+      validateFlag = true
+    },
+    {
+      validate () {
+        if (validateFlag) {
+          return true
+        }
+
+        return false
+      },
     })
 
     if (!top.count) {
@@ -23,10 +35,8 @@ describe('persist saved sessions between spec reruns', () => {
       })
     }
 
-    cy.$$('.runnable-active', top.document)[0].click()
-
     cy.wrap(null).should(() => {
-      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('restored')
+      expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('recreated')
     })
   })
 })
