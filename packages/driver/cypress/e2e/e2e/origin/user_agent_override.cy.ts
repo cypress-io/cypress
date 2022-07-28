@@ -1,6 +1,6 @@
 // @see https://github.com/cypress-io/cypress/issues/22953
 // We modify the user agent to strip cypress and electron out of the user agent string to appear more chrome-like
-// this only happens in electron and when the experimentalSessionAndOrigin flag is set to true
+// this only happens in electron and when the experimentalModifyObstructiveThirdPartyCode flag is set to true
 describe('user agent override', {
   browser: 'electron',
 }, () => {

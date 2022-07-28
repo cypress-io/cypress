@@ -338,7 +338,6 @@ describe('lib/browsers/electron', () => {
     describe('adding header aut iframe requests', function () {
       beforeEach(function () {
         this.options.experimentalSessionAndOrigin = true
-        electron._getUserAgent.returns('')
       })
 
       it('does not add header if not a sub frame', function () {
