@@ -109,13 +109,6 @@
     execa "^5.1.1"
     find-up "^5.0.0"
 
-"@antfu/utils@^0.2.4":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@antfu/utils/-/utils-0.2.4.tgz#c7d33fc6faa0d3a6fcc2555673f5e9b19c0fbc15"
-  integrity sha512-2bZNkVfL9IZESmvE26UKi8SzyvSoaIsGXDcnbHFMtmGMqUiB1fXpAJ1ijGf+tSqKRQ5yagck2U1Qk0p+705/kw==
-  dependencies:
-    "@types/throttle-debounce" "^2.1.0"
-
 "@antfu/utils@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@antfu/utils/-/utils-0.3.0.tgz#6306c43b52a883bd8e973e3ed8dd64248418bcc4"
@@ -2438,15 +2431,30 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-9.0.1.tgz#c27b391d8457d1e893f1eddeaf5e5412d12ffbb5"
   integrity sha512-6It2EVfGskxZCQhuykrfnALg7oVeiI6KclWSmGDqB0AiInVrTGB9Jp9i4/Ad21u9Jde/voVQz6eFX/eSg/UsPA==
 
-"@cypress-design/css@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.4.1.tgz#40c73462a1b8a04a2d045cef43d5e2480c3bbf2f"
-  integrity sha512-ycyrNcqm9Cy0+IrhVa7Ef9dSv+B/p69T0Sw6zhLDxHwq4S0YxtFgE4zf8R7O4SbR8vlU/YpV5GSQhaXCFLsQXg==
+"@cypress-design/css@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.5.2.tgz#bcb43bb2d6f872de8691d6acb546680b335ea757"
+  integrity sha512-ZuHdhbcCgEfKuggGYS4AkSGfkB2ZCsWewBYUNH/U+oYnkhDITgaSMKp0RWfBWrnqqyhD2mTYx8gNRWCNQ7tw8w==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
+    lodash "^4.17.21"
     vite-plugin-windicss "^1.8.4"
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
+
+"@cypress-design/icon-registry@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.4.2.tgz#bc2d913208acb33b5dfb1d8f6d7929b153e32ba0"
+  integrity sha512-iyH5xFc2abpwVPTEjoJ2ILIQy79DaR6ata76HAk9NHPWVUwG/yUPEzvp3m2T8IqgebNEuTtl4mBHM/u+jycxng==
+  dependencies:
+    camelcase "^6.3.0"
+
+"@cypress-design/vue-icon@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.4.2.tgz#3574a749efbdaf83f48251108c016c3d383160bd"
+  integrity sha512-i7YWizC/c1LFdxVZSbyTIOrj4LeiIxypemCXdygacmvogQS2buBC+CovqCMFAzKqnfBZUBGiQajMWWM5rzIduw==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.4.2"
 
 "@cypress/browserify-preprocessor@3.0.0":
   version "3.0.0"
@@ -8223,15 +8231,6 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@windicss/config@1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@windicss/config/-/config-1.2.4.tgz#24b36d30c1698fff14a9bacaebc93afaf2fe9019"
-  integrity sha512-81oah5NF7m/ltHrP2VpKu12qejP03erelNckH9ho86vuItsSd/tNehW3oJqOThZYsbuROCzIU55QDfe7MBd+Iw==
-  dependencies:
-    debug "^4.3.2"
-    jiti "^1.10.1"
-    windicss "^3.1.4"
-
 "@windicss/config@1.8.4":
   version "1.8.4"
   resolved "https://registry.yarnpkg.com/@windicss/config/-/config-1.8.4.tgz#090c7f48cb86b6cba1bd97742a2f012852026d3c"
@@ -8245,19 +8244,6 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@windicss/plugin-interaction-variants/-/plugin-interaction-variants-1.0.0.tgz#11e412c6fd653899f6cced4e4f7b402eb5456981"
   integrity sha512-jk0kvJEwphPlzjgCASxi0yCrLIrMPBHKTjPB1vF2LZsmWVaIPhKQRfpJW6+G093ipDos1E2BkevDrh/R2Ln8gg==
-
-"@windicss/plugin-utils@1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@windicss/plugin-utils/-/plugin-utils-1.2.4.tgz#b319355d6e9b4e529c965b5a55af6d57679e417f"
-  integrity sha512-0G0zPx+gLfnP2isVMrsY+C0BDXASgFwtiT7g+YL+0LCTxjPxGOMnu5lCaAoYq+1LAskliPagqnu5mgKUYMyf2Q==
-  dependencies:
-    "@antfu/utils" "^0.2.4"
-    "@windicss/config" "1.2.4"
-    debug "^4.3.2"
-    fast-glob "^3.2.6"
-    magic-string "^0.25.7"
-    micromatch "^4.0.4"
-    windicss "^3.1.4"
 
 "@windicss/plugin-utils@1.8.4", "@windicss/plugin-utils@^1.1.1", "@windicss/plugin-utils@^1.8.4":
   version "1.8.4"
@@ -11698,7 +11684,7 @@ camelcase@^5.0.0, camelcase@^5.2.0, camelcase@^5.3.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-camelcase@^6.0.0, camelcase@^6.2.0:
+camelcase@^6.0.0, camelcase@^6.2.0, camelcase@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
@@ -21716,7 +21702,7 @@ jimp@^0.2.21:
     tinycolor2 "^1.1.2"
     url-regex "^3.0.0"
 
-jiti@^1.10.1, jiti@^1.13.0:
+jiti@^1.13.0:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.13.0.tgz#3cdfc4e651ca0cca4c62ed5e47747b5841d41a8e"
   integrity sha512-/n9mNxZj/HDSrincJ6RP+L+yXbpnB8FybySBa+IjIaoH9FIxBbrbRT5XUbe8R7zuVM2AQqNMNDDqz0bzx3znOQ==
@@ -35043,17 +35029,7 @@ vite-plugin-vue-layouts@0.6.0:
     debug "^4.3.2"
     fast-glob "^3.2.7"
 
-vite-plugin-windicss@1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-1.2.4.tgz#b9ea60482dd8b6ba4fbc717ff5a9d17dedb0683b"
-  integrity sha512-U+mW8AiPRgC5wbUqjtvEIbZR3LzOwhNU0wnYQueT2SjjTfjlP74vcQg37yrULxycKibpdTYVHZuDuW4QkglPng==
-  dependencies:
-    "@windicss/plugin-utils" "1.2.4"
-    chalk "^4.1.1"
-    debug "^4.3.2"
-    windicss "^3.1.4"
-
-vite-plugin-windicss@^1.4.7, vite-plugin-windicss@^1.8.4:
+vite-plugin-windicss@^1.8.4:
   version "1.8.4"
   resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-1.8.4.tgz#98430706691d54d6b9bf43ac0e3c74dd26b10664"
   integrity sha512-LSZAO8BZn3x406GRbYX5t5ONXXJVdqiQtN1qrznLA/Dy5/NzZVhfcrL6N1qEYYO7HsCDT4pLAjTzObvDnM9Y8A==
@@ -35992,7 +35968,7 @@ windicss-webpack-plugin@^1.6.10:
     webpack-virtual-modules "^0.4.3"
     windicss "^3.5.1"
 
-windicss@^3.1.4, windicss@^3.5.1:
+windicss@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/windicss/-/windicss-3.5.1.tgz#5e279c21179dbc122122d0b3a3a2651511249241"
   integrity sha512-E1hYZATcZFci/XhGS0sJAMRxULjnK+glNukE78Ku7xeb3jxgMY55fFOdIrav+GjQCsgR+IZxPq9/DwmO6eyc4Q==
