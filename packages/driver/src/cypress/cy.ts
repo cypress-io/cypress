@@ -808,14 +808,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // Selectors are functions that accept args (which is called once each time the command is used in the spec
       // file), which return a function that accepts the subject (which is potentially called any number of times).
-      // The outer function is used to store any needed state needed by a particular instance of the command, while
-      // inner one (selectorFn, right here) is the one that determines the next subject.
+      // The outer function is used to store any needed state needed by a particular instance of the command, such as
+      // a Cypress.log() instance, while the inner one (selectorFn here) is the one that determines the next subject.
 
-      // We enqueue the outer function as the "cypress command". When it returns, we immediately invoke the inner
-      // function, retrying it in the normal loop until it succeeds. Once it passes the first time, it is added
-      // to the current chainer's subject chain.
-
-      // See command_queue.ts for more details.
+      // We enqueue the outer function as the "cypress command". See command_queue.ts for details on how this is
+      // invoked and the inner function retried.
       const command = $Command.create({
         name,
         args,

@@ -56,7 +56,16 @@ const commandRunningFailed = (Cypress, state, err) => {
   })
 }
 
-async function retrySelector (command: $Command, ret: any, isCy) {
+/*
+ * Selectors are simple beasts: They take arguments, and return an idempotent function. They contain no retry
+ *logic, have no awareness of cy.stop(), and are entirely synchronous.
+ *
+ * retrySelector is where we intergrate this simplicity with Cypress' retryability. It verifies the return value is
+ * a sync function, and retries selectors until they pass or time out. It is conceptually similar to
+ * cy.verifyUpcomingAssertions, but inverted - the command_queue calls retrySelector for selectors, while each
+ * individual action command is responsible for calling verifyUpcomingAssertions.
+ */
+function retrySelector (command: $Command, ret: any, isCy) {
   if ($utils.isPromiseLike(ret) && !isCy(ret)) {
     $errUtils.throwErrByPath(
       'selector_command.returned_promise', {
@@ -192,6 +201,9 @@ export class CommandQueue extends Queue<$Command> {
       let ret
       let enqueuedCmd
 
+      // Selectors can invoke other selectors - they are synchronous, and get added to the subject chain without
+      // issue. But they cannot contain action commands, which are async.
+      // This callback watches to ensure users don't try and invoke any actions while inside a selector.
       const commandEnqueued = (obj) => {
         if (isSelector && !obj.selector) {
           $errUtils.throwErrByPath(
@@ -222,12 +234,9 @@ export class CommandQueue extends Queue<$Command> {
       try {
         ret = __stackReplacementMarker(command.get('fn'), args)
 
-        // Selectors return a function which takes the current subject and returns the next
-        // subject. We wrap this in cy.verifyUpcomingAssertions() - as all retryable cypress
-        // commands function - and let it retry until it passes.
-
-        // We save the original return value on the $Command though - it's what gets added to
-        // the subject chain later.
+        // Selectors return a function which takes the current subject and returns the next subject. We wrap this in
+        // retrySelector() - and let it retry until it passes, times out or is cancelled.
+        // We save the original return value on the $Command though - it's what gets added to the subject chain later.
         if (isSelector) {
           command.set('selectorFn', ret)
           ret = retrySelector(command, ret, this.isCy)
@@ -313,12 +322,12 @@ export class CommandQueue extends Queue<$Command> {
         // For selectors, the "subject" here is the command's return value, which is a function which
         // accepts a subject and returns a subject, and can be re-invoked at any time.
 
-        // We add the command name here to make debugging easier; It should not be used functionally.
+        // We add the command name here only to make debugging easier; It should not be relied on functionally.
         subject.commandName = name
         cy.addSelectorToChainer(command.get('chainerId'), subject)
       } else {
         // For action commands, the "subject" here is the command's return value, which replaces
-        // the current subject chain. We cannot re-invoke action commands - the return value here is "final".
+        // the current subject chain. We cannot re-invoke action commands - the return value here is final.
         cy.setSubjectForChainer(command.get('chainerId'), subject)
       }
 

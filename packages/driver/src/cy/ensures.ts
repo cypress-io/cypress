@@ -278,6 +278,19 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureExistence = (subject, command) => {
+    // Cypress action commands use verifyUpcomingAssertions(), which collects both implicit assertions
+    // such as "element exists" and upcoming assertions, such as a potential should("not.exist"), then
+    // decides which assertions to actually run (skipping ensureExistence if there's an upcoming not.exist).
+    // For actions, `command` is undefined - and this code never executes at all if we're actually asserting
+    // against element existence.
+
+    // Selectors work a bit differently. There are no implicit assertions - they are always explicit, directly
+    // in the function body. Selectors themselves also do not look ahead - they always invoke their assertions.
+    // In the case of an upcoming shouldS('not.exist'), asserting-selector.js watches to see if any `not.exist` or `have.length`
+    // assertions are queued, and sets `skipExistenceAssertion` on the *previous* command.
+
+    // So if there's an upcoming .should('not.exist') command, this condition bypasses the ensureExistence() check on
+    // the previous command.
     if (command && command?.get('skipExistenceAssertion')) {
       return
     }

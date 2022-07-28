@@ -478,7 +478,10 @@ chai.use((chai, u) => {
         err = e
       }
 
-      if (!cy.state('current').get('selector')) {
+      // Selectors are always responsible for generating their own log messages, and associating any assertion
+      // errors with them. If we're currently executing a selector, then we don't need Cypress' custom assertFn,
+      // whose job it is to create a Cypress.log for any thrown error.
+      if (!cy.state('current') || !cy.state('current').get('selector')) {
         assertFn(passed, message, value, actual, expected, err)
       }
 
