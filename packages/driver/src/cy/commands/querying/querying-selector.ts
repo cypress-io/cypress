@@ -4,8 +4,18 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 
+/*
+ * __internalSelectorGet is a proof-of-concept of a selector command that replicates the functionality of cy.get(). It
+ * should be considered unstable and experimental, not suitable for general use.
+ *
+ * It exists as a platform to test the development as use of selector commands in the Detached DOM effort, and is merged
+ * as-is in an effort to avoid long-running branches and allow incremental reviews. It is intended as a candidate to
+ * eventually replace cy.should() entirely.
+ *
+ * https://github.com/cypress-io/cypress/issues/7306
+ */
 export default (Commands, Cypress, cy, state) => {
-  Commands.addSelector('getS', null, function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow> = {}) {
+  Commands.addSelector('__internalSelectorGet', null, function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow> = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },

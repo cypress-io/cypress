@@ -19,7 +19,7 @@ const __stackReplacementMarker = (fn, args) => {
   return fn(...args)
 }
 
-const commandRunningFailed = (Cypress, state, err) => {
+async const commandRunningFailed = (Cypress, state, err) => {
   // allow for our own custom onFail function
   if (err.onFail) {
     err.onFail(err)

@@ -6,6 +6,16 @@ import $errUtils from '../../cypress/error_utils'
 const reExistence = /exist/
 const reHaveLength = /length/
 
+/*
+ * __internalSelectorShould is a proof-of-concept of a selector command that replicates the functionality of
+ * cy.should(). It should be considered unstable and experimental, not suitable for general use.
+ *
+ * It exists as a platform to test the development as use of selector commands in the Detached DOM effort, and is merged
+ * as-is in an effort to avoid long-running branches and allow incremental reviews. It is intended as a candidate to
+ * eventually replace cy.get() entirely.
+ *
+ * https://github.com/cypress-io/cypress/issues/7306
+ */
 export default function (Commands, Cypress, cy, state) {
   Cypress.on('command:enqueued', (obj) => {
     if ((obj.name === 'shouldS' || obj.name === 'andS')) {
@@ -119,6 +129,6 @@ export default function (Commands, Cypress, cy, state) {
     }
   }
 
-  Commands.addSelector('shouldS', null, shouldS)
-  Commands.addSelector('andS', null, shouldS)
+  Commands.addSelector('__internalSelectorShould', null, shouldS)
+  Commands.addSelector('__internalSelectorAnd', null, shouldS)
 }

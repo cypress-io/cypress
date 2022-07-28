@@ -2,18 +2,23 @@ const { assertLogLength } = require('../../../support/utils')
 
 const { _, $ } = Cypress
 
+/*
+ * This file is a partial copy of selector.cy.ts, exercising the functionality of cy.get()
+ * using selector commands (__internalSelectorGet and __internalSelectorShould). It should
+ * eventually be removed at the same time as those commands are merged into cy.get() / cy.should().
+ */
 describe('src/cy/commands/querying-selector', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
 
-  context('#getS', {
+  context('#__internalSelectorGet', {
     defaultCommandTimeout: 2000,
   }, () => {
     it('finds by selector', () => {
       const list = cy.$$('#list')
 
-      cy.getS('#list').then(($list) => {
+      cy.__internalSelectorGet('#list').then(($list) => {
         expect($list.get(0)).to.eq(list.get(0))
       })
     })
@@ -30,7 +35,7 @@ describe('src/cy/commands/querying-selector', () => {
         }
       })
 
-      cy.getS('#missing-el').then(($div) => {
+      cy.__internalSelectorGet('#missing-el').then(($div) => {
         expect($div).to.match(missingEl)
       })
     })
@@ -46,7 +51,7 @@ describe('src/cy/commands/querying-selector', () => {
         cy.$$('body').append(missingEl)
       }))
 
-      cy.getS('#missing-el', { timeout: 10000 })
+      cy.__internalSelectorGet('#missing-el', { timeout: 10000 })
     })
 
     it('does not factor in the total time the test has been running', () => {
@@ -66,7 +71,7 @@ describe('src/cy/commands/querying-selector', () => {
       .wait(defaultCommandTimeout + 100)
       .get('#missing-el', { timeout: defaultCommandTimeout + 50 })
       // it should reset the timeout back
-      // to 200 after successfully finishing 'getS' method
+      // to 200 after successfully finishing '__internalSelectorGet' method
       .then(() => {
         expect(cy.timeout()).to.eq(defaultCommandTimeout)
       })
@@ -101,7 +106,7 @@ describe('src/cy/commands/querying-selector', () => {
       // <foobarbazquux>custom element</foobarbazquux>
 
       it('can get a custom element', () => {
-        cy.getS('foobarbazquux').shouldS('contain', 'custom element')
+        cy.__internalSelectorGet('foobarbazquux').__internalSelectorShould('contain', 'custom element')
       })
     })
 
@@ -113,7 +118,7 @@ describe('src/cy/commands/querying-selector', () => {
           cy.$$('body').append($('<div id=\'missing-el\'>missing el</div>'))
         }))
 
-        cy.getS('#missing-el').shouldS('exist')
+        cy.__internalSelectorGet('#missing-el').__internalSelectorShould('exist')
       })
     })
 
@@ -125,11 +130,11 @@ describe('src/cy/commands/querying-selector', () => {
           cy.$$('#button').remove()
         }))
 
-        cy.getS('#button').shouldS('not.exist')
+        cy.__internalSelectorGet('#button').__internalSelectorShould('not.exist')
       })
 
       it('returns null when cannot find element', () => {
-        cy.getS('#missing-el').shouldS('not.exist').then(($el) => {
+        cy.__internalSelectorGet('#missing-el').__internalSelectorShould('not.exist').then(($el) => {
           expect($el).to.be.null
         })
       })
@@ -144,7 +149,7 @@ describe('src/cy/commands/querying-selector', () => {
 
         cy.on('command:retry', retry)
 
-        cy.getS('#list li:last').shouldS('not.exist').then(($el) => {
+        cy.__internalSelectorGet('#list li:last').__internalSelectorShould('not.exist').then(($el) => {
           expect($el).to.be.null
         })
       })
@@ -154,7 +159,7 @@ describe('src/cy/commands/querying-selector', () => {
       it('finds invisible elements by default', () => {
         const button = cy.$$('#button').hide()
 
-        cy.getS('#button').then(($button) => {
+        cy.__internalSelectorGet('#button').then(($button) => {
           expect($button.get(0)).to.eq(button.get(0))
         })
       })
@@ -164,10 +169,10 @@ describe('src/cy/commands/querying-selector', () => {
       it('returns invisible element', () => {
         const button = cy.$$('#button').hide()
 
-        // cy.getS("#button").then ($button) ->
+        // cy.__internalSelectorGet("#button").then ($button) ->
         // expect($button).not.to.be.visible
 
-        cy.getS('#button').shouldS('not.be.visible').then(($button) => {
+        cy.__internalSelectorGet('#button').__internalSelectorShould('not.be.visible').then(($button) => {
           expect($button.get(0)).to.eq(button.get(0))
         })
       })
@@ -184,7 +189,7 @@ describe('src/cy/commands/querying-selector', () => {
 
         cy.on('command:retry', retry)
 
-        cy.getS('#button').shouldS('not.be.visible').then(($button) => {
+        cy.__internalSelectorGet('#button').__internalSelectorShould('not.be.visible').then(($button) => {
           expect($button.get(0)).to.eq(button.get(0))
         })
       })
@@ -194,7 +199,7 @@ describe('src/cy/commands/querying-selector', () => {
       it('returns visible element', () => {
         const button = cy.$$('#button')
 
-        cy.getS('#button').shouldS('be.visible').then(($button) => {
+        cy.__internalSelectorGet('#button').__internalSelectorShould('be.visible').then(($button) => {
           expect($button.get(0)).to.eq(button.get(0))
         })
       })
@@ -211,7 +216,7 @@ describe('src/cy/commands/querying-selector', () => {
 
         cy.on('command:retry', retry)
 
-        cy.getS('#button').shouldS('be.visible').then(($button) => {
+        cy.__internalSelectorGet('#button').__internalSelectorShould('be.visible').then(($button) => {
           expect($button.get(0)).to.eq(button.get(0))
         })
       })
@@ -221,7 +226,7 @@ describe('src/cy/commands/querying-selector', () => {
       it('resolves once length equals n', () => {
         const forms = cy.$$('form')
 
-        cy.getS('form').shouldS('have.length', forms.length).then(($forms) => {
+        cy.__internalSelectorGet('form').__internalSelectorShould('have.length', forms.length).then(($forms) => {
           expect($forms.length).to.eq(forms.length)
         })
       })
@@ -240,7 +245,7 @@ describe('src/cy/commands/querying-selector', () => {
         }))
 
         // should resolving after removing 2 buttons
-        cy.getS('button').shouldS('have.length', length).then(($buttons) => {
+        cy.__internalSelectorGet('button').__internalSelectorShould('have.length', length).then(($buttons) => {
           expect($buttons.length).to.eq(length)
         })
       })
@@ -252,7 +257,7 @@ describe('src/cy/commands/querying-selector', () => {
           cy.$$('button:first').attr('data-foo', 'bar')
         }))
 
-        cy.getS('button:first').shouldS('have.attr', 'data-foo').andS('match', /bar/)
+        cy.__internalSelectorGet('button:first').__internalSelectorShould('have.attr', 'data-foo').__internalSelectorAnd('match', /bar/)
       })
     })
 
@@ -261,7 +266,7 @@ describe('src/cy/commands/querying-selector', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'getS') {
+          if (attrs.name === '__internalSelectorGet') {
             this.lastLog = log
 
             this.logs.push(log)
@@ -285,13 +290,13 @@ describe('src/cy/commands/querying-selector', () => {
         })
 
         // should resolving after removing 2 buttons
-        cy.getS('button').shouldS('have.length', length).then(function ($buttons) {
+        cy.__internalSelectorGet('button').__internalSelectorShould('have.length', length).then(function ($buttons) {
           expect(this.lastLog.get('numElements')).to.eq(length)
         })
       })
 
       it('logs exist: false', () => {
-        cy.getS('#does-not-exist').shouldS('not.exist').then(function () {
+        cy.__internalSelectorGet('#does-not-exist').__internalSelectorShould('not.exist').then(function () {
           expect(this.lastLog.get('message')).to.eq('#does-not-exist')
 
           expect(this.lastLog.get('$el').get(0)).not.to.be.ok
@@ -300,7 +305,7 @@ describe('src/cy/commands/querying-selector', () => {
 
       it('logs immediately before resolving', (done) => {
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'getS') {
+          if (attrs.name === '__internalSelectorGet') {
             expect(log.pick('state', 'referencesAlias', 'aliasType')).to.deep.eq({
               state: 'pending',
               referencesAlias: undefined,
@@ -311,13 +316,13 @@ describe('src/cy/commands/querying-selector', () => {
           }
         })
 
-        cy.getS('body')
+        cy.__internalSelectorGet('body')
       })
 
       it('#consoleProps', () => {
-        cy.getS('body').then(function ($body) {
+        cy.__internalSelectorGet('body').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'getS',
+            Command: '__internalSelectorGet',
             Selector: 'body',
             Yielded: $body.get(0),
             Elements: 1,
@@ -333,7 +338,7 @@ describe('src/cy/commands/querying-selector', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'getS' || attrs.name === 'should') {
+          if (attrs.name === '__internalSelectorGet' || attrs.name === 'should') {
             this.lastLog = log
             this.logs.push(log)
           }
@@ -349,7 +354,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('.spinner\'')
+        cy.__internalSelectorGet('.spinner\'')
       })
 
       it('throws on too many elements after timing out waiting for length', (done) => {
@@ -361,7 +366,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('button').shouldS('have.length', buttons.length - 1)
+        cy.__internalSelectorGet('button').__internalSelectorShould('have.length', buttons.length - 1)
       })
 
       it('throws on too few elements after timing out waiting for length', (done) => {
@@ -373,7 +378,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('button').shouldS('have.length', buttons.length + 1)
+        cy.__internalSelectorGet('button').__internalSelectorShould('have.length', buttons.length + 1)
       })
 
       it('throws after timing out not finding element', (done) => {
@@ -383,7 +388,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#missing-el')
+        cy.__internalSelectorGet('#missing-el')
       })
 
       it('throws after timing out not finding element when should exist', (done) => {
@@ -393,7 +398,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#missing-el').shouldS('exist')
+        cy.__internalSelectorGet('#missing-el').__internalSelectorShould('exist')
       })
 
       it('throws existence error without running assertions', (done) => {
@@ -403,7 +408,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#missing-el').shouldS('have.prop', 'foo')
+        cy.__internalSelectorGet('#missing-el').__internalSelectorShould('have.prop', 'foo')
       })
 
       it('throws after timing out while not trying to find an element', (done) => {
@@ -413,7 +418,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('div:first').shouldS('not.exist')
+        cy.__internalSelectorGet('div:first').__internalSelectorShould('not.exist')
       })
 
       it('throws after timing out while trying to find an invisible element', (done) => {
@@ -423,7 +428,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('div:first').shouldS('not.be.visible')
+        cy.__internalSelectorGet('div:first').__internalSelectorShould('not.be.visible')
       })
 
       it('does not include message about why element was not visible', (done) => {
@@ -433,7 +438,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('div:first').shouldS('not.be.visible')
+        cy.__internalSelectorGet('div:first').__internalSelectorShould('not.be.visible')
       })
 
       it('throws after timing out trying to find a visible element', (done) => {
@@ -445,7 +450,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#button').shouldS('be.visible')
+        cy.__internalSelectorGet('#button').__internalSelectorShould('be.visible')
       })
 
       it('includes a message about why the element was not visible', (done) => {
@@ -457,7 +462,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#button').shouldS('be.visible')
+        cy.__internalSelectorGet('#button').__internalSelectorShould('be.visible')
       })
 
       it('sets error command state', function (done) {
@@ -470,7 +475,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('foobar')
+        cy.__internalSelectorGet('foobar')
       })
 
       _.each(['', 'foo', [], 1, null], (value) => {
@@ -481,7 +486,7 @@ describe('src/cy/commands/querying-selector', () => {
             done()
           })
 
-          cy.getS('foobar', value)
+          cy.__internalSelectorGet('foobar', value)
         })
       })
 
@@ -502,7 +507,7 @@ describe('src/cy/commands/querying-selector', () => {
           done()
         })
 
-        cy.getS('#button').shouldS('be.visible')
+        cy.__internalSelectorGet('#button').__internalSelectorShould('be.visible')
       })
     })
   })
