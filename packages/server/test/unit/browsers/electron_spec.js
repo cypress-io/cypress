@@ -188,6 +188,7 @@ describe('lib/browsers/electron', () => {
       sinon.stub(electron, '_clearCache').resolves()
       sinon.stub(electron, '_setProxy').resolves()
       sinon.stub(electron, '_setUserAgent')
+      sinon.stub(electron, '_getUserAgent')
     })
 
     it('sets menu.set whether or not its in headless mode', function () {
@@ -337,11 +338,7 @@ describe('lib/browsers/electron', () => {
     describe('adding header aut iframe requests', function () {
       beforeEach(function () {
         this.options.experimentalSessionAndOrigin = true
-        this.win.webContents.debugger.sendCommand = sinon.stub().withArgs('Browser.getVersion').callsFake(() => {
-          return {
-            userAgent: '',
-          }
-        })
+        electron._getUserAgent.returns('')
       })
 
       it('does not add header if not a sub frame', function () {
@@ -481,11 +478,7 @@ describe('lib/browsers/electron', () => {
 
       beforeEach(function () {
         userAgent = ''
-        this.win.webContents.debugger.sendCommand = sinon.stub().withArgs('Browser.getVersion').callsFake(() => {
-          return {
-            userAgent,
-          }
-        })
+        electron._getUserAgent.callsFake(() => userAgent)
       })
 
       describe('disabled', function () {

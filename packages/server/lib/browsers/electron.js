@@ -61,7 +61,7 @@ const _getAutomation = async function (win, options, parent) {
   // Only pertains to e2e code as experimentalSessionAndOrigin is enforced only as an e2e config option
   // @see https://github.com/cypress-io/cypress/issues/22953
   if (options.experimentalSessionAndOrigin && !options.userAgent) {
-    const { userAgent } = await sendCommand('Browser.getVersion')
+    const userAgent = await this._getUserAgent(win.webContents)
     // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
     const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
 
@@ -423,6 +423,12 @@ module.exports = {
     debug('clearing cache')
 
     return webContents.session.clearCache()
+  },
+
+  _getUserAgent (webContents) {
+    debug('getting user agent')
+
+    return webContents.session.getUserAgent()
   },
 
   _setUserAgent (webContents, userAgent) {
