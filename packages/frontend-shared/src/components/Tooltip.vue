@@ -77,13 +77,6 @@ const actualPopperClass = computed(() => {
   }
 }
 
-.v-popper__popper {
-  // Our modal overlays use a backdrop z-index of 10, but the tooltip lib defaults to 10000 which causes
-  // tooltips to overlay modals & modal backdrops. Override to set z-index so that tooltips aren't
-  // forced atop items they shouldn't be
-  z-index: 9;
-}
-
 .v-popper__popper.v-popper--theme-tooltip {
   .v-popper__inner {
     @apply bg-gray-900 py-2 px-4;

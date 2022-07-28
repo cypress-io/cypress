@@ -1,6 +1,8 @@
 import { LoginModalFragmentDoc } from '../../generated/graphql-test'
 import LoginModal from './LoginModal.vue'
 import { defaultMessages } from '@cy/i18n'
+import Tooltip from '../../components/Tooltip.vue'
+import { ref } from 'vue'
 
 const text = defaultMessages.topNav
 
@@ -193,5 +195,43 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       .should('be.visible')
       .and('be.disabled')
     })
+  })
+
+  it('automatically closes tooltips on open', () => {
+    const tooltipSlots = {
+      default: () => <div data-cy="tooltip-trigger">Trigger</div>,
+      popper: () => <div data-cy="tooltip-content">Tooltip Content</div>,
+    }
+    const isOpen = ref(false)
+
+    cy.mountFragment(LoginModalFragmentDoc, {
+      render: (gqlVal) => {
+        gqlVal.authState.browserOpened = true
+
+        return (
+          <div>
+            <Tooltip v-slots={tooltipSlots} isInteractive />
+            <LoginModal gql={gqlVal} utmMedium="testing" modelValue={isOpen.value} />
+          </div>
+        )
+      },
+    })
+
+    // Open tooltip
+    cy.findByTestId('tooltip-trigger').trigger('mouseenter')
+
+    // Wait for tooltip to be visible
+    cy.findByTestId('tooltip-content')
+    .should('be.visible')
+    .then(() => {
+      // Open modal
+      isOpen.value = true
+    })
+
+    // Verify tooltip is no longer open once modal was opened
+    cy.findByTestId('tooltip-content')
+    .should('not.be.visible')
+
+    cy.percySnapshot()
   })
 })
