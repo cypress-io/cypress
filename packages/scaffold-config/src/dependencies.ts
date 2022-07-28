@@ -4,7 +4,7 @@ export const WIZARD_DEPENDENCY_WEBPACK = {
   package: 'webpack',
   installer: 'webpack',
   description: 'Webpack is a module bundler',
-  minVersion: '>=4.0.0',
+  minVersion: '>=4.0.0 || >=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_2 = {
@@ -31,7 +31,7 @@ export const WIZARD_DEPENDENCY_REACT = {
   package: 'react',
   installer: 'react',
   description: 'A JavaScript library for building user interfaces',
-  minVersion: '>=16.x',
+  minVersion: '>=16.0.0 || >=17.0.0 || >=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_REACT_DOM = {
@@ -40,7 +40,7 @@ export const WIZARD_DEPENDENCY_REACT_DOM = {
   package: 'react-dom',
   installer: 'react-dom',
   description: 'This package serves as the entry point to the DOM and server renderers for React',
-  minVersion: '>=16.x',
+  minVersion: '>=16.0.0 || >=17.0.0 || >=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_TYPESCRIPT = {
@@ -58,7 +58,7 @@ export const WIZARD_DEPENDENCY_REACT_SCRIPTS = {
   package: 'react-scripts',
   installer: 'react-scripts',
   description: 'Create React apps with no build configuration',
-  minVersion: '>=4.0.0',
+  minVersion: '^=4.0.0 || ^=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
@@ -67,7 +67,7 @@ export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
   package: '@vue/cli-service',
   installer: '@vue/cli-service',
   description: 'Standard Tooling for Vue.js Development',
-  minVersion: '>=4.0.0',
+  minVersion: '^=4.0.0 || ^=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VITE = {
@@ -94,7 +94,7 @@ export const WIZARD_DEPENDENCY_NEXT = {
   package: 'next',
   installer: 'next',
   description: 'The React Framework for Production',
-  minVersion: '>=10.0.0',
+  minVersion: '^=10.0.0 || ^=11.0.0 || ^=12.0.0',
 } as const
 
 export const WIZARD_DEPENDENCIES = [
