@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getInvalidRootOptions, getRootConfigKeys, validateConfiguration } = require('@packages/config')
+const { getInvalidRootOptions, getConfigKeys, validateConfiguration } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -505,7 +505,7 @@ module.exports = {
     nestInvalidRootOptions(options.config, testingType)
 
     // get a list of the available config keys
-    const configKeys = getRootConfigKeys()
+    const configKeys = getConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)

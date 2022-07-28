@@ -124,7 +124,7 @@ export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
   return { ...defaultsForRuntime, ...defaultsForRuntime[runtimeOptions.testingType] }
 }
 
-export const getConfigKeys = (testingType: TestingType) => {
+export const getConfigKeys = (testingType?: TestingType) => {
   return testingType ? _(getTestingTypeConfigOptions(testingType)).reject({ isInternal: true }).map('name').value() : rootConfigKeys
 }
 

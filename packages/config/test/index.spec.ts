@@ -80,7 +80,7 @@ describe('config/src/index', () => {
 
   describe('.getRootConfigKeys', () => {
     it('returns getRootConfigKeys of public config keys', () => {
-      const rootConfigKeys = configUtil.getRootConfigKeys()
+      const rootConfigKeys = configUtil.getConfigKeys()
 
       expect(rootConfigKeys).to.include('blockHosts')
       expect(rootConfigKeys).to.not.include('devServerPublicPathRoute')
