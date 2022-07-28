@@ -147,26 +147,29 @@ export class ProjectConfigManager {
     }
   }
 
-  async loadTestingType () {
+  loadTestingType () {
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      try {
-        await this.setupNodeEvents(this._cachedLoadConfig)
-
-        if (typeof this._cachedLoadConfig?.initialConfig?.component?.devServer === 'object') {
-          this.checkDependenciesForComponentTesting(this._cachedLoadConfig?.initialConfig?.component?.devServer)
-        }
-      } catch (e) {
-        this.onLoadError(e)
-      }
+      this.setupNodeEvents(this._cachedLoadConfig)
+      .then(this.checkDependenciesForComponentTesting)
+      .catch(this.onLoadError)
     }
   }
 
-  checkDependenciesForComponentTesting (devServerOptions: Cypress.DevServerConfigOptions) {
+  checkDependenciesForComponentTesting () {
+    // if it's a function, for example, the user is created their own dev server,
+    // and not using one of our presets. Assume they know what they are doing and
+    // what dependencies they require.
+    if (typeof this._cachedLoadConfig?.initialConfig?.component?.devServer !== 'object') {
+      return
+    }
+
+    const devServerOptions = this._cachedLoadConfig.initialConfig.component.devServer
+
     const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
     const framework = WIZARD_FRAMEWORKS.find((x) => x.type === devServerOptions.framework)
 
