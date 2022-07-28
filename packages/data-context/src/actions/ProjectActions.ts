@@ -496,9 +496,7 @@ export class ProjectActions {
     }
 
     return this.api.isListening(baseUrl)
-    .catch(() => {
-      return this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl))
-    })
+    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
   }
 
   async switchTestingTypesAndRelaunch (testingType: Cypress.TestingType): Promise<void> {

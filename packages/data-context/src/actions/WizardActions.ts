@@ -19,6 +19,10 @@ export class WizardActions {
     return this.ctx.currentProject
   }
 
+  private get data () {
+    return this.ctx.wizardData
+  }
+
   setFramework (framework: typeof WIZARD_FRAMEWORKS[number] | null): void {
     const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
 
