@@ -277,7 +277,11 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureExistence = (subject) => {
+  const ensureExistence = (subject, command) => {
+    if (command && command?.get('skipExistenceAssertion')) {
+      return
+    }
+
     returnFalse = () => {
       cleanup()
 
@@ -302,10 +306,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureElExistence = ($el) => {
-    // dont throw if this isnt even a DOM object
-    // return if not $dom.isJquery($el)
-
+  const ensureElExistence = ($el, command) => {
     // ensure that we either had some assertions
     // or that the element existed
     if ($el && $el.length) {
@@ -315,7 +316,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
     // OR GO THROUGH I18N
 
-    return ensureExistence($el)
+    return ensureExistence($el, command)
   }
 
   const ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) => {

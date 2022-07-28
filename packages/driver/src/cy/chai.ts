@@ -478,7 +478,9 @@ chai.use((chai, u) => {
         err = e
       }
 
-      assertFn(passed, message, value, actual, expected, err)
+      if (!cy.state('current').get('selector')) {
+        assertFn(passed, message, value, actual, expected, err)
+      }
 
       if (!err) return
 

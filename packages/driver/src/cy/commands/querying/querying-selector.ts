@@ -81,7 +81,15 @@ export default (Commands, Cypress, cy, state) => {
         },
       })
 
-      cy.ensureElExistence($el)
+      try {
+        cy.ensureElExistence($el, this)
+      } catch (err) {
+        if (log) {
+          err.onFail = () => log.error(err)
+        }
+
+        throw err
+      }
 
       return $el
     }

@@ -372,7 +372,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     extendEvents(this)
 
     Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
-      this.enqueue(attrs)
+      this.enqueue($Command.create(attrs))
     })
 
     Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
@@ -730,14 +730,14 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return
       }
 
-      cy.enqueue({
+      cy.enqueue($Command.create({
         name,
         args,
         type,
         chainerId: chainer.chainerId,
         userInvocationStack,
         fn: firstCall ? cyFn : chainerFn,
-      })
+      }))
     }
 
     $Chainer.add(name, callback)
@@ -797,12 +797,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   addSelector ({ name, fn, prevSubject }) {
     const cy = this
 
-    const cyFn = function (chainerId, ...args) {
-      return fn.apply(cy.runnableCtx(name), args)
-    }
-
-    cyFn.originalFn = fn
-
     const callback = (chainer, userInvocationStack, args) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
@@ -822,15 +816,23 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // to the current chainer's subject chain.
 
       // See command_queue.ts for more details.
-      cy.enqueue({
+      const command = $Command.create({
         name,
         args,
         type: 'dual',
         chainerId: chainer.chainerId,
         userInvocationStack,
-        fn: cyFn,
         selector: true,
       })
+
+      const cyFn = function (chainerId, ...args) {
+        return fn.apply(command, args)
+      }
+
+      cyFn.originalFn = fn
+      command.set('fn', cyFn)
+
+      cy.enqueue(command)
     }
 
     $Chainer.add(name, callback)
@@ -1236,7 +1238,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
+  private enqueue (command: $Command) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to
@@ -1263,9 +1265,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // it onto the end of the queue
     const index = _.isNumber(nestedIndex) ? nestedIndex : this.queue.length
 
-    this.queue.insert(index, $Command.create(obj))
+    this.queue.insert(index, command)
 
-    return this.Cypress.action('cy:command:enqueued', obj)
+    return this.Cypress.action('cy:command:enqueued', command.attributes)
   }
 
   // TODO: Replace any with Command type.

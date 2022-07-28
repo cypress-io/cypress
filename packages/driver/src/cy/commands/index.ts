@@ -8,6 +8,8 @@ import * as Angular from './angular'
 
 import * as Asserting from './asserting'
 
+import * as AssertingSelector from './asserting-selector'
+
 import * as Clock from './clock'
 
 import * as Commands from './commands'
@@ -60,6 +62,7 @@ export const allCommands = {
   Aliasing,
   Angular,
   Asserting,
+  AssertingSelector,
   Clock,
   Commands,
   Connectors,

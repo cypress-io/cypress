@@ -73,18 +73,21 @@ async function retrySelector (command: $Command, ret: any, isCy) {
     )
   }
 
+  const options = {
+    timeout: command.get('timeout'),
+  }
+
   const onRetry = () => {
     try {
       ret(cy.currentSubject(command.get('chainerId')))
     } catch (err) {
+      options.error = err
       if (err.retry === false) {
         throw err
       }
-    }
-  }
 
-  const options = {
-    timeout: command.get('timeout'),
+      return cy.retry(onRetry, options)
+    }
   }
 
   return cy.retry(onRetry, options)
@@ -220,12 +223,14 @@ export class CommandQueue extends Queue<$Command> {
         ret = __stackReplacementMarker(command.get('fn'), args)
 
         // Selectors return a function which takes the current subject and returns the next
-        // subject. We invoke this once immediately, to verify that the subject exists.
-        // The function itself remains return value of the command - it's what gets added to
-        // the subject chain.
+        // subject. We wrap this in cy.verifyUpcomingAssertions() - as all retryable cypress
+        // commands function - and let it retry until it passes.
 
+        // We save the original return value on the $Command though - it's what gets added to
+        // the subject chain later.
         if (isSelector) {
-          await retrySelector(command, ret, this.isCy)
+          command.set('selectorFn', ret)
+          ret = retrySelector(command, ret, this.isCy)
         }
       } catch (err) {
         throw err
@@ -304,6 +309,7 @@ export class CommandQueue extends Queue<$Command> {
       this.state('current', null)
 
       if (isSelector) {
+        subject = command.get('selectorFn')
         // For selectors, the "subject" here is the command's return value, which is a function which
         // accepts a subject and returns a subject, and can be re-invoked at any time.
 
