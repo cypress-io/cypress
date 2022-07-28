@@ -337,6 +337,11 @@ describe('lib/browsers/electron', () => {
     describe('adding header aut iframe requests', function () {
       beforeEach(function () {
         this.options.experimentalSessionAndOrigin = true
+        this.win.webContents.debugger.sendCommand = sinon.stub().withArgs('Browser.getVersion').callsFake(() => {
+          return {
+            userAgent: '',
+          }
+        })
       })
 
       it('does not add header if not a sub frame', function () {
