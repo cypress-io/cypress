@@ -4,7 +4,7 @@ import LogoNext from '../images/logos/nextjs.svg'
 import LogoNuxt from '../images/logos/nuxt.svg'
 import LogoVue from '../images/logos/vue.svg'
 import LogoReact from '../images/logos/react.svg'
-import LogoAngular from '../images/logos/angular.svg'
+// import LogoAngular from '../images/logos/angular.svg'
 
 import type { FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 
@@ -19,5 +19,6 @@ export const FrameworkBundlerLogos: Record<FrontendFrameworkEnum | SupportedBund
   nuxtjs: LogoNuxt,
   react: LogoReact,
   reactscripts: LogoReact,
-  angular: LogoAngular,
+  // TODO: revert once Angular is slated for release
+  // angular: LogoAngular,
 }
