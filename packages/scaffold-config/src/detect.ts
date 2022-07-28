@@ -1,4 +1,4 @@
-import { WIZARD_FRAMEWORKS, inPkgJson } from './frameworks'
+import { WIZARD_FRAMEWORKS, inPkgJson, WizardFrontendFramework, WizardBundler } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'
@@ -9,8 +9,8 @@ import Debug from 'debug'
 const debug = Debug('cypress:scaffold-config:detect')
 
 interface DetectFramework {
-  framework?: typeof WIZARD_FRAMEWORKS[number]
-  bundler?: typeof WIZARD_BUNDLERS[number]
+  framework?: WizardFrontendFramework
+  bundler?: WizardBundler
 }
 
 // Detect the framework, which can either be a tool like Create React App,
