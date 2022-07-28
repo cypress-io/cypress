@@ -80,6 +80,8 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
     {
       options: { title: util.titleize('Downloading Cypress') },
       task: (ctx, task) => {
+        debug('Starting download task')
+
         // as our download progresses indicate the status
         progress.onProgress = progessify(task, 'Downloading Cypress')
 
@@ -96,6 +98,10 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
             util.titleize(chalk.green('Downloaded Cypress')),
             rendererOptions.renderer,
           )
+        })
+        .catch((e) => {
+          debug('got error from download.start', e)
+          throw e
         })
       },
     },
@@ -344,7 +350,11 @@ const start = async (options = {}) => {
 
   const downloadDir = os.tmpdir()
 
-  await downloadAndUnzip({ version: versionToInstall, installDir, downloadDir })
+  try {
+    await downloadAndUnzip({ version: versionToInstall, installDir, downloadDir })
+  } catch (e) {
+    debug('got error from downloadAndUnzip', e)
+  }
 
   // delay 1 sec for UX, unless we are testing
   await Promise.delay(1000)
@@ -361,7 +371,8 @@ const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
   return {
     options: { title: util.titleize('Unzipping Cypress') },
     task: (ctx, task) => {
-    // as our unzip progresses indicate the status
+      debug('Starting unzip task')
+      // as our unzip progresses indicate the status
       progress.onProgress = progessify(task, 'Unzipping Cypress')
 
       return unzip.start({ zipFilePath, installDir, progress })
@@ -371,6 +382,9 @@ const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
           util.titleize(chalk.green('Unzipped Cypress')),
           rendererOptions.renderer,
         )
+      }).catch((e) => {
+        debug('got error from unzip.start', e)
+        throw e
       })
     },
   }

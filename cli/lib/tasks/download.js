@@ -236,6 +236,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       throttle: progress.throttle,
     })
     .on('response', (response) => {
+      debug('got progress response, with headers', response.headers)
+
       // we have computed checksum and filesize during test runner binary build
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
@@ -288,8 +290,14 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
         Promise.all([new Promise((r) => {
+          debug('waiting for writestream close')
+
           return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
-        }), new Promise((r) => response.on('end', r))])
+        }), new Promise((r) => {
+          debug('waiting for response end close')
+
+          response.on('end', r)
+        })])
         .then(() => {
           debug('downloading finished')
           verifyDownloadedFile(downloadDestination, expectedSize,
@@ -301,11 +309,16 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       }
     })
     .on('error', (e) => {
-      if (e.code === 'ECONNRESET') return // sometimes proxies give ECONNRESET but we don't care
+      if (e.code === 'ECONNRESET') {
+        debug('Got progress error, ECONNRESET')
+
+        return // sometimes proxies give ECONNRESET but we don't care
+      }
 
       reject(e)
     })
     .on('progress', (state) => {
+      debug('Got progress event with state', state)
       // total time we've elapsed
       // starting on our first progress notification
       const elapsed = new Date() - started
@@ -318,6 +331,9 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       // send up our percent and seconds remaining
       progress.onProgress(percentage, util.secsRemaining(eta))
     })
+  }).catch((e) => {
+    debug('got error in downloadFromUrl', e)
+    throw e
   })
 }
 
