@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { computed, onBeforeMount } from 'vue'
 import FlakySpecSummary from './FlakySpecSummary.vue'
 import { gql, useQuery } from '@urql/vue'
 import { FlakySpecSummaryQueryDocument } from '../../generated/graphql'
@@ -55,8 +55,12 @@ const variables = computed(() => {
   }
 })
 
-const query = useQuery({ query: FlakySpecSummaryQueryDocument, variables })
+const query = useQuery({ query: FlakySpecSummaryQueryDocument, variables, pause: true })
 
 const flakyStatus = computed(() => query.data.value?.cloudSpecByPath?.__typename === 'CloudProjectSpec' ? query.data.value?.cloudSpecByPath?.flakyStatus : null)
+
+onBeforeMount(async () => {
+  await query.executeQuery({ requestPolicy: 'network-only' })
+})
 
 </script>

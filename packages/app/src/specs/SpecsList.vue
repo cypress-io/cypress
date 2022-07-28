@@ -184,7 +184,7 @@ import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import { CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { PurgeCloudSpecCacheDocument, CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
@@ -400,13 +400,30 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 }
 `
 
+gql`
+mutation PurgeCloudSpecCache ($projectSlug: String!, $specPaths: [String!]!) {
+  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths) {
+    __typename
+  }
+}
+`
+
 const refetchMutation = useMutation(CloudData_RefetchDocument)
+const purgeCloudSpecCacheMutation = useMutation(PurgeCloudSpecCacheDocument)
 
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
 const refetch = async (ids: string[]) => {
   if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
     await refetchMutation.executeMutation({ ids })
+  }
+}
+
+const purgeCloudSpecCache = async (paths: string[]) => {
+  const projectSlug = props.gql.currentProject?.projectId
+
+  if (!!projectSlug && paths && paths.length > 0) {
+    await purgeCloudSpecCacheMutation.executeMutation({ projectSlug, specPaths: paths })
   }
 }
 
@@ -454,11 +471,25 @@ function getIdsToRefetch () {
   .map((cloudSpec) => cloudSpec.id)
   ?? []
 }
+
+function getSpecPathsToPurge () {
+  return list.value
+  .map((spec) => spec.data.data?.relative)
+  .filter((val): val is string => !!val)
+  ?? []
+}
+
 async function fetchMissingOrErroneousItems () {
   const cloudSpecIds = getIdsToRefetch()
 
   if (cloudSpecIds.length > 0) {
     await refetch(cloudSpecIds)
+  }
+
+  const cloudSpecPaths = getSpecPathsToPurge()
+
+  if (cloudSpecPaths.length > 0) {
+    await purgeCloudSpecCache(cloudSpecPaths)
   }
 }
 
