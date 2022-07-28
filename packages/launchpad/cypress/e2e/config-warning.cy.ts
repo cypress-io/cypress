@@ -113,12 +113,12 @@ describe('experimentalStudio', () => {
 })
 
 describe('component testing dependency warnings', () => {
-  it('works', () => {
-    cy.scaffoldProject('component-testing-outdated-depenencies')
-    cy.addProject('component-testing-outdated-depenencies')
+  it('shows warning on browser launch screen with mismatched dependencies', () => {
+    cy.scaffoldProject('component-testing-outdated-dependencies')
+    cy.addProject('component-testing-outdated-dependencies')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.contains('component-testing-outdated-depenencies').click()
+    cy.contains('component-testing-outdated-dependencies').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     // cy.contains('[data-cy="project-card"]', 'component-testing-outdated-depenencies').click()

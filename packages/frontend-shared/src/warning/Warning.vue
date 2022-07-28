@@ -10,6 +10,7 @@
   >
     <div
       ref="markdownTarget"
+      class="warning-markdown"
       v-html="markdown"
     />
     <Button
@@ -68,3 +69,12 @@ let message = computed(() => {
 
 const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { code: ['bg-warning-200'] } })
 </script>
+
+<style lang="scss">
+.warning-markdown {
+  ul {
+    margin-left: 16px;
+    margin-bottom: 16px;
+  }
+}
+</style>
