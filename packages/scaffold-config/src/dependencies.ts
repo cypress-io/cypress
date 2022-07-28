@@ -113,7 +113,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
   installer: '@angular-devkit/build-angular',
   description: 'Angular Webpack build facade',
   minVersion: '>=13.0.0',
-}
+} as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
   type: 'angular',
@@ -122,7 +122,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
   installer: '@angular/core',
   description: 'The core of the Angular framework',
   minVersion: '>=13.0.0',
-}
+} as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   type: 'angular',
@@ -131,7 +131,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   installer: '@angular/common',
   description: 'Commonly needed Angular directives and services',
   minVersion: '>=13.0.0',
-}
+} as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   type: 'angular',
@@ -140,7 +140,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   installer: '@angular/platform-browser-dynamic',
   description: 'Library for using Angular in a web browser with JIT compilation',
   minVersion: '>=13.0.0',
-}
+} as const
 
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
