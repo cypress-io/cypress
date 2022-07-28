@@ -20,9 +20,6 @@ const keys = require('../util/keys')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
-const specWriter = require('../util/spec_writer')
-
-// dont yell about any errors either
 
 const runningInternalTests = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
@@ -659,7 +656,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const afterSpecRun = (spec, results, config) => {
-        // dont do anything if we failed to
+        // don't do anything if we failed to
         // create the instance
         if (!instanceId || results.skippedSpec) {
           return
@@ -679,17 +676,22 @@ const createRunAndRecordSpecs = (options = {}) => {
           console.log('')
         }
 
-        return specWriter.countStudioUsage(spec.absolute)
-        .then((metadata) => {
-          return postInstanceResults({
-            group,
-            config,
-            results,
-            parallel,
-            ciBuildId,
-            instanceId,
-            metadata,
-          })
+        // TODO: Cypress Studio was removed in Cypress 10.x
+        // when re-introduced, re-add this logic to gather
+        // studio usage metadata. For now, it is always 0.
+        // return specWriter.countStudioUsage(spec.absolute)
+        // .then((metadata) => {
+        return postInstanceResults({
+          group,
+          config,
+          results,
+          parallel,
+          ciBuildId,
+          instanceId,
+          metadata: {
+            studioCreated: 0,
+            studioExtended: 0,
+          },
         })
         .then((resp) => {
           if (!resp) {
