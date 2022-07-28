@@ -1,19 +1,22 @@
-import _ from 'lodash'
+import _, { Dictionary } from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
-import type { BreakingOption, BreakingOptionErrorKey } from './options'
-import type { TestingType } from '@packages/types'
+
+import { getInvalidRootOptions, defaultSpecPattern, options, breakingOptions, breakingRootOptions, getInvalidTestingTypeOptions, testingTypeBreakingOptions, getTestingTypeConfigOptions } from './options'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
+
+import type { ConfigOption, BreakingOption, BreakingOptionErrorKey, RuntimeConfigOption } from './options'
 
 export {
   defaultSpecPattern,
   validation,
   options,
   breakingOptions,
+  getInvalidRootOptions,
   BreakingOption,
   BreakingOptionErrorKey,
+  ValidationResult,
 }
 
 const debug = Debug('cypress:config:browser')
@@ -33,9 +36,8 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
+const rootConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
@@ -93,10 +95,14 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
   })
 }
 
-export const allowed = (obj = {}) => {
-  const propertyNames = publicConfigKeys.concat(breakingKeys)
+export const allowed = (obj = {}, testingType: TestingType) => {
+  return _.pick(obj, getConfigKeys(testingType))
+}
 
-  return _.pick(obj, propertyNames)
+export const invalid = (obj = {}, testingType: TestingType) => {
+  const opts = testingType ? getInvalidTestingTypeOptions(testingType) : getInvalidRootOptions()
+
+  return _.pick(obj, _(opts).map('name').value().concat(breakingKeys))
 }
 
 export const getBreakingKeys = () => {
@@ -108,18 +114,18 @@ export const getBreakingRootKeys = () => {
 }
 
 export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
+  const opts = getTestingTypeConfigOptions(runtimeOptions.testingType)
+
   // Default values can be functions, in which case they are evaluated
   // at runtime - for example, slowTestThreshold where the default value
   // varies between e2e and component testing.
-  const defaultsForRuntime = _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+  const defaultsForRuntime = _.mapValues(createIndex(opts, 'name', 'defaultValue'), (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
 
-  // As we normalize the config based on the selected testing type, we need
-  // to do the same with the default values to resolve those correctly
   return { ...defaultsForRuntime, ...defaultsForRuntime[runtimeOptions.testingType] }
 }
 
-export const getPublicConfigKeys = () => {
-  return publicConfigKeys
+export const getConfigKeys = (testingType: TestingType) => {
+  return testingType ? _(getTestingTypeConfigOptions(testingType)).reject({ isInternal: true }).map('name').value() : rootConfigKeys
 }
 
 export const matchesConfigKey = (key: string) => {
@@ -172,18 +178,6 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
-  let errProperty
-
-  Object.keys(config).some((option) => {
-    return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
-  })
-
-  if (errProperty) {
-    return onErr(errProperty)
-  }
-}
-
 export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: any) => {
   const restartOnChange = {
     browser: false,
@@ -209,4 +203,134 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
   }
 
   return restartOnChange
+}
+
+const _validateConfig = (allowedConfig: Array<ConfigOption|RuntimeConfigOption>, invalidConfig: Array<BreakingOption>, config: Record<string, any>, validationLevel: ValidationLevels): ValidationResult => {
+  const allowed: Dictionary<ConfigOption | RuntimeConfigOption> = _(allowedConfig).reject({ isInternal: true }).chain().keyBy('name').value()
+  const invalid: Dictionary<BreakingOption> = _(invalidConfig).chain().keyBy('name').value()
+
+  const invalidOptions: Array<BreakingOption> = []
+  const invalidConfigurationValues: Array<BreakingOption> = []
+
+  _.each(config, (value, configKey) => {
+    if (!allowed.hasOwnProperty(configKey)) {
+      if (invalid.hasOwnProperty(configKey)) {
+        invalidOptions.push(invalid[configKey] as BreakingOption)
+
+        return
+      }
+
+      invalidOptions.push({
+        name: configKey,
+        errorKey: 'INVALID_CONFIG_OPTION',
+        isWarning: true,
+      })
+
+      return
+    }
+
+    const { validation, defaultValue, overrideLevels = 'never' } = allowed[configKey] as ConfigOption
+    const runTimeValidation = ['suite', 'test', 'testTime'].includes(validationLevel)
+
+    if (runTimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(validationLevel))) {
+      invalidOptions.push({
+        name: configKey,
+        isWarning: false,
+        // @ts-ignore
+        errorKey: validationLevel === 'testTime' ? 'config.invalid_cypress_config_api_override' : 'config.invalid_test_config_override',
+      })
+
+      return
+    }
+
+    // config value is different from the default value
+    if (value !== defaultValue) {
+      const result = validation(configKey, value)
+
+      if (result !== true) {
+        invalidConfigurationValues.push(result)
+      }
+    }
+  })
+
+  return {
+    invalidOptions,
+    invalidConfigurationValues,
+  }
+}
+
+const CONFIG_LEVELS = ['root', 'e2e', 'component'] as const
+
+type ConfigLevel = typeof CONFIG_LEVELS[number]
+
+const TESTING_TYPES = ['e2e', 'component'] as const
+
+type TestingType = typeof TESTING_TYPES[number]
+
+type ValidationResult = {
+  invalidOptions: Array<BreakingOption>
+  invalidConfigurationValues: Array<BreakingOption>
+}
+
+type ValidationRecord = Record<ConfigLevel, ValidationResult>
+
+export const collectValidationResults = (config: Record<string, any>, validationLevel: ValidationLevels, configLevel: ConfigLevel = 'root'): ValidationRecord | ValidationResult => {
+  if (configLevel !== 'root') {
+    return _validateConfig(getTestingTypeConfigOptions(configLevel), getInvalidTestingTypeOptions(configLevel), config, validationLevel)
+  }
+
+  const result: any = {
+    root: _validateConfig(options, getInvalidRootOptions().concat(breakingOptions), config, validationLevel),
+  }
+
+  TESTING_TYPES.forEach((testingType: ConfigLevel) => {
+    // result[`${testingType}`] = _validateConfig(getTestingTypeConfigOptions(testingType), getInvalidTestingTypeOptions(testingType), config, validationLevel)
+    result[`${testingType}`] = collectValidationResults(config[`${testingType}`], validationLevel, testingType)
+  })
+
+  return result as ValidationRecord
+}
+
+const validationLevels = ['configFile', 'pluginMerge', 'suite', 'test', 'testTime'] as const
+
+type ValidationLevels = typeof validationLevels
+
+// use validation level for check if can update at test time
+export const validateConfiguration = (config: Record<string, any>, validationLevel: ValidationLevels, configLevel: ConfigLevel = 'root') => {
+  const results = collectValidationResults(config, validationLevel, configLevel)
+
+  if (configLevel !== 'root') {
+    return results
+  }
+
+  const invalidOptions = _.reduce(results, (invalid, result, configLevel) => {
+    if (result.invalidOptions.length) {
+      result.invalidOptions.forEach((opt) => {
+        invalid.push({
+          ...opt,
+          configLevel,
+        })
+      })
+    }
+
+    return invalid
+  }, [])
+
+  const invalidConfigurationValues = _.reduce(results, (invalid, result, configLevel) => {
+    if (result.invalidConfigurationValues.length) {
+      result.invalidConfigurationValues.forEach((opt) => {
+        invalid.push({
+          ...opt,
+          configLevel,
+        })
+      })
+    }
+
+    return invalid
+  }, [])
+
+  return {
+    invalidOptions,
+    invalidConfigurationValues,
+  }
 }

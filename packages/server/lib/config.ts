@@ -104,6 +104,7 @@ export function mergeDefaults (
   cliConfig: Record<string, any> = {},
 ) {
   const resolved = {}
+  const { testingType } = options
 
   config.rawJson = _.cloneDeep(config)
 
