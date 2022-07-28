@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { preprocessForSerialization } from './serialization'
-import { getTestingTypeConfigOptions } from '@packages/config/src/updated_options'
+import { getTestingTypeConfigOptions } from '@packages/config/src/options'
 
 /**
  * Mutates the config/env object serialized from the other origin to omit read-only values
