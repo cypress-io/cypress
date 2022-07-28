@@ -473,7 +473,7 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    describe('setUserAgentOverride with experimentalSessionAndOrigin', () => {
+    describe('setUserAgent with experimentalModifyObstructiveThirdPartyCode', () => {
       let userAgent
 
       beforeEach(function () {
@@ -483,7 +483,7 @@ describe('lib/browsers/electron', () => {
 
       describe('disabled', function () {
         it('does not attempt to replace the user agent', function () {
-          this.options.experimentalSessionAndOrigin = false
+          this.options.experimentalModifyObstructiveThirdPartyCode = false
 
           return electron._launch(this.win, this.url, this.automation, this.options)
           .then(() => {
@@ -494,12 +494,12 @@ describe('lib/browsers/electron', () => {
 
       describe('enabled and attempts to replace obstructive user agent string containing:', function () {
         beforeEach(function () {
-          this.options.experimentalSessionAndOrigin = true
+          this.options.experimentalModifyObstructiveThirdPartyCode = true
         })
 
         it('does not attempt to replace the user agent if the user passes in an explicit user agent', function () {
           userAgent = 'barbaz'
-          this.options.experimentalSessionAndOrigin = false
+          this.options.experimentalModifyObstructiveThirdPartyCode = false
           this.options.userAgent = 'foobar'
 
           return electron._launch(this.win, this.url, this.automation, this.options)
