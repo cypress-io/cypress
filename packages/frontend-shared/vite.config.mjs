@@ -1,8 +1,10 @@
+// @ts-check
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import VueI18n from '@intlify/vite-plugin-vue-i18n'
+import { vueI18n } from '@intlify/vite-plugin-vue-i18n'
 import VueSvgLoader from 'vite-svg-loader'
 import { CyCSSVitePlugin } from '@cypress-design/css'
 import Components from 'unplugin-vue-components/vite'
@@ -12,18 +14,8 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
 
-// eslint-disable-next-line no-duplicate-imports
-import type { UserConfig } from 'vite'
-import type { ArgumentsType } from '@antfu/utils'
-
-type PluginOptions = {
-  plugins?: any[]
-
-  // These types aren't publicly exported
-  vueI18nOptions?: ArgumentsType<typeof VueI18n>[0]
-  iconsOptions?: ArgumentsType<typeof Icons>[0]
-  componentsOptions?: ArgumentsType<typeof Components>[0]
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const base = './'
 
@@ -39,7 +31,7 @@ const makePlugins = (plugins) => {
   return ([
     vue(),
     vueJsx(), // Used mostly for testing in *.(t|j)sx files.
-    VueI18n({
+    vueI18n({
       include: path.resolve(__dirname, './src/locales/**'),
       ...plugins.vueI18nOptions,
     }),
@@ -88,14 +80,26 @@ const makePlugins = (plugins) => {
 
     // package.json is modified and auto-updated when new cjs dependencies
     // are added
-    PkgConfig(),
+    PkgConfig.default(),
     // OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
     ...(plugins?.plugins || []),
   ])
 }
 
-export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOptions = {}): UserConfig => {
+/**
+ * @typedef PluginOptions
+ * @type {object}
+ * @property {import('@antfu/utils').ArgumentsType<typeof vueI18n>[0]=} vueI18nOptions
+ * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} VueI18n
+ * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentOptions
+
+ * 
+ * @param {import('vite').UserConfig} config 
+ * @param {PluginOptions} plugins 
+ * @returns {import('vite').UserConfig}
+ */
+export const makeConfig = (config = {}, plugins = {}) => {
   // Don't overwrite plugins
   delete config.plugins
 
