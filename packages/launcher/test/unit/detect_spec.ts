@@ -1,6 +1,6 @@
 require('../spec_helper')
 import _ from 'lodash'
-import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
+import { detect, detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'

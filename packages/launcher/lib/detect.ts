@@ -25,20 +25,54 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   name: string
 }
 
-export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
-  const ver = browser.version.split('.')[0] ?? browser.version
-  const majorVersion = parseInt(ver) || browser.version
+type ValidatorResult = {
+  // whether or not the browser is supported by Cypress
+  isValid: boolean
+  // optional warning message that will be shown in the GUI
+  warningMessage?: string
+}
 
-  const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
+const getMajorVersion = (version: string): string => {
+  return version.split('.')[0] ?? version
+}
 
-  const foundBrowser = extend({}, browser, { majorVersion })
+// Compares a detected browser's major version to its minimum supported version
+// to determine if the browser is supported by Cypress.
+const validateMinVersion = (browser: FoundBrowser): ValidatorResult => {
+  const minSupportedVersion = browser.minSupportedVersion
+  const majorVersion = browser.majorVersion
 
-  if (unsupportedVersion) {
-    foundBrowser.unsupportedVersion = true
-    foundBrowser.warning = `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.`
+  if (majorVersion && minSupportedVersion && parseInt(majorVersion) < minSupportedVersion) {
+    return {
+      isValid: false,
+      warningMessage: `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${minSupportedVersion}.`,
+    }
   }
 
-  return foundBrowser
+  return {
+    isValid: true,
+  }
+}
+
+const validateStableFirefoxVersion = (browser: FoundBrowser, platform: NodeJS.Platform): ValidatorResult => {
+  // See https://github.com/cypress-io/cypress/issues/22086 for more info related
+  // to the FF bug in 101/102 on Windows.
+  if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+    return {
+      isValid: false,
+      warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to an unpatched browser incompatibility. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+    }
+  }
+
+  return validateMinVersion(browser)
+}
+
+const validateBrowser = (browser: FoundBrowser, platform: NodeJS.Platform) => {
+  if (browser.name === 'firefox' && browser.channel === 'stable') {
+    return validateStableFirefoxVersion(browser, platform)
+  }
+
+  return validateMinVersion(browser)
 }
 
 type PlatformHelper = {
@@ -126,8 +160,17 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
 
   return lookup(platform, browser)
   .then((val) => ({ ...browser, ...val }))
-  .then((val) => _.pick(val, pickBrowserProps) as HasVersion)
-  .then((browser) => setMajorVersion(browser))
+  .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
+  .then((browser) => {
+    browser.majorVersion = getMajorVersion(browser.version)
+
+    const validatorResult = validateBrowser(browser, platform)
+
+    browser.unsupportedVersion = !validatorResult.isValid
+    browser.warning = validatorResult.warningMessage
+
+    return browser
+  })
   .catch(failed)
 }
 
@@ -185,16 +228,15 @@ export const detectByPath = (
   const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
     const version = helper.getVersionNumber(versionStr, browser)
 
-    let parsedBrowser = extend({}, browser, {
+    return extend({}, browser, {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
       custom: true,
       path,
       version,
+      majorVersion: getMajorVersion(version),
     })
-
-    return setMajorVersion(parsedBrowser)
   }
 
   const pathData = helper.getPathData(path)
