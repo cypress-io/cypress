@@ -68,8 +68,7 @@ const _getAutomation = async function (win, options, parent) {
       if (message !== 'take:screenshot') {
         return fn(message, data)
       }
-
-      await sendCommand('Page.startScreencast', screencastOpts)
+      await sendCommand('Page.startScreencast', screencastOpts())
 
       const ret = await fn(message, data)
 
@@ -103,7 +102,6 @@ const _maybeRecordVideo = function (webContents, options) {
     if (!onScreencastFrame) {
       return
     }
-
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
         onScreencastFrame(params)
@@ -111,7 +109,7 @@ const _maybeRecordVideo = function (webContents, options) {
       }
     })
 
-    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
+    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts())
   }
 }
 

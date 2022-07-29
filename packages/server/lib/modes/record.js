@@ -791,6 +791,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
 
         if (response === responseDidFail) {
+          debug('`responseDidFail` equals `response`, allowing browser to hang until it is killed: Response %o', { responseDidFail })
+
           // dont call the cb, let the browser hang until it's killed
           return
         }
