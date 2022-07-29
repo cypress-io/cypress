@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Type } from '@angular/core'
+import { Component, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -52,7 +52,7 @@ export type MountResponse<T extends object> = {
    * @memberof MountResponse
    * @see https://angular.io/api/core/testing/ComponentFixture
    */
-  fixture: ComponentFixture<T>
+  fixture: ComponentFixture<T | WrapperComponent>
 
   /**
    * Configures and initializes environment and provides methods for creating components and services.
@@ -68,7 +68,7 @@ export type MountResponse<T extends object> = {
    * @memberof MountResponse
    * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
    */
-  component: T
+  component: T | WrapperComponent
 };
 
 /**
@@ -79,7 +79,7 @@ export type MountResponse<T extends object> = {
  * @returns {TestBedConfig} TestBedConfig
  */
 function bootstrapModule<T extends object> (
-  component: Type<T>,
+  component: Type<T> | WrapperComponent,
   config: TestBedConfig<T>,
 ): TestBedConfig<T> {
   const { componentProperties, ...testModuleMetaData } = config
@@ -109,9 +109,9 @@ function bootstrapModule<T extends object> (
  * @returns {TestBed} TestBed
  */
 function initTestBed<T extends object> (
-  component: Type<T>,
+  component: Type<T> | string,
   config: TestBedConfig<T>,
-): TestBed {
+): {testBed: TestBed, componentFixture: Type<T> | Type<WrapperComponent>} {
   const { providers, ...configRest } = config
 
   const testBed: TestBed = getTestBed()
@@ -126,19 +126,21 @@ function initTestBed<T extends object> (
     },
   )
 
+  const componentFixture = createComponentFixture(component)
+
   testBed.configureTestingModule({
-    ...bootstrapModule(component, configRest),
+    ...bootstrapModule(componentFixture, configRest),
   })
 
   if (providers != null) {
-    testBed.overrideComponent(component, {
+    testBed.overrideComponent(componentFixture, {
       add: {
         providers,
       },
     })
   }
 
-  return testBed
+  return { testBed, componentFixture }
 }
 
 /**
@@ -150,10 +152,10 @@ function initTestBed<T extends object> (
  * @returns {ComponentFixture<T>} ComponentFixture
  */
 function setupFixture<T extends object> (
-  component: Type<T>,
+  component: Type<T> | Type<WrapperComponent>,
   testBed: TestBed,
   autoDetectChanges: boolean,
-): ComponentFixture<T> {
+): ComponentFixture<T | WrapperComponent> {
   const fixture = testBed.createComponent(component)
 
   fixture.whenStable().then(() => {
@@ -183,6 +185,21 @@ function setupComponent<T extends object> (
   return component
 }
 
+@Component({ selector: 'cy-wrapper-component', template: '' })
+class WrapperComponent { }
+
+function createComponentFixture<T extends object> (
+  component: Type<T> | string,
+): Type<T> | Type<WrapperComponent> {
+  if (typeof component === 'string') {
+    TestBed.overrideTemplate(WrapperComponent, component)
+
+    return WrapperComponent
+  }
+
+  return component
+}
+
 /**
  * Mounts an Angular component inside Cypress browser
  *
@@ -204,12 +221,12 @@ function setupComponent<T extends object> (
  * @returns Cypress.Chainable<MountResponse<T>>
  */
 export function mount<T extends object> (
-  component: Type<T>,
+  component: Type<T> | string,
   config: TestBedConfig<T> = {},
   autoDetectChanges = true,
 ): Cypress.Chainable<MountResponse<T>> {
-  const testBed: TestBed = initTestBed(component, config)
-  const fixture = setupFixture(component, testBed, autoDetectChanges)
+  const { testBed, componentFixture } = initTestBed(component, config)
+  const fixture = setupFixture(componentFixture, testBed, autoDetectChanges)
   const componentInstance = setupComponent(config, fixture)
 
   const mountResponse: MountResponse<T> = {
@@ -220,7 +237,7 @@ export function mount<T extends object> (
 
   Cypress.log({
     name: 'mount',
-    message: component.name,
+    message: componentFixture.name,
     consoleProps: () => ({ result: mountResponse }),
   })
 
