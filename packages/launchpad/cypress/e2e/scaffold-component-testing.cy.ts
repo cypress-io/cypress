@@ -108,7 +108,8 @@ describe('scaffolding component testing', {
     })
   })
 
-  context('angular-cli-unconfigured', () => {
+  // TODO: revert once Angular is slated for release
+  context.skip('angular-cli-unconfigured', () => {
     it('scaffolds component testing for Angular', () => {
       startSetupFor('angular-cli-unconfigured')
 

@@ -12,7 +12,6 @@ const npmModulesToCopy = [
   'react18',
   'vue',
   'vue2',
-  'angular',
 ]
 
 npmModulesToCopy.forEach((folder) => {
