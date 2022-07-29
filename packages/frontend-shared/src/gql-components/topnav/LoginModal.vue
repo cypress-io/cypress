@@ -90,13 +90,14 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import CopyText from '@cy/components/CopyText.vue'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
+import { hideAllPoppers } from 'floating-vue'
 
 import {
   Dialog,
@@ -132,6 +133,18 @@ fragment LoginModal on Query {
   ...Auth
 }
 `
+
+// Ensure all tooltips are closed when the modal opens - this prevents tooltips from beneath that
+// are stuck open being rendered on top of the modal due to the use of a fixed z-index in `floating-vue`
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value) {
+      hideAllPoppers()
+    }
+  },
+  { immediate: true },
+)
 
 const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)
