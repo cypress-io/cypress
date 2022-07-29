@@ -1850,16 +1850,6 @@ jobs:
           command: |
             yarn test
           working_directory: npm/cypress-schematic
-      - run:
-          name: Launch Sandbox, Install Schematic for Angular 13, and Run Test
-          command: |
-            yarn launch:test13 && yarn test:e2e:sandbox13
-          working_directory: npm/cypress-schematic
-      - run:
-          name: Launch Sandbox, Install Schematic for Angular 14, and Run Test
-          command: |
-            yarn launch:test14 && yarn test:e2e:sandbox14
-          working_directory: npm/cypress-schematic
       - store-npm-logs
 
   npm-release:
