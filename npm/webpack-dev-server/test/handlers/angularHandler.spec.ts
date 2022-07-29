@@ -40,7 +40,8 @@ const projectConfig: AngularJsonProjectConfig = {
   },
 }
 
-describe('angularHandler', function () {
+// TODO: revert once Angular is slated for release
+describe.skip('angularHandler', function () {
   this.timeout(1000 * 60)
 
   it('sources the config from angular-13', async () => {
@@ -53,7 +54,7 @@ describe('angularHandler', function () {
         projectRoot,
         specPattern: 'src/**/*.cy.ts',
       } as Cypress.PluginConfigOptions,
-      framework: 'angular',
+      // framework: 'angular',
     } as WebpackDevServerConfig
 
     const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
@@ -78,7 +79,7 @@ describe('angularHandler', function () {
         projectRoot,
         specPattern: 'src/**/*.cy.ts',
       } as Cypress.PluginConfigOptions,
-      framework: 'angular',
+      // framework: 'angular',
     } as WebpackDevServerConfig
 
     const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
@@ -120,6 +121,8 @@ const expectLoadsAngularBuildOptions = () => {
   expect(buildOptions.aot).to.be.false
   expect(buildOptions.optimization).to.be.false
   expect(buildOptions.tsConfig).to.equal(tsConfig)
+  expect(buildOptions.outputHashing).to.equal('none')
+  expect(buildOptions.budgets).to.be.undefined
 
   const modifiedProjectConfig = cloneDeep(projectConfig)
 
