@@ -873,7 +873,16 @@ commands:
           # Ensure we're installing the node-version for the cloned repo
           command: |
             if [[ -f .node-version ]]; then
-              curl -L https://raw.githubusercontent.com/cypress-io/cypress/<< pipeline.git.branch >>/scripts/ensure-node.sh --output ci-ensure-node.sh
+              branch="<< pipeline.git.branch >>"
+
+              externalBranchPattern='^pull\/[0-9]+'
+              if [[ $branch =~ $externalBranchPattern ]]; then
+                # We are unable to curl from the external PR branch location
+                # so we fall back to develop
+                branch="develop"
+              fi
+
+              curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
             else 
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
