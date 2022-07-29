@@ -1115,3 +1115,86 @@ https://on.cypress.io/config
 
 
 `
+
+exports['testConfigOverrides / fails when setting invalid config opt with Cypress.config() in before:test:run:async'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (invalid_before_test_async.js)                                             │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid_before_test_async.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  invalid_before_test_async.js                                                    (1 of 1)
+
+
+  1) does not run
+  nested
+    2) does not run 2
+
+
+  0 passing
+  2 failing
+
+  1) does not run:
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test:before:run:async event handler. The \`testIsolation\` option can only be overridden from suite-level overrides.
+      [stack trace lines]
+
+  2) nested
+       does not run 2:
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test:before:run:async event handler. The \`testIsolation\` option can only be overridden from suite-level overrides.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     invalid_before_test_async.js                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/does not run (fail    (6400x2610)
+     ed).png                                                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/nested -- does not    (6400x2610)
+      run 2 (failed).png                                                                            
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/invalid_before_test_async.js.mp     (X second)
+                          4                                                                         
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  invalid_before_test_async.js             XX:XX        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
+
+
+`

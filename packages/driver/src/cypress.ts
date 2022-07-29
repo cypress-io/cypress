@@ -255,6 +255,11 @@ class $Cypress {
         overrideLevel = 'code'
       }
 
+      // FIXME: // bug in runner causes browser to hang in run mode when test:before:run throws an exception
+      if (overrideLevel === 'test:before:run' && this.config('isTextTerminal')) {
+        return
+      }
+
       const skipValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig || false
 
       if (!skipValidation) {

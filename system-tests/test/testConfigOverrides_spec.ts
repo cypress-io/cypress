@@ -33,7 +33,8 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  // systemTests.it.only('fails when setting invalid config opt with Cypress.config() in before:test:run', {
+  // FIXME: bug in runner causes browser to hang in run mode when test:before:run throws an exception
+  // systemTests.it.skip('fails when setting invalid config opt with Cypress.config() in before:test:run', {
   //   spec: 'testConfigOverrides/invalid_before_test.js',
   //   snapshot: true,
   //   outputPath,
@@ -41,21 +42,13 @@ describe('testConfigOverrides', () => {
   //   expectedExitCode: 1,
   // })
 
-  // systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
-  //   spec: 'testConfigOverrides/invalid_before_test_async.js',
-  //   snapshot: true,
-  //   outputPath,
-  //   browser: 'electron',
-  //   expectedExitCode: 1,
-  // })
-
-  // systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
-  //   spec: 'testConfigOverrides/invalid_code-level.js',
-  //   snapshot: true,
-  //   outputPath,
-  //   browser: 'electron',
-  //   expectedExitCode: 1,
-  // })
+  systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
+    spec: 'testConfigOverrides/invalid_before_test_async.js',
+    snapshot: true,
+    outputPath,
+    browser: 'electron',
+    expectedExitCode: 2,
+  })
 
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
