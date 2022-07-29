@@ -4,7 +4,7 @@ import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 
 import * as configUtil from '../src/index'
-import { OverrideLevel, OVERRIDE_LEVELS } from '../src/options'
+import { OverrideLevel, ALL_OVERRIDE_LEVELS } from '../src/options'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -241,7 +241,7 @@ describe('config/src/index', () => {
       })
     })
 
-    OVERRIDE_LEVELS.forEach((overrideLevel) => {
+    ALL_OVERRIDE_LEVELS.forEach((overrideLevel) => {
       it(`does not call onErr if validation succeeds from ${overrideLevel} level`, () => {
         const errorFn = sinon.spy()
 
