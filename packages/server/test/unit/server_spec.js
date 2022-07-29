@@ -10,6 +10,7 @@ const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const fileServer = require(`../../lib/file_server`)
 const ensureUrl = require(`../../lib/util/ensure-url`)
+const { getCtx } = require('@packages/data-context')
 
 const morganFn = function () {}
 
@@ -21,7 +22,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
     })
@@ -50,7 +51,7 @@ describe.skip('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()

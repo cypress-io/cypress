@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const { makeDataContext, setCtx } = require('../../lib/makeDataContext')
+const { makeDataContext, setCtx, getCtx } = require('../../lib/makeDataContext')
 
 setCtx(makeDataContext({}))
 
@@ -351,7 +351,7 @@ describe('Proxy Performance', function () {
           config: {
             supportFile: false,
           },
-        }).then((config) => {
+        }, getCtx().file.getFilesByGlob).then((config) => {
           config.port = CY_PROXY_PORT
 
           // turn off morgan
