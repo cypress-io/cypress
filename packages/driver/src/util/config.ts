@@ -13,7 +13,14 @@ import { preprocessForSerialization } from './serialization'
  */
 const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => {
   Object.keys(objectLikeConfig).forEach((key) => {
-    const { overrideLevels = 'never' } = options.find((option) => option.name === key) || { }
+    const option = options.find((option) => option.name === key)
+
+    // allow user defined config values
+    if (!option) {
+      return
+    }
+
+    const overrideLevels = option.overrideLevels || 'never'
 
     if (overrideLevels === 'never') {
       delete objectLikeConfig[key]

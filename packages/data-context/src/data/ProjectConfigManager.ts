@@ -417,7 +417,7 @@ export class ProjectConfigManager {
         // @ts-ignore - we don't know if the browser is headed or headless at this point.
         // this is handled in open_project#launch.
         fullConfig.browsers = browsers
-        fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }
+        fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runTime' }
       }
 
       fullConfig.browsers = fullConfig.browsers?.map((browser) => {
