@@ -6,7 +6,6 @@ const electron = require('electron')
 const DataContext = require('@packages/data-context')
 const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
-const Events = require(`../../../lib/gui/events`)
 const Windows = require(`../../../lib/gui/windows`)
 const interactiveMode = require(`../../../lib/modes/interactive`)
 
@@ -128,25 +127,12 @@ describe('gui/interactive', () => {
       this.state = {}
 
       sinon.stub(menu, 'set')
-      sinon.stub(Events, 'start')
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(Windows, 'trackState')
 
       const state = savedState.create()
 
       sinon.stub(state, 'get').resolves(this.state)
-    })
-
-    it('calls Events.start with options, adding env, onFocusTests, and os', () => {
-      sinon.stub(os, 'platform').returns('someOs')
-      const opts = {}
-
-      return interactiveMode.ready(opts).then(() => {
-        expect(Events.start).to.be.called
-        expect(Events.start.lastCall.args[0].onFocusTests).to.be.a('function')
-
-        expect(Events.start.lastCall.args[0].os).to.equal('someOs')
-      })
     })
 
     it('calls menu.set', () => {

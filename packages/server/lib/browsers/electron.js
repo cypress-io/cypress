@@ -65,7 +65,7 @@ const _getAutomation = async function (win, options, parent) {
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
         if (!options.onScreencastFrame) {
-          await sendCommand('Page.startScreencast', screencastOpts)
+          await sendCommand('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
           await sendCommand('Page.stopScreencast')
@@ -117,7 +117,7 @@ const _maybeRecordVideo = async function (webContents, options) {
     }
   })
 
-  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
+  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts())
 }
 
 module.exports = {
