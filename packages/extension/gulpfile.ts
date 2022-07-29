@@ -16,9 +16,7 @@ const manifest = () => {
 }
 
 const background = (cb) => {
-  const webpackCp = cp.fork(nodeWebpack, { stdio: 'inherit' })
-
-  webpackCp.on('exit', (code) => {
+  cp.fork(nodeWebpack, { stdio: 'inherit' }).on('exit', (code) => {
     cb(code === 0 ? null : new Error(`Webpack process exited with code ${code}`))
   })
 }
