@@ -97,6 +97,51 @@ export const WIZARD_DEPENDENCY_NEXT = {
   minVersion: '^=10.0.0 || ^=11.0.0 || ^=12.0.0',
 } as const
 
+export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
+  type: 'angular',
+  name: 'Angular CLI',
+  package: '@angular/cli',
+  installer: '@angular/cli',
+  description: 'CLI tool that you use to initialize, develop, scaffold, and maintain Angular applications.',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
+  type: 'angular',
+  name: 'Angular DevKit Build Angular',
+  package: '@angular-devkit/build-angular',
+  installer: '@angular-devkit/build-angular',
+  description: 'Angular Webpack build facade',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
+  type: 'angular',
+  name: 'Angular Core',
+  package: '@angular/core',
+  installer: '@angular/core',
+  description: 'The core of the Angular framework',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
+  type: 'angular',
+  name: 'Angular Common',
+  package: '@angular/common',
+  installer: '@angular/common',
+  description: 'Commonly needed Angular directives and services',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
+  type: 'angular',
+  name: 'Angular Platform Browser Dynamic',
+  package: '@angular/platform-browser-dynamic',
+  installer: '@angular/platform-browser-dynamic',
+  description: 'Library for using Angular in a web browser with JIT compilation',
+  minVersion: '>=13.0.0',
+} as const
+
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
@@ -109,6 +154,11 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_REACT_DOM,
   WIZARD_DEPENDENCY_VUE_2,
   WIZARD_DEPENDENCY_VUE_3,
+  WIZARD_DEPENDENCY_ANGULAR_CLI,
+  WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
+  WIZARD_DEPENDENCY_ANGULAR_CORE,
+  WIZARD_DEPENDENCY_ANGULAR_COMMON,
+  WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
 ] as const
 
 export const WIZARD_BUNDLERS = [
