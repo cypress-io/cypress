@@ -1,7 +1,15 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
-import type { BreakingOption, BreakingOptionErrorKey } from './options'
+import {
+  defaultSpecPattern,
+  options,
+  OVERRIDE_LEVELS,
+  breakingOptions,
+  breakingRootOptions,
+  testingTypeBreakingOptions,
+} from './options'
+
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
 import type { TestingType } from '@packages/types'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -21,10 +29,12 @@ const debug = Debug('cypress:config:browser')
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
-function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T) {
+function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
       memo[item[keyKey] as string] = item[valueKey]
+    } else {
+      memo[item[keyKey] as string] = defaultValueFallback
     }
 
     return memo
@@ -33,9 +43,9 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
+const testOverrideLevels = createIndex(options, 'name', 'overrideLevels', 'never')
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
@@ -172,16 +182,22 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
-  let errProperty
+export const validateOverridableAtTestTest = (config: any, overrideLevel: OverrideLevel, onErr: (errorKey: string, invalidConfigKey: string) => void) => {
+  Object.keys(config).some((configKey) => {
+    const runTimeValidation = OVERRIDE_LEVELS.includes(overrideLevel)
+    const overrideLevels = testOverrideLevels[configKey]
 
-  Object.keys(config).some((option) => {
-    return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
+    if (!overrideLevels) {
+      // non-cypress configuration option. skip validation
+      return
+    }
+
+    if (runTimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(overrideLevel))) {
+      const errPath = overrideLevel === 'runTime' ? 'config.invalid_cypress_config_api_override' : 'config.invalid_test_config_override'
+
+      onErr(errPath, configKey)
+    }
   })
-
-  if (errProperty) {
-    return onErr(errProperty)
-  }
 }
 
 export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: any) => {

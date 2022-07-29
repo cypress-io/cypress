@@ -1,4 +1,4 @@
-import { validate, validateNoReadOnlyConfig } from '@packages/config'
+import { validate as validateConfigValues, validateOverridableAtTestTest } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -238,21 +238,24 @@ class $Cypress {
 
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
-        validateNoReadOnlyConfig(config, (errProperty) => {
-          const errPath = this.state('runnable')
-            ? 'config.invalid_cypress_config_override'
-            : 'config.invalid_test_config_override'
+      const overrideLevel = this.state('runnable') ? 'runTime' : this.state('test')?._testConfig?.applied || 'supportFile'
+      const enforceConfigOverrideRules = this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig
 
-          const errMsg = $errUtils.errByPath(errPath, {
-            errProperty,
-          })
-
-          throw new (this.state('specWindow').Error)(errMsg)
+      validateOverridableAtTestTest(config, overrideLevel, (errPath, invalidConfigKey) => {
+        const errMsg = $errUtils.errByPath(errPath, {
+          invalidConfigKey,
+          overrideLevel: this.state('runnable')?.type || this.state('test')?._testConfig?.applied,
         })
-      }
 
-      validate(config, (errResult) => {
+        if (enforceConfigOverrideRules) {
+          throw new (this.state('specWindow').Error)(errMsg)
+        }
+
+        // eslint-disable-next-line no-console
+        console.warn(errMsg)
+      })
+
+      validateConfigValues(config, (errResult) => {
         const stringify = (str) => format(JSON.stringify(str))
 
         const format = (str) => `\`${str}\``

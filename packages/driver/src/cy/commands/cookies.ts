@@ -136,7 +136,7 @@ export default function (Commands, Cypress, cy, state, config) {
   const getAndClear = (log?, timeout?, options = {}) => {
     return automateCookies('get:cookies', options, log, timeout)
     .then((resp) => {
-    // bail early if we got no cookies!
+      // bail early if we got no cookies!
       if (resp && (resp.length === 0)) {
         return resp
       }
@@ -178,15 +178,17 @@ export default function (Commands, Cypress, cy, state, config) {
     }
   }
 
-  // TODO: handle failure here somehow
-  // maybe by tapping into the Cypress reset
-  // stuff, or handling this in the runner itself?
-  // Cypress sessions will clear cookies on its own before each test
-  Cypress.on('test:before:run:async', () => {
-    if (!Cypress.config('experimentalSessionAndOrigin')) {
+  // TODO: Cypress sessions will clear cookies on its own before each test.
+  // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
+  // session data (cookies / local storage / session storage) to reset functionality.
+  if (!Cypress.config('experimentalSessionAndOrigin')) {
+    // TODO: handle failure here somehow
+    // maybe by tapping into the Cypress reset
+    // stuff, or handling this in the runner itself?
+    Cypress.on('test:before:run:async', () => {
       return getAndClear()
-    }
-  })
+    })
+  }
 
   return Commands.addAll({
     getCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {

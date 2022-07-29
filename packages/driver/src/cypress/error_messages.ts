@@ -271,14 +271,16 @@ export default {
       docsUrl: 'https://on.cypress.io/config',
     },
     invalid_test_override: {
-      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      message: `The config override passed to your {{overrideLevel}}-level override has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_cypress_config_override: {
-      message: `\`Cypress.config()\` cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
+    invalid_cypress_config_api_override: {
+      message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` from the {{overrideLevel}}-level.`,
+      docsUrl: 'https://on.cypress.io/config',
     },
     invalid_test_config_override: {
-      message: `Cypress test configuration cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
+      message: `\`{{invalidConfigKey}}\` configuration cannot been overridden from the {{overrideLevel}}-level.`,
+      docsUrl: 'https://on.cypress.io/config',
     },
   },
 

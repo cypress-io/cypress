@@ -67,6 +67,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
+  "testIsolation": "default",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -77,12 +78,13 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "viewportWidth": 1000,
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
   "additionalIgnorePattern": [],
   "autoOpen": false,
   "browsers": [],
   "clientRoute": "/__/",
   "configFile": "cypress.config.js",
-  "cypressBinaryRoot": "/root/cypress",
+  "cypressBinaryRoot": "/Users/emily/dev/cypress",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
   "isInteractive": true,
@@ -146,6 +148,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
+  "testIsolation": "default",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -156,12 +159,13 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "viewportWidth": 1000,
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
   "additionalIgnorePattern": [],
   "autoOpen": false,
   "browsers": [],
   "clientRoute": "/__/",
   "configFile": "cypress.config.js",
-  "cypressBinaryRoot": "/root/cypress",
+  "cypressBinaryRoot": "/Users/emily/dev/cypress",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
   "isInteractive": true,
@@ -172,8 +176,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "socketId": null,
   "socketIoCookie": "__socket",
   "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/",
-  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
+  "xhrRoute": "/xhrs/"
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
@@ -221,6 +224,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "supportFile",
   "supportFolder",
   "taskTimeout",
+  "testIsolation",
   "trashAssetsBeforeRuns",
   "userAgent",
   "video",
@@ -235,6 +239,5 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "browsers",
   "hosts",
   "isInteractive",
-  "modifyObstructiveCode",
-  "specPattern"
+  "modifyObstructiveCode"
 ]

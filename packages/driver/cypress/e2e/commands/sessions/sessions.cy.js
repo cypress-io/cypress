@@ -43,6 +43,54 @@ describe('cy.session', { retries: 0 }, () => {
     })
   })
 
+  describe('test:before:run:async', () => {
+    it('clears session data before each run', async () => {
+      const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
+
+      await Cypress.action('runner:test:before:run:async', {})
+
+      expect(clearCurrentSessionData).to.be.called
+    })
+
+    it('clears session data before each run', async () => {
+      const backendSpy = cy.spy(Cypress, 'backend')
+
+      await Cypress.action('runner:test:before:run:async', {})
+
+      expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
+    })
+
+    describe('testIsolation=strict', { testIsolation: 'strict' }, () => {
+      it('clears page before each run when testIsolation=strict', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:run:async', {})
+
+          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+        })
+        .url('about:blank')
+      })
+    })
+
+    describe('testIsolation=default', { testIsolation: 'default' }, () => {
+      it('does not clear page', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:run:async', {})
+
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
+        })
+        .url('/fixtures/form.html')
+      })
+    })
+  })
+
   describe('session flows', () => {
     let logs = []
     let clearPageCount = 0
