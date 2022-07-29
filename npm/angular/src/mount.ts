@@ -74,7 +74,7 @@ export type MountResponse<T extends object> = {
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed
  *
- * @param {Type<T>} component Angular component being mounted
+ * @param {Type<T> | Type<WrapperComponent>} component Angular component being mounted
  * @param {TestBedConfig} config TestBed configuration passed into the mount function
  * @returns {TestBedConfig} TestBedConfig
  */
@@ -104,14 +104,14 @@ function bootstrapModule<T extends object> (
 /**
  * Initializes the TestBed
  *
- * @param {Type<T>} component Angular component being mounted
+ * @param {Type<T> | string} component Angular component being mounted or its template
  * @param {TestBedConfig} config TestBed configuration passed into the mount function
  * @returns {TestBed} TestBed
  */
 function initTestBed<T extends object> (
   component: Type<T> | string,
   config: TestBedConfig<T>,
-): {testBed: TestBed, componentFixture: Type<T> | Type<WrapperComponent>} {
+): { testBed: TestBed, componentFixture: Type<T> | Type<WrapperComponent> } {
   const { providers, ...configRest } = config
 
   const testBed: TestBed = getTestBed()
@@ -143,12 +143,33 @@ function initTestBed<T extends object> (
   return { testBed, componentFixture }
 }
 
+@Component({ selector: 'cy-wrapper-component', template: '' })
+class WrapperComponent { }
+
+/**
+ * Returns the Component if Type<T> or creates a WrapperComponent
+ *
+ * @param {Type<T> | string} component The component you want to create a fixture of
+ * @returns {Type<T> | Type<WrapperComponent>}
+ */
+function createComponentFixture<T extends object> (
+  component: Type<T> | string,
+): Type<T> | Type<WrapperComponent> {
+  if (typeof component === 'string') {
+    TestBed.overrideTemplate(WrapperComponent, component)
+
+    return WrapperComponent
+  }
+
+  return component
+}
+
 /**
  * Creates the ComponentFixture
  *
- * @param component Angular component being mounted
- * @param testBed TestBed
- * @param autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
+ * @param {Type<T> | Type<WrapperComponent>} component Angular component being mounted
+ * @param {TestBed} testBed TestBed
+ * @param {boolean} autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
  * @returns {ComponentFixture<T>} ComponentFixture
  */
 function setupFixture<T extends object> (
@@ -185,25 +206,10 @@ function setupComponent<T extends object> (
   return component
 }
 
-@Component({ selector: 'cy-wrapper-component', template: '' })
-class WrapperComponent { }
-
-function createComponentFixture<T extends object> (
-  component: Type<T> | string,
-): Type<T> | Type<WrapperComponent> {
-  if (typeof component === 'string') {
-    TestBed.overrideTemplate(WrapperComponent, component)
-
-    return WrapperComponent
-  }
-
-  return component
-}
-
 /**
  * Mounts an Angular component inside Cypress browser
  *
- * @param {Type<T>} component imported from angular file
+ * @param {Type<T> | string} component Angular component being mounted or its template
  * @param {TestBedConfig<T>} config configuration used to configure the TestBed
  * @param {boolean} autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
  * @example
@@ -217,6 +223,16 @@ function createComponentFixture<T extends object> (
  *    imports: [SharedModule]
  *  })
  *  cy.get('h1').contains('Hello World')
+ * })
+ *
+ * or
+ *
+ * it('can mount with template', () => {
+ *  mount('<app-hello-world></app-hello-world>', {
+ *    declarations: [HelloWorldComponent],
+ *    providers: [MyService],
+ *    imports: [SharedModule]
+ *  })
  * })
  * @returns Cypress.Chainable<MountResponse<T>>
  */
@@ -235,9 +251,11 @@ export function mount<T extends object> (
     component: componentInstance,
   }
 
+  const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
+
   Cypress.log({
     name: 'mount',
-    message: componentFixture.name,
+    message: logMessage,
     consoleProps: () => ({ result: mountResponse }),
   })
 
