@@ -1,8 +1,5 @@
 {
   "norewrite": [
-    "./coffee-script/lib/coffee-script/helpers.js",
-    "./coffeescript/lib/coffee-script/helpers.js",
-    "./cson-parser/node_modules/coffee-script/lib/coffee-script/helpers.js",
     "./evil-dns/evil-dns.js",
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
@@ -22,19 +19,18 @@
     "./node_modules/jsonfile/index.js",
     "./node_modules/prettier/index.js",
     "./node_modules/prettier/third-party.js",
-    "./node_modules/time-require/src/timeRequire.js",
     "./node_modules/trash/node_modules/make-dir/index.js",
     "./node_modules/utif/UTIF.js",
     "./packages/graphql/src/schema.ts",
     "./packages/https-proxy/lib/ca.js",
     "./packages/server/lib/browsers/index.js",
     "./packages/server/lib/capture.js",
+    "./packages/server/lib/routes-e2e.ts",
     "./packages/server/lib/unhandled_exceptions.js",
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/signal-exit/index.js",
-    "./prettier/index.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
@@ -808,7 +804,6 @@
     "./packages/server/lib/remote_states.ts",
     "./packages/server/lib/reporter.js",
     "./packages/server/lib/routes-ct.ts",
-    "./packages/server/lib/routes-e2e.ts",
     "./packages/server/lib/routes.ts",
     "./packages/server/lib/saved_state.ts",
     "./packages/server/lib/screenshots.js",
@@ -3847,5 +3842,5 @@
     "./packages/types/src/warning.ts"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "1c7d59e5d2e931fafd543d2e337f6353f578eecaee4560142ac030398d45e6c7"
+  "deferredHash": "28922af88a10edd38892b086c5f9d7c32da2033ff7740b30d93d7c1aab73f36e"
 }

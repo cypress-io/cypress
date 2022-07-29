@@ -86,6 +86,8 @@ function getSnapshotGenerator ({
 
       // resuls in recursive call to __get_fs2__
       'packages/https-proxy/lib/ca.js',
+
+      'packages/server/lib/routes-e2e.ts',
     ],
   })
 }
