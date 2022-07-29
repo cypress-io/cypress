@@ -31,7 +31,7 @@ export const WIZARD_DEPENDENCY_REACT = {
   package: 'react',
   installer: 'react',
   description: 'A JavaScript library for building user interfaces',
-  minVersion: '>=16.0.0 || >=17.0.0 || >=18.0.0',
+  minVersion: '^=16.0.0 || ^=17.0.0 || ^=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_REACT_DOM = {
@@ -40,7 +40,7 @@ export const WIZARD_DEPENDENCY_REACT_DOM = {
   package: 'react-dom',
   installer: 'react-dom',
   description: 'This package serves as the entry point to the DOM and server renderers for React',
-  minVersion: '>=16.0.0 || >=17.0.0 || >=18.0.0',
+  minVersion: '^=16.0.0 || ^=17.0.0 || ^=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_TYPESCRIPT = {

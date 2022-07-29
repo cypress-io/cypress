@@ -11,7 +11,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, inPkgJson, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { DependencyToInstall, inPkgJson, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -175,26 +175,54 @@ export class ProjectConfigManager {
     const devServerOptions = this._cachedLoadConfig.initialConfig.component.devServer
 
     const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
-    const framework = WIZARD_FRAMEWORKS.find((x) => x.type === devServerOptions.framework)
 
     // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
     // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
     const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
 
-    if (bundler) {
-      const result = inPkgJson(bundler, this.options.projectRoot)
-
-      if (!result.satisfied) {
-        unsupportedDeps.set(result.dependency.type, result)
-      }
+    if (!bundler) {
+      return
     }
 
-    if (framework && bundler?.type) {
+    const result = inPkgJson(bundler, this.options.projectRoot)
+
+    if (!result.satisfied) {
+      unsupportedDeps.set(result.dependency.type, result)
+    }
+
+    const isFrameworkSatisfied = (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
       for (const dep of framework.dependencies(bundler.type, this.options.projectRoot)) {
         const res = inPkgJson(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
-          unsupportedDeps.set(res.dependency.type, res)
+          return false
+        }
+      }
+
+      return true
+    }
+
+    const frameworks = WIZARD_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+
+    const mismatchedFrameworkDeps = new Map<typeof WIZARD_DEPENDENCIES[number]['type'], DependencyToInstall>()
+
+    let isSatisfied = false
+
+    for (const framework of frameworks) {
+      if (isFrameworkSatisfied(bundler, framework)) {
+        isSatisfied = true
+        break
+      } else {
+        for (const dep of framework.dependencies(bundler.type, this.options.projectRoot)) {
+          mismatchedFrameworkDeps.set(dep.dependency.type, dep)
+        }
+      }
+    }
+
+    if (!isSatisfied) {
+      for (const dep of Array.from(mismatchedFrameworkDeps.values())) {
+        if (!dep.satisfied) {
+          unsupportedDeps.set(dep.dependency.type, dep)
         }
       }
     }

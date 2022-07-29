@@ -1566,10 +1566,10 @@ export const AllCypressErrors = {
   COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
     const deps = dependencies.map<string>((dep) => {
       if (dep.detectedVersion) {
-        return `${dep.dependency.type}. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`
+        return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`
       }
 
-      return `${dep.dependency.type}. Expected ${dep.dependency.minVersion} but dependency was not found.`
+      return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion} but dependency was not found.`
     })
 
     return errTemplate`
@@ -1577,7 +1577,7 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(deps, { prefix: ' - ' })}
 
-      Cypress may not function as expected.
+      If you're experiencing problems, downgrade dependencies and restart Cypress.
     `
   },
 } as const

@@ -71,10 +71,12 @@ const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { cod
 </script>
 
 <style lang="scss">
+// Add some extra margin to the <ul>
+// TODO: ideally move this into `frontend-shared/src/composables/useMarkdown`
+// It doesn't get applied when added there due to conflicting with other, higher priority rules.
 .warning-markdown {
   ul {
-    margin-left: 16px;
-    margin-bottom: 16px;
+    @apply ml-16px mb-16px;
   }
 }
 </style>
