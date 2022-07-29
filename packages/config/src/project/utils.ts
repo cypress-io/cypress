@@ -8,7 +8,6 @@ import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
 } from '@packages/types'
-import { getCtx } from '@packages/data-context/src/globalContext'
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 
 import type { Config } from './types'
@@ -275,16 +274,14 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
 }
 
 // async function
-export async function setSupportFileAndFolder (obj: Config) {
+export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any) {
   if (!obj.supportFile) {
     return Bluebird.resolve(obj)
   }
 
   obj = _.clone(obj)
 
-  const ctx = getCtx()
-
-  const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile)
+  const supportFilesByGlob = await getFilesByGlob(obj.projectRoot, obj.supportFile)
 
   if (supportFilesByGlob.length > 1) {
     return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
@@ -366,6 +363,7 @@ export function mergeDefaults (
   config: Config = {},
   options: Record<string, any> = {},
   cliConfig: Record<string, any> = {},
+  getFilesByGlob: any,
 ) {
   const resolved: any = {}
 
@@ -488,7 +486,7 @@ export function mergeDefaults (
   delete config['resolved']['e2e']
   delete config['resolved']['component']
 
-  return setSupportFileAndFolder(config)
+  return setSupportFileAndFolder(config, getFilesByGlob)
 }
 
 function isValidCypressInternalEnvValue (value: string) {

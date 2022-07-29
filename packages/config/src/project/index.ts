@@ -3,7 +3,6 @@ import Debug from 'debug'
 import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
-import { getCtx } from '@packages/data-context/src/globalContext'
 import type {
   ResolvedFromConfig, TestingType, FullConfig,
 } from '@packages/types'
@@ -20,7 +19,7 @@ import {
 const debug = Debug('cypress:config:project')
 
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
-export function setupFullConfigWithDefaults (obj: any = {}): Promise<FullConfig> {
+export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
   debug('setting config object %o', obj)
   let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
@@ -38,7 +37,7 @@ export function setupFullConfigWithDefaults (obj: any = {}): Promise<FullConfig>
   config.projectName = projectName
 
   // @ts-ignore
-  return mergeDefaults(config, options, cliConfig)
+  return mergeDefaults(config, options, cliConfig, getFilesByGlob)
 }
 
 // TODO: update types from data-context/src/data/ProjectLifecycleManager.ts
@@ -53,7 +52,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
   // make sure every option returned from the plugins file
   // passes our validation functions
   validate(modifiedConfig, (validationResult: ConfigValidationFailureInfo | string) => {
-    let configFile = getCtx().lifecycleManager.configFile
+    let configFile = cfg.configFile!
 
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)

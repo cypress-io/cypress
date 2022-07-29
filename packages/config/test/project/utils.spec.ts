@@ -1,4 +1,5 @@
 import '@packages/server/test/spec_helper'
+import { getCtx } from '@packages/data-context/src/globalContext'
 
 import _ from 'lodash'
 import { expect } from 'chai'
@@ -120,7 +121,7 @@ describe('config/src/project/utils', () => {
       const options = {}
 
       try {
-        await mergeDefaults(cfg, options)
+        await mergeDefaults(cfg, options, {}, getCtx().file.getFilesByGlob)
       } catch {
         //
       }
@@ -137,7 +138,7 @@ describe('config/src/project/utils', () => {
       }
       const options = {}
 
-      await mergeDefaults(cfg, options)
+      await mergeDefaults(cfg, options, {}, getCtx().file.getFilesByGlob)
 
       expect(errors.throwErr).not.to.be.called
     })
@@ -472,7 +473,7 @@ describe('config/src/project/utils', () => {
         projectRoot: '/_test-output/path/to/project',
       }
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         expect(result).to.eql(obj)
       })
@@ -486,7 +487,7 @@ describe('config/src/project/utils', () => {
         supportFile: 'test/project/utils.spec.ts',
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -504,7 +505,7 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -522,7 +523,7 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -540,7 +541,7 @@ describe('config/src/project/utils', () => {
         supportFile: false,
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -563,7 +564,7 @@ describe('config/src/project/utils', () => {
         },
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .catch((err) => {
         expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
@@ -584,7 +585,7 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/index.ts',
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         debug('result is', result)
 
@@ -611,7 +612,7 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return setSupportFileAndFolder(obj)
+      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
       .then((result) => {
         debug('result is', result)
 
@@ -629,7 +630,7 @@ describe('config/src/project/utils', () => {
       this.defaults = (prop, value, cfg: any = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options)
+        return mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options, {}, getCtx().file.getFilesByGlob)
         .then((mergedConfig) => {
           expect(mergedConfig[prop]).to.deep.eq(value)
         })
@@ -833,35 +834,35 @@ describe('config/src/project/utils', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.numTestsKeptInMemory).to.eq(0)
       })
     })
 
     it('resets watchForFileChanges to false when runMode', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.watchForFileChanges).to.be.false
       })
     })
 
     it('can override morgan in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false })
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false }, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.morgan).to.be.false
       })
     })
 
     it('can override isTextTerminal in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.isTextTerminal).to.be.true
       })
     })
 
     it('can override socketId in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' }, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.socketId).to.eq('1234')
       })
@@ -881,7 +882,7 @@ describe('config/src/project/utils', () => {
         },
       }
 
-      return mergeDefaults(obj)
+      return mergeDefaults(obj, {}, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           foo: 'bar',
@@ -913,7 +914,7 @@ describe('config/src/project/utils', () => {
         },
       }
 
-      return mergeDefaults(obj, options)
+      return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           host: 'localhost',
@@ -1008,7 +1009,7 @@ describe('config/src/project/utils', () => {
           port: 1234,
         }
 
-        return mergeDefaults(obj, options)
+        return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
@@ -1095,7 +1096,7 @@ describe('config/src/project/utils', () => {
           },
         }
 
-        return mergeDefaults(obj, options)
+        return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             arch: { value: os.arch(), from: 'default' },
