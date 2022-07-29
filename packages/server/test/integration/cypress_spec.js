@@ -7,6 +7,7 @@ const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('@tooling/system-tests')
+const { normalizeStdout } = require('@tooling/system-tests/lib/normalizeStdout')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const pkg = require('@packages/root')
@@ -19,7 +20,6 @@ const argsUtil = require(`../../lib/util/args`)
 const { fs } = require(`../../lib/util/fs`)
 const ciProvider = require(`../../lib/util/ci_provider`)
 const settings = require(`../../lib/util/settings`)
-const Events = require(`../../lib/gui/events`)
 const Windows = require(`../../lib/gui/windows`)
 const interactiveMode = require(`../../lib/modes/interactive`)
 const runMode = require(`../../lib/modes/run`)
@@ -96,7 +96,9 @@ const snapshotConsoleLogs = function (name) {
   // so must switch back to original
   process.chdir(previousCwd)
 
-  return snapshot(name, stripAnsi(args))
+  const snap = normalizeStdout(stripAnsi(args))
+
+  return snapshot(name, snap)
 }
 
 function mockEE () {
@@ -1638,7 +1640,6 @@ describe('lib/cypress', () => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(ServerE2E.prototype, 'startWebsockets')
-      sinon.spy(Events, 'start')
       sinon.stub(electron.ipcMain, 'on')
     })
 
@@ -1657,20 +1658,10 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('passes options to Events.start', () => {
-      return cypress.start(['--port=2121', '--config=pageLoadTimeout=1000'])
-      .then(() => {
-        expect(Events.start).to.be.calledWithMatch({
-          config: {
-            pageLoadTimeout: 1000,
-            port: 2121,
-          },
-        })
-      })
-    })
-
     it('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
+
+      sinon.stub(interactiveMode, 'ready')
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
       process.env.CYPRESS_BASE_URL = 'http://localhost'
@@ -1685,7 +1676,7 @@ describe('lib/cypress', () => {
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => ctx.lifecycleManager.getFullInitialConfig())
       .then((json) => {
-        // this should be overriden by the env argument
+        // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
         const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, ...rest } = json
@@ -1702,7 +1693,7 @@ describe('lib/cypress', () => {
           '--env=baz=baz',
         ])
       }).then(() => {
-        const options = Events.start.firstCall.args[0]
+        const options = interactiveMode.ready.firstCall.args[0]
 
         return openProject.create(this.todosPath, { ...options, testingType: 'e2e' }, [])
       }).then(() => {

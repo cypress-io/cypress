@@ -147,4 +147,13 @@ describe('e2e sessions', () => {
       video: false,
     },
   })
+
+  it('sessions recreated on reload in open mode', {
+    spec: 'session_recreate_reload.cy.js',
+    snapshot: true,
+    config: {
+      experimentalSessionAndOrigin: true,
+      video: false,
+    },
+  })
 })
