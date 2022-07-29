@@ -108,12 +108,12 @@ describe('routes', () => {
     })
 
     it('route displays the alias', () => {
-      cy.get('.route-item .route-alias-name').eq(2)
+      cy.get('.route-item .route-alias-name')
       .should('have.text', 'createPost')
     })
 
     it('route displays a Tooltip for the alias', () => {
-      cy.get('.route-item .route-alias-name').eq(2).trigger('mouseover')
+      cy.get('.route-item .route-alias-name').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', `Aliased this route as: 'createPost'`)
     })
 

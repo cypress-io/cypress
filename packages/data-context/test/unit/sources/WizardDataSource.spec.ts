@@ -1,12 +1,12 @@
-import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardBundler, WizardFrontendFramework, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
-function findFramework (type: typeof WIZARD_FRAMEWORKS[number]['type']) {
+function findFramework (type: WizardFrontendFramework['type']) {
   return WIZARD_FRAMEWORKS.find((x) => x.type === type)!
 }
 
-function findBundler (type: typeof WIZARD_BUNDLERS[number]['type']) {
+function findBundler (type: WizardBundler['type']) {
   return WIZARD_BUNDLERS.find((x) => x.type === type)!
 }
 
@@ -149,8 +149,8 @@ describe('packagesToInstall', () => {
     ctx.update((coreData) => {
     // this should never happen!
       coreData.currentProject = projectPath
-      coreData.wizard.chosenFramework = undefined
-      coreData.wizard.chosenBundler = undefined
+      coreData.wizard.chosenFramework = null
+      coreData.wizard.chosenBundler = null
     })
 
     const actual = ctx.wizard.installDependenciesCommand()
