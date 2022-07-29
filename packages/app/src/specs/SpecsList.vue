@@ -182,9 +182,9 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useMutation, useSubscription } from '@urql/vue'
-import { computed, ref, watch } from 'vue'
-import { PurgeCloudSpecCacheDocument, CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { computed, ref, toRef, watch } from 'vue'
+import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
@@ -197,6 +197,7 @@ import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
+import { useCloudSpecData } from '../composables/useCloudSpecData'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -391,122 +392,20 @@ function getIdIfDirectory (row) {
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
 
-gql`
-mutation CloudData_Refetch ($ids: [ID!]!) {
-  loadRemoteFetchables(ids: $ids){
-    id
-    fetchingStatus
-  }
-}
-`
-
-gql`
-mutation PurgeCloudSpecCache ($projectSlug: String!, $specPaths: [String!]!) {
-  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths) {
-    __typename
-  }
-}
-`
-
-const refetchMutation = useMutation(CloudData_RefetchDocument)
-const purgeCloudSpecCacheMutation = useMutation(PurgeCloudSpecCacheDocument)
-
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
-const refetch = async (ids: string[]) => {
-  if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
-    await refetchMutation.executeMutation({ ids })
-  }
-}
+const displayedSpecs = computed(() => list.value.map((v) => v.data.data))
 
-const purgeCloudSpecCache = async (paths: string[]) => {
-  const projectSlug = props.gql.currentProject?.projectId
+const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
-  if (!!projectSlug && paths && paths.length > 0) {
-    await purgeCloudSpecCacheMutation.executeMutation({ projectSlug, specPaths: paths })
-  }
-}
-
-function shouldRefetch (item: NonNullCloudSpec) {
-  if (isOffline.value) {
-    // Offline, no need to refetch
-
-    return false
-  }
-
-  if (item.fetchingStatus === 'NOT_FETCHED' || item.fetchingStatus === undefined) {
-    // NOT_FETCHED, refetch
-
-    return true
-  }
-
-  if (props.mostRecentUpdate) {
-    if (
-      (
-        item.data?.__typename === 'CloudProjectSpecNotFound' ||
-        item.data?.__typename === 'CloudProjectSpec'
-      )
-      && (
-        item.data.retrievedAt &&
-        props.mostRecentUpdate > item.data.retrievedAt
-      )
-    ) {
-      // outdated, refetch
-
-      return true
-    }
-  }
-
-  // nothing new, no need to refetch
-
-  return false
-}
-
-type NonNullCloudSpec = Exclude<SpecsListFragment['cloudSpec'], undefined | null>
-
-function getIdsToRefetch () {
-  return list.value
-  .map((spec) => spec.data.data?.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec && shouldRefetch(cloudSpec)))
-  .map((cloudSpec) => cloudSpec.id)
-  ?? []
-}
-
-function getSpecPathsToPurge () {
-  return list.value
-  .map((spec) => spec.data.data?.relative)
-  .filter((val): val is string => !!val)
-  ?? []
-}
-
-async function fetchMissingOrErroneousItems () {
-  const cloudSpecIds = getIdsToRefetch()
-
-  if (cloudSpecIds.length > 0) {
-    await refetch(cloudSpecIds)
-  }
-
-  const cloudSpecPaths = getSpecPathsToPurge()
-
-  if (cloudSpecPaths.length > 0) {
-    await purgeCloudSpecCache(cloudSpecPaths)
-  }
-}
-
-const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloudSpec?.id).join('|'))
-
-const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
-
-watch([debouncedDisplayedSpecIds, isOnline, isProjectDisconnected, () => props.mostRecentUpdate], fetchMissingOrErroneousItems)
-
-async function refetchFailedCloudData () {
-  const latestRunsIds = props.gql.currentProject?.specs
-  .map((s) => s.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec?.fetchingStatus === 'ERRORED'))
-  .map((cloudSpec) => cloudSpec.id) ?? []
-
-  await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
-}
+const { refetchFailedCloudData } = useCloudSpecData(
+  isProjectDisconnected,
+  isOffline,
+  props.gql.currentProject?.projectId,
+  mostRecentUpdateRef,
+  displayedSpecs,
+  props.gql.currentProject?.specs as SpecsListFragment[] || [],
+)
 
 function refreshPage () {
   location.reload()
