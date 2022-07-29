@@ -33,6 +33,30 @@ describe('testConfigOverrides', () => {
     },
   })
 
+  // systemTests.it.only('fails when setting invalid config opt with Cypress.config() in before:test:run', {
+  //   spec: 'testConfigOverrides/invalid_before_test.js',
+  //   snapshot: true,
+  //   outputPath,
+  //   browser: 'electron',
+  //   expectedExitCode: 1,
+  // })
+
+  // systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
+  //   spec: 'testConfigOverrides/invalid_before_test_async.js',
+  //   snapshot: true,
+  //   outputPath,
+  //   browser: 'electron',
+  //   expectedExitCode: 1,
+  // })
+
+  // systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
+  //   spec: 'testConfigOverrides/invalid_code-level.js',
+  //   snapshot: true,
+  //   outputPath,
+  //   browser: 'electron',
+  //   expectedExitCode: 1,
+  // })
+
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
   const permutations: BrowserName[][] = [
@@ -45,7 +69,7 @@ describe('testConfigOverrides', () => {
       spec: 'testConfigOverrides/invalid.js',
       snapshot: true,
       browser: browserList,
-      expectedExitCode: 8,
+      expectedExitCode: 14,
       config: {
         video: false,
       },

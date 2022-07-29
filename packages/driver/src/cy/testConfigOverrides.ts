@@ -163,5 +163,7 @@ export class TestConfigOverride {
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
     }
+
+    resolvedTestConfig.applied = 'complete'
   }
 }

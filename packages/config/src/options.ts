@@ -30,9 +30,11 @@ export type BreakingOptionErrorKey =
   | 'TEST_FILES_RENAMED'
 
 // The test-time override levels
-export type OverrideLevel = 'supportFile' | 'suite' | 'test' | 'runTime' | 'never'
+export type OverrideLevel = 'code' | 'test:before:run' | 'test:before:run:async' | 'suite' | 'test' | 'runTime' | 'never'
 
-export const OVERRIDE_LEVELS = ['supportFile', 'suite', 'test', 'runTime'] as OverrideLevel[]
+export type OverrideLevels = Array<'code' | 'test:before:run' | 'test:before:run:async' | 'suite' | 'test' | 'runTime'> | 'never'
+
+export const ALL_OVERRIDE_LEVELS: OverrideLevels = ['code', 'test:before:run', 'test:before:run:async', 'suite', 'test', 'runTime']
 
 interface ConfigOption {
   name: string
@@ -44,7 +46,7 @@ interface ConfigOption {
    * it indicates the configuration value cannot be override via suite-/test-specific
    * overrides or at run-time with Cypress.Config().
    */
-  overrideLevels?: Exclude<OverrideLevel, 'never'>[] | 'never'
+  overrideLevels?: OverrideLevels
 }
 
 interface DriverConfigOption extends ConfigOption {
@@ -124,7 +126,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'arch',
     defaultValue: () => os.arch(),
@@ -133,13 +135,13 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
     requireRestartOnChange: 'server',
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -162,7 +164,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -180,12 +182,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
@@ -230,17 +232,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
@@ -253,7 +255,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'platform',
     defaultValue: () => os.platform(),
@@ -262,37 +264,37 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'projectId',
     defaultValue: null,
     validation: validate.isString,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: validate.isString,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'reporterOptions',
     defaultValue: null,
     validation: validate.isPlainObject,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
@@ -305,7 +307,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'retries',
     defaultValue: {
@@ -313,12 +315,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
       openMode: 0,
     },
     validation: validate.isValidRetriesConfig,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: validate.isBoolean,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
@@ -329,12 +331,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
@@ -350,7 +352,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'testIsolation',
     // TODO: When experimentalSessionAndOrigin is removed and released as GA,
@@ -359,7 +361,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     // strict by default when experimentalSessionAndOrigin=true
     defaultValue: 'default',
     validation: validate.isOneOf('default', 'strict'),
-    overrideLevels: ['supportFile', 'suite'],
+    overrideLevels: ['suite'],
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
@@ -390,17 +392,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'viewportWidth',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
-    overrideLevels: ['supportFile', 'suite', 'test', 'runTime'],
+    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,

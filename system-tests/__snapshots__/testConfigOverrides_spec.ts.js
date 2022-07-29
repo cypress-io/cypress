@@ -93,27 +93,43 @@ exports['testConfigOverrides / fails when passing invalid config values - [firef
 
   1) inline test config override throws error
   2) inline test config override throws error when executed within cy cmd
+  3) throws error when invalid test-level override
+  4) throws error when invalid config opt in Cypress.config() in test
   context config overrides throws error
-    3) runs
+    5) runs
 
   nested contexts overrides throws error at the correct line number
-    4) 1st test fails on overrides
-    5) 2nd test fails on overrides
+    6) 1st test fails on overrides
+    7) 2nd test fails on overrides
 
   nested contexts 
     test override
-      6) throws error at the correct line number
+      8) throws error at the correct line number
       ✓ does execute 2nd test
 
   throws error correctly when before hook
-    7) "before all" hook for "test config override throws error"
+    9) "before all" hook for "test config override throws error"
 
   throws error correctly when beforeEach hook
-    8) test config override throws error
+    10) test config override throws error
+
+  throws error when invalid config opt in Cypress.config() in before hook
+    11) "before all" hook for "4"
+
+  throws error when invalid config opt in Cypress.config() in beforeEach hook
+    12) "before each" hook for "5"
+
+  throws error when invalid config opt in Cypress.config() in after hook
+    13) 5
+    14) "after all" hook for "5"
+
+  throws error when invalid config opt in Cypress.config() in afterEach hook
+    15) 5
+    16) "after each" hook for "5"
 
 
   1 passing
-  8 failing
+  16 failing
 
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
@@ -127,9 +143,21 @@ Instead the value was: \`""\`
 Instead the value was: \`"null"\`
       [stack trace lines]
 
-  3) context config overrides throws error
+  3) throws error when invalid test-level override:
+     CypressError: The config passed to your test-level overrides has the following validation error:
+
+CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be set from suite-level overrides.
+
+https://on.cypress.io/config
+      [stack trace lines]
+
+  4) throws error when invalid config opt in Cypress.config() in test:
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+      [stack trace lines]
+
+  5) context config overrides throws error
        runs:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -138,9 +166,9 @@ Instead the value was: \`"1"\`
 https://on.cypress.io/config
       [stack trace lines]
 
-  4) nested contexts overrides throws error at the correct line number
+  6) nested contexts overrides throws error at the correct line number
        1st test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -149,9 +177,9 @@ Instead the value was: \`"500"\`
 https://on.cypress.io/config
       [stack trace lines]
 
-  5) nested contexts overrides throws error at the correct line number
+  7) nested contexts overrides throws error at the correct line number
        2nd test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -160,10 +188,10 @@ Instead the value was: \`"500"\`
 https://on.cypress.io/config
       [stack trace lines]
 
-  6) nested contexts 
+  8) nested contexts 
        test override
          throws error at the correct line number:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
@@ -172,9 +200,9 @@ Instead the value was: \`"not_an_http_url"\`
 https://on.cypress.io/config
       [stack trace lines]
 
-  7) throws error correctly when before hook
+  9) throws error correctly when before hook
        "before all" hook for "test config override throws error":
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -185,9 +213,9 @@ https://on.cypress.io/config
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error correctly when...\`
       [stack trace lines]
 
-  8) throws error correctly when beforeEach hook
+  10) throws error correctly when beforeEach hook
        test config override throws error:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -196,18 +224,56 @@ Instead the value was: \`"1"\`
 https://on.cypress.io/config
       [stack trace lines]
 
+  11) throws error when invalid config opt in Cypress.config() in before hook
+       "before all" hook for "4":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  12) throws error when invalid config opt in Cypress.config() in beforeEach hook
+       "before each" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  13) throws error when invalid config opt in Cypress.config() in after hook
+       5:
+     Error: Test Override validation should have failed & it block should not have executed.
+      [stack trace lines]
+
+  14) throws error when invalid config opt in Cypress.config() in after hook
+       "after all" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  15) throws error when invalid config opt in Cypress.config() in afterEach hook
+       5:
+     Error: Test Override validation should have failed & it block should not have executed.
+      [stack trace lines]
+
+  16) throws error when invalid config opt in Cypress.config() in afterEach hook
+       "after each" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
 
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
+  │ Tests:        15                                                                               │
   │ Passing:      1                                                                                │
-  │ Failing:      8                                                                                │
+  │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  9                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
@@ -220,6 +286,20 @@ https://on.cypress.io/config
      rror (failed).png                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e    (2560x1328)
      rror when executed within cy cmd (failed).png                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in test (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in before hook -- 4 -- before all hook (failed).png                       
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in after hook -- 5 (failed).png                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in afterEach hook -- 5 (failed).png                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+      in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
 
 ====================================================================================================
@@ -229,9 +309,9 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  invalid.js                               XX:XX        9        1        8        -        - │
+  │ ✖  invalid.js                               XX:XX       15        1       14        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       15        1       14        -        -  
 
 
 `
@@ -293,7 +373,7 @@ Instead the value was: \`"null"\`
   3) runs all tests
        context config overrides throws error
          runs:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -305,7 +385,7 @@ https://on.cypress.io/config
   4) runs all tests
        nested contexts overrides throws error at the correct line number
          1st test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -317,7 +397,7 @@ https://on.cypress.io/config
   5) runs all tests
        nested contexts overrides throws error at the correct line number
          2nd test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -330,7 +410,7 @@ https://on.cypress.io/config
        nested contexts 
          test override
            throws error at the correct line number:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
@@ -342,7 +422,7 @@ https://on.cypress.io/config
   7) runs all tests
        throws error correctly when before hook
          "before all" hook for "test config override throws error":
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -356,7 +436,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   8) runs all tests
        throws error correctly when beforeEach hook
          test config override throws error:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -435,7 +515,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   1) nested contexts 
        test override
          throws error at the correct line number:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -559,27 +639,43 @@ exports['testConfigOverrides / fails when passing invalid config values - [chrom
 
   1) inline test config override throws error
   2) inline test config override throws error when executed within cy cmd
+  3) throws error when invalid test-level override
+  4) throws error when invalid config opt in Cypress.config() in test
   context config overrides throws error
-    3) runs
+    5) runs
 
   nested contexts overrides throws error at the correct line number
-    4) 1st test fails on overrides
-    5) 2nd test fails on overrides
+    6) 1st test fails on overrides
+    7) 2nd test fails on overrides
 
   nested contexts 
     test override
-      6) throws error at the correct line number
+      8) throws error at the correct line number
       ✓ does execute 2nd test
 
   throws error correctly when before hook
-    7) "before all" hook for "test config override throws error"
+    9) "before all" hook for "test config override throws error"
 
   throws error correctly when beforeEach hook
-    8) test config override throws error
+    10) test config override throws error
+
+  throws error when invalid config opt in Cypress.config() in before hook
+    11) "before all" hook for "4"
+
+  throws error when invalid config opt in Cypress.config() in beforeEach hook
+    12) "before each" hook for "5"
+
+  throws error when invalid config opt in Cypress.config() in after hook
+    13) 5
+    14) "after all" hook for "5"
+
+  throws error when invalid config opt in Cypress.config() in afterEach hook
+    15) 5
+    16) "after each" hook for "5"
 
 
   1 passing
-  8 failing
+  16 failing
 
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
@@ -593,9 +689,22 @@ Instead the value was: \`""\`
 Instead the value was: \`"null"\`
       [stack trace lines]
 
-  3) context config overrides throws error
+  3) throws error when invalid test-level override:
+     CypressError: The config passed to your test-level overrides has the following validation error:
+
+CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be set from suite-level overrides.
+
+https://on.cypress.io/config
+  Error
+      [stack trace lines]
+
+  4) throws error when invalid config opt in Cypress.config() in test:
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+      [stack trace lines]
+
+  5) context config overrides throws error
        runs:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -605,9 +714,9 @@ https://on.cypress.io/config
   Error
       [stack trace lines]
 
-  4) nested contexts overrides throws error at the correct line number
+  6) nested contexts overrides throws error at the correct line number
        1st test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -617,9 +726,9 @@ https://on.cypress.io/config
   Error
       [stack trace lines]
 
-  5) nested contexts overrides throws error at the correct line number
+  7) nested contexts overrides throws error at the correct line number
        2nd test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -629,10 +738,10 @@ https://on.cypress.io/config
   Error
       [stack trace lines]
 
-  6) nested contexts 
+  8) nested contexts 
        test override
          throws error at the correct line number:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
@@ -642,9 +751,9 @@ https://on.cypress.io/config
   Error
       [stack trace lines]
 
-  7) throws error correctly when before hook
+  9) throws error correctly when before hook
        "before all" hook for "test config override throws error":
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -656,9 +765,9 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   Error
       [stack trace lines]
 
-  8) throws error correctly when beforeEach hook
+  10) throws error correctly when beforeEach hook
        test config override throws error:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -668,18 +777,56 @@ https://on.cypress.io/config
   Error
       [stack trace lines]
 
+  11) throws error when invalid config opt in Cypress.config() in before hook
+       "before all" hook for "4":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  12) throws error when invalid config opt in Cypress.config() in beforeEach hook
+       "before each" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  13) throws error when invalid config opt in Cypress.config() in after hook
+       5:
+     Error: Test Override validation should have failed & it block should not have executed.
+      [stack trace lines]
+
+  14) throws error when invalid config opt in Cypress.config() in after hook
+       "after all" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
+  15) throws error when invalid config opt in Cypress.config() in afterEach hook
+       5:
+     Error: Test Override validation should have failed & it block should not have executed.
+      [stack trace lines]
+
+  16) throws error when invalid config opt in Cypress.config() in afterEach hook
+       "after each" hook for "5":
+     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runTime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
+      [stack trace lines]
+
 
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
+  │ Tests:        15                                                                               │
   │ Passing:      1                                                                                │
-  │ Failing:      8                                                                                │
+  │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  9                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
@@ -692,6 +839,20 @@ https://on.cypress.io/config
      rror (failed).png                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
      rror when executed within cy cmd (failed).png                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in test (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in before hook -- 4 -- before all hook (failed).png                       
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in after hook -- 5 (failed).png                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in afterEach hook -- 5 (failed).png                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
+      in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
 
 ====================================================================================================
@@ -701,9 +862,9 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  invalid.js                               XX:XX        9        1        8        -        - │
+  │ ✖  invalid.js                               XX:XX       15        1       14        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       15        1       14        -        -  
 
 
 `
@@ -765,7 +926,7 @@ Instead the value was: \`"null"\`
   3) runs all tests
        context config overrides throws error
          runs:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -778,7 +939,7 @@ https://on.cypress.io/config
   4) runs all tests
        nested contexts overrides throws error at the correct line number
          1st test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -791,7 +952,7 @@ https://on.cypress.io/config
   5) runs all tests
        nested contexts overrides throws error at the correct line number
          2nd test fails on overrides:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`defaultCommandTimeout\` to be a number.
 
@@ -805,7 +966,7 @@ https://on.cypress.io/config
        nested contexts 
          test override
            throws error at the correct line number:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
@@ -818,7 +979,7 @@ https://on.cypress.io/config
   7) runs all tests
        throws error correctly when before hook
          "before all" hook for "test config override throws error":
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -833,7 +994,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   8) runs all tests
        throws error correctly when beforeEach hook
          test config override throws error:
-     CypressError: The config override passed to your test-level override has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
@@ -913,7 +1074,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   1) nested contexts 
        test override
          throws error at the correct line number:
-     CypressError: The config override passed to your suite-level override has the following validation error:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 

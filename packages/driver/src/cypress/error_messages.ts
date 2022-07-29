@@ -266,21 +266,49 @@ export default {
   },
 
   config: {
+    cypress_config_api: {
+      cannot_override_readonly: {
+        message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` in a {{runnableType}} at {{overrideLevel}} because it is a read-only configuration option.'`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      invalid_override (obj) {
+        return {
+          message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` in a {{runnableType}} at {{overrideLevel}}. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`,
+          docsUrl: 'https://on.cypress.io/config',
+        }
+      },
+    },
     invalid_argument: {
       message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
     invalid_test_override: {
-      message: `The config override passed to your {{overrideLevel}}-level override has the following validation error:\n\n{{errMsg}}`,
+      message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_cypress_config_api_override: {
-      message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` from the {{overrideLevel}}-level.`,
-      docsUrl: 'https://on.cypress.io/config',
+    event: {
+      cannot_override_readonly: {
+        message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` in a {{overrideLevel}} event handler because it is a read-only configuration option.'`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      invalid_override (obj) {
+        return {
+          message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` in a {{overrideLevel}} event handler. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`,
+          docsUrl: 'https://on.cypress.io/config',
+        }
+      },
     },
-    invalid_test_config_override: {
-      message: `\`{{invalidConfigKey}}\` configuration cannot been overridden from the {{overrideLevel}}-level.`,
-      docsUrl: 'https://on.cypress.io/config',
+    test_config: {
+      cannot_override_readonly: {
+        message: `The \`{{invalidConfigKey}}\` configuration cannot been overridden from a {{overrideLevel}}-level override because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      invalid_override (obj) {
+        return {
+          message: `The \`{{invalidConfigKey}}\` configuration cannot been overridden from a {{overrideLevel}}-level override. The \`{{invalidConfigKey}}\` option can only be set from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`,
+          docsUrl: 'https://on.cypress.io/config',
+        }
+      },
     },
   },
 

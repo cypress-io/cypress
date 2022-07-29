@@ -3,13 +3,13 @@ import Debug from 'debug'
 import {
   defaultSpecPattern,
   options,
-  OVERRIDE_LEVELS,
+  ALL_OVERRIDE_LEVELS,
   breakingOptions,
   breakingRootOptions,
   testingTypeBreakingOptions,
 } from './options'
 
-import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel, OverrideLevels } from './options'
 import type { TestingType } from '@packages/types'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -49,6 +49,12 @@ const testOverrideLevels = createIndex(options, 'name', 'overrideLevels', 'never
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
+
+export type InvalidTestOverrideResult = {
+  invalidConfigKey: string
+  overrideLevel: string
+  supportedOverrideLevels: OverrideLevels
+}
 
 export type BreakingErrResult = {
   name: string
@@ -182,10 +188,10 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateOverridableAtTestTest = (config: any, overrideLevel: OverrideLevel, onErr: (errorKey: string, invalidConfigKey: string) => void) => {
+export const validateOverridableAtTestTest = (config: any, overrideLevel: Exclude<OverrideLevel, 'never'>, onErr: (result: InvalidTestOverrideResult) => void) => {
   Object.keys(config).some((configKey) => {
-    const runTimeValidation = OVERRIDE_LEVELS.includes(overrideLevel)
-    const overrideLevels = testOverrideLevels[configKey]
+    const runTimeValidation = ALL_OVERRIDE_LEVELS.includes(overrideLevel)
+    const overrideLevels = testOverrideLevels[configKey] as OverrideLevels
 
     if (!overrideLevels) {
       // non-cypress configuration option. skip validation
@@ -193,9 +199,11 @@ export const validateOverridableAtTestTest = (config: any, overrideLevel: Overri
     }
 
     if (runTimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(overrideLevel))) {
-      const errPath = overrideLevel === 'runTime' ? 'config.invalid_cypress_config_api_override' : 'config.invalid_test_config_override'
-
-      onErr(errPath, configKey)
+      onErr({
+        invalidConfigKey: configKey,
+        overrideLevel,
+        supportedOverrideLevels: overrideLevels,
+      })
     }
   })
 }

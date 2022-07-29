@@ -53,3 +53,52 @@ describe('throws error correctly when beforeEach hook', () => {
     shouldNotExecute()
   })
 })
+
+it('throws error when invalid test-level override', { testIsolation: 'default' }, () => {
+  shouldNotExecute()
+})
+
+it('throws error when invalid config opt in Cypress.config() in test', () => {
+  Cypress.config({ testIsolation: 'default' })
+  shouldNotExecute()
+})
+
+describe('throws error when invalid config opt in Cypress.config() in before hook', () => {
+  before(() => {
+    Cypress.config({ testIsolation: 'default' })
+  })
+
+  it('4', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in beforeEach hook', () => {
+  beforeEach(() => {
+    Cypress.config({ testIsolation: 'default' })
+  })
+
+  it('5', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in after hook', () => {
+  after(() => {
+    Cypress.config({ testIsolation: 'default' })
+  })
+
+  it('5', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in afterEach hook', () => {
+  afterEach(() => {
+    Cypress.config({ testIsolation: 'default' })
+  })
+
+  it('5', () => {
+    shouldNotExecute()
+  })
+})
