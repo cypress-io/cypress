@@ -56,7 +56,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={null as any}
         totalRuns={null as any}
         runsSinceLastFlake={null as any}
-        dashboardUrl={null as any}
       />,
     )
 

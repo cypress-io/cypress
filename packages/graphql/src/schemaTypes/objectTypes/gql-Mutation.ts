@@ -651,7 +651,7 @@ export const mutation = mutationType({
     })
 
     t.field('purgeCloudSpecByPathCache', {
-      type: Query,
+      type: 'Boolean',
       args: {
         projectSlug: nonNull(stringArg({})),
         specPaths: nonNull(list(nonNull(stringArg({})))),
@@ -665,7 +665,7 @@ export const mutation = mutationType({
           await ctx.cloud.invalidate('Query', 'cloudSpecByPath', { projectSlug, specPath })
         }
 
-        return {}
+        return true
       },
     })
 

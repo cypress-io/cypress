@@ -14,9 +14,7 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 
 gql`
 mutation PurgeCloudSpecCache ($projectSlug: String!, $specPaths: [String!]!) {
-  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths) {
-    __typename
-  }
+  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths)
 }
 `
 
