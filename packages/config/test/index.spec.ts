@@ -191,57 +191,47 @@ describe('config/src/index', () => {
   })
 
   describe('.validateOverridableAtTestTest', () => {
-    ['supportFile', 'suite', 'test'].forEach((overrideLevel) => {
+    ALL_OVERRIDE_LEVELS.forEach((overrideLevel) => {
       it(`calls onError handler if configuration cannot be overridden from ${overrideLevel} level`, () => {
         const errorFn = sinon.spy()
 
         configUtil.validateOverridableAtTestTest({ chromeWebSecurity: false }, overrideLevel as OverrideLevel, errorFn)
 
         expect(errorFn).to.have.callCount(1)
-        expect(errorFn).to.have.been.calledWithMatch('config.invalid_test_config_override', 'chromeWebSecurity')
+        expect(errorFn).to.have.been.calledWithMatch({
+          invalidConfigKey: 'chromeWebSecurity',
+          overrideLevel,
+          supportedOverrideLevels: 'never',
+        })
       })
-    })
-
-    it('calls onError handler if configuration cannot be overridden from runtime level', () => {
-      const errorFn = sinon.spy()
-
-      configUtil.validateOverridableAtTestTest({ chromeWebSecurity: false }, 'runTime', errorFn)
-
-      expect(errorFn).to.have.callCount(1)
-      expect(errorFn).to.have.been.calledWithMatch('config.invalid_cypress_config_api_override', 'chromeWebSecurity')
     })
 
     describe('testIsolation', () => {
-      ['supportFile', 'suite'].forEach((overrideLevel) => {
-        it(`does not calls onError handler if configuration can be overridden from ${overrideLevel} level`, () => {
+      it('does not calls onError handler if configuration can be overridden from suite level', () => {
+        const errorFn = sinon.spy()
+
+        configUtil.validateOverridableAtTestTest({ testIsolation: 'strict' }, 'suite', errorFn)
+
+        expect(errorFn).to.have.callCount(0)
+      })
+
+      ;['code', 'test:before:run', 'test:before:run:async', 'test', 'runtime'].forEach((overrideLevel) => {
+        it(`calls onError handler if configuration can be overridden from ${overrideLevel} level`, () => {
           const errorFn = sinon.spy()
 
-          configUtil.validateOverridableAtTestTest({ testIsolation: 'strict' }, overrideLevel as OverrideLevel, errorFn)
+          configUtil.validateOverridableAtTestTest({ testIsolation: false }, overrideLevel, errorFn)
 
-          expect(errorFn).to.have.callCount(0)
+          expect(errorFn).to.have.callCount(1)
+          expect(errorFn).to.have.been.calledWithMatch({
+            invalidConfigKey: 'testIsolation',
+            overrideLevel,
+            supportedOverrideLevels: ['suite'],
+          })
         })
-      })
-
-      it('calls onError handler if configuration cannot be overridden from test level', () => {
-        const errorFn = sinon.spy()
-
-        configUtil.validateOverridableAtTestTest({ testIsolation: false }, 'test', errorFn)
-
-        expect(errorFn).to.have.callCount(1)
-        expect(errorFn).to.have.been.calledWithMatch('config.invalid_test_config_override', 'testIsolation')
-      })
-
-      it('calls onError handler if configuration cannot be overridden from runTime level', () => {
-        const errorFn = sinon.spy()
-
-        configUtil.validateOverridableAtTestTest({ testIsolation: false }, 'runTime', errorFn)
-
-        expect(errorFn).to.have.callCount(1)
-        expect(errorFn).to.have.been.calledWithMatch('config.invalid_cypress_config_api_override', 'testIsolation')
       })
     })
 
-    ALL_OVERRIDE_LEVELS.forEach((overrideLevel) => {
+    ALL_OVERRIDE_LEVELS.forEach((overrideLevel: OverrideLevel) => {
       it(`does not call onErr if validation succeeds from ${overrideLevel} level`, () => {
         const errorFn = sinon.spy()
 
@@ -254,7 +244,7 @@ describe('config/src/index', () => {
     it('does not call onErr if configuration is a non-Cypress config option', () => {
       const errorFn = sinon.spy()
 
-      configUtil.validateOverridableAtTestTest({ foo: 'bar' }, 'runTime' as OverrideLevel, errorFn)
+      configUtil.validateOverridableAtTestTest({ foo: 'bar' }, 'runtime' as OverrideLevel, errorFn)
 
       expect(errorFn).to.have.callCount(0)
     })

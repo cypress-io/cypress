@@ -190,7 +190,7 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
 
 export const validateOverridableAtTestTest = (config: any, overrideLevel: Exclude<OverrideLevel, 'never'>, onErr: (result: InvalidTestOverrideResult) => void) => {
   Object.keys(config).some((configKey) => {
-    const runTimeValidation = ALL_OVERRIDE_LEVELS.includes(overrideLevel)
+    const runtimeValidation = ALL_OVERRIDE_LEVELS.includes(overrideLevel)
     const overrideLevels = testOverrideLevels[configKey] as OverrideLevels
 
     if (!overrideLevels) {
@@ -198,7 +198,7 @@ export const validateOverridableAtTestTest = (config: any, overrideLevel: Exclud
       return
     }
 
-    if (runTimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(overrideLevel))) {
+    if (runtimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(overrideLevel))) {
       onErr({
         invalidConfigKey: configKey,
         overrideLevel,

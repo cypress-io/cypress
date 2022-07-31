@@ -385,7 +385,7 @@ describe('cannot set override configuration options that', () => {
   it('throws if mutating read-only config with Cypress.config()', (done) => {
     window.top.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
-      expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` in a test at runTime')
+      expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` in a test at runtime')
       done()
     })
 

@@ -242,7 +242,7 @@ class $Cypress {
       const test = this.state('test')
 
       if (this.state('duringUserTestExecution')) {
-        overrideLevel = 'runTime'
+        overrideLevel = 'runtime'
       } else if (test) {
         if (test?._fired?.hasOwnProperty('runner:test:before:run:async')) {
           overrideLevel = 'test:before:run:async'
@@ -267,7 +267,7 @@ class $Cypress {
           const isReadOnly = validationResult.supportedOverrideLevels === 'never'
           let errMsg
 
-          if (overrideLevel === 'runTime') {
+          if (overrideLevel === 'runtime') {
             const errKey = isReadOnly ? 'config.cypress_config_api.cannot_override_readonly' : 'config.cypress_config_api.invalid_override'
 
             errMsg = $errUtils.errByPath(errKey, {

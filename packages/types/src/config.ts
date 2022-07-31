@@ -2,7 +2,7 @@
 
 import type { AllModeOptions } from '.'
 
-export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runTime'] as const
+export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
 
