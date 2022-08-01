@@ -12,7 +12,7 @@ function smokeTestDockerImage (dockerImage: string) {
     })
   })
 
-  context('component', () => {
+  context('component: webpack-dev-server', () => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
       browser: 'electron',
@@ -22,10 +22,24 @@ function smokeTestDockerImage (dockerImage: string) {
       spec: 'src/simple_passing_component.cy.js',
     })
   })
+
+  context('component: vite-dev-server', () => {
+    systemTests.it(`can run in ${dockerImage}`, {
+      withBinary: true,
+      browser: 'electron',
+      dockerImage,
+      testingType: 'component',
+      project: 'simple-ct',
+      configFile: 'cypress-vite.config.js',
+      spec: 'src/simple_passing_component.cy.js',
+    })
+  })
 }
 
 describe('binary node versions', () => {
-  [
+  systemTests.setup()
+
+  ;[
     'cypress/base:12',
     'cypress/base:14',
     'cypress/base:16.14.2',

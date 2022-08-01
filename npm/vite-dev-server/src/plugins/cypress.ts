@@ -76,7 +76,7 @@ export const Cypress = (
       indexHtmlContent = indexHtmlContent.replace(
         '<head>',
         `<head>
-        ${scriptTagsToInject.map((script) => script.toString())}
+        ${scriptTagsToInject.map((script) => script.toString()).join('')}
       `,
       )
 

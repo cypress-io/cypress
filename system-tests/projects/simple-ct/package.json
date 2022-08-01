@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "vite": "^3.0.0",
+    "webpack": "^5.0.0"
+  }
+}
