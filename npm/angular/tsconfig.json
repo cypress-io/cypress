@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
-    "experimentalDecorators": true,
     "target": "es2020",
     "module": "es2020",
     "skipLibCheck": true,
