@@ -511,7 +511,7 @@ module.exports = {
           },
         })
 
-        return Windows.snapshotDance(true).then(() => instance)
+        return Windows.snapshotDance(false).then(() => instance)
       })
     })
   },
