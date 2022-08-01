@@ -29,17 +29,20 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
     // TODO: convert to async FS method
     // eslint-disable-next-line no-restricted-syntax
     const pkg = fs.readJsonSync(loc) as PkgJson
-    const pkgVersion = semver.coerce(pkg.version)
 
-    if (!pkgVersion) {
+    if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
     }
+
+    const satisfied = Boolean(pkg.version && semver.satisfies(pkg.version, dependency.minVersion, {
+      includePrerelease: true,
+    }))
 
     return {
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && semver.satisfies(pkgVersion, dependency.minVersion)),
+      satisfied,
     }
   } catch (e) {
     return {
