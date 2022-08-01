@@ -4,7 +4,7 @@
       <EmptyGenerator
         :gql="generateSpecFromSource.currentProject"
         title=""
-        type="componentEmpty"
+        type="component"
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
