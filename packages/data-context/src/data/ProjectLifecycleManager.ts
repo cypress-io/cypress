@@ -407,7 +407,7 @@ export class ProjectLifecycleManager {
         })
       }
 
-      s.currentProjectData = { error: null, warnings: [] }
+      s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
 
@@ -495,7 +495,7 @@ export class ProjectLifecycleManager {
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
       if (testingType) {
-        d.currentProjectData = {
+        d.diagnostics = {
           error: null,
           warnings: [],
         }
@@ -518,8 +518,8 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData && testingType) {
-        d.currentProjectData.error = null
+      if (d.diagnostics && testingType) {
+        d.diagnostics.error = null
       }
     })
 

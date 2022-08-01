@@ -112,11 +112,6 @@ interface Diagnostics {
   warnings: ErrorWrapperSource[]
 }
 
-export interface CurrentProjectData {
-  error: ErrorWrapperSource | null
-  warnings: ErrorWrapperSource[]
-}
-
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -142,7 +137,7 @@ export interface CoreDataShape {
   currentTestingType: TestingType | null
 
   // TODO: Move everything under this container, to make it simpler to reset the data when switching
-  currentProjectData: CurrentProjectData | null
+  diagnostics: Diagnostics | null
 
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -191,7 +186,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
-    currentProjectData: makeCurrentProjectData(modeOptions.projectRoot),
+    diagnostics: modeOptions.projectRoot ? { error: null, warnings: [] } : null,
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -229,23 +224,5 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
-  }
-}
-
-export function makeCurrentProjectData (projectRoot: Maybe<string>): CurrentProjectData | null {
-  if (projectRoot) {
-    return {
-      error: null,
-      warnings: [],
-    }
-  }
-
-  return null
-}
-
-export function clearDiagnostics (): Diagnostics | null {
-  return {
-    error: null,
-    warnings: [],
   }
 }

@@ -86,7 +86,7 @@ export class ProjectActions {
       d.baseError = null
       d.activeBrowser = null
       d.currentProject = null
-      d.currentProjectData = null
+      d.diagnostics = null
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null

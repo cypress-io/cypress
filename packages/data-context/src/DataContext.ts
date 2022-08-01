@@ -157,14 +157,14 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.currentProjectData?.error
+    return this.coreData.diagnostics?.error
       ?? this.coreData.baseError
       ?? null
   }
 
   get warnings () {
     return [
-      ...this.coreData.currentProjectData?.warnings ?? [],
+      ...this.coreData.diagnostics?.warnings ?? [],
       ...this.coreData.warnings ?? [],
     ]
   }
@@ -382,8 +382,8 @@ export class DataContext {
       }
 
       this.update((d) => {
-        if (d.currentProjectData) {
-          d.currentProjectData.error = err
+        if (d.diagnostics) {
+          d.diagnostics.error = err
         } else {
           d.baseError = err
         }
@@ -405,8 +405,8 @@ export class DataContext {
       }
 
       this.update((d) => {
-        if (d.currentProjectData) {
-          d.currentProjectData.warnings.push(warning)
+        if (d.diagnostics) {
+          d.diagnostics.warnings.push(warning)
         } else {
           d.warnings.push(warning)
         }
