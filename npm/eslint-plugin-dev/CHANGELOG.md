@@ -1,10 +1,16 @@
+# [@cypress/eslint-plugin-dev-v5.3.1](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.3.0...@cypress/eslint-plugin-dev-v5.3.1) (2022-06-29)
+
+
+### Bug Fixes
+
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+
 # [@cypress/eslint-plugin-dev-v5.3.0](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.2.0...@cypress/eslint-plugin-dev-v5.3.0) (2022-06-01)
 
 
 ### Features
 
-* detect component testing env ([#20002](https://github.com/cypress-io/cypress/issues/20002)) ([759449c](https://github.com/cypress-io/cypress/commit/759449c440307be5bd2bc010c3b355218d88e137))
-* merging / delegating remote queries to cloud schema ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
+* Turn "no-useless-constructor" off and enable "ignoreRestSiblings" ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
 
 # [@cypress/eslint-plugin-dev-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.1.0...@cypress/eslint-plugin-dev-v5.2.0) (2021-12-16)
 

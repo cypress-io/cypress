@@ -28,21 +28,53 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
   })
 
-  it('includes x-framework and x-dev-server in request to Cypress manifest, even when launched in e2e mode', () => {
-    cy.withCtx((ctx, o) => {
-      o.sinon.spy(ctx.util.fetch)
+  describe('request for Cypress manifest', () => {
+    beforeEach(() => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx.util.fetch)
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos', ['--e2e'])
     })
 
-    cy.scaffoldProject('todos')
-    cy.openProject('todos', ['--e2e'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.withCtx((ctx, o) => {
-      expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
-        headers: {
-          'x-framework': 'react',
-          'x-dev-server': 'webpack',
-        },
+    it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+          headers: {
+            'x-framework': 'react',
+            'x-dev-server': 'webpack',
+          },
+        })
+      })
+    })
+
+    describe('logged-in state', () => {
+      it(`sends 'false' when not logged in`, () => {
+        cy.visitLaunchpad()
+        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+            headers: {
+              'x-logged-in': 'false',
+            },
+          })
+        })
+      })
+
+      it(`sends 'true' when logged in`, () => {
+        cy.loginUser()
+        cy.visitLaunchpad()
+        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+            headers: {
+              'x-logged-in': 'true',
+            },
+          })
+        })
       })
     })
   })

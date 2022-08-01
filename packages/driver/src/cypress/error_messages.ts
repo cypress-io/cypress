@@ -1858,6 +1858,9 @@ export default {
 
           > ${cmd(obj.previous)}`
     },
+    state_subject_deprecated: {
+      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,
+    },
   },
 
   submit: {
@@ -1951,7 +1954,7 @@ export default {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_datetime: {
-      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
+      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\` or \`YYYY-MM-DDThh:mm:ss\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_month: {

@@ -6,7 +6,7 @@ import semver from 'semver'
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
-type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]['type']
+export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = typeof WIZARD_FRAMEWORKS[number]['codeGenFramework']
 
@@ -19,7 +19,7 @@ export interface DependencyToInstall {
   detectedVersion: string | null
 }
 
-export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
+export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number] & { specPattern?: string }
 
 export function inPkgJson (dependency: WizardDependency, projectPath: string): DependencyToInstall {
   try {
@@ -29,17 +29,20 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
     // TODO: convert to async FS method
     // eslint-disable-next-line no-restricted-syntax
     const pkg = fs.readJsonSync(loc) as PkgJson
-    const pkgVersion = semver.coerce(pkg.version)
 
-    if (!pkgVersion) {
+    if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
     }
+
+    const satisfied = Boolean(pkg.version && semver.satisfies(pkg.version, dependency.minVersion, {
+      includePrerelease: true,
+    }))
 
     return {
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && semver.satisfies(pkgVersion, dependency.minVersion)),
+      satisfied,
     }
   } catch (e) {
     return {
@@ -51,7 +54,7 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
   }
 }
 
-function getBundlerDependency (bundler: WizardBundler, projectPath: string): DependencyToInstall {
+function getBundlerDependency (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall {
   switch (bundler) {
     case 'vite': return inPkgJson(dependencies.WIZARD_DEPENDENCY_VITE, projectPath)
     case 'webpack': return inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath)
@@ -67,7 +70,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
@@ -87,7 +90,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
@@ -106,7 +109,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
@@ -125,7 +128,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
@@ -151,7 +154,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
@@ -169,7 +172,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
@@ -187,7 +190,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
@@ -205,7 +208,7 @@ export const WIZARD_FRAMEWORKS = [
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
@@ -217,4 +220,27 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
+  // TODO: revert once Angular is slated for release
+  // {
+  //   type: 'angular',
+  //   configFramework: 'angular',
+  //   category: 'template',
+  //   name: 'Angular',
+  //   detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
+  //   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+  //   dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
+  //     return [
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+  //     ]
+  //   },
+  //   codeGenFramework: 'angular',
+  //   mountModule: 'cypress/angular',
+  //   supportStatus: 'full',
+  //   componentIndexHtml: componentIndexHtmlGenerator(),
+  //   specPattern: '**/*.cy.ts',
+  // },
 ] as const

@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress'
-import webpackConfig from './webpack.config.ts'
+import webpackConfig from './webpack.config'
 
 export default defineConfig({
   projectId: 'ypt4pf',
