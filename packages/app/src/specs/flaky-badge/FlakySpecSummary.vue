@@ -15,13 +15,18 @@
         :class="severity.textClass"
       >{{ severity?.label }}</span>
       <span
-        class="ml-4"
+        class="ml-4 text-gray-800"
         data-cy="flaky-rate"
       >{{ t('specPage.flaky.flakyRate', [flakyRate]) }}</span>
     </div>
 
-    <div class="w-full grid text-gray-700 text-size-14px gap-2 grid-cols-2 justify-items-center">
+    <div class="flex flex-row text-gray-700 text-size-14px items-center">
       <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
+      <i-cy-dot-solid_x4
+        width="4"
+        height="4"
+        class="mx-2 icon-light-gray-200"
+      />
       <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', { count: runsSinceLastFlake, runsSinceLastFlake }) }}</span>
     </div>
   </div>

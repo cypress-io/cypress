@@ -108,7 +108,7 @@ describe('<FlakySpecSummary />', () => {
       )
 
       cy.findByTestId('flaky-runs').should('have.text', '0 flaky runs / 1000 total')
-      cy.findByTestId('last-flaky').should('have.text', 'Last flaky 0 runs ago')
+      cy.findByTestId('last-flaky').should('have.text', 'Last run flaky')
     })
 
     it('should handle 1 flaky run and 1 run since last flake', () => {
