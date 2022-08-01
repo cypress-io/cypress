@@ -51,4 +51,34 @@ describe("angular mount", () => {
       cy.get('@mySpy').should('have.been.calledWith', true)
     })
   })
+
+  it('can use a template string instead of Type<T> for component', () => {
+    cy.mount<ButtonOutputComponent>('<app-button-output (clicked)="clicked($event)"></app-button-output>', {
+      declarations: [ButtonOutputComponent],
+      componentProperties: {
+        clicked: cy.spy().as('myClickedSpy')
+      }
+    })
+    cy.get('button').click()
+    cy.get('@myClickedSpy').should('have.been.calledWith', true)
+  })
+
+  it('can use a template instead of Type<T> for component WITHOUT declarations', () => {
+    const mySpy = cy.spy().as('myClickedSpy')
+    cy.mount<ButtonOutputComponent>(`<app-button-output (clicked)="${mySpy()}"></app-button-output>`, {
+      declarations: [ButtonOutputComponent],
+    })
+    cy.get('button').click()
+    cy.get('@myClickedSpy').should('have.been.called')
+  })
+
+  it('can accept a cy.spy for an Output property', () => {
+    cy.mount(ButtonOutputComponent, {
+      componentProperties: {
+        clicked: cy.spy().as('mySpy')
+      }
+    })
+    cy.get('button').click();
+    cy.get('@mySpy').should('have.been.calledWith', true)
+  })
 });

@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, Type } from '@angular/core'
+import { Component, EventEmitter, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -37,8 +37,20 @@ export interface TestBedConfig<T extends object> extends TestModuleMetadata {
    *  cy.mount(ButtonComponent, { componentProperties: { text: 'Save' }})
    *  cy.get('button').contains('Save')
    * })
+   *
+   * it('renders a button with a cy.spy() replacing EventEmitter', () => {
+   *  cy.mount(ButtonComponent, {
+   *    componentProperties: {
+   *      clicked: cy.spy().as('mySpy)
+   *    }
+   *  })
+   *  cy.get('button').click()
+   *  cy.get('@mySpy').should('have.been.called')
+   * })
    */
-  componentProperties?: Partial<{ [P in keyof T]: T[P] }>
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends { emit }
+    ? Cypress.SinonSpyAgent<any> | EventEmitter<any>
+    : T[P] }>
 }
 
 /**
@@ -52,7 +64,7 @@ export type MountResponse<T extends object> = {
    * @memberof MountResponse
    * @see https://angular.io/api/core/testing/ComponentFixture
    */
-  fixture: ComponentFixture<T | WrapperComponent>
+  fixture: ComponentFixture<T>
 
   /**
    * Configures and initializes environment and provides methods for creating components and services.
@@ -68,18 +80,18 @@ export type MountResponse<T extends object> = {
    * @memberof MountResponse
    * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
    */
-  component: T | WrapperComponent
+  component: T
 };
 
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed
  *
- * @param {Type<T> | Type<WrapperComponent>} component Angular component being mounted
+ * @param {Type<T>} component Angular component being mounted
  * @param {TestBedConfig} config TestBed configuration passed into the mount function
  * @returns {TestBedConfig} TestBedConfig
  */
 function bootstrapModule<T extends object> (
-  component: Type<T> | WrapperComponent,
+  component: Type<T>,
   config: TestBedConfig<T>,
 ): TestBedConfig<T> {
   const { componentProperties, ...testModuleMetaData } = config
@@ -111,7 +123,7 @@ function bootstrapModule<T extends object> (
 function initTestBed<T extends object> (
   component: Type<T> | string,
   config: TestBedConfig<T>,
-): { testBed: TestBed, componentFixture: Type<T> | Type<WrapperComponent> } {
+): { testBed: TestBed, componentFixture: Type<T> } {
   const { providers, ...configRest } = config
 
   const testBed: TestBed = getTestBed()
@@ -126,7 +138,7 @@ function initTestBed<T extends object> (
     },
   )
 
-  const componentFixture = createComponentFixture(component)
+  const componentFixture = createComponentFixture(component) as Type<T>
 
   testBed.configureTestingModule({
     ...bootstrapModule(componentFixture, configRest),
@@ -150,11 +162,11 @@ class WrapperComponent { }
  * Returns the Component if Type<T> or creates a WrapperComponent
  *
  * @param {Type<T> | string} component The component you want to create a fixture of
- * @returns {Type<T> | Type<WrapperComponent>}
+ * @returns {Type<T> | WrapperComponent}
  */
 function createComponentFixture<T extends object> (
   component: Type<T> | string,
-): Type<T> | Type<WrapperComponent> {
+): Type<T | WrapperComponent> {
   if (typeof component === 'string') {
     TestBed.overrideTemplate(WrapperComponent, component)
 
@@ -167,16 +179,16 @@ function createComponentFixture<T extends object> (
 /**
  * Creates the ComponentFixture
  *
- * @param {Type<T> | Type<WrapperComponent>} component Angular component being mounted
+ * @param {Type<T>} component Angular component being mounted
  * @param {TestBed} testBed TestBed
  * @param {boolean} autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
  * @returns {ComponentFixture<T>} ComponentFixture
  */
 function setupFixture<T extends object> (
-  component: Type<T> | Type<WrapperComponent>,
+  component: Type<T>,
   testBed: TestBed,
   autoDetectChanges: boolean,
-): ComponentFixture<T | WrapperComponent> {
+): ComponentFixture<T> {
   const fixture = testBed.createComponent(component)
 
   fixture.whenStable().then(() => {
