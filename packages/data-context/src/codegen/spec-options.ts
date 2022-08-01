@@ -8,6 +8,7 @@ interface CodeGenOptions {
   codeGenPath: string
   codeGenType: CodeGenType
   erroredCodegenCandidate?: string | null
+  specFileExtension?: string
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -91,6 +92,7 @@ export class SpecOptions {
     const templateKey: TemplateKey = framework.mountModule === 'cypress/vue' ? 'vue3Component' : 'vue2Component'
 
     return {
+      codeGenType: this.options.codeGenType,
       componentName,
       componentPath,
       mountModule: framework.mountModule,

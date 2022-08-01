@@ -1,10 +1,9 @@
 import { parse } from '@babel/parser'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import sinon from 'sinon'
+// import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
@@ -12,6 +11,7 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
+// import * as scaffoldPackage from '@packages/scaffold-config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -146,22 +146,15 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
-  it('should generate from component template', async () => {
+  it('should generate from empty component template', async () => {
     const fileName = 'Button.tsx'
     const target = path.join(tmpPath, 'component')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
-      templateDir: templates.component,
+      templateDir: templates.componentEmpty,
       target,
     }
     const codeGenArgs = {
-      imports: [
-        'import { mount } from "@cypress/react"',
-        'import Button from "./Button"',
-      ],
-      componentName: 'Button',
-      docsLink: '// see: https://on.cypress.io/component-testing',
-      mount: 'mount(<Button />)',
       fileName,
     }
 
@@ -178,6 +171,93 @@ describe('code-generator', () => {
                 // cy.mount()
               })
             })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from Vue 2 component template', async () => {
+    const fileName = 'Button.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.vue2Component,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Button',
+      componentPath: 'path/to/component',
+      fileName,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://vue-test-utils.vuejs.org/
+              cy.mount(${codeGenArgs.componentName}, { propsData: {} })
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from Vue 3 component template', async () => {
+    const fileName = 'Button.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.vue3Component,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Button',
+      componentPath: 'path/to/component',
+      fileName,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
+          
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://test-utils.vuejs.org/guide/
+              cy.mount(${codeGenArgs.componentName}, { props: {} })
+            })
+          })`,
         },
       ],
       failed: [],
@@ -214,15 +294,12 @@ describe('code-generator', () => {
     }
   })
 
-  it('should generate from react component', async () => {
+  it('should generate empty test from react component', async () => {
     const target = path.join(tmpPath, 'react-component')
     const action: Action = {
-      templateDir: templates.component,
+      templateDir: templates.componentEmpty,
       target,
     }
-
-    // @ts-ignore
-    sinon.stub(ctx.project, 'guessFramework').returns(WIZARD_FRAMEWORKS[0])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
@@ -237,26 +314,26 @@ describe('code-generator', () => {
     expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
   })
 
-  it('should generate from vue component', async () => {
-    const target = path.join(tmpPath, 'vue-component')
-    const action: Action = {
-      templateDir: templates.component,
-      target,
-    }
+  // TODO: Come back to this in this PR
+  // it.only('should generate scaffolded test from vue 3 component', async () => {
+  //   const target = path.join(tmpPath, 'vue-component')
+  //   const action: Action = {
+  //     templateDir: templates.vue3Component,
+  //     target,
+  //   }
 
-    // @ts-ignore
-    sinon.stub(ctx.project, 'guessFramework').returns(WIZARD_FRAMEWORKS[1])
+  //   const newSpecCodeGenOptions = new SpecOptions(ctx, {
+  //     codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
+  //     codeGenType: 'component',
+  //     specFileExtension: '.cy',
+  //   })
 
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
-      codeGenType: 'component',
-      specFileExtension: '.cy',
-    })
+  //   sinon.stub(scaffoldPackage, 'detectFramework').returns({ framework: scaffoldPackage.WIZARD_FRAMEWORKS[2] })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+  //   let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    const codeGenResult = await codeGenerator(action, codeGenOptions)
+  //   const codeGenResult = await codeGenerator(action, codeGenOptions)
 
-    expect(() => codeGenResult.files[0].content).not.throw()
-  })
+  //   expect(() => codeGenResult.files[0].content).not.throw()
+  // })
 })

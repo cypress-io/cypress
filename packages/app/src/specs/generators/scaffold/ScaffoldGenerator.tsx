@@ -7,6 +7,7 @@ export const ScaffoldGenerator: SpecGenerator = {
   card: ScaffoldGeneratorCard,
   entry: ScaffoldGeneratorStepOne,
   matches: filters.matchesE2E,
+  show: () => true,
   disabled: () => { },
   id: 'scaffold',
 }
