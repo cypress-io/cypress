@@ -67,7 +67,14 @@ const variables = computed(() => {
 const query = useQuery({ query: FlakySpecSummaryQueryDocument, variables, pause: true })
 const purgeCloudSpecCacheMutation = useMutation(PurgeCloudSpecCacheDocument)
 
-const flakyStatus = computed(() => query.data.value?.cloudSpecByPath?.__typename === 'CloudProjectSpec' ? query.data.value?.cloudSpecByPath?.flakyStatus : null)
+const flakyStatus = computed(() => {
+  if (query.data.value?.cloudSpecByPath?.__typename === 'CloudProjectSpec' &&
+      query.data.value?.cloudSpecByPath?.flakyStatus?.__typename === 'CloudProjectSpecFlakyStatus') {
+    return query.data.value.cloudSpecByPath.flakyStatus
+  }
+
+  return null
+})
 
 onBeforeMount(async () => {
   // We can't tell when the flaky data was retrieved since the retrieval timestamp is maintained at the cloudSpec-level

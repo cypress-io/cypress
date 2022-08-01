@@ -41,6 +41,7 @@ import { computed } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import FlakySpecSummaryAdapter from './FlakySpecSummaryAdapter.vue'
 import FlakyBadge from './FlakyBadge.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment FlakyInformationProject on CurrentProject {
@@ -84,7 +85,18 @@ const props = defineProps<{
 }>()
 
 const isFlaky = computed(() => props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' && !!props.cloudSpecGql?.data?.isConsideredFlaky)
-const dashboardUrl = computed(() => props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' && props.cloudSpecGql?.data?.flakyStatus?.dashboardUrl || '#')
+const dashboardUrl = computed(() => {
+  const cloudSpec = props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' ? props.cloudSpecGql.data : null
+  const flakyStatus = cloudSpec?.flakyStatus?.__typename === 'CloudProjectSpecFlakyStatus' ? cloudSpec.flakyStatus : null
+
+  return getUrlWithParams({
+    url: flakyStatus?.dashboardUrl || '#',
+    params: {
+      utm_medium: 'Specs Flake Annotation Badge',
+      utm_campaign: 'Flaky',
+    },
+  })
+})
 
 const projectId = computed(() => props.projectGql?.projectId)
 const fromBranch = computed(() => props.projectGql?.branch ?? '')
