@@ -5,8 +5,6 @@ export function partial (domain) {
   return oneLine`
     <script type='text/javascript'>
       document.domain = '${domain}';
-      delete window.snapshotResult;
-      delete window.snapshotAuxiliaryData;
     </script>
   `
 }
@@ -16,8 +14,6 @@ export function full (domain) {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '${domain}';
-        delete window.snapshotResult;
-        delete window.snapshotAuxiliaryData;
 
         ${contents}
       </script>
@@ -30,8 +26,6 @@ export function fullCrossOrigin (domain) {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '${domain}';
-        delete window.snapshotResult;
-        delete window.snapshotAuxiliaryData;
 
         ${contents}
       </script>

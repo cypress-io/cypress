@@ -140,6 +140,10 @@ module.exports = async function installSnapshot (
       v8ContextFile,
     )
 
+    if (!fs.access(`${cypressAppSnapshotFile}.default`)) {
+      await fs.copyFile(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
+    }
+
     // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
     await fs.copyFile(
       path.join(projectBaseDir, v8ContextFile),

@@ -1,9 +1,14 @@
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
+import path from 'path'
+import util from 'util'
+import glob from 'glob'
+import fs from 'fs-extra'
+
+const globPromise = util.promisify(glob)
 
 const debug = Debug('cypress:server:windows')
 
@@ -143,7 +148,72 @@ export function defaults (options = {}) {
   })
 }
 
-export function create (projectRoot, _options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+export async function snapshotDance (remove: boolean) {
+  const platformString = process.platform
+  const projectBaseDir = path.join(__dirname, '../../../../')
+
+  const cypressAppSnapshotDir = (() => {
+    const electronPackageDir = path.join(projectBaseDir, 'packages/electron')
+
+    let cypressApp
+    let electronPath
+
+    switch (platformString) {
+      case 'darwin': {
+        cypressApp = 'dist/Cypress/Cypress.app'
+        electronPath = 'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/'
+        break
+      }
+      case 'win32':
+      case 'cygwin': {
+        cypressApp = 'dist/Cypress'
+        electronPath = ''
+        break
+      }
+
+      // TODO(thlorenz): verify Linux location
+      case 'linux':
+        cypressApp = 'dist/Cypress'
+        electronPath = ''
+        break
+
+      // TODO(thlorenz): verify BSD location
+      case 'openbsd':
+      case 'netbsd': {
+        cypressApp = 'dist/Cypress'
+        electronPath = ''
+        break
+      }
+
+      case 'sunos':
+        // TODO: Do we support sunos???
+        // eslint-disable-next-line no-fallthrough
+      default: {
+        throw new Error(`Unable to determine Cypress App location for '${platformString}' platform.`)
+      }
+    }
+
+    const cypressAppDir = path.join(electronPackageDir, cypressApp)
+
+    return path.join(
+      cypressAppDir,
+      electronPath,
+    )
+  })()
+
+  const matches = await globPromise(path.join(cypressAppSnapshotDir, 'v8*.bin'))
+  const cypressAppSnapshotFile = matches[0]
+
+  if (remove) {
+    await fs.move(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.custom`)
+    await fs.move(`${cypressAppSnapshotFile}.default`, cypressAppSnapshotFile)
+  } else {
+    await fs.move(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
+    await fs.move(`${cypressAppSnapshotFile}.custom`, cypressAppSnapshotFile)
+  }
+}
+
+export async function create (projectRoot, _options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
   const options = defaults(_options)
 
   if (options.show === false) {
@@ -213,7 +283,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 // open launchpad BrowserWindow
-export function open (projectRoot, launchpadPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
+export async function open (projectRoot, launchpadPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Promise<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   let win = getByType(options.type)
@@ -221,7 +291,7 @@ export function open (projectRoot, launchpadPort: number, options: WindowOptions
   if (win) {
     win.show()
 
-    return Bluebird.resolve(win)
+    return Promise.resolve(win)
   }
 
   recentlyCreatedWindow = true
@@ -239,7 +309,7 @@ export function open (projectRoot, launchpadPort: number, options: WindowOptions
     options.url = getUrl(options.type, launchpadPort)
   }
 
-  win = create(projectRoot, options, newBrowserWindow)
+  win = await create(projectRoot, options, newBrowserWindow)
 
   debug('creating electron window with options %o', options)
 
@@ -253,16 +323,18 @@ export function open (projectRoot, launchpadPort: number, options: WindowOptions
 
   // enable our url to be a promise
   // and wait for this to be resolved
-  return Bluebird.join(
+  return Promise.all([
     options.url,
     setWindowProxy(win),
-  )
-  .spread((url) => {
+  ])
+  .then(([url]) => {
     // navigate the window here!
     win.loadURL(url)
 
     recentlyCreatedWindow = false
-  }).thenReturn(win)
+
+    return win
+  })
 }
 
 export function trackState (projectRoot, isTextTerminal, win, keys) {

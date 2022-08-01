@@ -267,6 +267,7 @@ require('./packages/server')\
   }
 
   log(`copying ${sourceSnapshotFileLocation} to ${targetSnapshotFileLocation}`)
+  fs.copySync(targetSnapshotFileLocation, `${targetSnapshotFileLocation}.default`)
   fs.copySync(sourceSnapshotFileLocation, targetSnapshotFileLocation)
 
   await checkMaxPathLength()

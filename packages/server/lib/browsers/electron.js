@@ -183,7 +183,7 @@ module.exports = {
   _getAutomation,
 
   async _render (url, automation, preferences = {}, options = {}) {
-    const win = Windows.create(options.projectRoot, preferences)
+    const win = await Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
       // seemingly the only way to force headless to a certain screen size
@@ -200,7 +200,7 @@ module.exports = {
     })
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options, automation) {
+  async _launchChild (e, url, parent, projectRoot, state, options, automation) {
     e.preventDefault()
 
     const [parentX, parentY] = parent.getPosition()
@@ -213,7 +213,7 @@ module.exports = {
       trackState: false,
     })
 
-    const win = Windows.create(projectRoot, options)
+    const win = await Windows.create(projectRoot, options)
 
     // needed by electron since we prevented default and are creating
     // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
@@ -446,7 +446,7 @@ module.exports = {
 
     debug('open %o', { browser, url })
 
-    return savedState.create(projectRoot, isTextTerminal)
+    return Windows.snapshotDance(true).then(() => savedState.create(projectRoot, isTextTerminal))
     .then((state) => {
       return state.get()
     }).then((state) => {
@@ -511,7 +511,7 @@ module.exports = {
           },
         })
 
-        return instance
+        return Windows.snapshotDance(true).then(() => instance)
       })
     })
   },
