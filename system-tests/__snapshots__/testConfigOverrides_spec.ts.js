@@ -54,7 +54,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid-browser.js/An uncaught error was detect    (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid-browser.js/An uncaught error was detect     (1280x720)
      ed outside of a test (failed).png                                                              
 
 
@@ -282,23 +282,23 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
      rror (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
      rror when executed within cy cmd (failed).png                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in test (failed).png                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in before hook -- 4 -- before all hook (failed).png                       
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in after hook -- 5 (failed).png                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in afterEach hook -- 5 (failed).png                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
 
@@ -465,9 +465,9 @@ https://on.cypress.io/config
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
       config override throws error (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test    (2560x1328)
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
       config override throws error when executed within cy cmd (failed).png                         
 
 
@@ -1172,9 +1172,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/does not run (fail    (6400x2610)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/does not run (fail     (1280x720)
      ed).png                                                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/nested -- does not    (6400x2610)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async.js/nested -- does not     (1280x720)
       run 2 (failed).png                                                                            
 
 
