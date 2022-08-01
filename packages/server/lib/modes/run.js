@@ -409,10 +409,9 @@ const renderSummaryTable = (runUrl) => {
         })
 
         table4.push(['', ''])
-        table4.push([`Recorded Run: ${formatPath(runUrl, getWidth(table4, 0), 'gray')}`])
-
         console.log(terminal.renderTables(table4))
 
+        console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
         console.log('')
       }
     }
