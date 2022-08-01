@@ -115,6 +115,10 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
     case 'next':
       return await nextHandler(devServerConfig)
 
+      // TODO: revert once Angular is slated for release
+      // case 'angular':
+      //   return await angularHandler(devServerConfig)
+
     case 'react':
     case 'vue':
     case undefined:

@@ -4,7 +4,7 @@ export const WIZARD_DEPENDENCY_WEBPACK = {
   package: 'webpack',
   installer: 'webpack',
   description: 'Webpack is a module bundler',
-  minVersion: '>=4.0.0',
+  minVersion: '>=4.0.0 || >=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_2 = {
@@ -31,7 +31,7 @@ export const WIZARD_DEPENDENCY_REACT = {
   package: 'react',
   installer: 'react',
   description: 'A JavaScript library for building user interfaces',
-  minVersion: '>=16.x',
+  minVersion: '^=16.0.0 || ^=17.0.0 || ^=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_REACT_DOM = {
@@ -40,7 +40,7 @@ export const WIZARD_DEPENDENCY_REACT_DOM = {
   package: 'react-dom',
   installer: 'react-dom',
   description: 'This package serves as the entry point to the DOM and server renderers for React',
-  minVersion: '>=16.x',
+  minVersion: '^=16.0.0 || ^=17.0.0 || ^=18.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_TYPESCRIPT = {
@@ -58,7 +58,7 @@ export const WIZARD_DEPENDENCY_REACT_SCRIPTS = {
   package: 'react-scripts',
   installer: 'react-scripts',
   description: 'Create React apps with no build configuration',
-  minVersion: '>=4.0.0',
+  minVersion: '^=4.0.0 || ^=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
@@ -67,7 +67,7 @@ export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
   package: '@vue/cli-service',
   installer: '@vue/cli-service',
   description: 'Standard Tooling for Vue.js Development',
-  minVersion: '>=4.0.0',
+  minVersion: '^=4.0.0 || ^=5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VITE = {
@@ -76,7 +76,7 @@ export const WIZARD_DEPENDENCY_VITE = {
   package: 'vite',
   installer: 'vite',
   description: 'Vite is dev server that serves your source files over native ES modules',
-  minVersion: '>=2.0.0',
+  minVersion: '^=2.0.0 || ^=3.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_NUXT = {
@@ -94,7 +94,52 @@ export const WIZARD_DEPENDENCY_NEXT = {
   package: 'next',
   installer: 'next',
   description: 'The React Framework for Production',
-  minVersion: '>=10.0.0',
+  minVersion: '^=10.0.0 || ^=11.0.0 || ^=12.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
+  type: 'angular',
+  name: 'Angular CLI',
+  package: '@angular/cli',
+  installer: '@angular/cli',
+  description: 'CLI tool that you use to initialize, develop, scaffold, and maintain Angular applications.',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
+  type: 'angular',
+  name: 'Angular DevKit Build Angular',
+  package: '@angular-devkit/build-angular',
+  installer: '@angular-devkit/build-angular',
+  description: 'Angular Webpack build facade',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
+  type: 'angular',
+  name: 'Angular Core',
+  package: '@angular/core',
+  installer: '@angular/core',
+  description: 'The core of the Angular framework',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
+  type: 'angular',
+  name: 'Angular Common',
+  package: '@angular/common',
+  installer: '@angular/common',
+  description: 'Commonly needed Angular directives and services',
+  minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
+  type: 'angular',
+  name: 'Angular Platform Browser Dynamic',
+  package: '@angular/platform-browser-dynamic',
+  installer: '@angular/platform-browser-dynamic',
+  description: 'Library for using Angular in a web browser with JIT compilation',
+  minVersion: '>=13.0.0',
 } as const
 
 export const WIZARD_DEPENDENCIES = [
@@ -109,6 +154,11 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_REACT_DOM,
   WIZARD_DEPENDENCY_VUE_2,
   WIZARD_DEPENDENCY_VUE_3,
+  WIZARD_DEPENDENCY_ANGULAR_CLI,
+  WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
+  WIZARD_DEPENDENCY_ANGULAR_CORE,
+  WIZARD_DEPENDENCY_ANGULAR_COMMON,
+  WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
 ] as const
 
 export const WIZARD_BUNDLERS = [

@@ -72,6 +72,29 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   return webpackConfig
 }
 
+async function addEntryPoint (webpackConfig: Configuration) {
+  let entry = webpackConfig.entry
+
+  if (typeof entry === 'function') {
+    entry = await entry()
+  }
+
+  if (typeof entry === 'string') {
+    entry = [entry, CYPRESS_WEBPACK_ENTRYPOINT]
+  } else if (Array.isArray(entry)) {
+    entry.push(CYPRESS_WEBPACK_ENTRYPOINT)
+  } else if (typeof entry === 'object') {
+    entry = {
+      ...entry,
+      ['cypress-entry']: CYPRESS_WEBPACK_ENTRYPOINT,
+    }
+  } else {
+    entry = CYPRESS_WEBPACK_ENTRYPOINT
+  }
+
+  webpackConfig.entry = entry
+}
+
 /**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
@@ -161,7 +184,7 @@ export async function makeWebpackConfig (
     dynamicWebpackConfig,
   )
 
-  mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  await addEntryPoint(mergedConfig)
 
   debug('Merged webpack config %o', mergedConfig)
 

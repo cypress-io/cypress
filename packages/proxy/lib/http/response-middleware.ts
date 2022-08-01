@@ -400,14 +400,12 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const currentAUTUrl = ctx.getAUTUrl()
 
-  // A cookie needs cross origin handling if it's an AUT request and
-  // either the request itself is cross-origin or the origins between
-  // requests don't match, since the browser won't set them in that
-  // case and if it's secondary-origin -> primary-origin, we don't
-  // recognize the request as cross-origin
+  // A cookie needs cross origin handling if the request itself is
+  // cross-origin or the origins between requests don't match,
+  // since the browser won't set them in that case and if it's
+  // secondary-origin -> primary-origin, we don't recognize the request as cross-origin
   return (
     ctx.config.experimentalSessionAndOrigin
-    && ctx.req.isAUTFrame
     && (
       (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
