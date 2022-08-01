@@ -2,7 +2,7 @@
 // @ts-check
 
 const path = require('path')
-const fs = require('fs').promises
+const { promises: fs, existsSync } = require('fs')
 
 const { SnapshotGenerator, prettyPrintError } = require('v8-snapshot')
 
@@ -140,7 +140,7 @@ module.exports = async function installSnapshot (
       v8ContextFile,
     )
 
-    if (!fs.existsSync(`${cypressAppSnapshotFile}.default`)) {
+    if (!existsSync(`${cypressAppSnapshotFile}.default`)) {
       await fs.copyFile(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
     }
 
