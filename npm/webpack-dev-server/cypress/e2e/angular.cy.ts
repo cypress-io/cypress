@@ -12,7 +12,8 @@ for (const project of WEBPACK_REACT) {
     continue
   }
 
-  describe(`Working with ${project}`, () => {
+  // TODO: revert once Angular is slated for release
+  describe.skip(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
       cy.openProject(project)
