@@ -107,8 +107,7 @@
     "vue",
     "react",
     "vue2",
-    "react18",
-    "angular"
+    "react18"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -150,11 +149,6 @@
     "./mount-utils": {
       "require": "./mount-utils/dist/index.js",
       "types": "./mount-utils/dist/index.d.ts"
-    },
-    "./angular": {
-      "import": "./angular/dist/index.js",
-      "require": "./angular/dist/index.js",
-      "types": "./angular/dist/index.d.ts"
     }
   },
   "workspaces": {
