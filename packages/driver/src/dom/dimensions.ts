@@ -1,11 +1,35 @@
 import _ from 'lodash'
 
+type Dimensions = {
+  offset: any
+  paddingTop: number
+  paddingRight: number
+  paddingBottom: number
+  paddingLeft: number
+  borderTop: number
+  borderRight: number
+  borderBottom: number
+  borderLeft: number
+  marginTop: number
+  marginRight: number
+  marginBottom: number
+  marginLeft: number
+  width: number
+  height: number
+  heightWithPadding: number
+  heightWithBorder: number
+  heightWithMargin: number
+  widthWithPadding: number
+  widthWithBorder: number
+  widthWithMargin: number
+}
+
 const getElementDimensions = ($el) => {
   const el = $el.get(0)
 
   const { offsetHeight, offsetWidth } = el
 
-  const box = {
+  const box: Dimensions = {
     // offset disregards margin but takes into account border + padding
     offset: $el.offset(),
     // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
@@ -22,6 +46,14 @@ const getElementDimensions = ($el) => {
     marginRight: getMargin($el, 'right'),
     marginBottom: getMargin($el, 'bottom'),
     marginLeft: getMargin($el, 'left'),
+    width: 0,
+    height: 0,
+    heightWithPadding: 0,
+    heightWithBorder: 0,
+    heightWithMargin: 0,
+    widthWithPadding: 0,
+    widthWithBorder: 0,
+    widthWithMargin: 0,
   }
 
   // NOTE: offsetWidth/height always give us content + padding + border, so subtract them

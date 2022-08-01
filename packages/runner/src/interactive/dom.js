@@ -2,7 +2,7 @@ import _ from 'lodash'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import $Cypress from '@packages/driver'
-import $dimensions from './dimensions'
+import $dimensions from '@packages/driver/src/dom/dimensions'
 import { selectorPlaygroundHighlight } from './selector-playground/highlight'
 import { studioAssertionsMenu } from './studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
