@@ -273,3 +273,11 @@ export function mount<T extends object> (
 
   return cy.wrap(mountResponse, { log: false })
 }
+
+export const createOutputSpy = <T>(alias: string) => {
+  const emitter = new EventEmitter<T>()
+
+  cy.spy(emitter, 'emit').as(alias)
+
+  return emitter
+}

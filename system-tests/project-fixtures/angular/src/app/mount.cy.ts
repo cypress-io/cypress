@@ -5,6 +5,7 @@ import { CounterService } from "./components/counter.service";
 import { ChildComponent } from "./components/child.component";
 import { WithDirectivesComponent } from "./components/with-directives.component";
 import { ButtonOutputComponent } from "./components/button-output.component";
+import { createOutputSpy } from 'cypress/angular';
 
 describe("angular mount", () => {
   it("pushes CommonModule into component", () => {
@@ -63,7 +64,7 @@ describe("angular mount", () => {
     cy.get('@myClickedSpy').should('have.been.calledWith', true)
   })
 
-  it('can use a template instead of Type<T> for component WITHOUT declarations', () => {
+  it('can use a template instead of Type<T> for component WITHOUT componentProperties', () => {
     const mySpy = cy.spy().as('myClickedSpy')
     cy.mount<ButtonOutputComponent>(`<app-button-output (clicked)="${mySpy()}"></app-button-output>`, {
       declarations: [ButtonOutputComponent],
@@ -72,10 +73,10 @@ describe("angular mount", () => {
     cy.get('@myClickedSpy').should('have.been.called')
   })
 
-  it('can accept a cy.spy for an Output property', () => {
+  it('can accept a createOutputSpy for an Output property', () => {
     cy.mount(ButtonOutputComponent, {
       componentProperties: {
-        clicked: cy.spy().as('mySpy')
+        clicked: createOutputSpy<boolean>('mySpy')
       }
     })
     cy.get('button').click();
