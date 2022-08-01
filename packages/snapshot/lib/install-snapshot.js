@@ -140,7 +140,7 @@ module.exports = async function installSnapshot (
       v8ContextFile,
     )
 
-    if (!fs.access(`${cypressAppSnapshotFile}.default`)) {
+    if (!fs.existsSync(`${cypressAppSnapshotFile}.default`)) {
       await fs.copyFile(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
     }
 
