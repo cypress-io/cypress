@@ -289,10 +289,12 @@ Here is a list of the npm packages in this repository:
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
  | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
+ | [react18](./npm/react18)                               | `@cypress/react18`                   | Cypress component testing for React 18.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
  | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
- | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue.               |
+ | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
+ | [vue2](./npm/vue2)                                       | `@cypress/vue2`                     | Cypress component testing for Vue 2.               |
 
 We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate package the work is required in. For public packages, we use their qualified package name: For example, issues relating to the  webpack preprocessor are tagged under [`npm: @cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/labels/npm%3A%20%40cypress%2Fwebpack-preprocessor) label and issues related to the `driver` package are tagged with the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label.
 
@@ -513,7 +515,7 @@ The repository is setup with two main (protected) branches.
 - `master` is the code already published, both for the main Cypress app and independent npm packages.
 - `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests that update the main Cypress binary should be made against this branch.
 
-In general, we want to publish our standalone npm packages continuously as new features are added. Therefore, any pull requests that only change independent `@cypress/` packages in the [`npm`](./npm) directory should be made directly off the `master` branch. We use [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automatically publish these packages to npm when a PR is merged directly into master.
+In general, we want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, any pull requests that only change independent `@cypress/` packages in the [`npm`](./npm) directory should be made directly off the `master` branch. We use [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automatically publish these packages to npm when a PR is merged directly into master.
 
 When updating the main Cypress app, pull requests should be made against the `develop` branch. We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. In addition, if you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against the `develop` branch.
 
