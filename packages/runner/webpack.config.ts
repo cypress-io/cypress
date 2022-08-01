@@ -45,7 +45,7 @@ pngRule.use[0].options = {
 }
 
 // @ts-ignore
-const getMainConfig = (testingType): webpack.Configuration => {
+const getMainConfig = (): webpack.Configuration => {
   const config = {
     ...commonConfig,
     module: {
@@ -55,7 +55,7 @@ const getMainConfig = (testingType): webpack.Configuration => {
       ],
     },
     entry: {
-      cypress_runner: [path.resolve(__dirname, 'src', testingType, 'index.js')],
+      cypress_runner: [path.resolve(__dirname, 'src', 'index.js')],
     },
 
     output: {
@@ -89,14 +89,11 @@ const getMainConfig = (testingType): webpack.Configuration => {
   return config
 }
 
-const e2eTestingConfig = getMainConfig('e2e')
-const componentTestingConfig = getMainConfig('component')
-
 // @ts-ignore
 const crossOriginConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_cross_origin_runner: [path.resolve(__dirname, 'src', 'e2e', 'cross-origin.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src', 'cross-origin.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -131,8 +128,7 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 }
 
 export default [
-  e2eTestingConfig,
-  // componentTestingConfig,
+  getMainConfig(),
   mainInjectionConfig,
   crossOriginConfig,
   crossOriginInjectionConfig,

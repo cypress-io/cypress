@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import $ from 'jquery'
 import driver from '@packages/driver'
-import { dom } from '../dom'
+import { dom } from '../../dom'
 import { createEventManager } from '../../test/utils'
 
 import { StudioRecorder } from './studio-recorder'
