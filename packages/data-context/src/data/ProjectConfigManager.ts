@@ -155,16 +155,16 @@ export class ProjectConfigManager {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig)
-      .then(() => {
+      .then(async () => {
         if (this._testingType === 'component') {
-          this.checkDependenciesForComponentTesting()
+          await this.checkDependenciesForComponentTesting()
         }
       })
       .catch(this.onLoadError)
     }
   }
 
-  checkDependenciesForComponentTesting () {
+  async checkDependenciesForComponentTesting () {
     // if it's a function, for example, the user is created their own dev server,
     // and not using one of our presets. Assume they know what they are doing and
     // what dependencies they require.
@@ -184,15 +184,15 @@ export class ProjectConfigManager {
       return
     }
 
-    const result = inPkgJson(bundler, this.options.projectRoot)
+    const result = await inPkgJson(bundler, this.options.projectRoot)
 
     if (!result.satisfied) {
       unsupportedDeps.set(result.dependency.type, result)
     }
 
-    const isFrameworkSatisfied = (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
-      for (const dep of framework.dependencies(bundler.type, this.options.projectRoot)) {
-        const res = inPkgJson(dep.dependency, this.options.projectRoot)
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
+      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+        const res = await inPkgJson(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
           return false
@@ -209,11 +209,11 @@ export class ProjectConfigManager {
     let isSatisfied = false
 
     for (const framework of frameworks) {
-      if (isFrameworkSatisfied(bundler, framework)) {
+      if (await isFrameworkSatisfied(bundler, framework)) {
         isSatisfied = true
         break
       } else {
-        for (const dep of framework.dependencies(bundler.type, this.options.projectRoot)) {
+        for (const dep of await framework.dependencies(bundler.type, this.options.projectRoot)) {
           mismatchedFrameworkDeps.set(dep.dependency.type, dep)
         }
       }
