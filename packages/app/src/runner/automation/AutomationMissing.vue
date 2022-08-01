@@ -21,7 +21,7 @@
           <template #heading>
             <img
               class="min-w-16px w-16px"
-              :src="allBrowsersIcons[selectedBrowser.displayName]"
+              :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             >
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
           </template>
