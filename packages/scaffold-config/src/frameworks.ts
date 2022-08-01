@@ -29,17 +29,20 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
     // TODO: convert to async FS method
     // eslint-disable-next-line no-restricted-syntax
     const pkg = fs.readJsonSync(loc) as PkgJson
-    const pkgVersion = semver.coerce(pkg.version)
 
-    if (!pkgVersion) {
+    if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
     }
+
+    const satisfied = Boolean(pkg.version && semver.satisfies(pkg.version, dependency.minVersion, {
+      includePrerelease: true,
+    }))
 
     return {
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && semver.satisfies(pkgVersion, dependency.minVersion)),
+      satisfied,
     }
   } catch (e) {
     return {
@@ -217,26 +220,27 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
-  {
-    type: 'angular',
-    configFramework: 'angular',
-    category: 'template',
-    name: 'Angular',
-    detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
-      ]
-    },
-    codeGenFramework: 'angular',
-    mountModule: 'cypress/angular',
-    supportStatus: 'full',
-    componentIndexHtml: componentIndexHtmlGenerator(),
-    specPattern: '**/*.cy.ts',
-  },
+  // TODO: revert once Angular is slated for release
+  // {
+  //   type: 'angular',
+  //   configFramework: 'angular',
+  //   category: 'template',
+  //   name: 'Angular',
+  //   detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
+  //   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+  //   dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
+  //     return [
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+  //     ]
+  //   },
+  //   codeGenFramework: 'angular',
+  //   mountModule: 'cypress/angular',
+  //   supportStatus: 'full',
+  //   componentIndexHtml: componentIndexHtmlGenerator(),
+  //   specPattern: '**/*.cy.ts',
+  // },
 ] as const
