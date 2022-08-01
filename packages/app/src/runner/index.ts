@@ -8,7 +8,7 @@
  * - reporter
  * which are built with React and bundle with webpack.
  *
- * The entry point for the webpack bundle is `runner-ct/main.tsx`.
+ * The entry point for the webpack bundle is `runner/main.tsx`.
  * Any time you need to consume some existing code, add it to the `window.UnifiedRunner`
  * namespace there, and access it with `window.UnifiedRunner`.
  *
