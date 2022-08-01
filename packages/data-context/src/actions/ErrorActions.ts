@@ -9,14 +9,6 @@ export class ErrorActions {
    */
   clearError (id: string) {
     this.ctx.update((d) => {
-      if (d.currentProjectData?.testingTypeData?.activeAppData?.error?.id === id) {
-        d.currentProjectData.testingTypeData.activeAppData.error = null
-      }
-
-      if (d.currentProjectData?.testingTypeData?.error?.id === id) {
-        d.currentProjectData.testingTypeData.error = null
-      }
-
       if (d.currentProjectData?.error?.id === id) {
         d.currentProjectData.error = null
       }
@@ -49,18 +41,18 @@ export class ErrorActions {
         return
       }
 
-      const testingTypeWarningsIndex = d.currentProjectData?.testingTypeData?.warnings.findIndex((v) => v.id === id)
+      const testingTypeWarningsIndex = d.currentProjectData?.warnings.findIndex((v) => v.id === id)
 
       if (testingTypeWarningsIndex != null && testingTypeWarningsIndex !== -1) {
-        d.currentProjectData?.testingTypeData?.warnings.splice(testingTypeWarningsIndex, 1)
+        d.currentProjectData?.warnings.splice(testingTypeWarningsIndex, 1)
 
         return
       }
 
-      const appWarningsIndex = d.currentProjectData?.testingTypeData?.activeAppData?.warnings.findIndex((v) => v.id === id)
+      const appWarningsIndex = d.currentProjectData?.warnings.findIndex((v) => v.id === id)
 
       if (appWarningsIndex != null && appWarningsIndex !== -1) {
-        d.currentProjectData?.testingTypeData?.activeAppData?.warnings.splice(appWarningsIndex, 1)
+        d.currentProjectData?.warnings.splice(appWarningsIndex, 1)
       }
     })
   }

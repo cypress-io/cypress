@@ -30,8 +30,9 @@ export class BrowserActions {
 
     this.ctx.update((d) => {
       d.activeBrowser = browser
-      if (d.currentProjectData?.testingTypeData) {
-        d.currentProjectData.testingTypeData.activeAppData = { error: null, warnings: [] }
+      d.currentProjectData = {
+        error: null,
+        warnings: [],
       }
     })
 

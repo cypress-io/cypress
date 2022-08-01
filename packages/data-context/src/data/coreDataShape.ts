@@ -107,21 +107,14 @@ export interface ForceReconfigureProjectDataShape {
   component?: boolean | null
 }
 
-export interface ActiveAppData {
+interface Diagnostics {
   error: ErrorWrapperSource | null
   warnings: ErrorWrapperSource[]
-}
-
-export interface CurrentTestingTypeData {
-  error: ErrorWrapperSource | null
-  warnings: ErrorWrapperSource[]
-  activeAppData: ActiveAppData | null
 }
 
 export interface CurrentProjectData {
   error: ErrorWrapperSource | null
   warnings: ErrorWrapperSource[]
-  testingTypeData: CurrentTestingTypeData | null
 }
 
 export interface CoreDataShape {
@@ -244,21 +237,15 @@ export function makeCurrentProjectData (projectRoot: Maybe<string>, testingType:
     return {
       error: null,
       warnings: [],
-      testingTypeData: makeTestingTypeData(testingType),
     }
   }
 
   return null
 }
 
-export function makeTestingTypeData (testingType: Maybe<TestingType>): CurrentTestingTypeData | null {
-  if (testingType) {
-    return {
-      error: null,
-      warnings: [],
-      activeAppData: null,
-    }
+export function clearDiagnostics (): Diagnostics | null {
+  return {
+    error: null,
+    warnings: [],
   }
-
-  return null
 }
