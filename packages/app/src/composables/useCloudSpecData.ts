@@ -1,7 +1,7 @@
 import { gql, useMutation } from '@urql/vue'
 import { Ref, computed, watch } from 'vue'
 import { useDebounce } from '@vueuse/core'
-import { PurgeCloudSpecCacheDocument, CloudData_RefetchDocument, SpecsListFragment } from '../generated/graphql'
+import { CloudData_RefetchDocument, SpecsListFragment } from '../generated/graphql'
 
 gql`
 mutation CloudData_Refetch ($ids: [ID!]!) {
@@ -9,12 +9,6 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
     id
     fetchingStatus
   }
-}
-`
-
-gql`
-mutation PurgeCloudSpecCache ($projectSlug: String!, $specPaths: [String!]!) {
-  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths)
 }
 `
 
@@ -39,7 +33,6 @@ export function useCloudSpecData (
   allSpecs: (SpecsListFragment | undefined)[],
 ) {
   const refetchMutation = useMutation(CloudData_RefetchDocument)
-  const purgeCloudSpecCacheMutation = useMutation(PurgeCloudSpecCacheDocument)
 
   const isCloudSpecOlderThan = (item: NonNullCloudSpec, comparisonDttm: string | null) => {
     if (item.data?.__typename !== 'CloudProjectSpec' && item.data?.__typename !== 'CloudProjectSpecNotFound') {
@@ -73,16 +66,6 @@ export function useCloudSpecData (
     return false
   }
 
-  const shouldPurge = (item: NonNullCloudSpec) => {
-    if (isCloudSpecOlderThan(item, mostRecentUpdate.value)) {
-      // outdated, purge so it's refetched on next access
-      return true
-    }
-
-    // still valid, no need to purge
-    return false
-  }
-
   /**
    * Refetch any displayed RemoteFetchable entries that are older than the latest cloudProject update
    * or that have not yet been fetched
@@ -96,21 +79,6 @@ export function useCloudSpecData (
 
     if (!isProjectDisconnected.value && !refetchMutation.fetching.value && cloudSpecIdsToRefetch.length > 0) {
       await refetchMutation.executeMutation({ ids: cloudSpecIdsToRefetch })
-    }
-  }
-
-  /**
-   * Clear any cloudSpecByPath entries that are older than the latest cloudProject update
-   */
-  const purgeOutdatedCloudData = async () => {
-    const specPathsToPurge = allSpecs
-    .filter((spec) => Boolean(spec?.cloudSpec && shouldPurge(spec.cloudSpec)))
-    .map((spec) => spec?.relative)
-    .filter((val): val is string => !!val)
-    ?? []
-
-    if (!!projectId && specPathsToPurge && specPathsToPurge.length > 0) {
-      await purgeCloudSpecCacheMutation.executeMutation({ projectSlug: projectId, specPaths: specPathsToPurge })
     }
   }
 
@@ -136,16 +104,16 @@ export function useCloudSpecData (
   - Project connectivity state changes
   - Latest update timestamp for cloud project changes
   */
-  watch([debouncedDisplayedSpecIds, isOffline, isProjectDisconnected, mostRecentUpdate], () => {
-    fetchDisplayedCloudData()
-    purgeOutdatedCloudData()
-  }, {
-    flush: 'post',
-  })
+  watch(
+    [debouncedDisplayedSpecIds, isOffline, isProjectDisconnected, mostRecentUpdate],
+    () => {
+      fetchDisplayedCloudData()
+    },
+    { flush: 'post' },
+  )
 
   return {
     fetchDisplayedCloudData,
     refetchFailedCloudData,
-    purgeOutdatedCloudData,
   }
 }

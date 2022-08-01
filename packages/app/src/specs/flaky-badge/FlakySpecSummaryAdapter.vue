@@ -13,8 +13,8 @@
 
 import { computed, onBeforeMount } from 'vue'
 import FlakySpecSummary from './FlakySpecSummary.vue'
-import { gql, useQuery } from '@urql/vue'
-import { FlakySpecSummaryQueryDocument } from '../../generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { FlakySpecSummaryQueryDocument, PurgeCloudSpecCacheDocument } from '../../generated/graphql'
 
 gql`
 fragment FlakySpecSummaryQueryData on Query {
@@ -23,10 +23,13 @@ fragment FlakySpecSummaryQueryData on Query {
     ... on CloudProjectSpec {
       id
       flakyStatus(fromBranch: $fromBranch, flakyRunsWindow: 50) {
-        severity
-        flakyRuns
-        flakyRunsWindow
-        lastFlaky
+        __typename
+        ... on CloudProjectSpecFlakyStatus {
+          severity
+          flakyRuns
+          flakyRunsWindow
+          lastFlaky
+        }
       }
     }
   }
@@ -36,6 +39,12 @@ fragment FlakySpecSummaryQueryData on Query {
 gql`
 query FlakySpecSummaryQuery($projectId: String!, $specPath: String!, $fromBranch: String!) {
   ...FlakySpecSummaryQueryData
+}
+`
+
+gql`
+mutation PurgeCloudSpecCache ($projectSlug: String!, $specPaths: [String!]!) {
+  purgeCloudSpecByPathCache(projectSlug: $projectSlug, specPaths: $specPaths)
 }
 `
 
@@ -56,10 +65,14 @@ const variables = computed(() => {
 })
 
 const query = useQuery({ query: FlakySpecSummaryQueryDocument, variables, pause: true })
+const purgeCloudSpecCacheMutation = useMutation(PurgeCloudSpecCacheDocument)
 
 const flakyStatus = computed(() => query.data.value?.cloudSpecByPath?.__typename === 'CloudProjectSpec' ? query.data.value?.cloudSpecByPath?.flakyStatus : null)
 
 onBeforeMount(async () => {
+  // We can't tell when the flaky data was retrieved since the retrieval timestamp is maintained at the cloudSpec-level
+  // To ensure we display the latest data, invalidate the current cache entry for our query and refetch
+  await purgeCloudSpecCacheMutation.executeMutation({ projectSlug: props.projectId, specPaths: [props.specPath] })
   await query.executeQuery({ requestPolicy: 'network-only' })
 })
 

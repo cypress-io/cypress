@@ -67,7 +67,10 @@ fragment FlakyInformationCloudSpec on RemoteFetchableCloudProjectSpecResult {
       id
       isConsideredFlaky(fromBranch: $fromBranch)
       flakyStatus(fromBranch: $fromBranch, flakyRunsWindow: 50) {
-        dashboardUrl
+        __typename
+        ... on CloudProjectSpecFlakyStatus {
+          dashboardUrl
+        }
       }
     }
   }
