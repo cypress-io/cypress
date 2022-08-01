@@ -23,7 +23,7 @@ defaults: &defaults
     LINES: 24
 
     USE_SNAPSHOT: 1
-    DEBUG: snapshot:*,packherd:debug,cypress:*
+    DEBUG: snapshot:*,packherd:debug
 
 mainBuildFilters: &mainBuildFilters
   filters:
