@@ -78,6 +78,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -121,6 +126,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
