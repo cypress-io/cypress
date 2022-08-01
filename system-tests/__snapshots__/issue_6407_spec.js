@@ -23,9 +23,9 @@ exports['e2e issue 6407 throws if mutating read-only config with test configurat
   1 failing
 
   1) throws if mutating read-only config with test configuration:
-     CypressError: The config override passed to your test has the following validation error:
+     CypressError: The config passed to your test-level overrides has the following validation error:
 
-CypressError: Cypress test configuration cannot mutate option \`chromeWebSecurity\` because it is a read-only property.
+CypressError: The `chromeWebSecurity` configuration cannot been overridden from a test-level override because it is a read-only configuration option.
 
 https://on.cypress.io/config
   Error
