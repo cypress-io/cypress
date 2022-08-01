@@ -54,7 +54,7 @@
         <template #heading>
           <img
             class="min-w-16px w-16px"
-            :src="allBrowsersIcons[selectedBrowser.displayName]"
+            :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             :alt="selectedBrowser.displayName"
           >
           {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
