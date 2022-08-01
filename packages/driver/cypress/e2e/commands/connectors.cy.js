@@ -158,7 +158,7 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      it('should pass the eventually resolved thenable value downstream', () => {
+      it('should pass the eventual resolved thenable value downstream', () => {
         cy
         .wrap({ foo: 'bar' })
         .then((obj) => {
@@ -166,8 +166,7 @@ describe('src/cy/commands/connectors', () => {
           .wait(10)
           .then(() => {
             return obj.foo
-          })
-          .then((value) => {
+          }).then((value) => {
             expect(value).to.eq('bar')
 
             return value
@@ -310,7 +309,7 @@ describe('src/cy/commands/connectors', () => {
             return $div
           })
           .then(function () {
-            expect(cy.currentSubject()).not.to.be.instanceof(this.remoteWindow.$)
+            expect(cy.state('subject')).not.to.be.instanceof(this.remoteWindow.$)
           })
         })
       })
@@ -424,6 +423,7 @@ describe('src/cy/commands/connectors', () => {
 
           cy.get('div:first').invoke('parent').then(function ($parent) {
             expect($parent).to.be.instanceof(this.remoteWindow.$)
+            expect(cy.state('subject')).to.match(parent)
           })
         })
       })
