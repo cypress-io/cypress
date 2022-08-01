@@ -191,7 +191,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
-    currentProjectData: makeCurrentProjectData(modeOptions.projectRoot, modeOptions.testingType),
+    currentProjectData: makeCurrentProjectData(modeOptions.projectRoot),
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -232,7 +232,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
   }
 }
 
-export function makeCurrentProjectData (projectRoot: Maybe<string>, testingType: Maybe<TestingType>): CurrentProjectData | null {
+export function makeCurrentProjectData (projectRoot: Maybe<string>): CurrentProjectData | null {
   if (projectRoot) {
     return {
       error: null,
