@@ -315,7 +315,7 @@ describe('code-generator', () => {
   })
 
   // TODO: Come back to this in this PR
-  // it.only('should generate scaffolded test from vue 3 component', async () => {
+  // it('should generate scaffolded test from vue 3 component', async () => {
   //   const target = path.join(tmpPath, 'vue-component')
   //   const action: Action = {
   //     templateDir: templates.vue3Component,
