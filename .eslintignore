@@ -87,6 +87,7 @@ system-tests/projects/create-react-app-custom-index-html
 
 system-tests/projects/vueclivue2-unconfigured/**/*
 system-tests/projects/vueclivue2-configured/**/*
+system-tests/projects/outdated-deps-vuecli3/**/*
 
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
