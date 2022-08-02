@@ -1,18 +1,19 @@
 import _ from 'lodash'
 import os from 'os'
 import { app, nativeImage as image } from 'electron'
-// eslint-disable-next-line no-duplicate-imports
-import type { WebContents } from 'electron'
+
 import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, getCtx, clearCtx } from '@packages/data-context'
-import type { LaunchArgs, PlatformName } from '@packages/types'
-import { EventEmitter } from 'events'
+import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { WebContents } from 'electron'
+import type { LaunchArgs } from '@packages/types'
+
 import debugLib from 'debug'
-import Events from '../gui/events'
 
 const debug = debugLib('cypress:server:interactive')
 
@@ -153,21 +154,13 @@ export = {
       return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
-        Events.start({
-          ...(options as LaunchArgs),
-          onFocusTests () {
-            // @ts-ignore
-            return app.focus({ steal: true }) || win.focus()
-          },
-          os: os.platform() as PlatformName,
-        }, new EventEmitter())
 
         return win
       })
     })
   },
 
-  async run (options, ctx: DataContext) {
+  async run (options: LaunchArgs, _loading: Promise<void>) {
     const [, port] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
