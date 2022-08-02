@@ -9,6 +9,7 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
+import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -1559,6 +1560,24 @@ export const AllCypressErrors = {
       Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
+    `
+  },
+
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+    const deps = dependencies.map<string>((dep) => {
+      if (dep.detectedVersion) {
+        return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`
+      }
+
+      return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion} but dependency was not found.`
+    })
+
+    return errTemplate`
+      We detected that you have versions of dependencies that are not officially supported:
+
+      ${fmt.listItems(deps, { prefix: ' - ' })}
+
+      If you're experiencing problems, downgrade dependencies and restart Cypress.
     `
   },
 } as const
