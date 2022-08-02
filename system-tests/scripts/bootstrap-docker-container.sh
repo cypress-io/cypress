@@ -36,8 +36,6 @@ export CYPRESS_CACHE_FOLDER=/tmp/CYPRESS_CACHE_FOLDER/
 export npm_config_cache=/tmp/npm_config_cache/
 export npm_config_package_lock=false
 
-mkdir -p $npm_config_cache
-chown -R $(id -u):$(id -g) $npm_config_cache
 npx npm@latest install --unsafe-perm --allow-root --force file:$CLI_PATH
 
 PATH=$PATH:./node_modules/.bin
