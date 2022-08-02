@@ -1,3 +1,19 @@
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-07-25)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-07-25)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
 # [@cypress/schematic-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.7.0...@cypress/schematic-v2.0.0) (2022-06-01)
 
 

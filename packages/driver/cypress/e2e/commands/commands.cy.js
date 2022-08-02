@@ -58,8 +58,7 @@ describe('src/cy/commands/commands', () => {
       cy
       .get('input:first')
       .parent()
-      .command('login', 'brian@foo.com')
-      .then(($input) => {
+      .command('login', 'brian@foo.com').then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
     })
