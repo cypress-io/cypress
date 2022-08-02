@@ -1,6 +1,5 @@
 import { keyBy } from 'lodash'
 import { computed } from 'vue'
-import type { TestingType } from '@packages/types'
 import type { SpecGenerator, GeneratorId } from './types'
 import { ScaffoldGenerator } from './scaffold'
 import { EmptyGenerator } from './empty'
@@ -20,8 +19,8 @@ export const generatorList: SpecGenerator[] = [
   EmptyGenerator,
 ]
 
-export const getFilteredGeneratorList = (testingType?: TestingType | null, codeGenGlob?: string) => {
-  return computed(() => generatorList.filter((g) => g.matches(testingType) && (g.show === undefined ? true : g.show(codeGenGlob))))
+export const getFilteredGeneratorList = (currentProject) => {
+  return computed(() => generatorList.filter((g) => g.matches(currentProject.currentTestingType) && (g.show === undefined ? true : g.show(currentProject))))
 }
 
 export const generators = keyBy(generatorList, 'id') as Record<GeneratorId, SpecGenerator>

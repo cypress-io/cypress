@@ -28,6 +28,11 @@ gql`
 fragment CreateSpecCards on Query {
   currentProject {
     id
+    config
+    codeGenGlobs {
+      id
+      component
+    }
   }
 }
 `

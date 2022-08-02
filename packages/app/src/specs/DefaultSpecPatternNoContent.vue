@@ -63,7 +63,7 @@ const props = defineProps<{
   gql: CreateSpecContentFragment
 }>()
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType, props.gql.currentProject?.codeGenGlobs.component)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal', id: string): void

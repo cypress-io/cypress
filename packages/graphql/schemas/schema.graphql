@@ -1175,7 +1175,14 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(
+    codeGenCandidate: String!
+    erroredCodegenCandidate: String
+
+    """Whether or not the project has a custom spec pattern defined"""
+    hasCustomSpecPattern: Boolean
+    type: CodeGenType!
+  ): GenerateSpecResponse
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean

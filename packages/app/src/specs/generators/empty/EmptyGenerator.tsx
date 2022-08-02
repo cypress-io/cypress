@@ -7,6 +7,10 @@ export const EmptyGenerator: SpecGenerator = {
   entry: EmptyGeneratorCardStepOne,
   matches: () => true,
   disabled: () => false,
-  show: (codeGenGlob) => codeGenGlob !== '*.vue',
+  show: (currentProject) => {
+    const specPattern = currentProject?.config.find((item) => item.field === 'specPattern')
+
+    return currentProject?.codeGenGlobs?.component !== '*.vue' || (specPattern && specPattern.from !== 'default')
+  },
   id: 'empty',
 }

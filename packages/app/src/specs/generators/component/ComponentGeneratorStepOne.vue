@@ -8,6 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
+        :has-custom-spec-pattern="hasCustomSpecPattern"
         @restart="cancelSpecNameCreation"
         @updateTitle="(value) => emits('update:title', value)"
       />
@@ -90,6 +91,7 @@ import EmptyGenerator from '../EmptyGenerator.vue'
 const props = defineProps<{
   title: string
   codeGenGlob: string
+  hasCustomSpecPattern: boolean
 }>()
 const { t } = useI18n()
 const emits = defineEmits<{
@@ -133,8 +135,8 @@ query ComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $hasCustomSpecPattern: Boolean) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, hasCustomSpecPattern: $hasCustomSpecPattern) {
     ...GeneratorSuccess
     currentProject {
       id
@@ -180,6 +182,7 @@ const makeSpec = async (file) => {
   const { data } = await mutation.executeMutation({
     codeGenCandidate: file.absolute,
     type: 'component',
+    hasCustomSpecPattern: props.hasCustomSpecPattern,
   })
 
   generateSpecFromSource.value = data?.generateSpecFromSource
