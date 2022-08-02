@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2020",
+    "skipLibCheck": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "allowJs": true,
+    "declaration": true,
+    "outDir": "dist",
+    "strict": false,
+    "noImplicitAny": false,
+    "baseUrl": "./",
+    "types": [
+      "cypress"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*.*"],
+  "exclude": ["src/**/*-spec.*"]
+}

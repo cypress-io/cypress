@@ -1,11 +1,11 @@
 @import '../select/select';
 
 $pass: #08c18d !default;
-$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$font-sans: 'Fira Mono', 'Helvetica Neue', 'Arial', sans-serif;
 
 .editor-picker {
   label {
-    align-items: start;
+    align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
   }
@@ -65,7 +65,7 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 [data-reach-dialog-overlay] {
   display: flex;
   padding: 2em 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 [data-reach-dialog-content] {

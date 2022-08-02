@@ -1,34 +1,24 @@
-import fs from 'fs-extra'
 import gulp from 'gulp'
 import rimraf from 'rimraf'
-import webpack from 'webpack'
-import cypressIcons from '@cypress/icons'
-import webpackConfig from './webpack.config.js'
+import * as cypressIcons from '@packages/icons'
+import cp from 'child_process'
+import * as path from 'path'
 
-const pkg = require('./package.json')
+const nodeWebpack = path.join(__dirname, '..', '..', 'scripts', 'run-webpack.js')
 
 const clean = (done) => {
   rimraf('dist', done)
 }
 
-const manifest = (done) => {
-  gulp.src('app/manifest.json')
+const manifest = () => {
+  return gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
-  .on('end', () => {
-    return fs.readJson('dist/manifest.json', function (err, json) {
-      json.version = pkg.version
-
-      return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
-    })
-  })
-
-  return null
 }
 
 const background = (cb) => {
-  const compiler = webpack(webpackConfig as webpack.Configuration)
-
-  compiler.run(cb)
+  cp.fork(nodeWebpack, { stdio: 'inherit' }).on('exit', (code) => {
+    cb(code === 0 ? null : new Error(`Webpack process exited with code ${code}`))
+  })
 }
 
 const html = () => {

@@ -9,6 +9,14 @@ types/minimatch
 types/sinon
 types/sinon-chai
 # copied from net-stubbing package on build
-types/net-stubbing.ts
+types/net-stubbing.d.ts
 # ignore CLI output build folder
 build
+
+# ignore packages synced at build-time via
+# the sync-exported-npm-with-cli.js script
+vue
+vue2
+react*
+mount-utils
+angular

@@ -1,0 +1,72 @@
+<script>
+  let setCounter = 0
+  let getCounter = 0
+  const { getAttribute, setAttribute } = HTMLElement.prototype
+  HTMLElement.prototype.getAttribute = function() {
+    if (this.tagName === 'FORM' || this.tagName === 'A') {
+      getCounter++
+    }
+    return getAttribute.apply(this, arguments)
+  }
+  HTMLElement.prototype.setAttribute = function(name) {
+    if (this.tagName === 'FORM' || this.tagName === 'A' && !name.startsWith('data-cypress')) {
+      setCounter++
+    }
+    return setAttribute.apply(this, arguments)
+  }
+  function handleEventTarget(e) {
+    if (e.target.target !== '_top') {
+      e.target.target = '_top'
+    }
+    if (e.target.target !== '_top') {
+      throw new Error('target property must be top')
+    }
+  }  
+  function handleEventAttribute(e) {
+    if (e.target.getAttribute('target') !== '_top') {
+      e.target.setAttribute('target', '_top')
+    }
+    if (e.target.getAttribute('target') !== '_top') {
+      throw new Error('Get Attribute must have top')
+    }
+  }
+  window.getCounters = () => {
+    return {
+      getCounter,
+      setCounter
+    }
+  }
+</script>
+<div>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleEventTarget(event)">
+    <button class="setTarget" type="submit">Submit setTarget</button>
+  </form>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleEventAttribute(event)">
+    <button class="setAttr" type="submit">Submit setAttribute</button>
+  </form>
+  <form target="_top" method="GET" action="/fixtures/dom.html">
+    <button class="inline_top" type="submit">Submit inline top</button>
+  </form>
+  <form target="_parent" method="GET" action="/fixtures/dom.html">
+    <button class="inline_parent" type="submit">Submit inline parent</button>
+  </form>
+  <form target="_self" method="GET" action="/fixtures/dom.html">
+    <button class="inline_self" type="submit">Submit inline self</button>
+  </form>
+  <form target="_blank" method="GET" action="/fixtures/dom.html">
+    <button class="inline_blank" type="submit">Submit blank</button>
+  </form>
+  <form target="invalid" method="GET" action="/fixtures/dom.html">
+    <button class="inline_invalid" type="submit">Submit invalid</button>
+  </form>
+  <div>
+    <a class="setTarget" href="/fixtures/dom.html" onclick="handleEventTarget(event)">Link setTarget</a>
+    <a class="setAttr" href="/fixtures/dom.html" onclick="handleEventAttribute(event)">Link setAttribute</a>
+    <a class="inline_top" href="/fixtures/dom.html" target="_top">Link top</a>
+    <a class="inline_parent" href="/fixtures/dom.html" target="_parent">Link parent</a>
+    <a class="inline_self" href="/fixtures/dom.html" target="_self">Link self</a>
+    <a class="inline_blank" href="/fixtures/dom.html" target="_blank">Link _blank</a>
+    <a class="inline_invalid" href="/fixtures/dom.html" target="invalid">Link invalid</a>
+  </div>
+  <iframe src="issue-1244.html">
+</div>

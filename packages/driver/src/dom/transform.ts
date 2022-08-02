@@ -1,6 +1,8 @@
 import _ from 'lodash'
-import { getParent } from './elements'
-import { isDocument } from './document'
+import $elements from './elements'
+import $document from './document'
+
+const { isDocument } = $document
 
 export const detectVisibility = ($el: any) => {
   const list = extractTransformInfoFromElements($el)
@@ -40,7 +42,7 @@ const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []):
     list.push(info)
   }
 
-  const $parent = getParent($el)
+  const $parent = $elements.getParent($el)
 
   if (!$parent.length || isDocument($parent)) {
     return list

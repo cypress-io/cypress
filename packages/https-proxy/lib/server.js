@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { allowDestroy, connect } = require('@packages/network')
+const { allowDestroy, connect, httpUtils } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
 const https = require('https')
 const net = require('net')
@@ -34,6 +34,16 @@ class Server {
   }
 
   connect (req, browserSocket, head, options = {}) {
+    // the SNI server requires a hostname, so if the hostname is blank,
+    // destroy the socket and fail fast
+    const { hostname } = url.parse(`https://${req.url}`)
+
+    if (!hostname) {
+      browserSocket.destroy()
+
+      return debug(`Invalid hostname for request url ${req.url}`)
+    }
+
     // don't buffer writes - thanks a lot, Nagle
     // https://github.com/cypress-io/cypress/issues/3192
     browserSocket.setNoDelay(true)
@@ -183,12 +193,32 @@ class Server {
       }
 
       return this._getPortFor(hostname)
+      .catch(async (err) => {
+        debug('Error adding context, deleting certs and regenning %o', { hostname, err })
+
+        // files on disk can be corrupted, so try again
+        // @see https://github.com/cypress-io/cypress/issues/8705
+        await this._ca.clearDataForHostname(hostname)
+
+        return this._getPortFor(hostname)
+      })
       .then((port) => {
         sslServers[hostname] = { port }
 
         leave()
 
         return makeConnection(port)
+      })
+      .catch((err) => {
+        debug('Error making connection %o', { err })
+
+        browserSocket.destroy(err)
+
+        leave()
+
+        if (this._onError) {
+          return this._onError(err, browserSocket, head)
+        }
       })
     })
   }
@@ -227,7 +257,10 @@ class Server {
 
   _listenHttpsServer (data) {
     return new Promise((resolve, reject) => {
-      const server = https.createServer(data)
+      const server = https.createServer({
+        ...data,
+        ...httpUtils.lenientOptions,
+      })
 
       allowDestroy(server)
 

@@ -1,15 +1,16 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import Attempt from '../attempts/attempt-model'
-import Err from '../errors/err-model'
+import Err, { ErrProps } from '../errors/err-model'
 import { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import { SessionProps } from '../sessions/sessions-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
@@ -17,7 +18,7 @@ export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
   state: TestState | null
-  err?: Err
+  err?: ErrProps
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
@@ -133,6 +134,10 @@ export default class Test extends Runnable {
     return this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
+  }
+
+  addSession (props: SessionProps) {
+    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
   }
 
   updateLog (props: LogProps) {

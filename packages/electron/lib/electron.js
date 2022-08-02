@@ -16,6 +16,7 @@ fs = Promise.promisifyAll(fs)
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
  */
 const isSandboxNeeded = () => {
+  // eslint-disable-next-line no-restricted-properties
   return (os.platform() === 'linux') && (process.geteuid() === 0)
 }
 
@@ -96,7 +97,7 @@ module.exports = {
     debug('dest path %s', dest)
 
     // make sure this path exists!
-    return fs.statAsync(appPath)
+    return fs.accessAsync(appPath)
     .then(() => {
       debug('appPath exists %s', appPath)
 
@@ -118,8 +119,9 @@ module.exports = {
       // we have an active debugger session
       if (inspector.url()) {
         const dp = process.debugPort + 1
+        const inspectFlag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
 
-        argv.unshift(`--inspect-brk=${dp}`)
+        argv.unshift(`${inspectFlag}=${dp}`)
       } else {
         const opts = minimist(argv)
 
@@ -128,10 +130,6 @@ module.exports = {
         }
       }
 
-      // max HTTP header size 8kb -> 1mb
-      // https://github.com/cypress-io/cypress/issues/76
-      argv.unshift(`--max-http-header-size=${1024 * 1024}`)
-
       debug('spawning %s with args', execPath, argv)
 
       if (debug.enabled) {
@@ -139,13 +137,13 @@ module.exports = {
         argv.push('--enable-logging')
       }
 
-      return cp.spawn(execPath, argv, { stdio: 'inherit' })
-      .on('close', (code, errCode) => {
-        debug('electron closing %o', { code, errCode })
+      const spawned = cp.spawn(execPath, argv, { stdio: 'inherit' })
+      .on('close', (code, signal) => {
+        debug('electron closing %o', { code, signal })
 
-        if (code) {
-          debug('original command was')
-          debug(execPath, argv.join(' '))
+        if (signal) {
+          debug('electron exited with a signal, forcing code = 1 %o', { signal })
+          code = 1
         }
 
         if (cb) {
@@ -158,6 +156,8 @@ module.exports = {
 
         return process.exit(code)
       })
+
+      return spawned
     }).catch((err) => {
       // eslint-disable-next-line no-console
       console.debug(err.stack)

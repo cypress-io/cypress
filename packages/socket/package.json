@@ -2,11 +2,12 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
   "browser": "lib/browser.ts",
   "scripts": {
-    "build-prod": "tsc",
-    "clean-deps": "rm -rf node_modules",
+    "build-prod": "tsc || echo 'built, with type errors' && rm lib/browser.js",
+    "clean": "rimraf lib/*.js",
+    "check-ts": "tsc --noEmit",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -15,21 +16,28 @@
   },
   "dependencies": {
     "circular-json": "0.5.9",
-    "socket.io": "3.0.4",
-    "socket.io-client": "3.0.4"
+    "engine.io": "5.2.1",
+    "engine.io-parser": "4.0.2",
+    "socket.io": "4.0.1",
+    "socket.io-client": "4.0.1"
   },
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
-    "resolve-pkg": "2.0.0"
+    "resolve-pkg": "2.0.0",
+    "rimraf": "3.0.2"
   },
   "files": [
+    "index.js",
     "lib",
     "patches"
   ],
+  "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
+      "engine.io",
+      "engine.io-parser",
       "socket.io",
       "socket.io/socket.io-parser",
       "socket.io-client",

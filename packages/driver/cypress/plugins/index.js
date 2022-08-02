@@ -6,9 +6,10 @@ const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 const wp = require('@cypress/webpack-preprocessor')
+const Jimp = require('jimp')
 
 process.env.NO_LIVERELOAD = '1'
-const webpackOptions = require('@packages/runner/webpack.config.ts').default
+const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
 
 // set mode to development which overrides
 // the 'none' value of the base webpack config
@@ -31,12 +32,15 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on) => {
+module.exports = (on, config) => {
   on('file:preprocessor', wp({ webpackOptions }))
 
   on('task', {
     'return:arg' (arg) {
       return arg
+    },
+    'cypress:env' () {
+      return process.env['CYPRESS']
     },
     'arg:is:undefined' (arg) {
       if (arg === undefined) {
@@ -58,5 +62,20 @@ module.exports = (on) => {
 
       return null
     },
+    'check:screenshot:size' ({ filePath, width, height, devicePixelRatio }) {
+      return Jimp.read(filePath)
+      .then((image) => {
+        width = width * devicePixelRatio
+        height = height * devicePixelRatio
+
+        if (image.bitmap.width !== width || image.bitmap.height !== height) {
+          throw new Error(`Screenshot does not match dimensions! Expected: ${width} x ${height} but got ${image.bitmap.width} x ${image.bitmap.height}`)
+        }
+
+        return null
+      })
+    },
   })
+
+  return config
 }

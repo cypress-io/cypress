@@ -6,7 +6,7 @@
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
 import _ from 'lodash'
-import url from 'url'
+import url, { URL } from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -46,7 +46,10 @@ export function removePort (urlObject) {
 
   // set host to undefined else url.format(...) will ignore the port property
   // https://nodejs.org/api/url.html#url_url_format_urlobject
+  // Additionally, the types are incorrect (don't include undefined), so we add TS exceptions
+  /* @ts-ignore */
   delete parsed.host
+  /* @ts-ignore */
   delete parsed.port
 
   return parsed
@@ -68,10 +71,12 @@ export function addDefaultPort (urlToCheck) {
   if (!parsed.port) {
     // unset host...
     // see above for reasoning
+    /* @ts-ignore */
     delete parsed.host
     if (parsed.protocol) {
       parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
     } else {
+      /* @ts-ignore */
       delete parsed.port
     }
   }
@@ -81,4 +86,20 @@ export function addDefaultPort (urlToCheck) {
 
 export function getPath (urlToCheck) {
   return url.parse(urlToCheck).path
+}
+
+const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+
+export function isLocalhost (url: URL) {
+  return (
+    // https://datatracker.ietf.org/doc/html/draft-west-let-localhost-be-localhost#section-2
+    url.hostname === 'localhost'
+    || url.hostname.endsWith('.localhost')
+    // [::1] is the IPv6 localhost address
+    // See https://datatracker.ietf.org/doc/html/rfc4291#section-2.5.3
+    || url.hostname === '[::1]'
+    // 127.0.0.0/8 are considered localhost for IPv4
+    // See https://datatracker.ietf.org/doc/html/rfc5735 (Page 3)
+    || localhostIPRegex.test(url.hostname)
+  )
 }

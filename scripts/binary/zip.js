@@ -4,7 +4,6 @@ const execa = require('execa')
 const path = require('path')
 const la = require('lazy-ass')
 const fs = require('fs')
-const R = require('ramda')
 const filesize = require('filesize')
 
 // prints disk usage numbers using "du" utility
@@ -59,7 +58,7 @@ const macZip = (src, dest) => {
 
     return execa(zip, options)
     .then(onZipFinished)
-    .then(R.always(dest))
+    .then(() => dest)
     .catch(onError)
   })
 }
@@ -73,7 +72,10 @@ const checkZipSize = function (zipPath) {
   const zipSize = filesize(stats.size, { round: 0 })
 
   console.log(`zip file size ${zipSize}`)
-  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 265 : 228
+  // Before you modify these max sizes, check and see what you did that might have
+  // done to increase the size of the binary, and if you do need to change it,
+  // call it out in the PR description / comments
+  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 295 : 200
   const MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
 
   if (stats.size > MAX_ZIP_FILE_SIZE) {
@@ -100,8 +102,12 @@ const linuxZipAction = function (parentFolder, dest, relativeSource) {
 
   return execa(cmd, { shell: true })
   .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
+  .then(() => dest)
+  .then((val) => {
+    checkZipSize(val)
+
+    return val
+  })
   .catch(onError)
 }
 
@@ -123,7 +129,7 @@ const renameFolder = function (src) {
   console.log(`renaming ${src} to ${renamed}`)
 
   return fs.promises.rename(src, renamed)
-  .then(R.always(renamed))
+  .then(() => renamed)
 }
 
 // resolves with zipped filename
@@ -136,7 +142,7 @@ const linuxZip = function (src, dest) {
   return renameFolder(src)
   .then((renamedSource) => {
     return printFileSizes(renamedSource)
-    .then(R.always(renamedSource))
+    .then(() => renamedSource)
   }).then((renamedSource) => {
     console.log(`will zip folder ${renamedSource}`)
     const parentFolder = path.dirname(renamedSource)
@@ -173,8 +179,12 @@ const windowsZipAction = function (src, dest) {
 
   return execa(cmd, { shell: true })
   .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
+  .then(() => dest)
+  .then((val) => {
+    checkZipSize(val)
+
+    return val
+  })
   .catch(onError)
 }
 

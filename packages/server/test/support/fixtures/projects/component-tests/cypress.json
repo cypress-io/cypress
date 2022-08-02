@@ -1,4 +1,0 @@
-{
-  "experimentalComponentTesting": true,
-  "componentFolder": "cypress/component-tests"
-}

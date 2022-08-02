@@ -2,10 +2,10 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const config = require(`${root}lib/config`)
-const fixture = require(`${root}lib/fixture`)
-const { fs } = require(`${root}lib/util/fs`)
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const fixture = require(`../../lib/fixture`)
+const { fs } = require(`../../lib/util/fs`)
+const FixturesHelper = require('@tooling/system-tests')
+const { getCtx } = require(`../../lib/makeDataContext`)
 const os = require('os')
 const eol = require('eol')
 
@@ -13,13 +13,22 @@ const isWindows = () => {
   return os.platform() === 'win32'
 }
 
+let ctx
+
 describe('lib/fixture', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
+    this.read = (folder, image, encoding) => {
+      return fs.readFileAsync(path.join(folder, image), encoding)
+    }
 
-    return config.get(this.todosPath).then((cfg) => {
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    return ctx.lifecycleManager.getFullInitialConfig()
+    .then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
   })
@@ -166,14 +175,16 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     })
 
     // https://github.com/cypress-io/cypress/issues/3739
-    it('can load a fixture with no extension when a same-named folder also exists', () => {
+    it('can load a fixture with no extension when a same-named folder also exists', async () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      return config.get(projectPath)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
+
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
-        .then((fixture) => {
-          expect(fixture).to.deep.eq({ 'bar': 'baz' })
+        .then((result) => {
+          expect(result).to.deep.eq({ 'bar': 'baz' })
         })
       })
     })
@@ -212,7 +223,7 @@ ParseError: Unterminated string constant\
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
+        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n\n${e}`)
       })
     })
   })
@@ -325,6 +336,15 @@ John,Chef,1982
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/1558
+  context('binary files', () => {
+    it('returns file as buffer regardless of extension when passed null encoding', function () {
+      return fixture.get(this.fixturesFolder, 'nested/fixture.js', { encoding: null }).then((index) => {
+        expect(index).to.eql(Buffer.from('{nested: "fixture"}'))
+      })
+    })
+  })
+
   context('file with unknown extension and encoding specified', () => {
     it('returns text encoded as specified', function () {
       return fixture.get(this.fixturesFolder, 'ascii.foo', { encoding: 'ascii' }).then((index) => {
@@ -334,69 +354,64 @@ John,Chef,1982
   })
 
   context('image files', () => {
-    beforeEach(function () {
-      this.read = (folder, image, encoding) => {
-        return fs.readFileAsync(path.join(folder, image), encoding)
-      }
-    })
-
-    it('returns png as string', function () {
-      return this.read(this.fixturesFolder, 'images/flower.png', 'base64')
-      .then((str) => {
+    it('returns png as buffer', function () {
+      return this.read(this.fixturesFolder, 'images/flower.png')
+      .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/flower.png')
-        .then((base64) => {
-          expect(base64).to.eq(str)
+        .then((result) => {
+          expect(result).to.eql(file)
         })
       })
     })
 
-    it('returns jpg as string', function () {
-      return this.read(this.fixturesFolder, 'images/sample.jpg', 'base64')
-      .then((str) => {
+    it('returns jpg as buffer', function () {
+      return this.read(this.fixturesFolder, 'images/sample.jpg')
+      .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/sample.jpg')
-        .then((base64) => {
-          expect(base64).to.eq(str)
+        .then((result) => {
+          expect(result).to.eql(file)
         })
       })
     })
 
-    it('returns gif as string', function () {
-      return this.read(this.fixturesFolder, 'images/word.gif', 'base64')
-      .then((str) => {
+    it('returns gif as buffer', function () {
+      return this.read(this.fixturesFolder, 'images/word.gif')
+      .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/word.gif')
-        .then((base64) => {
-          expect(base64).to.eq(str)
+        .then((result) => {
+          expect(result).to.eql(file)
         })
       })
     })
 
-    it('returns tif as string', function () {
-      return this.read(this.fixturesFolder, 'images/sample.tif', 'base64')
-      .then((str) => {
+    it('returns tif as buffer', function () {
+      return this.read(this.fixturesFolder, 'images/sample.tif')
+      .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/sample.tif')
-        .then((base64) => {
-          expect(base64).to.eq(str)
+        .then((result) => {
+          expect(result).to.eql(file)
         })
       })
     })
 
-    it('returns png as binary', function () {
+    it('returns png as binary if that encoding is requested', function () {
       return this.read(this.fixturesFolder, 'images/flower.png', 'binary')
-      .then((bin) => {
+      .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/flower.png', { encoding: 'binary' })
-        .then((bin2) => {
-          expect(bin).to.eq(bin2)
+        .then((result) => {
+          expect(result).to.eq(file)
         })
       })
     })
   })
 
   context('zip files', () => {
-    it('returns zip as base64 string', function () {
-      return fixture.get(this.fixturesFolder, 'example.zip').then((base64) => {
-        const str = 'UEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEABAAemlwL1VYDAAGAwZWBgMGVvUBFABQSwMECgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkAEAB6aXAvYS50eHRVWAwA8QIGVvECBlb1ARQAUEsDBAoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJABAAemlwL2IudHh0VVgMAPMCBlbzAgZW9QEUAFBLAwQKAAAAAAClszlHAAAAAAAAAAAAAAAACQAQAHppcC9jLnR4dFVYDAD1AgZW9QIGVvUBFABQSwMECgAAAAAApbM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZC50eHRVWAwA9gIGVvYCBlb1ARQAUEsDBAoAAAAAAKazOUcAAAAAAAAAAAAAAAAJABAAemlwL2UudHh0VVgMAPgCBlb4AgZW9QEUAFBLAwQKAAAAAACnszlHAAAAAAAAAAAAAAAACQAQAHppcC9mLnR4dFVYDAD5AgZW+QIGVvUBFABQSwMECgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZy50eHRVWAwA+wIGVvsCBlb1ARQAUEsDBAoAAAAAAKizOUcAAAAAAAAAAAAAAAAJABAAemlwL2gudHh0VVgMAPwCBlb8AgZW9QEUAFBLAwQKAAAAAACpszlHAAAAAAAAAAAAAAAACQAQAHppcC9pLnR4dFVYDAD9AgZW/QIGVvUBFABQSwMECgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvai50eHRVWAwA/wIGVv8CBlb1ARQAUEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJABAAemlwL2sudHh0VVgMAAYDBlYGAwZW9QEUAFBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEAAwAAAAAAAAAAEDtQQAAAAB6aXAvVVgIAAYDBlYGAwZWUEsBAhUDCgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBMgAAAHppcC9hLnR4dFVYCADxAgZW8QIGVlBLAQIVAwoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgWkAAAB6aXAvYi50eHRVWAgA8wIGVvMCBlZQSwECFQMKAAAAAAClszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIGgAAAAemlwL2MudHh0VVgIAPUCBlb1AgZWUEsBAhUDCgAAAAAApbM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSB1wAAAHppcC9kLnR4dFVYCAD2AgZW9gIGVlBLAQIVAwoAAAAAAKazOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgQ4BAAB6aXAvZS50eHRVWAgA+AIGVvgCBlZQSwECFQMKAAAAAACnszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIFFAQAAemlwL2YudHh0VVgIAPkCBlb5AgZWUEsBAhUDCgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBfAEAAHppcC9nLnR4dFVYCAD7AgZW+wIGVlBLAQIVAwoAAAAAAKizOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgbMBAAB6aXAvaC50eHRVWAgA/AIGVvwCBlZQSwECFQMKAAAAAACpszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIHqAQAAemlwL2kudHh0VVgIAP0CBlb9AgZWUEsBAhUDCgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBIQIAAHppcC9qLnR4dFVYCAD/AgZW/wIGVlBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgVgCAAB6aXAvay50eHRVWAgABgMGVgYDBlZQSwUGAAAAAAwADAAfAwAAjwIAAAAA'
-
-        expect(base64).to.eq(str)
+    it('returns zip as buffer', function () {
+      return this.read(this.fixturesFolder, 'example.zip')
+      .then((file) => {
+        return fixture.get(this.fixturesFolder, 'example.zip').then((result) => {
+          expect(result).to.eql(file)
+        })
       })
     })
   })

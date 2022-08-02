@@ -1,0 +1,46 @@
+{
+  "name": "@packages/config",
+  "version": "0.0.0-development",
+  "description": "Config contains the configuration types and validation function used in the cypress electron application.",
+  "private": true,
+  "main": "index.js",
+  "browser": "src/browser.ts",
+  "scripts": {
+    "build-prod": "tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/!**__fixtures__**/**/*.js || echo 'cleaned'",
+    "test": "yarn test-unit",
+    "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000"
+  },
+  "dependencies": {
+    "@babel/core": "^7",
+    "@babel/parser": "^7",
+    "@babel/plugin-syntax-typescript": "^7",
+    "@babel/plugin-transform-typescript": "^7",
+    "@babel/traverse": "^7",
+    "@babel/types": "^7",
+    "check-more-types": "2.24.0",
+    "common-tags": "1.8.0",
+    "debug": "^4.3.2",
+    "fs-extra": "^9.1.0",
+    "lodash": "^4.17.21",
+    "recast": "0.20.4"
+  },
+  "devDependencies": {
+    "@packages/root": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
+    "@types/mocha": "9.1.0",
+    "babel-plugin-tester": "^10.1.0",
+    "chai": "4.2.0",
+    "mocha": "7.0.1",
+    "rimraf": "3.0.2"
+  },
+  "files": [
+    "src"
+  ],
+  "types": "src/index.ts"
+}

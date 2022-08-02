@@ -1,11 +1,25 @@
 require('../../spec_helper')
 
-const browsers = require(`${root}../lib/browsers`)
-const utils = require(`${root}../lib/browsers/utils`)
+const stripAnsi = require('strip-ansi')
+const os = require('os')
+const chalk = require('chalk')
+const browsers = require(`../../../lib/browsers`)
+const utils = require(`../../../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
+const { EventEmitter } = require('events')
+const { sinon } = require('../../spec_helper')
+const { exec } = require('child_process')
+const util = require('util')
+const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
+const electron = require('../../../lib/browsers/electron')
+const Promise = require('bluebird')
+
+const normalizeSnapshot = (str) => {
+  return snapshot(stripAnsi(str))
+}
 
 const normalizeBrowsers = (message) => {
-  return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
+  return message.replace(/(found on your system are:)(?:\n - .*)*/, '$1\n - chrome\n - firefox\n - electron')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
@@ -15,6 +29,12 @@ before(() => {
   process.versions.electron = true
 })
 
+let ctx
+
+beforeEach(() => {
+  ctx = createTestDataContext()
+})
+
 after(() => {
   process.versions.electron = originalElectronVersion
 })
@@ -22,7 +42,14 @@ after(() => {
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {
-      const instance = { pid: 1234 }
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      ee.pid = 1234
+      const instance = ee
 
       browsers._setInstance(instance)
 
@@ -49,43 +76,49 @@ describe('lib/browsers/index', () => {
 
   context('.ensureAndGetByNameOrPath', () => {
     it('returns browser by name', () => {
-      sinon.stub(utils, 'getBrowsers').resolves([
+      const foundBrowsers = [
         { name: 'foo', channel: 'stable' },
         { name: 'bar', channel: 'stable' },
-      ])
+      ]
 
-      return browsers.ensureAndGetByNameOrPath('foo')
+      return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers)
       .then((browser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
     })
 
     it('throws when no browser can be found', () => {
-      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
+      const foundBrowsers = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
     })
 
     it('throws a special error when canary is passed', () => {
-      sinon.stub(utils, 'getBrowsers').resolves([
+      const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'chrome', channel: 'canary' },
         { name: 'firefox', channel: 'stable' },
-      ])
+      ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('canary'))
+      return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(err.message)
+        return normalizeSnapshot(err.message)
       })
     })
   })
 
-  context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
-      return browsers.open({
+  context('.connectToNewSpec', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
+      return browsers.connectToNewSpec({
         name: 'foo-bad-bang',
         family: 'foo-bad',
       }, {
@@ -93,12 +126,34 @@ describe('lib/browsers/index', () => {
       })
       .then((e) => {
         throw new Error('should\'ve failed')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('\'foo-bad-bang\' was not found on your system')
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system or is not supported by Cypress.`)
+      })
+    })
+  })
+
+  context('.open', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
+      return browsers.open({
+        name: 'foo-bad-bang',
+        family: 'foo-bad',
+      }, {
+        browsers: [],
+      }, null, ctx)
+      .then((e) => {
+        throw new Error('should\'ve failed')
+      })
+      .catch((err) => {
+        // by being explicit with assertions, if something is unexpected
+        // we will get good error message that includes the "err" object
+        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
       })
     })
   })
@@ -126,6 +181,112 @@ describe('lib/browsers/index', () => {
       expect(onWarning).to.be.calledOnce
 
       expect(onWarning).to.be.calledWithMatch({ type: 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS' })
+    })
+  })
+
+  context('.getMajorVersion', () => {
+    it('returns first number when string of numbers', () => {
+      expect(utils.getMajorVersion('91.0.4472.106')).to.eq(91) // Chromium format
+      expect(utils.getMajorVersion('91.0a1')).to.eq(91) // Firefox format
+    })
+
+    it('is empty string when empty string', () => {
+      expect(utils.getMajorVersion('')).to.eq('') // fallback if no version
+    })
+
+    // https://github.com/cypress-io/cypress/issues/15485
+    it('returns version when unconventional version format', () => {
+      const vers = 'VMware Fusion 12.1.0'
+
+      expect(utils.getMajorVersion(vers)).to.eq(vers)
+    })
+  })
+
+  context('setFocus', () => {
+    it('calls open when running MacOS', () => {
+      const mockExec = sinon.stub()
+
+      sinon.stub(os, 'platform').returns('darwin')
+      sinon.stub(util, 'promisify').returns(mockExec)
+
+      browsers._setInstance({
+        pid: 3333,
+      })
+
+      browsers.setFocus()
+
+      expect(util.promisify).to.be.calledWith(exec)
+      expect(mockExec).to.be.calledWith(`open -a "$(ps -p 3333 -o comm=)"`)
+    })
+
+    it('calls WScript AppActivate to activate the window when running Windows', () => {
+      const mockExec = sinon.stub()
+
+      sinon.stub(os, 'platform').returns('win32')
+      sinon.stub(util, 'promisify').returns(mockExec)
+
+      browsers._setInstance({
+        pid: 3333,
+      })
+
+      browsers.setFocus()
+
+      expect(util.promisify).to.be.calledWith(exec)
+      expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+    })
+  })
+
+  context('kill', () => {
+    it('allows registered emitter events to fire before kill', () => {
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const removeAllListenersSpy = sinon.spy(ee, 'removeAllListeners')
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      const exitSpy = sinon.spy()
+
+      ee.once('exit', () => {
+        exitSpy()
+      })
+
+      return browsers.close().then(() => {
+        expect(exitSpy.calledBefore(removeAllListenersSpy)).to.be.true
+        expect(browsers.getBrowserInstance()).to.eq(null)
+      })
+    })
+  })
+
+  context('browserStatus', () => {
+    it('calls setBrowserStatus with correct lifecycle state', () => {
+      const url = 'http://localhost:3000'
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.browser, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+        ['opening', 'open', 'closed'].forEach((status, i) => {
+          expect(ctx.browser.setBrowserStatus.getCall(i).args[0]).eq(status)
+        })
+      })
     })
   })
 })

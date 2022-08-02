@@ -2,13 +2,14 @@ const _ = require('lodash')
 const os = require('os')
 const debug = require('debug')('cypress:server:api')
 const request = require('@cypress/request-promise')
-const errors = require('@cypress/request-promise/errors')
+const RequestErrors = require('@cypress/request-promise/errors')
 const Promise = require('bluebird')
 const humanInterval = require('human-interval')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
-const { apiRoutes, onRoutes } = require('./util/routes')
+const errors = require('./errors')
+const { apiRoutes } = require('./util/routes')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -92,6 +93,47 @@ const getCachedResponse = (params) => {
   return responseCache[params.url]
 }
 
+const retryWithBackoff = (fn) => {
+  // for e2e testing purposes
+  let attempt
+
+  if (process.env.DISABLE_API_RETRIES) {
+    debug('api retries disabled')
+
+    return Promise.try(() => fn(0))
+  }
+
+  return (attempt = (retryIndex) => {
+    return Promise
+    .try(() => fn(retryIndex))
+    .catch(isRetriableError, (err) => {
+      if (retryIndex > DELAYS.length) {
+        throw err
+      }
+
+      const delay = DELAYS[retryIndex]
+
+      errors.warning(
+        'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
+          delay,
+          tries: DELAYS.length - retryIndex,
+          response: err,
+        },
+      )
+
+      retryIndex++
+
+      return Promise
+      .delay(delay)
+      .then(() => {
+        debug(`retry #${retryIndex} after ${delay}ms`)
+
+        return attempt(retryIndex)
+      })
+    })
+  })(0)
+}
+
 const formatResponseBody = function (err) {
   // if the body is JSON object
   if (_.isObject(err.error)) {
@@ -147,28 +189,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getOrgs (authToken) {
-    return rp.get({
-      url: apiRoutes.orgs(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
-  getProjects (authToken) {
-    return rp.get({
-      url: apiRoutes.projects(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
   getProject (projectId, authToken) {
     return rp.get({
       url: apiRoutes.project(projectId),
@@ -183,55 +203,39 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectRuns (projectId, authToken, options = {}) {
-    if (options.page == null) {
-      options.page = 1
-    }
-
-    return rp.get({
-      url: apiRoutes.projectRuns(projectId),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : 10000,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '3',
-      },
-    })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
-
   createRun (options = {}) {
-    const body = {
-      ..._.pick(options, [
-        'ci',
-        'specs',
-        'commit',
-        'group',
-        'platform',
-        'parallel',
-        'ciBuildId',
-        'projectId',
-        'recordKey',
-        'specPattern',
-        'tags',
-      ]),
-      runnerCapabilities,
-    }
+    return retryWithBackoff((attemptIndex) => {
+      const body = {
+        ..._.pick(options, [
+          'ci',
+          'specs',
+          'commit',
+          'group',
+          'platform',
+          'parallel',
+          'ciBuildId',
+          'projectId',
+          'recordKey',
+          'specPattern',
+          'tags',
+          'testingType',
+        ]),
+        runnerCapabilities,
+      }
 
-    return rp.post({
-      body,
-      url: apiRoutes.runs(),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-      headers: {
-        'x-route-version': '4',
-      },
+      return rp.post({
+        body,
+        url: apiRoutes.runs(),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '4',
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   createInstance (options = {}) {
@@ -244,67 +248,87 @@ module.exports = {
       'platform',
     ])
 
-    return rp.post({
-      body,
-      url: apiRoutes.instances(runId),
-      json: true,
-      timeout: timeout != null ? timeout : SIXTY_SECONDS,
-      headers: {
-        'x-route-version': '5',
-      },
+    return retryWithBackoff((attemptIndex) => {
+      return rp.post({
+        body,
+        url: apiRoutes.instances(runId),
+        json: true,
+        timeout: timeout != null ? timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '5',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   postInstanceTests (options = {}) {
-    const { instanceId, ...body } = options
+    const { instanceId, runId, timeout, ...body } = options
 
-    return rp.post({
-      url: apiRoutes.instanceTests(instanceId),
-      json: true,
-      timeout: SIXTY_SECONDS,
-      headers: {
-        'x-route-version': '1',
-      },
-      body,
+    return retryWithBackoff((attemptIndex) => {
+      return rp.post({
+        url: apiRoutes.instanceTests(instanceId),
+        json: true,
+        timeout: timeout || SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        body,
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   updateInstanceStdout (options = {}) {
-    return rp.put({
-      url: apiRoutes.instanceStdout(options.instanceId),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-      body: {
-        stdout: options.stdout,
-      },
+    return retryWithBackoff((attemptIndex) => {
+      return rp.put({
+        url: apiRoutes.instanceStdout(options.instanceId),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        body: {
+          stdout: options.stdout,
+        },
+        headers: {
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
+
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   postInstanceResults (options = {}) {
-    return rp.post({
-      url: apiRoutes.instanceResults(options.instanceId),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-      headers: {
-        'x-route-version': '1',
-      },
-      body: _.pick(options, [
-        'stats',
-        'tests',
-        'exception',
-        'video',
-        'screenshots',
-        'reporterStats',
-      ]),
+    return retryWithBackoff((attemptIndex) => {
+      return rp.post({
+        url: apiRoutes.instanceResults(options.instanceId),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        body: _.pick(options, [
+          'stats',
+          'tests',
+          'exception',
+          'video',
+          'screenshots',
+          'reporterStats',
+          'metadata',
+        ]),
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   createCrashReport (body, authToken, timeout = 3000) {
@@ -364,113 +388,13 @@ module.exports = {
         remoteOrigin,
       },
     })
-    .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
-  },
-
-  getProjectRecordKeys (projectId, authToken) {
-    return rp.get({
-      url: apiRoutes.projectRecordKeys(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
-  requestAccess (projectId, authToken) {
-    return rp.post({
-      url: apiRoutes.membershipRequests(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
-
-  _projectToken (method, projectId, authToken) {
-    return rp({
-      method,
-      url: apiRoutes.projectToken(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '2',
-      },
-    })
-    .get('apiToken')
-    .catch(tagError)
-  },
-
-  getProjectToken (projectId, authToken) {
-    return this._projectToken('get', projectId, authToken)
-  },
-
-  updateProjectToken (projectId, authToken) {
-    return this._projectToken('put', projectId, authToken)
-  },
-
-  getReleaseNotes (version) {
-    return rp.get({
-      url: onRoutes.releaseNotes(version),
-      json: true,
-    })
-    .catch((err) => {
-      // log and ignore by sending an empty response if there's an error
-      debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
-
-      return {}
-    })
-  },
-
-  retryWithBackoff (fn, options = {}) {
-    // for e2e testing purposes
-    let attempt
-
-    if (process.env.DISABLE_API_RETRIES) {
-      debug('api retries disabled')
-
-      return Promise.try(fn)
-    }
-
-    return (attempt = (retryIndex) => {
-      return Promise
-      .try(fn)
-      .catch(isRetriableError, (err) => {
-        if (retryIndex > DELAYS.length) {
-          throw err
-        }
-
-        const delay = DELAYS[retryIndex]
-
-        if (options.onBeforeRetry) {
-          options.onBeforeRetry({
-            err,
-            delay,
-            retryIndex,
-            total: DELAYS.length,
-          })
-        }
-
-        retryIndex++
-
-        return Promise
-        .delay(delay)
-        .then(() => {
-          debug(`retry #${retryIndex} after ${delay}ms`)
-
-          return attempt(retryIndex)
-        })
-      })
-    })(0)
   },
 
   clearCache () {
     responseCache = {}
   },
+
+  retryWithBackoff,
 }

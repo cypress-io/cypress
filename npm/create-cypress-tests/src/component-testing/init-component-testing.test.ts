@@ -20,7 +20,7 @@ describe('init component tests script', () => {
   let execStub: SinonStub | null = null
 
   const e2eTestOutputPath = path.resolve(__dirname, '..', 'test-output')
-  const cypressConfigPath = path.join(e2eTestOutputPath, 'cypress.json')
+  const cypressConfigPath = path.join(e2eTestOutputPath, 'cypress.config.ts')
 
   beforeEach(async () => {
     logSpy = sinon.spy(global.console, 'log')
@@ -32,6 +32,8 @@ describe('init component tests script', () => {
 
     await fs.remove(e2eTestOutputPath)
     await fs.mkdir(e2eTestOutputPath)
+
+    process.env.BABEL_TEST_ROOT = e2eTestOutputPath
   })
 
   afterEach(() => {
@@ -53,9 +55,9 @@ describe('init component tests script', () => {
 
   function snapshotGeneratedFiles (name: string) {
     snapshot(
-      `${name} cypress.json`,
+      `${name} cypress.config.ts`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress.json'),
+        path.join(e2eTestOutputPath, 'cypress.config.ts'),
         { encoding: 'utf-8' },
       ),
     )
@@ -69,7 +71,7 @@ describe('init component tests script', () => {
     )
 
     const supportFile = fs.readFileSync(
-      path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+      path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
       { encoding: 'utf-8' },
     )
 
@@ -79,9 +81,9 @@ describe('init component tests script', () => {
     }
 
     snapshot(
-      `${name} support/index.js`,
+      `${name} support/component.js`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+        path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
         { encoding: 'utf-8' },
       ),
     )
@@ -89,8 +91,8 @@ describe('init component tests script', () => {
 
   it('determines more presumable configuration to suggest', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
-      '/cypress/support/index.js': '',
+      '/cypress.config.ts': 'export default {}',
+      '/cypress/support/component.js': '',
       '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
       // For next.js user will have babel config, but we want to suggest to use the closest config for the application code
       '/babel.config.js': 'module.exports = { }',
@@ -112,8 +114,8 @@ describe('init component tests script', () => {
 
   it('automatically suggests to the user which config to use', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
-      '/cypress/support/index.js': 'import "./commands.js";',
+      '/cypress.config.ts': 'export default {}',
+      '/cypress/support/component.js': 'import "./commands.js";',
       '/cypress/plugins/index.js': 'module.exports = () => {}',
       '/package.json': JSON.stringify({
         dependencies: {
@@ -143,7 +145,7 @@ describe('init component tests script', () => {
 
   it('Asks for preferred bundling tool if can not determine the right one', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/webpack.config.js': 'module.exports = { }',
       '/package.json': JSON.stringify({ dependencies: { } }),
     })
@@ -151,7 +153,7 @@ describe('init component tests script', () => {
     promptSpy = sinon.stub(inquirer, 'prompt')
     .onCall(0)
     .returns(Promise.resolve({
-      framework: 'vue',
+      framework: 'vue@2',
     }) as any)
     .onCall(1)
     .returns(Promise.resolve({
@@ -168,15 +170,15 @@ describe('init component tests script', () => {
 
   it('Asks for framework if more than 1 option was auto detected', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/webpack.config.js': 'module.exports = { }',
-      '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '*' } }),
+      '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '^2.4.5' } }),
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt')
     .onCall(0)
     .returns(Promise.resolve({
-      framework: 'vue',
+      framework: 'vue@3',
     }) as any)
     .onCall(1)
     .returns(Promise.resolve({
@@ -187,12 +189,44 @@ describe('init component tests script', () => {
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
     expect(
-      someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue')} are available from this directory.`),
+      someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue@2')} are available from this directory.`),
     ).to.be.true
   })
 
-  it('installs the right adapter', () => {
+  it('installs the right adapter', async () => {
+    createTempFiles({
+      '/cypress.config.ts': 'export default {}',
+      '/webpack.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { react: '16.4.5' } }),
+    })
 
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'vite',
+      componentFolder: 'src',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    expect(execStub).to.be.calledWith('yarn add @cypress/react --dev')
+  })
+
+  it('installs the right adapter for vue 3', async () => {
+    createTempFiles({
+      '/cypress.config.ts': 'export default {}',
+      '/vite.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { vue: '^3.0.0' } }),
+    })
+
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'vite',
+      componentFolder: 'src',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    expect(execStub).to.be.calledWith('yarn add @cypress/vue --dev')
   })
 
   it('suggest the right instruction based on user template choice', async () => {
@@ -202,7 +236,7 @@ describe('init component tests script', () => {
           react: '^16.0.0',
         },
       }),
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
@@ -219,9 +253,9 @@ describe('init component tests script', () => {
     ).to.be.true
   })
 
-  it('suggests right docs example and cypress.json config based on the `componentFolder` answer', async () => {
+  it('suggests right docs example and cypress.config.ts config based on the `componentFolder` answer', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/package.json': JSON.stringify({
         dependencies: {
           react: '^16.0.0',
@@ -236,13 +270,11 @@ describe('init component tests script', () => {
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
-    const injectedCode = fs.readFileSync(path.join(e2eTestOutputPath, 'cypress.json'), { encoding: 'utf-8' })
+    const injectedCode = require(path.join(e2eTestOutputPath, 'cypress.config.ts'))
 
-    expect(injectedCode).to.equal(JSON.stringify(
+    expect(JSON.stringify(injectedCode.default, null, 2)).to.equal(JSON.stringify(
       {
-        experimentalComponentTesting: true,
-        componentFolder: 'cypress/component',
-        testFiles: '**/*.spec.{js,ts,jsx,tsx}',
+        specPattern: 'cypress/component/**/*.spec.{js,ts,jsx,tsx}',
       },
       null,
       2,
@@ -251,7 +283,7 @@ describe('init component tests script', () => {
 
   it('Shows help message if cypress files are not created', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/package.json': JSON.stringify({
         dependencies: {
           react: '^16.0.0',
@@ -272,5 +304,37 @@ describe('init component tests script', () => {
         'was not updated automatically. Please add the following config manually:',
       ),
     ).to.be.true
+  })
+
+  it(`Doesn't affect injected code if user has custom babel.config.js`, async () => {
+    createTempFiles({
+      '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
+      '/cypress.config.ts': 'export default {}',
+      'babel.config.js': `module.exports = ${JSON.stringify({
+        presets: [
+          '@babel/preset-env',
+        ],
+      })}`,
+      '/package.json': JSON.stringify({
+        dependencies: {
+          babel: '*',
+          react: '^16.0.0',
+        },
+      }),
+    })
+
+    sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'create-react-app',
+      componentFolder: 'cypress/component',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    const babelPluginsOutput = await fs.readFile(
+      path.join(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'),
+      'utf-8',
+    )
+
+    expect(babelPluginsOutput).not.to.contain('use strict')
+    expect(babelPluginsOutput).to.contain('module.exports = (on, config) => {')
   })
 })

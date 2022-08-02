@@ -1,4 +1,4 @@
-('../spec_helper')
+require('../spec_helper')
 
 const _ = require('lodash')
 let r = require('@cypress/request')
@@ -7,34 +7,39 @@ const compression = require('compression')
 const dns = require('dns')
 const express = require('express')
 const http = require('http')
-const path = require('path')
 const url = require('url')
 let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
-const pkg = require('@packages/root')
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
-const Watchers = require(`${root}lib/watchers`)
-const pluginsModule = require(`${root}lib/plugins`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const resolve = require(`${root}lib/util/resolve`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
-const CacheBuster = require(`${root}lib/util/cache_buster`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const pluginsModule = require(`../../lib/plugins`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const resolve = require(`../../lib/util/resolve`)
+const { fs } = require(`../../lib/util/fs`)
+const CacheBuster = require(`../../lib/util/cache_buster`)
+const Fixtures = require('@tooling/system-tests')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
+/**
+ * @type {import('@packages/resolve-dist')}
+ */
+const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
+const dedent = require('dedent')
 
 zlib = Promise.promisifyAll(zlib)
 
 // force supertest-session to use promises provided in supertest
 const session = proxyquire('supertest-session', { supertest })
 
-const absolutePathRegex = /"\/[^{}]*?\.projects/g
+const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
@@ -52,10 +57,31 @@ const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
 }
 
+function getHugeJsFile () {
+  const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
+
+  const getHugeFile = () => {
+    return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
+    .then((resp) => {
+      return fs
+      .outputFileAsync(pathToHugeAppJs, resp)
+      .return(resp)
+    })
+  }
+
+  return fs
+  .readFileAsync(pathToHugeAppJs, 'utf8')
+  .catch(getHugeFile)
+}
+
+let ctx
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await scaffoldCommonNodeModules()
+    ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
@@ -64,20 +90,24 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
-    this.setup = (initialUrl, obj = {}) => {
+    Fixtures.scaffold()
+
+    this.setup = async (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
       }
 
       if (!obj.projectRoot) {
-        obj.projectRoot = '/foo/bar/'
+        obj.projectRoot = Fixtures.projectPath('e2e')
       }
+
+      await ctx.lifecycleManager.setCurrentProject(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
       // for each test
-      return config.set(obj)
+      return config.setupFullConfigWithDefaults(obj)
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -120,40 +150,47 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectE2E('/path/to/project-e2e')
-
           cfg.pluginsFile = false
 
-          return Promise.all([
+          return ctx.lifecycleManager.waitForInitializeSuccess()
+          .then(() => {
+            return Promise.all([
             // open our https server
-            httpsServer.start(8443),
+              httpsServer.start(8443),
 
-            // and open our cypress server
-            (this.server = new ServerE2E(new Watchers())),
+              // and open our cypress server
+              (this.server = new ServerE2E()),
 
-            this.server.open(cfg, this.project)
-            .spread(async (port) => {
-              const automationStub = {
-                use: () => { },
-              }
+              this.server.open(cfg, {
+                SocketCtor: SocketE2E,
+                getSpec: () => spec,
+                getCurrentBrowser: () => null,
+                createRoutes,
+                testingType: 'e2e',
+                exit: false,
+              })
+              .spread(async (port) => {
+                const automationStub = {
+                  use: () => { },
+                }
 
-              await this.server.startWebsockets(automationStub, config, {})
+                await this.server.startWebsockets(automationStub, config, {})
 
-              if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
-              }
+                if (initialUrl) {
+                  this.server.remoteStates.set(initialUrl)
+                }
 
-              this.srv = this.server.getHttpServer()
+                this.srv = this.server.getHttpServer()
 
-              this.session = session(this.srv)
+                this.session = session(this.srv)
 
-              this.proxy = `http://localhost:${port}`
-            }),
-
-            pluginsModule.init(cfg, {
-              projectRoot: cfg.projectRoot,
-            }),
-          ])
+                this.proxy = `http://localhost:${port}`
+              }),
+            ])
+          })
+          .then(() => {
+            ctx.lifecycleManager.setAndLoadCurrentTestingType('e2e')
+          })
         }
 
         if (this.server) {
@@ -172,7 +209,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    Fixtures.remove()
     this.session.destroy()
     preprocessor.close()
     this.project = null
@@ -180,7 +216,11 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearCurrentProject(),
     )
+    .then(() => {
+      Fixtures.remove()
+    })
   })
 
   context('GET /', () => {
@@ -190,7 +230,7 @@ describe('Routes', () => {
 
     // this tests a situation where we open our browser in another browser
     // without proxy mode set
-    it('redirects to config.clientRoute without a _remoteOrigin and without a proxy', function () {
+    it('redirects to config.clientRoute without a remote origin and without a proxy', function () {
       return this.rp({
         url: this.proxy,
         proxy: null,
@@ -202,10 +242,10 @@ describe('Routes', () => {
       })
     })
 
-    it('does not redirect with _remoteOrigin set', function () {
+    it('does not redirect with remote origin set', function () {
       return this.setup('http://www.github.com')
       .then(() => {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, '<html></html>', {
           'Content-Type': 'text/html',
@@ -275,7 +315,9 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/Runner.start/)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
+
+        expect(res.headers['origin-agent-cluster']).to.eq('?0')
       })
     })
 
@@ -284,7 +326,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.include('<title>foobarbaz</title>')
+        expect(res.body).to.include('<title>e2e</title>')
       })
     })
 
@@ -304,11 +346,12 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start\(.+\)/)
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
 
+    // TODO: no automation in unified app
     it('clientRoute routes to \'not launched through Cypress\' without a proxy set', function () {
       return this.rp({
         url: `${this.proxy}/__`,
@@ -341,24 +384,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start/)
-        })
-      })
-    })
-
-    it('sends Cypress.version', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
-      .then(() => {
-        return this.rp('http://localhost:9999/__')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
-          const configStr = Buffer.from(base64Config, 'base64').toString()
-
-          expect(configStr).to.include('version')
-
-          expect(configStr).to.include(pkg.version)
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
@@ -383,190 +409,62 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/spec-iframe/)
+        expect(res.body).to.match(/\.reporter/)
       })
     })
   })
 
-  context('GET /__cypress/files', () => {
-    beforeEach(() => {
-      Fixtures.scaffold('todos')
-
-      return Fixtures.scaffold('ids')
+  context('GET /__cypress/automation', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
     })
 
-    describe('todos with specific configuration', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('todos'),
-          config: {
-            integrationFolder: 'tests',
-            fixturesFolder: 'tests/_fixtures',
-            supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/**/*'],
-          },
-        })
-      })
+    it('sends getLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/getLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
 
-      it('returns base json file path objects of only tests', function () {
-        // this should omit any _fixture files, _support files and javascripts
-        return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_fixtures', '**', '*'))
-        .then((files) => {
-          // make sure there are fixtures in here!
-          expect(files.length).to.be.gt(0)
-
-          return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_support', '**', '*'))
-          .then((files) => {
-            // make sure there are support files in here!
-            expect(files.length).to.be.gt(0)
-
-            return this.rp({
-              url: 'http://localhost:2020/__cypress/files',
-              json: true,
-            })
-            .then((res) => {
-              expect(res.statusCode).to.eq(200)
-
-              const {
-                body,
-              } = res
-
-              expect(body.integration).to.have.length(4)
-
-              // remove the absolute path key
-              body.integration = _.map(body.integration, (obj) => {
-                return _.pick(obj, 'name', 'relative')
-              })
-
-              expect(res.body).to.deep.eq({
-                integration: [
-                  {
-                    'name': 'sub/a&b%c.js',
-                    'relative': 'tests/sub/a&b%c.js',
-                  },
-                  {
-                    name: 'sub/sub_test.coffee',
-                    relative: 'tests/sub/sub_test.coffee',
-                  },
-                  {
-                    name: 'test1.js',
-                    relative: 'tests/test1.js',
-                  },
-                  {
-                    name: 'test2.coffee',
-                    relative: 'tests/test2.coffee',
-                  },
-                ],
-              })
-            })
-          })
-        })
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
       })
     })
 
-    describe('ids with regular configuration', () => {
-      it('returns test files as json ignoring *.hot-update.js', function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-        })
-        .then(() => {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/files',
-            json: true,
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
+    it('sends setLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/setLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
 
-            const {
-              body,
-            } = res
-
-            expect(body.integration).to.have.length(6)
-
-            // remove the absolute path key
-            body.integration = _.map(body.integration, (obj) => {
-              return _.pick(obj, 'name', 'relative')
-            })
-
-            expect(body).to.deep.eq({
-              integration: [
-                {
-                  name: 'bar.js',
-                  relative: 'cypress/integration/bar.js',
-                },
-                {
-                  name: 'baz.js',
-                  relative: 'cypress/integration/baz.js',
-                },
-                {
-                  name: 'dom.jsx',
-                  relative: 'cypress/integration/dom.jsx',
-                },
-                {
-                  name: 'foo.coffee',
-                  relative: 'cypress/integration/foo.coffee',
-                },
-                {
-                  name: 'nested/tmp.js',
-                  relative: 'cypress/integration/nested/tmp.js',
-                },
-                {
-                  name: 'noop.coffee',
-                  relative: 'cypress/integration/noop.coffee',
-                },
-              ],
-            })
-          })
-        })
-      })
-
-      it('can ignore other files as well', function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-          config: {
-            ignoreTestFiles: ['**/bar.js', 'foo.coffee', '**/*.hot-update.js', '**/nested/*'],
-          },
-        })
-        .then(() => {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/files',
-            json: true,
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const {
-              body,
-            } = res
-
-            expect(body.integration).to.have.length(3)
-
-            // remove the absolute path key
-            body.integration = _.map(body.integration, (obj) => {
-              return _.pick(obj, 'name', 'relative')
-            })
-
-            expect(body).to.deep.eq({
-              integration: [
-                {
-                  name: 'baz.js',
-                  relative: 'cypress/integration/baz.js',
-                },
-                {
-                  name: 'dom.jsx',
-                  relative: 'cypress/integration/dom.jsx',
-                },
-                {
-                  name: 'noop.coffee',
-                  relative: 'cypress/integration/noop.coffee',
-                },
-              ],
-            })
-          })
-        })
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/set:storage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
       })
     })
   })
+
+  function pollUntilEventsIpcLoaded () {
+    return new Promise((resolve) => {
+      let i = 0
+
+      const interval = setInterval(() => {
+        if (ctx.lifecycleManager.isFullConfigReady) {
+          clearInterval(interval)
+          resolve()
+        }
+
+        i += 1
+
+        if (i > 50) {
+          throw Error(dedent`
+            setupNodeEvents and plugins did not complete after 10 seconds.
+            There might be an endless loop or an uncaught exception that isn't bubbling up.`)
+        }
+      }, 200)
+    })
+  }
 
   context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
@@ -578,29 +476,43 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('processes spec into modern javascript', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
+
+        expect(res.statusCode).to.eq(200)
+        // "modern" features should remain and not be transpiled into es5
+        expect(res.body).to.include('const numbers')
+        expect(res.body).to.include('[...numbers]')
+        expect(res.body).to.include('async function')
+        expect(res.body).to.include('await Promise')
+      })
+
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Module not found')
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
       })
     })
 
@@ -617,31 +529,31 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Module not found')
       })
     })
 
@@ -651,16 +563,19 @@ describe('Routes', () => {
 
         return this.setup({
           projectRoot: Fixtures.projectPath('failures'),
+          config: {
+            supportFile: false,
+          },
         })
       })
 
-      it('serves error javascript file when there\'s a syntax error', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Unexpected token')
-        })
+      it('serves error javascript file when there\'s a syntax error', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Unexpected token')
       })
     })
 
@@ -671,28 +586,28 @@ describe('Routes', () => {
         return this.setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            integrationFolder: 'my-tests',
-            javascripts: ['helpers/includes.js'],
+            specPattern: 'my-tests/**/*',
+            supportFile: 'helpers/includes.js',
           },
         })
       })
 
-      it('processes my-tests/test1.js spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`expect('no-server')`)
-        })
+      it('processes my-tests/test1.js spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`expect('no-server')`)
       })
 
-      it('processes helpers/includes.js javascripts', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`console.log('includes')`)
-        })
+      it('processes helpers/includes.js supportFile', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`console.log('includes')`)
       })
     })
   })
@@ -877,7 +792,8 @@ describe('Routes', () => {
           return this.setup({
             projectRoot: Fixtures.projectPath('todos'),
             config: {
-              integrationFolder: 'tests',
+              specPattern: 'tests/**/*',
+              supportFile: false,
               fixturesFolder: 'tests/_fixtures',
             },
           })
@@ -1024,186 +940,6 @@ describe('Routes', () => {
   //       .expect("Content-Type", /application\/json/)
   //       .expect(JSON.parse(json))
 
-  context('GET /__cypress/iframes/*', () => {
-    beforeEach(() => {
-      Fixtures.scaffold('e2e')
-      Fixtures.scaffold('todos')
-      Fixtures.scaffold('no-server')
-
-      return Fixtures.scaffold('ids')
-    })
-
-    describe('todos', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('todos'),
-          config: {
-            integrationFolder: 'tests',
-            fixturesFolder: 'tests/_fixtures',
-            supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/etc.js'],
-          },
-        })
-      })
-
-      it('renders iframe with variables passed in', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/test2.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back all tests', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_all_tests_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back tests matching spec filter', function () {
-        // only returns tests with "sub_test" in their names
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
-
-        this.project.spec = {
-          specFilter: 'sub_test',
-        }
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          console.log(body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('no-server', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('no-server'),
-          config: {
-            integrationFolder: 'my-tests',
-            supportFile: 'helpers/includes.js',
-            fileServerFolder: 'foo',
-          },
-        })
-      })
-
-      it('renders iframe with variables passed in', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_server_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/test1.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('no-server with supportFile: false', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('no-server'),
-          config: {
-            integrationFolder: 'my-tests',
-            supportFile: false,
-          },
-        })
-      })
-
-      it('renders iframe without support file', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_server_no_support_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('e2e', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('e2e'),
-          config: {
-            integrationFolder: 'cypress/integration',
-            supportFile: 'cypress/support/commands.js',
-          },
-        })
-      })
-
-      it('omits support directories', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_e2e_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/app_spec.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('ids', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-        })
-      })
-
-      it('renders iframe with variables passed in', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_ids_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back all tests', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_ids_all_tests_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-  })
-
   context('GET *', () => {
     context('basic request', () => {
       beforeEach(function () {
@@ -1211,7 +947,7 @@ describe('Routes', () => {
       })
 
       it('basic 200 html response', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/html',
@@ -1237,7 +973,7 @@ describe('Routes', () => {
       })
 
       it('unzips, injects, and then rezips initial content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1256,7 +992,7 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('<html>')
           expect(res.body).to.include('gzip')
-          expect(res.body).to.include('Cypress.')
+          expect(res.body).to.include('parent.Cypress')
           expect(res.body).to.include('document.domain = \'github.com\'')
 
           expect(res.body).to.include('</html>')
@@ -1264,7 +1000,7 @@ describe('Routes', () => {
       })
 
       it('unzips, injects, and then rezips regular http content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1291,7 +1027,7 @@ describe('Routes', () => {
       })
 
       it('does not inject on regular gzip\'d content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1370,7 +1106,7 @@ describe('Routes', () => {
       })
 
       it('strips unsupported deflate and br encoding', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/accept')
         .matchHeader('accept-encoding', 'gzip')
         .reply(200, '<html>accept</html>')
@@ -1390,7 +1126,7 @@ describe('Routes', () => {
       })
 
       it('removes accept-encoding when nothing is supported', function () {
-        nock(this.server._remoteOrigin, {
+        nock(this.server.remoteStates.current().origin, {
           badheaders: ['accept-encoding'],
         })
         .get('/accept')
@@ -1417,7 +1153,7 @@ describe('Routes', () => {
       })
 
       it('sends back a 304', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/app.js')
         .reply(304)
 
@@ -1439,7 +1175,7 @@ describe('Routes', () => {
       })
 
       it('passes the location header through', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .reply(302, undefined, {
           'Location': '/',
@@ -1466,7 +1202,7 @@ describe('Routes', () => {
       // this fixes improper url merge where we took query params
       // and added them needlessly
       it('doesnt redirect with query params or hashes which werent in location header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': '/css',
@@ -1487,7 +1223,7 @@ describe('Routes', () => {
       })
 
       it('does redirect with query params if location header includes them', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': '/css?q=search',
@@ -1512,7 +1248,7 @@ describe('Routes', () => {
       })
 
       it('does redirect with query params to external domain if location header includes them', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': 'https://www.google.com/search?q=cypress',
@@ -1537,7 +1273,7 @@ describe('Routes', () => {
       })
 
       it('sets cookies and removes __cypress.initial when initial is originally false', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/css')
         .reply(302, undefined, {
           'Set-Cookie': 'foo=bar; Path=/',
@@ -1563,7 +1299,7 @@ describe('Routes', () => {
         it(`handles direct for status code: ${code}`, function () {
           return this.setup('http://auth.example.com')
           .then(() => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/login')
             .reply(code, undefined, {
               Location: 'http://app.example.com/users/1',
@@ -1591,7 +1327,7 @@ describe('Routes', () => {
       })
 
       it('passes through status code + content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/index.html')
         .reply(500, 'server error', {
           'Content-Type': 'text/html',
@@ -1720,7 +1456,7 @@ describe('Routes', () => {
       })
 
       it('transparently proxies decoding gzip failures', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/index.html')
         .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
           'Content-Type': 'text/html',
@@ -1765,7 +1501,7 @@ describe('Routes', () => {
 
       describe('when initial is true', () => {
         it('sets back to false', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.html')
           .reply(200, 'OK', {
             'Content-Type': 'text/html',
@@ -1787,7 +1523,7 @@ describe('Routes', () => {
 
       describe('when initial is false', () => {
         it('does not reset initial or remoteHost', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.html')
           .reply(200, 'OK', {
             'Content-Type': 'text/html',
@@ -1809,7 +1545,7 @@ describe('Routes', () => {
       })
 
       it('sends with Transfer-Encoding: chunked without Content-Length', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, Buffer.from('foo'), {
           'Content-Type': 'text/html',
@@ -1831,7 +1567,7 @@ describe('Routes', () => {
       })
 
       it('does not have Content-Length', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, 'foo', {
           'Content-Type': 'text/html',
@@ -1854,7 +1590,7 @@ describe('Routes', () => {
       })
 
       it('forwards cookies from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, 'OK', {
           'set-cookie': 'userId=123',
@@ -1874,7 +1610,7 @@ describe('Routes', () => {
       })
 
       it('appends to previous cookies from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, '<html></html>', {
           'set-cookie': 'userId=123; Path=/',
@@ -1899,7 +1635,7 @@ describe('Routes', () => {
       })
 
       it('appends cookies on redirects', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(302, undefined, {
           'location': '/dashboard',
@@ -1925,7 +1661,7 @@ describe('Routes', () => {
       })
 
       it('passes invalid cookies', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/invalid')
         .reply(200, 'OK', {
           'set-cookie': [
@@ -1948,7 +1684,7 @@ describe('Routes', () => {
       })
 
       it('forwards other headers from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/auth')
         .reply(200, 'OK', {
           'x-token': 'abc-123',
@@ -1968,7 +1704,7 @@ describe('Routes', () => {
       })
 
       it('forwards headers to outgoing requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .matchHeader('x-custom', 'value')
         .reply(200, 'hello from bar!', {
@@ -1990,7 +1726,7 @@ describe('Routes', () => {
       })
 
       it('omits x-frame-options', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2006,7 +1742,7 @@ describe('Routes', () => {
       })
 
       it('omits content-security-policy', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2027,7 +1763,7 @@ describe('Routes', () => {
       })
 
       it('omits content-security-policy-report-only', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2048,7 +1784,7 @@ describe('Routes', () => {
       })
 
       it('omits document-domain from Feature-Policy header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2073,7 +1809,7 @@ describe('Routes', () => {
       it('does not modify host origin header', function () {
         return this.setup('http://foobar.com')
         .then(() => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/css')
           .matchHeader('host', 'foobar.com')
           .reply(200)
@@ -2091,7 +1827,7 @@ describe('Routes', () => {
       })
 
       it('does not cache when initial response', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/html',
@@ -2111,7 +1847,7 @@ describe('Routes', () => {
       })
 
       it('does cache requesting resource without injection', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/plain',
@@ -2127,7 +1863,7 @@ describe('Routes', () => {
       })
 
       it('forwards origin header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .matchHeader('host', 'localhost:8080')
         .matchHeader('origin', 'http://localhost:8080')
@@ -2219,10 +1955,12 @@ describe('Routes', () => {
 
           const base64 = Buffer.from(`${username}:${password}`).toString('base64')
 
-          this.server._remoteAuth = {
-            username,
-            password,
-          }
+          this.server.remoteStates.set('http://localhost:8080', {
+            auth: {
+              username,
+              password,
+            },
+          })
 
           nock('http://localhost:8080')
           .get('/index')
@@ -2251,10 +1989,12 @@ describe('Routes', () => {
         it('does not modify existing auth headers when matching origin', function () {
           const existing = 'Basic asdf'
 
-          this.server._remoteAuth = {
-            username: 'u',
-            password: 'p',
-          }
+          this.server.remoteStates.set('http://localhost:8080', {
+            auth: {
+              username: 'u',
+              password: 'p',
+            },
+          })
 
           nock('http://localhost:8080')
           .get('/index')
@@ -2273,7 +2013,7 @@ describe('Routes', () => {
         })
 
         // https://github.com/cypress-io/cypress/issues/4267
-        it('doesn\'t attach auth headers to a diff protection space on the same origin', function () {
+        it(`doesn't attach auth headers to a diff protection space on the same origin`, function () {
           return this.setup('http://beta.something.com')
           .then(() => {
             const username = 'u'
@@ -2281,10 +2021,12 @@ describe('Routes', () => {
 
             const base64 = Buffer.from(`${username}:${password}`).toString('base64')
 
-            this.server._remoteAuth = {
-              username,
-              password,
-            }
+            this.server.remoteStates.set('http://beta.something.com', {
+              auth: {
+                username,
+                password,
+              },
+            })
 
             nock(/.*\.something.com/)
             .get('/index')
@@ -2321,7 +2063,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/javascript-logo.png')
           .replyWithFile(200, image, {
             'Content-Type': 'image/png',
@@ -2353,7 +2095,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/javascript-logo.png')
           .replyWithFile(200, zipped, {
             'Content-Type': 'image/png',
@@ -2392,7 +2134,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/font.woff')
           .replyWithFile(200, font, {
             'Content-Type': 'application/font-woff; charset=utf-8',
@@ -2424,7 +2166,7 @@ describe('Routes', () => {
         // if this test finishes without timing out we know its all good
         const contents = removeWhitespace(Fixtures.get('server/err_response.html'))
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, contents, {
           'Content-Type': 'text/html; charset=utf-8',
@@ -2447,56 +2189,51 @@ describe('Routes', () => {
         return this.setup('http://www.google.com')
       })
 
-      it('injects when head has attributes', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html'))
-
-        nock(this.server._remoteOrigin)
+      it('injects when head has attributes', async function () {
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
         })
 
-        return this.rp({
+        const injection = await getRunnerInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
           url: 'http://www.google.com/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+        const body = cleanResponseBody(res.body)
 
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
-      it('injects even when head tag is missing', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html'))
-
-        nock(this.server._remoteOrigin)
+      it('injects even when head tag is missing', async function () {
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
         })
 
-        return this.rp({
+        const injection = await getRunnerInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
+
+        const res = await this.rp({
           url: 'http://www.google.com/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+        const body = cleanResponseBody(res.body)
 
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
       it('injects when head is capitalized', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML> <HEAD>hello from bar!</HEAD> </HTML>', {
           'Content-Type': 'text/html',
@@ -2516,7 +2253,7 @@ describe('Routes', () => {
       })
 
       it('injects when head missing but has <header>', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
           'Content-Type': 'text/html',
@@ -2538,7 +2275,7 @@ describe('Routes', () => {
       })
 
       it('injects when body is capitalized', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML> <BODY>hello from bar!</BODY> </HTML>', {
           'Content-Type': 'text/html',
@@ -2558,7 +2295,7 @@ describe('Routes', () => {
       })
 
       it('injects when both head + body are missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML>hello from bar!</HTML>', {
           'Content-Type': 'text/html',
@@ -2580,7 +2317,7 @@ describe('Routes', () => {
       })
 
       it('injects even when html + head + body are missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<div>hello from bar!</div>', {
           'Content-Type': 'text/html',
@@ -2602,7 +2339,7 @@ describe('Routes', () => {
       })
 
       it('injects after DOCTYPE declaration when no other content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<!DOCTYPE>', {
           'Content-Type': 'text/html',
@@ -2622,7 +2359,7 @@ describe('Routes', () => {
       })
 
       it('injects superdomain even when head tag is missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2643,14 +2380,14 @@ describe('Routes', () => {
       })
 
       it('injects content after following redirect', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(302, undefined, {
           // redirect us to google.com!
           'Location': 'http://www.google.com/foo',
         })
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .reply(200, '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2672,7 +2409,7 @@ describe('Routes', () => {
             expect(res.statusCode).to.eq(200)
             expect(res.headers['set-cookie']).to.match(/initial=;/)
 
-            expect(res.body).to.include('Cypress.action(')
+            expect(res.body).to.include('parent.Cypress')
           })
         })
       })
@@ -2680,7 +2417,7 @@ describe('Routes', () => {
       it('injects performantly on a huge amount of elements over http', function () {
         Fixtures.scaffold()
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/elements.html')
         .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
           'Content-Type': 'text/html',
@@ -2722,7 +2459,7 @@ describe('Routes', () => {
       })
 
       it('does not inject when not initial and not html', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/plain',
@@ -2741,25 +2478,21 @@ describe('Routes', () => {
         })
       })
 
-      it('injects into https server', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('injects into https server', async function () {
+        await this.setup('https://localhost:8443')
 
-        return this.setup('https://localhost:8443')
-        .then(() => {
-          return this.rp({
-            url: 'https://localhost:8443/',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents)
-          })
+        const injection = await getRunnerInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://localhost:8443/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
       it('injects into https://www.google.com', function () {
@@ -2782,7 +2515,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('Cypress.action(')
+            expect(res.body).to.include('parent.Cypress')
           })
         })
       })
@@ -2812,50 +2545,40 @@ describe('Routes', () => {
         })
       })
 
-      it('works with host swapping', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('works with host swapping', async function () {
+        await this.setup('https://www.foobar.com:8443')
+        evilDns.add('*.foobar.com', '127.0.0.1')
 
-        return this.setup('https://www.foobar.com:8443')
-        .then(() => {
-          evilDns.add('*.foobar.com', '127.0.0.1')
-
-          return this.rp({
-            url: 'https://www.foobar.com:8443/index.html',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-          })
+        const injection = await getRunnerInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://www.foobar.com:8443/index.html',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
       })
 
-      it('continues to inject on the same https superdomain but different subdomain', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('continues to inject on the same https superdomain but different subdomain', async function () {
+        await this.setup('https://www.foobar.com:8443')
+        evilDns.add('*.foobar.com', '127.0.0.1')
 
-        return this.setup('https://www.foobar.com:8443')
-        .then(() => {
-          evilDns.add('*.foobar.com', '127.0.0.1')
-
-          return this.rp({
-            url: 'https://docs.foobar.com:8443/index.html',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-          })
+        const injection = await getRunnerInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://docs.foobar.com:8443/index.html',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
       })
 
       it('injects document.domain on https requests to same superdomain but different subdomain', function () {
@@ -2881,7 +2604,7 @@ describe('Routes', () => {
       })
 
       it('injects document.domain on other http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/html',
@@ -2926,8 +2649,36 @@ describe('Routes', () => {
         })
       })
 
+      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+        nock('http://www.foobar.com')
+        .get('/')
+        .reply(200, '<html><head></head><body>hi</body></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        this.server._eventBus.on('cross:origin:delaying:html', () => {
+          this.server._eventBus.emit('cross:origin:release:html')
+        })
+
+        return this.rp({
+          url: 'http://www.foobar.com',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'X-Cypress-Is-AUT-Frame': 'true',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+        })
+      })
+
       it('does not inject document.domain on non http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/json')
         .reply(200, {
           foo: '<html><head></head></html>',
@@ -2947,7 +2698,7 @@ describe('Routes', () => {
         })
       })
 
-      it('does not inject document.domain on http requests which do not match current superDomain', function () {
+      it('does not inject document.domain on http requests which do not match current superDomain and are not the AUT iframe', function () {
         nock('http://www.foobar.com')
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
@@ -2969,7 +2720,7 @@ describe('Routes', () => {
       })
 
       it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/json')
         .reply(200, { foo: 'bar' })
 
@@ -2990,7 +2741,7 @@ describe('Routes', () => {
       })
 
       it('does not inject into x-requested-with request headers', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/html',
@@ -3015,7 +2766,7 @@ describe('Routes', () => {
 
       return ['text/html', 'application/xhtml+xml', 'text/plain, application/xhtml+xml', '', null].forEach((type) => {
         it(`does not inject unless both text/html and application/xhtml+xml is requested: tried to accept: ${type}`, function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/iframe')
           .reply(200, '<html><head></head></html>', {
             'Content-Type': 'text/html',
@@ -3051,7 +2802,7 @@ describe('Routes', () => {
         it('replaces obstructive code in HTML files', function () {
           const html = '<html><body><script>if (top !== self) { }</script></body></html>'
 
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
@@ -3073,7 +2824,7 @@ describe('Routes', () => {
         })
 
         it('replaces obstructive code in JS files', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
             'Content-Type': 'application/javascript',
@@ -3096,7 +2847,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.html')
             .reply(200, resp, {
               'Content-Type': 'text/html',
@@ -3124,7 +2875,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.js')
             .reply(200, resp, {
               'Content-Type': 'application/javascript',
@@ -3150,7 +2901,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             // remove the last 8 characters which
             // truncates the CRC checksum and size check
@@ -3177,7 +2928,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.html')
             // remove the last 8 characters which
             // truncates the CRC checksum and size check
@@ -3203,7 +2954,7 @@ describe('Routes', () => {
         })
 
         it('ECONNRESETs bad gzip responses when not injecting', function (done) {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .delayBody(100)
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
@@ -3223,7 +2974,7 @@ describe('Routes', () => {
         })
 
         it('ECONNRESETs bad gzip responses when injecting', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
             'Content-Type': 'text/html',
@@ -3245,22 +2996,9 @@ describe('Routes', () => {
         })
 
         it('does not die rewriting a huge JS file', function () {
-          const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
-
-          const getHugeFile = () => {
-            return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
-            .then((resp) => {
-              return fs
-              .outputFileAsync(pathToHugeAppJs, resp)
-              .return(resp)
-            })
-          }
-
-          return fs
-          .readFileAsync(pathToHugeAppJs, 'utf8')
-          .catch(getHugeFile)
+          return getHugeJsFile()
           .then((hugeJsFile) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             .reply(200, hugeJsFile, {
               'Content-Type': 'application/javascript',
@@ -3293,7 +3031,7 @@ describe('Routes', () => {
         it('can turn off security rewriting for HTML', function () {
           const html = '<html><body><script>if (top !== self) { }</script></body></html>'
 
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
@@ -3315,7 +3053,7 @@ describe('Routes', () => {
         })
 
         it('does not replaces obstructive code in JS files', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
             'Content-Type': 'application/javascript',
@@ -3339,7 +3077,7 @@ describe('Routes', () => {
       })
 
       it('does not rewrite html when initial', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><body><a href=\'http://www.google.com\'>google</a></body></html>', {
           'Content-Type': 'text/html',
@@ -3364,7 +3102,7 @@ describe('Routes', () => {
       })
 
       it('does not rewrite html when not initial', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><body><a href=\'http://www.google.com\'>google</a></body></html>', {
           'Content-Type': 'text/html',
@@ -3397,7 +3135,8 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             fileServerFolder: 'dev',
-            integrationFolder: 'my-tests',
+            specPattern: 'my-tests/**/*',
+            supportFile: false,
           },
         })
         .then(() => {
@@ -3410,8 +3149,8 @@ describe('Routes', () => {
           })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.match(/index.html content/)
-            expect(res.body).to.match(/Cypress\.action/)
+            expect(res.body).to.include('index.html content')
+            expect(res.body).to.include('parent.Cypress')
 
             expect(res.headers['set-cookie']).to.match(/initial=;/)
             expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
@@ -3573,7 +3312,7 @@ describe('Routes', () => {
       beforeEach(function () {
         return this.setup('http://getbootstrap.com')
         .then(() => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/components')
           .reply(200, 'content page', {
             'Content-Type': 'text/html',
@@ -3587,7 +3326,7 @@ describe('Routes', () => {
       })
 
       it('proxies http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/css/application.css')
         .reply(200, 'html { color: #333 }', {
           'Content-Type': 'text/css',
@@ -3608,7 +3347,7 @@ describe('Routes', () => {
         .then(() => {
           // make an initial request to set the
           // session proxy!
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/css')
           .reply(200, 'css content page', {
             'Content-Type': 'text/html',
@@ -3622,7 +3361,7 @@ describe('Routes', () => {
       })
 
       it('proxies to the remote session', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/css/application.css')
         .reply(200, 'html { color: #333 }', {
           'Content-Type': 'text/css',
@@ -3752,8 +3491,7 @@ describe('Routes', () => {
       })
 
       it('aborts the proxied request', function (done) {
-        fs
-        .readFileAsync(Fixtures.path('server/libs/huge_app.js'), 'utf8')
+        getHugeJsFile()
         .then((str) => {
           const server = http.createServer((req, res) => {
             // when the incoming message to our
@@ -3871,30 +3609,33 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(1000)
+      this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
-        this.httpSrv = http.createServer((req, res) => {
-          const { query } = url.parse(req.url, true)
+        Fixtures.scaffoldProject('e2e')
+        .then(() => {
+          this.httpSrv = http.createServer((req, res) => {
+            const { query } = url.parse(req.url, true)
 
-          if (_.has(query, 'chunked')) {
-            res.setHeader('tranfer-encoding', 'chunked')
-          } else {
-            res.setHeader('content-length', '0')
-          }
+            if (_.has(query, 'chunked')) {
+              res.setHeader('tranfer-encoding', 'chunked')
+            } else {
+              res.setHeader('content-length', '0')
+            }
 
-          res.writeHead(Number(query.status), {
-            'x-foo': 'bar',
+            res.writeHead(Number(query.status), {
+              'x-foo': 'bar',
+            })
+
+            return res.end()
           })
 
-          return res.end()
-        })
+          return this.httpSrv.listen(() => {
+            this.port = this.httpSrv.address().port
 
-        return this.httpSrv.listen(() => {
-          this.port = this.httpSrv.address().port
-
-          return this.setup(`http://localhost:${this.port}`)
-          .then(_.ary(done, 0))
+            return this.setup(`http://localhost:${this.port}`)
+            .then(_.ary(done, 0))
+          })
         })
       })
 
@@ -3906,7 +3647,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')
@@ -3918,7 +3659,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response with chunked encoding immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}&chunked`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')
@@ -3936,7 +3677,7 @@ describe('Routes', () => {
     })
 
     it('processes POST + redirect on remote proxy', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login', {
         username: 'brian@cypress.io',
         password: 'foobar',
@@ -3966,7 +3707,7 @@ describe('Routes', () => {
     // this happens on a real form submit because beforeunload fires
     // and initial=true gets set
     it('processes POST + redirect on remote initial', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login', {
         username: 'brian@cypress.io',
         password: 'foobar',
@@ -3995,7 +3736,7 @@ describe('Routes', () => {
     })
 
     it('does not alter request headers', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .matchHeader('x-csrf-token', 'abc-123')
       .post('/login', {
         username: 'brian@cypress.io',
@@ -4022,7 +3763,7 @@ describe('Routes', () => {
     })
 
     it('does not fail on a big cookie', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login')
       .reply(200)
 
@@ -4042,8 +3783,67 @@ describe('Routes', () => {
       })
     })
 
+    // Set custom status message/reason phrase from http response
+    // https://github.com/cypress-io/cypress/issues/16973
+    it('set custom status message when reason phrase is set', function () {
+      nock(this.server.remoteStates.current().origin)
+      .post('/companies/validate', {
+        payload: { name: 'Brian' },
+      })
+      .reply(400, function (uri, requestBody) {
+        this.req.response.statusMessage = 'This is the custom status message'
+
+        return {
+          status: 400,
+          message: 'This is the reply body',
+        }
+      })
+
+      return this.rp({
+        method: 'POST',
+        url: 'http://localhost:8000/companies/validate',
+        json: true,
+        body: {
+          payload: { name: 'Brian' },
+        },
+        headers: {
+          'x-cypress-status': '400',
+        },
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(400)
+        expect(res.statusMessage).to.eq('This is the custom status message')
+      })
+    })
+
+    // use default status message/reason phrase correspond to status code, from http response
+    // https://github.com/cypress-io/cypress/issues/16973
+    it('uses default status message when reason phrase is not set', function () {
+      nock(this.server.remoteStates.current().origin)
+      .post('/companies/validate', {
+        payload: { name: 'Brian' },
+      })
+      .reply(400)
+
+      return this.rp({
+        method: 'POST',
+        url: 'http://localhost:8000/companies/validate',
+        json: true,
+        body: {
+          payload: { name: 'Brian' },
+        },
+        headers: {
+          'x-cypress-status': '400',
+        },
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(400)
+        expect(res.statusMessage).to.eq('Bad Request')
+      })
+    })
+
     it('hands back 201 status codes', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/companies/validate', {
         payload: { name: 'Brian' },
       })

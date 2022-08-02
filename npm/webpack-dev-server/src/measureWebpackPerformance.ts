@@ -1,11 +1,15 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
-import * as webpack from 'webpack'
 import path from 'path'
 import fs from 'fs'
 import chalk from 'chalk'
 import SpeedMeasurePlugin from 'speed-measure-webpack-plugin'
+import type { Configuration } from 'webpack'
 
-export function measureWebpackPerformance (webpackConfig: webpack.Configuration): webpack.Configuration {
+/**
+ * @internal
+ */
+export function measureWebpackPerformance (webpackConfig: Configuration) {
   if (!process.env.WEBPACK_PERF_MEASURE) {
     throw new Error('Performance monitoring is possible only with WEBPACK_PERF_MEASURE env variable set')
   }
@@ -54,5 +58,6 @@ export function measureWebpackPerformance (webpackConfig: webpack.Configuration)
     })
     : new SpeedMeasurePlugin()
 
+  // @ts-expect-error
   return smp.wrap(webpackConfig)
 }

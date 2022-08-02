@@ -114,6 +114,10 @@
           width: 60px;
         }
 
+        /* normalizing li height across supported browsers */
+        li {
+          height: 18px;
+        }
       </style>
 
       DOM Fixture
@@ -213,6 +217,10 @@
         <input type="checkbox" name="colors" value="blue" />
         <input type="checkbox" name="colors" value="green" />
         <input type="checkbox" name="colors" value="red" />
+        <input type="checkbox" name="dogs" value="husky" />
+        <input type="checkbox" name="dogs" value="poodle" />
+        <input type="checkbox" name="dogs" value="on" />
+        <input type="checkbox" name="dogs" data-no-value="true" />
         <input type="tel">
       </form>
 
@@ -318,6 +326,12 @@
           <button type="button">button</button>
           <button type="submit">submit me</button>
         </form>
+
+        <form id="multiple-inputs-and-button-submit.outside-form">
+          <input name="fname" />
+          <input name="lname" />
+        </form>
+        <button form="multiple-inputs-and-button-submit.outside-form" type="submit">submit me</button>
 
         <form id="multiple-inputs-and-reset-and-submit-buttons">
           <input name="fname" />
@@ -433,8 +447,8 @@
       </select>
 
       <select name="foods">
-        <option value="Japanese">Ramen</option>
-        <option value="Ramen">Japanese</option>
+        <option value="Ramen">Ramen</option>
+        <option value="Japanese">Japanese</option>
       </select>
 
       <select name="names">
@@ -450,12 +464,20 @@
         <option value="2001">2001: A Space Odyssey</option>
         <option value="co">Clockwork Orange</option>
         <option value="twbb">There Will Be Blood</option>
+        <option value="gone&nbsp;with&nbsp;the&nbsp;wind">Gone with the Wind</option>
       </select>
 
       <select name="disabled" disabled>
         <option value="foo">foo</option>
         <option value="bar">bar</option>
       </select>
+
+      <fieldset disabled>
+        <select name="fieldset-disabled">
+          <option value="foo">foo</option>
+          <option value="bar">bar</option>
+        </select>
+      </fieldset>
 
       <select name="optgroup-disabled">
         <optgroup label="foobar" disabled>

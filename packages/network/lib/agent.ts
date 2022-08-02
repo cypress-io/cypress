@@ -6,10 +6,14 @@ import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
+import { lenientOptions } from './http-utils'
+import { ClientCertificateStore } from './client-certificates'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
+
+export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -34,7 +38,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
   connectReq.push(`Host: ${hostname}:${port}`)
 
   if (proxy.auth) {
-    connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
+    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
@@ -151,9 +155,7 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
-    // allow requests which contain invalid/malformed headers
-    // https://github.com/cypress-io/cypress/issues/5602
-    req.insecureHTTPParser = true
+    _.merge(req, lenientOptions)
 
     // Legacy API: addRequest(req, host, port, localAddress)
     // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
@@ -177,10 +179,6 @@ export class CombinedAgent {
         hostname: options.host,
         port: options.port,
       }) + options.path
-
-      if (!options.uri) {
-        options.uri = url.parse(options.href)
-      }
     }
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
@@ -191,12 +189,28 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
+        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
+
         return this.httpsAgent.addRequest(req, options)
       }
 
       this.httpAgent.addRequest(req, options)
     })
   }
+}
+
+const getProxyOrTargetOverrideForUrl = (href) => {
+  // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
+  // force the parent Cypress server to treat the child Cypress server like a proxy without
+  // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave
+  // like a proxy
+  const targetHost = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+
+  if (targetHost && href.includes(targetHost)) {
+    return targetHost
+  }
+
+  return getProxyForUrl(href)
 }
 
 class HttpAgent extends http.Agent {
@@ -210,8 +224,8 @@ class HttpAgent extends http.Agent {
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (process.env.HTTP_PROXY) {
-      const proxy = getProxyForUrl(options.href)
+    if (process.env.HTTP_PROXY || process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
+      const proxy = getProxyOrTargetOverrideForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
@@ -263,6 +277,23 @@ class HttpsAgent extends https.Agent {
   constructor (opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
+  }
+
+  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
+    }
+
+    // Ensure we have a proper port defined otherwise node has assumed we are port 80
+    // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
+    // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
+    // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
+    if (!options.uri.port && options.uri.protocol === 'https:') {
+      options.uri.port = String(443)
+      options.port = 443
+    }
+
+    super.addRequest(req, options)
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {

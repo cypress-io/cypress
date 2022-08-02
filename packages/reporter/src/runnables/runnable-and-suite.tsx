@@ -15,14 +15,14 @@ import Collapsible from '../collapsible/collapsible'
 import SuiteModel from './suite-model'
 import TestModel from '../test/test-model'
 
+import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+
 interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
 }
 
 const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
-  if (!model.shouldRender) return null
-
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -36,7 +36,7 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
       <span className='runnable-controls'>
         <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
           <a onClick={_launchStudio} className='runnable-controls-studio'>
-            <i className='fas fa-magic' />
+            <WandIcon />
           </a>
         </Tooltip>
       </span>
@@ -82,6 +82,7 @@ class Runnable extends Component<RunnableProps> {
           'runnable-retried': model.hasRetried,
           'runnable-studio': appState.studioActive,
         })}
+        data-model-state={model.state}
       >
         {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
       </li>

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean": "rm lib/*.js",
-    "clean-deps": "rm -rf node_modules",
+    "clean": "rimraf 'lib/**/*.js'",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
@@ -16,13 +16,15 @@
     "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
-    "debug": "4.3.2",
-    "lodash": "4.17.19",
+    "debug": "^4.3.2",
+    "fs-extra": "9.1.0",
+    "lodash": "^4.17.21",
+    "node-forge": "1.3.0",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/request": "2.88.5",
+    "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
@@ -30,9 +32,10 @@
     "@types/concat-stream": "1.6.0",
     "express": "4.17.1",
     "mocha": "6.2.2",
+    "rimraf": "3.0.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
-    "typescript": "3.5.3"
+    "typescript": "^4.2.3"
   },
   "files": [
     "lib"

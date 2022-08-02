@@ -2,7 +2,7 @@ const _ = require('lodash')
 const os = require('os')
 const md5 = require('md5')
 const path = require('path')
-const debug = require('debug')('cypress:server:file')
+const debugVerbose = require('debug')('cypress-verbose:server:util:file')
 const Promise = require('bluebird')
 const lockFile = Promise.promisifyAll(require('lockfile'))
 const { fs } = require('./fs')
@@ -13,6 +13,17 @@ const { default: pQueue } = require('p-queue')
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 
+function getUid () {
+  try {
+    // eslint-disable-next-line no-restricted-properties
+    return process.geteuid()
+  } catch (err) {
+    // process.geteuid() can fail, return a constant
+    // @see https://github.com/cypress-io/cypress/issues/17415
+    return 1
+  }
+}
+
 class File {
   constructor (options = {}) {
     if (!options.path) {
@@ -20,22 +31,33 @@ class File {
     }
 
     this.path = options.path
-
-    this._lockFileDir = path.join(os.tmpdir(), 'cypress')
-    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
-
-    this._queue = new pQueue({ concurrency: 1 })
-
-    this._cache = {}
-    this._lastRead = 0
+    this.initialize()
 
     exit.ensure(() => {
       return lockFile.unlockSync(this._lockFilePath)
     })
   }
 
+  initialize () {
+    // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
+    // Instead, we make a user specific directory with os.tmpdir.
+    this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
+    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
+
+    this._queue = new pQueue({ concurrency: 1 })
+
+    this._cache = {}
+    this._lastRead = 0
+  }
+
+  __resetForTest () {
+    this._queue.clear()
+    lockFile.unlockSync(this._lockFilePath)
+    this.initialize()
+  }
+
   transaction (fn) {
-    debug('transaction for %s', this.path)
+    debugVerbose('transaction for %s', this.path)
 
     return this._addToQueue(() => {
       return fn({
@@ -46,19 +68,19 @@ class File {
   }
 
   get (...args) {
-    debug('get values from %s', this.path)
+    debugVerbose('get values from %s', this.path)
 
     return this._get(false, ...args)
   }
 
   set (...args) {
-    debug('set values in %s', this.path)
+    debugVerbose('set values in %s', this.path)
 
     return this._set(false, ...args)
   }
 
   remove () {
-    debug('remove %s', this.path)
+    debugVerbose('remove %s', this.path)
     this._cache = {}
 
     return this._lock()
@@ -66,7 +88,7 @@ class File {
       return fs.removeAsync(this.path)
     })
     .finally(() => {
-      debug('remove succeeded or failed for %s', this.path)
+      debugVerbose('remove succeeded or failed for %s', this.path)
 
       return this._unlock()
     })
@@ -88,7 +110,7 @@ class File {
 
       const value = _.get(contents, key)
 
-      return value === undefined ? defaultValue : value
+      return value === undefined ? _.clone(defaultValue) : value
     })
   }
 
@@ -112,7 +134,7 @@ class File {
   _read () {
     return this._lock()
     .then(() => {
-      debug('read %s', this.path)
+      debugVerbose('read %s', this.path)
 
       return fs.readJsonAsync(this.path, 'utf8')
     })
@@ -129,7 +151,7 @@ class File {
       throw err
     })
     .finally(() => {
-      debug('read succeeded or failed for %s', this.path)
+      debugVerbose('read succeeded or failed for %s', this.path)
 
       return this._unlock()
     })
@@ -184,19 +206,19 @@ class File {
   _write () {
     return this._lock()
     .then(() => {
-      debug('write %s', this.path)
+      debugVerbose('write %s', this.path)
 
       return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
     })
     .finally(() => {
-      debug('write succeeded or failed for %s', this.path)
+      debugVerbose('write succeeded or failed for %s', this.path)
 
       return this._unlock()
     })
   }
 
   _lock () {
-    debug('attempt to get lock on %s', this.path)
+    debugVerbose('attempt to get lock on %s', this.path)
 
     return fs
     .ensureDirAsync(this._lockFileDir)
@@ -205,19 +227,21 @@ class File {
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
     })
     .finally(() => {
-      return debug('getting lock succeeded or failed for %s', this.path)
+      return debugVerbose('getting lock succeeded or failed for %s', this.path)
     })
   }
 
   _unlock () {
-    debug('attempt to unlock %s', this.path)
+    debugVerbose('attempt to unlock %s', this.path)
 
     return lockFile
     .unlockAsync(this._lockFilePath)
     .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, () => {}) // ignore timeouts
+    .catch(Promise.TimeoutError, () => { // ignore timeouts
+      debugVerbose(`unlock timeout error for %s`, this._lockFilePath)
+    })
     .finally(() => {
-      return debug('unlock succeeded or failed for %s', this.path)
+      return debugVerbose('unlock succeeded or failed for %s', this.path)
     })
   }
 }

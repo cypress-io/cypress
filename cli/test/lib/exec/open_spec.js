@@ -25,7 +25,6 @@ describe('exec open', function () {
       .then(() => {
         expect(spawn.start).to.be.calledWith([], {
           detached: false,
-          stdio: 'inherit',
           dev: true,
         })
       })
@@ -56,20 +55,11 @@ describe('exec open', function () {
       })
     })
 
-    it('spawns with --config-file false', function () {
-      return open.start({ configFile: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--config-file', false],
-        )
-      })
-    })
-
     it('spawns with --config-file set', function () {
-      return open.start({ configFile: 'special-cypress.json' })
+      return open.start({ configFile: 'special-cypress.config.js' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--config-file', 'special-cypress.json'],
+          ['--config-file', 'special-cypress.config.js'],
         )
       })
     })
@@ -121,6 +111,32 @@ describe('exec open', function () {
       .then(() => {
         expect(spawn.start).to.be.calledWith([])
       })
+    })
+
+    it('spawns without --testing-type when not specified', () => {
+      return open.start().then(() => {
+        expect(spawn.start).to.be.calledWith([])
+      })
+    })
+
+    it('spawns with --testing-type e2e', () => {
+      return open.start({ testingType: 'e2e' }).then(() => {
+        expect(spawn.start).to.be.calledWith(['--testing-type', 'e2e'])
+      })
+    })
+
+    it('spawns with --testing-type component', () => {
+      return open.start({ testingType: 'component' }).then(() => {
+        expect(spawn.start).to.be.calledWith(['--testing-type', 'component'])
+      })
+    })
+
+    it('throws if --testing-type is invalid', () => {
+      expect(() => open.processOpenOptions({ testingType: 'randomTestingType' })).to.throw()
+    })
+
+    it('throws if --config-file is false', () => {
+      expect(() => open.processOpenOptions({ configFile: 'false' })).to.throw()
     })
   })
 })

@@ -4,6 +4,7 @@ const http = require('http')
 const socket = require('@packages/socket')
 const Promise = require('bluebird')
 const mockRequire = require('mock-require')
+const client = require('../../app/client')
 
 const browser = {
   cookies: {
@@ -24,20 +25,31 @@ const browser = {
   },
   windows: {
     getLastFocused () {},
+    getCurrent () {},
+    update () {},
   },
-  runtime: {
-
-  },
+  runtime: {},
   tabs: {
+    create () {},
     query () {},
     executeScript () {},
     captureVisibleTab () {},
+    remove () {},
+  },
+  browsingData: {
+    remove () {},
+  },
+  webRequest: {
+    onBeforeSendHeaders: {
+      addListener () {},
+    },
   },
 }
 
 mockRequire('webextension-polyfill', browser)
 
 const background = require('../../app/background')
+const { expect } = require('chai')
 
 const PORT = 12345
 
@@ -106,21 +118,28 @@ const tab3 = {
 
 describe('app/background', () => {
   beforeEach(function (done) {
+    global.window = {}
+
     this.httpSrv = http.createServer()
-    this.server = socket.server(this.httpSrv, { path: '/__socket.io' })
+    this.server = socket.server(this.httpSrv, { path: '/__socket' })
 
-    this.onConnect = (callback) => {
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
-
-      client.on('connect', _.once(() => {
-        callback(client)
-      }))
+    const ws = {
+      on: sinon.stub(),
+      emit: sinon.stub(),
     }
 
-    this.stubEmit = (callback) => {
-      this.onConnect((client) => {
-        client.emit = _.once(callback)
-      })
+    sinon.stub(client, 'connect').returns(ws)
+
+    browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox' }),
+
+    this.connect = async (options = {}) => {
+      const ws = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+
+      // skip 'connect' and 'automation:client:connected' and trigger
+      // the handler that kicks everything off
+      await ws.on.withArgs('automation:config').args[0][1](options)
+
+      return ws
     }
 
     this.httpSrv.listen(PORT, done)
@@ -135,72 +154,47 @@ describe('app/background', () => {
   })
 
   context('.connect', () => {
-    it('can connect', function (done) {
-      this.server.on('connection', () => {
-        return done()
-      })
+    it('emits \'automation:client:connected\'', async function () {
+      const ws = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      return background.connect(`http://localhost:${PORT}`, '/__socket.io')
+      await ws.on.withArgs('connect').args[0][1]()
+
+      expect(ws.emit).to.be.calledWith('automation:client:connected')
     })
 
-    it('emits \'automation:client:connected\'', (done) => {
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
-
-      sinon.spy(client, 'emit')
-
-      return client.on('connect', _.once(() => {
-        expect(client.emit).to.be.calledWith('automation:client:connected')
-
-        return done()
-      }))
-    })
-
-    it('listens to cookie changes', (done) => {
+    it('listens to cookie changes', async function () {
       const addListener = sinon.stub(browser.cookies.onChanged, 'addListener')
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      return client.on('connect', _.once(() => {
-        expect(addListener).to.be.calledOnce
+      await this.connect()
 
-        return done()
-      }))
+      expect(addListener).to.be.calledOnce
     })
   })
 
   context('cookies', () => {
-    it('onChanged does not emit when cause is overwrite', function (done) {
+    it('onChanged does not emit when cause is overwrite', async function () {
       const addListener = sinon.stub(browser.cookies.onChanged, 'addListener')
+      const ws = await this.connect()
+      const fn = addListener.getCall(0).args[0]
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
+      fn({ cause: 'overwrite' })
 
-        const fn = addListener.getCall(0).args[0]
-
-        fn({ cause: 'overwrite' })
-
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
-
-        done()
-      })
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
     })
 
-    it('onChanged emits automation:push:request change:cookie', function (done) {
+    it('onChanged emits automation:push:request change:cookie', async function () {
       const info = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' } }
 
-      sinon.stub(browser.cookies.onChanged, 'addListener').yieldsAsync(info)
+      sinon.stub(browser.cookies.onChanged, 'addListener').yields(info)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('change:cookie')
-        expect(data).to.deep.eq(info)
+      const ws = await this.connect()
 
-        done()
-      })
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'change:cookie', info)
     })
   })
 
   context('downloads', () => {
-    it('onCreated emits automation:push:request create:download', function (done) {
+    it('onCreated emits automation:push:request create:download', async function () {
       const downloadItem = {
         id: '1',
         filename: '/path/to/download.csv',
@@ -208,23 +202,19 @@ describe('app/background', () => {
         url: 'http://localhost:1234/download.csv',
       }
 
-      sinon.stub(browser.downloads.onCreated, 'addListener').yieldsAsync(downloadItem)
+      sinon.stub(browser.downloads.onCreated, 'addListener').yields(downloadItem)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('create:download')
-        expect(data).to.deep.eq({
-          id: `${downloadItem.id}`,
-          filePath: downloadItem.filename,
-          mime: downloadItem.mime,
-          url: downloadItem.url,
-        })
+      const ws = await this.connect()
 
-        done()
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'create:download', {
+        id: `${downloadItem.id}`,
+        filePath: downloadItem.filename,
+        mime: downloadItem.mime,
+        url: downloadItem.url,
       })
     })
 
-    it('onChanged emits automation:push:request complete:download', function (done) {
+    it('onChanged emits automation:push:request complete:download', async function () {
       const downloadDelta = {
         id: '1',
         state: {
@@ -232,34 +222,29 @@ describe('app/background', () => {
         },
       }
 
-      sinon.stub(browser.downloads.onChanged, 'addListener').yieldsAsync(downloadDelta)
+      sinon.stub(browser.downloads.onChanged, 'addListener').yields(downloadDelta)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('complete:download')
-        expect(data).to.deep.eq({ id: `${downloadDelta.id}` })
+      const ws = await this.connect()
 
-        done()
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'complete:download', {
+        id: `${downloadDelta.id}`,
       })
     })
 
-    it('onChanged does not emit if state does not exist', function (done) {
+    it('onChanged does not emit if state does not exist', async function () {
       const downloadDelta = {
         id: '1',
       }
       const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
-        addListener.getCall(0).args[0](downloadDelta)
+      const ws = await this.connect()
 
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
+      addListener.getCall(0).args[0](downloadDelta)
 
-        done()
-      })
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
     })
 
-    it('onChanged does not emit if state.current is not "complete"', function (done) {
+    it('onChanged does not emit if state.current is not "complete"', async function () {
       const downloadDelta = {
         id: '1',
         state: {
@@ -268,15 +253,134 @@ describe('app/background', () => {
       }
       const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
+      const ws = await this.connect()
 
-        addListener.getCall(0).args[0](downloadDelta)
+      addListener.getCall(0).args[0](downloadDelta)
 
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
+    })
 
-        done()
+    it('does not add downloads listener if in non-Firefox browser', async function () {
+      browser.runtime.getBrowserInfo = undefined
+
+      const onCreated = sinon.stub(browser.downloads.onCreated, 'addListener')
+      const onChanged = sinon.stub(browser.downloads.onChanged, 'addListener')
+
+      await this.connect()
+
+      expect(onCreated).not.to.be.called
+      expect(onChanged).not.to.be.called
+    })
+  })
+
+  context('add header to aut iframe requests', () => {
+    const withExperimentalFlagOn = {
+      experimentalSessionAndOrigin: true,
+    }
+
+    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect()
+
+      expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
+    })
+
+    it('does not add header if it is the top frame', async function () {
+      const details = {
+        parentFrameId: -1,
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
+    })
+
+    it('does not add header if it is a nested frame', async function () {
+      const details = {
+        parentFrameId: 12345,
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
+    })
+
+    it('does not add header if it is not a sub frame request', async function () {
+      const details = {
+        parentFrameId: 0,
+        type: 'stylesheet',
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
+    })
+
+    it('does not add header if it is a spec frame request', async function () {
+      const details = {
+        parentFrameId: 0,
+        type: 'sub_frame',
+        url: '/__cypress/integration/spec.js',
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
+    })
+
+    it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
+      const details = {
+        parentFrameId: 0,
+        type: 'sub_frame',
+        url: 'http://localhost:3000/index.html',
+        requestHeaders: [
+          { name: 'X-Foo', value: 'Bar' },
+        ],
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.deep.equal({
+        requestHeaders: [
+          {
+            name: 'X-Foo',
+            value: 'Bar',
+          },
+          {
+            name: 'X-Cypress-Is-AUT-Frame',
+            value: 'true',
+          },
+        ],
       })
+    })
+
+    it('does not add before-headers listener if in non-Firefox browser', async function () {
+      browser.runtime.getBrowserInfo = undefined
+
+      const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect(withExperimentalFlagOn)
+
+      expect(onBeforeSendHeaders).not.to.be.called
     })
   })
 
@@ -314,7 +418,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })
@@ -331,7 +435,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })
@@ -397,13 +501,16 @@ describe('app/background', () => {
   context('integration', () => {
     beforeEach(function (done) {
       done = _.once(done)
+
+      client.connect.restore()
+
       this.server.on('connection', (socket1) => {
         this.socket = socket1
 
         return done()
       })
 
-      this.client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+      this.client = background.connect(`http://localhost:${PORT}`, '/__socket')
     })
 
     describe('get:cookies', () => {
@@ -515,23 +622,12 @@ describe('app/background', () => {
       beforeEach(() => {
         browser.runtime.lastError = { message: 'some error' }
 
-        sinon.stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'google.com' })
-        .resolves([
-          { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
-          { name: 'foo', value: 'bar', path: '/foo', domain: 'google.com', secure: false, httpOnly: false, expirationDate: 456 },
-        ])
-        .withArgs({ domain: 'should.throw' })
-        .resolves([
-          { name: 'shouldThrow', value: 'key', path: '/', domain: 'should.throw', secure: false, httpOnly: true, expirationDate: 123 },
-        ])
-        .withArgs({ domain: 'no.details' })
-        .resolves([
-          { name: 'shouldThrow', value: 'key', path: '/', domain: 'no.details', secure: false, httpOnly: true, expirationDate: 123 },
-        ])
-
         return sinon.stub(browser.cookies, 'remove')
-        .withArgs({ name: 'session', url: 'https://google.com/' })
+        .callsFake(function () {
+          // eslint-disable-next-line no-console
+          console.log('unstubbed browser.cookies.remove', ...arguments)
+        })
+        .withArgs({ url: 'https://google.com', name: 'foo' })
         .resolves(
           { name: 'session', url: 'https://google.com/', storeId: '123' },
         )
@@ -539,27 +635,37 @@ describe('app/background', () => {
         .resolves(
           { name: 'foo', url: 'https://google.com/foo', storeId: '123' },
         )
-        .withArgs({ name: 'noDetails', url: 'http://no.details/' })
+        .withArgs({ name: 'noDetails', url: 'http://no.details' })
         .resolves(null)
-        .withArgs({ name: 'shouldThrow', url: 'http://should.throw/' })
+        .withArgs({ name: 'shouldThrow', url: 'http://should.throw' })
         .rejects({ message: 'some error' })
       })
 
       it('resolves with array of removed cookies', function (done) {
+        const cookieArr = [{ domain: 'google.com', name: 'foo', secure: true }]
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq([
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
-            { name: 'foo', value: 'bar', path: '/foo', domain: 'google.com', secure: false, httpOnly: false, expirationDate: 456 },
-          ])
+          expect(obj.response).to.deep.eq(cookieArr)
 
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'google.com' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
 
-      it('rejects with error thrown', function (done) {
+      it('rejects when no cookie.name', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.__error).to.contain('did not include a name')
+
+          return done()
+        })
+
+        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw' }])
+      })
+
+      it('rejects with error thrown in browser.cookies.remove', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
@@ -567,18 +673,20 @@ describe('app/background', () => {
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'should.throw' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw', name: 'shouldThrow' }])
       })
 
-      it('rejects when no details', function (done) {
+      it('doesnt fail when no found cookie', function (done) {
+        const cookieArr = [{ domain: 'no.details', name: 'noDetails' }]
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.__error).to.eq(`Removing cookie failed for: ${JSON.stringify({ url: 'http://no.details/', name: 'shouldThrow' })}`)
+          expect(obj.response).to.deep.eq(cookieArr)
 
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'no.details' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
     })
 
@@ -662,6 +770,27 @@ describe('app/background', () => {
       })
     })
 
+    describe('focus:browser:window', () => {
+      beforeEach(() => {
+        sinon.stub(browser.windows, 'getCurrent').resolves({ id: '10' })
+        sinon.stub(browser.windows, 'update').withArgs('10', { focused: true }).resolves()
+      })
+
+      it('focuses the current window', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.windows.update).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'focus:browser:window')
+      })
+    })
+
     describe('take:screenshot', () => {
       beforeEach(() => {
         return sinon.stub(browser.windows, 'getLastFocused').resolves({ id: 1 })
@@ -697,6 +826,48 @@ describe('app/background', () => {
         })
 
         return this.server.emit('automation:request', 123, 'take:screenshot')
+      })
+    })
+
+    describe('reset:browser:state', () => {
+      beforeEach(() => {
+        sinon.stub(browser.browsingData, 'remove').withArgs({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).resolves()
+      })
+
+      it('resets the browser state', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.browsingData.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'reset:browser:state')
+      })
+    })
+
+    describe('reset:browser:tabs:for:next:test', () => {
+      beforeEach(() => {
+        sinon.stub(browser.tabs, 'create').withArgs({ url: 'about:blank' })
+        sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
+        sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
+      })
+
+      it('closes the tabs in the current browser window', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.tabs.create).to.be.called
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.tabs.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
       })
     })
   })

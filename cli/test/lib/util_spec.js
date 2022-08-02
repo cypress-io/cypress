@@ -12,9 +12,6 @@ const la = require('lazy-ass')
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 
-// https://github.com/cypress-io/cypress/issues/5431
-const expectedNodeOptions = `--max-http-header-size=${1024 * 1024}`
-
 describe('util', () => {
   beforeEach(() => {
     sinon.stub(process, 'exit')
@@ -33,7 +30,7 @@ describe('util', () => {
   })
 
   context('.getGitHubIssueUrl', () => {
-    it('returls url for issue number', () => {
+    it('returns url for issue number', () => {
       const url = util.getGitHubIssueUrl(4034)
 
       expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
@@ -217,7 +214,6 @@ describe('util', () => {
         FORCE_COLOR: '1',
         DEBUG_COLORS: '1',
         MOCHA_COLORS: '1',
-        NODE_OPTIONS: expectedNodeOptions,
       })
 
       util.supportsColor.returns(false)
@@ -229,46 +225,7 @@ describe('util', () => {
         FORCE_STDERR_TTY: '0',
         FORCE_COLOR: '0',
         DEBUG_COLORS: '0',
-        NODE_OPTIONS: expectedNodeOptions,
       })
-    })
-  })
-
-  context('.getNodeOptions', () => {
-    let restoreEnv
-
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
-    })
-
-    it('adds required NODE_OPTIONS', () => {
-      restoreEnv = mockedEnv({
-        NODE_OPTIONS: undefined,
-      })
-
-      expect(util.getNodeOptions({})).to.deep.eq({
-        NODE_OPTIONS: expectedNodeOptions,
-      })
-    })
-
-    it('includes existing NODE_OPTIONS', () => {
-      restoreEnv = mockedEnv({
-        NODE_OPTIONS: '--foo --bar',
-      })
-
-      expect(util.getNodeOptions({})).to.deep.eq({
-        NODE_OPTIONS: `${expectedNodeOptions} --foo --bar`,
-        ORIGINAL_NODE_OPTIONS: '--foo --bar',
-      })
-    })
-
-    it('does not return if dev is set and version < 12', () => {
-      expect(util.getNodeOptions({
-        dev: true,
-      }, 11)).to.be.undefined
     })
   })
 
@@ -295,6 +252,93 @@ describe('util', () => {
         FORCE_STDOUT_TTY: false,
         FORCE_STDERR_TTY: false,
       })
+    })
+  })
+
+  context('.getOriginalNodeOptions', () => {
+    let restoreEnv
+    const sandbox = sinon.createSandbox()
+
+    afterEach(() => {
+      if (restoreEnv) {
+        restoreEnv()
+        restoreEnv = null
+      }
+    })
+
+    it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
+      sandbox.stub(process.versions, 'node').value('v16.14.2')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
+
+      restoreEnv = mockedEnv({
+        NODE_OPTIONS: '--require foo.js',
+      })
+
+      expect(util.getOriginalNodeOptions({})).to.deep.eq({
+        ORIGINAL_NODE_OPTIONS: '--require foo.js',
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/18914
+    it('includes --openssl-legacy-provider in Node 17+ w/ OpenSSL 3', () => {
+      sandbox.stub(process.versions, 'node').value('v17.1.0')
+      sandbox.stub(process.versions, 'openssl').value('3.0.0-quic')
+
+      restoreEnv = mockedEnv({
+        NODE_OPTIONS: '--require foo.js',
+      })
+
+      let childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js --openssl-legacy-provider')
+
+      restoreEnv()
+      restoreEnv = mockedEnv({})
+      childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq(' --openssl-legacy-provider')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/19320
+    it('does not include --openssl-legacy-provider in Node 17+ w/ OpenSSL 1', () => {
+      sandbox.stub(process.versions, 'node').value('v17.1.0')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
+
+      restoreEnv = mockedEnv({
+        NODE_OPTIONS: '--require foo.js',
+      })
+
+      let childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js')
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).not.to.contain('--openssl-legacy-provider')
+
+      restoreEnv()
+      restoreEnv = mockedEnv({})
+      childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.be.undefined
+    })
+
+    // https://github.com/cypress-io/cypress/issues/18914
+    it('does not include --openssl-legacy-provider in Node <=16', () => {
+      sandbox.stub(process.versions, 'node').value('v16.14.2')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
+
+      restoreEnv = mockedEnv({})
+
+      let childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.be.undefined
+
+      restoreEnv = mockedEnv({
+        NODE_OPTIONS: '--require foo.js',
+      })
+
+      childOptions = util.getOriginalNodeOptions()
+
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js')
+      expect(childOptions.ORIGINAL_NODE_OPTIONS).not.to.contain('--openssl-legacy-provider')
     })
   })
 

@@ -4,7 +4,10 @@ const injectDevServer = require('@cypress/react/plugins/next');
 const something = require("something");
 
 module.exports = (on, config) => {
-  injectDevServer(on, config);
-  return config; // IMPORTANT to return the config object
+  if (config.testingType === "component") {
+    injectDevServer(on, config);
+  }
+
+  return config; // IMPORTANT to return a config
 };
 `

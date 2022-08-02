@@ -1,15 +1,24 @@
 {
   "extends": [
-    "plugin:@cypress/dev/tests"
+    "../../.eslintrc.js"
   ],
   "parser": "@typescript-eslint/parser",
-  "rules": {
-    "no-undef": "off"
-  },
   "env": {
     "cypress/globals": true
   },
   "plugins": [
     "cypress"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "./lib/graphql/entities/**/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error"
+        ]
+      }
+    }
   ]
 }

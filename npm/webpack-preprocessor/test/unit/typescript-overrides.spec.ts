@@ -147,7 +147,7 @@ describe('./lib/typescript-overrides', () => {
       const err = typescriptOverrides.overrideSourceMaps(true)
 
       expect(err).to.be.instanceOf(Error)
-      expect(err.message).to.eq(`Cannot find module 'typescript'`)
+      expect(err.message).to.match(/Cannot find module '.*typescript\.js'/)
     })
   })
 })

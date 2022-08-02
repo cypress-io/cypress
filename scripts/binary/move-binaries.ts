@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { s3helpers } from './s3-api'
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
@@ -5,7 +7,6 @@ import is from 'check-more-types'
 // using "arg" module for parsing CLI arguments
 // because it plays really nicely with TypeScript
 import arg from 'arg'
-import { prop, sortBy, last, equals } from 'ramda'
 import pluralize from 'pluralize'
 
 // inquirer-confirm is missing type definition
@@ -17,9 +18,9 @@ import confirm from 'inquirer-confirm'
 import uploadUtils from './util/upload'
 
 // @ts-ignore
-import { getUploadDirForPlatform } from './upload-unique-binary'
+import { getUploadDirForPlatform } from './upload-build-artifact'
 // @ts-ignore
-import { zipName, getFullUploadName } from './upload'
+import { zipName, getFullUploadPath } from './upload'
 
 /**
  * 40 character full sha commit string
@@ -33,7 +34,7 @@ type semver = string
 /**
  * Platform plus architecture string like "darwin-x64"
  */
-type platformArch = 'darwin-x64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
+type platformArch = 'darwin-x64' | 'darwin-arm64' | 'linux-x64' | 'linux-arm64' | 'win32-x64'
 
 interface ReleaseInformation {
   commit: commit
@@ -87,9 +88,9 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
 
   // each path includes commit SHA and build number, let's pick the last build
   const parsedBuilds = matching.map(parseBuildPath)
-  const sortedBuilds = sortBy(prop('build'))(parsedBuilds)
+  const sortedBuilds = _.sortBy(parsedBuilds, 'build')
 
-  return prop('s3path', last(sortedBuilds))
+  return _.last(sortedBuilds).s3path
 }
 
 /**
@@ -112,6 +113,8 @@ export const prompts = {
 export const moveBinaries = async (args = []) => {
   debug('moveBinaries with args %o', args)
   const options = arg({
+    '--s3bucket': String,
+    '--s3folder': String,
     '--commit': String,
     '--version': String,
     // optional, if passed, only the binary for that platform will be moved
@@ -135,20 +138,25 @@ export const moveBinaries = async (args = []) => {
     version: options['--version'],
   }
 
-  const aws = uploadUtils.getS3Credentials()
-  const s3 = s3helpers.makeS3(aws)
+  const credentials = await uploadUtils.getS3Credentials()
+  const aws = {
+    'bucket': options['--s3bucket'] || uploadUtils.S3Configuration.bucket,
+    'folder': options['--s3folder'] || uploadUtils.S3Configuration.releaseFolder,
+  }
+
+  const s3 = s3helpers.makeS3(credentials)
 
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
 
-  let platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+  let platforms: platformArch[] = uploadUtils.getValidPlatformArchs() as platformArch[]
 
   if (options['--platformArch']) {
     const onlyPlatform = options['--platformArch']
 
     console.log('only moving single platform %s', onlyPlatform)
     la(uploadUtils.isValidPlatformArch(onlyPlatform), 'invalid platform-arch', onlyPlatform)
-    platforms = platforms.filter(equals(onlyPlatform))
+    platforms = platforms.filter((p) => p === onlyPlatform)
   }
 
   la(platforms.length, 'no platforms to move', platforms)
@@ -159,14 +167,16 @@ export const moveBinaries = async (args = []) => {
 
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version,
-    }, platformArch)
+      uploadFolder: 'binary',
+      platformArch,
+    })
 
-    console.log('finding binary for %s in %s', platformArch, uploadDir)
+    console.log('finding binary in %s for %s in %s', aws.bucket, platformArch, uploadDir)
 
     const list: string[] = await s3helpers.listS3Objects(uploadDir, aws.bucket, s3)
 
     if (debug.enabled) {
-      console.log('all found subfolders')
+      console.log('all found sub-folders')
       console.log(list.join('\n'))
     }
 
@@ -193,7 +203,7 @@ export const moveBinaries = async (args = []) => {
   console.log('Copying %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
 
-  console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
+  console.log(lastBuilds.map((v) => v.s3zipPath).join('\n'))
 
   try {
     await prompts.shouldCopy()
@@ -215,7 +225,7 @@ export const moveBinaries = async (args = []) => {
       platformArch: lastBuild.platformArch,
       name: zipName,
     }
-    const destinationPath = getFullUploadName(options)
+    const destinationPath = getFullUploadPath(options)
 
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
@@ -227,6 +237,8 @@ export const moveBinaries = async (args = []) => {
       s3zipPath: destinationPath,
     })
   }
+
+  await uploadUtils.purgeDesktopAppAllPlatforms(releaseOptions.version, zipName)
 
   // return all available information
   return { lastBuilds, testRunners }

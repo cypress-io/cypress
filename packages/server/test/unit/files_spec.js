@@ -1,18 +1,24 @@
 require('../spec_helper')
 
-const config = require(`${root}lib/config`)
-const files = require(`${root}lib/files`)
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const files = require('../../lib/files')
+const FixturesHelper = require('@tooling/system-tests')
+const { getCtx } = require('../../lib/makeDataContext')
+
+let ctx
 
 describe('lib/files', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath).then((cfg) => {
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    return ctx.lifecycleManager.getFullInitialConfig().then(async (cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
     })
   })
 
@@ -25,7 +31,7 @@ describe('lib/files', () => {
       return files.readFile(this.projectRoot, 'tests/_fixtures/message.txt').then(({ contents, filePath }) => {
         expect(contents).to.eq('foobarbaz')
 
-        expect(filePath).to.include('/.projects/todos/tests/_fixtures/message.txt')
+        expect(filePath).to.include('/cy-projects/todos/tests/_fixtures/message.txt')
       })
     })
 
@@ -38,6 +44,13 @@ describe('lib/files', () => {
     it('uses encoding specified in options', function () {
       return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: 'ascii' }).then(({ contents }) => {
         expect(contents).to.eq('o#?\n')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is sent to driver as a Buffer', function () {
+      return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: null }).then(({ contents }) => {
+        expect(contents).to.eql(Buffer.from('\n'))
       })
     })
 
@@ -62,7 +75,7 @@ describe('lib/files', () => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents, filePath }) => {
           expect(contents).to.equal('foo')
 
-          expect(filePath).to.include('/.projects/todos/.projects/write_file.txt')
+          expect(filePath).to.include('/cy-projects/todos/.projects/write_file.txt')
         })
       })
     })
@@ -71,6 +84,15 @@ describe('lib/files', () => {
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', '', { encoding: 'ascii' }).then(() => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents }) => {
           expect(contents).to.equal('�')
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is written exactly as received', function () {
+      return files.writeFile(this.projectRoot, '.projects/write_file.txt', Buffer.from(''), { encoding: null }).then(() => {
+        return files.readFile(this.projectRoot, '.projects/write_file.txt', { encoding: null }).then(({ contents }) => {
+          expect(contents).to.eql(Buffer.from(''))
         })
       })
     })

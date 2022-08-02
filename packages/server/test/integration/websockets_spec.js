@@ -5,34 +5,47 @@ const ws = require('ws')
 const httpsProxyAgent = require('https-proxy-agent')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const socketIo = require(`${root}../socket`)
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { Automation } = require(`${root}lib/automation`)
-const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const socketIo = require(`@packages/socket/lib/browser`)
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const { Automation } = require(`../../lib/automation`)
+const Fixtures = require('@tooling/system-tests')
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 const cyPort = 12345
 const otherPort = 55551
 const wsPort = 20000
 const wssPort = 8443
 
+let ctx
+
 describe('Web Sockets', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    return config.get(this.idsPath, { port: cyPort })
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
+
+    return ctx.lifecycleManager.getFullInitialConfig({ port: cyPort })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
       this.server = new ServerE2E()
 
-      return this.server.open(this.cfg)
+      return this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        testingType: 'e2e',
+        getCurrentBrowser: () => null,
+      })
       .then(async () => {
         const automationStub = {
           use: () => { },
@@ -65,7 +78,7 @@ describe('Web Sockets', () => {
     it('sends back ECONNRESET when error upgrading', function (done) {
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
-      this.server._onDomainSet(`http://localhost:${otherPort}`)
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
 
       const client = new ws(`ws://localhost:${otherPort}`, {
         agent,
@@ -109,7 +122,7 @@ describe('Web Sockets', () => {
       // force node into legit proxy mode like a browser
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
-      this.server._onDomainSet(`http://localhost:${wsPort}`)
+      this.server.remoteStates.set(`http://localhost:${wsPort}`)
 
       this.ws.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -140,7 +153,7 @@ describe('Web Sockets', () => {
         rejectUnauthorized: false,
       })
 
-      this.server._onDomainSet(`https://localhost:${wssPort}`)
+      this.server.remoteStates.set(`https://localhost:${wssPort}`)
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -180,7 +193,7 @@ describe('Web Sockets', () => {
         rejectUnauthorized: false,
       })
 
-      this.server._onDomainSet(`https://foobar.com:${wssPort}`)
+      this.server.remoteStates.set(`https://foobar.com:${wssPort}`)
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -297,13 +310,13 @@ describe('Web Sockets', () => {
 
     context('when http superDomain has been set', () => {
       return testSocketIo(`http://localhost:${otherPort}`, function () {
-        return this.server._onDomainSet(`http://localhost:${otherPort}`)
+        return this.server.remoteStates.set(`http://localhost:${otherPort}`)
       })
     })
 
     context('when https superDomain has been set', () => {
       return testSocketIo(`http://localhost:${wssPort}`, function () {
-        return this.server._onDomainSet(`http://localhost:${wssPort}`)
+        return this.server.remoteStates.set(`http://localhost:${wssPort}`)
       })
     })
   })

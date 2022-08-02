@@ -4,25 +4,26 @@
   "private": true,
   "browser": "src/main.tsx",
   "scripts": {
-    "build-for-tests": "webpack",
-    "clean-deps": "rm -rf node_modules",
+    "build-for-tests": "node ../../scripts/run-webpack",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
     "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
-    "@fortawesome/fontawesome-free": "5.11.2",
+    "@fontsource/mulish": "4.3.0",
+    "@fontsource/open-sans": "4.3.0",
+    "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
-    "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
-    "@reach/visually-hidden": "0.10.4",
-    "classnames": "2.2.6",
+    "classnames": "2.3.1",
     "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
-    "cypress-real-events": "1.1.0",
-    "lodash": "4.17.19",
+    "cypress-real-events": "1.6.0",
+    "lodash": "^4.17.21",
     "markdown-it": "11.0.0",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
@@ -30,11 +31,11 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-svg-loader": "3.0.3",
+    "rimraf": "3.0.2",
     "sinon": "7.5.0",
-    "webpack": "4.35.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"
   },
-  "files": [
-    "lib"
-  ]
+  "files": []
 }

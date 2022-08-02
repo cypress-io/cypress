@@ -1,4 +1,5 @@
 import { oneLine } from 'common-tags'
+import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } from '@packages/resolve-dist'
 
 export function partial (domain) {
   return oneLine`
@@ -9,17 +10,25 @@ export function partial (domain) {
 }
 
 export function full (domain) {
-  return oneLine`
-    <script type='text/javascript'>
-      document.domain = '${domain}';
+  return getRunnerInjectionContents().then((contents) => {
+    return oneLine`
+      <script type='text/javascript'>
+        document.domain = '${domain}';
 
-      var Cypress = window.Cypress = parent.Cypress;
+        ${contents}
+      </script>
+    `
+  })
+}
 
-      if (!Cypress) {
-        throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!');
-      };
+export function fullCrossOrigin (domain) {
+  return getRunnerCrossOriginInjectionContents().then((contents) => {
+    return oneLine`
+      <script type='text/javascript'>
+        document.domain = '${domain}';
 
-      Cypress.action('app:window:before:load', window);
-    </script>
-  `
+        ${contents}
+      </script>
+    `
+  })
 }

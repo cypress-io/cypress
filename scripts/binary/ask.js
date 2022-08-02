@@ -84,6 +84,14 @@ const getReleases = (releases) => {
   }]
 }
 
+const getEnsureVersion = () => {
+  return prompt([{
+    name: 'version',
+    type: 'input',
+    message: 'Which version do you want to ensure?',
+  }])
+}
+
 const getVersions = (releases) => {
   return [{
     name: 'version',
@@ -197,6 +205,7 @@ module.exports = {
   getPlatformQuestion,
   getQuestions,
   getReleases,
+  getEnsureVersion,
   getVersions,
   getBumpTasks,
   deployNewVersion,

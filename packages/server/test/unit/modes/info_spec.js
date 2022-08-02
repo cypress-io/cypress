@@ -1,10 +1,10 @@
 require('../../spec_helper')
 
-const info = require(`${root}../lib/modes/info`)
-const capture = require(`${root}../lib/capture`)
-const browserUtils = require(`${root}../lib/browsers/utils`)
-const { fs } = require(`${root}../lib/util/fs`)
-const launcher = require('@packages/launcher')
+const info = require(`../../../lib/modes/info`)
+const capture = require(`../../../lib/capture`)
+const browserUtils = require(`../../../lib/browsers/utils`)
+const { fs } = require(`../../../lib/util/fs`)
+const detect = require('@packages/launcher/lib/detect')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const _ = require('lodash')
@@ -12,6 +12,10 @@ const _ = require('lodash')
 describe('lib/modes/info', () => {
   beforeEach(() => {
     capture.restore()
+
+    sinon.stub(browserUtils, 'getBrowserPath')
+    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
+    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
   })
 
   afterEach(() => {
@@ -48,17 +52,18 @@ describe('lib/modes/info', () => {
   }
 
   it('prints no browsers', async () => {
-    sinon.stub(launcher, 'detect').resolves([])
+    sinon.stub(detect, 'detect').resolves([])
     await infoAndSnapshot('output without any browsers')
   })
 
   it('prints 1 found browser', async () => {
-    sinon.stub(launcher, 'detect').resolves([chromeStable])
+    sinon.stub(detect, 'detect').resolves([chromeStable])
+
     await infoAndSnapshot('single chrome:stable')
   })
 
   it('prints 2 found browsers', async () => {
-    sinon.stub(launcher, 'detect').resolves([chromeStable, firefoxDev])
+    sinon.stub(detect, 'detect').resolves([chromeStable, firefoxDev])
     // have to make sure random sampling from the browser list
     // to create examples returns same order
     // so Chrome will be picked first, Firefox will be second
@@ -72,10 +77,7 @@ describe('lib/modes/info', () => {
   })
 
   it('adds profile for browser if folder exists', async () => {
-    sinon.stub(launcher, 'detect').resolves([chromeStable, firefoxDev])
-    sinon.stub(browserUtils, 'getBrowserPath')
-    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
-    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
+    sinon.stub(detect, 'detect').resolves([chromeStable, firefoxDev])
 
     sinon.stub(fs, 'statAsync')
     .withArgs('/path/to/user/chrome/profile').throws('No Chrome profile folder')

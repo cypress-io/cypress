@@ -5,7 +5,7 @@ import Bluebird from 'bluebird'
 
 const log = Debug('cypress:driver')
 
-const proxyFunctions = ['emit', 'emitThen', 'emitMap']
+const proxyFunctions = ['emit', 'emitThen', 'emitThenSeries', 'emitMap']
 
 const withoutFunctions = (arr) => {
   return _.reject(arr, _.isFunction)
@@ -20,7 +20,7 @@ type CyEvents = {
   emitThenSeries: (eventName: string, ...args: any[]) => Bluebird<any[]>
 }
 
-type Events = EventEmitter2 & CyEvents
+export type Events = EventEmitter2 & CyEvents
 
 export function extend (obj): Events {
   const events: EventEmitter2 & Partial<CyEvents> = new EventEmitter2()
@@ -54,6 +54,7 @@ export function extend (obj): Events {
             // array of results
             return ret1.concat(ret2)
           case 'emitThen':
+          case 'emitThenSeries':
             return Bluebird.join(ret1, ret2, (a, a2) => {
               // array of results
               return a.concat(a2)
@@ -87,6 +88,7 @@ export function extend (obj): Events {
 
   events.emitMap = map(_.map)
   events.emitThen = map(Bluebird.map)
+  events.emitThenSeries = map(Bluebird.mapSeries)
 
   // is our log enabled and have we not silenced
   // this specific object?
@@ -116,4 +118,17 @@ export function extend (obj): Events {
 
   // return the events object
   return events as Events
+}
+
+/**
+ * When we create a listener from the runner for the AUT, we need to ensure the function
+ * is sourced from the AUT, otherwise the event will not be associated correctly.
+ *
+ * We do this by creating a function from the AUT window, keeping in state to ensure we
+ * only have a single fn
+ */
+export function makeContentWindowListener (fnName, contentWindow) {
+  return new contentWindow.Function(fnName, `return function() {
+    return ${fnName}.apply(this, arguments)
+  }`)
 }

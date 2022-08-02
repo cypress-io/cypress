@@ -1,69 +1,86 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const path = require('path')
-const R = require('ramda')
 const debug = require('debug')('test')
-const config = require(`${root}lib/config`)
-const errors = require(`${root}lib/errors`)
-const configUtil = require(`${root}lib/util/config`)
-const findSystemNode = require(`${root}lib/util/find_system_node`)
-const scaffold = require(`${root}lib/scaffold`)
-let settings = require(`${root}lib/util/settings`)
+const stripAnsi = require('strip-ansi')
+const { stripIndent } = require('common-tags')
+const Fixtures = require('@tooling/system-tests')
+const { getCtx } = require('@packages/data-context')
+
+const config = require(`../../lib/config`)
+const errors = require(`../../lib/errors`)
+const configUtil = require(`../../lib/util/config`)
+
+const os = require('node:os')
 
 describe('lib/config', () => {
-  beforeEach(function () {
+  before(function () {
     this.env = process.env
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+
+    Fixtures.scaffold()
   })
 
-  afterEach(function () {
+  after(function () {
     process.env = this.env
   })
 
   context('environment name check', () => {
-    it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+    it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
+      sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
+      try {
+        await config.mergeDefaults(cfg, options)
+      } catch {
+        //
+      }
 
-      expect(errors.throw).have.been.calledOnce
+      expect(errors.throwErr).have.been.calledOnce
     })
 
-    it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw')
+    it('allows production CYPRESS_INTERNAL_ENV', async () => {
+      sinon.stub(errors, 'throwErr')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
+      await config.mergeDefaults(cfg, options)
 
-      expect(errors.throw).not.to.be.called
+      expect(errors.throwErr).not.to.be.called
     })
   })
 
   context('.get', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
+      this.ctx = getCtx()
+
       this.projectRoot = '/_test-output/path/to/project'
 
+      sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
+
+      await this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+      this.ctx.lifecycleManager.setCurrentTestingType('e2e')
+
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
-        sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'reloadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
 
     it('sets projectRoot', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectRoot).to.eq(this.projectRoot)
 
@@ -74,7 +91,7 @@ describe('lib/config', () => {
     it('sets projectName', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
       })
@@ -86,7 +103,7 @@ describe('lib/config', () => {
 
       this.setup(settings, envSettings)
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         expect(settings).to.deep.equal({ foo: 'bar' })
         expect(envSettings).to.deep.equal({ baz: 'qux' })
@@ -99,21 +116,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })
@@ -123,15 +140,15 @@ describe('lib/config', () => {
     context('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
-          return config.get(this.projectRoot) // shouldn't throw
+          return this.ctx.lifecycleManager.getFullInitialConfig() // shouldn't throw
         }
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
-          return config.get(this.projectRoot)
+          return this.ctx.lifecycleManager.getFullInitialConfig()
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {
-            expect(err.message).to.include(errorMessage)
+            expect(stripAnsi(err.message)).to.include(stripIndent`${errorMessage}`)
           })
         }
       })
@@ -142,16 +159,10 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      it('validates cypress.json', function () {
+      it('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.json')
-      })
-
-      it('validates cypress.env.json', function () {
-        this.setup({}, { reporter: 5 })
-
-        return this.expectValidationFails('cypress.env.json')
+        return this.expectValidationFails('Expected reporter to be a string')
       })
 
       it('only validates known values', function () {
@@ -169,35 +180,49 @@ describe('lib/config', () => {
 
         it('fails if not a number', function () {
           this.setup({ animationDistanceThreshold: { foo: 'bar' } })
-          this.expectValidationFails('be a number')
 
-          return this.expectValidationFails('the value was: \`{"foo":"bar"}\`')
+          return this.expectValidationFails('be a number')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            {
+              "foo": "bar"
+            }`)
+          })
         })
       })
 
       context('baseUrl', () => {
         it('passes if begins with http://', function () {
-          this.setup({ baseUrl: 'http://example.com' })
+          this.setup({ e2e: { baseUrl: 'http://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if begins with https://', function () {
-          this.setup({ baseUrl: 'https://example.com' })
+          this.setup({ e2e: { baseUrl: 'https://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string', function () {
-          this.setup({ baseUrl: false })
+          this.setup({ e2e: { baseUrl: false } })
 
           return this.expectValidationFails('be a fully qualified URL')
         })
 
         it('fails if not a fully qualified url', function () {
-          this.setup({ baseUrl: 'localhost' })
+          this.setup({ e2e: { baseUrl: 'localhost' } })
 
           return this.expectValidationFails('be a fully qualified URL')
+        })
+
+        it('fails if it is set on root level', function () {
+          this.setup({ baseUrl: 'localhost' })
+
+          return this.expectValidationFails('It is now configured separately as a testing type property: e2e.baseUrl')
         })
       })
 
@@ -210,9 +235,11 @@ describe('lib/config', () => {
 
         it('fails if not a boolean', function () {
           this.setup({ chromeWebSecurity: 42 })
-          this.expectValidationFails('be a boolean')
 
-          return this.expectValidationFails('the value was: `42`')
+          return this.expectValidationFails('be a boolean')
+          .then(() => {
+            return this.expectValidationFails('the value was: 42')
+          })
         })
       })
 
@@ -225,9 +252,79 @@ describe('lib/config', () => {
 
         it('fails if not a boolean', function () {
           this.setup({ modifyObstructiveCode: 42 })
-          this.expectValidationFails('be a boolean')
 
-          return this.expectValidationFails('the value was: `42`')
+          return this.expectValidationFails('be a boolean')
+          .then(() => {
+            return this.expectValidationFails('the value was: 42')
+          })
+        })
+      })
+
+      context('component', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            component: {
+              execTimeout: 10000,
+            },
+          })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ component: false })
+
+          return this.expectValidationFails('to be a plain object')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+
+          return this.expectValidationFails('Expected component.baseUrl to be a fully qualified URL (starting with `http://` or `https://`).')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
+        })
+      })
+
+      context('e2e', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            e2e: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ e2e: false })
+
+          return this.expectValidationFails('to be a plain object')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
+
+          return this.expectValidationFails('Expected e2e.animationDistanceThreshold to be a number')
+          .then(() => {
+            return this.expectValidationFails('the value was: "this is definitely not a number"')
+          })
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+
+          return this.expectValidationFails('Expected component.baseUrl to be a fully qualified URL (starting with `http://` or `https://`).')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
         })
       })
 
@@ -240,9 +337,11 @@ describe('lib/config', () => {
 
         it('fails if not a number', function () {
           this.setup({ defaultCommandTimeout: 'foo' })
-          this.expectValidationFails('be a number')
 
-          return this.expectValidationFails('the value was: `"foo"`')
+          return this.expectValidationFails('be a number')
+          .then(() => {
+            return this.expectValidationFails('the value was: "foo"')
+          })
         })
       })
 
@@ -297,9 +396,11 @@ describe('lib/config', () => {
 
         it('fails if not a string', function () {
           this.setup({ fileServerFolder: true })
-          this.expectValidationFails('be a string')
 
-          return this.expectValidationFails('the value was: `true`')
+          return this.expectValidationFails('be a string')
+          .then(() => {
+            return this.expectValidationFails('the value was: true')
+          })
         })
       })
 
@@ -323,44 +424,38 @@ describe('lib/config', () => {
         })
       })
 
-      context('ignoreTestFiles', () => {
+      context('excludeSpecPattern', () => {
         it('passes if a string', function () {
-          this.setup({ ignoreTestFiles: '*.jsx' })
+          this.setup({ e2e: { excludeSpecPattern: '*.jsx', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ ignoreTestFiles: ['*.jsx'] })
+          this.setup({ e2e: { excludeSpecPattern: ['*.jsx'], supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ ignoreTestFiles: 5 })
+          this.setup({ e2e: { excludeSpecPattern: 5 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ ignoreTestFiles: [5] })
-          this.expectValidationFails('be a string or an array of strings')
+          this.setup({ e2e: { excludeSpecPattern: [5] } })
 
-          return this.expectValidationFails('the value was: `[5]`')
-        })
-      })
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
 
-      context('integrationFolder', () => {
-        it('passes if a string', function () {
-          this.setup({ integrationFolder: '_tests' })
 
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a string', function () {
-          this.setup({ integrationFolder: true })
-
-          return this.expectValidationFails('be a string')
+            [
+              5
+            ]`)
+          })
         })
       })
 
@@ -420,26 +515,6 @@ describe('lib/config', () => {
         })
       })
 
-      context('pluginsFile', () => {
-        it('passes if a string', function () {
-          this.setup({ pluginsFile: 'cypress/plugins' })
-
-          return this.expectValidationPasses()
-        })
-
-        it('passes if false', function () {
-          this.setup({ pluginsFile: false })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a string or false', function () {
-          this.setup({ pluginsFile: 42 })
-
-          return this.expectValidationFails('be a string')
-        })
-      })
-
       context('port', () => {
         it('passes if a number', function () {
           this.setup({ port: 10 })
@@ -496,50 +571,61 @@ describe('lib/config', () => {
         })
       })
 
-      context('testFiles', () => {
+      context('specPattern', () => {
         it('passes if a string', function () {
-          this.setup({ testFiles: '**/*.coffee' })
+          this.setup({ e2e: { supportFile: false, specPattern: '**/*.coffee' } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ testFiles: ['**/*.coffee', '**/*.jsx'] })
+          this.setup({ e2e: { supportFile: false, specPattern: ['**/*.coffee'] } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ testFiles: 42 })
+          this.setup({ e2e: { supportFile: false, specPattern: 42 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ testFiles: [5] })
-          this.expectValidationFails('be a string or an array of strings')
+          this.setup({ e2e: { supportFile: false, specPattern: [5] } })
 
-          return this.expectValidationFails('the value was: `[5]`')
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            [
+              5
+            ]`)
+          })
         })
       })
 
       context('supportFile', () => {
-        it('passes if a string', function () {
-          this.setup({ supportFile: 'cypress/support' })
-
-          return this.expectValidationPasses()
-        })
-
         it('passes if false', function () {
-          this.setup({ supportFile: false })
+          this.setup({ e2e: { supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or false', function () {
-          this.setup({ supportFile: true })
+          this.setup({ e2e: { supportFile: true } })
 
           return this.expectValidationFails('be a string or false')
+        })
+
+        it('fails if is set at root level', function () {
+          this.setup({ supportFile: false })
+
+          return this.expectValidationFails('The supportFile configuration option is now invalid when set from the root of the config object in')
+          .then(() => {
+            return this.expectValidationFails('It is now configured separately as a testing type property: e2e.supportFile and component.supportFile')
+          })
         })
       })
 
@@ -760,9 +846,17 @@ describe('lib/config', () => {
 
         it('fails if not an array of strings', function () {
           this.setup({ blockHosts: [5] })
-          this.expectValidationFails('be a string or an array of strings')
 
-          return this.expectValidationFails('the value was: `[5]`')
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            [
+              5
+            ]`)
+          })
         })
       })
 
@@ -794,49 +888,136 @@ describe('lib/config', () => {
         })
       })
 
-      context('firefoxGcInterval', () => {
-        it('passes if a number', function () {
-          this.setup({ firefoxGcInterval: 1 })
+      function pemCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  cert: 'certs/cert.crt',
+                  key: 'certs/cert.key',
+                  passphrase: 'certs/cert.key.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      function pfxCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  pfx: 'certs/cert.pfx',
+                  passphrase: 'certs/cerpfx.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      context('clientCertificates', () => {
+        it('accepts valid PEM config', function () {
+          this.setup(pemCertificate())
 
           return this.expectValidationPasses()
         })
 
-        it('passes if null', function () {
-          this.setup({ firefoxGcInterval: null })
+        it('accepts valid PFX config', function () {
+          this.setup(pfxCertificate())
 
           return this.expectValidationPasses()
         })
 
-        it('passes if correctly shaped object', function () {
-          this.setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+        it('detects invalid config with no url', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationPasses()
+          cfg.clientCertificates[0].url = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].url to be a URL matcher.\n\nInstead the value was: null')
         })
 
-        it('fails if string', function () {
-          this.setup({ firefoxGcInterval: 'foo' })
+        it('detects invalid config with no certs', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationFails('a positive number or null or an object')
+          cfg.clientCertificates[0].certs = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].certs to be an array of certs.\n\nInstead the value was: null')
         })
 
-        it('fails if invalid object', function () {
-          this.setup({ firefoxGcInterval: { foo: 'bar' } })
+        it('detects invalid config with no cert', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationFails('a positive number or null or an object')
+          cfg.clientCertificates[0].certs[0].cert = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` must have either PEM or PFX defined')
+        })
+
+        it('detects invalid config with PEM and PFX certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].pfx = 'a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` has both PEM and PFX defined')
+        })
+
+        it('detects invalid PEM config with no key', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].certs[0].key to be a key filepath.\n\nInstead the value was: null')
+        })
+
+        it('detects PEM cert absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].certs[0].cert to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
+        })
+
+        it('detects PEM key absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].certs[0].key to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
+        })
+
+        it('detects PFX absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = undefined
+          cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].certs[0].pfx to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
+        })
+
+        it('detects CA absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('clientCertificates[0].ca[0] to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
       })
-    })
-  })
-
-  context('.getConfigKeys', () => {
-    beforeEach(function () {
-      this.includes = (key) => {
-        expect(config.getConfigKeys()).to.include(key)
-      }
-    })
-
-    it('includes blockHosts', function () {
-      return this.includes('blockHosts')
     })
   })
 
@@ -911,12 +1092,19 @@ describe('lib/config', () => {
       this.defaults = (prop, value, cfg = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return config.mergeDefaults(cfg, options)
-        .then(R.prop(prop))
-        .then((result) => {
-          expect(result).to.deep.eq(value)
+        return config.mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options)
+        .then((mergedConfig) => {
+          expect(mergedConfig[prop]).to.deep.eq(value)
         })
       }
+    })
+
+    it('slowTestThreshold=10000 for e2e', function () {
+      return this.defaults('slowTestThreshold', 10000, {}, { testingType: 'e2e' })
+    })
+
+    it('slowTestThreshold=250 for component', function () {
+      return this.defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
     })
 
     it('port=null', function () {
@@ -977,10 +1165,6 @@ describe('lib/config', () => {
       return this.defaults('baseUrl', 'http://localhost:8000', {
         baseUrl: 'http://localhost:8000',
       })
-    })
-
-    it('javascripts=[]', function () {
-      return this.defaults('javascripts', [])
     })
 
     it('viewportWidth=1000', function () {
@@ -1112,43 +1296,44 @@ describe('lib/config', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.numTestsKeptInMemory).to.eq(0)
       })
     })
 
     it('resets watchForFileChanges to false when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.watchForFileChanges).to.be.false
       })
     })
 
     it('can override morgan in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { morgan: false })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false })
       .then((cfg) => {
         expect(cfg.morgan).to.be.false
       })
     })
 
     it('can override isTextTerminal in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.isTextTerminal).to.be.true
       })
     })
 
     it('can override socketId in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: 1234 })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
       .then((cfg) => {
-        expect(cfg.socketId).to.eq(1234)
+        expect(cfg.socketId).to.eq('1234')
       })
     })
 
     it('deletes envFile', () => {
       const obj = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
         env: {
           foo: 'bar',
           version: '0.5.2',
@@ -1176,6 +1361,7 @@ describe('lib/config', () => {
     it('merges env into @config.env', () => {
       const obj = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
         env: {
           host: 'localhost',
           user: 'brian',
@@ -1212,6 +1398,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
     })
 
+    it('warns if experimentalSessionSupport is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionSupport', true, {
+        experimentalSessionSupport: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
+    })
+
     it('warns if experimentalShadowDomSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -1232,6 +1428,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
     })
 
+    it('warns if experimentalStudio is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalStudio', true, {
+        experimentalStudio: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
+    })
+
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
@@ -1243,10 +1449,21 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
     })
 
+    it('warns if firefoxGcInterval is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('firefoxGcInterval', true, {
+        firefoxGcInterval: true,
+      })
+
+      expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
+          supportFile: false,
         }
 
         const options = {
@@ -1258,43 +1475,48 @@ describe('lib/config', () => {
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
+            arch: { value: os.arch(), from: 'default' },
             baseUrl: { value: null, from: 'default' },
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            componentFolder: { value: 'cypress/component', from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
-            experimentalComponentTesting: { value: false, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
-            integrationFolder: { value: 'cypress/integration', from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: 'default', from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
             port: { value: 1234, from: 'cli' },
             projectId: { value: null, from: 'default' },
+            redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
-            supportFile: { value: 'cypress/support', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
+            supportFile: { value: false, from: 'config' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1311,7 +1533,7 @@ describe('lib/config', () => {
       })
 
       it('sets config, envFile and env', () => {
-        sinon.stub(config, 'getProcessEnvVars').returns({
+        sinon.stub(configUtil, 'getProcessEnvVars').returns({
           quux: 'quux',
           RECORD_KEY: 'foobarbazquux',
           PROJECT_ID: 'projectId123',
@@ -1319,6 +1541,7 @@ describe('lib/config', () => {
 
         const obj = {
           projectRoot: '/foo/bar',
+          supportFile: false,
           baseUrl: 'http://localhost:8080',
           port: 2020,
           env: {
@@ -1338,19 +1561,21 @@ describe('lib/config', () => {
         return config.mergeDefaults(obj, options)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
+            arch: { value: os.arch(), from: 'default' },
             animationDistanceThreshold: { value: 5, from: 'default' },
             baseUrl: { value: 'http://localhost:8080', from: 'config' },
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            componentFolder: { value: 'cypress/component', from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalComponentTesting: { value: false, from: 'default' },
+            experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalStudio: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1374,29 +1599,32 @@ describe('lib/config', () => {
               },
             },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
-            integrationFolder: { value: 'cypress/integration', from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: 'default', from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
+            platform: { value: os.platform(), from: 'default' },
             port: { value: 2020, from: 'config' },
             projectId: { value: 'projectId123', from: 'env' },
+            redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'spec', from: 'default' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
-            supportFile: { value: 'cypress/support', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
+            supportFile: { value: false, from: 'config' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1506,7 +1734,7 @@ describe('lib/config', () => {
 
   context('_.defaultsDeep', () => {
     it('merges arrays', () => {
-    // sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      // sanity checks to confirm how Lodash merges arrays in defaultsDeep
       const diffs = {
         list: [1],
       }
@@ -1634,6 +1862,7 @@ describe('lib/config', () => {
       }
 
       const cfg = {
+        projectRoot: '/foo/bar',
         browsers: [browser],
         resolved: {
           browsers: {
@@ -1647,10 +1876,10 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       config.updateWithPluginValues(cfg, overrides)
 
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_ERROR')
+      expect(errors.throwErr).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
     })
 
     it('allows user to filter browsers', () => {
@@ -1709,7 +1938,7 @@ describe('lib/config', () => {
 
   context('.parseEnv', () => {
     it('merges together env from config, env from file, env from process, and env from CLI', () => {
-      sinon.stub(config, 'getProcessEnvVars').returns({
+      sinon.stub(configUtil, 'getProcessEnvVars').returns({
         version: '0.12.1',
         user: 'bob',
       })
@@ -1756,7 +1985,7 @@ describe('lib/config', () => {
 
         obj[`${key}version`] = '0.12.0'
 
-        expect(config.getProcessEnvVars(obj)).to.deep.eq({
+        expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
           host: 'http://localhost:8888',
           version: '0.12.0',
         })
@@ -1771,7 +2000,7 @@ describe('lib/config', () => {
         CYPRESS_PROJECT_ID: 'abc123',
       }
 
-      expect(config.getProcessEnvVars(obj)).to.deep.eq({
+      expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
         FOO: 'bar',
         PROJECT_ID: 'abc123',
         CRASH_REPORTS: 0,
@@ -1815,25 +2044,6 @@ describe('lib/config', () => {
     })
   })
 
-  context('.setScaffoldPaths', () => {
-    it('sets integrationExamplePath + integrationExampleName + scaffoldedFiles', () => {
-      const obj = {
-        integrationFolder: '/_test-output/path/to/project/cypress/integration',
-      }
-
-      sinon.stub(scaffold, 'fileTree').resolves([])
-
-      return config.setScaffoldPaths(obj).then((result) => {
-        expect(result).to.deep.eq({
-          integrationFolder: '/_test-output/path/to/project/cypress/integration',
-          integrationExamplePath: '/_test-output/path/to/project/cypress/integration/examples',
-          integrationExampleName: 'examples',
-          scaffoldedFiles: [],
-        })
-      })
-    })
-  })
-
   context('.setSupportFileAndFolder', () => {
     it('does nothing if supportFile is falsey', () => {
       const obj = {
@@ -1864,30 +2074,48 @@ describe('lib/config', () => {
       })
     })
 
-    it('sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/no-scaffolding')
+    it('sets the supportFile to default e2e.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
+      const projectRoot = Fixtures.projectPath('no-scaffolding')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/e2e.js',
       })
 
       return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
-          supportFile: `${projectRoot}/cypress/support/index.js`,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
+          supportFolder: `${projectRoot}/cypress/support`,
+        })
+      })
+    })
+
+    it('finds support file in project path that contains glob syntax', () => {
+      const projectRoot = Fixtures.projectPath('project-with-(glob)-[chars]')
+
+      const obj = config.setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      return config.setSupportFileAndFolder(obj)
+      .then((result) => {
+        expect(result).to.eql({
+          projectRoot,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
           supportFolder: `${projectRoot}/cypress/support`,
         })
       })
     })
 
     it('sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/empty-folders')
+      const projectRoot = Fixtures.projectPath('empty-folders')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: false,
       })
 
       return config.setSupportFileAndFolder(obj)
@@ -1905,27 +2133,33 @@ describe('lib/config', () => {
       const obj = config.setAbsolutePaths({
         projectRoot,
         supportFile: 'does/not/exist',
+        resolved: {
+          supportFile: {
+            value: 'does/not/exist',
+            from: 'default',
+          },
+        },
       })
 
       return config.setSupportFileAndFolder(obj)
       .catch((err) => {
-        expect(err.message).to.include('The support file is missing or invalid.')
+        expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
     })
 
     it('sets the supportFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = Fixtures.projectPath('ts-proj')
       const supportFolder = `${projectRoot}/cypress/support`
       const supportFilename = `${supportFolder}/index.ts`
 
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(supportFolder).throws(e)
+      sinon.stub(config.utils, 'resolveModule').withArgs(supportFilename).throws(e)
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/index.ts',
       })
 
       return config.setSupportFileAndFolder(obj)
@@ -1941,7 +2175,7 @@ describe('lib/config', () => {
     })
 
     it('uses custom TS supportFile if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-custom-names')
+      const projectRoot = Fixtures.projectPath('ts-proj-custom-names')
       const supportFolder = `${projectRoot}/cypress`
       const supportFilename = `${supportFolder}/support.ts`
 
@@ -1968,177 +2202,10 @@ describe('lib/config', () => {
     })
   })
 
-  context('.setPluginsFile', () => {
-    it('does nothing if pluginsFile is falsey', () => {
-      const obj = {
-        projectRoot: '/_test-output/path/to/project',
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql(obj)
-      })
-    })
-
-    it('sets the pluginsFile to default index.js if does not exist', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/no-scaffolding')
-
-      const obj = {
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: `${projectRoot}/cypress/plugins/index.js`,
-        })
-      })
-    })
-
-    it('sets the pluginsFile to index.ts if it exists', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
-
-      const obj = {
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: `${projectRoot}/cypress/plugins/index.ts`,
-        })
-      })
-    })
-
-    it('sets the pluginsFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
-      const pluginsFolder = `${projectRoot}/cypress/plugins`
-      const pluginsFilename = `${pluginsFolder}/index.ts`
-
-      const e = new Error('Cannot resolve TS file by default')
-
-      e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFolder).throws(e)
-
-      const obj = {
-        projectRoot,
-        pluginsFile: pluginsFolder,
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: pluginsFilename,
-        })
-      })
-    })
-
-    it('set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/empty-folders')
-
-      const obj = config.setAbsolutePaths({
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      })
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: false,
-        })
-      })
-    })
-
-    it('throws error if pluginsFile is not default and does not exist', () => {
-      const projectRoot = process.cwd()
-
-      const obj = {
-        projectRoot,
-        pluginsFile: 'does/not/exist',
-      }
-
-      return config.setPluginsFile(obj)
-      .catch((err) => {
-        expect(err.message).to.include('The plugins file is missing or invalid.')
-      })
-    })
-
-    it('uses custom TS pluginsFile if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-custom-names')
-      const pluginsFolder = `${projectRoot}/cypress`
-      const pluginsFile = `${pluginsFolder}/plugins.ts`
-
-      const e = new Error('Cannot resolve TS file by default')
-
-      e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFile).throws(e)
-
-      const obj = {
-        projectRoot,
-        pluginsFile,
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile,
-        })
-      })
-    })
-  })
-
-  context('.setParentTestsPaths', () => {
-    it('sets parentTestsFolder and parentTestsFolderDisplay', () => {
-      const obj = {
-        projectRoot: '/_test-output/path/to/project',
-        integrationFolder: '/_test-output/path/to/project/cypress/integration',
-      }
-
-      expect(config.setParentTestsPaths(obj)).to.deep.eq({
-        projectRoot: '/_test-output/path/to/project',
-        integrationFolder: '/_test-output/path/to/project/cypress/integration',
-        parentTestsFolder: '/_test-output/path/to/project/cypress',
-        parentTestsFolderDisplay: 'project/cypress',
-      })
-    })
-
-    it('sets parentTestsFolderDisplay to parentTestsFolder if they are the same', () => {
-      const obj = {
-        projectRoot: '/_test-output/path/to/project',
-        integrationFolder: '/_test-output/path/to/project/tests',
-      }
-
-      expect(config.setParentTestsPaths(obj)).to.deep.eq({
-        projectRoot: '/_test-output/path/to/project',
-        integrationFolder: '/_test-output/path/to/project/tests',
-        parentTestsFolder: '/_test-output/path/to/project',
-        parentTestsFolderDisplay: 'project',
-      })
-    })
-  })
-
   context('.setAbsolutePaths', () => {
     it('is noop without projectRoot', () => {
       expect(config.setAbsolutePaths({})).to.deep.eq({})
     })
-
-    // it "resolves fileServerFolder with projectRoot", ->
-    //   obj = {
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "foo"
-    //   }
-
-    //   expect(config.setAbsolutePaths(obj)).to.deep.eq({
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "/_test-output/path/to/project/foo"
-    //   })
 
     it('does not mutate existing obj', () => {
       const obj = {}
@@ -2157,7 +2224,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'unitFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',
@@ -2178,85 +2245,72 @@ describe('lib/config', () => {
 
   context('.setNodeBinary', () => {
     beforeEach(function () {
-      this.findSystemNode = sinon.stub(findSystemNode, 'findNodePathAndVersion')
       this.nodeVersion = process.versions.node
     })
 
-    it('sets current Node ver if nodeVersion != system', function () {
-      return config.setNodeBinary({
-        nodeVersion: undefined,
+    it('sets bundled Node ver if nodeVersion != system', function () {
+      const obj = config.setNodeBinary({
+        nodeVersion: 'bundled',
       })
-      .then((obj) => {
-        expect(this.findSystemNode).to.not.be.called
 
-        expect(obj).to.deep.eq({
-          nodeVersion: undefined,
-          resolvedNodeVersion: this.nodeVersion,
-        })
+      expect(obj).to.deep.eq({
+        nodeVersion: 'bundled',
+        resolvedNodeVersion: this.nodeVersion,
       })
     })
 
-    it('sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves', function () {
-      this.findSystemNode.resolves({
-        path: '/foo/bar/node',
-        version: '1.2.3',
-      })
-
-      return config.setNodeBinary({
+    it('sets cli Node ver if nodeVersion = system', function () {
+      const obj = config.setNodeBinary({
         nodeVersion: 'system',
-      })
-      .then((obj) => {
-        expect(this.findSystemNode).to.be.calledOnce
+      }, '/foo/bar/node', '1.2.3')
 
-        expect(obj).to.deep.eq({
-          nodeVersion: 'system',
-          resolvedNodeVersion: '1.2.3',
-          resolvedNodePath: '/foo/bar/node',
-        })
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: '1.2.3',
+        resolvedNodePath: '/foo/bar/node',
       })
     })
 
-    it('sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects', function () {
-      const err = new Error()
-      const onWarning = sinon.stub()
-
-      this.findSystemNode.rejects(err)
-
-      return config.setNodeBinary({
+    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
+      const obj = config.setNodeBinary({
         nodeVersion: 'system',
-      }, onWarning)
-      .then((obj) => {
-        expect(this.findSystemNode).to.be.calledOnce
-        expect(onWarning).to.be.calledOnce
-        expect(obj).to.deep.eq({
-          nodeVersion: 'system',
-          resolvedNodeVersion: this.nodeVersion,
-        })
+      }, undefined, '1.2.3')
 
-        expect(obj.resolvedNodePath).to.be.undefined
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+
+    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
+      const obj = config.setNodeBinary({
+        nodeVersion: 'system',
+      }, '/foo/bar/node')
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
       })
     })
   })
-})
 
-describe('lib/util/config', () => {
-  context('.isDefault', () => {
-    it('returns true if value is default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: null }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
+  describe('relativeToProjectRoot', () => {
+    context('posix', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = '/root/projects'
+        const supportFile = '/root/projects/cypress/support/e2e.js'
 
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.true
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq('cypress/support/e2e.js')
+      })
     })
 
-    it('returns false if value is not default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: 'http://localhost:8080' }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
+    context('windows', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = `\\root\\projects`
+        const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
 
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.false
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
+      })
     })
   })
 })

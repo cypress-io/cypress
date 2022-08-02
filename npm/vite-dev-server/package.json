@@ -4,27 +4,37 @@
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
-    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
-    "test": "yarn cy:run",
-    "watch": "tsc -w"
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
+    "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
+    "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
+    "watch": "tsc -w",
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
-    "debug": "4.3.2",
-    "mustache": "4.1.0"
+    "debug": "4.3.3",
+    "find-up": "6.3.0",
+    "local-pkg": "0.4.1",
+    "node-html-parser": "5.3.3",
+    "pathe": "0.2.0"
   },
   "devDependencies": {
-    "@types/mustache": "4.1.1",
-    "vite": "2.0.5"
-  },
-  "peerDependencies": {
-    "vite": ">= 2"
+    "chai": "^4.3.6",
+    "dedent": "^0.7.0",
+    "mocha": "^9.2.2",
+    "sinon": "^13.0.1",
+    "ts-node": "^10.2.1",
+    "vite": "3.0.3",
+    "vite-plugin-inspect": "0.4.3"
   },
   "files": [
     "dist",
-    "index-template.html"
+    "client",
+    "index.html",
+    "index.d.ts"
   ],
   "license": "MIT",
   "repository": {
@@ -33,10 +43,8 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
-  },
-  "ciJobs": [
-    "npm-vite-dev-server"
-  ]
+  }
 }

@@ -50,6 +50,8 @@ const baseRules = {
     'error',
     2,
     {
+      // TODO: fix this, we shouldn't need to ignore TemplateLiterals
+      'ignoredNodes': ['TemplateLiteral'],
       'SwitchCase': 1,
       'MemberExpression': 0,
     },
@@ -114,7 +116,7 @@ const baseRules = {
   'no-unneeded-ternary': 'error',
   'no-unreachable': 'error',
   'no-unused-labels': 'error',
-  'no-unused-vars': ['error', { args: 'none' }],
+  'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
   'no-useless-concat': 'error',
   'no-useless-constructor': 'error',
   'no-var': 'error',
@@ -193,7 +195,8 @@ const baseRules = {
   ],
   'space-infix-ops': 'error',
   'space-unary-ops': 'error',
-  'template-curly-spacing': 'error',
+  // TODO: change this back to 'error'
+  'template-curly-spacing': 'off',
   'use-isnan': 'error',
   'valid-typeof': 'error',
 }
@@ -213,6 +216,9 @@ module.exports = {
       settings: {
         json: {
           'sort-package-json': 'pro',
+        },
+        react: {
+          version: 'detect',
         },
       },
       env: {
@@ -252,17 +258,31 @@ module.exports = {
           },
         },
         {
-          files: '*.ts',
+          files: [
+            '*.ts',
+            '*.tsx',
+            '*.vue',
+          ],
           parser: '@typescript-eslint/parser',
           plugins: [
             '@typescript-eslint',
           ],
           rules: {
+            'no-undef': 'off',
             'no-unused-vars': 'off',
+            'indent': 'off',
+            'no-useless-constructor': 'off',
+            'no-duplicate-imports': 'off',
+            'import/no-duplicates': 'off',
+            '@typescript-eslint/no-duplicate-imports': [
+              'error',
+            ],
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
                 'args': 'none',
+                'ignoreRestSiblings': true,
+                'argsIgnorePattern': '^_',
               },
             ],
             '@typescript-eslint/type-annotation-spacing': 'error',
@@ -278,6 +298,15 @@ module.exports = {
                 'singleline': {
                   'delimiter': 'comma',
                 },
+              },
+            ],
+            '@typescript-eslint/indent': [
+              'error',
+              2,
+              {
+                'ignoredNodes': ['TemplateLiteral', 'TSTypeParameterInstantiation'],
+                'SwitchCase': 1,
+                'MemberExpression': 0,
               },
             ],
           },

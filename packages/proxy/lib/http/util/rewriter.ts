@@ -1,17 +1,19 @@
 import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
+import type { CypressWantsInjection } from '../../types'
 
 export type SecurityOpts = {
   isHtml?: boolean
   url: string
   useAstSourceRewriting: boolean
+  modifyObstructiveThirdPartyCode: boolean
   deferSourceMapRewrite: (opts: any) => string
 }
 
 export type InjectionOpts = {
   domainName: string
-  wantsInjection: WantsInjection
+  wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
 }
 
@@ -19,8 +21,6 @@ const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
-
-type WantsInjection = 'full' | 'partial' | false
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
@@ -30,6 +30,8 @@ function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
+    case 'fullCrossOrigin':
+      return inject.fullCrossOrigin(domainName)
     case 'partial':
       return inject.partial(domainName)
     default:
@@ -42,7 +44,7 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return html.replace(re, str)
   }
 
-  const htmlToInject = getHtmlToInject(opts)
+  const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to

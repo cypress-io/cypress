@@ -1,0 +1,31 @@
+.sessions-container.instruments-container {
+  .instrument-content {
+    padding: 0;
+  }
+
+  .clear-sessions {
+    text-transform: none;
+    color: $gray-400;
+    display: flex;
+    align-items: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    &:hover,
+    &:focus {
+      color: $gray-50;
+    }
+  }
+
+  .session-item {
+    padding: 3px 10px;
+
+    background-color: $gray-1000;
+    color: $gray-400;
+    min-height: 20px;
+
+    &:hover {
+      cursor: pointer;
+      background-color: $gray-900;
+    }
+  }
+}

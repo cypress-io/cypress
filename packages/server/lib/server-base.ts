@@ -2,36 +2,39 @@ import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
+import EventEmitter from 'events'
 import evilDns from 'evil-dns'
-import express from 'express'
+import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
-import { AddressInfo } from 'net'
+import type { AddressInfo } from 'net'
 import url from 'url'
-import httpsProxy from '@packages/https-proxy'
+import la from 'lazy-ass'
+import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, uri } from '@packages/network'
-import { NetworkProxy } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
-import errors from './errors'
-import logger from './logger'
+import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import type { SocketCt } from './socket-ct'
+import * as errors from './errors'
 import Request from './request'
-import { SocketE2E } from './socket-e2e'
+import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
-import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
-
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/static/favicon.ico',
-]
-const DEFAULT_DOMAIN_NAME = 'localhost'
-const fullyQualifiedRe = /^https?:\/\//
+import { createInitialWorkers } from '@packages/rewriter'
+import type { Cfg } from './project-base'
+import type { Browser } from '@packages/server/lib/browsers/types'
+import { InitializeRoutes, createCommonRoutes } from './routes'
+import { createRoutesE2E } from './routes-e2e'
+import { createRoutesCT } from './routes-ct'
+import type { FoundSpec } from '@packages/types'
+import type { Server as WebSocketServer } from 'ws'
+import { RemoteStates } from './remote_states'
+import { cookieJar } from './util/cookies'
+import type { Automation } from './automation/automation'
+import type { AutomationCookie } from './automation/cookies'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -41,7 +44,14 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute) {
+const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+  const ALLOWED_PROXY_BYPASS_URLS = [
+    '/',
+    `/${namespace}/runner/cypress_runner.css`,
+    `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
+    `/${namespace}/runner/favicon.ico`,
+  ]
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -83,7 +93,21 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export class ServerBase<TSocket extends SocketE2E | SocketCt> {
+export type WarningErr = Record<string, any>
+
+export interface OpenServerOptions {
+  SocketCtor: typeof SocketE2E | typeof SocketCt
+  testingType: Cypress.TestingType
+  onError: any
+  onWarning: any
+  exit?: boolean
+  getCurrentBrowser: () => Browser
+  getAutomation: () => Automation
+  getSpec: () => FoundSpec | null
+  shouldCorrelatePreRequests: () => boolean
+}
+
+export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
   protected isListening: boolean
@@ -96,23 +120,26 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
-
-  protected _remoteAuth: unknown
-  protected _remoteProps: unknown
-  protected _remoteOrigin: unknown
-  protected _remoteStrategy: unknown
-  protected _remoteVisitingUrl: unknown
-  protected _remoteDomainName: unknown
-  protected _remoteFileServer: unknown
+  protected _graphqlWS?: WebSocketServer
+  protected _eventBus: EventEmitter
+  protected _remoteStates: RemoteStates
 
   constructor () {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
+    this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
     this._fileServer = null
+
+    this._remoteStates = new RemoteStates(() => {
+      return {
+        serverPort: this._port(),
+        fileServerPort: this._fileServer?.port(),
+      }
+    })
   }
 
   ensureProp = ensureProp
@@ -141,11 +168,101 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._httpsProxy, 'open')
   }
 
+  get remoteStates () {
+    return this._remoteStates
+  }
+
+  setupCrossOriginRequestHandling () {
+    this._eventBus.on('cross:origin:delaying:html', (request) => {
+      this.socket.localBus.once('cross:origin:release:html', () => {
+        this._eventBus.emit('cross:origin:release:html')
+      })
+
+      this.socket.toDriver('cross:origin:delaying:html', request)
+    })
+
+    this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
+      this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
+        this._eventBus.emit('cross:origin:automation:cookies:received')
+      })
+
+      this.socket.toDriver('cross:origin:automation:cookies', cookies)
+    })
+  }
+
+  abstract createServer (
+    app: Express,
+    config: Cfg,
+    onWarning: unknown,
+  ): Bluebird<[number, WarningErr?]>
+
+  open (config: Cfg, {
+    getSpec,
+    getAutomation,
+    getCurrentBrowser,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    testingType,
+    SocketCtor,
+    exit,
+  }: OpenServerOptions) {
+    debug('server open')
+
+    la(_.isPlainObject(config), 'expected plain config object', config)
+
+    if (!config.baseUrl && testingType === 'component') {
+      throw new Error('ServerCt#open called without config.baseUrl.')
+    }
+
+    const app = this.createExpressApp(config)
+
+    this._nodeProxy = httpProxy.createProxyServer({
+      target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
+    })
+
+    this._socket = new SocketCtor(config) as TSocket
+
+    clientCertificates.loadClientCertificateConfig(config)
+
+    this.createNetworkProxy({ config, getAutomation, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
+
+    if (config.experimentalSourceRewriting) {
+      createInitialWorkers()
+    }
+
+    this.createHosts(config.hosts)
+
+    const routeOptions: InitializeRoutes = {
+      config,
+      remoteStates: this._remoteStates,
+      nodeProxy: this.nodeProxy,
+      networkProxy: this._networkProxy!,
+      onError,
+      getSpec,
+      getCurrentBrowser,
+      testingType,
+      exit,
+    }
+
+    this.setupCrossOriginRequestHandling()
+    this._remoteStates.addEventListeners(this.socket.localBus)
+
+    const runnerSpecificRouter = testingType === 'e2e'
+      ? createRoutesE2E(routeOptions)
+      : createRoutesCT(routeOptions)
+
+    app.use(runnerSpecificRouter)
+    app.use(createCommonRoutes(routeOptions))
+
+    return this.createServer(app, config, onWarning)
+  }
+
   createExpressApp (config) {
-    const { morgan, clientRoute } = config
+    const { morgan, clientRoute, namespace } = config
     const app = express()
 
-    // set the cypress config from the cypress.json file
+    // set the cypress config from the cypress.config.{js,ts,mjs,cjs} file
     app.set('view engine', 'html')
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
@@ -167,12 +284,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute))
+    app.use(_forceProxyMiddleware(clientRoute, namespace))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -182,6 +299,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.disable('x-powered-by')
 
     return app
+  }
+
+  useMorgan () {
+    return require('morgan')('dev')
   }
 
   getHttpServer () {
@@ -197,7 +318,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy ({ config, getAutomation, remoteStates, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -206,21 +327,27 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
-      getRemoteState,
+      shouldCorrelatePreRequests,
+      getAutomation,
+      remoteStates,
       getFileServerToken,
+      getCookieJar: () => cookieJar,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,
+      serverBus: this._eventBus,
     })
   }
 
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
+      this._remoteStates.reset()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -230,14 +357,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts = {}) {
+  createHosts (hosts: {[key: string]: string} | null = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
   }
 
+  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  }
+
+  emitRequestEvent (eventName, data) {
+    this.socket.toDriver('request:event', eventName, data)
+  }
+
   _createHttpServer (app): DestroyableHttpServer {
-    const svr = http.createServer(app)
+    const svr = http.createServer(httpUtils.lenientOptions, app)
 
     allowDestroy(svr)
 
@@ -245,7 +380,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return svr
   }
 
-  _port () {
+  _port = () => {
     return (this.server.address() as AddressInfo).port
   }
 
@@ -298,90 +433,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
-    // {
-    //   origin: "http://localhost:2020"
-    //   fileServer:
-    //   strategy: "file"
-    //   domainName: "localhost"
-    //   props: null
-    // }
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   strategy: "http"
-    //   domainName: "google.com"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    const props = _.extend({}, {
-      auth: this._remoteAuth,
-      props: this._remoteProps,
-      origin: this._remoteOrigin,
-      strategy: this._remoteStrategy,
-      visiting: this._remoteVisitingUrl,
-      domainName: this._remoteDomainName,
-      fileServer: this._remoteFileServer,
-    })
-
-    debug('Getting remote state: %o', props)
-
-    return props
-  }
-
-  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
-    const l = (type, val) => {
-      return debug('Setting', type, val)
-    }
-
-    this._remoteAuth = options.auth
-
-    l('remoteAuth', this._remoteAuth)
-
-    // if this isn't a fully qualified url
-    // or if this came to us as <root> in our tests
-    // then we know to go back to our default domain
-    // which is the localhost server
-    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
-      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
-      this._remoteStrategy = 'file'
-      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
-      this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteStrategy', this._remoteStrategy)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-      l('remoteFileServer', this._remoteFileServer)
-    } else {
-      this._remoteOrigin = origin(fullyQualifiedUrl)
-
-      this._remoteStrategy = 'http'
-
-      this._remoteFileServer = null
-
-      // set an object with port, tld, and domain properties
-      // as the remoteHostAndPort
-      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
-
-      // @ts-ignore
-      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-    }
-
-    return this._getRemoteState()
-  }
-
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
-    // bail if this is our own namespaced socket.io request
+    // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
       if (!this.socketAllowed.isRequestAllowed(req)) {
@@ -389,7 +442,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         socket.end()
       }
 
-      // we can return here either way, if the socket is still valid socket.io will hook it up
+      // we can return here either way, if the socket is still valid socket.io or graphql-ws will hook it up
       return
     }
 
@@ -413,6 +466,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           port,
           protocol,
         },
+        headers: {
+          'x-cypress-forwarded-from-cypress': true,
+        },
         agent,
       }, onProxyErr)
     }
@@ -429,21 +485,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const baseUrl = this._baseUrl ?? '<root>'
 
-    return this._onDomainSet(baseUrl)
+    return this._remoteStates.set(baseUrl)
   }
 
   _close () {
-    this.reset()
-
-    logger.unsetSettings()
-
-    evilDns.clear()
-
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
+      return Bluebird.resolve(true)
     }
+
+    this.reset()
+
+    evilDns.clear()
 
     return this._server.destroyAsync()
     .then(() => {
@@ -452,14 +506,17 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.join(
+    return Bluebird.all([
       this._close(),
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
-    )
-    .then(() => {
+      this._graphqlWS?.close(),
+    ])
+    .then((res) => {
       this._middleware = null
+
+      return res
     })
   }
 
@@ -467,8 +524,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._socket && this._socket.end()
   }
 
-  changeToUrl (url) {
-    return this._socket && this._socket.changeToUrl(url)
+  async sendFocusBrowserMessage () {
+    this._socket && await this._socket.sendFocusBrowserMessage()
   }
 
   onRequest (fn) {

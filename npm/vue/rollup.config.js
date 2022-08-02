@@ -16,15 +16,12 @@ function createEntry (options) {
   const {
     format,
     input,
-    isBrowser,
   } = options
 
   const config = {
     input,
     external: [
       'vue',
-      '@vue/test-utils',
-      '@cypress/webpack-dev-server',
     ],
     plugins: [
       resolve({ preferBuiltins: true }), commonjs(),
@@ -36,7 +33,6 @@ function createEntry (options) {
       format,
       globals: {
         vue: 'Vue',
-        '@vue/test-utils': 'VueTestUtils',
       },
       exports: 'auto',
     },
@@ -45,9 +41,6 @@ function createEntry (options) {
   if (input === 'src/index.ts') {
     if (format === 'es') {
       config.output.file = pkg.module
-      if (isBrowser) {
-        config.output.file = pkg.unpkg
-      }
     }
 
     if (format === 'cjs') {
@@ -61,14 +54,14 @@ function createEntry (options) {
 
   config.plugins.push(
     ts({
-      check: format === 'es' && isBrowser,
+      check: false,
       tsconfigOverride: {
         compilerOptions: {
           declaration: format === 'es',
-          target: 'es5', // not sure what this should be?
+          noEmit: false,
           module: format === 'cjs' ? 'es2015' : 'esnext',
         },
-        exclude: ['tests'],
+        exclude: ['cypress/component'],
       },
     }),
   )
@@ -77,10 +70,6 @@ function createEntry (options) {
 }
 
 export default [
-  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: false }),
-  createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
-  createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
-  createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
-  createEntry({ format: 'cjs', input: 'src/support.js', isBrowser: false }),
-  createEntry({ format: 'cjs', input: 'src/plugins/webpack/index.js', isBrowser: false }),
+  createEntry({ format: 'es', input: 'src/index.ts' }),
+  createEntry({ format: 'cjs', input: 'src/index.ts' }),
 ]

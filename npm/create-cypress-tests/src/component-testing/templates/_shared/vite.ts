@@ -10,17 +10,18 @@ export const ViteTemplate: Template = {
   dependencies: ['@cypress/vite-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast(
+      requiresReturnConfig: true,
+      RequireAst: babel.template.ast(
         'const { startDevServer } = require("@cypress/vite-dev-server");',
       ),
-      ModuleExportsBody: babel.template.ast([
+      IfComponentTestingPluginsAst: babel.template.ast([
         'on("dev-server:start", async (options) => startDevServer({ options }))',
       ].join('\n'), { preserveComments: true }),
     }
   },
   test: (root) => {
     return {
-      success: scanFSForAvailableDependency(root, ['vite']),
+      success: scanFSForAvailableDependency(root, { vite: '*' }),
     }
   },
 }

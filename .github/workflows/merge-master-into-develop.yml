@@ -11,7 +11,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          token: ${{ secrets.DEVELOP_PUSH_TOKEN }}
+          # the default `GITHUB_TOKEN` cannot push to protected branches, so use `cypress-app-bot`'s token instead
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
       - name: Set committer info
         run: |
           git config --local user.email "$(git log --format='%ae' HEAD^!)"
@@ -22,8 +23,12 @@ jobs:
         id: check-conflict
         run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<<<<<<')"
       - name: Merge master into develop
+        id: merge-master
         run: git merge master
         if: ${{ !steps.check-conflict.outputs.merge_conflict }}
+      - name: Failed merge, set merged status as failed
+        run: echo "::set-output name=merge_conflict::'failed merge'"
+        if: ${{ steps.merge-master.outcome != 'success' }}
       - name: Push
         run: git push
         if: ${{ !steps.check-conflict.outputs.merge_conflict }}

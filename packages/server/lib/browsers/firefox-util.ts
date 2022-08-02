@@ -6,6 +6,9 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
+import { CdpAutomation } from './cdp_automation'
+import { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
 const errors = require('../errors')
 
@@ -17,6 +20,12 @@ let timings = {
   gc: [] as any[],
   cc: [] as any[],
   collections: [] as any[],
+}
+
+let driver
+
+const sendMarionette = (data) => {
+  return driver.send(new Command(data))
 }
 
 const getTabId = (tab) => {
@@ -93,6 +102,54 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
+async function connectMarionetteToNewTab () {
+  // When firefox closes its last tab, it keeps a blank tab open. This will be the only handle
+  // So we will connect to it and navigate it to about:blank to set it up for CDP connection
+  const handles = await sendMarionette({
+    name: 'WebDriver:GetWindowHandles',
+  })
+
+  await sendMarionette({
+    name: 'WebDriver:SwitchToWindow',
+    parameters: { handle: handles[0] },
+  })
+
+  await navigateToUrl('about:blank')
+}
+
+async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
+  debug('firefox: reconnecting to blank tab')
+
+  await connectMarionetteToNewTab()
+
+  debug('firefox: reconnecting CDP')
+
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  await options.onInitializeNewBrowserTab()
+
+  debug(`firefox: navigating to ${options.url}`)
+  await navigateToUrl(options.url)
+}
+
+async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
+  const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  return browserCriClient
+}
+
+async function navigateToUrl (url) {
+  await sendMarionette({
+    name: 'WebDriver:Navigate',
+    parameters: { url },
+  })
+}
+
 const logGcDetails = () => {
   const reducedTimings = {
     ...timings,
@@ -158,16 +215,27 @@ export default {
   },
 
   setup ({
+    automation,
     extensions,
+    onError,
     url,
     marionettePort,
     foxdriverPort,
-  }) {
+    remotePort,
+    options,
+  }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-    ])
+      remotePort && setupRemote(remotePort, automation, onError, options),
+    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
+
+  connectToNewSpec,
+
+  navigateToUrl,
+
+  setupRemote,
 
   async setupFoxdriver (port) {
     await protocol._connectAsync({
@@ -241,14 +309,10 @@ export default {
       getDelayMsForRetry,
     })
 
-    const driver = new Marionette.Drivers.Promises({
+    driver = new Marionette.Drivers.Promises({
       port,
       tries: 1, // marionette-client has its own retry logic which we want to avoid
     })
-
-    const sendMarionette = (data) => {
-      return driver.send(new Command(data))
-    }
 
     debug('firefox: navigating page with webdriver')
 
@@ -289,17 +353,26 @@ export default {
           })
         }))
       })
-      .then(() => {
-        return sendMarionette({
-          name: 'WebDriver:Navigate',
-          parameters: { url },
-        })
-      })
       .then(resolve)
       .catch(_onError('commands'))
     })
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
+  },
+
+  async windowFocus () {
+  // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+  // this is critical for headless mode since otherwise the browser never gains focus
+    return sendMarionette({
+      name: 'WebDriver:ExecuteScript',
+      parameters: {
+        'args': [],
+        'script': `return (() => {
+        top.focus()
+      }).apply(null, arguments)\
+      `,
+      },
+    })
   },
 }

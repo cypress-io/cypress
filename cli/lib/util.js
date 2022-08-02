@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const R = require('ramda')
+const arch = require('arch')
 const os = require('os')
 const ospath = require('ospath')
 const crypto = require('crypto')
@@ -18,10 +18,12 @@ const executable = require('executable')
 const { stripIndent } = require('common-tags')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
-const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 const fs = require('./fs')
+const semver = require('semver')
+
+const pkg = require(path.join(__dirname, '..', 'package.json'))
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
@@ -114,10 +116,9 @@ const logBrokenGtkDisplayWarning = () => {
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
-  const lines = stdout.split('\n').map(R.trim)
-  const lineMatches = R.equals(expectedLine)
+  const lines = stdout.split('\n').map((val) => val.trim())
 
-  return lines.some(lineMatches)
+  return lines.some((line) => line === expectedLine)
 }
 
 /**
@@ -197,13 +198,15 @@ const parseOpts = (opts) => {
     'cacheClear',
     'cachePrune',
     'ciBuildId',
-    'componentTesting',
+    'ct',
+    'component',
     'config',
     'configFile',
     'cypressVersion',
     'destination',
     'detached',
     'dev',
+    'e2e',
     'exit',
     'env',
     'force',
@@ -211,6 +214,8 @@ const parseOpts = (opts) => {
     'group',
     'headed',
     'headless',
+    'inspect',
+    'inspectBrk',
     'key',
     'path',
     'parallel',
@@ -230,11 +235,14 @@ const parseOpts = (opts) => {
 
   // some options might be quoted - which leads to unexpected results
   // remove double quotes from certain options
-  const removeQuotes = {
-    group: dequote,
-    ciBuildId: dequote,
+  const cleanOpts = { ...opts }
+  const toDequote = ['group', 'ciBuildId']
+
+  for (const prop of toDequote) {
+    if (_.has(opts, prop)) {
+      cleanOpts[prop] = dequote(opts[prop])
+    }
   }
-  const cleanOpts = R.evolve(removeQuotes, opts)
 
   debug('parsed cli options %o', cleanOpts)
 
@@ -249,12 +257,16 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    folder = `${folder}-e2e-test`
+  }
 
   const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 
@@ -281,33 +293,33 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getNodeOptions(options))
+    .extend(util.getOriginalNodeOptions())
     .value()
   },
 
-  getNodeOptions (options, nodeVersion) {
-    if (!nodeVersion) {
-      nodeVersion = Number(process.versions.node.split('.')[0])
+  getOriginalNodeOptions () {
+    const opts = {}
+
+    if (process.env.NODE_OPTIONS) {
+      opts.ORIGINAL_NODE_OPTIONS = process.env.NODE_OPTIONS
     }
 
-    if (options.dev && nodeVersion < 12) {
-      // `node` is used instead of Electron when --dev is passed, so this won't work if Node is too old
-      debug('NODE_OPTIONS=--max-http-header-size could not be set because we\'re in dev mode and Node is < 12.0.0')
+    // https://github.com/cypress-io/cypress/issues/18914
+    // Node 17+ ships with OpenSSL 3 by default, so we may need the option
+    // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
+    // function. This option doesn't exist on Node <17 or when it is built
+    // against OpenSSL 1, so we have to detect Node's major version and check
+    // which version of OpenSSL it was built against before spawning the plugins
+    // process.
 
-      return
+    // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
+    // version that has been updated to webpack >= 5.61, which no longer relies on
+    // Node's builtin crypto.hash function.
+    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
+      opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
     }
 
-    // https://github.com/cypress-io/cypress/issues/5431
-    const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2}`
-
-    if (_.isString(process.env.NODE_OPTIONS)) {
-      return {
-        NODE_OPTIONS: `${NODE_OPTIONS} ${process.env.NODE_OPTIONS}`,
-        ORIGINAL_NODE_OPTIONS: process.env.NODE_OPTIONS || '',
-      }
-    }
-
-    return { NODE_OPTIONS }
+    return opts
   },
 
   getForceTty () {
@@ -351,6 +363,10 @@ const util = {
 
   cwd () {
     return process.cwd()
+  },
+
+  pkgBuildInfo () {
+    return pkg.buildInfo
   },
 
   pkgVersion () {
@@ -443,13 +459,62 @@ const util = {
     })
   },
 
-  getPlatformInfo () {
-    return util.getOsVersionAsync().then((version) => {
-      return stripIndent`
-        Platform: ${os.platform()} (${version})
-        Cypress Version: ${util.pkgVersion()}
-      `
-    })
+  async getPlatformInfo () {
+    const [version, osArch] = await Promise.all([
+      util.getOsVersionAsync(),
+      this.getRealArch(),
+    ])
+
+    return stripIndent`
+      Platform: ${os.platform()}-${osArch} (${version})
+      Cypress Version: ${util.pkgVersion()}
+    `
+  },
+
+  _cachedArch: undefined,
+
+  /**
+   * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
+   */
+  async getRealArch () {
+    if (this._cachedArch) return this._cachedArch
+
+    async function _getRealArch () {
+      const osPlatform = os.platform()
+      // eslint-disable-next-line no-restricted-syntax
+      const osArch = os.arch()
+
+      debug('detecting arch %o', { osPlatform, osArch })
+
+      if (osArch === 'arm64') return 'arm64'
+
+      if (osPlatform === 'darwin') {
+        // could possibly be x64 node on arm64 darwin, check if we are being translated by Rosetta
+        // https://stackoverflow.com/a/65347893/3474615
+        const { stdout } = await execa('sysctl', ['-n', 'sysctl.proc_translated']).catch(() => '')
+
+        debug('rosetta check result: %o', { stdout })
+        if (stdout === '1') return 'arm64'
+      }
+
+      if (osPlatform === 'linux') {
+        // could possibly be x64 node on arm64 linux, check the "machine hardware name"
+        // list of names for reference: https://stackoverflow.com/a/45125525/3474615
+        const { stdout } = await execa('uname', ['-m']).catch(() => '')
+
+        debug('arm uname -m result: %o ', { stdout })
+        if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      const pkgArch = arch()
+
+      if (pkgArch === 'x86') return 'ia32'
+
+      return pkgArch
+    }
+
+    return (this._cachedArch = await _getRealArch())
   },
 
   // attention:

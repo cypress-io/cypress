@@ -9,11 +9,10 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
+const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const chalk = require('chalk')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -29,8 +28,9 @@ const exit = (code = 0) => {
 }
 
 const showWarningForInvalidConfig = (options) => {
+  const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+    if (!publicConfigKeys.find((configKey) => configKey === option)) {
       invalid.push(option)
     }
 
@@ -60,10 +60,6 @@ const exitErr = (err) => {
   })
 }
 
-const isComponentTesting = (options) => {
-  return options.testingType === 'component'
-}
-
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -78,20 +74,14 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
+      if (this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
           warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
-        // just run the gui code directly here
-        // and pass our options directly to main
-        if (isComponentTesting(options)) {
-          debug(`skipping running Electron when in ${mode} mode`)
-        } else {
-          debug('running Electron currently')
-        }
+        debug('running Electron currently')
 
         return require('./modes')(mode, options)
       }
@@ -116,15 +106,12 @@ module.exports = {
 
         debug('electron open arguments %o', args)
 
-        return cypressElectron.open('.', args, fn)
+        // const mainEntryFile = require.main.filename
+        const serverMain = require('./cwd')()
+
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
-  },
-
-  openProject (options) {
-    // this code actually starts a project
-    // and is spawned from nodemon
-    return require('./open_project').open(options.project, options)
   },
 
   start (argv = []) {
@@ -132,7 +119,7 @@ module.exports = {
 
     // if the CLI passed "--" somewhere, we need to remove it
     // for https://github.com/cypress-io/cypress/issues/5466
-    argv = R.without('--', argv)
+    argv = argv.filter((val) => val !== '--')
 
     let options
 
@@ -148,11 +135,6 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
-
-    // Allow for Cypress to test locally, but do not allow users to access component testing
-    if (options.componentTesting && !process.env.CYPRESS_INTERNAL_ENV) {
-      throw new Error('Component testing mode is not implemented. But coming 🥳.')
-    }
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -186,14 +168,6 @@ module.exports = {
         mode = 'smokeTest'
       } else if (options.returnPkg) {
         mode = 'returnPkg'
-      } else if (options.logs) {
-        mode = 'logs'
-      } else if (options.clearLogs) {
-        mode = 'clearLogs'
-      } else if (options.getKey) {
-        mode = 'getKey'
-      } else if (options.generateKey) {
-        mode = 'generateKey'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -245,36 +219,6 @@ module.exports = {
         }).then(exit0)
         .catch(exitErr)
 
-      case 'logs':
-        // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'clearLogs':
-        // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'getKey':
-        // print the key + exit
-        return require('./project-base').ProjectBase
-        .getSecretKeyByPath(options.projectRoot)
-        .then((key) => {
-          return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
-        .catch(exitErr)
-
-      case 'generateKey':
-        // generate + print the key + exit
-        return require('./project-base').ProjectBase
-        .generateSecretKeyByPath(options.projectRoot)
-        .then((key) => {
-          return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
-        .catch(exitErr)
-
       case 'exitWithCode':
         return require('./modes/exit')(options)
         .then(exit)
@@ -290,7 +234,7 @@ module.exports = {
 
             if (isCanceled) {
               // eslint-disable-next-line no-console
-              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return 1
             }
@@ -305,8 +249,7 @@ module.exports = {
         return this.runElectron(mode, options)
 
       case 'openProject':
-        // open + start the project
-        return this.openProject(options)
+        throw new Error('Unused')
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)

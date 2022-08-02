@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const Reporter = require(`${root}lib/reporter`)
+const Reporter = require(`../../lib/reporter`)
 const snapshot = require('snap-shot-it')
 
 describe('lib/reporter', () => {
@@ -111,7 +111,6 @@ describe('lib/reporter', () => {
     it('recursively creates suites for fullTitle', function () {
       const args = this.reporter.parseArgs('fail', [this.testObj])
 
-      console.log(args)
       expect(args[0]).to.eq('fail')
 
       const title = 'TodoMVC - React When page is initially opened should focus on the todo input field'
@@ -166,6 +165,55 @@ describe('lib/reporter', () => {
       expect(this.emit.getCall(0).args[1].state).to.eq('passed')
 
       expect(this.emit.getCall(0).args[1].tests.length).to.equal(2)
+    })
+  })
+
+  context('#normalizeTest', () => {
+    let reporter
+    let test
+
+    beforeEach(() => {
+      reporter = new Reporter()
+      test = {
+        prevAttempts: [
+          {
+            err: {
+              name: 'Error',
+              message: 'There was an error',
+            },
+          },
+        ],
+      }
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17378
+    describe('attempt errors', () => {
+      it('is null when error is undefined', () => {
+        test.prevAttempts[0].err = undefined
+        const result = reporter.normalizeTest(test)
+
+        expect(result.attempts[0].error).to.be.null
+      })
+
+      it('stack is undefined when error is a string', () => {
+        test.prevAttempts[0].err = 'There was an error'
+        const result = reporter.normalizeTest(test)
+
+        expect(result.attempts[0].error.stack).to.be.undefined
+      })
+
+      it('stack is undefined when undefined', () => {
+        const result = reporter.normalizeTest(test)
+
+        expect(result.attempts[0].error.stack).to.be.undefined
+      })
+
+      it('stack is an empty string when an empty string', () => {
+        test.prevAttempts[0].err.stack = ''
+        const result = reporter.normalizeTest(test)
+
+        expect(result.attempts[0].error.stack).to.equal('')
+      })
     })
   })
 })

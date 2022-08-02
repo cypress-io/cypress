@@ -79,26 +79,33 @@ describe('features', () => {
     const options = { typescript: require.resolve('typescript') }
 
     it('handles typescript (and tsconfig paths)', async () => {
-      await runAndEval('ts_spec.ts', options)
+      await runAndEval('ts_spec.ts', { ...options })
     })
 
     it('handles tsx', async () => {
-      await runAndEval('tsx_spec.tsx', options)
+      await runAndEval('tsx_spec.tsx', { ...options })
     })
 
     it('handles importing .ts and .tsx', async () => {
-      await runAndEval('typescript_imports_spec.js', options)
+      await runAndEval('typescript_imports_spec.js', { ...options })
     })
 
     it('handles esModuleInterop: false (default)', async () => {
-      await runAndEval('typescript_esmoduleinterop_false_spec.ts', options)
+      await runAndEval('typescript_esmoduleinterop_false_spec.ts', { ...options })
     })
 
     it('handles esModuleInterop: true', async () => {
-      await runAndEval('esmoduleinterop-true/typescript_esmoduleinterop_true_spec.ts', options)
+      await runAndEval('esmoduleinterop-true/typescript_esmoduleinterop_true_spec.ts', { ...options })
     })
 
-    it('errors when processing .ts file and typescript option is not set', function () {
+    // https://github.com/cypress-io/cypress/issues/15767
+    // defaultOptions don't have typescript config baked in since it requires
+    // the path to typescript and the file, so it needs to be added later
+    it('adds typescript support if using defaultOptions', async () => {
+      await runAndEval('tsx_spec.tsx', { ...options, ...preprocessor.defaultOptions })
+    })
+
+    it('errors when processing .ts file and typescript option is not set', () => {
       return run('ts_spec.ts')
       .then(shouldntResolve)
       .catch((err) => {
@@ -107,7 +114,7 @@ describe('features', () => {
       })
     })
 
-    it('errors when processing .tsx file and typescript option is not set', function () {
+    it('errors when processing .tsx file and typescript option is not set', () => {
       return run('tsx_spec.tsx')
       .then(shouldntResolve)
       .catch((err) => {

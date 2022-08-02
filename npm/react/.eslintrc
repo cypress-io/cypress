@@ -12,6 +12,7 @@
   "env": {
     "cypress/globals": true
   },
+  "root": true,
   "globals": {
     "jest": "readonly"
   },

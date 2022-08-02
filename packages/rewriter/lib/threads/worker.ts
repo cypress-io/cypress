@@ -10,7 +10,7 @@ if (isMainThread) {
 
 import { rewriteJs, rewriteJsSourceMap } from '../js'
 import { rewriteHtmlJs } from '../html'
-import { RewriteRequest, RewriteResponse } from './types'
+import type { RewriteRequest, RewriteResponse } from './types'
 
 parentPort!.postMessage(true)
 
@@ -61,7 +61,7 @@ parentPort!.on('message', async (req: RewriteRequest) => {
     const output = await _getOutput()
 
     _reply({ output, threadMs: _getThreadMs() })
-  } catch (error) {
+  } catch (error: any) {
     _reply({ error, threadMs: _getThreadMs() })
   }
 

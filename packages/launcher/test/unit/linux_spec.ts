@@ -4,20 +4,23 @@ import _ from 'lodash'
 import * as linuxHelper from '../../lib/linux'
 import 'chai-as-promised'
 import { log } from '../log'
-import { detect, firefoxGcWarning } from '../../lib/detect'
-import { browsers } from '../../lib/browsers'
+import { detect } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
 import os from 'os'
 import sinon, { SinonStub } from 'sinon'
+import mockFs from 'mock-fs'
 
 describe('linux browser detection', () => {
   let execa: SinonStub
+  let cachedEnv = { ...process.env }
 
   beforeEach(() => {
-    sinon.restore()
     execa = sinon.stub(utils, 'getOutput')
+
+    sinon.stub(os, 'platform').returns('linux')
+    sinon.stub(os, 'release').returns('1.0.0')
 
     execa.withArgs('test-browser', ['--version'])
     .resolves({ stdout: 'test-browser v100.1.2.3' })
@@ -30,6 +33,12 @@ describe('linux browser detection', () => {
 
     execa.withArgs('/foo/bar/browser', ['--version'])
     .resolves({ stdout: 'foo-browser v9001.1.2.3' })
+  })
+
+  afterEach(() => {
+    Object.assign(process.env, cachedEnv)
+    mockFs.restore()
+    sinon.restore()
   })
 
   it('detects browser by running --version', () => {
@@ -49,9 +58,8 @@ describe('linux browser detection', () => {
   // https://github.com/cypress-io/cypress/pull/7039
   it('sets profilePath on snapcraft chromium', () => {
     execa.withArgs('chromium', ['--version'])
-    .resolves({ stdout: 'Chromium 1.2.3 snap' })
+    .resolves({ stdout: 'Chromium 64.2.3 snap' })
 
-    sinon.stub(os, 'platform').returns('linux')
     sinon.stub(os, 'homedir').returns('/home/foo')
 
     const checkBrowser = ([browser]) => {
@@ -60,14 +68,72 @@ describe('linux browser detection', () => {
         name: 'chromium',
         family: 'chromium',
         displayName: 'Chromium',
-        majorVersion: 1,
+        majorVersion: 64,
+        minSupportedVersion: 64,
         path: 'chromium',
         profilePath: '/home/foo/snap/chromium/current',
-        version: '1.2.3',
+        version: '64.2.3',
       })
     }
 
     return detect().then(checkBrowser)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/19793
+  context('sets profilePath on snapcraft firefox', () => {
+    const expectedSnapFirefox = {
+      channel: 'stable',
+      name: 'firefox',
+      family: 'firefox',
+      displayName: 'Firefox',
+      majorVersion: 99,
+      minSupportedVersion: 86,
+      path: 'firefox',
+      profilePath: '/home/foo/snap/firefox/current',
+      version: '99.2.3',
+    }
+
+    beforeEach(() => {
+      execa.withArgs('firefox', ['--version'])
+      .resolves({ stdout: 'Mozilla Firefox 99.2.3' })
+
+      sinon.stub(os, 'homedir').returns('/home/foo')
+    })
+
+    it('with shim script', async () => {
+      process.env.PATH = '/bin'
+      mockFs({
+        '/bin/firefox': mockFs.symlink({ path: '/usr/bin/firefox' }),
+        '/usr/bin/firefox': mockFs.file({ mode: 0o777, content: 'foo bar foo bar foo bar\nexec /snap/bin/firefox\n' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
+    })
+
+    it('with /snap/bin in path', async () => {
+      process.env.PATH = '/bin:/snap/bin'
+      mockFs({
+        '/snap/bin/firefox': mockFs.file({ mode: 0o777, content: 'binary' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
+    })
+
+    it('with symlink to /snap/bin in path', async () => {
+      process.env.PATH = '/bin'
+      mockFs({
+        '/bin/firefox': mockFs.symlink({ path: '/snap/bin/firefox' }),
+        '/snap/bin/firefox': mockFs.file({ mode: 0o777, content: 'binary' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
+    })
   })
 
   // https://github.com/cypress-io/cypress/issues/6669
@@ -91,18 +157,6 @@ describe('linux browser detection', () => {
 
     // @ts-ignore
     return linuxHelper.detect(goal).then(checkBrowser)
-  })
-
-  // @see https://github.com/cypress-io/cypress/issues/8241
-  it('adds warnings to Firefox versions less than 80', async () => {
-    const goalFirefox = _.find(browsers, { binary: 'firefox' })
-
-    sinon.stub(os, 'platform').withArgs().returns('linux')
-    execa.withArgs('firefox', ['--version']).resolves({ stdout: 'Mozilla Firefox 79.1' })
-
-    expect((await detect([goalFirefox]))[0]).to.include({
-      warning: firefoxGcWarning,
-    })
   })
 
   // despite using detect(), this test is in linux/spec instead of detect_spec because it is

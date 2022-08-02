@@ -1,6 +1,5 @@
 /// <reference path="../../cli/types/cy-blob-util.d.ts" />
 /// <reference path="../../cli/types/cy-bluebird.d.ts" />
-/// <reference path="../../cli/types/cy-moment.d.ts" />
 /// <reference path="../../cli/types/cy-minimatch.d.ts" />
 
 /// <reference path="../../cli/types/cypress.d.ts" />
@@ -16,4 +15,9 @@ declare namespace Cypress {
     */
     percySnapshot (): Chainable
   }
+}
+
+declare module "*.svg" {
+  const content: any;
+  export default content;
 }

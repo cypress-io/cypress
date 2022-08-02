@@ -5,11 +5,11 @@ const debug = require('debug')('test')
 const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
-const errors = require(`${root}../lib/errors`)
-const api = require(`${root}../lib/api`)
-const logger = require(`${root}../lib/logger`)
-const recordMode = require(`${root}../lib/modes/record`)
-const ciProvider = require(`${root}../lib/util/ci_provider`)
+const errors = require(`../../../lib/errors`)
+const api = require(`../../../lib/api`)
+const exception = require(`../../../lib/exception`)
+const recordMode = require(`../../../lib/modes/record`)
+const ciProvider = require(`../../../lib/util/ci_provider`)
 
 const initialEnv = _.clone(process.env)
 
@@ -273,6 +273,7 @@ describe('lib/modes/record', () => {
           version: '59',
         }
         const tag = 'nightly,develop'
+        const testingType = 'e2e'
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -287,6 +288,7 @@ describe('lib/modes/record', () => {
           specPattern,
           runAllSpecs,
           tag,
+          testingType,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -297,6 +299,7 @@ describe('lib/modes/record', () => {
             projectId,
             ciBuildId,
             recordKey: key,
+            testingType,
             specPattern: 'spec/pattern1,spec/pattern2',
             specs: ['path/to/spec/a', 'path/to/spec/b'],
             platform: {
@@ -333,6 +336,7 @@ describe('lib/modes/record', () => {
       sinon.stub(api, 'updateInstanceStdout')
 
       this.options = {
+        runId: 'run-id-123',
         instanceId: 'id-123',
         captured: {
           toString () {
@@ -348,37 +352,20 @@ describe('lib/modes/record', () => {
       return recordMode.updateInstanceStdout(this.options)
       .then(() => {
         expect(api.updateInstanceStdout).to.be.calledWith({
+          runId: 'run-id-123',
           instanceId: 'id-123',
           stdout: 'foobarbaz\n',
         })
       })
     })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode.updateInstanceStdout(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.updateInstanceStdout(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
-
-    it('does not createException when statusCode is 503', () => {
+    it('does not create exception when statusCode is 503', () => {
       const err = new Error('foo')
 
       err.statusCode = 503
 
-      sinon.spy(logger, 'createException')
-
-      sinon.stub(api, 'retryWithBackoff').rejects(err)
+      api.updateInstanceStdout.rejects(err)
+      sinon.spy(exception, 'create')
 
       const options = {
         instanceId: 'id-123',
@@ -389,7 +376,7 @@ describe('lib/modes/record', () => {
 
       return recordMode.updateInstanceStdout(options)
       .then(() => {
-        expect(logger.createException).not.to.be.called
+        expect(exception.create).not.to.be.called
       })
     })
   })
@@ -422,31 +409,14 @@ describe('lib/modes/record', () => {
       })
     })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode.createInstance(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createInstance(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
-
     it('errors when statusCode is 503', async () => {
       const err = new Error('foo')
 
       err.statusCode = 503
 
-      sinon.spy(errors, 'get')
+      api.createInstance.rejects(err)
 
-      sinon.stub(api, 'retryWithBackoff').rejects(err)
+      sinon.spy(errors, 'get')
 
       await expect(recordMode.createInstance({
         runId: 'run-123',
@@ -473,38 +443,21 @@ describe('lib/modes/record', () => {
       }
     })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createRun(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.called
-      })
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createRun(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
-
     // https://github.com/cypress-io/cypress/issues/14571
     it('handles non-string key', async () => {
-      const apiError = new Error('Invalid Record Key')
+      const err = new Error('Invalid Record Key')
 
-      apiError.statusCode = 401
+      err.statusCode = 401
 
-      sinon.stub(api, 'retryWithBackoff').rejects(apiError)
-      sinon.spy(errors, 'throw')
+      api.createRun.rejects(err)
+
+      sinon.spy(errors, 'throwErr')
       await expect(recordMode.createRun({
         git: {},
         recordKey: true, // instead of a string
       })).to.be.rejected
 
-      expect(errors.throw).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
+      expect(errors.throwErr).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
     })
   })
 
@@ -520,23 +473,6 @@ describe('lib/modes/record', () => {
         captured: '',
       }
     })
-
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode._postInstanceTests(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode._postInstanceTests(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
   })
 
   context('.postInstanceResults', () => {
@@ -550,23 +486,6 @@ describe('lib/modes/record', () => {
         results: {},
         captured: '',
       }
-    })
-
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode.postInstanceResults(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.postInstanceResults(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
     })
   })
 })

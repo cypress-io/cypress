@@ -1,29 +1,15 @@
 const _ = require('lodash')
-const R = require('ramda')
 const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
 const glob = require('../util/glob')
-const specsUtil = require('../util/specs')
-const pathHelpers = require('../util/path_helpers')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
-
-const SPEC_URL_PREFIX = '/__cypress/tests?p'
+const { getCtx } = require('@packages/data-context')
 
 module.exports = {
-  handleFiles (req, res, config) {
-    debug('handle files')
 
-    return specsUtil.find(config)
-    .then((files) => {
-      return res.json({
-        integration: files,
-      })
-    })
-  },
-
-  handleIframe (req, res, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, config, remoteStates, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -32,7 +18,7 @@ module.exports = {
 
     return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
-      return this.getJavascripts(config)
+      return this.getSupportFile(config)
       .then((js) => {
         const allFilesToSend = js.concat(specs)
 
@@ -40,7 +26,7 @@ module.exports = {
 
         const iframeOptions = {
           title: this.getTitle(test),
-          domain: getRemoteState().domainName,
+          domain: remoteStates.getPrimary().domainName,
           scripts: JSON.stringify(allFilesToSend),
         }
 
@@ -51,6 +37,20 @@ module.exports = {
     })
   },
 
+  handleCrossOriginIframe (req, res) {
+    const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
+    const domain = req.hostname
+
+    const iframeOptions = {
+      domain,
+      title: `Cypress for ${domain}`,
+    }
+
+    debug('cross origin iframe with options %o', iframeOptions)
+
+    res.render(iframePath, iframeOptions)
+  },
+
   getSpecs (spec, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
@@ -59,15 +59,14 @@ module.exports = {
     const convertSpecPath = (spec) => {
       // get the absolute path to this spec and
       // get the browser url + cache buster
-      const convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      const convertedSpec = path.join(config.projectRoot, spec)
 
       debug('converted %s to %s', spec, convertedSpec)
 
-      return this.prepareForBrowser(convertedSpec, config.projectRoot)
+      return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
-    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -76,33 +75,48 @@ module.exports = {
       // desktop-gui/src/specs/specs-store.js
       return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
     }
-    const specFilterFn = specFilter ? specFilterContains : R.T
+    const specFilterFn = specFilter ? specFilterContains : () => true
 
-    const getSpecsHelper = () => {
+    const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
-      const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
-
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.find(config)
-        .then(R.tap((specs) => {
-          return debug('found __all specs %o', specs)
-        }))
-        .filter(specFilterFn)
-        .filter((foundSpec) => {
-          if (experimentalComponentTestingEnabled) {
-            return foundSpec.specType === specTypeFilter
-          }
+        const ctx = getCtx()
 
-          return true
-        }).then(R.tap((specs) => {
-          return debug('filtered __all specs %o', specs)
-        })).map((spec) => {
-          // grab the name of each
-          return spec.absolute
+        const [e2ePatterns, componentPatterns] = await Promise.all([
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
+        ])
+
+        // It's possible that the E2E pattern matches some component tests, for example
+        // e2e.specPattern: src/**/*.cy.ts
+        // component.specPattern: src/components/**/*.cy.ts
+        // in this case, we want to remove anything that matches
+        // - the component.specPattern
+        // - the e2e.excludeSpecPattern
+        return ctx.project.findSpecs({
+          projectRoot: config.projectRoot,
+          testingType: 'e2e',
+          specPattern: e2ePatterns.specPattern,
+          configSpecPattern: e2ePatterns.specPattern,
+          excludeSpecPattern: e2ePatterns.excludeSpecPattern,
+          additionalIgnorePattern: componentPatterns.specPattern,
+        })
+        .then((specs) => {
+          debug('found __all specs %o', specs)
+
+          return specs
+        })
+        .filter(specFilterFn)
+        .then((specs) => {
+          debug('filtered __all specs %o', specs)
+
+          return specs
         }).map(convertSpecPath)
       }
+
+      debug('normalizing spec %o', { spec })
 
       // normalize by sending in an array of 1
       return [convertSpecPath(spec)]
@@ -114,7 +128,9 @@ module.exports = {
     })
   },
 
-  prepareForBrowser (filePath, projectRoot) {
+  prepareForBrowser (filePath, projectRoot, namespace) {
+    const SPEC_URL_PREFIX = `/${namespace}/tests?p`
+
     filePath = filePath.replace(SPEC_URL_PREFIX, '__CYPRESS_SPEC_URL_PREFIX__')
     filePath = escapeFilenameInUrl(filePath).replace('__CYPRESS_SPEC_URL_PREFIX__', SPEC_URL_PREFIX)
     const relativeFilePath = path.relative(projectRoot, filePath)
@@ -122,12 +138,12 @@ module.exports = {
     return {
       absolute: filePath,
       relative: relativeFilePath,
-      relativeUrl: this.getTestUrl(relativeFilePath),
+      relativeUrl: this.getTestUrl(relativeFilePath, namespace),
     }
   },
 
-  getTestUrl (file) {
-    const url = `${SPEC_URL_PREFIX}=${file}`
+  getTestUrl (file, namespace) {
+    const url = `/${namespace}/tests?p=${file}`
 
     debug('test url for file %o', { file, url })
 
@@ -142,14 +158,13 @@ module.exports = {
     return test
   },
 
-  getJavascripts (config) {
-    const { projectRoot, supportFile, javascripts } = config
+  getSupportFile (config) {
+    const { projectRoot, supportFile, namespace } = config
 
-    // automatically add in support scripts and any javascripts
-    let files = [].concat(javascripts)
+    let files = []
 
     if (supportFile !== false) {
-      files = [supportFile].concat(files)
+      files = [supportFile]
     }
 
     // TODO: there shouldn't be any reason
@@ -174,7 +189,7 @@ module.exports = {
       return glob(p, { nodir: true })
     }).then(_.flatten)
     .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot)
+      return this.prepareForBrowser(filePath, projectRoot, namespace)
     })
   },
 

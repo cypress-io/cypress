@@ -1,5 +1,3 @@
-const _ = require('lodash')
-const path = require('path')
 const awspublish = require('gulp-awspublish')
 const human = require('human-interval')
 const la = require('lazy-ass')
@@ -7,7 +5,8 @@ const check = require('check-more-types')
 const fse = require('fs-extra')
 const os = require('os')
 const Promise = require('bluebird')
-const { configFromEnvOrJsonFile, filenameToShellVariable } = require('@cypress/env-or-json-file')
+const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
+
 const konfig = require('../get-config')()
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
@@ -15,7 +14,6 @@ const getUploadUrl = function () {
   const url = konfig('cdn_url')
 
   la(check.url(url), 'could not get CDN url', url)
-  console.log('upload url', url)
 
   return url
 }
@@ -26,51 +24,52 @@ const formHashFromEnvironment = function () {
   } = process
 
   if (env.CIRCLECI) {
-    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
-  }
-
-  if (env.APPVEYOR) {
-    return `appveyor-${env.APPVEYOR_REPO_BRANCH}-${env.APPVEYOR_REPO_COMMIT}`
+    return `${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   }
 
   throw new Error('Do not know how to form unique build hash on this CI')
 }
 
-const getS3Credentials = function () {
-  const key = path.join('scripts', 'support', 'aws-credentials.json')
-  const config = configFromEnvOrJsonFile(key)
-
-  if (!config) {
-    console.error('⛔️  Cannot find AWS credentials')
-    console.error('Using @cypress/env-or-json-file module')
-    console.error('and filename', key)
-    console.error('which is environment variable', filenameToShellVariable(key))
-    console.error('available environment variable keys')
-    console.error(Object.keys(process.env))
-    throw new Error('AWS config not found')
-  }
-
-  la(check.unemptyString(config.bucket), 'missing AWS config bucket')
-  la(check.unemptyString(config.folder), 'missing AWS config folder')
-  la(check.unemptyString(config.key), 'missing AWS key')
-  la(check.unemptyString(config.secret), 'missing AWS secret key')
-
-  return config
+const S3Configuration = {
+  bucket: 'cdn.cypress.io',
+  releaseFolder: 'desktop',
+  binaryZipName: 'cypress.zip',
+  betaUploadTypes: {
+    binary: {
+      uploadFolder: 'binary',
+      uploadFileName: 'cypress.zip',
+    },
+    'npm-package': {
+      uploadFolder: 'npm',
+      uploadFileName: 'cypress.tgz',
+    },
+  },
 }
 
-const getPublisher = function (getAwsObj = getS3Credentials) {
-  const aws = getAwsObj()
+const getS3Credentials = async function () {
+  // sso is not required for CirceCI
+  if (process.env.CIRCLECI) {
+    return fromEnv()()
+  }
 
-  // console.log("aws.bucket", aws.bucket)
+  // use 'prod' by default to align with our internal docs for setting up `awscli`
+  // https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress
+  return fromSSO({ profile: process.env.AWS_PROFILE || 'prod' })()
+}
+
+const getPublisher = async function () {
+  const aws = await getS3Credentials()
+
   return awspublish.create({
     httpOptions: {
       timeout: human('10 minutes'),
     },
     params: {
-      Bucket: aws.bucket,
+      Bucket: S3Configuration.bucket,
     },
-    accessKeyId: aws.key,
-    secretAccessKey: aws.secret,
+    accessKeyId: aws.accessKeyId,
+    secretAccessKey: aws.secretAccessKey,
+    sessionToken: aws.sessionToken,
   })
 }
 
@@ -81,20 +80,20 @@ const getDesktopUrl = function (version, osName, zipName) {
 }
 
 // purges desktop application url from Cloudflare cache
-const purgeDesktopAppFromCache = function ({ version, platform, zipName }) {
+const purgeDesktopAppFromCache = function ({ version, platformArch, zipName }) {
   la(check.unemptyString(version), 'missing desktop version', version)
-  la(check.unemptyString(platform), 'missing platform', platform)
+  la(check.unemptyString(platformArch), 'missing platformArch', platformArch)
   la(check.unemptyString(zipName), 'missing zip filename')
   la(check.extension('zip', zipName),
     'zip filename should end with .zip', zipName)
 
-  const osName = getUploadNameByOsAndArch(platform)
-
-  la(check.unemptyString(osName), 'missing osName', osName)
-  const url = getDesktopUrl(version, osName, zipName)
+  const url = getDesktopUrl(version, platformArch, zipName)
 
   return purgeCloudflareCache(url)
 }
+
+// all architectures we are building the test runner for
+const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 
 // purges links to desktop app for all platforms
 // for a given version
@@ -102,17 +101,12 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
   la(check.unemptyString(version), 'missing desktop version', version)
   la(check.unemptyString(zipName), 'missing zipName', zipName)
 
-  const platforms = ['darwin', 'linux', 'win32']
-
   console.log(`purging all desktop links for version ${version} from Cloudflare`)
 
-  return Promise.mapSeries(platforms, (platform) => {
-    return purgeDesktopAppFromCache({ version, platform, zipName })
+  return Promise.mapSeries(validPlatformArchs, (platformArch) => {
+    return purgeDesktopAppFromCache({ version, platformArch, zipName })
   })
 }
-
-// all architectures we are building test runner for
-const validPlatformArchs = ['darwin-x64', 'linux-x64', 'win32-ia32', 'win32-x64']
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
@@ -122,25 +116,12 @@ const getValidPlatformArchs = () => {
 }
 
 const getUploadNameByOsAndArch = function (platform) {
-  // just hard code for now...
   const arch = os.arch()
 
-  const uploadNames = {
-    darwin: {
-      'x64': 'darwin-x64',
-    },
-    linux: {
-      'x64': 'linux-x64',
-    },
-    win32: {
-      'x64': 'win32-x64',
-      'ia32': 'win32-ia32',
-    },
-  }
-  const name = _.get(uploadNames[platform], arch)
+  const name = [platform, arch].join('-')
 
-  if (!name) {
-    throw new Error(`Cannot find upload name for OS: '${platform}' with arch: '${arch}'`)
+  if (!isValidPlatformArch(name)) {
+    throw new Error(`${name} is not a valid upload destination. Does validPlatformArchs need updating?`)
   }
 
   la(isValidPlatformArch(name), 'formed invalid platform', name, 'from', platform, arch)
@@ -162,6 +143,7 @@ const saveUrl = (filename) => {
 }
 
 module.exports = {
+  S3Configuration,
   getS3Credentials,
   getPublisher,
   purgeDesktopAppFromCache,

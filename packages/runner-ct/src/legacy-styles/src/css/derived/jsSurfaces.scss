@@ -1,0 +1,8 @@
+@use '../surfaces.scss' as *;
+
+// Exposes $shadow as a JS variable when directly imported
+:export {
+  @each $name, $shadow in $shadow {
+    #{$name}: #{$shadow};
+  }
+}

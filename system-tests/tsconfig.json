@@ -1,0 +1,19 @@
+{
+  "extends": "../packages/ts/tsconfig.json",
+  "include": [
+    "test",
+    "lib",
+  ],
+  "files": [
+    "../packages/ts/index.d.ts",
+    "./globals.d.ts"
+  ],
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["esnext"],
+    "skipLibCheck": true,
+    "noImplicitReturns": false,
+    "strictNullChecks": false,
+    "typeRoots": ["../node_modules/@types"]
+  }
+}

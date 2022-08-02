@@ -7,11 +7,46 @@ declare namespace Cypress {
   type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = 'portrait' | 'landscape'
-  type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type PrevSubject = keyof PrevSubjectMap
+  type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
+  interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
+    selector?: string | null
+  }
+
+  interface PrevSubjectMap<O = unknown> {
+    optional: O
+    element: JQueryWithSelector
+    document: Document
+    window: Window
+  }
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
+  }
+  interface CommandFn<T extends keyof ChainableMethods> {
+    (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFns {
+    [name: string]: (this: Mocha.Context, ...args: any) => any
+  }
+  interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
+    (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnsWithSubject<S> {
+    [name: string]: (this: Mocha.Context, prevSubject: S, ...args: any) => any
+  }
+  interface CommandOriginalFn<T extends keyof ChainableMethods> extends CallableFunction {
+    (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
+  interface CommandOriginalFnWithSubject<T extends keyof ChainableMethods, S> extends CallableFunction {
+    (prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
+  interface CommandFnWithOriginalFn<T extends keyof Chainable> {
+    (this: Mocha.Context, originalFn: CommandOriginalFn<T>, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithOriginalFnAndSubject<T extends keyof Chainable, S> {
+    (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface ObjectLike {
     [key: string]: any
@@ -19,6 +54,16 @@ declare namespace Cypress {
   interface Auth {
     username: string
     password: string
+  }
+
+  interface RemoteState {
+    auth?: Auth
+    domainName: string
+    strategy: 'file' | 'http'
+    origin: string
+    fileServer: string | null
+    props: Record<string, any>
+    visiting: string
   }
 
   interface Backend {
@@ -59,10 +104,26 @@ declare namespace Cypress {
      */
     displayName: string
     version: string
-    majorVersion: number
+    majorVersion: number | string
     path: string
     isHeaded: boolean
     isHeadless: boolean
+    /**
+     * Informational text to accompany this browser. Shown in desktop-gui.
+     */
+    info?: string
+    /**
+     * Warning text to accompany this browser. Shown in desktop-gui.
+     */
+    warning?: string
+    /**
+     * The minimum majorVersion of this browser supported by Cypress.
+     */
+    minSupportedVersion?: number
+    /**
+     * If `true`, this browser is too old to be supported by Cypress.
+     */
+    unsupportedVersion?: boolean
   }
 
   interface LocalStorage {
@@ -113,7 +174,7 @@ declare namespace Cypress {
 
   /**
    * Spec type for the given test. "integration" is the default, but
-   * tests run using experimentalComponentTesting will be "component"
+   * tests run using `open --component` will be "component"
    *
    * @see https://on.cypress.io/experiments
    */
@@ -138,7 +199,12 @@ declare namespace Cypress {
   /**
    * The interface for user-defined properties in Window object under test.
    */
-  interface ApplicationWindow {} // tslint:disable-line
+  interface ApplicationWindow { } // tslint:disable-line
+
+  /**
+   * The configuration for Cypress.
+   */
+  type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -172,23 +238,20 @@ declare namespace Cypress {
      */
     Blob: BlobUtil.BlobUtilStatic
     /**
+     * Cypress automatically includes a Buffer library and exposes it as Cypress.Buffer.
+     *
+     * @see https://on.cypress.io/buffer
+     * @see https://github.com/feross/buffer
+     * @example
+     *    Cypress.Buffer.method()
+     */
+    Buffer: BufferType
+    /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
      * @see https://on.cypress.io/minimatch
      */
     minimatch: typeof Minimatch.minimatch
-    /**
-     * @deprecated Will be removed in a future version.
-     * Consider including your own datetime formatter in your tests.
-     *
-     * Cypress automatically includes moment.js and exposes it as Cypress.moment.
-     *
-     * @see https://on.cypress.io/moment
-     * @see http://momentjs.com/
-     * @example
-     *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
-     */
-    moment: Moment.MomentStatic
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -254,6 +317,14 @@ declare namespace Cypress {
     spec: Spec
 
     /**
+     * Currently executing test runnable instance.
+     */
+    currentTest: {
+      title: string
+      titlePath: string[]
+    }
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
@@ -264,9 +335,19 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Internal class for session management.
+     */
+    session: Session
+
+    /**
+     * Current testing type, determined by the Test Runner chosen to run.
+     */
+    testingType: TestingType
+
+    /**
      * Fire automation:request event for internal use.
      */
-    automation(eventName: string, ...args: any[]): Promise<any>
+    automation(eventName: string, ...args: any[]): Bluebird.Promise<any>
 
     /**
      * Promise wrapper for certain internal tasks.
@@ -282,7 +363,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ResolvedConfigOptions & RuntimeConfigOptions
+    config(): Config
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -292,7 +373,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
+    config<K extends keyof Config>(key: K): Config[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -301,7 +382,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
+    config<K extends keyof TestConfigOverrides>(key: K, value: TestConfigOverrides[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -317,7 +398,7 @@ declare namespace Cypress {
 
     // no real way to type without generics
     /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.json"
+     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js,ts,mjs,cjs}"
      *
      * @see https://on.cypress.io/env
      */
@@ -326,7 +407,7 @@ declare namespace Cypress {
      * Returns specific environment variable or undefined
      * @see https://on.cypress.io/env
      * @example
-     *    // cypress.json
+     *    // cypress.config.js
      *    { "env": { "foo": "bar" } }
      *    Cypress.env("foo") // => bar
      */
@@ -346,15 +427,6 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
-
-    /**
-     * Firefox only: Get the current number of tests that will run between forced garbage collections.
-     *
-     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
-     *
-     * @see https://on.cypress.io/firefox-gc-issue
-     */
-    getFirefoxGcInterval(): number | null | undefined
 
     /**
      * @returns the number of test retries currently enabled for the run
@@ -393,9 +465,26 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
-      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+      ): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+      ): void
+      addAll<T extends keyof Chainable>(fns: CommandFns): void
+      addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+      addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+      ): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
+      ): void
+      overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
+      overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
     }
 
     /**
@@ -403,8 +492,16 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
       preserveOnce(...names: string[]): void
-      defaults(options: Partial<CookieDefaults>): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
+      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -497,6 +594,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/keyboard-api
+     */
+    Keyboard: {
+      defaults(options: Partial<KeyboardDefaultsOptions>): void
+    }
+
+    /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
@@ -508,6 +612,14 @@ declare namespace Cypress {
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
+     * @see https://on.cypress.io/selector-playground-api
+     */
+    SelectorPlayground: {
+      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+      getSelector($el: JQuery): JQuery.Selector
     }
 
     /**
@@ -527,6 +639,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     off: Actions
+
+    /**
+     * Trigger action
+     * @private
+     */
+    action: (action: string, ...args: any[]) => any[] | void
+
+    /**
+     * Load  files
+     * @private
+     */
+    onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
+  }
+
+  interface SessionOptions {
+    validate?: () => false | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -558,7 +686,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/get
      * @example
     ```
-    // Get the aliased ‘todos’ elements
+    // Get the aliased 'todos' elements
     cy.get('ul#todos').as('todos')
     //...hack hack hack...
     // later retrieve the todos
@@ -566,6 +694,20 @@ declare namespace Cypress {
     ```
      */
     as(alias: string): Chainable<Subject>
+
+    /**
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
+     * @example
+     *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
+     *      fileName: 'users.json',
+     *      fileContents: [{name: 'John Doe'}]
+     *    })
+     */
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
 
     /**
      * Blur a focused element. This element must currently be in focus.
@@ -592,9 +734,9 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/check
      * @example
-     *    // Select the radio with the value of ‘US’
+     *    // Select the radio with the value of 'US'
      *    cy.get('[type="radio"]').check('US')
-     *    // Check the checkboxes with the values ‘ga’ and ‘ca’
+     *    // Check the checkboxes with the values 'ga' and 'ca'
      *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
      */
     check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
@@ -618,7 +760,7 @@ declare namespace Cypress {
 
     /**
      * Clear a specific browser cookie.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear a specific cookie inside a single test.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookie
      */
@@ -626,7 +768,7 @@ declare namespace Cypress {
 
     /**
      * Clear all browser cookies.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear a specific cookie inside a single test.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
      */
@@ -635,7 +777,7 @@ declare namespace Cypress {
     /**
      * Clear data in local storage.
      * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * shared across tests. You shouldn't need to use this command unless you're using it
      * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
@@ -664,36 +806,36 @@ declare namespace Cypress {
     ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
-   /**
-     * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn’t need to use this command unless you’re using it
-     * to clear localStorage inside a single test. Yields `localStorage` object.
-     *
-     * @see https://on.cypress.io/clearlocalstorage
-     * @param {options} [object] - options object
-     * @example
-      ```
-      // Removes all local storage items, without logging
-      cy.clearLocalStorage({ log: false })
-      ```
-     */
+    /**
+      * Clear data in local storage.
+      * Cypress automatically runs this command before each test to prevent state from being
+      * shared across tests. You shouldn't need to use this command unless you're using it
+      * to clear localStorage inside a single test. Yields `localStorage` object.
+      *
+      * @see https://on.cypress.io/clearlocalstorage
+      * @param {options} [object] - options object
+      * @example
+       ```
+       // Removes all local storage items, without logging
+       cy.clearLocalStorage({ log: false })
+       ```
+      */
     clearLocalStorage(options: Partial<Loggable>): Chainable<Storage>
-   /**
-     * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn’t need to use this command unless you’re using it
-     * to clear localStorage inside a single test. Yields `localStorage` object.
-     *
-     * @see https://on.cypress.io/clearlocalstorage
-     * @param {string} [key] - name of a particular item to remove (optional).
-     * @param {options} [object] - options object
-     * @example
-      ```
-      // Removes item "todos" without logging
-      cy.clearLocalStorage("todos", { log: false })
-      ```
-     */
+    /**
+      * Clear data in local storage.
+      * Cypress automatically runs this command before each test to prevent state from being
+      * shared across tests. You shouldn't need to use this command unless you're using it
+      * to clear localStorage inside a single test. Yields `localStorage` object.
+      *
+      * @see https://on.cypress.io/clearlocalstorage
+      * @param {string} [key] - name of a particular item to remove (optional).
+      * @param {options} [object] - options object
+      * @example
+       ```
+       // Removes item "todos" without logging
+       cy.clearLocalStorage("todos", { log: false })
+       ```
+      */
     clearLocalStorage(key: string, options: Partial<Loggable>): Chainable<Storage>
 
     /**
@@ -719,8 +861,8 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific coordinates
      *
-     * @param {number} x The distance in pixels from the element’s left to issue the click.
-     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @param {number} x The distance in pixels from the element's left to issue the click.
+     * @param {number} y The distance in pixels from the element's top to issue the click.
      * @see https://on.cypress.io/click
      * @example
     ```
@@ -781,7 +923,7 @@ declare namespace Cypress {
      *    // or use this shortcut
      *    cy.clock().invoke('restore')
      */
-    clock(now: number|Date, options?: Loggable): Chainable<Clock>
+    clock(now: number | Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
      *
@@ -790,7 +932,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number|Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number | Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -827,7 +969,7 @@ declare namespace Cypress {
      *    // tries to find the given text for up to 1 second
      *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -845,7 +987,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -854,7 +996,7 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<JQuery<E>>
 
     /**
      * Double-click a DOM element.
@@ -875,8 +1017,8 @@ declare namespace Cypress {
     /**
      * Double-click a DOM element at specific coordinates
      *
-     * @param {number} x The distance in pixels from the element’s left to issue the click.
-     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @param {number} x The distance in pixels from the element's left to issue the click.
+     * @param {number} y The distance in pixels from the element's top to issue the click.
      * @see https://on.cypress.io/dblclick
      * @example
     ```
@@ -905,8 +1047,8 @@ declare namespace Cypress {
     /**
      * Right-click a DOM element at specific coordinates
      *
-     * @param {number} x The distance in pixels from the element’s left to issue the click.
-     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @param {number} x The distance in pixels from the element's left to issue the click.
+     * @param {number} y The distance in pixels from the element's top to issue the click.
      * @see https://on.cypress.io/rightclick
      * @example
     ```
@@ -925,6 +1067,15 @@ declare namespace Cypress {
     debug(options?: Partial<Loggable>): Chainable<Subject>
 
     /**
+      * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
+      *
+      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
+      *
+      * @see https://on.cypress.io/session
+      */
+    session(id: string | object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+
+    /**
      * Get the window.document of the page that is currently active.
      *
      * @see https://on.cypress.io/document
@@ -933,7 +1084,7 @@ declare namespace Cypress {
      *      .its('contentType')
      *      .should('eq', 'text/html')
      */
-    document(options?: Partial<Loggable>): Chainable<Document>
+    document(options?: Partial<Loggable & Timeoutable>): Chainable<Document>
 
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
@@ -1000,7 +1151,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/find
      * @example
-     *    // Find the li’s within the nav
+     *    // Find the li's within the nav
      *    cy.get('.left-nav>.nav').find('>li')
      */
     find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Shadow>): Chainable<JQuery<E>>
@@ -1072,7 +1223,7 @@ declare namespace Cypress {
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
      * @example
-     *    // Get the aliased ‘todos’ elements
+     *    // Get the aliased 'todos' elements
      *    cy.get('ul#todos').as('todos')
      *    //...hack hack hack...
      *    //later retrieve the todos
@@ -1095,7 +1246,7 @@ declare namespace Cypress {
     getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
-     * Navigate back or forward to the previous or next URL in the browser’s history.
+     * Navigate back or forward to the previous or next URL in the browser's history.
      *
      * @see https://on.cypress.io/go
      */
@@ -1140,7 +1291,7 @@ declare namespace Cypress {
     invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
-     * Get a property’s value on the previously yielded subject.
+     * Get a property's value on the previously yielded subject.
      *
      * @see https://on.cypress.io/its
      * @example
@@ -1279,6 +1430,29 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     off: Actions
+
+    /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', () => {
+     *      cy.get('h1').should('equal', 'Example Domain')
+     *    })
+     */
+    origin<T extends any>(urlOrDomain: string, fn: () => void): Chainable<T>
+
+    /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
+     *      expect(key).to.equal('value')
+     *      expect(foo).to.equal('foo')
+     *    })
+     */
+    origin<T, S extends any>(urlOrDomain: string, options: {
+      args: T
+    }, fn: (args: T) => void): Chainable<S>
 
     /**
      * Get the parent DOM element of a set of DOM elements.
@@ -1456,7 +1630,7 @@ declare namespace Cypress {
      * @example
      *    cy.request('http://dev.local/seed')
      */
-    request(url: string, body?: RequestBody): Chainable<Response>
+    request<T = any>(url: string, body?: RequestBody): Chainable<Response<T>>
     /**
      * Make an HTTP request with specific method.
      *
@@ -1464,7 +1638,7 @@ declare namespace Cypress {
      * @example
      *    cy.request('POST', 'http://localhost:8888/users', {name: 'Jane'})
      */
-    request(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response>
+    request<T = any>(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response<T>>
     /**
      * Make an HTTP request with specific behavior.
      *
@@ -1475,7 +1649,7 @@ declare namespace Cypress {
      *      followRedirect: false // turn off following redirects
      *    })
      */
-    request(options: Partial<RequestOptions>): Chainable<Response>
+    request<T = any>(options: Partial<RequestOptions>): Chainable<Response<T>>
 
     /**
      * Get the root DOM element.
@@ -1586,17 +1760,11 @@ declare namespace Cypress {
     scrollTo(x: number | string, y: number | string, options?: Partial<ScrollToOptions>): Chainable<Subject>
 
     /**
-     * Select an `<option>` with specific text within a `<select>`.
+     * Select an `<option>` with specific text, value, or index within a `<select>`.
      *
      * @see https://on.cypress.io/select
      */
-    select(text: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
-    /**
-     * Select an `<option>` with specific value(s) within a `<select>`.
-     *
-     * @see https://on.cypress.io/select
-     */
-    select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
+    select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
      * @deprecated Use `cy.intercept()` instead.
@@ -1633,7 +1801,7 @@ declare namespace Cypress {
      *    .shadow()
      *    .find('.my-button')
      *    .click()
-     * @see https://on.cypress.io/experimental
+     * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
 
@@ -1720,7 +1888,7 @@ declare namespace Cypress {
      */
     stub(): Agent<sinon.SinonStub>
     /**
-     * Stubs all the object’s methods.
+     * Stubs all the object's methods.
      *
      * @see https://on.cypress.io/stub
      * @example
@@ -1784,7 +1952,7 @@ declare namespace Cypress {
     /**
      * Run a task in Node via the plugins file.
      *
-     * @see https://on.cypress.io/task
+     * @see https://on.cypress.io/api/task
      */
     task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
@@ -1817,13 +1985,43 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    then<S extends string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends HTMLElement>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends ArrayLike<HTMLElement>>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends any[] | object>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
     then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
@@ -1872,14 +2070,14 @@ declare namespace Cypress {
      *  // or use this shortcut
      *  cy.tick(5000).invoke('restore')
      */
-    tick(milliseconds: number): Chainable<Clock>
+    tick(milliseconds: number, options?: Partial<Loggable>): Chainable<Clock>
 
     /**
      * Get the `document.title` property of the page that is currently active.
      *
      * @see https://on.cypress.io/title
      */
-    title(options?: Partial<Loggable>): Chainable<string>
+    title(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Trigger an event on a DOM element.
@@ -1948,11 +2146,11 @@ declare namespace Cypress {
      * @example
      *    // Unchecks checkbox element
      *    cy.get('[type="checkbox"]').uncheck()
-     *    // Uncheck element with the id ‘saveUserName’
+     *    // Uncheck element with the id 'saveUserName'
      *    cy.get('#saveUserName').uncheck()
      *    // Uncheck all checkboxes
      *    cy.get(':checkbox').uncheck()
-     *    // Uncheck the checkbox with the value of ‘ga’
+     *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
@@ -1961,7 +2159,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/uncheck
      * @example
-     *    // Uncheck the checkbox with the value of ‘ga’
+     *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck('ga')
      */
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -1970,7 +2168,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/uncheck
      * @example
-     *    // Uncheck the checkbox with the value of ‘ga’, 'ma'
+     *    // Uncheck the checkbox with the value of 'ga', 'ma'
      *    cy.get('input[type="checkbox"]').uncheck(['ga', 'ma'])
      */
     uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
@@ -1981,7 +2179,7 @@ declare namespace Cypress {
      * @alias cy.location('href')
      * @see https://on.cypress.io/url
      */
-    url(options?: Partial<Loggable & Timeoutable>): Chainable<string>
+    url(options?: Partial<UrlOptions>): Chainable<string>
 
     /**
      * Control the size and orientation of the screen for your application.
@@ -2118,12 +2316,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
     ```
     cy.writeFile('path/to/message.txt', 'Hello World')
-      .then((text) => {
-        expect(text).to.equal('Hello World') // true
-      })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2132,12 +2327,23 @@ declare namespace Cypress {
     cy.writeFile('path/to/ascii.txt', 'Hello World', {
       flag: 'a+',
       encoding: 'ascii'
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
+    /**
+     * Write to a file with the specified encoding and contents.
+     *
+     * An `encoding` option in `options` will override the `encoding` argument.
+     *
+     * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/ascii.txt', 'Hello World', 'utf8', {
+      flag: 'a+',
+    })
+    ```
+     */
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
 
     /**
      * jQuery library bound to the AUT
@@ -2147,6 +2353,12 @@ declare namespace Cypress {
      *    cy.$$('p')
      */
     $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
+  }
+
+  type ChainableMethods<Subject = any> = {
+    [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
+        ? Chainable<Subject>[P]
+        : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2176,7 +2388,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
   }
 
   interface Failable {
@@ -2324,7 +2536,18 @@ declare namespace Cypress {
     scrollBehavior: scrollBehaviorOptions
   }
 
-  interface BlurOptions extends Loggable, Forceable { }
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+    /**
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
+     * document.
+     *
+     * @default 'select'
+     */
+    action: 'select' | 'drag-drop'
+  }
+
+  interface BlurOptions extends Loggable, Timeoutable, Forceable { }
 
   interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
@@ -2394,9 +2617,50 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
-  interface ResolvedConfigOptions {
+  interface PEMCert {
     /**
-     * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
+     * Path to the certificate file, relative to project root.
+     */
+    cert: string
+    /**
+     * Path to the private key file, relative to project root.
+     */
+    key: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface PFXCert {
+    /**
+     * Path to the certificate container, relative to project root.
+     */
+    pfx: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface ClientCertificate {
+    /**
+     * URL to match requests against. Wildcards following [minimatch](https://github.com/isaacs/minimatch) rules are supported.
+     */
+    url: string
+    /**
+     * Paths to one or more CA files to validate certs against, relative to project root.
+     */
+    ca?: string[]
+    /**
+     * A PEM format certificate/private key pair or PFX certificate container
+     */
+    certs: PEMCert[] | PFXCert[]
+  }
+
+  interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
+    /**
+     * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
      * @default null
      */
     baseUrl: string | null
@@ -2409,7 +2673,7 @@ declare namespace Cypress {
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
      */
-    ignoreTestFiles: string | string[]
+    excludeSpecPattern: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
@@ -2430,6 +2694,11 @@ declare namespace Cypress {
      * @default "spec"
      */
     reporterOptions: { [key: string]: any }
+    /**
+     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold.
+     * @default 10000
+     */
+    slowTestThreshold: number
     /**
      * Whether Cypress will watch and restart tests on test file changes
      * @default true
@@ -2476,11 +2745,6 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
-     * Path to folder containing integration test files
-     * @default "cypress/integration"
-     */
-    integrationFolder: string
-    /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
      */
@@ -2491,10 +2755,10 @@ declare namespace Cypress {
      */
     nodeVersion: 'system' | 'bundled'
     /**
-     * Path to plugins file. (Pass false to disable)
-     * @default "cypress/plugins/index.js"
+     * The application under test cannot redirect more than this limit.
+     * @default 20
      */
-    pluginsFile: string | false
+    redirectionLimit: number
     /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
@@ -2511,13 +2775,13 @@ declare namespace Cypress {
      */
     screenshotOnRunFailure: boolean
     /**
-     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
+     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run's test failure
      * @default "cypress/screenshots"
      */
     screenshotsFolder: string | false
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/index.js"
+     * @default "cypress/support/{e2e|component}.js"
      */
     supportFile: string | false
     /**
@@ -2541,7 +2805,7 @@ declare namespace Cypress {
      */
     video: boolean
     /**
-     * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
+     * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you'd like the video uploaded only when there are failing tests.
      * @default true
      */
     videoUploadOnPasses: boolean
@@ -2551,12 +2815,12 @@ declare namespace Cypress {
      */
     chromeWebSecurity: boolean
     /**
-     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
+     * Default height in pixels for the application under tests' viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 660
      */
     viewportHeight: number
     /**
-     * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
+     * Default width in pixels for the application under tests' viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 1000
      */
     viewportWidth: number
@@ -2576,44 +2840,103 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
-     * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
-     * If a number is supplied, it will apply to `run` mode and `open` mode.
-     * Set the interval to `null` or 0 to disable forced garbage collections.
-     * @default { runMode: 1, openMode: null }
-     */
-    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
-    /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
-     * algorithm.
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
      */
-    experimentalSourceRewriting: boolean
+    experimentalInteractiveRunEvents: boolean
+    /**
+     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
+     * @default false
+     */
+    experimentalSessionAndOrigin: boolean
+    /**
+     * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
+     * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
+     * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
+     * This option has no impact on experimentalSourceRewriting and is only used with the
+     * non-experimental source rewriter.
+     * @see https://on.cypress.io/configuration#experimentalModifyObstructiveThirdPartyCode
+     */
+    experimentalModifyObstructiveThirdPartyCode: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
-    experimentalStudio: boolean
+    experimentalSourceRewriting: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | {runMode?: Nullable<number>, openMode?: Nullable<number>}>
+    retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
      */
     includeShadowDom: boolean
+
+    /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    specPattern: string | string[]
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * Polyfills `window.fetch` to enable Network spying and stubbing
+     */
+    experimentalFetchPolyfill: boolean
+
+    /**
+     * Override default config options for Component Testing runner.
+     * @default {}
+     */
+    component: ComponentConfigOptions<ComponentDevServerOpts>
+
+    /**
+     * Override default config options for E2E Testing runner.
+     * @default {}
+     */
+    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
+
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificates: ClientCertificate[]
+
+    /**
+     * Handle Cypress plugins
+     */
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
+
+    indexHtmlFile: string
   }
 
   /**
    * Options appended to config object on runtime.
    */
-  interface RuntimeConfigOptions {
+  interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
+    /**
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js,ts,mjs,cjs})
+     */
+    configFile: string
     /**
      * CPU architecture, from Node `os.arch()`
      *
@@ -2621,29 +2944,13 @@ declare namespace Cypress {
      */
     arch: string
     /**
-     * The list of hosts to be blocked
-     */
-    blockHosts: null | string | string[]
-    /**
-     * The browser Cypress is running on.
-     */
-    browser: Browser
-    /**
      * Available browsers found on your system.
      */
     browsers: Browser[]
     /**
-     * Path to folder containing component test files.
-     */
-    componentFolder: string
-    /**
-     * Whether component testing is enabled.
-     */
-    experimentalComponentTesting: boolean
-    /**
      * Hosts mappings to IP addresses.
      */
-    hosts: null | string[]
+    hosts: null | {[key: string]: string}
     /**
      * Whether Cypress was launched via 'cypress open' (interactive mode)
      */
@@ -2659,79 +2966,117 @@ declare namespace Cypress {
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
-    /**
-     * A unique ID for the project used for recording
-     */
-    projectId: null | string
-    /**
-     * Path to the support folder.
-     */
-    supportFolder: string
-    /**
-     * Glob pattern to determine what test files to load.
-     */
-    testFiles: string
-    /**
-     * The user agent the browser sends in all request headers.
-     */
-    userAgent: null | string
+    remote: RemoteState
     /**
      * The Cypress version being used.
      */
     version: string
 
     // Internal or Unlisted at server/lib/config_options
+    namespace: string
+    projectRoot: string
+    devServerPublicPathRoute: string
+    cypressBinaryRoot: string
+  }
+
+  /**
+   * Optional options added before the server starts
+   */
+  interface RuntimeServerConfigOptions {
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
+    // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
     browserUrl: string
     clientRoute: string
-    configFile: string
     cypressEnv: string
-    integrationExampleName: string
-    integrationExamplePath: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
-    namespace: string
     parentTestsFolder: string
     parentTestsFolderDisplay: string
     projectName: string
-    projectRoot: string
     proxyUrl: string
+    remote: RemoteState
     report: boolean
     reporterRoute: string
     reporterUrl: string
     socketId: null | string
     socketIoCookie: string
     socketIoRoute: string
-    spec: {
-      absolute: string
-      name: string
-      relative: string
-      specFilter: null | string
-      specType: 'integration' | 'component'
-    }
+    spec: Cypress['spec'] | null
+    specs: Array<Cypress['spec']>
     xhrRoute: string
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
+    keystrokeDelay?: number
   }
 
   /**
    * All configuration items are optional.
    */
-  type ConfigOptions = Partial<ResolvedConfigOptions>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
-  interface PluginConfigOptions extends ResolvedConfigOptions {
-    /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
-    */
-    configFile: string | false
+  interface DefineDevServerConfig {
+    // This interface can be extended by the user, to inject the types for their
+    // preferred bundler: e.g.
+    //
+    // import type * as webpack from 'webpack'
+    //
+    // declare global {
+    //   namespace Cypress {
+    //     interface DefineDevServerConfig {
+    //       webpackConfig?: webpack.Configuration
+    //     }
+    //   }
+    // }
+    [key: string]: any
+  }
+
+  type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
+  type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  type DevServerConfigOptions = {
+    bundler: 'webpack'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next'
+    webpackConfig?: PickConfigOpt<'webpackConfig'>
+  } | {
+    bundler: 'vite'
+    framework: 'react' | 'vue'
+    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+  }
+
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
+    devServerConfig?: ComponentDevServerOpts
+  }
+
+  /**
+   * Config options that can be assigned on cypress.config.{js,ts,mjs,cjs} file
+   */
+  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
+
+  /**
+   * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
+   * so we have proper completion for `devServerConfig`
+   */
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>>
+
+  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**
     * Absolute path to the root of the project
     */
     projectRoot: string
+    /**
+     * Type of test and associated runner that was launched.
+     */
+    testingType: TestingType
     /**
      * Cypress version.
      */
@@ -2760,6 +3105,18 @@ declare namespace Cypress {
      * @default {}
      */
     env: object
+  }
+
+  /**
+   * Options for Cypress.Keyboard.defaults()
+   */
+  interface KeyboardDefaultsOptions {
+    /**
+    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    *
+    * @default 10
+    */
+    keystrokeDelay: number
   }
 
   /**
@@ -2812,6 +3169,7 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
+    overwrite: boolean
     onBeforeScreenshot: ($el: JQuery) => void
     onAfterScreenshot: ($el: JQuery, props: {
       path: string
@@ -2832,6 +3190,11 @@ declare namespace Cypress {
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
+  }
+
+  interface SelectorPlaygroundDefaultsOptions {
+    selectorPriority: string[]
+    onElement: ($el: JQuery) => string | null | undefined
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
@@ -2888,6 +3251,11 @@ declare namespace Cypress {
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
+  }
+
+  interface Session {
+    // Clear all saved sessions and re-run the current spec file.
+    clearAllSavedSessions: () => Promise<void>
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
@@ -2994,7 +3362,7 @@ declare namespace Cypress {
 
     /**
      * Cypress will automatically apply the right authorization headers
-     * if you’re attempting to visit an application that requires
+     * if you're attempting to visit an application that requires
      * Basic Authentication.
      *
      * @example
@@ -3037,6 +3405,18 @@ declare namespace Cypress {
     eventConstructor: string
   }
 
+  /**
+   * Options to change the default behavior of .url()
+   */
+  interface UrlOptions extends Loggable, Timeoutable {
+    /**
+     * Whether the url is decoded
+     *
+     * @default false
+     */
+    decode: boolean
+  }
+
   /** Options to change the default behavior of .writeFile */
   interface WriteFileOptions extends Loggable {
     flag: string
@@ -3053,7 +3433,7 @@ declare namespace Cypress {
   interface Chainer<Subject> {
     // chai
     /**
-     * Asserts that the target’s `type` is equal to the given string type.
+     * Asserts that the target's `type` is equal to the given string type.
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
@@ -3064,7 +3444,7 @@ declare namespace Cypress {
     (chainer: 'be.a', type: string): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.above', 5)
      * @see http://chaijs.com/api/bdd/#method_above
@@ -3072,7 +3452,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.above', value: number | Date): Chainable<Subject>
     /**
-     * Asserts that the target’s `type` is equal to the given string type.
+     * Asserts that the target's `type` is equal to the given string type.
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
@@ -3084,7 +3464,7 @@ declare namespace Cypress {
     (chainer: 'be.an', value: string): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.at.least', 5)
      * @see http://chaijs.com/api/bdd/#method_least
@@ -3093,7 +3473,7 @@ declare namespace Cypress {
     (chainer: 'be.at.least', value: number | Date): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.below', 5)
      * @see http://chaijs.com/api/bdd/#method_below
@@ -3109,7 +3489,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.approximately', 5, 0.5)
      * @alias closeTo
@@ -3118,7 +3498,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.closeTo', 5, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -3126,7 +3506,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.closeTo', value: number, delta: number): Chainable<Subject>
     /**
-     * When the target is a string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
+     * When the target is a string or array, .empty asserts that the target's length property is strictly (===) equal to 0
      * @example
      *    cy.wrap([]).should('be.empty')
      *    cy.wrap('').should('be.empty')
@@ -3152,7 +3532,7 @@ declare namespace Cypress {
     (chainer: 'be.false'): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.greaterThan', 5)
      * @alias above
@@ -3162,7 +3542,7 @@ declare namespace Cypress {
     (chainer: 'be.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.gt', 5)
      * @alias above
@@ -3172,7 +3552,7 @@ declare namespace Cypress {
     (chainer: 'be.gt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.gte', 5)
      * @alias least
@@ -3182,7 +3562,7 @@ declare namespace Cypress {
     (chainer: 'be.gte', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lessThan', 5)
      * @alias below
@@ -3192,7 +3572,7 @@ declare namespace Cypress {
     (chainer: 'be.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lt', 5)
      * @alias below
@@ -3202,7 +3582,7 @@ declare namespace Cypress {
     (chainer: 'be.lt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lte', 5)
      * @alias most
@@ -3211,7 +3591,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.lte', value: number): Chainable<Subject>
     /**
-     * Asserts that the target is loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * Asserts that the target is loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
      *    cy.wrap(1).should('be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
@@ -3252,7 +3632,7 @@ declare namespace Cypress {
     (chainer: 'be.NaN'): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
@@ -3261,8 +3641,8 @@ declare namespace Cypress {
     (chainer: 'be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'be.within', start: Date, end: Date): Chainable<Subject>
     /**
-     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
-     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it's invoked before the target function compared to when it's invoked afterward.
+     * However, it's often best to assert that `subject` is equal to its expected value.
      * @example
      *    let dots = ''
      *    function addDot() { dots += '.' }
@@ -3292,8 +3672,8 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: any): Chainable<Subject>
     /**
-     * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -3323,7 +3703,7 @@ declare namespace Cypress {
      */
     (chainer: 'deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(1).should('exist')
      * @see http://chaijs.com/api/bdd/#method_exist
@@ -3404,7 +3784,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.deep.property', value: string, obj: object): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is equal to the given number `n`.
+     * Asserts that the target's `length` property is equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length', 3)
      *    cy.wrap('foo').should('have.length', 3)
@@ -3414,7 +3794,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length' | 'have.lengthOf', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is greater than to the given number `n`.
+     * Asserts that the target's `length` property is greater than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.greaterThan', 2)
      *    cy.wrap('foo').should('have.length.greaterThan', 2)
@@ -3423,7 +3803,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.greaterThan' | 'have.lengthOf.greaterThan', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is greater than to the given number `n`.
+     * Asserts that the target's `length` property is greater than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.gt', 2)
      *    cy.wrap('foo').should('have.length.gt', 2)
@@ -3432,7 +3812,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.gt' | 'have.lengthOf.gt' | 'have.length.above' | 'have.lengthOf.above', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is greater than or equal to the given number `n`.
+     * Asserts that the target's `length` property is greater than or equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.gte', 2)
      *    cy.wrap('foo').should('have.length.gte', 2)
@@ -3441,7 +3821,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.gte' | 'have.lengthOf.gte' | 'have.length.at.least' | 'have.lengthOf.at.least', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * Asserts that the target's `length` property is less than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 4)
      *    cy.wrap('foo').should('have.length.lessThan', 4)
@@ -3450,7 +3830,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.lessThan' | 'have.lengthOf.lessThan', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * Asserts that the target's `length` property is less than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.lt', 4)
      *    cy.wrap('foo').should('have.length.lt', 4)
@@ -3459,7 +3839,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.lt' | 'have.lengthOf.lt' | 'have.length.below' | 'have.lengthOf.below', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is less than or equal to the given number `n`.
+     * Asserts that the target's `length` property is less than or equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.lte', 4)
      *    cy.wrap('foo').should('have.length.lte', 4)
@@ -3468,7 +3848,7 @@ declare namespace Cypress {
      */
     (chainer: 'have.length.lte' | 'have.lengthOf.lte' | 'have.length.at.most' | 'have.lengthOf.at.most', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is within `start` and `finish`.
+     * Asserts that the target's `length` property is within `start` and `finish`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.within', 1, 5)
      * @see http://chaijs.com/api/bdd/#method_lengthof
@@ -3542,12 +3922,12 @@ declare namespace Cypress {
      */
     (chainer: 'include.members' | 'include.ordered.members' | 'include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
-     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
-     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
+     * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * It's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
-     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
+     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`'s `prop` property is greater after
      * invoking the target function compared to beforehand.
      *
      * @example
@@ -3592,7 +3972,7 @@ declare namespace Cypress {
     (chainer: 'satisfy', fn: (val: any) => boolean): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
      *    function badFn() { throw new TypeError('Illegal salmon!') }
      *    cy.wrap(badFn).should('throw')
@@ -3604,7 +3984,7 @@ declare namespace Cypress {
     (chainer: 'throw', value?: string | RegExp): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
      *    function badFn() { throw new TypeError('Illegal salmon!') }
      *    cy.wrap(badFn).should('throw')
@@ -3632,7 +4012,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.extensible'): Chainable<Subject>
     /**
-     * Asserts that the target is sealed, which means that new properties can’t be added to it, and its existing properties can’t be reconfigured or deleted.
+     * Asserts that the target is sealed, which means that new properties can't be added to it, and its existing properties can't be reconfigured or deleted.
      * @example
      *    let sealedObject = Object.seal({})
      *    let frozenObject = Object.freeze({})
@@ -3643,7 +4023,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.sealed'): Chainable<Subject>
     /**
-     * Asserts that the target is frozen, which means that new properties can’t be added to it, and its existing properties can’t be reassigned to different values, reconfigured, or deleted.
+     * Asserts that the target is frozen, which means that new properties can't be added to it, and its existing properties can't be reassigned to different values, reconfigured, or deleted.
      * @example
      *    let frozenObject = Object.freeze({})
      *    cy.wrap(frozenObject).should('be.frozen')
@@ -3652,7 +4032,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.frozen'): Chainable<Subject>
     /**
-     * Asserts that the target is a number, and isn’t `NaN` or positive/negative `Infinity`.
+     * Asserts that the target is a number, and isn't `NaN` or positive/negative `Infinity`.
      * @example
      *    cy.wrap(1).should('be.finite')
      * @see http://chaijs.com/api/bdd/#method_finite
@@ -3662,7 +4042,7 @@ declare namespace Cypress {
 
     // chai.not
     /**
-     * Asserts that the target’s `type` is not equal to the given string type.
+     * Asserts that the target's `type` is not equal to the given string type.
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
@@ -3673,7 +4053,7 @@ declare namespace Cypress {
     (chainer: 'not.be.a', type: string): Chainable<Subject>
     /**
      * Asserts that the target is a not number or not a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.above', 10)
      * @see http://chaijs.com/api/bdd/#method_above
@@ -3681,7 +4061,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.above', value: number | Date): Chainable<Subject>
     /**
-     * Asserts that the target’s `type` is not equal to the given string type.
+     * Asserts that the target's `type` is not equal to the given string type.
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
@@ -3693,7 +4073,7 @@ declare namespace Cypress {
     (chainer: 'not.be.an', value: string): Chainable<Subject>
     /**
      * Asserts that the target is not a number or not a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.at.least', 10)
      * @see http://chaijs.com/api/bdd/#method_least
@@ -3702,7 +4082,7 @@ declare namespace Cypress {
     (chainer: 'not.be.at.least', value: number | Date): Chainable<Subject>
     /**
      * Asserts that the target is not a number or not a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.below', 1)
      * @see http://chaijs.com/api/bdd/#method_below
@@ -3718,7 +4098,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a not number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
      * @alias closeTo
@@ -3727,7 +4107,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -3735,7 +4115,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.closeTo', value: number, delta: number): Chainable<Subject>
     /**
-     * When the target is a not string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
+     * When the target is a not string or array, .empty asserts that the target's length property is strictly (===) equal to 0
      * @example
      *    cy.wrap([1]).should('not.be.empty')
      *    cy.wrap('foo').should('not.be.empty')
@@ -3761,7 +4141,7 @@ declare namespace Cypress {
     (chainer: 'not.be.false'): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.greaterThan', 7)
      * @alias above
@@ -3771,7 +4151,7 @@ declare namespace Cypress {
     (chainer: 'not.be.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.gt', 7)
      * @alias above
@@ -3781,7 +4161,7 @@ declare namespace Cypress {
     (chainer: 'not.be.gt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.gte', 7)
      * @alias least
@@ -3791,7 +4171,7 @@ declare namespace Cypress {
     (chainer: 'not.be.gte', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lessThan', 3)
      * @alias below
@@ -3801,7 +4181,7 @@ declare namespace Cypress {
     (chainer: 'not.be.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lt', 3)
      * @alias below
@@ -3811,7 +4191,7 @@ declare namespace Cypress {
     (chainer: 'not.be.lt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lte', 3)
      * @alias most
@@ -3820,7 +4200,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.lte', value: number): Chainable<Subject>
     /**
-     * Asserts that the target is not loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * Asserts that the target is not loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
      *    cy.wrap(0).should('not.be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
@@ -3861,7 +4241,7 @@ declare namespace Cypress {
     (chainer: 'not.be.NaN'): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(3).should('not.be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
@@ -3870,8 +4250,8 @@ declare namespace Cypress {
     (chainer: 'not.be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'not.be.within', start: Date, end: Date): Chainable<Subject>
     /**
-     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
-     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it's invoked before the target function compared to when it's invoked afterward.
+     * However, it's often best to assert that `subject` is equal to its expected value.
      * @example
      *    let dots = ''
      *    function addDot() { dots += '.' }
@@ -3901,8 +4281,8 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain', value: any): Chainable<Subject>
     /**
-     * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -3931,7 +4311,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(null).should('not.exist')
      * @see http://chaijs.com/api/bdd/#method_exist
@@ -3988,7 +4368,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.deep.property', value: string, obj: object): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not equal to the given number `n`.
+     * Asserts that the target's `length` property is not equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length', 2)
      * cy.wrap('foo').should('not.have.length', 2)
@@ -3998,7 +4378,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length' | 'not.have.lengthOf', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not greater than to the given number `n`.
+     * Asserts that the target's `length` property is not greater than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.greaterThan', 4)
      *    cy.wrap('foo').should('not.have.length.greaterThan', 4)
@@ -4007,7 +4387,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.greaterThan' | 'not.have.lengthOf.greaterThan', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not greater than to the given number `n`.
+     * Asserts that the target's `length` property is not greater than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.gt', 4)
      *    cy.wrap('foo').should('not.have.length.gt', 4)
@@ -4016,7 +4396,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.gt' | 'not.have.lengthOf.gt' | 'not.have.length.above' | 'not.have.lengthOf.above', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not greater than or equal to the given number `n`.
+     * Asserts that the target's `length` property is not greater than or equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.gte', 4)
      *    cy.wrap('foo').should('not.have.length.gte', 4)
@@ -4025,7 +4405,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.gte' | 'not.have.lengthOf.gte' | 'not.have.length.at.least' | 'not.have.lengthOf.at.least', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * Asserts that the target's `length` property is less than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 2)
      *    cy.wrap('foo').should('have.length.lessThan', 2)
@@ -4034,7 +4414,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.lessThan' | 'not.have.lengthOf.lessThan', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not less than to the given number `n`.
+     * Asserts that the target's `length` property is not less than to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.lt', 2)
      *    cy.wrap('foo').should('not.have.length.lt', 2)
@@ -4043,7 +4423,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.lt' | 'not.have.lengthOf.lt' | 'not.have.length.below' | 'not.have.lengthOf.below', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is not less than or equal to the given number `n`.
+     * Asserts that the target's `length` property is not less than or equal to the given number `n`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.lte', 2)
      *    cy.wrap('foo').should('not.have.length.lte', 2)
@@ -4052,7 +4432,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.length.lte' | 'not.have.lengthOf.lte' | 'not.have.length.at.most' | 'not.have.lengthOf.at.most', value: number): Chainable<Subject>
     /**
-     * Asserts that the target’s `length` property is within `start` and `finish`.
+     * Asserts that the target's `length` property is within `start` and `finish`.
      * @example
      *    cy.wrap([1, 2, 3]).should('not.have.length.within', 6, 12)
      * @see http://chaijs.com/api/bdd/#method_lengthof
@@ -4126,12 +4506,12 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.members' | 'not.include.ordered.members' | 'not.include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
-     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
-     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
+     * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * It's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
-     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
+     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`'s `prop` property is greater after
      * invoking the target function compared to beforehand.
      *
      * @example
@@ -4176,7 +4556,7 @@ declare namespace Cypress {
     (chainer: 'not.satisfy', fn: (val: any) => boolean): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
      *    function badFn() { console.log('Illegal salmon!') }
      *    cy.wrap(badFn).should('not.throw')
@@ -4188,7 +4568,7 @@ declare namespace Cypress {
     (chainer: 'not.throw', value?: string | RegExp): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
      *    function badFn() { console.log('Illegal salmon!') }
      *    cy.wrap(badFn).should('not.throw')
@@ -4217,7 +4597,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.extensible'): Chainable<Subject>
     /**
-     * Asserts that the target is sealed, which means that new properties can’t be added to it, and its existing properties can’t be reconfigured or deleted.
+     * Asserts that the target is sealed, which means that new properties can't be added to it, and its existing properties can't be reconfigured or deleted.
      * @example
      *    cy.wrap({a: 1}).should('be.sealed')
      *    cy.wrap({a: 1}).should('be.sealed')
@@ -4226,7 +4606,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.sealed'): Chainable<Subject>
     /**
-     * Asserts that the target is frozen, which means that new properties can’t be added to it, and its existing properties can’t be reassigned to different values, reconfigured, or deleted.
+     * Asserts that the target is frozen, which means that new properties can't be added to it, and its existing properties can't be reassigned to different values, reconfigured, or deleted.
      * @example
      *    cy.wrap({a: 1}).should('not.be.frozen')
      * @see http://chaijs.com/api/bdd/#method_frozen
@@ -4234,7 +4614,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.frozen'): Chainable<Subject>
     /**
-     * Asserts that the target is a number, and isn’t `NaN` or positive/negative `Infinity`.
+     * Asserts that the target is a number, and isn't `NaN` or positive/negative `Infinity`.
      * @example
      *    cy.wrap(NaN).should('not.be.finite')
      *    cy.wrap(Infinity).should('not.be.finite')
@@ -4246,7 +4626,7 @@ declare namespace Cypress {
     // sinon-chai
     /**
      * Assert spy/stub was called the `new` operator.
-     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * Beware that this is inferred based on the value of the this object and the spy function's prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
@@ -4319,7 +4699,7 @@ declare namespace Cypress {
     (chainer: 'be.calledWithMatch' | 'have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy/stub was called the `new` operator.
-     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * Beware that this is inferred based on the value of the this object and the spy function's prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
@@ -4406,7 +4786,7 @@ declare namespace Cypress {
     // sinon-chai.not
     /**
      * Assert spy/stub was not called the `new` operator.
-     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * Beware that this is inferred based on the value of the this object and the spy function's prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
@@ -4479,7 +4859,7 @@ declare namespace Cypress {
     (chainer: 'not.be.calledWithMatch' | 'not.have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy/stub was not called the `new` operator.
-     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * Beware that this is inferred based on the value of the this object and the spy function's prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
@@ -5030,7 +5410,7 @@ declare namespace Cypress {
 
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
-     * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
+     * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you'd like to assert on.
      * Just be sure _not_ to include any code that has side effects in your callback function. The callback function will be retried over and over again until no assertions within it throw.
      * @example
      *    cy
@@ -5115,27 +5495,27 @@ declare namespace Cypress {
   }
 
   interface BeforeRunDetails {
-    browser: Browser
+    browser?: Browser
     config: ConfigOptions
     cypressVersion: string
     group?: string
-    parallel: boolean
+    parallel?: boolean
     runUrl?: string
-    specs: Spec[]
-    specPattern: string[]
+    specs?: Spec[]
+    specPattern?: string[]
     system: SystemDetails
     tag?: string
   }
 
-  interface DevServerOptions {
+  interface DevServerConfig {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions,
-    devServerEvents: NodeJS.EventEmitter,
+    cypressConfig: PluginConfigOptions
+    devServerEvents: NodeJS.EventEmitter
   }
 
   interface ResolvedDevServerConfig {
     port: number
-    close: (done?: () => any) => void
+    close: (done?: (err?: Error) => any) => void
   }
 
   interface PluginEvents {
@@ -5146,8 +5526,23 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
-    (action: 'dev-server:start', fn: (file: DevServerOptions) => Promise<ResolvedDevServerConfig>): void
+    (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
+  }
+
+  interface CodeFrame {
+    frame: string
+    language: string
+    line: number
+    column: number
+    absoluteFile: string
+    originalFile: string
+    relativeFile: string
+  }
+
+  interface CypressError extends Error {
+    docsUrl?: string
+    codeFrame?: CodeFrame
   }
 
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
@@ -5160,7 +5555,7 @@ declare namespace Cypress {
    */
   interface Actions {
     /**
-     * Fires when an uncaught exception occurs in your application.
+     * Fires when an uncaught exception or unhandled rejection occurs in your application. If it's an unhandled rejection, the rejected promise will be the 3rd argument.
      * Cypress will fail the test when this fires.
      * Return `false` from this event and Cypress will not fail the test. Also useful for debugging purposes because the actual `error` instance is provided to you.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -5168,7 +5563,7 @@ declare namespace Cypress {
     ```
       // likely want to do this in a support file
       // so it's applied to all spec files
-      // cypress/support/index.js
+      // cypress/support/{e2e|component}.js
 
       Cypress.on('uncaught:exception', (err, runnable) => {
         // returning false here prevents Cypress from
@@ -5186,7 +5581,7 @@ declare namespace Cypress {
       })
     ```
      */
-    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable) => false | void): Cypress
+    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable, promise?: Promise<any>) => false | void): Cypress
     /**
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
@@ -5255,7 +5650,7 @@ declare namespace Cypress {
      *  This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): Cypress
+    (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress
     /**
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when
      * Cypress resets the viewport to the default between tests. Useful for debugging purposes.
@@ -5289,6 +5684,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
+    /**
+     * Fires when a command is skipped, namely the `should` command.
+     * Useful for debugging and understanding how commands are handled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'skipped:command:end', fn: (command: CommandQueue) => void): Cypress
     /**
      * Fires whenever a command begins its retrying routines.
      * This is called on the trailing edge after Cypress has internally
@@ -5379,10 +5780,13 @@ declare namespace Cypress {
   }
 
   interface EnqueuedCommand {
+    id: string
     name: string
     args: any[]
     type: string
     chainerId: string
+    injected: boolean
+    userInvocationStack?: string
     fn(...args: any[]): any
   }
 
@@ -5392,6 +5796,18 @@ declare namespace Cypress {
     stderr: string
   }
 
+  type FileReference = string | BufferType | FileReferenceObject
+  interface FileReferenceObject {
+    /*
+     * Buffers will be used as-is, while strings will be interpreted as an alias or a file path.
+     * All other types will have `Buffer.from(JSON.stringify())` applied.
+     */
+    contents: any
+    fileName?: string
+    mimeType?: string
+    lastModified?: number
+  }
+
   interface LogAttrs {
     url: string
     consoleProps: ObjectLike
@@ -5399,6 +5815,7 @@ declare namespace Cypress {
 
   interface Log {
     end(): Log
+    error(error: Error): Log
     finish(): void
     get<K extends keyof LogConfig>(attr: K): LogConfig[K]
     get(): LogConfig
@@ -5408,24 +5825,31 @@ declare namespace Cypress {
   }
 
   interface LogConfig extends Timeoutable {
+    /** Unique id for the log, in the form of '<origin>-<number>' */
+    id: string
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
+    /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
+    type: 'parent' | 'child'
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** additional information to include in the log */
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean
+    /** Set to true to immediately finish the log  */
+    end: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }
 
-  interface Response {
+  interface Response<T> {
     allRequestResponses: any[]
-    body: any
+    body: T
     duration: number
-    headers: { [key: string]: string }
+    headers: { [key: string]: string | string[] }
     isOkStatusCode: boolean
     redirects?: string[]
     redirectedToUrl?: string
@@ -5466,7 +5890,7 @@ declare namespace Cypress {
     xhr: XMLHttpRequest
   }
 
-  type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
+  type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le' | null
   type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
   type ViewportPreset = 'macbook-16' | 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-se2' | 'iphone-8' | 'iphone-7' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
@@ -5497,48 +5921,48 @@ declare namespace Cypress {
   }
   ```
    */
-  interface cy extends Chainable<undefined> {}
+  interface cy extends Chainable<undefined> { }
 }
 
 declare namespace Mocha {
   interface TestFunction {
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
-        /**
-         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
-         * as a thunk.
-         */
-        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    /**
+     * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
+     * as a thunk.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
 
   interface SuiteFunction {

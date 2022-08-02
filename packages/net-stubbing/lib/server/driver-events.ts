@@ -1,26 +1,28 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import {
+import type {
   NetStubbingState,
   GetFixtureFn,
   BackendRoute,
 } from './types'
 import {
+  PLAIN_FIELDS,
   AnnotatedRouteMatcherOptions,
-  NetEventFrames,
   RouteMatcherOptions,
+  NetEvent,
 } from '../types'
 import {
   getAllStringMatcherFields,
+  sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
-import { onRequestContinue } from './intercept-request'
-import { onResponseContinue } from './intercept-response'
-import CyServer from '@packages/server'
+import { InterceptedRequest } from './intercepted-request'
+import type CyServer from '@packages/server'
+import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
+async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute<BackendStaticResponse>) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -29,12 +31,49 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   }
 
   const route: BackendRoute = {
+    id: options.routeId,
+    hasInterceptor: options.hasInterceptor,
+    staticResponse: options.staticResponse,
     routeMatcher,
     getFixture,
-    ..._.omit(options, 'routeMatcher'), // skip the user's un-annotated routeMatcher
+    matches: 0,
   }
 
   state.routes.push(route)
+}
+
+function getRequest (state: NetStubbingState, requestId: string) {
+  return Object.values(state.requests).find(({ id }) => {
+    return requestId === id
+  })
+}
+
+function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
+  const request = getRequest(state, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  request.addSubscription(options.subscription)
+}
+
+async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
+  const request = getRequest(state, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  if (options.staticResponse.fixture && ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)) {
+    // if we're already in a response phase, it's possible that the fixture body will never be sent to the browser
+    // so include the fixture body in `after:response`
+    request.includeBodyInAfterResponse = true
+  }
+
+  await setResponseFromFixture(getFixture, options.staticResponse)
+
+  await _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -62,34 +101,34 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
     _.set(ret, field, value)
   })
 
-  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
-
-  _.extend(ret, _.pick(options, noAnnotationRequiredFields))
+  _.extend(ret, _.pick(options, PLAIN_FIELDS))
 
   return ret
 }
 
-type OnNetEventOpts = {
+type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
   socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEventFrames.AddRoute | NetEventFrames.HttpRequestContinue | NetEventFrames.HttpResponseContinue
+  frame: NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
 }
 
-export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
-  const { state, socket, getFixture, args, eventName, frame } = opts
+export async function onNetStubbingEvent (opts: OnNetStubbingEventOpts): Promise<any> {
+  const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
     case 'route:added':
-      return _onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
-    case 'http:request:continue':
-      return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
-    case 'http:response:continue':
-      return onResponseContinue(state, <NetEventFrames.HttpResponseContinue>frame)
+      return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute<BackendStaticResponse>>frame)
+    case 'subscribe':
+      return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
+    case 'event:handler:resolved':
+      return InterceptedRequest.resolveEventHandler(state, <NetEvent.ToServer.EventHandlerResolved>frame)
+    case 'send:static:response':
+      return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
     default:
       throw new Error(`Unrecognized net event: ${eventName}`)
   }

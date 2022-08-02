@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 const fs = require('fs')
 const debug = require('debug')('net-profiler')
 

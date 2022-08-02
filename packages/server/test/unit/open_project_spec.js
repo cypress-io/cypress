@@ -1,10 +1,15 @@
 require('../spec_helper')
 
-const chokidar = require('chokidar')
-const browsers = require(`${root}lib/browsers`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
-const openProject = require(`${root}lib/open_project`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
+const Bluebird = require('bluebird')
+const browsers = require(`../../lib/browsers`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const { openProject } = require('../../lib/open_project')
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const runEvents = require(`../../lib/plugins/run_events`)
+const Fixtures = require('@tooling/system-tests')
+const delay = require('lodash/delay')
+
+const todosPath = Fixtures.projectPath('todos')
 
 describe('lib/open_project', () => {
   beforeEach(function () {
@@ -14,30 +19,48 @@ describe('lib/open_project', () => {
     }
 
     this.config = {
-      integrationFolder: '/user/foo/cypress/integration',
-      testFiles: '**/*.*',
-      ignoreTestFiles: '**/*.nope',
-      projectRoot: '/project/root',
+      excludeSpecPattern: '**/*.nope',
+      projectRoot: todosPath,
     }
 
+    this.onError = sinon.stub()
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(ProjectE2E.prototype, 'open').resolves()
-    sinon.stub(ProjectE2E.prototype, 'reset').resolves()
-    sinon.stub(ProjectE2E.prototype, 'getSpecUrl').resolves()
-    sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
-    sinon.stub(ProjectE2E.prototype, 'getAutomation').returns(this.automation)
+    sinon.stub(browsers, 'connectToNewSpec')
+    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
+      specPattern: 'cypress/integration/**/*',
+    })
+
+    sinon.stub(ProjectBase.prototype, 'open').resolves()
+    sinon.stub(ProjectBase.prototype, 'reset').resolves()
+    sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
+    sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
-    openProject.create('/project/root')
+    return Fixtures.scaffoldProject('todos').then(() => {
+      return openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+    })
   })
 
   context('#launch', () => {
-    beforeEach(function () {
-      openProject.getProject().options = {}
+    beforeEach(async function () {
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+      openProject.getProject().__setConfig({
+        browserUrl: 'http://localhost:8888/__/',
+        projectRoot: todosPath,
+        specType: 'integration',
+        e2e: {
+          specPattern: 'cypress/integration/**/*',
+        },
+      })
+
+      openProject.getProject().options = {
+        onError: this.onError,
+      }
 
       this.spec = {
         absolute: 'path/to/spec',
+        relative: 'path/to/spec',
       }
 
       this.browser = { name: 'chrome' }
@@ -76,7 +99,7 @@ describe('lib/open_project', () => {
     it('calls project.reset on launch', function () {
       return openProject.launch(this.browser, this.spec)
       .then(() => {
-        expect(ProjectE2E.prototype.reset).to.be.called
+        expect(ProjectBase.prototype.reset).to.be.called
       })
     })
 
@@ -91,70 +114,163 @@ describe('lib/open_project', () => {
         expect(this.browser.isHeadless).to.be.false
       })
     })
-  })
 
-  context('#getSpecChanges', () => {
-    beforeEach(function () {
-      this.watcherStub = {
-        on: sinon.stub(),
-        close: sinon.stub(),
-      }
+    describe('spec events', function () {
+      this.beforeEach(function () {
+        sinon.stub(runEvents, 'execute').resolves()
+      })
 
-      sinon.stub(chokidar, 'watch').returns(this.watcherStub)
-    })
+      it('executes before:spec if in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
 
-    it('watches spec files', function () {
-      return openProject.getSpecChanges({}).then(() => {
-        expect(chokidar.watch).to.be.calledWith(this.config.testFiles, {
-          cwd: this.config.integrationFolder,
-          ignored: this.config.ignoreTestFiles,
-          ignoreInitial: true,
+        return openProject.launch(this.browser, this.spec).then(() => {
+          expect(runEvents.execute).to.be.calledWith('before:spec', this.config, this.spec)
         })
       })
-    })
 
-    it('calls onChange callback when file is added', function () {
-      const onChange = sinon.spy()
+      it('does not execute before:spec if not in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = true
 
-      this.watcherStub.on.withArgs('add').yields()
+        return openProject.launch(this.browser, this.spec).then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('before:spec')
+        })
+      })
 
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
+      it('does not execute before:spec if experimental flag is not enabled', function () {
+        this.config.experimentalInteractiveRunEvents = false
+        this.config.isTextTerminal = false
+
+        return openProject.launch(this.browser, this.spec).then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('before:spec')
+        })
+      })
+
+      it('executes after:spec on browser close if in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
+        const onBrowserClose = () => Bluebird.resolve()
+
+        return openProject.launch(this.browser, this.spec, { onBrowserClose })
+        .then(() => {
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
+        })
+      })
+
+      it('does not execute after:spec on browser close if not in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = true
+        const onBrowserClose = () => Bluebird.resolve()
+
+        return openProject.launch(this.browser, this.spec, { onBrowserClose })
+        .then(() => {
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('after:spec')
+        })
+      })
+
+      it('does not execute after:spec on browser close if experimental flag is not enabled', function () {
+        this.config.experimentalInteractiveRunEvents = false
+        this.config.isTextTerminal = false
+        const onBrowserClose = () => Bluebird.resolve()
+
+        return openProject.launch(this.browser, this.spec, { onBrowserClose })
+        .then(() => {
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('after:spec')
+        })
+      })
+
+      it('does not execute after:spec on browser close if the project is no longer open', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
+        const onBrowserClose = () => Bluebird.resolve()
+
+        return openProject.launch(this.browser, this.spec, { onBrowserClose })
+        .then(() => {
+          openProject.__reset()
+
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('after:spec')
+        })
+      })
+
+      it('sends after:spec errors through onError option', function () {
+        const err = new Error('thrown from after:spec handler')
+
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
+        runEvents.execute.withArgs('after:spec').rejects(err)
+
+        return openProject.launch(this.browser, this.spec, { onError: this.onError })
+        .then(() => {
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          return new Bluebird((res) => {
+            delay(() => {
+              expect(runEvents.execute).to.be.calledWith('after:spec')
+              expect(this.onError).to.be.calledWith(err)
+              res()
+            }, 100)
+          })
+        })
+      })
+
+      it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
+        await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
+        expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
       })
     })
+  })
 
-    it('calls onChange callback when file is removed', function () {
-      const onChange = sinon.spy()
+  context('#sendFocusBrowserMessage', () => {
+    it('focuses browser if runner is connected', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = sinon.stub()
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(true)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
 
-      this.watcherStub.on.withArgs('unlink').yields()
+      await openProject.sendFocusBrowserMessage()
 
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
-      })
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).to.have.been.calledOnce
+      expect(openProject.relaunchBrowser).not.to.have.been.called
     })
 
-    it('only calls onChange once if there are multiple changes in a row', function () {
-      const onChange = sinon.spy()
+    it('relaunches browser if runner is not connected and relaunch exists', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = sinon.stub()
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(false)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
 
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
+      await openProject.sendFocusBrowserMessage()
 
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.calledOnce
-      })
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
+      expect(openProject.relaunchBrowser).to.have.been.calledOnce
     })
 
-    it('destroys and creates specsWatcher as expected', function () {
-      expect(openProject.specsWatcher).to.exist
-      openProject.stopSpecsWatcher()
-      expect(openProject.specsWatcher).to.be.null
+    it('does not throw if relaunch is not defined', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = null
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(false)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
 
-      return openProject.getSpecChanges()
-      .then(() => {
-        expect(openProject.specsWatcher).to.exist
-      })
+      await openProject.sendFocusBrowserMessage()
+
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
     })
   })
 })

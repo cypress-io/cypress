@@ -58,28 +58,29 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
-- appveyor
-- azure
-- awsCodeBuild
-- bamboo
-- bitbucket
-- buildkite
-- circle
-- codeshipBasic
-- codeshipPro
-- concourse
-- codeFresh
-- drone
-- githubActions
-- gitlab
-- goCD
-- googleCloud
-- jenkins
-- semaphore
-- shippable
-- teamfoundation
-- travis
-- netlify
+ - appveyor
+ - azure
+ - awsCodeBuild
+ - bamboo
+ - bitbucket
+ - buildkite
+ - circle
+ - codeshipBasic
+ - codeshipPro
+ - concourse
+ - codeFresh
+ - drone
+ - githubActions
+ - gitlab
+ - goCD
+ - googleCloud
+ - jenkins
+ - semaphore
+ - shippable
+ - teamfoundation
+ - travis
+ - netlify
+ - layerci
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -95,28 +96,29 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
-- appveyor
-- azure
-- awsCodeBuild
-- bamboo
-- bitbucket
-- buildkite
-- circle
-- codeshipBasic
-- codeshipPro
-- concourse
-- codeFresh
-- drone
-- githubActions
-- gitlab
-- goCD
-- googleCloud
-- jenkins
-- semaphore
-- shippable
-- teamfoundation
-- travis
-- netlify
+ - appveyor
+ - azure
+ - awsCodeBuild
+ - bamboo
+ - bitbucket
+ - buildkite
+ - circle
+ - codeshipBasic
+ - codeshipPro
+ - concourse
+ - codeFresh
+ - drone
+ - githubActions
+ - gitlab
+ - goCD
+ - googleCloud
+ - jenkins
+ - semaphore
+ - shippable
+ - teamfoundation
+ - travis
+ - netlify
+ - layerci
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -133,28 +135,29 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
-- appveyor
-- azure
-- awsCodeBuild
-- bamboo
-- bitbucket
-- buildkite
-- circle
-- codeshipBasic
-- codeshipPro
-- concourse
-- codeFresh
-- drone
-- githubActions
-- gitlab
-- goCD
-- googleCloud
-- jenkins
-- semaphore
-- shippable
-- teamfoundation
-- travis
-- netlify
+ - appveyor
+ - azure
+ - awsCodeBuild
+ - bamboo
+ - bitbucket
+ - buildkite
+ - circle
+ - codeshipBasic
+ - codeshipPro
+ - concourse
+ - codeFresh
+ - drone
+ - githubActions
+ - gitlab
+ - goCD
+ - googleCloud
+ - jenkins
+ - semaphore
+ - shippable
+ - teamfoundation
+ - travis
+ - netlify
+ - layerci
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -189,11 +192,11 @@ The existing run is: https://dashboard.cypress.io/runs/12345
 
 In order to run in parallel mode each machine must send identical environment parameters such as:
 
-- specs
-- osName
-- osVersion
-- browserName
-- browserVersion (major)
+ - specs
+ - osName
+ - osVersion
+ - browserName
+ - browserVersion (major)
 
 This machine sent the following parameters:
 
@@ -203,7 +206,7 @@ This machine sent the following parameters:
   "browserName": "Electron",
   "browserVersion": "59.1.2.3",
   "specs": [
-    "cypress/integration/app_spec.js"
+    "cypress/e2e/app.cy.js"
   ]
 }
 
@@ -275,32 +278,76 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['could not parse config error'] = `
-Cypress encountered an error while parsing the argument config
+Cypress encountered an error while parsing the argument: --config
 
 You passed: xyz
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['could not parse env error'] = `
-Cypress encountered an error while parsing the argument env
+Cypress encountered an error while parsing the argument: --env
 
 You passed: a123
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['could not parse reporter options error'] = `
-Cypress encountered an error while parsing the argument reporterOptions
+Cypress encountered an error while parsing the argument: --reporterOptions
 
 You passed: nonono
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['INVALID_CONFIG_OPTION'] = `
-\`test\` is not a valid configuration option,\`foo\` is not a valid configuration option
+The following configuration options are invalid:
+
+ - test
+ - foo
 
 https://on.cypress.io/configuration
+
+`
+
+exports['Long Dashboard URL'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
+  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false                           │
+  │ Run URL:    http://dashboard.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long │
+  │             -long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-l │
+  │             ong-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-lon │
+  │             g-long-long-long-long-long-long-long-long-url                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app.cy.js                                                                       (1 of 1)
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖                                           XX:XX        1        2        3        4        5 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        2        3        4        5  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: http://dashboard.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-url
 
 `

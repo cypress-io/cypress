@@ -2,7 +2,7 @@ import { NetworkProxy } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
-  onNetEvent,
+  onNetStubbingEvent,
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
@@ -11,13 +11,14 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
+import { RemoteStates } from '@packages/server/lib/remote_states'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
 context('network stubbing', () => {
   let config
-  let remoteState
+  let remoteStates: RemoteStates
   let netStubbingState: NetStubbingState
   let app
   let destinationApp
@@ -27,7 +28,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {}
-    remoteState = {}
+    remoteStates = new RemoteStates(() => {})
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()
@@ -38,9 +39,12 @@ context('network stubbing', () => {
       netStubbingState,
       config,
       middleware: defaultMiddleware,
-      getRemoteState: () => remoteState,
+      getCurrentBrowser: () => ({ family: 'chromium' }),
+      remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
+      getRenderedHTMLOrigins: () => ({}),
+      serverBus: new EventEmitter(),
     })
 
     app.use((req, res, next) => {
@@ -59,6 +63,7 @@ context('network stubbing', () => {
 
     server = allowDestroy(destinationApp.listen(() => {
       destinationPort = server.address().port
+      remoteStates.set(`http://localhost:${destinationPort}`)
       done()
     }))
   })
@@ -83,7 +88,7 @@ context('network stubbing', () => {
 
   it('adds CORS headers to static stubs', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -92,6 +97,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -108,7 +114,7 @@ context('network stubbing', () => {
 
   it('does not override CORS headers', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -120,6 +126,7 @@ context('network stubbing', () => {
         },
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -133,7 +140,7 @@ context('network stubbing', () => {
 
   it('uses Origin to set CORS header', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -142,6 +149,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -156,32 +164,33 @@ context('network stubbing', () => {
 
   it('adds CORS headers to dynamically intercepted requests', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
       hasInterceptor: true,
       getFixture,
+      matches: 1,
     })
 
     socket.toDriver.callsFake((_, event, data) => {
-      if (event === 'http:request:received') {
-        onNetEvent({
-          eventName: 'http:request:continue',
+      if (event === 'before:request') {
+        onNetStubbingEvent({
+          eventName: 'send:static:response',
+          // @ts-ignore
           frame: {
-            routeHandlerId: '1',
             requestId: data.requestId,
-            req: data.req,
             staticResponse: {
+              ...data.data,
               body: 'replaced',
             },
-            hasResponseHandler: false,
-            tryNextRoute: false,
           },
           state: netStubbingState,
-          socket,
           getFixture,
           args: [],
+          socket: {
+            toDriver () {},
+          },
         })
       }
     })
@@ -189,48 +198,18 @@ context('network stubbing', () => {
     return supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .then((res) => {
+      expect(res.text).to.eq('replaced')
       expect(res.headers).to.include({
         'access-control-allow-origin': '*',
       })
-
-      expect(res.text).to.eq('replaced')
     })
   })
 
-  it('does not modify multipart/form-data files', () => {
+  it('does not modify multipart/form-data files', async () => {
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
     let sendContentLength = ''
     let receivedContentLength = ''
     let realContentLength = ''
-
-    netStubbingState.routes.push({
-      handlerId: '1',
-      routeMatcher: {
-        url: '*',
-      },
-      hasInterceptor: true,
-      getFixture,
-    })
-
-    socket.toDriver.callsFake((_, event, data) => {
-      if (event === 'http:request:received') {
-        sendContentLength = data.req.headers['content-length']
-        onNetEvent({
-          eventName: 'http:request:continue',
-          frame: {
-            routeHandlerId: '1',
-            requestId: data.requestId,
-            req: data.req,
-            res: data.res,
-            hasResponseHandler: false,
-            tryNextRoute: false,
-          },
-          state: netStubbingState,
-          socket,
-          getFixture,
-          args: [],
-        })
-      }
-    })
 
     destinationApp.post('/', (req, res) => {
       const chunks = []
@@ -250,12 +229,49 @@ context('network stubbing', () => {
       })
     })
 
-    return supertest(app)
+    // capture unintercepted content-length
+    await supertest(app)
     .post(`/http://localhost:${destinationPort}`)
-    .attach('file', Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')) // 1 pixel png image
-    .then(() => {
-      expect(sendContentLength).to.eq(receivedContentLength)
-      expect(sendContentLength).to.eq(realContentLength)
+    .attach('file', png)
+
+    netStubbingState.routes.push({
+      id: '1',
+      routeMatcher: {
+        url: '*',
+      },
+      hasInterceptor: true,
+      getFixture,
+      matches: 1,
     })
+
+    socket.toDriver.callsFake((_, event, data) => {
+      if (event === 'before:request') {
+        sendContentLength = data.data.headers['content-length']
+        onNetStubbingEvent({
+          eventName: 'send:static:response',
+          // @ts-ignore
+          frame: {
+            requestId: data.requestId,
+            staticResponse: {
+              ...data.data,
+            },
+          },
+          state: netStubbingState,
+          getFixture,
+          args: [],
+          socket: {
+            toDriver () {},
+          },
+        })
+      }
+    })
+
+    // capture content-length after intercepting
+    await supertest(app)
+    .post(`/http://localhost:${destinationPort}`)
+    .attach('file', png)
+
+    expect(sendContentLength).to.eq(receivedContentLength)
+    expect(sendContentLength).to.eq(realContentLength)
   })
 })

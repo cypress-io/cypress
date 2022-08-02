@@ -3,15 +3,24 @@ import launchEditor from 'launch-editor'
 
 const debug = debugModule('cypress:server:file-opener')
 
-export const openFile = (fileDetails) => {
+export interface OpenFileDetails {
+  file: string
+  where: {
+    binary: string
+  }
+  line: number
+  column: number
+}
+
+export const openFile = (fileDetails: OpenFileDetails) => {
   debug('open file: %o', fileDetails)
 
-  const openerId = fileDetails.where.openerId
+  const binary = fileDetails.where.binary
 
-  if (openerId === 'computer') {
+  if (binary === 'computer') {
     try {
       require('electron').shell.showItemInFolder(fileDetails.file)
-    } catch (err) {
+    } catch (err: any) {
       debug('error opening file: %s', err.stack)
     }
 
@@ -20,7 +29,7 @@ export const openFile = (fileDetails) => {
 
   const { file, line, column } = fileDetails
 
-  launchEditor(`${file}:${line}:${column}`, `"${openerId}"`, (__, errMsg) => {
+  launchEditor(`${file}:${line}:${column}`, `"${binary}"`, (__, errMsg) => {
     debug('error opening file: %s', errMsg)
   })
 }

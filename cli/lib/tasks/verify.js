@@ -1,21 +1,21 @@
 const _ = require('lodash')
 const chalk = require('chalk')
-const Listr = require('listr')
+const { Listr } = require('listr2')
 const debug = require('debug')('cypress:cli')
-const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const path = require('path')
 const os = require('os')
 
+const verbose = require('../VerboseRenderer')
 const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
 const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
 
-const VERIFY_TEST_RUNNER_TIMEOUT_MS = 30000
+const VERIFY_TEST_RUNNER_TIMEOUT_MS = +util.getEnv('CYPRESS_VERIFY_TIMEOUT') || 30000
 
 const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
@@ -190,7 +190,7 @@ function testBinary (version, binaryDir, options) {
 
   const tasks = new Listr([
     {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
+      options: { title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)) },
       task: (ctx, task) => {
         debug('clearing out the verified version')
 
@@ -218,7 +218,7 @@ function testBinary (version, binaryDir, options) {
         })
       },
     },
-  ], rendererOptions)
+  ], { rendererOptions })
 
   return tasks.run()
 }

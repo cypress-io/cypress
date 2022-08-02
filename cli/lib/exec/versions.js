@@ -41,8 +41,15 @@ const getVersions = () => {
     return versions
   })
   .then((binaryVersions) => {
+    const buildInfo = util.pkgBuildInfo()
+
+    let packageVersion = util.pkgVersion()
+
+    if (!buildInfo) packageVersion += ' (development)'
+    else if (!buildInfo.stable) packageVersion += ' (pre-release)'
+
     const versions = {
-      package: util.pkgVersion(),
+      package: packageVersion,
       binary: binaryVersions.binary || 'not installed',
       electronVersion: binaryVersions.electronVersion || 'not found',
       electronNodeVersion: binaryVersions.electronNodeVersion || 'not found',

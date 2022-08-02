@@ -5,10 +5,13 @@
 - Make sure you set the correct base branch based on what packages you're changing: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#branches
 -->
 
-- Closes <!-- issue number here. e.g. "Closes #1234" -->
+- Closes <!-- link to the issue here, if there is one -->
 
 ### User facing changelog
-<!-- Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog-->
+<!-- 
+Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog
+If the change is not user-facing, write "n/a".
+-->
 
 ### Additional details
 <!-- Examples:
@@ -17,16 +20,24 @@
 - Any implementation details to explain?
 -->
 
+### Steps to test
+<!--
+For non-trivial behavior changes, list the steps that a reviewer should follow to validate the new behavior.
+This is not meant to be the only testing performed by a reviewer, just the "happy path" that leads to the new behavior.
+-->
+
 ### How has the user experience changed?
 <!-- Provide before and after examples of the change.
 Screenshots or GIFs are preferred. -->
 
 ### PR Tasks
-<!-- These tasks must be completed before a PR is merged.
-Delete tasks if they are not applicable. -->
+<!-- 
+These tasks must be completed before a PR is merged.
+If a task does not apply, write [na] instead of checking the box.
+DO NOT DELETE the PR checklist.
+-->
 
 - [ ] Have tests been added/updated?
-- [ ] Has the original issue or this PR been tagged with a release in ZenHub? <!-- (internal team only)-->
+- [ ] Has the original issue (or this PR, if no issue exists) been tagged with a release in ZenHub? (user-facing changes only)
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
-- [ ] Have new configuration options been added to the [`cypress.schema.json`](https://github.com/cypress-io/cypress/blob/develop/cli/schema/cypress.schema.json)?

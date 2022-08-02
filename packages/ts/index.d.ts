@@ -24,11 +24,12 @@ import { Url } from 'url'
   }
 
   interface ClientRequest {
-    _header: { [key: string]: string }
+    _header?: { [key: string]: string }
     _implicitHeader: () => void
     output: string[]
     agent: Agent
     insecureHTTPParser: boolean
+    maxHeaderSize?: number
   }
 
   interface RequestOptions extends ClientRequestArgs {
@@ -43,7 +44,7 @@ import { Url } from 'url'
   }
 
   interface OutgoingMessage {
-    destroy(error?: Error): void
+    destroy(error?: Error): this
   }
 
   export const CRLF: string

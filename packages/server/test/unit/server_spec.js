@@ -5,12 +5,11 @@ const os = require('os')
 const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
-const config = require(`${root}lib/config`)
-const logger = require(`${root}lib/logger`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const fileServer = require(`${root}lib/file_server`)
-const ensureUrl = require(`${root}lib/util/ensure-url`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const fileServer = require(`../../lib/file_server`)
+const ensureUrl = require(`../../lib/util/ensure-url`)
 
 const morganFn = function () {}
 
@@ -18,7 +17,29 @@ mockery.registerMock('morgan', () => {
   return morganFn
 })
 
-xdescribe('lib/server', () => {
+describe('lib/server', () => {
+  beforeEach(function () {
+    this.server = new ServerE2E()
+
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } })
+    .then((cfg) => {
+      this.config = cfg
+    })
+  })
+
+  context('#close', () => {
+    it('resolves true successfully bailing out early', function () {
+      return this.server.close().then((res) => {
+        expect(res[0]).to.be.true
+      })
+    })
+  })
+})
+
+// TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
+// The introducion of server-base/socket-base and the `ensureProp` function made unit testing
+// the server difficult.
+describe.skip('lib/server', () => {
   beforeEach(function () {
     this.fileServer = {
       close () {},
@@ -29,7 +50,7 @@ xdescribe('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.set({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()
@@ -121,15 +142,6 @@ xdescribe('lib/server', () => {
       return this.server.open(this.config)
       .then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
-      })
-    })
-
-    it('calls logger.setSettings with config', function () {
-      sinon.spy(logger, 'setSettings')
-
-      return this.server.open(this.config)
-      .then((ret) => {
-        expect(logger.setSettings).to.be.calledWith(this.config)
       })
     })
   })
@@ -302,15 +314,6 @@ xdescribe('lib/server', () => {
       })
     })
 
-    it('clears settings from Log', function () {
-      logger.setSettings({})
-
-      return this.server.close()
-      .then(() => {
-        expect(logger.getSettings()).to.be.undefined
-      })
-    })
-
     it('calls close on this._socket', function () {
       this.server._socket = { close: sinon.spy() }
 
@@ -352,7 +355,7 @@ xdescribe('lib/server', () => {
     })
 
     it('calls proxy.ws with hostname + port', function () {
-      this.server._onDomainSet('https://www.google.com')
+      this.server.remoteStates.set('https://www.google.com')
 
       const req = {
         connection: {
@@ -391,92 +394,6 @@ xdescribe('lib/server', () => {
       this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(this.socket.end).to.be.called
-    })
-  })
-
-  context('#_onDomainSet', () => {
-    beforeEach(function () {
-      this.server = new ServerE2E()
-    })
-
-    it('sets port to 443 when omitted and https:', function () {
-      const ret = this.server._onDomainSet('https://staging.google.com/foo/bar')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'https://staging.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '443',
-          domain: 'google',
-          tld: 'com',
-        },
-      })
-    })
-
-    it('sets port to 80 when omitted and http:', function () {
-      const ret = this.server._onDomainSet('http://staging.google.com/foo/bar')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://staging.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '80',
-          domain: 'google',
-          tld: 'com',
-        },
-      })
-    })
-
-    it('sets host + port to localhost', function () {
-      const ret = this.server._onDomainSet('http://localhost:4200/a/b?q=1#asdf')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://localhost:4200',
-        strategy: 'http',
-        domainName: 'localhost',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '4200',
-          domain: '',
-          tld: 'localhost',
-        },
-      })
-    })
-
-    it('sets <root> when not http url', function () {
-      this.server._server = {
-        address () {
-          return { port: 9999 }
-        },
-      }
-
-      this.server._fileServer = {
-        port () {
-          return 9998
-        },
-      }
-
-      const ret = this.server._onDomainSet('/index.html')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://localhost:9999',
-        strategy: 'file',
-        domainName: 'localhost',
-        fileServer: 'http://localhost:9998',
-        props: null,
-        visiting: undefined,
-      })
     })
   })
 })

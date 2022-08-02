@@ -1,9 +1,12 @@
 {
   "extends": "./../ts/tsconfig.json",
   "include": [
-    "lib/*.ts",
-    "lib/**/*.ts"
+    "**/*.ts",
+    "./index.ts"
   ],
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
   "files": [
     "./../ts/index.d.ts"
   ],

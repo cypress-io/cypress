@@ -9,6 +9,7 @@ const Promise = require('bluebird')
 const proxy = require('../helpers/proxy')
 const httpServer = require('../helpers/http_server')
 const httpsServer = require('../helpers/https_server')
+const fs = require('fs').promises
 
 describe('Proxy', () => {
   beforeEach(function () {
@@ -98,9 +99,7 @@ describe('Proxy', () => {
       proxy: 'http://localhost:3333',
       resolveWithFullResponse: true,
     })
-    .then((res) => {
-      // ensure client has disconnected
-      expect(res.socket.destroyed).to.be.true
+    .then(() => {
       // ensure the outgoing socket created for this connection was destroyed
       expect(net.connect).calledOnce
 
@@ -149,6 +148,44 @@ describe('Proxy', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/8705
+    it('handles errors with reusing existing certificates', async function () {
+      await this.proxy._ca.removeAll()
+
+      proxy.reset()
+      const genSpy = this.sandbox.spy(this.proxy, '_generateMissingCertificates')
+
+      await request({
+        strictSSL: false,
+        url: 'https://localhost:8443/',
+        proxy: 'http://localhost:3333',
+      })
+
+      proxy.reset()
+      expect(genSpy).to.be.calledWith('localhost').and.calledOnce
+
+      const privateKeyPath = this.proxy._ca.getPrivateKeyPath('localhost')
+      const key = (await fs.readFile(privateKeyPath)).toString().trim()
+
+      expect(key).to.match(/^-----BEGIN RSA PRIVATE KEY-----/)
+      .and.match(/-----END RSA PRIVATE KEY-----$/)
+
+      await fs.writeFile(privateKeyPath, 'some random garbage')
+
+      await request({
+        strictSSL: false,
+        url: 'https://localhost:8443/',
+        proxy: 'http://localhost:3333',
+      })
+
+      expect(genSpy).to.always.have.been.calledWith('localhost').and.calledTwice
+
+      const key2 = (await fs.readFile(privateKeyPath)).toString().trim()
+
+      expect(key2).to.match(/^-----BEGIN RSA PRIVATE KEY-----/)
+      .and.match(/-----END RSA PRIVATE KEY-----$/)
+    })
+
     // https://github.com/cypress-io/cypress/issues/771
     it('generates certs and can proxy requests for HTTPS requests to IPs', function () {
       this.sandbox.spy(this.proxy, '_generateMissingCertificates')
@@ -178,6 +215,25 @@ describe('Proxy', () => {
         expect(this.proxy._generateMissingCertificates).to.be.calledTwice
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/9220
+    it('handles errors with addContext', async function () {
+      this.sandbox.spy(this.proxy, 'connect')
+      this.sandbox.stub(this.proxy._sniServer, 'addContext').throws(new Error('error adding context'))
+
+      return request({
+        strictSSL: false,
+        url: 'https://localhost:8443/',
+        proxy: 'http://localhost:3333',
+      }).catch(() => {
+        // This scenario will cause an error but we should clean
+        // ensure the outgoing socket created for this connection was destroyed
+        expect(this.proxy.connect).calledOnce
+        const socket = this.proxy.connect.getCalls()[0].args[1]
+
+        expect(socket.destroyed).to.be.true
+      })
+    })
   })
 
   context('closing', () => {
@@ -192,7 +248,7 @@ describe('Proxy', () => {
       }).then(() => {
         return proxy.start(3333)
       }).then(() => {
-      // force this to reject if its called
+        // force this to reject if its called
         this.sandbox.stub(this.proxy, '_generateMissingCertificates').rejects(new Error('should not call'))
 
         return request({
@@ -204,7 +260,6 @@ describe('Proxy', () => {
     })
   })
 
-  // TODO
   context('with an upstream proxy', () => {
     beforeEach(function () {
       // PROXY vars should override npm_config vars, so set them to cause failures if they are used
@@ -273,10 +328,7 @@ describe('Proxy', () => {
         resolveWithFullResponse: true,
         forever: false,
       })
-      .then((res) => {
-        // ensure client has disconnected
-        expect(res.socket.destroyed).to.be.true
-
+      .then(() => {
         // ensure the outgoing socket created for this connection was destroyed
         expect(net.connect).calledOnce
         const socket = net.connect.getCalls()[0].returnValue

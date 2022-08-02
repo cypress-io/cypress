@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+  <head>
+    <title>Page Redirect Loop</title>
+    <script>
+      window.onload = function(){
+        setTimeout(() => {
+          window.location.href = "/fixtures/redirection-loop-b.html"
+        }, 25);
+      }
+    </script>
+  </head>
+  <body>
+    Page A
+  </body>
+</html>

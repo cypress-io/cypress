@@ -2,7 +2,7 @@ const stripAnsi = require('strip-ansi')
 
 const whitespaceAtEndOfLineRe = /\s+$/g
 const datesRe = /(\d+:\d+:\d+)/g
-const downloadQueryRe = /(\?platform=(darwin|linux|win32)&arch=(x64|ia32))/
+const downloadQueryRe = /(\?platform=(darwin|linux|win32)&arch=x64)/
 
 const removeExcessWhiteSpace = (str) => {
   return str.replace(whitespaceAtEndOfLineRe, '')

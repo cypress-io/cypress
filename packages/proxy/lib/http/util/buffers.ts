@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import debugModule from 'debug'
 import { uri } from '@packages/network'
-import { Readable } from 'stream'
-import { IncomingMessage } from 'http'
+import type { Readable } from 'stream'
+import type { IncomingMessage } from 'http'
 
 const debug = debugModule('cypress:proxy:http:util:buffers')
 
@@ -12,6 +12,7 @@ export type HttpBuffer = {
   response: IncomingMessage
   stream: Readable
   url: string
+  isCrossOrigin: boolean
 }
 
 const stripPort = (url) => {
@@ -23,7 +24,7 @@ const stripPort = (url) => {
 }
 
 export class HttpBuffers {
-  buffer: Optional<HttpBuffer> = undefined
+  buffer: Optional<HttpBuffer> | undefined = undefined
 
   reset (): void {
     debug('resetting buffers')

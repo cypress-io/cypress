@@ -1,8 +1,7 @@
-/* global Cypress, JSX */
+/* global JSX */
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 // @ts-ignore
@@ -11,7 +10,6 @@ import EQ from 'css-element-queries/src/ElementQueries'
 import { RunnablesErrorModel } from './runnables/runnable-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
-import ForcedGcWarning from './lib/forced-gc-warning'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
 import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
@@ -19,6 +17,8 @@ import shortcuts from './lib/shortcuts'
 
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
+import TestingPreferences from './preferences/testing-preferences'
+import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
 interface BaseReporterProps {
   appState: AppState
@@ -27,47 +27,23 @@ interface BaseReporterProps {
   runner: Runner
   scroller: Scroller
   statsStore: StatsStore
+  autoScrollingEnabled?: boolean
+  isSpecsListOpen?: boolean
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
-  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
-  spec: Cypress.Cypress['spec']
+  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   experimentalStudioEnabled: boolean
-  /** Used for component testing front-end */
-  specRunId?: string | null
+  runnerStore: MobxRunnerStore
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
-  runMode: 'single',
-}
-
-export interface MultiReporterProps extends BaseReporterProps{
-  runMode: 'multi',
-  allSpecs: Array<Cypress.Cypress['spec']>
+  runMode: 'single'
 }
 
 @observer
-class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
-  static propTypes = {
-    error: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      link: PropTypes.string,
-      callout: PropTypes.string,
-      message: PropTypes.string.isRequired,
-    }),
-    runner: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-    spec: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      relative: PropTypes.string.isRequired,
-      absolute: PropTypes.string.isRequired,
-    }),
-    experimentalStudioEnabled: PropTypes.bool,
-  }
-
-  static defaultProps = {
+class Reporter extends Component<SingleReporterProps> {
+  static defaultProps: Partial<SingleReporterProps> = {
     runMode: 'single',
     appState,
     events,
@@ -80,11 +56,9 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     const {
       appState,
       className,
-      runMode,
       runnablesStore,
       scroller,
       error,
-      events,
       statsStore,
       experimentalStudioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
@@ -92,34 +66,22 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
 
     return (
       <div className={cs(className, 'reporter', {
-        multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
-        {this.props.runMode === 'single' ? (
-          <Runnables
+        {appState?.isPreferencesMenuOpen ? (
+          <TestingPreferences appState={appState} />
+        ) : (
+          this.props.runnerStore.spec && <Runnables
             appState={appState}
             error={error}
             runnablesStore={runnablesStore}
             scroller={scroller}
-            spec={this.props.spec}
+            spec={this.props.runnerStore.spec}
+            statsStore={this.props.statsStore}
           />
-        ) : this.props.allSpecs.map((spec) => (
-          <Runnables
-            key={spec.relative}
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={spec}
-          />
-        ))}
-
-        <ForcedGcWarning
-          appState={appState}
-          events={events}
-        />
+        )}
       </div>
     )
   }
@@ -127,11 +89,14 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
-    this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
+    if (!this.props.runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec not to be null.`)
+    }
 
+    this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
     if (
       this.props.resetStatsOnSpecChange &&
-      this.props.specRunId !== newProps.specRunId
+      this.props.runnerStore.specRunId !== newProps.runnerStore.specRunId
     ) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
@@ -140,10 +105,18 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
+
+    if (!runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec not to be null.`)
+    }
 
     action('set:scrolling', () => {
-      appState.setAutoScrolling(appState.autoScrollingEnabled)
+      appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
+    action('set:specs:list', () => {
+      appState.setSpecsList(isSpecsListOpen ?? false)
     })()
 
     this.props.events.init({
@@ -157,7 +130,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
 
     shortcuts.start()
     EQ.init()
-    this.props.runnablesStore.setRunningSpec(spec.relative)
+    this.props.runnablesStore.setRunningSpec(runnerStore.spec.relative)
   }
 
   componentWillUnmount () {

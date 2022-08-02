@@ -22,7 +22,11 @@ export const utils = {
         resolve({ stderr, stdout })
       }
 
-      proc.on('exit', finish)
+      // the "exit" event might happen before
+      // the child streams are finished, thus we use
+      // the "close" event
+      // https://github.com/cypress-io/cypress/issues/8611
+      proc.on('close', finish)
 
       proc.stdout.on('data', (chunk) => {
         stdout += chunk

@@ -21,5 +21,24 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // A flag that controls whether or not Windi CSS classes will be sorted on save on save.
+  "windicss.sortOnSave": true,
+
+  // Support autocompletion and preview of strings.
+  // Additionally, support extraction of hardcoded strings into key-values.
+  "i18n-ally.localesPaths": "packages/frontend-shared/src/locales",
+  "i18n-ally.displayLanguage": "en-US",
+  "i18n-ally.enabledFrameworks": ["vue"],
+  "i18n-ally.extract.keyPrefix": "{fileNameWithoutExt}.",
+  "i18n-ally.extract.keyMaxLength": 40,
+  "i18n-ally.keystyle": "nested",
+
+  // Volar is the main extension that powers Vue's language features.
+  // These are commented out because they slow down node development
+  // "volar.autoCompleteRefs": false,
+  "volar.takeOverMode.enabled": true,
+
+  "editor.tabSize": 2,
 }

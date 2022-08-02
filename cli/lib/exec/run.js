@@ -5,24 +5,7 @@ const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { exitWithError, errors } = require('../errors')
-
-/**
- * Throws an error with "details" property from
- * "errors" object.
- * @param {Object} details - Error details
- */
-const throwInvalidOptionError = (details) => {
-  if (!details) {
-    details = errors.unknownError
-  }
-
-  // throw this error synchronously, it will be caught later on and
-  // the details will be propagated to the promise chain
-  const err = new Error()
-
-  err.details = details
-  throw err
-}
+const { processTestingType, throwInvalidOptionError, checkConfigFile } = require('./shared')
 
 /**
  * Typically a user passes a string path to the project.
@@ -75,6 +58,7 @@ const processRunOptions = (options = {}) => {
   }
 
   if (options.configFile !== undefined) {
+    checkConfigFile(options)
     args.push('--config-file', options.configFile)
   }
 
@@ -154,6 +138,16 @@ const processRunOptions = (options = {}) => {
     args.push('--tag', options.tag)
   }
 
+  if (options.inspect) {
+    args.push('--inspect')
+  }
+
+  if (options.inspectBrk) {
+    args.push('--inspectBrk')
+  }
+
+  args.push(...processTestingType(options))
+
   return args
 }
 
@@ -161,7 +155,7 @@ module.exports = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
+  start (options = {}) {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -171,10 +165,14 @@ module.exports = {
     })
 
     function run () {
-      let args
-
       try {
-        args = processRunOptions(options)
+        const args = processRunOptions(options)
+
+        debug('run to spawn.start args %j', args)
+
+        return spawn.start(args, {
+          dev: options.dev,
+        })
       } catch (err) {
         if (err.details) {
           return exitWithError(err.details)()
@@ -182,16 +180,6 @@ module.exports = {
 
         throw err
       }
-
-      if (isComponentTesting) {
-        args.push('--componentTesting')
-      }
-
-      debug('run to spawn.start args %j', args)
-
-      return spawn.start(args, {
-        dev: options.dev,
-      })
     }
 
     if (options.dev) {

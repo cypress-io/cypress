@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getSimpleConfig } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
 
@@ -39,7 +39,7 @@ pngRule.use[0].options = {
 }
 
 // @ts-ignore
-const config: webpack.Configuration = {
+const mainConfig: webpack.Configuration = {
   ...commonConfig,
   module: {
     rules: [
@@ -56,18 +56,8 @@ const config: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
-config.plugins = [
-  // @ts-ignore
-  ...config.plugins,
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './static/index.html'),
-    inject: false,
-  }),
-]
-
-config.resolve = {
-  ...config.resolve,
+mainConfig.resolve = {
+  ...mainConfig.resolve,
   alias: {
     'bluebird': require.resolve('bluebird'),
     'lodash': require.resolve('lodash'),
@@ -78,4 +68,47 @@ config.resolve = {
   },
 }
 
-export default config
+// @ts-ignore
+const crossOriginConfig: webpack.Configuration = {
+  ...commonConfig,
+  entry: {
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const mainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/main.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const crossOriginInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_cross_origin: [path.resolve(__dirname, 'injection/cross-origin.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [
+  mainConfig,
+  mainInjectionConfig,
+  crossOriginConfig,
+  crossOriginInjectionConfig,
+]

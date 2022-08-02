@@ -36,8 +36,8 @@ declare namespace CypressCommandLine {
    */
   interface CypressRunOptions extends CypressCommonOptions {
     /**
-     * Specify different browser to run tests in, either by name or by filesystem path
-    */
+     * Specify browser to run tests in, either by name or by filesystem path
+     */
     browser: string
     /**
      * Specify a unique identifier for a run to enable grouping or parallelization
@@ -114,7 +114,7 @@ declare namespace CypressCommandLine {
    */
   interface CypressOpenOptions extends CypressCommonOptions {
     /**
-     * Specify a filesystem path to a custom browser
+     * Specify browser to run tests in, either by name or by filesystem path
      */
     browser: string
     /**
@@ -138,15 +138,13 @@ declare namespace CypressCommandLine {
     /**
      * Specify configuration
      */
-    config: Partial<Cypress.ResolvedConfigOptions>
+    config: Cypress.ConfigOptions
     /**
      * Path to the config file to be used.
      *
-     * If `false` is passed, no config file will be used.
-     *
-     * @default "cypress.json"
+     * @default "cypress.config.{js,ts,mjs,cjs}"
      */
-    configFile: string | false
+    configFile: string
     /**
      * Specify environment variables.
      * TODO: isn't this duplicate of config.env?!
@@ -156,6 +154,11 @@ declare namespace CypressCommandLine {
      * Path to a specific project
      */
     project: string
+    /**
+     * Specify the type of tests to execute.
+     * @default "e2e"
+     */
+    testingType: Cypress.TestingType
   }
 
   // small utility types to better express meaning of other types
@@ -372,6 +375,21 @@ declare module 'cypress' {
      * Cypress does
      */
     cli: CypressCommandLine.CypressCliParser
+
+    /**
+     * Provides automatic code completion for configuration in many popular code editors.
+     * While it's not strictly necessary for Cypress to parse your configuration, we
+     * recommend wrapping your config object with `defineConfig()`
+     * @example
+     * module.exports = defineConfig({
+     *   viewportWith: 400
+     * })
+     *
+     * @see ../types/cypress-npm-api.d.ts
+     * @param {Cypress.ConfigOptions} config
+     * @returns {Cypress.ConfigOptions} the configuration passed in parameter
+     */
+    defineConfig<ComponentDevServerOpts = any>(config: Cypress.ConfigOptions<ComponentDevServerOpts>): Cypress.ConfigOptions
   }
 
   // export Cypress NPM module interface

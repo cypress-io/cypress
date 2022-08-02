@@ -9,7 +9,7 @@ import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import request from '@cypress/request-promise'
-import * as socketIo from '@packages/socket'
+import * as socketIo from '@packages/socket/lib/browser'
 import {
   buildConnectReqHead,
   createProxySock,
@@ -17,9 +17,15 @@ import {
   isResponseStatusCode200,
   regenerateRequestHead,
   CombinedAgent,
+  clientCertificateStore,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
+import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
+import Forge from 'node-forge'
+import fetch from 'cross-fetch'
+import os from 'os'
+const { pki } = Forge
 
 const expect = chai.expect
 
@@ -27,15 +33,70 @@ chai.use(sinonChai)
 
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
-const HTTPS_PORT = 31443
+const HTTPS_PORT = 443
+
+function createCertAndKey (): [object, object] {
+  let keys = pki.rsa.generateKeyPair(2048)
+  let cert = pki.createCertificate()
+
+  cert.publicKey = keys.publicKey
+  cert.serialNumber = '01'
+  cert.validity.notBefore = new Date()
+  cert.validity.notAfter = new Date()
+  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
+
+  let attrs = [
+    {
+      name: 'commonName',
+      value: 'example.org',
+    },
+    {
+      name: 'countryName',
+      value: 'US',
+    },
+    {
+      shortName: 'ST',
+      value: 'California',
+    },
+    {
+      name: 'localityName',
+      value: 'San Fran',
+    },
+    {
+      name: 'organizationName',
+      value: 'Test',
+    },
+    {
+      shortName: 'OU',
+      value: 'Test',
+    },
+  ]
+
+  cert.setSubject(attrs)
+  cert.setIssuer(attrs)
+  cert.sign(keys.privateKey)
+
+  return [cert, keys.privateKey]
+}
 
 describe('lib/agent', function () {
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+    try {
+      // Disabling the eslint for geteuid since we are explicitly catching if there's a problem with it
+      // eslint-disable-next-line
+      if (os.platform() === 'linux' && process.geteuid && process.geteuid() !== 0) {
+        // eslint-disable-next-line no-console
+        console.error('You must be a root user to run these tests since we specifically test hosting a server at 443 which requires root access')
+      }
+    } catch (error) {
+      // OK to do nothing here since geteuid is only a problem on windows
+    }
   })
 
   afterEach(function () {
-    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
+    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = ''
     sinon.restore()
   })
 
@@ -94,6 +155,13 @@ describe('lib/agent', function () {
             agent: this.agent,
           })
 
+          this.fetch = function (this: any, input: RequestInfo, init?: RequestInit) {
+            return fetch.call(this, input, {
+              agent: this.agent,
+              ...init,
+            })
+          }
+
           if (testCase.proxyUrl) {
             let options: any = {
               keepRequests: true,
@@ -137,10 +205,51 @@ describe('lib/agent', function () {
           })
         })
 
+        it('HTTP pages can be loaded via fetch', function () {
+          return this.fetch(`http://localhost:${HTTP_PORT}/get`)
+          .then((response) => response.text())
+          .then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                url: `http://localhost:${HTTP_PORT}/get`,
+              })
+            }
+          })
+        })
+
         it('HTTPS pages can be loaded', function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+          })
+        })
+
+        it('HTTPS pages can be loaded via fetch', function () {
+          return this.fetch(`https://localhost:${HTTPS_PORT}/get`)
+          .then((response) => response.text())
+          .then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+          })
+        })
+
+        it('HTTPS pages can be loaded via fetch with no explicit port', function () {
+          return this.fetch(`https://localhost/get`)
+          .then((response) => response.text())
+          .then((body) => {
             expect(body).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
@@ -218,7 +327,7 @@ describe('lib/agent', function () {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
-                url: 'localhost:31443',
+                url: `localhost:${HTTPS_PORT}`,
               })
             }
 
@@ -365,6 +474,118 @@ describe('lib/agent', function () {
           })
         })
       })
+
+      it('HTTP pages can be loaded with the Upstream target URL', function (done) {
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
+        process.env.NO_PROXY = ''
+        process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = `http://localhost:${HTTP_PORT}`
+
+        this.request({
+          url: `http://localhost:${HTTP_PORT}/get`,
+        }).on('response', (response) => {
+          expect(response.req.path).to.equal('http://localhost:31080/get')
+
+          done()
+        })
+      })
+    })
+  })
+
+  context('CombinedAgent with client certificates', function () {
+    const proxyUrl = `https://localhost:${PROXY_PORT}`
+
+    before(function () {
+      this.servers = new Servers()
+
+      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    })
+
+    after(function () {
+      return this.servers.stop()
+    })
+
+    ;[
+      {
+        name: 'should present a client certificate',
+        peresentClientCertificate: true,
+      },
+      {
+        name: 'should present not a client certificate',
+        peresentClientCertificate: false,
+      },
+    ].slice().map((testCase) => {
+      context(testCase.name, function () {
+        beforeEach(function () {
+          // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+          // @see https://github.com/cypress-io/cypress/pull/8295
+          process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+          process.env.npm_config_noproxy = 'just,some,nonsense'
+
+          process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxyUrl
+          process.env.NO_PROXY = ''
+
+          this.agent = new CombinedAgent()
+
+          this.request = request.defaults({
+            proxy: null,
+            agent: this.agent,
+          })
+
+          let options: any = {
+            keepRequests: true,
+            https: this.servers.https,
+            auth: false,
+          }
+
+          if (testCase.peresentClientCertificate) {
+            clientCertificateStore.clear()
+            const certAndKey = createCertAndKey()
+            const pemCert = pki.certificateToPem(certAndKey[0])
+
+            this.clientCert = pemCert
+            const testCerts = new UrlClientCertificates(`https://localhost`)
+
+            testCerts.clientCertificates = new ClientCertificates()
+            testCerts.clientCertificates.cert.push(pemCert)
+            testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+            clientCertificateStore.addClientCertificatesForUrl(testCerts)
+          }
+
+          this.debugProxy = new DebuggingProxy(options)
+
+          return this.debugProxy.start(PROXY_PORT)
+        })
+
+        afterEach(function () {
+          this.debugProxy.stop()
+        })
+
+        it('Client certificate presneted if appropriate', function () {
+          return this.request({
+            url: `https://localhost:${HTTPS_PORT}/get`,
+          }).then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+
+            expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+
+            // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
+            // will include the public certificate
+            if (this.clientCert) {
+              expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be used for the TLS Socket')
+            } else {
+              expect(socketKey[0]).not.to.contain(this.clientCert, 'A client cert should not be used for the TLS Socket')
+            }
+          })
+        })
+      })
     })
   })
 
@@ -387,7 +608,7 @@ describe('lib/agent', function () {
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
-        'Proxy-Authorization: basic YmF6OnF1dXg=',
+        'Proxy-Authorization: Basic YmF6OnF1dXg=',
         '', '',
       ].join('\r\n'))
     })
@@ -399,7 +620,7 @@ describe('lib/agent', function () {
       const proxy = url.parse('http://foo.bar:1234')
 
       createProxySock({ proxy }, () => {
-        expect(net.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        expect(net.connect).to.be.calledWith({ family: 4, host: 'foo.bar', port: 1234 })
         done()
       })
     })
@@ -409,7 +630,7 @@ describe('lib/agent', function () {
       const proxy = url.parse('https://foo.bar:1234')
 
       createProxySock({ proxy }, () => {
-        expect(tls.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        expect(tls.connect).to.be.calledWith({ family: 4, host: 'foo.bar', port: 1234 })
         done()
       })
     })

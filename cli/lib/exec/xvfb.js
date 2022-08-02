@@ -12,6 +12,7 @@ const debugXvfb = Debug('cypress:xvfb')
 debug.Debug = debugXvfb.Debug = Debug
 
 const xvfbOptions = {
+  displayNum: process.env.XVFB_DISPLAY_NUM,
   timeout: 30000, // milliseconds
   // need to explicitly define screen otherwise electron will crash
   // https://github.com/cypress-io/cypress/issues/6184
@@ -58,6 +59,12 @@ module.exports = {
   },
 
   isNeeded () {
+    if (process.env.ELECTRON_RUN_AS_NODE) {
+      debug('Environment variable ELECTRON_RUN_AS_NODE detected, xvfb is not needed')
+
+      return false // xvfb required for electron processes only.
+    }
+
     if (os.platform() !== 'linux') {
       return false
     }

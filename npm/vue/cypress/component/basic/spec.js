@@ -23,8 +23,8 @@ describe('Declarative rendering', () => {
   })
 
   it('changes message if data changes', () => {
-    // mounted Vue instance is available under Cypress.vue
-    Cypress.vue.message = 'Vue rocks!'
+    // mounted Vue instance is available under Cypress.vueWrapper
+    Cypress.vueWrapper.setData({ message: 'Vue rocks!' })
     cy.contains('Vue rocks!')
   })
 })

@@ -1,40 +1,78 @@
-# Webpack-ct
+# @cypress/webpack-dev-server
 
-> **Note** this package is not meant to be used outside of cypress component testing.
+Implements the APIs for the object-syntax of the Cypress Component-testing "webpack dev server".
 
-Install `@cypress/vue` or `@cypress/react` to get this package working properly
+> **Note:** This package is bundled with the Cypress binary and should not need to be installed separately. See the [Component Framework Configuration Docs](https://docs.cypress.io/guides/component-testing/component-framework-configuration) for setting up component testing with webpack. The `devServer` function signature is for advanced use-cases.
 
-## Responsibilities
+Object API:
 
-- Make a `webpack.config` from the users setup
-    - add current project rules and aliases
-    - remove eslint?
-- Launch webpack dev server
-- Update entry point (in `src/browser.ts`)
-- The entry point (`browser.ts`) has to delegate the loading of spec files to the loader + plugin
+```ts
+import { defineConfig } from 'cypress'
 
-## Performance tests 
-
-In order to get webpack performance statistics run `yarn cypress open-ct` or `yarn cypress run-ct` with `WEBPACK_PERF_MEASURE` env variable:
-
-```sh
-WEBPACK_PERF_MEASURE=true yarn cypress run-ct
+export default defineConfig({
+  component: {
+    devServer: {
+      framework: 'create-react-app',
+      bundler: 'webpack',
+      // webpackConfig?: Will try to infer, if passed it will be used as is
+    }
+  }
+})
 ```
 
-This will output the timings of whole webpack output and timings for each specified plugin and loader. 
+Function API:
 
-### Compare results
+```ts
+import { devServer } from '@cypress/webpack-dev-server'
+import { defineConfig } from 'cypress'
 
-In order to run performance tests and compare timings with the previous build run:
-
-```sh
-WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
+export default defineConfig({
+  component: {
+    devServer(devServerConfig) {
+      return devServer({
+        ...devServerConfig,
+        framework: 'create-react-app',
+        webpackConfig: require('./webpack.config.js')
+      })
+    }
+  }
+})
 ```
 
-This will create the file `./__perf-stats/{name-of-project}.json` or if this file exists will compare results with the previously saved version. 
+## Testing
 
-In order to update the `{name-of-project}.json` file and use new stats as a base for the next comparisons run:  
+Unit tests can be run with `yarn test`. Integration tests can be run with `yarn cypress:run`
 
-```sh
-WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
-```
+This module should be primarily covered by system-tests / open-mode tests. All system-tests directories should be created using the notation:
+
+`webpack${major}_wds${devServerMajor}-$framework{-$variant}`
+
+- webpack4_wds3-react
+- webpack4_wds4-next-11
+- webpack5_wds3-next-12
+- webpack4_wds4-create-react-app
+
+## Architecture
+
+There should be a single publicly-exported entrypoint for the module, `devServer`, all other types and functions should be considered internal/implementation details, and types stripped from the output.
+
+The `devServer` will first source the modules from the user's project, falling back to our own bundled versions of libraries. This ensures that the user has installed the current modules, and throws an error if the user does not have the library installed.
+
+From there, we check the "framework" field to source or define any known webpack transforms to aid in the compilation.
+
+We then merge the sourced config with the user's webpack config, and layer on our own transforms, and provide this to a webpack instance. The webpack instance used to create a webpack-dev-server, which is returned.
+
+## Compatibility
+
+| @cypress/webpack-dev-server | cypress |
+| --------------------------- | ------- |
+| <= v1                       | <= v9   |
+| >= v2                       | >= v10  |
+
+## License
+
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
+
+This project is licensed under the terms of the [MIT license](/LICENSE).
+
+## [Changelog](./CHANGELOG.md)

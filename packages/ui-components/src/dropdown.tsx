@@ -108,8 +108,10 @@ class Dropdown extends Component<Props> {
   }
 
   _onSelect (item: object) {
-    this.setState({ open: false })
-    this.props.onSelect(item)
+    const retval = this.props.onSelect(item)
+    const open = _.isBoolean(retval) ? retval : false
+
+    this.setState({ open })
   }
 }
 

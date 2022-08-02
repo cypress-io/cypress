@@ -1,0 +1,9 @@
+# Ignores TypeScript files, but keeps definitions.
+*.ts
+!*.d.ts
+
+*.js.map
+!src/**/__files__/**/*.js
+!src/**/files/**/*.ts
+*.vscode
+sandbox

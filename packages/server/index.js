@@ -1,3 +1,14 @@
+// if running in production mode (CYPRESS_INTERNAL_ENV)
+// all transpile should have been done already
+// and these calls should do nothing
+require('@packages/ts/register')
+
+const { patchFs } = require('./lib/util/patch-fs')
+const fs = require('fs')
+
+// prevent EMFILE errors
+patchFs(fs)
+
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -12,13 +23,9 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
 
-process.env.UV_THREADPOOL_SIZE = 128
+require('./lib/unhandled_exceptions')
 
-require('graceful-fs').gracefulify(require('fs'))
-// if running in production mode (CYPRESS_INTERNAL_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
+process.env.UV_THREADPOOL_SIZE = 128
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()
@@ -34,19 +41,6 @@ process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
 // always show stack traces for Electron deprecation warnings
 process.traceDeprecation = true
 
-require('./lib/util/suppress_unauthorized_warning').suppress()
+require('./lib/util/suppress_warnings').suppress()
 
-function launchOrFork () {
-  const nodeOptions = require('./lib/util/node_options')
-
-  if (nodeOptions.needsOptions()) {
-    // https://github.com/cypress-io/cypress/pull/5492
-    return nodeOptions.forkWithCorrectOptions()
-  }
-
-  nodeOptions.restoreOriginalOptions()
-
-  module.exports = require('./lib/cypress').start(process.argv)
-}
-
-launchOrFork()
+module.exports = require('./lib/cypress').start(process.argv)

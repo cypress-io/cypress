@@ -11,6 +11,11 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
+import Command from '../commands/command-model'
+import { formattedMessage } from '../commands/command'
+
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
+import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -31,7 +36,8 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: Attempt
+  model: Attempt | Command
+  onPrintToConsole?: () => void
 }
 
 const TestError = observer((props: TestErrorProps) => {
@@ -39,18 +45,14 @@ const TestError = observer((props: TestErrorProps) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
+  const onPrint = props.onPrintToConsole || (() => {
     events.emit('show:error', props.model)
-  }
+  })
 
   const _onPrintClick = (e: MouseEvent) => {
     e.stopPropagation()
 
     onPrint()
-  }
-
-  const formattedMessage = (message?: string) => {
-    return message ? md.renderInline(message) : ''
   }
 
   const { err } = props.model
@@ -63,7 +65,7 @@ const TestError = observer((props: TestErrorProps) => {
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle' />
+            <WarningIcon />
             {err.name}
           </div>
         </div>
@@ -84,7 +86,7 @@ const TestError = observer((props: TestErrorProps) => {
                   role='button'
                   tabIndex={0}
                 >
-                  <div tabIndex={-1}><i className="fas fa-terminal" /> <span>Print to console</span></div>
+                  <div tabIndex={-1}><TerminalIcon /> <span>Print to console</span></div>
                 </div>
               </FlashOnClick>
             }

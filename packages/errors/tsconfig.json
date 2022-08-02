@@ -1,0 +1,16 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "include": [
+    "src",
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": false,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error"
+  }
+}

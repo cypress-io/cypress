@@ -6,7 +6,8 @@ const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
 const verify = require('../../cli/lib/tasks/verify')
-const Fixtures = require('../../packages/server/test/support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
 const fs = Promise.promisifyAll(fse)
 
@@ -82,7 +83,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
 
     const args = [
       `--run-project=${e2e}`,
-      `--spec=${e2e}/cypress/integration/simple_passing_spec.js`,
+      `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
     ]
 
     if (verify.needsSandbox()) {
@@ -117,8 +118,8 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   console.log('running failing project test')
 
   const verifyScreenshots = function () {
-    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails1 (failed).png')
-    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails2 (failed).png')
+    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing.cy.js', 'simple failing spec -- fails1 (failed).png')
+    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing.cy.js', 'simple failing spec -- fails2 (failed).png')
 
     return Promise.all([
       fs.statAsync(screenshot1),
@@ -132,7 +133,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
 
       const args = [
         `--run-project=${e2e}`,
-        `--spec=${e2e}/cypress/integration/simple_failing_spec.js`,
+        `--spec=${e2e}/cypress/e2e/simple_failing.cy.js`,
       ]
 
       if (verify.needsSandbox()) {
@@ -159,21 +160,24 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   .then(verifyScreenshots)
 }
 
-const test = function (buildAppExecutable) {
-  Fixtures.scaffold()
-
+const test = async function (buildAppExecutable) {
+  await scaffoldCommonNodeModules()
+  await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
-  return runSmokeTest(buildAppExecutable)
-  .then(() => {
-    return runProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return runFailingProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return Fixtures.remove()
-  })
+  await runSmokeTest(buildAppExecutable)
+  await runProjectTest(buildAppExecutable, e2e)
+  await runFailingProjectTest(buildAppExecutable, e2e)
+  Fixtures.remove()
 }
 
 module.exports = {
   test,
+}
+
+if (require.main === module) {
+  const buildAppExecutable = path.join(__dirname, `../../build/${os.platform()}-unpacked/Cypress`)
+
+  console.log('Script invoked directly, running smoke tests.')
+  test(buildAppExecutable)
 }

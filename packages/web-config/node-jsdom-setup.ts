@@ -111,6 +111,10 @@ export const register = ({
         return args[0]
       }
 
+      if (args[0].endsWith('.scss')) {
+        return args[0]
+      }
+
       const ret = _load.apply(this, browserPkg)
 
       return ret

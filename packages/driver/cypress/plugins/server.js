@@ -6,8 +6,11 @@ const http = require('http')
 const httpsProxy = require('@packages/https-proxy')
 const path = require('path')
 const Promise = require('bluebird')
+const multer = require('multer')
+const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
+
 const httpPorts = [3500, 3501]
 const httpsPort = 3502
 
@@ -23,18 +26,32 @@ const createApp = (port) => {
   })
 
   app.use(require('cors')())
+  app.use(require('cookie-parser')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
+  app.use(bodyParser.raw())
   app.use(require('method-override')())
 
   app.head('/', (req, res) => {
     return res.sendStatus(200)
   })
 
+  app.get('/', (req, res) => {
+    return res.send('<html><body>root page</body></html>')
+  })
+
   app.get('/timeout', (req, res) => {
     return Promise
     .delay(req.query.ms || 0)
+    .then(() => {
+      return res.send('<html><body>timeout</body></html>')
+    })
+  })
+
+  app.get('/redirect-timeout', (req, res) => {
+    return Promise
+    .delay(100)
     .then(() => {
       return res.send('<html><body>timeout</body></html>')
     })
@@ -85,6 +102,24 @@ const createApp = (port) => {
     })
   })
 
+  app.get('/binary', (req, res) => {
+    const uint8 = new Uint8Array(3)
+
+    uint8[0] = 120
+    uint8[1] = 42
+    uint8[2] = 7
+
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(Buffer.from(uint8))
+  })
+
+  app.post('/binary', (req, res) => {
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(req.body)
+  })
+
   app.get('/1mb', (req, res) => {
     return res.type('text').send('X'.repeat(1024 * 1024))
   })
@@ -98,11 +133,14 @@ const createApp = (port) => {
 
     return res
     .set('WWW-Authenticate', 'Basic')
+    .type('html')
     .sendStatus(401)
   })
 
   app.get('/json-content-type', (req, res) => {
-    return res.send({})
+    res.setHeader('content-type', req.query.contentType || 'application/json')
+
+    return res.end('{}')
   })
 
   app.get('/html-content-type-with-charset-param', (req, res) => {
@@ -137,6 +175,14 @@ const createApp = (port) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
   })
 
+  app.all('/dump-octet-body', (req, res) => {
+    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
+  })
+
+  app.all('/dump-form-data', upload.single('file'), (req, res) => {
+    return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}<br>original name:<br>${req.file.originalname}</body></html>`)
+  })
+
   app.get('/status-404', (req, res) => {
     return res
     .status(404)
@@ -147,6 +193,109 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  app.get('/prelogin', (req, res) => {
+    const { redirect, override } = req.query
+    let cookie = 'prelogin=true'
+
+    // if testing overridden cookies, need to make it cross-origin so it's
+    // included in the cross-origin `/login` request
+    if (override) {
+      cookie += '; SameSite=None; Secure'
+    }
+
+    res
+    .header('Set-Cookie', cookie)
+    .redirect(302, redirect)
+  })
+
+  app.get('/cookie-login', (req, res) => {
+    const { cookie, localhostCookie, username, redirect } = req.query
+
+    res
+    .header('Set-Cookie', decodeURIComponent(cookie))
+    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}&cookie=${localhostCookie}`)
+  })
+
+  const getUserCookie = (req) => {
+    return req.cookies.user || req.cookies['__Host-user'] || req.cookies['__Secure-user']
+  }
+
+  app.get('/verify-cookie-login', (req, res) => {
+    if (!getUserCookie(req)) {
+      return res
+      .send('<html><body><h1>Not logged in</h1></body></html>')
+    }
+
+    const { cookie, username, redirect } = req.query
+
+    res.send(`
+      <html>
+        <body>
+          <h1>Redirecting ${username}...</h1>
+          <script>
+            setTimeout(() => {
+              window.location.href = '${redirect}?username=${username}&cookie=${cookie}'
+            }, 500)
+          </script>
+        </body>
+      </html>
+    `)
+  })
+
+  app.get('/login', (req, res) => {
+    const { cookie, username } = req.query
+
+    if (!username) {
+      return res.send('<html><body><h1>Must specify username to log in</h1></body></html>')
+    }
+
+    if (!req.cookies.prelogin) {
+      return res.send('<html><body><h1>Social login failed</h1></body></html>')
+    }
+
+    const decodedCookie = decodeURIComponent(cookie)
+
+    res
+    .append('Set-Cookie', decodedCookie)
+    .append('Set-Cookie', 'prelogin=verified')
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/logout', (req, res) => {
+    res
+    .header('Set-Cookie', 'user=')
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/welcome', (req, res) => {
+    const user = getUserCookie(req)
+
+    if (!user) {
+      return res.send('<html><body><h1>No user found</h1></body></html>')
+    }
+
+    if (req.cookies.prelogin !== 'verified') {
+      return res.send('<html><body><h1>Login not verified</h1></body></html>')
+    }
+
+    res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
+  })
+
+  let _var = ''
+
+  app.get('/set-var', (req, res) => {
+    _var = req.query.v
+    res.sendStatus(200)
+  })
+
+  app.get('/get-var', (req, res) => {
+    res.send(_var)
+  })
+
+  app.post('/upload', (req, res) => {
+    res.sendStatus(200)
   })
 
   app.use(express.static(path.join(__dirname, '..')))

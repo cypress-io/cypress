@@ -2,20 +2,20 @@ import _ from 'lodash'
 import { observable } from 'mobx'
 
 interface DefaultAppState {
-  forcingGc: boolean
-  firefoxGcInterval: number | null | undefined
   isPaused: boolean
   isRunning: boolean
+  isPreferencesMenuOpen: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
 }
 
+// these are used for the `reset` method
+// so only a subset of the initial values are declared here
 const defaults: DefaultAppState = {
-  forcingGc: false,
-  firefoxGcInterval: undefined,
   isPaused: false,
   isRunning: false,
+  isPreferencesMenuOpen: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
@@ -23,12 +23,12 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
-  @observable forcingGc = defaults.forcingGc
+  @observable isSpecsListOpen = false
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
+  @observable isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
-  @observable firefoxGcInterval = defaults.firefoxGcInterval
   @observable studioActive = defaults.studioActive
 
   isStopped = false;
@@ -59,14 +59,6 @@ class AppState {
     this._resetAutoScrolling()
   }
 
-  setForcingGc (forcingGc: boolean) {
-    this.forcingGc = forcingGc
-  }
-
-  setFirefoxGcInterval (firefoxGcInterval: DefaultAppState['firefoxGcInterval']) {
-    this.firefoxGcInterval = firefoxGcInterval
-  }
-
   temporarilySetAutoScrolling (isEnabled?: boolean | null) {
     if (isEnabled != null) {
       this.autoScrollingEnabled = isEnabled
@@ -75,6 +67,18 @@ class AppState {
 
   toggleAutoScrolling () {
     this.setAutoScrolling(!this.autoScrollingEnabled)
+  }
+
+  toggleSpecList () {
+    this.isSpecsListOpen = !this.isSpecsListOpen
+  }
+
+  togglePreferencesMenu () {
+    this.isPreferencesMenuOpen = !this.isPreferencesMenuOpen
+  }
+
+  setSpecsList (status: boolean) {
+    this.isSpecsListOpen = status
   }
 
   setAutoScrolling (isEnabled?: boolean | null) {

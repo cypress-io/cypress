@@ -1,17 +1,27 @@
-import fse from 'fs-extra'
+import * as fse from 'fs-extra'
+import winVersionInfo from 'win-version-info'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
-import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
-import { log } from '../log'
-import { Browser, FoundBrowser, PathData } from '../types'
-import { utils } from '../utils'
+import Debug from 'debug'
+import type { PathData } from '../types'
+import type { Browser, FoundBrowser } from '@packages/types'
+
+const debug = Debug('cypress:launcher:windows')
+const debugVerbose = Debug('cypress-verbose:launcher:windows')
 
 function formFullAppPath (name: string) {
   return [
     `C:/Program Files (x86)/Google/Chrome/Application/${name}.exe`,
     `C:/Program Files/Google/Chrome/Application/${name}.exe`,
+  ].map(normalize)
+}
+
+function formChromeBetaAppPath () {
+  return [
+    'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
+    'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
   ].map(normalize)
 }
 
@@ -78,6 +88,7 @@ type WindowsBrowserPaths = {
 const formPaths: WindowsBrowserPaths = {
   chrome: {
     stable: formFullAppPath,
+    beta: formChromeBetaAppPath,
     canary: formChromeCanaryAppPath,
   },
   chromium: {
@@ -103,25 +114,11 @@ const formPaths: WindowsBrowserPaths = {
 }
 
 function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
-  const getVersion = (stdout: string): string => {
-    // result from wmic datafile
-    // "Version=61.0.3163.100"
-    const wmicVersion = /^Version=(\S+)$/
-    const m = wmicVersion.exec(stdout)
-
-    if (m) {
-      return m[1]
-    }
-
-    log('Could not extract version from %s using regex %s', stdout, wmicVersion)
-    throw notInstalledErr(browser.name)
-  }
-
   const formFullAppPathFn: NameToPath = get(formPaths, [browser.name, browser.channel], formFullAppPath)
 
   const exePaths = formFullAppPathFn(browser.name)
 
-  log('looking at possible paths... %o', { browser, exePaths })
+  debugVerbose('looking at possible paths... %o', { browser, exePaths })
 
   // shift and try paths 1-by-1 until we find one that works
   const tryNextExePath = async () => {
@@ -136,17 +133,16 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
     return fse.pathExists(path)
     .then((exists) => {
-      log('found %s ?', path, exists)
+      debugVerbose('found %s ? %o', path, { exists })
 
       if (!exists) {
         return tryNextExePath()
       }
 
-      return getVersionString(path)
-      .then(tap(log))
-      .then(getVersion)
-      .then((version: string) => {
-        log('browser %s at \'%s\' version %s', browser.name, exePath, version)
+      // Use exports.getVersionString here, rather than our local reference
+      // to that variable so that the tests can easily mock it
+      return exports.getVersionString(path).then((version) => {
+        debug('got version string for %s: %o', browser.name, { exePath, version })
 
         return {
           name: browser.name,
@@ -156,7 +152,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       })
     })
     .catch((err) => {
-      log('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
+      debug('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
 
       return tryNextExePath()
     })
@@ -175,23 +171,20 @@ export function getVersionString (path: string) {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
-  const args = [
-    'datafile',
-    'where',
-    `name="${path}"`,
-    'get',
-    'Version',
-    '/value',
-  ]
-
-  return utils.execa('wmic', args)
-  .then(prop('stdout'))
-  .then(trim)
+  try {
+    return Promise.resolve(winVersionInfo(path).FileVersion)
+  } catch (err) {
+    return Promise.reject(err)
+  }
 }
 
 export function getVersionNumber (version: string) {
   if (version.indexOf('Version=') > -1) {
-    return version.split('=')[1]
+    const split = version.split('=')
+
+    if (split[1]) {
+      return split[1]
+    }
   }
 
   return version

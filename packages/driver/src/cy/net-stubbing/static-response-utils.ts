@@ -1,10 +1,13 @@
 import _ from 'lodash'
 
-import {
+import type {
   StaticResponse,
-  BackendStaticResponse,
+  BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
+import {
+  caseInsensitiveHas,
+} from '@packages/net-stubbing/lib/util'
 import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
@@ -92,11 +95,11 @@ export function parseStaticResponseShorthand (statusCodeOrBody: number | string 
 function getFixtureOpts (fixture: string): FixtureOpts {
   const [filePath, encoding] = fixture.split(',')
 
-  return { filePath, encoding }
+  return { filePath, encoding: encoding === 'null' ? null : encoding }
 }
 
-export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
+export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
 
   if (staticResponse.delayMs) {
     // support deprecated `delayMs` usage
@@ -107,12 +110,21 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
   }
 
-  if (staticResponse.body) {
-    if (_.isString(staticResponse.body)) {
+  if (!_.isUndefined(staticResponse.body)) {
+    if (_.isString(staticResponse.body) || _.isArrayBuffer(staticResponse.body)) {
       backendStaticResponse.body = staticResponse.body
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
-      _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+
+      // There are various json-related MIME types. We cannot simply set it as `application/json`.
+      // @see https://www.iana.org/assignments/media-types/media-types.xhtml
+      if (
+        !backendStaticResponse.headers ||
+        (backendStaticResponse.headers &&
+          !caseInsensitiveHas(backendStaticResponse.headers, 'content-type'))
+      ) {
+        _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+      }
     }
   }
 

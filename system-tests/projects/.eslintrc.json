@@ -1,0 +1,15 @@
+{
+  "plugins": [
+    "cypress"
+  ],
+  "env": {
+    "cypress/globals": true
+  },
+  "rules": {
+    "mocha/no-global-tests": "off"
+  },
+  "ignorePatterns": [
+    "failures/cypress/e2e/syntax_error.js",
+    "plugins-root-syntax-error/cypress.config.js"
+  ]
+}

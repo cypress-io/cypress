@@ -12,17 +12,15 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const questionsRemain = require('@cypress/questions-remain')
-const R = require('ramda')
+const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
 const ask = require('./ask')
-const bump = require('./bump')
 const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
-const { uploadNpmPackage } = require('./upload-npm-package')
-const { uploadUniqueBinary } = require('./upload-unique-binary')
+const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 
 // initialize on existing repo
@@ -36,7 +34,7 @@ const fail = (str) => {
   return console.log(chalk.bgRed(` ${chalk.black(str)} `))
 }
 
-const zippedFilename = R.always(upload.zipName)
+const zippedFilename = () => upload.zipName
 
 // goes through the list of properties and asks relevant question
 // resolves with all relevant options set
@@ -70,12 +68,7 @@ const deploy = {
 
   parseOptions (argv) {
     const opts = minimist(argv, {
-      boolean: ['skip-clean'],
-      default: {
-        'skip-clean': false,
-      },
       alias: {
-        skipClean: 'skip-clean',
         zip: ['zipFile', 'zip-file', 'filename'],
       },
     })
@@ -84,47 +77,12 @@ const deploy = {
       opts.runTests = false
     }
 
-    if (!opts.platform && (os.platform() === meta.platforms.linux)) {
-      // only can build Linux on Linux
-      opts.platform = meta.platforms.linux
-    }
-
-    // windows aliases
-    if ((opts.platform === 'win32') || (opts.platform === 'win') || (opts.platform === 'windows')) {
-      opts.platform = meta.platforms.windows
-    }
-
-    if (!opts.platform && (os.platform() === meta.platforms.windows)) {
-      // only can build Windows binary on Windows platform
-      opts.platform = meta.platforms.windows
-    }
-
-    // be a little bit user-friendly and allow aliased values
-    if (opts.platform === 'mac') {
-      opts.platform = meta.platforms.darwin
-    }
+    if (!opts.platform) opts.platform = os.platform()
 
     debug('parsed command line options')
     debug(opts)
 
     return opts
-  },
-
-  bump () {
-    return ask.whichBumpTask()
-    .then((task) => {
-      switch (task) {
-        case 'run':
-          return bump.runTestProjects()
-        case 'version':
-          return ask.whichVersion(meta.distDir(''))
-          .then((v) => {
-            return bump.version(v)
-          })
-        default:
-          throw new Error('unknown task')
-      }
-    })
   },
 
   release () {
@@ -143,10 +101,87 @@ const deploy = {
         fail('Release Failed')
         throw err
       })
+      .then(() => {
+        return this.checkDownloads({ version })
+      })
     }
 
     return askMissingOptions(['version'])(options)
     .then(release)
+  },
+
+  checkDownloads ({ version }) {
+    const systems = [
+      { platform: 'linux', arch: 'x64' },
+      { platform: 'linux', arch: 'arm64' },
+      { platform: 'darwin', arch: 'x64' },
+      { platform: 'darwin', arch: 'arm64' },
+      { platform: 'win32', arch: 'x64' },
+    ]
+
+    const urlExists = (url) => {
+      return rp.head(url)
+      .then(() => true)
+      .catch(() => false)
+    }
+
+    const checkSystem = ({ platform, arch }) => {
+      const url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
+      const system = `${platform}-${arch}`
+
+      process.stdout.write(`Checking for ${chalk.yellow(system)} at ${chalk.cyan(url)} ... `)
+
+      return urlExists(url)
+      .then((exists) => {
+        const result = exists ? '✅' : '❌'
+
+        process.stdout.write(`${result}\n`)
+
+        return { exists, platform, arch, url }
+      })
+    }
+
+    const allEnsured = (results) => {
+      return !results.filter(({ exists }) => !exists).length
+    }
+
+    return Promise.mapSeries(systems, checkSystem)
+    .then((results) => {
+      if (allEnsured(results)) return results
+
+      console.log(chalk.red(`\nCould not ensure v${version} of the Cypress binary is available for the following systems:`))
+
+      return results
+    })
+    .map((result) => {
+      const { exists, platform, arch, url } = result
+
+      if (exists) return result
+
+      console.log(`
+  ${chalk.yellow('Platform')}: ${platform}
+  ${chalk.yellow('Arch')}: ${arch}
+  ${chalk.yellow('URL')}: ${url}`)
+
+      return result
+    })
+    .then((results) => {
+      if (allEnsured(results)) return
+
+      const purgeCommand = `yarn binary-purge --version ${version}`
+      const ensureCommand = `yarn binary-ensure --version ${version}`
+
+      console.log(`\nPurge the cloudflare cache with ${chalk.yellow(purgeCommand)} and check again with ${chalk.yellow(ensureCommand)}\n`)
+
+      process.exit(1)
+    })
+  },
+
+  ensure () {
+    const options = this.parseOptions(process.argv)
+
+    return questionsRemain({ version: ask.getEnsureVersion })(options)
+    .then(this.checkDownloads)
   },
 
   build (options) {
@@ -161,7 +196,7 @@ const deploy = {
     .then(() => {
       debug('building binary: platform %s version %s', options.platform, options.version)
 
-      return build(options.platform, options.version, options)
+      return build.buildCypressApp(options)
     })
   },
 
@@ -182,18 +217,11 @@ const deploy = {
     })
   },
 
-  // upload Cypress NPM package file
-  'upload-npm-package' (args = process.argv) {
-    console.log('#packageUpload')
+  // upload Cypress binary or NPM Package zip file under unique hash
+  'upload-build-artifact' (args = process.argv) {
+    console.log('#uploadBuildArtifact')
 
-    return uploadNpmPackage(args)
-  },
-
-  // upload Cypress binary zip file under unique hash
-  'upload-unique-binary' (args = process.argv) {
-    console.log('#uniqueBinaryUpload')
-
-    return uploadUniqueBinary(args)
+    return uploadArtifactToS3(args)
   },
 
   // uploads a single built Cypress binary ZIP file
@@ -218,10 +246,21 @@ const deploy = {
       console.log('for platform %s version %s',
         options.platform, options.version)
 
-      return upload.toS3({
-        zipFile: options.zip,
+      const uploadPath = upload.getFullUploadPath({
         version: options.version,
         platform: options.platform,
+        name: upload.zipName,
+      })
+
+      return upload.toS3({
+        file: options.zip,
+        uploadPath,
+      }).then(() => {
+        return uploadUtils.purgeDesktopAppFromCache({
+          version: options.version,
+          platform: options.platform,
+          zipName: options.zip,
+        })
       })
     })
   },

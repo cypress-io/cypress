@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 require('../../spec_helper')
 
 const path = require('path')
@@ -7,7 +8,6 @@ const cp = require('child_process')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
-const { mockSpawn } = require('spawn-mock')
 const mockfs = require('mock-fs')
 const mockedEnv = require('mocked-env')
 
@@ -20,11 +20,13 @@ const verify = require(`${lib}/tasks/verify`)
 const Stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
 const snapshot = require('../../support/snapshot')
+const { mockSpawn } = require('../../support/spawn-mock')
 
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
 const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
 const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
+const DEFAULT_VERIFY_TIMEOUT = 30000
 
 let stdout
 let spawnedProcess
@@ -68,7 +70,31 @@ context('lib/tasks/verify', () => {
   })
 
   it('has verify task timeout', () => {
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.be.gt(10000)
+    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
+  })
+
+  it('accepts custom verify task timeout', () => {
+    process.env.CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  })
+
+  it('accepts custom verify task timeout from npm', () => {
+    process.env.npm_config_CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  })
+
+  it('falls back to default verify task timeout if custom value is invalid', () => {
+    process.env.CYPRESS_VERIFY_TIMEOUT = 'foobar'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
@@ -184,7 +210,7 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+    sinon.stub(cp, 'spawn').withArgs('/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress').callsFake(mockSpawn((cp) => {
       cp.stderr.write('some stderr')
       cp.stdout.write('some stdout')
     }))

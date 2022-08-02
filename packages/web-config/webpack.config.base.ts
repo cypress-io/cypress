@@ -30,7 +30,32 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
 
 evalDevToolPlugin.evalDevToolPlugin = true
 
-function makeSassLoaders ({ modules }): RuleSetRule {
+const optimization = {
+  usedExports: true,
+  providedExports: true,
+  sideEffects: true,
+  namedChunks: true,
+  namedModules: true,
+  removeAvailableModules: true,
+  mergeDuplicateChunks: true,
+  flagIncludedChunks: true,
+  removeEmptyChunks: true,
+}
+
+const stats = {
+  errors: true,
+  warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
+  warnings: true,
+  all: false,
+  builtAt: true,
+  colors: true,
+  modules: true,
+  maxModules: 20,
+  excludeModules: /(main|test-entry).scss/,
+  timings: true,
+}
+
+function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -40,6 +65,13 @@ function makeSassLoaders ({ modules }): RuleSetRule {
     exclude,
     enforce: 'pre',
     use: [
+      {
+        loader: require.resolve('css-modules-typescript-loader'),
+        options: {
+          modules: true,
+          mode: process.env.CI ? 'verify' : 'emit',
+        },
+      },
       {
         loader: require.resolve('css-loader'),
         options: {
@@ -72,7 +104,13 @@ function makeSassLoaders ({ modules }): RuleSetRule {
   }
 }
 
-const getCommonConfig = () => {
+// the chrome version should be synced with
+// npm/webpack-batteries-included-preprocessor/index.js and
+// packages/server/lib/browsers/chrome.ts
+const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }]
+const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]
+
+export const getCommonConfig = () => {
   const commonConfig: Configuration = {
     mode: 'none',
     node: {
@@ -86,18 +124,8 @@ const getCommonConfig = () => {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },
 
-    stats: {
-      errors: true,
-      warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
-      warnings: true,
-      all: false,
-      builtAt: true,
-      colors: true,
-      modules: true,
-      maxModules: 20,
-      excludeModules: /(main|test-entry).scss/,
-      timings: true,
-    },
+    stats,
+    optimization,
 
     module: {
       rules: [
@@ -113,9 +141,9 @@ const getCommonConfig = () => {
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
               presets: [
-                [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
+                babelPresetEnvConfig,
                 require.resolve('@babel/preset-react'),
-                [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+                babelPresetTypeScriptConfig,
               ],
               babelrc: false,
             },
@@ -164,18 +192,6 @@ const getCommonConfig = () => {
       ],
     },
 
-    optimization: {
-      usedExports: true,
-      providedExports: true,
-      sideEffects: true,
-      namedChunks: true,
-      namedModules: true,
-      removeAvailableModules: true,
-      mergeDuplicateChunks: true,
-      flagIncludedChunks: true,
-      removeEmptyChunks: true,
-    },
-
     plugins: [
       new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
       new MiniCSSExtractWebpackPlugin(),
@@ -208,6 +224,69 @@ const getCommonConfig = () => {
   return commonConfig
 }
 
-export default getCommonConfig
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+export const getSimpleConfig = () => ({
+  node: {
+    fs: 'empty',
+    child_process: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    module: 'empty',
+  },
+  resolve: {
+    extensions: ['.js', '.ts', '.json'],
+  },
+
+  stats,
+  optimization,
+
+  cache: true,
+
+  module: {
+    rules: [
+      {
+        test: /\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: require.resolve('babel-loader'),
+          options: {
+            plugins: [
+              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+            ],
+            presets: [
+              babelPresetEnvConfig,
+              babelPresetTypeScriptConfig,
+            ],
+            babelrc: false,
+          },
+        },
+      },
+      // FIXME: we don't actually want or need wasm support in the
+      // cross origin bundle that uses this config, but we need to refactor
+      // the driver so that it doesn't load the wasm code in
+      // packages/driver/src/cypress/source_map_utils.js when creating
+      // the cross origin bundle. for now, this is necessary so the build
+      // doesn't fail
+      // https://github.com/cypress-io/cypress/issues/19888
+      {
+        test: /\.wasm$/,
+        type: 'javascript/auto',
+        use: [
+          {
+            loader: require.resolve('arraybuffer-loader'),
+          },
+        ],
+      },
+    ],
+  },
+
+  plugins: [
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+  ],
+})
 
 export { HtmlWebpackPlugin }
+
+export function getCopyWebpackPlugin () {
+  return require('copy-webpack-plugin')
+}

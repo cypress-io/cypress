@@ -10,19 +10,19 @@
     "test": "jest"
   },
   "dependencies": {
-    "bluebird": "^3.5.5",
+    "bluebird": "3.5.5",
     "chalk": "^2.4.2",
     "eslint-rule-composer": "^0.3.0",
     "lodash": "^4.17.15",
-    "shelljs": "^0.8.3"
+    "shelljs": "0.8.5"
   },
   "devDependencies": {
-    "eslint": "^6.1.0",
+    "eslint": "^7.22.0",
     "eslint-plugin-json-format": "^2.0.0",
-    "eslint-plugin-mocha": "^5.3.0",
+    "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "jest": "^24.8.0",
-    "jest-cli": "^24.8.0",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },
@@ -33,7 +33,7 @@
     "eslint": ">= 3.2.1",
     "eslint-plugin-json-format": ">= 2.0.0",
     "eslint-plugin-mocha": "^4.11.0",
-    "eslint-plugin-react": "^7.2.1"
+    "eslint-plugin-react": "^7.22.0"
   },
   "bin": {
     "lint-changed": "./lib/scripts/lint-changed.js",
@@ -45,7 +45,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/eslint-plugin-dev#readme",
-  "author": "Chris Breiding (chris@cypress.io)",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Feslint-plugin-dev&template=bug-report.md"
   },
@@ -53,8 +52,5 @@
     "cypress",
     "eslint",
     "eslintplugin"
-  ],
-  "ciJobs": [
-    "npm-eslint-plugin-dev"
   ]
 }

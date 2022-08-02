@@ -1,0 +1,31 @@
+{
+  "name": "@cypress/mount-utils",
+  "version": "0.0.0-development",
+  "description": "Shared utilities for the various component testing adapters",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc || echo 'built, with type errors'",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
+    "watch": "tsc -w"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/mount-utils#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean-deps": "rm -rf node_modules",
+    "clean": "rimraf 'lib/**/*.js'",
+    "clean-deps": "rimraf node_modules",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "yarn run-mocha \"test/integration/*.spec.ts\"",
@@ -13,25 +14,30 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
+    "chalk": "2.4.2",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
-    "debug": "4.3.2",
+    "debug": "^4.3.2",
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.6.2",
-    "lodash": "4.17.19",
+    "lodash": "^4.17.19",
     "pumpify": "1.5.1",
     "through": "2.3.8",
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/request": "2.88.5",
+    "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.1",
+    "@packages/resolve-dist": "0.0.0-development",
+    "@packages/rewriter": "0.0.0-development",
+    "@packages/server": "0.0.0-development",
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.10",
     "express": "4.17.1",
+    "rimraf": "3.0.2",
     "supertest": "6.0.1",
-    "typescript": "3.5.3"
+    "typescript": "^4.2.3"
   },
   "files": [
     "lib"

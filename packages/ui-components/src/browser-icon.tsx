@@ -20,6 +20,7 @@ interface LogoOptions {
 const logoPaths: LogoOptions = {
   canary: require('browser-logos/src/chrome-canary/chrome-canary_32x32.png'),
   chrome: require('browser-logos/src/chrome/chrome_32x32.png'),
+  chromeBeta: require('browser-logos/src/chrome-beta/chrome-beta_32x32.png'),
   chromium: require('browser-logos/src/chromium/chromium_32x32.png'),
   edge: require('browser-logos/src/edge/edge_32x32.png'),
   edgeBeta: require('browser-logos/src/edge-beta/edge-beta_32x32.png'),

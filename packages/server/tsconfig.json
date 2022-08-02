@@ -2,12 +2,19 @@
   "extends": "./../ts/tsconfig.json",
   "include": [
     "lib/*.ts",
-    "lib/**/*.ts"
+    "lib/**/*.ts",
   ],
   "files": [
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "types": ["mocha", "node", "chrome"]
+    "lib": ["esnext"],
+    "types": [
+      "mocha",
+      "node"
+    ],
+    "resolveJsonModule": true,
+    "noUnusedLocals": false,
+    "importHelpers": true
   }
 }

@@ -70,18 +70,6 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         const unzipWithNode = () => {
           debug('unzipping with node.js (slow)')
 
-          const endFn = (err) => {
-            if (err) {
-              debug('error %s', err.message)
-
-              return reject(err)
-            }
-
-            debug('node unzip finished')
-
-            return resolve()
-          }
-
           const opts = {
             dir: installDir,
             onEntry: tick,
@@ -89,7 +77,19 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           debug('calling Node extract tool %s %o', zipFilePath, opts)
 
-          return unzipTools.extract(zipFilePath, opts, endFn)
+          return unzipTools.extract(zipFilePath, opts)
+          .then(() => {
+            debug('node unzip finished')
+
+            return resolve()
+          })
+          .catch((err) => {
+            if (err) {
+              debug('error %s', err.message)
+
+              return reject(err)
+            }
+          })
         }
 
         const unzipFallback = _.once(unzipWithNode)
@@ -195,7 +195,11 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
   })
 }
 
-const start = ({ zipFilePath, installDir, progress }) => {
+function isMaybeWindowsMaxPathLengthError (err) {
+  return os.platform() === 'win32' && err.code === 'ENOENT' && err.syscall === 'realpath'
+}
+
+const start = async ({ zipFilePath, installDir, progress }) => {
   la(is.unemptyString(installDir), 'missing installDir')
   if (!progress) {
     progress = { onProgress: () => {
@@ -203,18 +207,23 @@ const start = ({ zipFilePath, installDir, progress }) => {
     } }
   }
 
-  return fs.pathExists(installDir)
-  .then((exists) => {
-    if (exists) {
+  try {
+    const installDirExists = await fs.pathExists(installDir)
+
+    if (installDirExists) {
       debug('removing existing unzipped binary', installDir)
 
-      return fs.removeAsync(installDir)
+      await fs.removeAsync(installDir)
     }
-  })
-  .then(() => {
-    return unzip({ zipFilePath, installDir, progress })
-  })
-  .catch(throwFormErrorText(errors.failedUnzip))
+
+    await unzip({ zipFilePath, installDir, progress })
+  } catch (err) {
+    const errorTemplate = isMaybeWindowsMaxPathLengthError(err) ?
+      errors.failedUnzipWindowsMaxPathLength
+      : errors.failedUnzip
+
+    await throwFormErrorText(errorTemplate)(err)
+  }
 }
 
 module.exports = {

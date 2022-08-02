@@ -8,7 +8,7 @@ import Err, { ParsedStackFileLine, ParsedStackMessageLine } from './err-model'
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
 
 interface Props {
-  err: Err,
+  err: Err
 }
 
 type StringOrElement = string | ReactElement
@@ -18,7 +18,7 @@ const isMessageLine = (stackLine: ParsedStackFileLine | ParsedStackMessageLine) 
 }
 
 const ErrorStack = observer(({ err }: Props) => {
-  if (!err.parsedStack) return <>err.stack</>
+  if (!err.parsedStack) return <>{err.stack}</>
 
   // only display stack lines beyond the original message, since it's already
   // displayed above this in the UI

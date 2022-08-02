@@ -27,8 +27,6 @@ You can also run all of the driver's tests locally. We don't really recommend th
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
 ```bash
-yarn workspace @packages/driver start
-
 # in separate terminal
 yarn workspace @packages/driver cypress:run
 
@@ -52,6 +50,10 @@ Note: you may need to enable "Verbose" or "Debug" log levels inside the browser'
 - `unfetch` to polyfill `fetch`. Added constructor function to point XMLHttpRequest to the application under test window.
 
 Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
+
+## Cross-origin Testing
+
+Working on cross-origin testing or reviewing a PR related to it? Check out the [Cross-origin Testing Technical Overview](./cross-origin-testing.md).
 
 <!-- ## Catalog of Events
 

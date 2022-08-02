@@ -1,115 +1,27 @@
-import { log } from './log'
+import Debug from 'debug'
 import * as cp from 'child_process'
-import { Browser, FoundBrowser } from './types'
+import { browsers, FoundBrowser } from '@packages/types'
+import type { Readable } from 'stream'
+
+export const debug = Debug('cypress:launcher:browsers')
+
+export { browsers }
 
 /** list of the browsers we can detect and use by default */
-export const browsers: Browser[] = [
-  {
-    name: 'chrome',
-    family: 'chromium',
-    channel: 'stable',
-    displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/m,
-    binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
-  },
-  {
-    name: 'chromium',
-    family: 'chromium',
-    // technically Chromium is always in development
-    channel: 'stable',
-    displayName: 'Chromium',
-    versionRegex: /Chromium (\S+)/m,
-    binary: ['chromium-browser', 'chromium'],
-  },
-  {
-    name: 'chrome',
-    family: 'chromium',
-    channel: 'canary',
-    displayName: 'Canary',
-    versionRegex: /Google Chrome Canary (\S+)/m,
-    binary: 'google-chrome-canary',
-  },
-  {
-    name: 'firefox',
-    family: 'firefox',
-    channel: 'stable',
-    displayName: 'Firefox',
-    // Mozilla Firefox 70.0.1
-    versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
-    binary: 'firefox',
-  },
-  {
-    name: 'firefox',
-    family: 'firefox',
-    channel: 'dev',
-    displayName: 'Firefox Developer Edition',
-    // Mozilla Firefox 73.0b12
-    versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
-    // ubuntu PPAs install it as firefox
-    binary: ['firefox-developer-edition', 'firefox'],
-  },
-  {
-    name: 'firefox',
-    family: 'firefox',
-    channel: 'nightly',
-    displayName: 'Firefox Nightly',
-    // Mozilla Firefox 74.0a1
-    versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
-    // ubuntu PPAs install it as firefox-trunk
-    binary: ['firefox-nightly', 'firefox-trunk'],
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
-    channel: 'stable',
-    displayName: 'Edge',
-    versionRegex: /Microsoft Edge (\S+)/m,
-    binary: ['edge', 'microsoft-edge'],
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
-    channel: 'canary',
-    displayName: 'Edge Canary',
-    versionRegex: /Microsoft Edge Canary (\S+)/m,
-    binary: 'edge-canary',
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
-    channel: 'beta',
-    displayName: 'Edge Beta',
-    versionRegex: /Microsoft Edge Beta (\S+)/m,
-    binary: 'edge-beta',
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
-    channel: 'dev',
-    displayName: 'Edge Dev',
-    versionRegex: /Microsoft Edge Dev (\S+)/m,
-    binary: ['edge-dev', 'microsoft-edge-dev'],
-  },
-  {
-    name: 'webkit',
-    family: 'webkit',
-    channel: 'dev',
-    displayName: 'WebKit',
-    // WebKitGTK 2.31.1 (r272495)
-    versionRegex: /WebKitGTK (\S+)/m,
-    module: 'playwright-webkit',
-    getBinaryPath: (pw) => pw.webkit.executablePath(),
-  },
-]
 
 /** starts a found browser and opens URL if given one */
+
+export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
+
 export function launch (
   browser: FoundBrowser,
   url: string,
+  debuggingPort: number,
   args: string[] = [],
+  defaultBrowserEnv = [],
   opts: { pipeStdio?: boolean } = {},
 ) {
-  log('launching browser %o', { browser, url })
+  debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
@@ -119,7 +31,7 @@ export function launch (
     args = [url].concat(args)
   }
 
-  log('spawning browser with args %o', { args })
+  debug('spawning browser with args %o', { args })
 
   const stdio: ('ignore' | 'pipe')[] = ['ignore', 'pipe', 'pipe']
 
@@ -128,18 +40,22 @@ export function launch (
     stdio.push('pipe', 'pipe')
   }
 
-  const proc = cp.spawn(browser.path, args, { stdio })
+  // allow setting default env vars such as MOZ_HEADLESS_WIDTH
+  // but only if it's not already set by the environment
+  const env = Object.assign({}, defaultBrowserEnv, process.env)
 
-  proc.stdout && proc.stdout.on('data', (buf) => {
-    log('%s stdout: %s', browser.name, String(buf).trim())
+  const proc = cp.spawn(browser.path, args, { stdio, env })
+
+  proc.stdout!.on('data', (buf) => {
+    debug('%s stdout: %s', browser.name, String(buf).trim())
   })
 
-  proc.stderr && proc.stderr.on('data', (buf) => {
-    log('%s stderr: %s', browser.name, String(buf).trim())
+  proc.stderr!.on('data', (buf) => {
+    debug('%s stderr: %s', browser.name, String(buf).trim())
   })
 
   proc.on('exit', (code, signal) => {
-    log('%s exited: %o', browser.name, { code, signal })
+    debug('%s exited: %o', browser.name, { code, signal })
   })
 
   return proc

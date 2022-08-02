@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
@@ -43,7 +43,7 @@ export default class Hook implements HookProps {
     let consecutiveDuplicateAliases: Array<Alias> = []
     const aliases: Array<Alias> = this.commands.map((command) => {
       if (command.alias) {
-        if (command.hasDuplicates) {
+        if (command.hasChildren) {
           consecutiveDuplicateAliases.push(command.alias)
         }
 
@@ -78,7 +78,7 @@ export default class Hook implements HookProps {
   }
 
   addCommand (command: CommandModel) {
-    if (!command.event && !this.isStudio) {
+    if (!command.event && command.type !== 'system' && !this.isStudio) {
       command.number = this._currentNumber
       this._currentNumber++
     }
@@ -87,13 +87,25 @@ export default class Hook implements HookProps {
       command.number = 1
     }
 
+    if (command.group) {
+      const groupCommand = _.find(this.commands, { id: command.group }) as CommandModel
+
+      if (groupCommand && groupCommand.addChild) {
+        groupCommand.addChild(command)
+      } else {
+        // if we cant find a command to attach to, treat this like an ordinary log
+        command.group = undefined
+      }
+    }
+
     const lastCommand = _.last(this.commands)
 
     if (lastCommand &&
       lastCommand.isMatchingEvent &&
       lastCommand.isMatchingEvent(command) &&
-      lastCommand.addDuplicate) {
-      lastCommand.addDuplicate(command)
+      lastCommand.addChild
+    ) {
+      lastCommand.addChild(command)
     } else {
       this.commands.push(command)
     }

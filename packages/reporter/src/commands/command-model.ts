@@ -1,27 +1,44 @@
+import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-import Err from '../errors/err-model'
+import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
-import { TimeoutID } from '../lib/types'
+import type { TimeoutID } from '../lib/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-interface RenderProps {
+export interface RenderProps {
   message?: string
-  indicator?: string
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
+  interceptions?: Array<{
+    command: 'intercept' | 'route'
+    alias?: string
+    type: 'function' | 'stub' | 'spy'
+  }>
+  status?: string
+  wentToOrigin?: boolean
+}
+
+export interface SessionRenderProps {
+  status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
 }
 
 export interface CommandProps extends InstrumentProps {
-  err?: Err
+  err?: ErrProps
   event?: boolean
   number?: number
   numElements: number
-  renderProps?: RenderProps
+  renderProps?: RenderProps | SessionRenderProps
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
+  showError?: boolean
+  group?: number
+  groupLevel?: number
+  hasSnapshot?: boolean
+  hasConsoleProps?: boolean
 }
 
 export default class Command extends Instrument {
@@ -32,12 +49,17 @@ export default class Command extends Instrument {
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable visible?: boolean = true
+  @observable visible?: boolean
   @observable wallClockStartedAt?: string
-  @observable duplicates: Array<Command> = []
-  @observable isDuplicate = false
+  @observable children: Array<Command> = []
   @observable hookId: string
   @observable isStudio: boolean
+  @observable showError?: boolean = false
+  @observable group?: number
+  @observable groupLevel?: number
+  @observable hasSnapshot?: boolean
+  @observable hasConsoleProps?: boolean
+  @observable _isOpen: boolean|null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -46,13 +68,54 @@ export default class Command extends Instrument {
     return this.renderProps.message || this.message
   }
 
-  @computed get numDuplicates () {
-    // and one to include self so it's the total number of same events
-    return this.duplicates.length + 1
+  private countNestedCommands (children) {
+    if (children.length === 0) {
+      return 0
+    }
+
+    return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
   }
 
-  @computed get hasDuplicates () {
-    return this.numDuplicates > 1
+  @computed get numChildren () {
+    if (this.event) {
+      // add one to include self so it's the total number of same events
+      return this.children.length + 1
+    }
+
+    return this.countNestedCommands(this.children)
+  }
+
+  @computed get isOpen () {
+    if (!this.hasChildren) return null
+
+    return this._isOpen || (this._isOpen === null
+      && (
+        // command has nested commands
+        (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
+        // command has nested commands with children
+        (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
+        // last nested command is open
+        _.last(this.children)?.isOpen ||
+        // show slow command when test is running
+        (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
+        // at last nested command failed
+        _.last(this.children)?.state === 'failed'
+      )
+    )
+  }
+
+  @action toggleOpen () {
+    this._isOpen = !this.isOpen
+  }
+
+  @computed get hasChildren () {
+    if (this.event) {
+      // if the command is an event log, we add one to the number of children count to include
+      // itself in the total number of same events that render when the group is closed
+      return this.numChildren > 1
+    }
+
+    return this.numChildren > 0
   }
 
   constructor (props: CommandProps) {
@@ -64,10 +127,17 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
-    this.visible = props.visible
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
+    this.showError = !!props.showError
+    this.group = props.group
+    this.hasSnapshot = !!props.hasSnapshot
+    this.hasConsoleProps = !!props.hasConsoleProps
+    this.groupLevel = props.groupLevel || 0
 
     this._checkLongRunning()
   }
@@ -79,19 +149,33 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
-    this.visible = props.visible
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.timeout = props.timeout
+    this.hasSnapshot = props.hasSnapshot
+    this.hasConsoleProps = props.hasConsoleProps
+    this.showError = props.showError
 
     this._checkLongRunning()
   }
 
   isMatchingEvent (command: Command) {
+    if (command.name === 'page load') return false
+
+    if (command.type === 'system') return false
+
     return command.event && this.matches(command)
   }
 
-  addDuplicate (command: Command) {
-    command.isDuplicate = true
-    this.duplicates.push(command)
+  @action
+  setGroup (id) {
+    this.group = id
+  }
+
+  addChild (command: Command) {
+    command.setGroup(this.id)
+    this.children.push(command)
   }
 
   matches (command: Command) {

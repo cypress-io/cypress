@@ -1,0 +1,21 @@
+name: "Semantic Pull Request"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  main:
+    name: Lint Title
+    runs-on: ubuntu-latest
+    steps:
+      # use a fork of the GitHub action - we cannot pull in untrusted third party actions
+      # see https://github.com/cypress-io/cypress/pull/20091#discussion_r801799647
+      - uses: cypress-io/action-semantic-pull-request@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          validateSingleCommit: true

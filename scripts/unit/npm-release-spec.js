@@ -25,7 +25,7 @@ const semanticReleaseNoUpdate = (version) => {
 [semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
+[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] › ℹ  Found git tag @cypress/package-v${version} associated with version ${version} on branch master
@@ -66,7 +66,7 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 [semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
+[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] › ℹ  Found git tag @cypress/package-v${oldVersion} associated with version ${oldVersion} on branch master
@@ -150,7 +150,7 @@ const semanticReleaseNew = () => {
 [semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
+[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] › ℹ  No git tag version found on branch master

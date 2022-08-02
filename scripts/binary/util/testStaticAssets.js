@@ -13,7 +13,7 @@ const globAsync = Promise.promisify(glob)
 const testStaticAssets = async (buildResourcePath) => {
   await Promise.all([
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/runner/dist/*.js`,
+      assetGlob: `${buildResourcePath}/packages/runner/dist/cypress_runner.js`,
       badStrings: [
         // should only exist during development
         'webpack-livereload-plugin',
@@ -35,25 +35,35 @@ const testStaticAssets = async (buildResourcePath) => {
       minLineCount: 5000,
     }),
     testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
+      goodStrings: [
+        'action("app:window:before:load",window)',
+      ],
+    }),
+    testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/*.css`,
       goodStrings: [
         // indicates css autoprefixer is correctly appending vendor prefixes (e.g -moz-touch)
         ['-ms-', 20],
       ],
     }),
-
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/socket.io-parser/dist/binary.js`,
+      badStrings: [
+        'pack.data = _deconstructPacket(packetData, buffers);',
+      ],
       goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        `window.env = 'production'`,
+        'pack.data = _deconstructPacket(packetData, buffers, [], new WeakMap());',
       ],
     }),
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/app.js`,
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/engine.io-parser/lib/encodePacket.browser.js`,
+      badStrings: [
+        'return callback(data instanceof ArrayBuffer ? data : data.buffer);',
+      ],
       goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        'react.production.min.js',
+        'This extra check is made because the "instanceof ArrayBuffer" check does not work',
+        'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
       ],
     }),
   ])

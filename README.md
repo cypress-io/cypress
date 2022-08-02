@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="https://cloud.githubusercontent.com/assets/1268976/20607953/d7ae489c-b24a-11e6-9cc4-91c6c74c5e88.png"/>
+  <a href="https://www.cypress.io">
+    <picture>
+      <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
+      <img alt="Cypress Logo" src="./assets/cypress-logo-light.png">
+    </picture>    
+  </a>
 </p>
 <p align="center">
   <a href="https://on.cypress.io">Documentation</a> |
@@ -13,6 +19,9 @@
 
 <p align="center">
   Fast, easy and reliable testing for anything that runs in a browser.
+</p>
+<p align="center">
+  Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
 </p>
 
 <p align="center">
@@ -39,7 +48,7 @@
 
 [![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
 
-Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypress.io/guides/getting-started/installing-cypress.html).
+Install Cypress for Mac, Linux, or Windows, then [get started](https://on.cypress.io/install).
 
 ```bash
 npm install cypress --save-dev

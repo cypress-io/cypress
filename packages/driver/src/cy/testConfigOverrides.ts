@@ -1,17 +1,72 @@
-const _ = require('lodash')
+import _ from 'lodash'
+import $errUtils from '../cypress/error_utils'
 
-function mutateConfiguration (testConfigOverride, config, env) {
-  const globalConfig = _.clone(config())
+// See Test Config Overrides in ../../../../cli/types/cypress.d.ts
+
+type ResolvedTestConfigOverride = {
+  /**
+   * The list of test config overrides and the invocation details used to add helpful
+   * error messaging to consumers if a test override fails validation.
+   */
+  testConfigList: Array<TestConfig>
+  /**
+   * The test config overrides that will apply to the test if it passes validation.
+   * */
+  unverifiedTestConfig: Object
+}
+
+type TestConfig = {
+  overrides: {
+    browser?: Object
+  }
+  invocationDetails: {
+    stack: Object
+  }
+};
+
+type ConfigOverrides = {
+  env: Object | undefined
+};
+
+function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
+  testConfigList.forEach(({ overrides: testConfigOverride, invocationDetails }) => {
+    if (_.isArray(testConfigOverride)) {
+      setConfig(testConfigOverride, config, localConfigOverrides)
+    } else {
+      delete testConfigOverride.browser
+
+      try {
+        config(testConfigOverride)
+      } catch (e: any) {
+        let err = $errUtils.errByPath('config.invalid_test_override', {
+          errMsg: e.message,
+        })
+
+        err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
+        throw err
+      }
+      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
+    }
+  })
+
+  return localConfigOverrides
+}
+
+function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
+  const { testConfigList } = testConfig || []
+
+  let globalConfig = _.clone(config())
+
+  const localConfigOverrides = setConfig(testConfigList, config)
+
+  // only store the global config values that updated
+  globalConfig = _.pick(globalConfig, Object.keys(localConfigOverrides))
   const globalEnv = _.clone(env())
 
-  delete testConfigOverride.browser
-  config(testConfigOverride)
+  const localConfigOverridesBackup = _.clone(localConfigOverrides)
 
-  const localTestConfig = config()
-  const localTestConfigBackup = _.clone(localTestConfig)
-
-  if (testConfigOverride.env) {
-    env(testConfigOverride.env)
+  if (localConfigOverrides.env) {
+    env(localConfigOverrides.env)
   }
 
   const localTestEnv = env()
@@ -23,9 +78,14 @@ function mutateConfiguration (testConfigOverride, config, env) {
   // TODO: (NEXT_BREAKING) always restore configuration
   //   do not allow global mutations inside test
   const restoreConfigFn = function () {
-    _.each(localTestConfig, (val, key) => {
-      if (localTestConfigBackup[key] !== val) {
+    _.each(localConfigOverrides, (val, key) => {
+      if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
+      }
+
+      // explicitly set to undefined if config wasn't previously defined
+      if (!globalConfig.hasOwnProperty(key)) {
+        globalConfig[key] = undefined
       }
     })
 
@@ -35,8 +95,9 @@ function mutateConfiguration (testConfigOverride, config, env) {
       }
     })
 
-    config.reset()
+    // reset test config overrides
     config(globalConfig)
+
     env.reset()
     env(globalEnv)
   }
@@ -46,33 +107,48 @@ function mutateConfiguration (testConfigOverride, config, env) {
 
 // this is called during test onRunnable time
 // in order to resolve the test config upfront before test runs
-export function getResolvedTestConfigOverride (test) {
-  let curParent = test.parent
+// note: must return as an object to meet the dashboard recording API
+export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
+  let curr = test
+  let testConfigList: TestConfig[] = []
 
-  const testConfig = [test._testConfig]
-
-  while (curParent) {
-    if (curParent._testConfig) {
-      testConfig.push(curParent._testConfig)
+  while (curr) {
+    if (curr._testConfig) {
+      if (curr._testConfig.testConfigList) {
+        // configuration for mocha function has already been processed
+        testConfigList = testConfigList.concat(curr._testConfig.testConfigList)
+      } else {
+        testConfigList.unshift({
+          overrides: curr._testConfig,
+          invocationDetails: curr.invocationDetails,
+        })
+      }
     }
 
-    curParent = curParent.parent
+    curr = curr.parent
   }
 
-  return _.reduceRight(testConfig, (acc, opts) => _.extend(acc, opts), {})
+  const testConfig = {
+    testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
+    // collect test overrides to send to the dashboard api when @packages/server is ran in record mode
+    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
+  }
+
+  return testConfig
 }
 
-class TestConfigOverride {
+export class TestConfigOverride {
   private restoreTestConfigFn: Nullable<() => void> = null
+
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = test._testConfig || {}
+    const resolvedTestConfig = test._testConfig || {
+      unverifiedTestConfig: [],
+    }
 
-    this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+    if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
+      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+    }
   }
-}
-
-export function create () {
-  return new TestConfigOverride()
 }

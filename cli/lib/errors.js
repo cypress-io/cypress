@@ -1,6 +1,5 @@
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
-const { merge } = require('ramda')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
@@ -39,6 +38,13 @@ const invalidRunProjectPath = {
   `,
 }
 
+const invalidOS = {
+  description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
+  solution: stripIndent`
+
+  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
+}
+
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
   solution: stripIndent`
@@ -50,6 +56,13 @@ const failedDownload = {
 const failedUnzip = {
   description: 'The Cypress App could not be unzipped.',
   solution: genericErrorSolution,
+}
+
+const failedUnzipWindowsMaxPathLength = {
+  description: 'The Cypress App could not be unzipped.',
+  solution: `This is most likely because the maximum path length is being exceeded on your system.
+
+  Read here for solutions to this problem: https://on.cypress.io/win-max-path-length-error`,
 }
 
 const missingApp = (binaryDir) => {
@@ -74,7 +87,7 @@ const binaryNotExecutable = (executable) => {
 
     Please check that you have the appropriate user permissions.
 
-    You can also try clearing the cache with 'cypress cache clear' and reinstalling. 
+    You can also try clearing the cache with 'cypress cache clear' and reinstalling.
   `,
   }
 }
@@ -149,13 +162,9 @@ const invalidSmokeTestDisplayError = {
 
       ${hr}
 
-      This is usually caused by a missing library or dependency.
+      This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
 
-      The error above should indicate which dependency is missing.
-
-        ${chalk.blue(requiredDependenciesUrl)}
-
-      If you are using Docker, we provide containers with all required dependencies installed.
+      Please refer to the error above for more detail.
     `
   },
 }
@@ -164,13 +173,9 @@ const missingDependency = {
   description: 'Cypress failed to start.',
   // this message is too Linux specific
   solution: stripIndent`
-    This is usually caused by a missing library or dependency.
+    This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
 
-    The error below should indicate which dependency is missing.
-
-      ${chalk.blue(requiredDependenciesUrl)}
-
-    If you are using Docker, we provide containers with all required dependencies installed.
+    Please refer to the error below for more details.
   `,
 }
 
@@ -217,6 +222,26 @@ const invalidCypressEnv = {
   exitCode: 11,
 }
 
+const invalidTestingType = {
+  description: 'Invalid testingType',
+  solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
+}
+
+const incompatibleTestTypeFlags = {
+  description: '`--e2e` and `--component` cannot both be passed.',
+  solution: 'Either pass `--e2e` or `--component`, but not both.',
+}
+
+const incompatibleTestingTypeAndFlag = {
+  description: 'Set a `testingType` and also passed `--e2e` or `--component` flags.',
+  solution: 'Either set `testingType` or pass a testing type flag, but not both.',
+}
+
+const invalidConfigFile = {
+  description: '`--config-file` cannot be false.',
+  solution: 'Either pass a relative path to a valid Cypress config file or remove this option.',
+}
+
 /**
  * This error happens when CLI detects that the child Test Runner process
  * was killed with a signal, like SIGBUS
@@ -244,7 +269,7 @@ const CYPRESS_RUN_BINARY = {
 
 function addPlatformInformation (info) {
   return util.getPlatformInfo().then((platform) => {
-    return merge(info, { platform })
+    return { ...info, platform }
   })
 }
 
@@ -394,12 +419,14 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidOS,
     invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,
     unexpected,
     failedDownload,
     failedUnzip,
+    failedUnzipWindowsMaxPathLength,
     invalidCypressEnv,
     invalidCacheDirectory,
     CYPRESS_RUN_BINARY,
@@ -407,5 +434,9 @@ module.exports = {
     childProcessKilled,
     incompatibleHeadlessFlags,
     invalidRunProjectPath,
+    invalidTestingType,
+    incompatibleTestTypeFlags,
+    incompatibleTestingTypeAndFlag,
+    invalidConfigFile,
   },
 }

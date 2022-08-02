@@ -3,9 +3,10 @@ const EE = require('events')
 const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
+const debugVerbose = require('debug')('cypress-verbose:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
-const { CdpAutomation } = require('./cdp_automation')
+const { CdpAutomation, screencastOpts } = require('./cdp_automation')
 const savedState = require('../saved_state')
 const utils = require('./utils')
 const errors = require('../errors')
@@ -35,7 +36,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -43,26 +44,47 @@ const _getAutomation = function (win, options) {
     })
   })
 
-  const automation = CdpAutomation(sendCommand)
-
-  if (!options.onScreencastFrame) {
-    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-    // workaround: start and stop screencasts between screenshots
-    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-      if (message !== 'take:screenshot') {
-        return fn(message, data)
+  const on = (eventName, cb) => {
+    win.webContents.debugger.on('message', (event, method, params) => {
+      if (method === eventName) {
+        cb(params)
       }
-
-      await sendCommand('Page.startScreencast')
-
-      const ret = await fn(message, data)
-
-      await sendCommand('Page.stopScreencast')
-
-      return ret
     })
   }
+
+  const sendClose = () => {
+    win.destroy()
+  }
+
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
+
+  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+    switch (message) {
+      case 'take:screenshot': {
+        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+        // workaround: start and stop screencasts between screenshots
+        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+        if (!options.onScreencastFrame) {
+          await sendCommand('Page.startScreencast', screencastOpts())
+          const ret = await fn(message, data)
+
+          await sendCommand('Page.stopScreencast')
+
+          return ret
+        }
+
+        return fn(message, data)
+      }
+      case 'focus:browser:window': {
+        win.show()
+
+        return
+      }
+      default: {
+        return fn(message, data)
+      }
+    }
+  })
 
   return automation
 }
@@ -79,27 +101,23 @@ const _installExtensions = function (win, extensionPaths = [], options) {
   })
 }
 
-const _maybeRecordVideo = function (webContents, options) {
-  return async () => {
-    const { onScreencastFrame } = options
+const _maybeRecordVideo = async function (webContents, options) {
+  const { onScreencastFrame } = options
 
-    debug('maybe recording video %o', { onScreencastFrame })
+  debug('maybe recording video %o', { onScreencastFrame })
 
-    if (!onScreencastFrame) {
-      return
-    }
-
-    webContents.debugger.on('message', (event, method, params) => {
-      if (method === 'Page.screencastFrame') {
-        onScreencastFrame(params)
-        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
-      }
-    })
-
-    await webContents.debugger.sendCommand('Page.startScreencast', {
-      format: 'jpeg',
-    })
+  if (!onScreencastFrame) {
+    return
   }
+
+  webContents.debugger.on('message', (event, method, params) => {
+    if (method === 'Page.screencastFrame') {
+      onScreencastFrame(params)
+      webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
+    }
+  })
+
+  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts())
 }
 
 module.exports = {
@@ -128,7 +146,7 @@ module.exports = {
       },
       onFocus () {
         if (options.show) {
-          return menu.set({ withDevTools: true })
+          return menu.set({ withInternalDevTools: true })
         }
       },
       onNewWindow (e, url) {
@@ -153,18 +171,33 @@ module.exports = {
       },
     }
 
+    if (options.browser.isHeadless) {
+      // prevents a tiny 1px padding around the window
+      // causing screenshots/videos to be off by 1px
+      options.resizable = false
+    }
+
     return _.defaultsDeep({}, options, defaults)
   },
 
   _getAutomation,
 
-  _render (url, projectRoot, automation, options = {}) {
-    const win = Windows.create(projectRoot, options)
+  async _render (url, automation, preferences = {}, options = {}) {
+    const win = Windows.create(options.projectRoot, preferences)
 
-    automation.use(_getAutomation(win, options))
+    if (preferences.browser.isHeadless) {
+      // seemingly the only way to force headless to a certain screen size
+      // electron BrowserWindow constructor is not respecting width/height preferences
+      win.setSize(preferences.width, preferences.height)
+    } else if (options.isTextTerminal) {
+      // we maximize in headed mode as long as it's run mode
+      // this is consistent with chrome+firefox headed
+      win.maximize()
+    }
 
-    return this._launch(win, url, automation, options)
-    .tap(_maybeRecordVideo(win.webContents, options))
+    return this._launch(win, url, automation, preferences).tap(async () => {
+      automation.use(await _getAutomation(win, preferences, automation))
+    })
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -191,7 +224,7 @@ module.exports = {
 
   _launch (win, url, automation, options) {
     if (options.show) {
-      menu.set({ withDevTools: true })
+      menu.set({ withInternalDevTools: true })
     }
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {
@@ -228,14 +261,27 @@ module.exports = {
       )
     })
     .then(() => {
-      return win.loadURL(url)
+      return win.loadURL('about:blank')
+    })
+    .then(() => this._getAutomation(win, options, automation))
+    .then((cdpAutomation) => automation.use(cdpAutomation))
+    .then(() => {
+      return Promise.all([
+        _maybeRecordVideo(win.webContents, options),
+        this._handleDownloads(win, options.downloadsFolder, automation),
+      ])
     })
     .then(() => {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      return this._handleDownloads(win.webContents, options.downloadsFolder, automation)
+      return win.loadURL(url)
+    })
+    .then(() => {
+      if (options.experimentalSessionAndOrigin) {
+        this._listenToOnBeforeHeaders(win)
+      }
     })
     .return(win)
   },
@@ -252,7 +298,7 @@ module.exports = {
     const originalSendCommand = webContents.debugger.sendCommand
 
     webContents.debugger.sendCommand = function (message, data) {
-      debug('debugger: sending %s with params %o', message, data)
+      debugVerbose('debugger: sending %s with params %o', message, data)
 
       return originalSendCommand.call(webContents.debugger, message, data)
       .then((res) => {
@@ -263,7 +309,7 @@ module.exports = {
           debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
         }
 
-        debug('debugger: received response to %s: %o', message, debugRes)
+        debugVerbose('debugger: received response to %s: %o', message, debugRes)
 
         return res
       }).catch((err) => {
@@ -291,8 +337,8 @@ module.exports = {
     return webContents.debugger.sendCommand('Console.enable')
   },
 
-  _handleDownloads (webContents, dir, automation) {
-    webContents.session.on('will-download', (event, downloadItem) => {
+  _handleDownloads (win, dir, automation) {
+    const onWillDownload = (event, downloadItem) => {
       const savePath = path.join(dir, downloadItem.getFilename())
 
       automation.push('create:download', {
@@ -307,11 +353,47 @@ module.exports = {
           id: downloadItem.getETag(),
         })
       })
-    })
+    }
 
-    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+    const { session } = win.webContents
+
+    session.on('will-download', onWillDownload)
+
+    // avoid adding redundant `will-download` handlers if session is reused for next spec
+    win.on('closed', () => session.removeListener('will-download', onWillDownload))
+
+    return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
+    })
+  },
+
+  _listenToOnBeforeHeaders (win) {
+    // true if the frame only has a single parent, false otherwise
+    const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
+
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
+      if (
+        // isn't an iframe
+        details.resourceType !== 'subFrame'
+        // the top-level frame or a nested frame
+        || !isFirstLevelIFrame(details.frame)
+        // is the spec frame, not the AUT
+        || details.url.includes('__cypress')
+      ) {
+        cb({})
+
+        return
+      }
+
+      cb({
+        requestHeaders: {
+          ...details.requestHeaders,
+          'X-Cypress-Is-AUT-Frame': 'true',
+        },
+      })
     })
   },
 
@@ -351,6 +433,14 @@ module.exports = {
     })
   },
 
+  async connectToNewSpec (browser, options, automation) {
+    this.open(browser, options.url, options, automation)
+  },
+
+  async connectToExisting () {
+    throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
+  },
+
   open (browser, url, options = {}, automation) {
     const { projectRoot, isTextTerminal } = options
 
@@ -381,7 +471,10 @@ module.exports = {
 
       debug('launching browser window to url: %s', url)
 
-      return this._render(url, projectRoot, automation, preferences)
+      return this._render(url, automation, preferences, {
+        projectRoot: options.projectRoot,
+        isTextTerminal: options.isTextTerminal,
+      })
       .then(async (win) => {
         await _installExtensions(win, launchOptions.extensions, options)
 
@@ -406,6 +499,11 @@ module.exports = {
           })],
           browserWindow: win,
           kill () {
+            if (this.isProcessExit) {
+              // if the process is exiting, all BrowserWindows will be destroyed anyways
+              return
+            }
+
             return tryToCall(win, 'destroy')
           },
           removeAllListeners () {

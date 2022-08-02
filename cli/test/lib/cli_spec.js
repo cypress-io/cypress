@@ -28,6 +28,7 @@ describe('cli', () => {
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
+    sinon.stub(util, 'pkgBuildInfo').returns({ stable: true })
     this.exec = (args) => {
       const cliArgs = `node test ${args}`.split(' ')
 
@@ -629,24 +630,38 @@ describe('cli', () => {
     })
 
     it('spawns server with correct args for component-testing', () => {
+      this.exec('open --component --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
+    })
+
+    it('spawns server with correct args for depricated component-testing command', () => {
       this.exec('open-ct --dev')
-      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
     it('runs server with correct args for component-testing', () => {
-      this.exec('run-ct --dev')
-      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+      this.exec('run --component --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('does not display open-ct command in the help', () => {
+    it('runs server with correct args for depricated component-testing command', () => {
+      this.exec('run-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
+    })
+
+    it('does display open-ct command in the help', () => {
       return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.not.include('open-ct')
+        expect(result).to.include('open-ct')
       })
     })
 
-    it('does not display run-ct command in the help', () => {
+    it('does display run-ct command in the help', () => {
       return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.not.include('run-ct')
+        expect(result).to.include('run-ct')
       })
     })
   })

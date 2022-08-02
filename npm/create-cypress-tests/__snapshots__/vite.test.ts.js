@@ -6,8 +6,12 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => startDevServer({
-    options
-  }));
+  if (config.testingType === "component") {
+    on("dev-server:start", async options => startDevServer({
+      options
+    }));
+  }
+
+  return config; // IMPORTANT to return a config
 };
 `

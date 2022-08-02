@@ -6,6 +6,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
+import Tag from '../lib/tag'
 import RouteModel from './route-model'
 
 export interface RouteProps {
@@ -18,9 +19,12 @@ const Route = observer(({ model }: RouteProps) => (
     <td className='route-url'>{model.url}</td>
     <td className='route-is-stubbed'>{model.isStubbed ? 'Yes' : 'No'}</td>
     <td className='route-alias'>
-      <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`} className='cy-tooltip'>
-        <span className='route-alias-name'>{model.alias}</span>
-      </Tooltip>
+      <Tag
+        tooltipMessage={`Aliased this route as: '${model.alias}'`}
+        type='route'
+        customClassName='route-alias-name'
+        content={model.alias}
+      />
     </td>
     <td className='route-num-responses'>{model.numResponses || '-'}</td>
   </tr>
@@ -62,7 +66,7 @@ const Routes = observer(({ model }: RoutesProps) => (
               <thead>
                 <tr>
                   <th>Method</th>
-                  <th>Url</th>
+                  <th>Route Matcher</th>
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>

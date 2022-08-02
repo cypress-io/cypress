@@ -1,9 +1,10 @@
 import { findApp, FindAppParams } from './util'
-import { Browser, DetectedBrowser } from '../types'
+import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
-import { log } from '../log'
-import { merge } from 'ramda'
+import Debug from 'debug'
 import { get } from 'lodash'
+
+const debugVerbose = Debug('cypress-verbose:launcher:darwin')
 
 type Detectors = {
   [name: string]: {
@@ -17,6 +18,12 @@ export const browsers: Detectors = {
       appName: 'Google Chrome.app',
       executable: 'Contents/MacOS/Google Chrome',
       appId: 'com.google.Chrome',
+      versionProperty: 'KSVersion',
+    },
+    beta: {
+      appName: 'Google Chrome Beta.app',
+      executable: 'Contents/MacOS/Google Chrome Beta',
+      appId: 'com.google.Chrome.beta',
       versionProperty: 'KSVersion',
     },
     canary: {
@@ -37,19 +44,19 @@ export const browsers: Detectors = {
   firefox: {
     stable: {
       appName: 'Firefox.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.firefox',
       versionProperty: 'CFBundleShortVersionString',
     },
     dev: {
       appName: 'Firefox Developer Edition.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.firefoxdeveloperedition',
       versionProperty: 'CFBundleShortVersionString',
     },
     nightly: {
       appName: 'Firefox Nightly.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.nightly',
       versionProperty: 'CFBundleShortVersionString',
     },
@@ -93,16 +100,15 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
 
   if (!findAppParams) {
     // ok, maybe it is custom alias?
-    log('detecting custom browser %s on darwin', browser.name)
+    debugVerbose('could not find %s in findApp map, falling back to linux detection method', browser.name)
 
     return linuxHelper.detect(browser)
   }
 
   return findApp(findAppParams)
-  .then(merge({ name: browser.name }))
-  .catch(() => {
-    log('could not detect %s using traditional Mac methods', browser.name)
-    log('trying linux search')
+  .then((val) => ({ name: browser.name, ...val }))
+  .catch((err) => {
+    debugVerbose('could not detect %s using findApp %o, falling back to linux detection method', browser.name, err)
 
     return linuxHelper.detect(browser)
   })

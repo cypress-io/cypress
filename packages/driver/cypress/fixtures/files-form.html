@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Generic File Inputs</title>
+  </head>
+  <script>
+    const template = document.createElement('template')
+    template.innerHTML = `
+      <label for="file-input">Shadow DOM</label>
+      <input name="file-input" id="file-input" type="file" />
+    `
+
+    class FileInput extends HTMLElement {
+      constructor() {
+        super()
+        this.root = this.attachShadow({ mode: 'open' })
+      }
+
+      connectedCallback() {
+        this.root.appendChild(template.content.cloneNode(true))
+      }
+    }
+
+    window.customElements.define('file-input', FileInput);
+  </script>
+  <body>
+    <style>
+      form {
+        position: relative;
+        min-height: 30px;
+      }
+
+      #hidden, #hidden-basic-label {
+        display: none;
+      }
+
+      #covered, #covering {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+      }
+      #covering {
+        background: black;
+        z-index: 1;
+      }
+
+      #scroll-form {
+        display: block;
+        width: 300px;
+        height: 50px;
+        overflow: auto;
+      }
+      #tall {
+        height: 80px;
+        background: black;
+      }
+    </style>
+
+    <form>
+      <label for="basic" id="basic-label">Basic Label</label>
+      <label for="basic" id="hidden-basic-label">Hidden Label</label>
+      <input id="basic" type="file" />
+      <label id="containing-label">
+        Containing Label
+        <input type="file" id="contained" />
+      </label>
+    </form>
+
+    <form>
+        <input id="multiple" type="file" multpile />
+    </form>
+
+    <form>
+      <label for="hidden" id="hidden-label">Label for Hidden</label>
+      <input id="hidden" type="file" />
+    </form>
+
+    <form>
+      <file-input id="shadow"></file-input>
+    </form>
+
+    <form>
+      <label for="text-input" id="text-label">Text label</label>
+      <input type="text" id="text-input" />
+
+      <label for="nonexistent" id="nonexistent-label">
+        Bad label
+        <input type="file" />
+      </label>
+    </form>
+
+    <form>
+      <div id="covering"></div>
+      <input id="covered" type="file" />
+    </form>
+
+    <form>
+      <label for="disabled" id="disabled-label">Disabled Label</label>
+      <input id="disabled" type="file" disabled />
+    </form>
+
+    <form id="scroll-form">
+      <div id="tall"></div>
+      <label for="scroll" id="scroll-label">Scroll Label</label>
+      <input id="scroll" type="file" />
+    </form>
+  </body>
+</html>

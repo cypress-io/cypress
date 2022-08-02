@@ -1,0 +1,41 @@
+<html>
+<body>
+  <h1>Script and Style in the body</h1>
+  <script>
+    const b = 'I am in the script tag in body'
+  </script>
+  <div>
+    <script>
+      const c = 'I am in the script tag in body'
+    </script>
+  </div>
+  <style>
+    h1 { font-size: 32px }
+  </style>
+  <div>
+    <style>
+      h1 { font-size: 32px }
+    </style>
+  </div>
+
+  <!--
+    // https://github.com/cypress-io/cypress/issues/19377
+    Below is added to ensure `style`, `script` tags are not removed by `cy.contains()` command.
+  -->
+  <p>Hello</p>
+  <button id="my_button_1" style="display: none;">I'm a button</button>
+  <button id="my_button_2">Click me</button>
+  <div id="result"></div>
+  <style>
+      button#my_button_1 {
+          background-color: red;
+          display: inline !important;
+      }
+  </style>
+  <script id="my_script">
+      document.getElementById('my_button_2').addEventListener('click', function() {
+          document.getElementById('result').innerHTML = 'This is the result';
+      });
+  </script>
+</body>
+</html>

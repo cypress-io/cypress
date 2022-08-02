@@ -1,0 +1,29 @@
+<html>
+<body>
+  <div id="parent" style="display:flex; height: 90vh;">
+    <div id="Preselect" style="flex:1; background-color:aquamarine; height: 100%;">
+      Preselect
+    </div>
+    <div id="Details" style="flex:1; background-color:blue; height: 100%; overflow:scroll;">
+      Details
+      <div id="modal" style="background-color: chartreuse; height: 80vh; width: 90%; position: fixed; display: block; left:5%; top:5%;">
+        <div id="sticky" style="background-color: darkgray; position:sticky; bottom: 10%; width:9%; height:10%;">
+          <button id="button" style="background-color: darkred; color:white;">
+            click me
+          </button>
+          <div id="message"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const btn = document.getElementById('button')
+  const msg = document.getElementById('message')
+
+  btn.onclick = (e) => {
+    msg.innerHTML = 'Success!'
+  }
+</script>
+
+</html>

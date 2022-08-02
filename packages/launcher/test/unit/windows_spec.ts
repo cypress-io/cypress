@@ -2,23 +2,22 @@ import _ from 'lodash'
 import { expect } from 'chai'
 import * as windowsHelper from '../../lib/windows'
 import { normalize } from 'path'
-import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import { browsers } from '../../lib/browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
 import snapshot from 'snap-shot-it'
-import { Browser } from '../../lib/types'
+import type { Browser } from '@packages/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 
 function stubBrowser (path: string, version: string) {
   path = windowsHelper.doubleEscape(normalize(path))
 
-  ;(utils.execa as unknown as SinonStub)
-  .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
-  .resolves({ stdout: `Version=${version}` })
+  ;(windowsHelper.getVersionString as unknown as SinonStub)
+  .withArgs(path)
+  .resolves(version)
 
   ;(fse.pathExists as SinonStub)
   .withArgs(path)
@@ -40,12 +39,14 @@ describe('windows browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)
-    sinon.stub(utils, 'execa').rejects()
+    sinon.stub(windowsHelper, 'getVersionString').rejects()
   })
 
   it('detects browsers as expected', async () => {
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
+
+    stubBrowser('C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe', '6.7.8')
 
     // canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Google/Chrome SxS/Application/chrome.exe`, '3.4.5')
@@ -68,6 +69,13 @@ describe('windows browser detection', () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe`, '14')
 
     snapshot(await detect(browsers))
+  })
+
+  it('detects 64-bit Chrome Beta app path', async () => {
+    stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
+    const chrome = _.find(browsers, { name: 'chrome', channel: 'beta' })
+
+    snapshot(await windowsHelper.detect(chrome))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8425
@@ -136,20 +144,10 @@ describe('windows browser detection', () => {
   })
 
   context('#getVersionString', () => {
-    it('runs wmic and returns output', async () => {
+    it('returns the FileVersion from win-version-info', async () => {
       stubBrowser('foo', 'bar')
 
-      expect(await windowsHelper.getVersionString('foo')).to.eq('Version=bar')
-    })
-
-    it('rejects with errors', async () => {
-      const err = new Error()
-
-      ;(utils.execa as unknown as SinonStub)
-      .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
-      .rejects(err)
-
-      await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
+      expect(await windowsHelper.getVersionString('foo')).to.eq('bar')
     })
   })
 

@@ -5,12 +5,12 @@ const EE = require('events')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 
-const menu = require(`${root}../lib/gui/menu`)
-const plugins = require(`${root}../lib/plugins`)
-const Windows = require(`${root}../lib/gui/windows`)
-const electron = require(`${root}../lib/browsers/electron`)
-const savedState = require(`${root}../lib/saved_state`)
-const { Automation } = require(`${root}../lib/automation`)
+const menu = require(`../../../lib/gui/menu`)
+const plugins = require(`../../../lib/plugins`)
+const Windows = require(`../../../lib/gui/windows`)
+const electron = require(`../../../lib/browsers/electron`)
+const savedState = require(`../../../lib/saved_state`)
+const { Automation } = require(`../../../lib/automation`)
 
 const ELECTRON_PID = 10001
 
@@ -22,6 +22,9 @@ describe('lib/browsers/electron', () => {
       some: 'var',
       projectRoot: '/foo/',
       onWarning: sinon.stub().returns(),
+      browser: {
+        isHeadless: false,
+      },
     }
 
     this.automation = new Automation('foo', 'bar', 'baz')
@@ -32,6 +35,8 @@ describe('lib/browsers/electron', () => {
       close: sinon.stub(),
       loadURL: sinon.stub(),
       focusOnWebView: sinon.stub(),
+      show: sinon.stub(),
+      destroy: sinon.stub(),
       webContents: {
         session: {
           cookies: {
@@ -40,6 +45,9 @@ describe('lib/browsers/electron', () => {
             remove: sinon.stub(),
           },
           on: sinon.stub(),
+          webRequest: {
+            onBeforeSendHeaders () {},
+          },
         },
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
         'debugger': {
@@ -67,6 +75,14 @@ describe('lib/browsers/electron', () => {
     }
   })
 
+  context('.connectToNewSpec', () => {
+    it('calls open with the browser, url, options, and automation', async function () {
+      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      expect(electron.open).to.be.called
+    })
+  })
+
   context('.open', () => {
     beforeEach(function () {
       return this.stubForOpen()
@@ -79,13 +95,18 @@ describe('lib/browsers/electron', () => {
 
         options = Windows.defaults(options)
 
-        const keys = _.keys(electron._render.firstCall.args[3])
+        const preferencesKeys = _.keys(electron._render.firstCall.args[2])
 
-        expect(_.keys(options)).to.deep.eq(keys)
+        expect(_.keys(options)).to.deep.eq(preferencesKeys)
+
+        expect(electron._render.firstCall.args[3]).to.deep.eql({
+          projectRoot: this.options.projectRoot,
+          isTextTerminal: this.options.isTextTerminal,
+        })
 
         expect(electron._render).to.be.calledWith(
           this.url,
-          this.options.projectRoot,
+          this.automation,
         )
       })
     })
@@ -109,7 +130,7 @@ describe('lib/browsers/electron', () => {
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
-        const options = electron._render.firstCall.args[3]
+        const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('onFocus', 'onNewWindow', 'onCrashed')
       })
@@ -126,7 +147,7 @@ describe('lib/browsers/electron', () => {
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
-        const options = electron._render.firstCall.args[3]
+        const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('foo', 'onFocus', 'onNewWindow', 'onCrashed')
       })
@@ -172,7 +193,7 @@ describe('lib/browsers/electron', () => {
     it('sets menu.set whether or not its in headless mode', function () {
       return electron._launch(this.win, this.url, this.automation, { show: true })
       .then(() => {
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
         menu.set.reset()
 
@@ -274,38 +295,237 @@ describe('lib/browsers/electron', () => {
         })
       })
     })
+
+    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
+
+        expect(this.win.show).to.be.called
+      })
+    })
+
+    it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+
+        expect(this.win.destroy).to.be.called
+      })
+    })
+
+    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', function () {
+      this.options.experimentalSessionAndOrigin = false
+      sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.win.webContents.session.webRequest.onBeforeSendHeaders).not.to.be.called
+      })
+    })
+
+    describe('adding header aut iframe requests', function () {
+      beforeEach(function () {
+        this.options.experimentalSessionAndOrigin = true
+      })
+
+      it('does not add header if not a sub frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'stylesheet',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is the top frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: null,
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is a nested frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: {
+                  parent: null,
+                },
+              },
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is a spec frame request', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: null,
+              },
+            },
+            url: '/__cypress/integration/spec.js',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if frame is not available', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            url: 'http://localhost:3000/index.html',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('adds X-Cypress-Is-AUT-Frame header to AUT iframe request', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: null,
+              },
+            },
+            url: 'http://localhost:3000/index.html',
+            requestHeaders: {
+              'X-Foo': 'Bar',
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({
+            requestHeaders: {
+              'X-Foo': 'Bar',
+              'X-Cypress-Is-AUT-Frame': 'true',
+            },
+          })
+        })
+      })
+    })
   })
 
   context('._render', () => {
     beforeEach(function () {
-      this.newWin = {}
+      this.newWin = {
+        maximize: sinon.stub(),
+        setSize: sinon.stub(),
+        show: sinon.stub(),
+        destroy: sinon.stub(),
+        webContents: this.win.webContents,
+      }
+
+      this.preferences = { ...this.options }
 
       sinon.stub(menu, 'set')
       sinon.stub(electron, '_setProxy').resolves()
       sinon.stub(electron, '_launch').resolves()
 
       return sinon.stub(Windows, 'create')
-      .withArgs(this.options.projectRoot, this.options)
       .returns(this.newWin)
     })
 
     it('creates window instance and calls launch with window', function () {
-      return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
+      return electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
-
-        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.options)
+        expect(this.newWin.setSize).not.called
+        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.preferences)
       })
     })
 
-    it('registers onRequest automation middleware', function () {
-      sinon.spy(this.automation, 'use')
+    it('calls setSize on electron window if headless', function () {
+      const preferences = { ...this.preferences, browser: { isHeadless: true }, width: 100, height: 200 }
 
-      return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
+      return electron._render(this.url, this.automation, preferences, this.options)
       .then(() => {
-        expect(this.automation.use).to.be.called
+        expect(this.newWin.maximize).not.called
+        expect(this.newWin.setSize).calledWith(100, 200)
+      })
+    })
 
-        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+    it('maximizes electron window if headed and not interactive', function () {
+      this.options.isTextTerminal = true
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).to.be.called
+      })
+    })
+
+    it('does not maximize electron window if interactive', function () {
+      this.options.isTextTerminal = false
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).not.to.be.called
       })
     })
   })
@@ -366,14 +586,14 @@ describe('lib/browsers/electron', () => {
     })
 
     it('.onFocus', function () {
-      let opts = electron._defaultOptions('/foo', this.state, { show: true })
+      let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
 
       opts.onFocus()
-      expect(menu.set).to.be.calledWith({ withDevTools: true })
+      expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
-      opts = electron._defaultOptions('/foo', this.state, { show: false })
+      opts = electron._defaultOptions('/foo', this.state, { show: false, browser: {} })
       opts.onFocus()
 
       expect(menu.set).not.to.be.called
@@ -511,7 +731,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child
         expect(menu.set).to.be.calledTwice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 
@@ -521,7 +741,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child, once for focus
         expect(menu.set).to.be.calledThrice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 

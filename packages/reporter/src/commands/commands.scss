@@ -1,7 +1,13 @@
+@mixin nested-command-dashes($color) {
+  border-left: 1px dotted $color;
+  border-image-slice: 0 0 0 1;
+  border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 4px);
+}
+
 .reporter {
+  // rendered within ../hooks/hooks.tsx
   .commands-container {
-    background-color: #eef1f4;
-    font-family: $monospace;
+    background-color: $reporter-section-background;
     min-width: $reporter-contents-min-width;
     padding: 0;
 
@@ -11,232 +17,216 @@
   }
 
   .command {
-    cursor: pointer;
-    margin: 0;
+    min-height: 28px;
+    font-family: $monospace;
   }
 
-  .command-scaled {
-    font-size: 85%;
-    line-height: 14px;
+  // System Command Styles
+  .command-type-system {
+    user-select: none;
   }
 
-  .command-is-studio {
-    cursor: auto;
-
-    &.command-type-parent .command-controls .studio-command-remove {
-      display: block;
-      padding-left: 5px;
-
-      &:hover {
-        color: #565554;
-      }
-    }
-
-    .command-wrapper:hover {
-      background-color: #eef1f4;
-    }
-  }
-
-  .hook-studio {
-    .command-wrapper:hover {
-      background-color: #eef1f4;
-    }
-
-    .command-type-parent {
-      &:hover {
-        border-top: 1px solid #e3e3e3;
-      }
-
-      &:first-child {
-        border-top: 0;
-      }
-    }
-  }
-
+  // Event Styles
+  .command-type-system,
   .command-is-event {
     font-style: italic;
 
     .command-method,
     .command-message {
-      color: #9a9aaa !important;
+      color: $gray-500;
     }
   }
 
-  .command-type-parent {
-    border-top: 1px solid #e3e3e3;
-
-    &:hover {
-      border-top: 1px solid #eef1f4;
-    }
-
-    &:first-child {
-      border-top: 0;
-    }
-  }
-
+  // Child Styles
   .command-type-child {
     .command-method {
       &:before {
         float: left;
         content: "-";
         margin-right: 2px;
-        padding-left: 5px;
       }
     }
   }
 
   .command-wrapper {
-    color: #777;
-    min-height: 20px;
+    border-left: 2px solid $reporter-section-background;
+    background-color: $reporter-section-background;
+    color: $gray-500;
+    display: flex;
+    min-height: 28px;
+    padding-right: 2px;
 
-    &:hover {
-      background-color: #E0E5E7;
+    &.command-is-interactive:hover {
+      background-color: $gray-900;
+      cursor: pointer;
+
+      .command-expander > path {
+        stroke: $gray-700;
+      }
     }
 
     .command-wrapper-text {
       display: flex;
-      flex-wrap: wrap;
-      padding: 2px 5px 0;
+      flex-wrap: nowrap;
+    }
 
-      .command-alias {
-        border-radius: 10px;
-        color: #777888;
-        padding: 0 5px;
+    .command-interceptions {
+      font-style: normal;
+
+      .status {
+        font-weight: 600;
+      }
+    }
+
+    // ensures alias & number of children commands don't break if reporter width is narrow
+    .alias-container {
+      margin-left: 0;
+      white-space: nowrap;
+  
+      > * {
         display: inline-block;
-
-        &.show-count {
-          padding-right: 2px;
-        }
-
-        &.route {
-          background-color: $yellow-medium;
-        }
-
-        &.dom {
-          background-color: darken(#D4EAFF, 3%);
-        }
-
-        &.agent,
-        &.primitive {
-          background-color: darken(#FFE0DE, 3%);
-        }
-
-        &.show-count {
-          border-radius: 10px 0 0 10px;
-        }
+        margin-left: 2px;
       }
-
-      // ensures alias & number of duplicates don't break if reporter
-      // width is narrow
-      .alias-container {
-        white-space: nowrap;
-
-        > {
-          display: inline-block;
-        }
-      }
-
-      .num-duplicates,
-      .command-alias-count {
-        border-radius: 5px;
-        color: #777;
-        font-size: 90%;
-        font-style: normal;
-        line-height: 1;
+    
+      > *:first-child {
         margin-left: 0;
       }
-
-      .num-duplicates.has-alias {
-        border-radius: 10px;
-        line-height: 2;
-        padding: 3px 5px 3px 5px;
-      }
-
-      .command-alias-count {
-        border-radius: 0 10px 10px 0;
-        padding: 5px 6px 3px 4px;
-      }
-
-      .num-duplicates,
-      .command-alias-count {
-        background-color: darken(#ffdf9c, 8%) !important;
-      }
-    }
-
-    .command-progress {
-      height: 2px;
     }
   }
 
-  .command-number {
+  .command-number-column {
+    color: #5a5f7a;
     flex-shrink: 0;
-    color: #bcbccc;
     min-height: 1px; // because some numbers are empty
-    padding-right: 10px;
+    max-height: 28px; // because some numbers are empty
+    padding-top: 4px;
+    padding-bottom: 4px;
     text-align: right;
-    width: 25px;
+    width: 24px;
+  }
 
-    i {
-      display: none;
+  // when no children, add padding to act as the .command-expander-column's width
+  // to prevent adding another element to the page
+  .command-number-column + span.command-pin-target {
+    margin-left: 25px;
+  }
+
+  .command-pin-target.command-group {
+    @include nested-command-dashes($gray-600);
+    padding-left: 12px;
+    min-height: 28px;
+
+    .command-group-block {
+      @include nested-command-dashes($gray-600);
+      width: 11px;
+      min-height: 28px;
+      min-width: 11px;
     }
   }
 
-  .command-state-pending .command-number {
-    i {
-      line-height: 18px;
-      display: inline-block;
-    }
+  .command-info {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 0;
+    overflow: hidden;
+    width: 100%;
+    font-weight: 600;
 
-    span {
-      display: none;
+    .command-aliases,
+    .command-message {
+      overflow: hidden;
+
+      .fa-circle {
+        padding: 4px;
+        padding-right: 2px;
+        display: inline-block;
+      }
+
+      .fa-circle.command-message-indicator-successful {
+        color: $jade-400;
+      }
+
+      .fa-circle.command-message-indicator-aborted {
+        color: $orange-400;
+      }
+
+      .fa-circle.command-message-indicator-bad {
+        color: $red-500
+      }
+
+      .fa-circle.command-message-indicator-pending {
+        color: $indigo-400;
+      }
     }
+  }
+
+  .command-message-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .command-method {
-    padding: 1px 2px 0;
-    display: inline-block;
-    font-size: 11px;
-    min-width: 80px;
-    font-weight: 600;
-    color: #565554;
+    font-size: 12px;
+    margin-right: 12px;
+    min-width: fit-content;
   }
 
-  .command-state-pending > span > .command-wrapper {
-    border-left: 2px solid $pending;
-    background-color: lighten($pending, 40%);
+  // Command State Styles
+  .command-state-passed {
+    border-left: 2px solid $reporter-section-background;
+
+    &.command-is-interactive:hover {
+      border-left: 2px solid $gray-900;
+    }
+
+    &:not(.command-is-event) .command-number {
+      color: $gray-700;
+    }
+  
+    &:not(.command-is-event, .command-type-system) .command-method {
+      color: $gray-200;
+    }
+
+    .command-message {
+      color: $gray-500;
+    }
+  }
+
+  .command-state-pending {
+    border-left: 2px solid $indigo-800;
+    background-color: $gray-900;
     cursor: default;
+    color: $indigo-200;
 
-    &:hover {
-      box-shadow: none;
-    }
+    .command-number-column {
+      padding-top: 4px;
+      padding-bottom: 4px;
 
-    .command-wrapper-text {
-      padding-left: 3px;
-
-      .command-number {
-        margin-left: 5px;
-        width: 20px;
-      }
-
-      .command-number,
-      .command-method,
-      .command-message,
-      .command-pin {
-        color: lighten($pending, 15%);
+      .fa-circle {
+        line-height: 18px;
+        display: inline-block;
+  
+        .icon-light {
+          stroke: $gray-800;
+        }
       }
     }
+  }
 
-    .command-progress > span {
+  .command-state-pending + .command-progress {
+    height: 2px;
+
+    span {
       animation-fill-mode: forwards;
       animation-iteration-count: 1;
       animation-name: progress-bar;
       animation-timing-function: linear;
-      background: #7eb0db;
+      background: $indigo-500;
       display: block;
       float: right;
       height: 100%;
-      width: 100%;
       transform-origin: right;
+      width: 100%;
 
       @keyframes progress-bar {
         100% {
@@ -246,98 +236,58 @@
     }
   }
 
-  .command-state-failed > span > .command-wrapper {
-    border-left: 2px solid $fail;
-    background-color: $err-header-background;
+  .command-state-failed {
+    color: $err-header-text;
 
-    &:hover {
-      background: darken($err-header-background, 2%);
+    &:not(.command-type-system) {
+      border-left: 2px solid $fail;
+      background-color: $err-header-background;
+          
+      &.command-is-interactive:hover {
+        background: rgba($red-400, 0.3);
+      }
     }
 
-    .command-wrapper-text {
-      padding-left: 3px;
+    .command-number-column,
+    .command-method,
+    .command-message {
+      color: $err-header-text;
+    }
 
-      .command-number,
-      .command-method,
-      .command-message,
-      .command-pin {
-        color: $err-header-text;
+    .command-group {
+      border-color: $err-header-text;
+      @include nested-command-dashes($err-header-text);
+
+      .command-group-block {
+        border-color: $err-header-text;
+        @include nested-command-dashes($err-header-text);
       }
     }
   }
 
-  .command-message {
-    flex-grow: 2;
-    margin-left: 0;
-    overflow: hidden;
-    white-space: nowrap;
-
-    > span {
-      align-items: center;
-      display: flex;
-    }
+  .command .runnable-err-wrapper {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    margin-bottom: 5px;
   }
 
-  .command-message-text {
-    display: block;
-    flex-grow: 2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .command-wrapper .fa-circle {
-    display: none;
-  }
-
-  .command-name-xhr,
-  .command-name-request {
-    .command-status {
-      font-weight: 700;
-      color: #565554;
-      margin-right: 3px;
-    }
-
-    .command-body {
-      color: #565554;
-    }
-
-    &.command-with-indicator .fa-circle {
-      display: inline-block;
-    }
-
-    .fa-circle.successful {
-      color: $pending;
-    }
-
-    .fa-circle.aborted {
-      color: $fail;
-    }
-
-    .fa-circle.bad {
-      color: #F0AD4E;
-    }
-
-    .fa-circle.pending {
-      color: #AAA;
-    }
-  }
-
+  // Custom Styles for Specific Commands
   .command-name-assert {
     .command-method {
       span {
         border-radius: 2px;
         padding: 0 3px;
-        font-size: 11px;
+        font-size: 12px;
         display: inline-block;
         line-height: 14px;
       }
     }
 
     .command-message {
-      color: #565554;
+      color: $gray-500;
 
       strong {
-        font-weight: 600;
         margin: 0 3px;
       }
     }
@@ -346,304 +296,187 @@
       white-space: normal;
     }
 
-    &.command-state-pending {
+    .command-state-pending {
       .command-method {
+        color: $pending;
+
         span {
           background-color: $pending;
-          color: white;
-
+          color: $black;
         }
       }
+
       .command-message {
         color: $pending;
 
         strong {
-          color: darken($pending, 10%);
+          color: $indigo-300;
         }
       }
     }
 
-    &.command-state-failed {
+    .command-state-failed {
       .command-method {
+        color: $fail;
+
         span {
           background-color: $fail;
-          color: white;
+          color: $black;
         }
       }
+
       .command-message {
         color: $fail;
 
         strong {
-          color: darken($fail, 10%);
+          color: $red-300;
         }
       }
     }
 
-    &.command-state-passed {
+    .command-state-passed {
       .command-method {
         color: $pass;
 
         span {
           background-color: $pass;
-          color: white;
+          color: $black;
         }
       }
+
       .command-message {
-        color: darken($pass, 3%);
+        color: $jade-300;
 
         strong {
-          color: darken($pass, 10%);
+          color: $jade-200;
         }
       }
     }
   }
 
-  .command-name-log,
-  .command-name-get,
-  .command-name-download {
-    // we're wrapping the text, so override command-scaled
-    font-size: 100%;
-    line-height: 18px;
+  .command-pin-target {
+    width: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
 
-    .command-message-text {
-      white-space: initial;
-      word-wrap: break-word;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 50;
-      -webkit-box-orient: vertical;
+  .command-message-text {
+    font-size: 12px;
+    white-space: initial;
+    word-wrap: inherit;
+    width: 100%;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
+  }
+
+  // Styles for Uncaught Exception
+  .command-name-uncaught-exception {
+    // need extra spacing between (uncaught exception) and the error message
+    .command-message {
+      margin-left: 5px;
     }
   }
 
   .command-controls {
-    i {
-      padding: 2px;
-      color: #ababab;
+    display: flex;
+    padding-bottom: 4px;
+    padding-right: 2px;
+    padding-top: 4px;
+
+    svg {
+      color: rgba($gray-600, .25);
+      color: $gray-600;
+      vertical-align: text-top;
     }
 
-    .studio-command-remove {
-      display: none;
-    }
-
-    .command-alias {
-      font-family: $open-sans;
-      font-size: 10px;
-      line-height: 1.75;
+    .command-invisible {
+      display: inline-block;
       margin-left: 5px;
-    }
-
-    i:hover {
-      cursor: pointer;
+      margin-right: 0;
     }
 
     label {
       font-size: 85%;
     }
+
+    > * {
+      display: inline-block;
+      margin-left: 2px;
+    }
+  
+    > *:first-child {
+      margin-left: 0;
+    }
   }
 
-  .command-invisible {
-    display: none;
-    margin-left: 5px;
-    margin-right: 0;
-  }
-
-  .command-is-invisible .command-invisible {
-    display: inline-block;
-  }
-
-  .command-has-num-elements .num-elements,
-  .num-duplicates {
-    display: none;
-  }
-
-  .command-has-num-elements.no-elements .num-elements,
-  .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-duplicates .num-duplicates {
-    display: inline;
-  }
-
-  .command-is-duplicate .num-duplicates,
-  .command-name-assert.command-has-num-elements .num-elements {
-    display: none;
+  .command-error {
+    font-style: normal;
   }
 
   .command-pin {
-    color: #999;
-    display: none;
-    flex-shrink: 0;
-    font-size: 14px;
+    color: $pinned;
+    font-size: 12px;
     line-height: 1;
-    margin-right: 10px;
+    margin-top: -1px;
+    margin-left: 10px;
     outline: none;
-    padding: 2px 0 0;
     text-align: right;
     width: 15px;
+    max-height: 20px;
 
-    i {
-      margin-right :0;
+    .icon-light {
+      fill: $purple-700;
     }
   }
 
-  .command-expander {
-    color: #bcbccc;
-    display: none;
-    text-align: right;
-    padding-right: 8px;
+  .command-expander-column {
+    flex-shrink: 0;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     width: 25px;
-
-    i {
-      @extend .#{$fa-css-prefix}-caret-right;
-    }
-
-    &:hover {
-      color: #999;
-    }
-  }
-
-  .command-has-duplicates,
-  .command-has-duplicates:hover {
-    .command-number {
-      display: block;
-    }
-
-    .command-number {
-      display: none;
-    }
-  }
-
-  .command-has-duplicates .command-expander {
-    display: block;
-  }
-
-  .command-is-duplicate {
-    &:first-child {
-      border-top: solid 1px #e3e3e3;
-    }
+    display: flex;
 
     .command-expander {
-      visibility: hidden;
-    }
-  }
+      color: $gray-500;
+      transform: rotate(-90deg);
+      transition: transform 150ms ease-out;
+      margin-top: 5px;
 
-  .command-is-open {
-    .command-expander {
-      i {
-        @extend .#{$fa-css-prefix}-caret-down;
+      path {
+        stroke: $gray-700;
       }
     }
 
-    .num-duplicates {
-      display: none;
-    }
-
-    .command-alias {
-      border-radius: 10px !important;
+    .command-expander-is-open {
+      transform: rotate(0deg);
     }
   }
 
-  .command-is-pinned,
-  .command:not(.command-is-studio):hover {
-    .command-number {
-      display: none;
-    }
-
-    .command-pin {
-      display: block;
-    }
-  }
-
-  .command-has-duplicates:hover .duplicates .command-pin,
-  .command-has-duplicates:hover > span > .command-wrapper .command-pin {
-    display: none;
-  }
-
-  .command-has-duplicates.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate > span > .command-wrapper:hover {
-    .command-expander {
-      display: none;
-    }
-
-    .command-pin {
-      display: block;
-    }
-  }
-
-  .command-state-pending > span .command-wrapper:hover {
-    .command-number {
-      display: block;
-    }
-
-    .command-pin {
-      display: none;
-    }
-  }
-
-  .command-is-pinned > span > .command-wrapper {
-    background: lighten($pinned, 40%);
+  .command-is-pinned {
+    background: $indigo-1000;
     border-left: 2px solid $pinned;
 
     &,
     &:hover {
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) inset;
+      box-shadow: 0 1px 2px rgba($black, 0.2) inset;
     }
 
     &:hover {
-      background: lighten($pinned, 38%);
-    }
-
-    .command-wrapper-text {
-      padding-left: 3px;
-
-      .command-pin {
-        color: $pinned;
-      }
+      background: $indigo-900;
+      border-left: 2px solid $pinned;
     }
   }
 
+  // rendered within ../attempts/attempts.tsx
   .no-commands {
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
+    background-color: $gray-1000;
+    border: 1px solid $gray-900;
     border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-    min-height: 20px;
+    box-shadow: inset 0 1px 1px rgba($white, 0.05);
+    min-height: 28px;
     padding: 9px;
   }
-
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="300px"] {
-    .command-wrapper-text {
-      flex-wrap: nowrap;
-    }
-  }
-
-  .studio-prompt {
-    cursor: auto;
-
-    .command-wrapper {
-      padding: 5px 10px;
-      pointer-events: none;
-
-      .command-wrapper-text {
-        align-items: center;
-
-        .command-message {
-          text-align: center;
-
-          .command-message-text {
-            color: $pending;
-          }
-        }
-
-        .command-controls i {
-          color: $pending;
-
-          &:hover {
-            color: $pending;
-          }
-        }
-      }
-    }
-  }
 }
+

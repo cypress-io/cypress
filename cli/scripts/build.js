@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const shell = require('shelljs')
 
 const fs = require('../lib/fs')
 
@@ -8,7 +9,6 @@ const fs = require('../lib/fs')
 const {
   version,
   description,
-  author,
   homepage,
   license,
   bugs,
@@ -20,6 +20,10 @@ const {
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')
 
+function getStdout (cmd) {
+  return shell.exec(cmd).trim()
+}
+
 function preparePackageForNpmRelease (json) {
   // modify the existing package.json
   // to prepare it for releasing to npm
@@ -27,11 +31,17 @@ function preparePackageForNpmRelease (json) {
   delete json['private']
   // no need to include "nyc" code coverage settings
   delete json.nyc
+  delete json.workspaces
 
   _.extend(json, {
     version,
+    buildInfo: {
+      commitBranch: process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),
+      commitSha: getStdout('git rev-parse HEAD'),
+      commitDate: new Date(getStdout('git show -s --format=%ci')).toISOString(),
+      stable: false,
+    },
     description,
-    author,
     homepage,
     license,
     bugs,

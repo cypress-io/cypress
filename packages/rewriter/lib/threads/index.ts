@@ -4,8 +4,8 @@ import Debug from 'debug'
 import * as path from 'path'
 import os from 'os'
 import { MessageChannel, Worker } from 'worker_threads'
-import { RewriteRequest, RewriteResponse } from './types'
-import { DeferSourceMapRewriteFn } from '../js'
+import type { RewriteRequest, RewriteResponse } from './types'
+import type { DeferSourceMapRewriteFn } from '../js'
 
 const debug = Debug('cypress:rewriter:threads')
 
@@ -21,7 +21,7 @@ const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
 // because it does not require importing @packages/ts like development does.
 // this has a huge performance impact, bringing the `responsiveMs` for threads
 // from ~1s to about ~300ms on my system
-const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'worker.js' : 'worker-shim.js'
+const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'worker.js' : '../../script/worker-shim.js'
 
 const WORKER_PATH = path.join(__dirname, WORKER_FILENAME)
 
