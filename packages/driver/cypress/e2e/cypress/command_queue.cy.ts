@@ -31,10 +31,9 @@ describe('src/cypress/command_queue', () => {
   const fail = () => {}
   const isCy = () => true
   const clearTimeout = () => {}
-  const setSubjectForChainer = () => {}
 
   beforeEach(() => {
-    queue = new CommandQueue(state, timeout, whenStable, cleanup, fail, isCy, clearTimeout, setSubjectForChainer)
+    queue = new CommandQueue(state, timeout, whenStable, cleanup, fail, isCy, clearTimeout)
 
     queue.add(createCommand({
       name: 'get',

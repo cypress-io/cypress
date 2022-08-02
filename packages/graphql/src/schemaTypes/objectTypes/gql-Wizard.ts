@@ -33,8 +33,8 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('packagesToInstall', {
       type: WizardNpmPackage,
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
-      resolve: (source, args, ctx) => {
-        return ctx.wizard.packagesToInstall().map((pkg) => {
+      resolve: async (source, args, ctx) => {
+        return (await ctx.wizard.packagesToInstall()).map((pkg) => {
           return {
             name: pkg.dependency.name,
             package: pkg.dependency.package,

@@ -13,6 +13,75 @@ const builtInCommands = [
   addNetstubbingCommand,
 ]
 
+const reservedCommandNames = {
+  addAlias: true,
+  addCommand: true,
+  addCommandSync: true,
+  aliasNotFoundFor: true,
+  assert: true,
+  clearTimeout: true,
+  config: true,
+  createSnapshot: true,
+  detachDom: true,
+  devices: true,
+  documentHasFocus: true,
+  ensureAttached: true,
+  ensureDescendents: true,
+  ensureDocument: true,
+  ensureElDoesNotHaveCSS: true,
+  ensureElExistence: true,
+  ensureElement: true,
+  ensureElementIsNotAnimating: true,
+  ensureNotDisabled: true,
+  ensureNotHiddenByAncestors: true,
+  ensureNotReadonly: true,
+  ensureRunnable: true,
+  ensureScrollability: true,
+  ensureStrictVisibility: true,
+  ensureSubjectByType: true,
+  ensureValidPosition: true,
+  ensureVisibility: true,
+  ensureWindow: true,
+  expect: true,
+  fail: true,
+  fireBlur: true,
+  fireFocus: true,
+  getFocused: true,
+  getIndexedXhrByAlias: true,
+  getNextAlias: true,
+  getRemoteLocation: true,
+  getRemotejQueryInstance: true,
+  getRequestsByAlias: true,
+  getStyles: true,
+  getXhrTypeByAlias: true,
+  id: true,
+  initialize: true,
+  interceptBlur: true,
+  interceptFocus: true,
+  isCy: true,
+  isStable: true,
+  isStopped: true,
+  needsFocus: true,
+  now: true,
+  onBeforeAppWindowLoad: true,
+  onBeforeWindowLoad: true,
+  onCssModified: true,
+  onUncaughtException: true,
+  pauseTimers: true,
+  queue: true,
+  replayCommandsFrom: true,
+  reset: true,
+  resetTimer: true,
+  retry: true,
+  setRunnable: true,
+  state: true,
+  stop: true,
+  timeout: true,
+  validateAlias: true,
+  verifyUpcomingAssertions: true,
+  whenStable: true,
+}
+
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
     return 'dual'
@@ -27,7 +96,6 @@ const getTypeByPrevSubject = (prevSubject) => {
 
 export default {
   create: (Cypress, cy, state, config) => {
-    const reservedCommandNames = new Set(Object.keys(cy))
     // create a single instance
     // of commands
     const commands = {}
@@ -146,7 +214,7 @@ export default {
           })
         }
 
-        if (reservedCommandNames.has(name)) {
+        if (reservedCommandNames[name]) {
           $errUtils.throwErrByPath('miscellaneous.reserved_command', {
             args: {
               name,
@@ -184,6 +252,11 @@ export default {
           type,
           prevSubject,
         })
+      },
+
+      addSelector (name, fn) {
+        // TODO: Add overriding stuff.
+        return cy.addSelector(name, fn)
       },
 
       overwrite (name, fn) {
