@@ -27,8 +27,10 @@ export class SpecOptions {
   private parsedPath: ParsedPath;
   private parsedErroredCodegenCandidate?: ParsedPath
 
-  private getFrontendFramework () {
-    return detectFramework(this.ctx.currentProject || '').framework
+  private async getFrontendFramework () {
+    const detected = await detectFramework(this.ctx.currentProject || '')
+
+    return await detected.framework
   }
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
