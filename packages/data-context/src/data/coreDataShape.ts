@@ -134,10 +134,7 @@ export interface CoreDataShape {
   currentProject: string | null
   currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
-
-  // TODO: Move everything under this container, to make it simpler to reset the data when switching
   diagnostics: Diagnostics
-
   wizard: WizardDataShape
   migration: MigrationDataShape
   user: AuthenticatedUserShape | null
