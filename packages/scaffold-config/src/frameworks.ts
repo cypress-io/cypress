@@ -21,14 +21,13 @@ export interface DependencyToInstall {
 
 export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number] & { specPattern?: string }
 
-export function inPkgJson (dependency: WizardDependency, projectPath: string): DependencyToInstall {
+export async function isDependencyInstalled (dependency: WizardDependency, projectPath: string): Promise<DependencyToInstall> {
   try {
     const loc = require.resolve(path.join(dependency.package, 'package.json'), {
       paths: [projectPath],
     })
-    // TODO: convert to async FS method
-    // eslint-disable-next-line no-restricted-syntax
-    const pkg = fs.readJsonSync(loc) as PkgJson
+
+    const pkg = await fs.readJson(loc) as PkgJson
 
     if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
@@ -54,10 +53,10 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
   }
 }
 
-function getBundlerDependency (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall {
+function getBundlerDependency (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall> {
   switch (bundler) {
-    case 'vite': return inPkgJson(dependencies.WIZARD_DEPENDENCY_VITE, projectPath)
-    case 'webpack': return inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath)
+    case 'vite': return isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VITE, projectPath)
+    case 'webpack': return isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath)
     default: throw Error(`Unknown bundler ${bundler}`)
   }
 }
@@ -70,13 +69,13 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-      ]
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+      ])
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -91,12 +90,12 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ]
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -111,12 +110,12 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
-      ]
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
+      ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -131,12 +130,12 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-      ]
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
+      ])
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -158,11 +157,11 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ]
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -177,11 +176,11 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
         getBundlerDependency(bundler, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ]
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -196,11 +195,11 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
         getBundlerDependency(bundler, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
-      ]
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
+      ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -215,12 +214,12 @@ export const WIZARD_FRAMEWORKS = [
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-      return [
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
         getBundlerDependency(bundler, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-      ]
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
+      ])
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -238,11 +237,11 @@ export const WIZARD_FRAMEWORKS = [
   //   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
   //   dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
   //     return [
-  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
-  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
-  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
-  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
-  //       inPkgJson(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
   //     ]
   //   },
   //   codeGenFramework: 'angular',
