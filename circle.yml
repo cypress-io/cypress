@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - tbiethman/electron-19
+        - revert-22742
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ 'revert-22742', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ 'revert-22742', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -129,7 +129,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/electron-19" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "revert-22742" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -883,7 +883,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else 
+            else
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
