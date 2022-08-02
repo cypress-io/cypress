@@ -600,12 +600,12 @@ class $Cypress {
         return this.emit('after:all:screenshots', ...args)
 
       case 'command:log:added':
-        this.runner.addLog(args[0], this.config('isInteractive'))
+        // this.runner.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
-        this.runner.addLog(args[0], this.config('isInteractive'))
+        // this.runner.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:changed', ...args)
 
