@@ -310,3 +310,44 @@ The following configuration options are invalid:
 https://on.cypress.io/configuration
 
 `
+
+exports['Long Dashboard URL'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
+  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false                           │
+  │ Run URL:    http://dashboard.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long │
+  │             -long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-l │
+  │             ong-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-lon │
+  │             g-long-long-long-long-long-long-long-long-url                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app.cy.js                                                                       (1 of 1)
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖                                           XX:XX        1        2        3        4        5 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        2        3        4        5  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: http://dashboard.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-url
+
+`
