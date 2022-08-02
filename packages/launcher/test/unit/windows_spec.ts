@@ -113,8 +113,10 @@ describe('windows browser detection', () => {
           info: `Loaded from ${win10Path}`,
           custom: true,
           version: '100',
-          majorVersion: 100,
+          majorVersion: '100',
           path: win10Path,
+          unsupportedVersion: false,
+          warning: undefined,
         }),
       )
     })
@@ -136,8 +138,10 @@ describe('windows browser detection', () => {
           info: `Loaded from ${win10Path}`,
           custom: true,
           version: '100',
-          majorVersion: 100,
+          majorVersion: '100',
           path: win10Path,
+          unsupportedVersion: false,
+          warning: undefined,
         }),
       )
     })

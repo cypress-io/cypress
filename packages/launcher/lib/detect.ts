@@ -54,10 +54,11 @@ const validateMinVersion = (browser: FoundBrowser): ValidatorResult => {
   }
 }
 
-const validateStableFirefoxVersion = (browser: FoundBrowser, platform: NodeJS.Platform): ValidatorResult => {
-  // See https://github.com/cypress-io/cypress/issues/22086 for more info related
-  // to the FF bug in 101/102 on Windows.
-  if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+// Firefox 101 and 102 on Windows features a bug that results in Cypress being unable
+// to connect to the launched browser. A fix was first released in stable 103.
+// See https://github.com/cypress-io/cypress/issues/22086 for related info.
+const validateWindowsFirefoxVersion = (browser: FoundBrowser): ValidatorResult => {
+  if (browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
     return {
       isValid: false,
       warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to an unpatched browser incompatibility. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
@@ -67,12 +68,18 @@ const validateStableFirefoxVersion = (browser: FoundBrowser, platform: NodeJS.Pl
   return validateMinVersion(browser)
 }
 
+// Determines level of Cypress support for the found browser
 const validateBrowser = (browser: FoundBrowser, platform: NodeJS.Platform) => {
-  if (browser.name === 'firefox' && browser.channel === 'stable') {
-    return validateStableFirefoxVersion(browser, platform)
+  let validator = validateMinVersion
+
+  if (platform === 'win32' && browser.name === 'firefox' && browser.channel === 'stable') {
+    validator = validateWindowsFirefoxVersion
   }
 
-  return validateMinVersion(browser)
+  const validatorResult = validator(browser)
+
+  browser.unsupportedVersion = !validatorResult.isValid
+  browser.warning = validatorResult.warningMessage
 }
 
 type PlatformHelper = {
@@ -164,10 +171,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
   .then((browser) => {
     browser.majorVersion = getMajorVersion(browser.version)
 
-    const validatorResult = validateBrowser(browser, platform)
-
-    browser.unsupportedVersion = !validatorResult.isValid
-    browser.warning = validatorResult.warningMessage
+    validateBrowser(browser, platform)
 
     return browser
   })
@@ -228,7 +232,7 @@ export const detectByPath = (
   const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
     const version = helper.getVersionNumber(versionStr, browser)
 
-    return extend({}, browser, {
+    const parsedBrowser = extend({}, browser, {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
@@ -236,7 +240,11 @@ export const detectByPath = (
       path,
       version,
       majorVersion: getMajorVersion(version),
-    })
+    }) as FoundBrowser
+
+    validateBrowser(parsedBrowser, os.platform())
+
+    return parsedBrowser
   }
 
   const pathData = helper.getPathData(path)

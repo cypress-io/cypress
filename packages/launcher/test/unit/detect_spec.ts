@@ -38,47 +38,6 @@ describe('browser detection', () => {
     return detect().then(checkBrowsers)
   })
 
-  context('#setMajorVersion', () => {
-    it('major version is converted to number when string of numbers', () => {
-      const foundBrowser = {
-        name: 'test browser',
-        version: '11.22.33',
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.majorVersion).to.equal(11)
-    })
-
-    it('falls back to version when unconventional browser version', () => {
-      const foundBrowser = {
-        name: 'test browser',
-        version: 'VMware Fusion 12.1.0',
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.majorVersion).to.equal(foundBrowser.version)
-    })
-
-    it('creates warning when version is unsupported', () => {
-      const foundBrowser = {
-        displayName: 'TestBro',
-        name: 'test browser',
-        version: '9000.1',
-        minSupportedVersion: 9001,
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.warning).to.contain('does not support running TestBro version 9000')
-      .and.contain('TestBro newer than or equal to 9001')
-    })
-  })
-
   context('#detectByPath', () => {
     let execa: SinonStub
 
@@ -110,8 +69,10 @@ describe('browser detection', () => {
             info: 'Loaded from /foo/bar/browser',
             custom: true,
             version: '9001.1.2.3',
-            majorVersion: 9001,
+            majorVersion: '9001',
             path: '/foo/bar/browser',
+            unsupportedVersion: false,
+            warning: undefined,
           }),
         )
       })
@@ -151,8 +112,10 @@ describe('browser detection', () => {
             info: 'Loaded from /Applications/My Shiny New Browser.app',
             custom: true,
             version: '100.1.2.3',
-            majorVersion: 100,
+            majorVersion: '100',
             path: '/Applications/My Shiny New Browser.app',
+            unsupportedVersion: false,
+            warning: undefined,
           }),
         )
       })
@@ -164,6 +127,7 @@ describe('browser detection', () => {
 
       const foundBrowser = await detectByPath('/good-firefox')
 
+      expect(foundBrowser.unsupportedVersion).to.be.true
       expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
       .and.contain('Firefox newer than or equal to 86')
     })
