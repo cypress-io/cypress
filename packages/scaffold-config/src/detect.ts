@@ -1,4 +1,4 @@
-import { WIZARD_FRAMEWORKS, inPkgJson, WizardFrontendFramework, WizardBundler } from './frameworks'
+import { WIZARD_FRAMEWORKS, isDependencyInstalled, WizardFrontendFramework, WizardBundler } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'
@@ -15,9 +15,9 @@ interface DetectFramework {
 
 export async function areAllDepsSatisified (projectPath: string, framework: typeof WIZARD_FRAMEWORKS[number]) {
   for (const dep of framework.detectors) {
-    const satisfied = await inPkgJson(dep, projectPath)
+    const result = await isDependencyInstalled(dep, projectPath)
 
-    if (!satisfied) {
+    if (!result.satisfied) {
       return false
     }
   }
@@ -57,7 +57,7 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
     const hasLibrary = await areAllDepsSatisified(projectPath, library)
 
     for (const bundler of WIZARD_BUNDLERS) {
-      const detectBundler = await inPkgJson(bundler, projectPath)
+      const detectBundler = await isDependencyInstalled(bundler, projectPath)
 
       if (hasLibrary && detectBundler.satisfied) {
         return {

@@ -1,7 +1,7 @@
 import {
   WIZARD_DEPENDENCY_TYPESCRIPT,
   DependencyToInstall,
-  inPkgJson,
+  isDependencyInstalled,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
 
@@ -21,7 +21,7 @@ export class WizardDataSource {
 
     if (this.ctx.lifecycleManager.metaState.isUsingTypeScript) {
       packages.push({
-        ...await (inPkgJson(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject)),
+        ...await (isDependencyInstalled(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject)),
         dependency: WIZARD_DEPENDENCY_TYPESCRIPT,
       })
     }

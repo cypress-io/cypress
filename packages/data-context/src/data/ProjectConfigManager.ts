@@ -11,7 +11,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, inPkgJson, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -184,7 +184,7 @@ export class ProjectConfigManager {
       return
     }
 
-    const result = await inPkgJson(bundler, this.options.projectRoot)
+    const result = await isDependencyInstalled(bundler, this.options.projectRoot)
 
     if (!result.satisfied) {
       unsupportedDeps.set(result.dependency.type, result)
@@ -192,7 +192,7 @@ export class ProjectConfigManager {
 
     const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
       for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
-        const res = await inPkgJson(dep.dependency, this.options.projectRoot)
+        const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
           return false
