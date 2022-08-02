@@ -127,7 +127,6 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIONamespace>
   }
   hasInitializedMode: 'run' | 'open' | null
-  baseError: ErrorWrapperSource | null
   dashboardGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
@@ -137,7 +136,7 @@ export interface CoreDataShape {
   currentTestingType: TestingType | null
 
   // TODO: Move everything under this container, to make it simpler to reset the data when switching
-  diagnostics: Diagnostics | null
+  diagnostics: Diagnostics
 
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -145,7 +144,6 @@ export interface CoreDataShape {
   electron: ElectronShape
   authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
-  warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   versionData: {
@@ -164,7 +162,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cliTestingType: modeOptions.testingType ?? null,
     machineBrowsers: null,
     hasInitializedMode: null,
-    baseError: null,
     dashboardGraphQLError: null,
     dev: {
       refreshState: null,
@@ -186,7 +183,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
-    diagnostics: modeOptions.projectRoot ? { error: null, warnings: [] } : null,
+    diagnostics: { error: null, warnings: [] },
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -213,7 +210,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
         shouldAddCustomE2ESpecPattern: false,
       },
     },
-    warnings: [],
     activeBrowser: null,
     user: null,
     electron: {

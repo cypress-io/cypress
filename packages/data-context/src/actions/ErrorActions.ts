@@ -9,12 +9,8 @@ export class ErrorActions {
    */
   clearError (id: string) {
     this.ctx.update((d) => {
-      if (d.diagnostics?.error?.id === id) {
+      if (d.diagnostics.error?.id === id) {
         d.diagnostics.error = null
-      }
-
-      if (d.baseError?.id === id) {
-        d.baseError = null
       }
     })
   }
@@ -25,34 +21,34 @@ export class ErrorActions {
    */
   clearWarning (id: string) {
     this.ctx.update((d) => {
-      const warningsIndex = d.warnings.findIndex((v) => v.id === id)
+      const warningsIndex = d.diagnostics.warnings.findIndex((v) => v.id === id)
 
       if (warningsIndex != null && warningsIndex !== -1) {
-        d.warnings.splice(warningsIndex, 1)
+        d.diagnostics.warnings.splice(warningsIndex, 1)
 
         return
       }
 
-      const projectWarningsIndex = d.diagnostics?.warnings.findIndex((v) => v.id === id)
+      const projectWarningsIndex = d.diagnostics.warnings.findIndex((v) => v.id === id)
 
       if (projectWarningsIndex != null && projectWarningsIndex !== -1) {
-        d.diagnostics?.warnings.splice(projectWarningsIndex, 1)
+        d.diagnostics.warnings.splice(projectWarningsIndex, 1)
 
         return
       }
 
-      const testingTypeWarningsIndex = d.diagnostics?.warnings.findIndex((v) => v.id === id)
+      const testingTypeWarningsIndex = d.diagnostics.warnings.findIndex((v) => v.id === id)
 
       if (testingTypeWarningsIndex != null && testingTypeWarningsIndex !== -1) {
-        d.diagnostics?.warnings.splice(testingTypeWarningsIndex, 1)
+        d.diagnostics.warnings.splice(testingTypeWarningsIndex, 1)
 
         return
       }
 
-      const appWarningsIndex = d.diagnostics?.warnings.findIndex((v) => v.id === id)
+      const appWarningsIndex = d.diagnostics.warnings.findIndex((v) => v.id === id)
 
       if (appWarningsIndex != null && appWarningsIndex !== -1) {
-        d.diagnostics?.warnings.splice(appWarningsIndex, 1)
+        d.diagnostics.warnings.splice(appWarningsIndex, 1)
       }
     })
   }

@@ -157,16 +157,11 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.diagnostics?.error
-      ?? this.coreData.baseError
-      ?? null
+    return this.coreData.diagnostics.error
   }
 
   get warnings () {
-    return [
-      ...this.coreData.diagnostics?.warnings ?? [],
-      ...this.coreData.warnings ?? [],
-    ]
+    return this.coreData.diagnostics.warnings
   }
 
   @cached
@@ -384,8 +379,6 @@ export class DataContext {
       this.update((d) => {
         if (d.diagnostics) {
           d.diagnostics.error = err
-        } else {
-          d.baseError = err
         }
       })
 
@@ -405,11 +398,7 @@ export class DataContext {
       }
 
       this.update((d) => {
-        if (d.diagnostics) {
-          d.diagnostics.warnings.push(warning)
-        } else {
-          d.warnings.push(warning)
-        }
+        d.diagnostics.warnings.push(warning)
       })
 
       this.emitter.errorWarningChange()
