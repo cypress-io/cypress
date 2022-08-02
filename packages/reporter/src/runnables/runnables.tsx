@@ -64,7 +64,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
           </OpenFileInIDE>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
           <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
-          <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
+          <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
         </>
       )}
       <hr />
@@ -145,7 +145,7 @@ class Runnables extends Component<RunnablesProps> {
     const { scroller, appState } = this.props
 
     scroller.setContainer(this.refs.container as Element, action('user:scroll:detected', () => {
-      if (appState && appState.isRunning) {
+      if (appState && appState.isRunning && Cypress.config().isInteractive) {
         appState.temporarilySetAutoScrolling(false)
       }
     }))
