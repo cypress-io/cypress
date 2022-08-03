@@ -36,7 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/support/binary-install-logging', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
