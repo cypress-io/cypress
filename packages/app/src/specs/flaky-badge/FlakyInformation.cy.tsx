@@ -38,9 +38,7 @@ describe('<FlakyInformation />', () => {
 
     cy.findByTestId('flaky-badge').should('be.visible')
 
-    cy.get('.v-popper').trigger('mouseenter')
-
-    cy.findByTestId('flaky-spec-summary').should('be.visible')
+    cy.get('.v-popper').should('be.visible')
   })
 
   it('does not render if flaky status returned as false', () => {
