@@ -3,7 +3,6 @@ import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-// import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
@@ -11,7 +10,6 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
-// import * as scaffoldPackage from '@packages/scaffold-config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
