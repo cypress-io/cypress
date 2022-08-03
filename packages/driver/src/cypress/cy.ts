@@ -846,10 +846,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return memo
       }, [initialCommand])
 
+      const chainerId = this.state('chainerId')
+
       for (let c of commandsToInsert) {
         // clone the command to prevent
         // mutating its properties
-        return cy.enqueue(c.clone())
+        const command = c.clone()
+
+        command.set('chainerId', chainerId)
+        cy.enqueue(command)
       }
     }
 
