@@ -484,10 +484,10 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
-    const framework = detectFramework(this.ctx.currentProject || '').framework
+    const detected = await detectFramework(this.ctx.currentProject || '')
 
     return {
-      component: framework?.glob ?? looseComponentGlob,
+      component: detected.framework?.glob ?? looseComponentGlob,
     }
   }
 
