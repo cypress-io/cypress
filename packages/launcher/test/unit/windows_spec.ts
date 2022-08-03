@@ -115,8 +115,6 @@ describe('windows browser detection', () => {
           version: '100',
           majorVersion: '100',
           path: win10Path,
-          unsupportedVersion: false,
-          warning: undefined,
         }),
       )
     })

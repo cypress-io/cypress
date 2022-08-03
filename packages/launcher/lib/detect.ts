@@ -8,6 +8,7 @@ import * as linuxHelper from './linux'
 import Debug from 'debug'
 import type {
   Browser,
+  BrowserValidator,
   DetectedBrowser,
   FoundBrowser,
 } from '@packages/types'
@@ -25,61 +26,20 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   name: string
 }
 
-type ValidatorResult = {
-  // whether or not the browser is supported by Cypress
-  isValid: boolean
-  // optional warning message that will be shown in the GUI
-  warningMessage?: string
-}
-
 const getMajorVersion = (version: string): string => {
   return version.split('.')[0] ?? version
 }
 
-// Compares a detected browser's major version to its minimum supported version
-// to determine if the browser is supported by Cypress.
-const validateMinVersion = (browser: FoundBrowser): ValidatorResult => {
-  const minSupportedVersion = browser.minSupportedVersion
-  const majorVersion = browser.majorVersion
+// Determines if found browser is supported by Cypress. If found to be
+// unsupported, the the browser will be unavailable for selection and
+// will present the determined warning message to the user.
+const validateCypressSupport = (validator: BrowserValidator | undefined, browser: FoundBrowser, platform: NodeJS.Platform) => {
+  if (validator) {
+    const validatorResult = validator(browser, platform)
 
-  if (majorVersion && minSupportedVersion && parseInt(majorVersion) < minSupportedVersion) {
-    return {
-      isValid: false,
-      warningMessage: `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${minSupportedVersion}.`,
-    }
+    browser.unsupportedVersion = !validatorResult.isValid
+    browser.warning = validatorResult.warningMessage
   }
-
-  return {
-    isValid: true,
-  }
-}
-
-// Firefox 101 and 102 on Windows features a bug that results in Cypress being unable
-// to connect to the launched browser. A fix was first released in stable 103.
-// See https://github.com/cypress-io/cypress/issues/22086 for related info.
-const validateWindowsFirefoxVersion = (browser: FoundBrowser): ValidatorResult => {
-  if (browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
-    return {
-      isValid: false,
-      warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to an unpatched browser incompatibility. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
-    }
-  }
-
-  return validateMinVersion(browser)
-}
-
-// Determines level of Cypress support for the found browser
-const validateBrowser = (browser: FoundBrowser, platform: NodeJS.Platform) => {
-  let validator = validateMinVersion
-
-  if (platform === 'win32' && browser.name === 'firefox' && browser.channel === 'stable') {
-    validator = validateWindowsFirefoxVersion
-  }
-
-  const validatorResult = validator(browser)
-
-  browser.unsupportedVersion = !validatorResult.isValid
-  browser.warning = validatorResult.warningMessage
 }
 
 type PlatformHelper = {
@@ -168,12 +128,12 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
   return lookup(platform, browser)
   .then((val) => ({ ...browser, ...val }))
   .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
-  .then((browser) => {
-    browser.majorVersion = getMajorVersion(browser.version)
+  .then((foundBrowser) => {
+    foundBrowser.majorVersion = getMajorVersion(foundBrowser.version)
 
-    validateBrowser(browser, platform)
+    validateCypressSupport(browser.validator, foundBrowser, platform)
 
-    return browser
+    return foundBrowser
   })
   .catch(failed)
 }
@@ -242,7 +202,7 @@ export const detectByPath = (
       majorVersion: getMajorVersion(version),
     }) as FoundBrowser
 
-    validateBrowser(parsedBrowser, os.platform())
+    validateCypressSupport(browser.validator, parsedBrowser, os.platform())
 
     return parsedBrowser
   }

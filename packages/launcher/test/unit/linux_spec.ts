@@ -174,8 +174,6 @@ describe('linux browser detection', () => {
         version: '100.1.2.3',
         path: 'test-browser',
         majorVersion: '100',
-        unsupportedVersion: false,
-        warning: undefined,
       },
       {
         displayName: 'Foo Browser',
@@ -183,8 +181,6 @@ describe('linux browser detection', () => {
         version: '100.1.2.3',
         path: 'foo-browser',
         majorVersion: '100',
-        unsupportedVersion: false,
-        warning: undefined,
       },
     ]
 
@@ -211,8 +207,6 @@ describe('linux browser detection', () => {
         version: '100.1.2.3',
         path: 'foo-browser',
         majorVersion: '100',
-        unsupportedVersion: false,
-        warning: undefined,
       },
     ]
 

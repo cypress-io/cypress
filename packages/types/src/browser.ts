@@ -6,6 +6,8 @@ export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | 
 
 export type BrowserFamily = typeof BROWSER_FAMILY[number]
 
+export type BrowserValidator = (browser: FoundBrowser, platform: NodeJS.Platform) => BrowserValidatorResult
+
 /**
  * Represents a typical browser to try to detect and turn into a `FoundBrowser`.
  */
@@ -38,6 +40,8 @@ export type Browser = {
   info?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
   minSupportedVersion?: number
+  /** if set, is called to determine if found browser is supported by Cypress */
+  validator?: BrowserValidator
 }
 
 /**
@@ -66,6 +70,31 @@ export const MIN_FIREFOX_VERSION = 86
 // Edge switched to Blink in 79
 export const MIN_EDGE_VERSION = 79
 
+export type BrowserValidatorResult = {
+  // whether or not the browser is supported by Cypress
+  isValid: boolean
+  // optional warning message that will be shown in the GUI
+  warningMessage?: string
+}
+
+// Compares a detected browser's major version to its minimum supported version
+// to determine if the browser is supported by Cypress.
+const validateMinVersion = (browser: FoundBrowser): BrowserValidatorResult => {
+  const minSupportedVersion = browser.minSupportedVersion
+  const majorVersion = browser.majorVersion
+
+  if (majorVersion && minSupportedVersion && parseInt(majorVersion) < minSupportedVersion) {
+    return {
+      isValid: false,
+      warningMessage: `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${minSupportedVersion}.`,
+    }
+  }
+
+  return {
+    isValid: true,
+  }
+}
+
 export const browsers: Browser[] = [
   {
     name: 'chrome',
@@ -75,6 +104,7 @@ export const browsers: Browser[] = [
     versionRegex: /Google Chrome (\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
     minSupportedVersion: MIN_CHROME_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'chromium',
@@ -85,6 +115,7 @@ export const browsers: Browser[] = [
     versionRegex: /Chromium (\S+)/m,
     binary: ['chromium-browser', 'chromium'],
     minSupportedVersion: MIN_CHROME_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'chrome',
@@ -94,6 +125,7 @@ export const browsers: Browser[] = [
     versionRegex: /Google Chrome (\S+) beta/m,
     binary: 'google-chrome-beta',
     minSupportedVersion: MIN_CHROME_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'chrome',
@@ -103,6 +135,7 @@ export const browsers: Browser[] = [
     versionRegex: /Google Chrome Canary (\S+)/m,
     binary: 'google-chrome-canary',
     minSupportedVersion: MIN_CHROME_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'firefox',
@@ -113,6 +146,20 @@ export const browsers: Browser[] = [
     versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
     binary: 'firefox',
     minSupportedVersion: MIN_FIREFOX_VERSION,
+    validator: (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
+      // Firefox 101 and 102 on Windows features a bug that results in Cypress being unable
+      // to connect to the launched browser. A fix was first released in stable 103.
+      // See https://github.com/cypress-io/cypress/issues/22086 for related info.
+
+      if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+        return {
+          isValid: false,
+          warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to an unpatched browser incompatibility. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+        }
+      }
+
+      return validateMinVersion(browser)
+    },
   },
   {
     name: 'firefox',
@@ -124,6 +171,7 @@ export const browsers: Browser[] = [
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
     minSupportedVersion: MIN_FIREFOX_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'firefox',
@@ -135,6 +183,7 @@ export const browsers: Browser[] = [
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
     minSupportedVersion: MIN_FIREFOX_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'edge',
@@ -144,6 +193,7 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge (\S+)/m,
     binary: ['edge', 'microsoft-edge'],
     minSupportedVersion: MIN_EDGE_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'edge',
@@ -153,6 +203,7 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Canary (\S+)/m,
     binary: 'edge-canary',
     minSupportedVersion: MIN_EDGE_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'edge',
@@ -162,6 +213,7 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Beta (\S+)/m,
     binary: 'edge-beta',
     minSupportedVersion: MIN_EDGE_VERSION,
+    validator: validateMinVersion,
   },
   {
     name: 'edge',
@@ -171,6 +223,7 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Dev (\S+)/m,
     binary: ['edge-dev', 'microsoft-edge-dev'],
     minSupportedVersion: MIN_EDGE_VERSION,
+    validator: validateMinVersion,
   },
 ]
 

@@ -71,8 +71,6 @@ describe('browser detection', () => {
             version: '9001.1.2.3',
             majorVersion: '9001',
             path: '/foo/bar/browser',
-            unsupportedVersion: false,
-            warning: undefined,
           }),
         )
       })
@@ -114,8 +112,6 @@ describe('browser detection', () => {
             version: '100.1.2.3',
             majorVersion: '100',
             path: '/Applications/My Shiny New Browser.app',
-            unsupportedVersion: false,
-            warning: undefined,
           }),
         )
       })
