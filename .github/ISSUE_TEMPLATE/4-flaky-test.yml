@@ -1,0 +1,42 @@
+name: "❄️ Flaky internal test"
+description: Report a flaky test in the Cypress app open-source code.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? 👉 [Start a new discussion](https://github.com/cypress-io/cypress/discussions) or [ask in chat](https://on.cypress.io/discord).
+  - type: textarea
+    id: dashboard
+    attributes:
+      label: Link to dashboard
+      description: Please include a link to the failure in the Cypress Dashboard
+    validations:
+      required: true
+  - type: textarea
+    id: github-link
+    attributes:
+      label: Link to failing test in GitHub
+      description: Provide the GitHub link to the failing test with the line number.
+    validations:
+      required: true
+  - type: textarea
+    id: analysis
+    attributes:
+      label: Analysis
+      description: If you can, provide a quick analysis of why this test is flaky. 
+      placeholder: ex. The test appears to be flaky because...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Cypress Version
+      description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
+      placeholder: ex. 7.6.0
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Other
+      placeholder: Any other details?
