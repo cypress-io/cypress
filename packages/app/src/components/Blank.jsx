@@ -1,6 +1,6 @@
-const svgCy = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M16.877 19.0494C18.8191 19.0494 20.401 20.085 21.2139 21.8915L21.2782 22.0329L24.5398 20.9253L24.4704 20.7583C23.2074 17.6823 20.2981 15.7704 16.877 15.7704C14.4719 15.7704 12.5169 16.5414 10.9015 18.1243C9.29635 19.697 8.48353 21.6757 8.48353 24.0064C8.48353 26.3166 9.29635 28.285 10.9015 29.8577C12.5169 31.4407 14.4719 32.2116 16.877 32.2116C20.2981 32.2116 23.2074 30.2997 24.4704 27.2263L24.5398 27.0593L21.273 25.9491L21.2113 26.0956C20.4833 27.8713 18.8628 28.9326 16.877 28.9326C15.5239 28.9326 14.3818 28.4598 13.4763 27.5295C12.5606 26.5864 12.0976 25.4018 12.0976 24.009C12.0976 22.6059 12.5503 21.4444 13.4763 20.4576C14.3792 19.5222 15.5239 19.0494 16.877 19.0494Z" fill="#1B1E2E"/>
-<path d="M37.3061 16.0737L32.658 27.8353L27.979 16.0737H24.1514L30.7133 32.1268L26.0446 43.449L25.828 43.963C25.6788 44.3224 25.3533 44.5752 24.9776 44.6273C24.6537 44.6424 24.3277 44.65 24 44.65C23.9323 44.65 23.8647 44.6497 23.7972 44.649C12.4859 44.5402 3.35 35.337 3.35 24C3.35 12.5953 12.5953 3.35 24 3.35C35.4047 3.35 44.65 12.5953 44.65 24C44.65 32.5719 39.4271 39.924 31.99 43.0474L30.7772 45.9958C30.5987 46.43 30.3755 46.8377 30.1141 47.2142C40.4075 44.5105 48 35.1419 48 24C48 10.7452 37.2548 0 24 0C10.7452 0 0 10.7452 0 24C0 37.1872 10.6357 47.8902 23.7972 47.9992C23.8247 47.9994 25.0196 47.9794 25.0177 47.9794C26.736 47.9075 28.2717 46.8308 28.9276 45.235L29.4694 43.9179L40.9228 16.0737H37.3061Z" fill="#1B1E2E"/>
+const svgCy = `<svg width="49" height="48" viewBox="0 0 49 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.7571 19.0494C19.6992 19.0494 21.2811 20.085 22.094 21.8915L22.1583 22.0329L25.42 20.9253L25.3505 20.7583C24.0875 17.6823 21.1783 15.7704 17.7571 15.7704C15.352 15.7704 13.397 16.5414 11.7816 18.1243C10.1765 19.697 9.36366 21.6757 9.36366 24.0064C9.36366 26.3166 10.1765 28.285 11.7816 29.8577C13.397 31.4407 15.352 32.2116 17.7571 32.2116C21.1783 32.2116 24.0875 30.2997 25.3505 27.2263L25.42 27.0593L22.1531 25.9491L22.0914 26.0956C21.3635 27.8713 19.7429 28.9326 17.7571 28.9326C16.4041 28.9326 15.2619 28.4598 14.3565 27.5295C13.4407 26.5864 12.9777 25.4018 12.9777 24.009C12.9777 22.6059 13.4304 21.4444 14.3565 20.4576C15.2594 19.5222 16.4041 19.0494 17.7571 19.0494Z" fill="#BFC2D4"/>
+<path d="M38.1863 16.0737L33.5381 27.8353L28.8591 16.0737H25.0315L31.5934 32.1268L26.9247 43.449L26.7081 43.963C26.559 44.3224 26.2335 44.5752 25.8578 44.6273C25.5338 44.6423 25.2078 44.65 24.8801 44.65C24.8124 44.65 24.7448 44.6497 24.6773 44.649C13.366 44.5402 4.23013 35.337 4.23013 24C4.23013 12.5953 13.4754 3.35 24.8801 3.35C36.2848 3.35 45.5301 12.5953 45.5301 24C45.5301 32.5719 40.3072 39.924 32.8701 43.0474L31.6574 45.9958C31.4788 46.43 31.2556 46.8377 30.9942 47.2142C41.2877 44.5105 48.8801 35.1419 48.8801 24C48.8801 10.7452 38.135 0 24.8801 0C11.6253 0 0.880127 10.7452 0.880127 24C0.880127 37.1872 11.5158 47.8902 24.6773 47.9992C24.7048 47.9994 25.8997 47.9794 25.8978 47.9794C27.6161 47.9075 29.1518 46.8308 29.8077 45.235L30.3495 43.9179L41.8029 16.0737H38.1863Z" fill="#BFC2D4"/>
 </svg>
 `
 
@@ -79,142 +79,84 @@ const defaultStyles = `
   }
 `
 
-const listStyles = `
-ul {
-  text-align: left;
-  margin: 0 auto 10px;
-  display: inline-block;
-  padding: 20px 20px 20px 40px;
-}
+const blankStyles = `
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-li {
-  list-style: decimal;
-  list-style-position: outside;
-  margin: 4px 0;
-}
+  svg {
+    display: inline-block;
+    stroke-width: 0;
+    margin: 0 0 24px 0;
+  }
+
+  .outer-container {
+    background-color: #f3f4fa;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .inner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .text {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+    color: #2E3247;
+    margin: 0 32px 4px;
+  }
+
+  .subtext {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    color: #747994;
+    margin: 0 32px;
+  }
 `
 
-export const initial = () => {
+const blankContentsHtml = (text = '', subtext = '') => {
   return `
     <style>
-      ${defaultStyles}
-
-      ${listStyles}
+      ${blankStyles}
     </style>
 
-    <div class='container'>
-      ${svgCy}
-      <p>This is the default blank page.</p>
-      <p>To test your web application:</p>
-      <ul>
-        <li>Start your app's server</li>
-        <li>
-          <kbd>
-            <a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a>
-          </kbd>
-          your app
-        </li>
-        <li>Begin writing tests</li>
-      </ul>
+    <div class='outer-container'>
+      <div class='inner-container'>
+        ${svgCy}
+        <p class="text">${text}</p>
+        <p class="subtext">${subtext}</p>
+      </div>
     </div>
   `
 }
 
-export const initialCT = () => {
-  return `
-    <style>
-      ${defaultStyles}
-
-      ${listStyles}
-    </style>
-
-    <div class='container'>
-      ${svgCy}
-      <p>This is the default blank page.</p>
-      <p>To test your web application:</p>
-      <ul>
-        <li>Mount your component with
-          <kbd>
-            <a href='https://on.cypress.io/mount' target='_blank'>mount()</a>
-          </kbd>
-        </li>
-        <li>Begin writing tests</li>
-      </ul>
-    </div>
-  `
+export const initial = () => {
+  return blankContentsHtml()
 }
 
 export const sessionLifecycle = () => {
-  return `
-    <style>
-
-      ${defaultStyles}
-
-      ${listStyles}
-
-      .warn {
-        color: #bd5800;
-        background-color: #f5f4d7;
-        font-size: 15px;
-        font-weight: normal;
-        padding: 16px;
-        max-width: 600px;
-        margin: 0 16px 8px;
-        display: inline-block;
-        text-align: left;
-        width: 90%;
-      }
-
-      .em {
-        font-style: italic;
-      }
-    </style>
-
-    <div class='container'>
-      ${svgCy}
-      <br/>
-      <p class="warn">Because <code><b>experimentalSessionAndOrigin</b></code> is enabled, Cypress navigates to the default blank page <span class="em">before each test</span> to ensure test reliability.</p>
-      <p>This is the default blank page.</p>
-      <p>To test your web application:</p>
-      <ul>
-        <li>Start your app's server</li>
-        <li>
-          <kbd>
-            <a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a>
-          </kbd>
-          your app
-        </li>
-        <li>Begin writing tests</li>
-      </ul>
-    </div>
-  `
+  return blankContentsHtml('Default blank page',
+    'This page was cleared by navigating to about:blank.<br>All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
 }
 
 export const session = () => {
-  return `
-    <style>
-      ${defaultStyles}
-
-      ${listStyles}
-
-    </style>
-
-    <div class='container'>
-    ${svgCy}
-      <p>This is a blank page.</p>
-      <p>We always navigate you here after <kbd>cy.session()</kbd></p>
-      <p>To continue your test, follow up the command with
-      <kbd><a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a></kbd>
-      </p>
-<pre><code>
-1 |
-2 | cy.session(...)
-3 | <b>cy.visit(...)</b>
-4 |
-</code></pre>
-
-    </div>
-  `
+  return blankContentsHtml('Default blank page', 'This page was cleared by navigating to about:blank.')
 }
 
 export const visitFailure = (props) => {
@@ -277,7 +219,6 @@ export const visitFailure = (props) => {
 
 export const blankContents = {
   initial,
-  initialCT,
   session,
   sessionLifecycle,
   visitFailure,
