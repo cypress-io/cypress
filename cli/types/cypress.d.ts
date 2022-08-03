@@ -3044,7 +3044,7 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'angular'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'

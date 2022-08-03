@@ -80,14 +80,14 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  initialize () {
+  async initialize () {
     if (!this.ctx.currentProject) {
       return
     }
 
     this.resetWizard()
 
-    const detected = detectFramework(this.ctx.currentProject)
+    const detected = await detectFramework(this.ctx.currentProject)
 
     debug('detected %o', detected)
 
