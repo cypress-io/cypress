@@ -7,7 +7,7 @@
       @close="showModal = false"
     />
     <InlineSpecListHeader
-      v-model:search="search"
+      v-model:specFilterModel="specFilterModel"
       :result-count="specs.length"
       @newSpec="showModal = true"
     />
@@ -68,16 +68,16 @@ const props = defineProps<{
 
 const showModal = ref(false)
 
-const { debouncedSearchString, search } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
 
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!debouncedSearchString.value) return specs
+  if (!debouncedSpecFilterModel.value) return specs
 
-  return fuzzySortSpecs(specs, debouncedSearchString.value)
+  return fuzzySortSpecs(specs, debouncedSpecFilterModel.value)
 })
 
 </script>

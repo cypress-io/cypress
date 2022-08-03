@@ -16,10 +16,10 @@ export function useSpecFilter (savedFilter?: string) {
 
   // prefer a filter from client side store, saved filter in gql can be stale
   // and is only used to set the value in the store on first load
-  const initialFilter = specStore.specFilter ? specStore.specFilter : savedFilter ?? ''
-  const search = ref(initialFilter)
+  const initialFilter = specStore.specFilter ?? savedFilter ?? ''
+  const specFilterModel = ref(initialFilter)
 
-  const debouncedSearchString = useDebounce(search, 200)
+  const debouncedSpecFilterModel = useDebounce(specFilterModel, 200)
 
   function setSpecFilter (specFilter: string) {
     if (specStore.specFilter !== specFilter) {
@@ -28,15 +28,15 @@ export function useSpecFilter (savedFilter?: string) {
     }
   }
 
-  watch(() => debouncedSearchString?.value, (newVal) => {
+  watch(() => debouncedSpecFilterModel?.value, (newVal) => {
     setSpecFilter(newVal ?? '')
   })
 
   // initialize spec filter in store
-  setSpecFilter(search.value)
+  setSpecFilter(specFilterModel.value)
 
   return {
-    search,
-    debouncedSearchString,
+    specFilterModel,
+    debouncedSpecFilterModel,
   }
 }
