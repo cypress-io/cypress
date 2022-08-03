@@ -182,20 +182,22 @@ describe('clears session data beforeEach test even with no session', () => {
 })
 
 describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
-  cy.state('foo', true)
   it('t1', () => {
     // only warns after initial blank page
     // unfortunately this fails when run alongside other tests
     // cy.contains('experimentalSessionAndOrigin').should('not.exist')
-    cy.contains('default blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
+    cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
   })
 
   it('t2', () => {
-    cy.contains('Because experimentalSessionAndOrigin')
-    cy.contains('default blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
+    cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
   })
 })
 
@@ -210,16 +212,16 @@ describe('navigates to special about:blank after session', () => {
   })
 
   it('t1', () => {
-    cy.contains('session')
-    cy.contains('blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
   })
 
   it('t2', () => {
-    cy.contains('cy.session')
-    cy.contains('blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
   })
 })
 
