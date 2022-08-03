@@ -232,7 +232,6 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
-    isLoadingNodeEvents
   }
   isGlobalMode
   ...TopNav
