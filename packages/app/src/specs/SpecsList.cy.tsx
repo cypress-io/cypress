@@ -218,6 +218,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@resultsCount')
         .should('contain.text', '50 Matches')
         // the exact wording here can be deceptive so confirm it's not still
+        // displaying "of", since X of 50 Matches would pass for containing "50 matches"
+        // but would be wrong.
         .should('not.contain.text', 'of 50 Matches')
       })
 
