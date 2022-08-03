@@ -186,7 +186,7 @@ describe('code-generator', () => {
   })
 
   it('should generate from Vue 2 component template', async () => {
-    const fileName = 'Button.tsx'
+    const fileName = 'MyComponent.vue'
     const target = path.join(tmpPath, 'component')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
@@ -194,7 +194,7 @@ describe('code-generator', () => {
       target,
     }
     const codeGenArgs = {
-      componentName: 'Button',
+      componentName: 'MyComponent',
       componentPath: 'path/to/component',
       fileName,
     }
@@ -229,7 +229,7 @@ describe('code-generator', () => {
   })
 
   it('should generate from Vue 3 component template', async () => {
-    const fileName = 'Button.tsx'
+    const fileName = 'HelloWorld.vue'
     const target = path.join(tmpPath, 'component')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
@@ -237,7 +237,7 @@ describe('code-generator', () => {
       target,
     }
     const codeGenArgs = {
-      componentName: 'Button',
+      componentName: 'HelloWorld',
       componentPath: 'path/to/component',
       fileName,
     }
@@ -313,27 +313,4 @@ describe('code-generator', () => {
 
     expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
   })
-
-  // TODO: Come back to this in this PR
-  // it('should generate scaffolded test from vue 3 component', async () => {
-  //   const target = path.join(tmpPath, 'vue-component')
-  //   const action: Action = {
-  //     templateDir: templates.vue3Component,
-  //     target,
-  //   }
-
-  //   const newSpecCodeGenOptions = new SpecOptions(ctx, {
-  //     codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
-  //     codeGenType: 'component',
-  //     specFileExtension: '.cy',
-  //   })
-
-  //   sinon.stub(scaffoldPackage, 'detectFramework').returns({ framework: scaffoldPackage.WIZARD_FRAMEWORKS[2] })
-
-  //   let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-  //   const codeGenResult = await codeGenerator(action, codeGenOptions)
-
-  //   expect(() => codeGenResult.files[0].content).not.throw()
-  // })
 })
