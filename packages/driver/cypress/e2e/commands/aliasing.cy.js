@@ -30,7 +30,7 @@ describe('src/cy/commands/aliasing', () => {
     })
 
     it('stores the lookup as an alias when .then() is an intermediate', () => {
-      cy.get('body').then().as('body')
+      cy.get('body').then(() => {}).as('body')
       cy.get('@body')
     })
 
