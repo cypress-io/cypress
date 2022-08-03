@@ -356,11 +356,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'testIsolation',
     // TODO: When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'default' to 'strict' and
+    // update the defaultValue from 'legacy' to 'strict' and
     // update this code to remove the check/override specific to enable
     // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'default',
-    validation: validate.isOneOf('default', 'strict'),
+    defaultValue: 'legacy',
+    validation: validate.isOneOf('legacy', 'strict'),
     overrideLevels: ['suite'],
   }, {
     name: 'trashAssetsBeforeRuns',

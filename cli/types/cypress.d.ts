@@ -2786,11 +2786,11 @@ declare namespace Cypress {
     supportFile: string | false
     /**
      * The test isolation level applied to ensure a clean slate between tests.
-     *   - default - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
+     *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
      *   - strict - all resets everything from default, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
      * @default "default", however, when experimentalSessionAndOrigin=true, the default is "strict"
      */
-    testIsolation: 'default' | 'strict'
+    testIsolation: 'legacy' | 'strict'
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"

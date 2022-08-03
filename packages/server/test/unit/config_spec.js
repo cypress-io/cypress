@@ -1519,7 +1519,7 @@ describe('lib/config', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'default', from: 'default' },
+            testIsolation: { value: 'legacy', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1630,7 +1630,7 @@ describe('lib/config', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'default', from: 'default' },
+            testIsolation: { value: 'legacy', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1677,7 +1677,7 @@ describe('lib/config', () => {
           supportFile: false,
           baseUrl: 'http://localhost:8080',
           experimentalSessionAndOrigin: true,
-          testIsolation: 'default',
+          testIsolation: 'legacy',
         }
 
         const options = {
@@ -1689,7 +1689,7 @@ describe('lib/config', () => {
           expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
           expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'default', from: 'config' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'legacy', from: 'config' })
         })
       })
     })
