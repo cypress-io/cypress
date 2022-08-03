@@ -95,4 +95,14 @@ describe("angular mount", () => {
     cy.get('button').click()
     cy.get('@clickedSpy').should('have.been.calledWith', true)
   })
+
+  describe("teardown", () => {
+    beforeEach(() => {
+      cy.get("[id^=root]").should("not.exist");
+    });
+
+    it("should mount", () => {
+      cy.mount(ButtonOutputComponent);
+    });
+  });
 });
