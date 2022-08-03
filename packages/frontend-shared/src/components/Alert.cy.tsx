@@ -16,6 +16,8 @@ const prefixIconSelector = '[data-cy=alert-prefix-icon]'
 
 const dismissSelector = `[aria-label=${messages.dismissAriaLabel}]`
 
+faker.seed(1)
+
 const alertTitle = faker.hacker.phrase()
 const alertBodyContent = faker.lorem.sentences(2)
 
