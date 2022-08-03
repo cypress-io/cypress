@@ -19,6 +19,9 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing'
+import {
+  setupHooks,
+} from '@cypress/mount-utils'
 
 /**
  * Additional module configurations needed while mounting the component, like
@@ -83,14 +86,6 @@ export type MountResponse<T> = {
   fixture: ComponentFixture<T>
 
   /**
-   * Configures and initializes environment and provides methods for creating components and services.
-   *
-   * @memberof MountResponse
-   * @see https://angular.io/api/core/testing/TestBed
-   */
-  testBed: TestBed
-
-  /**
    * The instance of the root component class
    *
    * @memberof MountResponse
@@ -134,41 +129,29 @@ function bootstrapModule<T> (
  *
  * @param {Type<T> | string} component Angular component being mounted or its template
  * @param {MountConfig} config TestBed configuration passed into the mount function
- * @returns {TestBed} TestBed
+ * @returns {Type<T>} componentFixture
  */
 function initTestBed<T> (
   component: Type<T> | string,
   config: MountConfig<T>,
-): { testBed: TestBed, componentFixture: Type<T> } {
+): Type<T> {
   const { providers, ...configRest } = config
-
-  const testBed: TestBed = getTestBed()
-
-  testBed.resetTestEnvironment()
-
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-    {
-      teardown: { destroyAfterEach: false },
-    },
-  )
 
   const componentFixture = createComponentFixture(component) as Type<T>
 
-  testBed.configureTestingModule({
+  TestBed.configureTestingModule({
     ...bootstrapModule(componentFixture, configRest),
   })
 
   if (providers != null) {
-    testBed.overrideComponent(componentFixture, {
+    TestBed.overrideComponent(componentFixture, {
       add: {
         providers,
       },
     })
   }
 
-  return { testBed, componentFixture }
+  return componentFixture
 }
 
 @Component({ selector: 'cy-wrapper-component', template: '' })
@@ -196,16 +179,15 @@ function createComponentFixture<T> (
  * Creates the ComponentFixture
  *
  * @param {Type<T>} component Angular component being mounted
- * @param {TestBed} testBed TestBed
+ * @param {MountConfig<T>} config MountConfig
 
  * @returns {ComponentFixture<T>} ComponentFixture
  */
 function setupFixture<T> (
   component: Type<T>,
-  testBed: TestBed,
   config: MountConfig<T>,
 ): ComponentFixture<T> {
-  const fixture = testBed.createComponent(component)
+  const fixture = TestBed.createComponent(component)
 
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
@@ -277,12 +259,11 @@ export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
 ): Cypress.Chainable<MountResponse<T>> {
-  const { testBed, componentFixture } = initTestBed(component, config)
-  const fixture = setupFixture(componentFixture, testBed, config)
+  const componentFixture = initTestBed(component, config)
+  const fixture = setupFixture(componentFixture, config)
   const componentInstance = setupComponent(config, fixture)
 
   const mountResponse: MountResponse<T> = {
-    testBed,
     fixture,
     component: componentInstance,
   }
@@ -311,3 +292,18 @@ export const createOutputSpy = <T>(alias: string) => {
 
   return emitter as any
 }
+
+// Only needs to run once, we reset before each test
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+  {
+    teardown: { destroyAfterEach: false },
+  },
+)
+
+setupHooks(() => {
+  // Not public, we need to call this to remove the last component from the DOM
+  TestBed['tearDownTestingModule']()
+  TestBed.resetTestingModule()
+})
