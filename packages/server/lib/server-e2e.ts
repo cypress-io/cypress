@@ -191,8 +191,10 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
       // @ts-ignore
       const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
+      // If the iterator is exhausted (done) on the first try, then 0 matches were found
+      const zeroMatches = iterator.next().done
 
-      return !iterator.next().done
+      return !zeroMatches
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
