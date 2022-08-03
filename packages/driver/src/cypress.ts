@@ -237,7 +237,8 @@ class $Cypress {
         overrideLevel = 'code'
       }
 
-      // FIXME: // bug in runner causes browser to hang in run mode when test:before:run throws an exception
+      // FIXME: https://github.com/cypress-io/cypress/issues/23039
+      // bug in runner causes browser to hang in run mode when test:before:run throws an exception
       if (overrideLevel === 'test:before:run' && this.config('isTextTerminal')) {
         return
       }

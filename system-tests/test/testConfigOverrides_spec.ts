@@ -33,7 +33,8 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  // FIXME: bug in runner causes browser to hang in run mode when test:before:run throws an exception
+  // FIXME: https://github.com/cypress-io/cypress/issues/23039
+  // bug in runner causes browser to hang in run mode when test:before:run throws an exception
   // systemTests.it.skip('fails when setting invalid config opt with Cypress.config() in before:test:run', {
   //   spec: 'testConfigOverrides/invalid_before_test.js',
   //   snapshot: true,

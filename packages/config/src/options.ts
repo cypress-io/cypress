@@ -34,7 +34,7 @@ export const ALL_OVERRIDE_LEVELS = ['code', 'test:before:run', 'test:before:run:
 
 export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number] | 'never'
 
-export type OverrideLevels = Array<typeof ALL_OVERRIDE_LEVELS[number]> | 'never'
+export type OverrideLevels = Readonly<Array<typeof ALL_OVERRIDE_LEVELS[number]> | 'never'>
 
 interface ConfigOption {
   name: string
@@ -355,7 +355,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'testIsolation',
-    // TODO: When experimentalSessionAndOrigin is removed and released as GA,
+    // TODO: https://github.com/cypress-io/cypress/issues/23093
+    // When experimentalSessionAndOrigin is removed and released as GA,
     // update the defaultValue from 'legacy' to 'strict' and
     // update this code to remove the check/override specific to enable
     // strict by default when experimentalSessionAndOrigin=true
