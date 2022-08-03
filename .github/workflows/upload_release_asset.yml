@@ -1,0 +1,36 @@
+# fossa report attribution --debug --format spdx >> myFile
+name: Upload SBOM as Release Asset
+# Ensures that this is only run once, either when pushing
+# directly to main OR when pushing to a PR against main.
+on:
+  release:
+    types:
+      - published
+jobs:
+  generate_SBOM:
+    runs-on: ubuntu-latest
+    env:
+          FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Download Fossa binary and install
+        run:  |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+      - name: Generate SBOM
+        run:  |
+          fossa analyze 
+          fossa report attribution --debug --format spdx >> SBOM.rpt
+      - name: Verify report
+        run:  |
+          ls -lht|head
+          cat SBOM.rpt      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./SBOM.rpt
+          asset_name: SBOM.rpt
+          asset_content_type: text/plain
