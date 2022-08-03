@@ -32,9 +32,9 @@ const dashesOrUnderscoresRe = /^(_-)+/
 function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
-      memo[item[keyKey] as string] = item[valueKey]
+      memo[item[keyKey]] = item[valueKey]
     } else {
-      memo[item[keyKey] as string] = defaultValueFallback
+      memo[item[keyKey]] = defaultValueFallback
     }
 
     return memo
