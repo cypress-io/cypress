@@ -518,9 +518,6 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (testingType) {
-        d.diagnostics.error = null
-      }
     })
 
     if (this._currentTestingType === testingType) {
