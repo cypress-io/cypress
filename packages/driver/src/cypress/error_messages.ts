@@ -1888,9 +1888,6 @@ export default {
 
           > ${cmd(obj.previous)}`
     },
-    state_subject_deprecated: {
-      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,
-    },
   },
 
   submit: {

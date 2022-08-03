@@ -27,7 +27,6 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
   const endLogGroupCmd = $Command.create({
     name: 'end-logGroup',
     injected: true,
-    args: [],
   })
 
   const forwardYieldedSubject = () => {
