@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - issue-22147-nohoist
+        - revert-22742
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,6 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +44,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -58,22 +56,23 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
     - false
     # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
-# windows is slow in CI, so we only run a certain set of tests on each commit
+# windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
-fullWindowsWorkflowFilters: &full-windows-workflow-filters
-  filters:
-    branches:
-      only:
-      - develop
-      - 'linux-arm64'
-      - '*-release'
-      - 'win*'
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.13.2-chrome100-ff98
+      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -82,7 +81,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.13.2-chrome100-ff98
+      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
         user: node
     environment:
       PLATFORM: linux
@@ -128,7 +127,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-22147-nohoist" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -179,10 +178,14 @@ commands:
     steps:
       - run:
           name: Build all codegen
-          command: yarn gulp buildProd
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp buildProd
       - run:
           name: Build packages
-          command: yarn build
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -315,6 +318,7 @@ commands:
       - run:
           name: Install Node Modules
           command: |
+            source ./scripts/ensure-node.sh
             # avoid installing Percy's Chromium every time we use @percy/cli
             # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
             PERCY_POSTINSTALL_BROWSER=true \
@@ -376,7 +380,9 @@ commands:
             - run:
                 name: Stop .only
                  # this will catch ".only"s in js/coffee as well
-                command: yarn stop-only-all
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn stop-only-all
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -384,7 +390,9 @@ commands:
           ## See the following information
           ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-          command: yarn check-terminal
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-terminal
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -537,7 +545,7 @@ commands:
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
               CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -562,7 +570,7 @@ commands:
 
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
@@ -570,7 +578,7 @@ commands:
       - run:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
@@ -657,7 +665,7 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: 
+      - run:
           name: 'Verify Mocha Results'
           command: |
             source ./scripts/ensure-node.sh
@@ -860,8 +868,28 @@ commands:
           repo: <<parameters.repo>>
           pull_request_id: <<parameters.pull_request_id>>
       - run:
+          # Ensure we're installing the node-version for the cloned repo
+          command: |
+            if [[ -f .node-version ]]; then
+              branch="<< pipeline.git.branch >>"
+
+              externalBranchPattern='^pull\/[0-9]+'
+              if [[ $branch =~ $externalBranchPattern ]]; then
+                # We are unable to curl from the external PR branch location
+                # so we fall back to develop
+                branch="develop"
+              fi
+
+              curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
+            else
+              # if no .node-version file exists, we no-op the node script and use the global yarn
+              echo '' > ci-ensure-node.sh
+            fi
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
+            source ./ci-ensure-node.sh
             if [[ -f yarn.lock ]]; then
               yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
@@ -890,11 +918,14 @@ commands:
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
-          command: npx cypress version
+          command: |
+            source ./ci-ensure-node.sh
+            npx cypress version
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: |
+            source ./ci-ensure-node.sh
             [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - when:
           condition: <<parameters.build-project>>
@@ -903,15 +934,19 @@ commands:
               name: Build 🏗 (maybe)
               working_directory: /tmp/<<parameters.repo>>
               command: |
+                source ./ci-ensure-node.sh
                 [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: <<parameters.server-start-command>>
+          command: |
+            source ./ci-ensure-node.sh
+            <<parameters.server-start-command>>
           background: true
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+          command: |
+            npx wait-on <<parameters.wait-on>> --timeout 120000
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - when:
@@ -941,14 +976,18 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>>
       - store-npm-logs
 
   wait-on-circle-jobs:
@@ -1005,6 +1044,7 @@ commands:
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
             fi
+            source ./scripts/ensure-node.sh
             node --version
             yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
@@ -1018,6 +1058,7 @@ commands:
                 sudo apt-get update && sudo apt-get install -y zip
               fi
             fi
+            source ./scripts/ensure-node.sh
             yarn binary-zip
       - store-npm-logs
       - persist_to_workspace:
@@ -1033,10 +1074,14 @@ commands:
     steps:
       - run:
           name: Bump NPM version
-          command: yarn get-next-version --npm
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn get-next-version --npm
       - run:
           name: Build NPM package
-          command: yarn build --scope cypress
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build --scope cypress
       - run:
           name: Copy Re-exported NPM Packages
           command: node ./scripts/post-build.js
@@ -1053,7 +1098,9 @@ commands:
           steps:
             - run:
                 name: list NPM package contents
-                command: yarn workspace cypress size
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
@@ -1213,7 +1260,7 @@ jobs:
             run-vite-dev-server-integration-tests
       - run:
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize
 
   cli-visual-tests:
@@ -1235,7 +1282,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1580,7 +1627,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1603,7 +1650,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1613,7 +1660,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs      
+      - store-npm-logs
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -1625,7 +1672,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1635,7 +1682,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs            
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
@@ -1751,14 +1798,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/angular build
-      - run:
-          name: Run tests
-          command: yarn test-ci
-          working_directory: npm/angular
-      - store_test_results:
-          path: npm/angular/test_results
-      - store_artifacts:
-          path: npm/angular/test_results
       - store-npm-logs
 
   npm-react:
@@ -2362,7 +2401,7 @@ linux-x64-workflow: &linux-x64-workflow
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install          
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2671,14 +2710,12 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - lint:
-        <<: *full-windows-workflow-filters
         name: windows-lint
         executor: windows
         requires:
           - windows-build
 
     - unit-tests:
-        <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
         resource_class: windows.large
@@ -2686,7 +2723,6 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
-        <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
         resource_class: windows.large
@@ -2717,3 +2753,4 @@ workflows:
     <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
+    <<: *windows-workflow-filters

@@ -20,6 +20,9 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
+import { patchDocumentCookie } from './patches/cookies'
+import { patchFormElementSubmit } from './patches/submit'
+import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
 
@@ -147,6 +150,16 @@ const attachToWindow = (autWindow: Window) => {
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
+
+  if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
+    patchFormElementSubmit(autWindow)
+    patchElementIntegrity(autWindow)
+  }
+
+  patchDocumentCookie(Cypress, autWindow)
+
+  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
+  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
 
   cy.overrides.wrapNativeMethods(autWindow)
 

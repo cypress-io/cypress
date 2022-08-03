@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
-import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { WizardFrontendFramework, WizardBundler } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -54,7 +54,7 @@ export interface ConfigChildProcessShape {
 }
 
 export interface AppDataShape {
-  isInGlobalMode: boolean
+  isGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
@@ -63,11 +63,11 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: typeof WIZARD_BUNDLERS[number] | null
-  chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  chosenBundler: WizardBundler | null
+  chosenFramework: WizardFrontendFramework | null
   chosenManualInstall: boolean
-  detectedBundler: typeof WIZARD_BUNDLERS[number] | null
-  detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  detectedBundler: WizardBundler | null
+  detectedFramework: WizardFrontendFramework | null
 }
 
 export interface MigrationDataShape {
@@ -182,7 +182,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshState: null,
     },
     app: {
-      isInGlobalMode: Boolean(modeOptions.global),
+      isGlobalMode: Boolean(modeOptions.global),
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,

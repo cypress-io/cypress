@@ -61,7 +61,7 @@ describe('App: Specs', () => {
         }).should('be.visible').within(() => {
           cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
           cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
-          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="file-match-indicator"]').contains('No Matches')
           cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
         })
 
@@ -320,7 +320,7 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
@@ -652,7 +652,7 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
@@ -711,8 +711,8 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
-        cy.findByRole('button', { name: 'New Spec' }).click()
+        cy.contains('No Specs Found', { timeout: 12000 }).should('be.visible')
+        cy.findByRole('button', { name: 'New Spec' }).click({ timeout: 12000 })
 
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',

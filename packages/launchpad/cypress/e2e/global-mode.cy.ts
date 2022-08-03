@@ -6,6 +6,20 @@ import { getPathForPlatform } from './support/getPathForPlatform'
 const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
+  describe('methods of opening global mode', () => {
+    it('shows global page when opened by --global flag', () => {
+      cy.openGlobalMode()
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows global page when opened by global install', () => {
+      cy.openGlobalMode({ byFlag: false })
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+  })
+
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
@@ -71,7 +85,7 @@ describe('Launchpad: Global Mode', () => {
 
   describe('when projects have been added', () => {
     const setupAndValidateProjectsList = (projectList, globalModeOptions?: string[] | undefined) => {
-      cy.openGlobalMode(globalModeOptions)
+      cy.openGlobalMode({ argv: globalModeOptions })
 
       // Adding a project puts the project first in the list, so we reverse the list
       // to ensure the projectList in the UI matches what is passed in.

@@ -237,6 +237,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
+  const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
 
   if (isRenderedHTML) {
@@ -257,7 +258,6 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
     // const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin(this.req.proxiedUrl)
     const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
-    const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
     if (this.config.experimentalSessionAndOrigin && isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
@@ -308,10 +308,14 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.setHeader('Origin-Agent-Cluster', '?0')
   }
 
-  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && isReqMatchOriginPolicy && (
-    (this.res.wantsInjection === 'full')
-    || resContentTypeIsJavaScript(this.incomingRes)
-  )
+  this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalModifyObstructiveThirdPartyCode) &&
+    // if experimentalModifyObstructiveThirdPartyCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
+    ((this.config.experimentalModifyObstructiveThirdPartyCode
+      && (isHTML || isRenderedHTML || resContentTypeIsJavaScript(this.incomingRes))) ||
+     this.res.wantsInjection === 'full' ||
+     this.res.wantsInjection === 'fullCrossOrigin' ||
+     // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
+     (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchOriginPolicy))
 
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
@@ -370,14 +374,12 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const currentAUTUrl = ctx.getAUTUrl()
 
-  // A cookie needs cross origin handling if it's an AUT request and
-  // either the request itself is cross-origin or the origins between
-  // requests don't match, since the browser won't set them in that
-  // case and if it's secondary-origin -> primary-origin, we don't
-  // recognize the request as cross-origin
+  // A cookie needs cross origin handling if the request itself is
+  // cross-origin or the origins between requests don't match,
+  // since the browser won't set them in that case and if it's
+  // secondary-origin -> primary-origin, we don't recognize the request as cross-origin
   return (
     ctx.config.experimentalSessionAndOrigin
-    && ctx.req.isAUTFrame
     && (
       (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
@@ -528,6 +530,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isHtml: isHtml(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
     })
@@ -556,6 +559,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
     isHtml: isHtml(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
+    modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
   })).on('error', this.onError)

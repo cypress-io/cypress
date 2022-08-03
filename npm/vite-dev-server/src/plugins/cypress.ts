@@ -2,6 +2,7 @@ import debugFn from 'debug'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
+import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
@@ -52,21 +53,44 @@ export const Cypress = (
     configResolved (config) {
       base = config.base
     },
-    async transformIndexHtml () {
+    async transformIndexHtml (html) {
+      // it's possibe other plugins have modified the HTML
+      // before we get to. For example vitejs/plugin-react will
+      // add a preamble. We do our best to look at the HTML we
+      // receive and inject it.
+      // For now we just grab any `<script>` tags and inject them to <head>.
+      // We will add more handling as we learn the use cases.
+      const root = parse(html)
+
+      const scriptTagsToInject = root.childNodes.filter((node) => {
+        return node instanceof HTMLElement && node.rawTagName === 'script'
+      })
+
       const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
-      const indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
+
+      let indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
+
+      // Inject the script tags
+      indexHtmlContent = indexHtmlContent.replace(
+        '<head>',
+        `<head>
+        ${scriptTagsToInject.map((script) => script.toString())}
+      `,
+      )
+
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // insert the script in the end of the body
-      return `${indexHtmlContent.substring(0, endOfBody)
-    }<script>
-    ${loader}
-    </script>${
-      indexHtmlContent.substring(endOfBody)
-    }`
+      const newHtml = `
+        ${indexHtmlContent.substring(0, endOfBody)}
+        <script>${loader}</script>
+        ${indexHtmlContent.substring(endOfBody)}
+      `
+
+      return newHtml
     },
     configureServer: async (server: ViteDevServer) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {

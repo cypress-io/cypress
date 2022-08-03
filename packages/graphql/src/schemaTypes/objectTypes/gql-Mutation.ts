@@ -33,7 +33,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.error.clearError(args.id)
-        await ctx.lifecycleManager.refreshLifecycle().catch(ctx.lifecycleManager.onLoadError)
+        await ctx.lifecycleManager.refreshLifecycle().catch((e) => ctx.lifecycleManager.onLoadError(e))
 
         return {}
       },
@@ -176,7 +176,7 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           // Component Testing has a wizard to help users configure their project
           if (ctx.coreData.currentTestingType === 'component') {
-            ctx.actions.wizard.initialize()
+            await ctx.actions.wizard.initialize()
           } else {
             // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
             await ctx.actions.wizard.scaffoldTestingType()

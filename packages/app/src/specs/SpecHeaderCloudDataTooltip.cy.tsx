@@ -1,9 +1,11 @@
-import { SpecHeaderCloudDataTooltipFragmentDoc, SpecHeaderCloudDataTooltip_RequestAccessDocument } from '../generated/graphql-test'
+import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import { get, set } from 'lodash'
 import { defaultMessages } from '@cy/i18n'
 
-describe('SpecHeaderCloudDataTooltip', () => {
+const tooltipContentSelector = '.v-popper'
+
+describe('<SpecHeaderCloudDataTooltip />', () => {
   function mountWithStatus (
     status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
     mode: string,
@@ -16,29 +18,38 @@ describe('SpecHeaderCloudDataTooltip', () => {
     },
   ) {
     cy.mountFragment(SpecHeaderCloudDataTooltipFragmentDoc, {
-      onResult: (ctx) => {
-        set(ctx, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
+      onResult: (result) => {
+        set(result, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
 
         switch (status) {
           case 'LOGGED_OUT':
-            set(ctx, 'cloudViewer', null)
+            set(result, 'cloudViewer', null)
             break
           case 'NOT_CONNECTED':
-            set(ctx, 'currentProject.cloudProject.__typename', null)
+            set(result, 'currentProject.cloudProject.__typename', null)
             break
           case 'NOT_FOUND':
-            set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectNotFound')
+            set(result, 'currentProject.cloudProject.__typename', 'CloudProjectNotFound')
             break
           case 'ACCESS_REQUESTED':
-            set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectUnauthorized')
-            set(ctx, 'currentProject.cloudProject.hasRequestedAccess', true)
+            set(result, 'currentProject.cloudProject', {
+              __typename: 'CloudProjectUnauthorized',
+              message: '',
+              hasRequestedAccess: true,
+            })
+
             break
           case 'UNAUTHORIZED':
-            set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectUnauthorized')
+            set(result, 'currentProject.cloudProject', {
+              __typename: 'CloudProjectUnauthorized',
+              message: '',
+              hasRequestedAccess: false,
+            })
+
             break
           case 'CONNECTED':
           default:
-            set(ctx, 'currentProject.cloudProject.__typename', 'CloudProjectSpec')
+            set(result, 'currentProject.cloudProject.__typename', 'CloudProjectSpec')
             break
         }
       },
@@ -85,13 +96,13 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-          cy.get('button').should('not.exist')
+          cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
 
           cy.percySnapshot()
         })
@@ -103,7 +114,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
@@ -125,35 +136,13 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
           cy.percySnapshot()
-        })
-
-        it('should update to "Request Sent" when button is triggered', () => {
-          cy.stubMutationResolver(SpecHeaderCloudDataTooltip_RequestAccessDocument, (defineResult) => {
-            return defineResult({
-              cloudProjectRequestAccess: {
-                __typename: 'CloudProjectUnauthorized',
-                message: 'msg',
-                hasRequestedAccess: true,
-              },
-            })
-          })
-
-          cy.get('.v-popper').trigger('mouseenter')
-
-          cy.findByTestId('request-access-button')
-          .should('be.visible')
-          .click()
-
-          cy.findByTestId('access-requested-button')
-          .should('be.visible')
-          .should('be.disabled')
         })
       })
 
@@ -163,15 +152,11 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
-
-          cy.findByTestId('access-requested-button')
-          .should('be.visible')
-          .should('be.disabled')
 
           cy.percySnapshot()
         })
@@ -183,7 +168,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
@@ -205,7 +190,7 @@ describe('SpecHeaderCloudDataTooltip', () => {
         })
 
         it('should render expected tooltip content', () => {
-          cy.get('.v-popper').trigger('mouseenter')
+          cy.get(tooltipContentSelector).trigger('mouseenter')
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')

@@ -84,6 +84,7 @@ export class OpenProject {
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
+      experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
     })
 
     // if we don't have the isHeaded property
@@ -271,6 +272,9 @@ export class OpenProject {
         testingType,
       },
     })
+
+    // This was previously in the ProjectBase constructor but is now async
+    await this._ctx.lifecycleManager.setCurrentProject(path)
 
     try {
       await this.projectBase.initializeConfig()

@@ -93,9 +93,11 @@ import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
-import CodeIcon from '~icons/cy/code-editor_x24'
-import RunsIcon from '~icons/cy/runs_x24'
-import SettingsIcon from '~icons/cy/settings_x24'
+import {
+  IconTechnologyCodeEditor,
+  IconTechnologyTestResults,
+  IconObjectGear,
+} from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
@@ -103,14 +105,15 @@ import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.pn
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
+import { useWindowSize } from '@vueuse/core'
 
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: RunsIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-]
+  { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
+  { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
+  { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+] as const
 
 gql`
 fragment SidebarNavigation on Query {
@@ -140,6 +143,8 @@ query SideBarNavigation {
 }
 `
 
+const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
+
 const query = useQuery({ query: SideBarNavigationDocument })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
@@ -148,12 +153,14 @@ const bindingsOpen = ref(false)
 
 const route = useRoute()
 
-const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpandedAllowed !== false)
+const navIsAlwaysCollapsed = computed(() => width.value >= NAV_EXPAND_MIN_SCREEN_WIDTH && route.meta?.navBarExpandedAllowed !== false)
 
 const isNavBarExpanded = ref(true)
 
+const { width } = useWindowSize()
+
 watchEffect(() => {
-  if (route.meta?.navBarExpandedAllowed === false) {
+  if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     isNavBarExpanded.value = false
   } else {
     isNavBarExpanded.value = query.data?.value?.localSettings.preferences.isSideNavigationOpen ?? true
@@ -161,7 +168,7 @@ watchEffect(() => {
 })
 
 const toggleNavbarIfAllowed = () => {
-  if (route.meta?.navBarExpandedAllowed === false) {
+  if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     return
   }
 

@@ -58,7 +58,7 @@ describe('<RunStatusDots />', () => {
       cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
       cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
       cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-indigo-400')
-      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-400')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
     })
   })
@@ -124,5 +124,15 @@ describe('<RunStatusDots />', () => {
       cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
     })
+  })
+
+  it('builds href with UTM params', () => {
+    const runs = fakeRuns(['PASSED'])
+
+    mountWithRuns(runs)
+
+    cy.get('a')
+    .should('have.attr', 'href')
+    .and('contain', 'utm_campaign=PASSED')
   })
 })

@@ -1,4 +1,4 @@
-import type { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -55,8 +55,8 @@ function scaffoldAndOpenE2EProject (opts: {
 
 function scaffoldAndOpenCTProject (opts: {
   name: Parameters<typeof cy.scaffoldProject>[0]
-  framework: typeof WIZARD_FRAMEWORKS[number]['name']
-  bundler?: typeof WIZARD_FRAMEWORKS[number]['supportedBundlers'][number]['name']
+  framework: WizardFrontendFramework['name']
+  bundler?: WizardFrontendFramework['supportedBundlers'][number]['name']
   args?: Parameters<typeof cy.openProject>[1]
   removeFixturesFolder?: boolean
 }) {
@@ -77,7 +77,7 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
 
-  cy.contains('React.js(detected)').click()
+  cy.contains('Pick a framework').click()
   cy.contains(opts.framework).click()
   if (opts.bundler) {
     cy.contains('Webpack(detected)').click()

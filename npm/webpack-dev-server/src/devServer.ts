@@ -25,7 +25,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
+export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
 
 /**
  * @internal
@@ -98,9 +98,11 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   })
 }
 
-export type PresetHandlerResult = { frameworkConfig?: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
+export type PresetHandlerResult = { frameworkConfig: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
 
-async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
+
+async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
   switch (devServerConfig.framework) {
     case 'create-react-app':
       return createReactAppHandler(devServerConfig)
@@ -112,6 +114,10 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Pres
 
     case 'next':
       return await nextHandler(devServerConfig)
+
+      // TODO: revert once Angular is slated for release
+      // case 'angular':
+      //   return await angularHandler(devServerConfig)
 
     case 'react':
     case 'vue':

@@ -17,7 +17,7 @@ const expectEslintModifications = (webpackConfig: Configuration) => {
 }
 
 const expectModuleSourceInPlaceModifications = (webpackConfig: Configuration, projectRoot: string) => {
-  const moduleSourcePlugin: any = webpackConfig.resolve.plugins.find((plugin) => plugin.constructor.name === 'ModuleScopePlugin')
+  const moduleSourcePlugin: any = webpackConfig.resolve?.plugins?.find((plugin) => plugin.constructor.name === 'ModuleScopePlugin')
 
   if (!moduleSourcePlugin) {
     throw new Error('Expected to find ModuleScopePlugin in webpack config')
@@ -27,7 +27,7 @@ const expectModuleSourceInPlaceModifications = (webpackConfig: Configuration, pr
 }
 
 const expectBabelRuleModifications = (webpackConfig: Configuration, projectRoot: string) => {
-  const babelRule: any = (webpackConfig.module.rules as any).find((rule) => rule.oneOf)?.oneOf.find((oneOf) => oneOf.loader?.includes('babel-loader'))
+  const babelRule: any = (webpackConfig.module?.rules as any)?.find((rule) => rule.oneOf)?.oneOf.find((oneOf) => oneOf.loader?.includes('babel-loader'))
 
   if (!babelRule) {
     throw new Error('Expected to find BabelRule in webpack config')
@@ -37,7 +37,7 @@ const expectBabelRuleModifications = (webpackConfig: Configuration, projectRoot:
 }
 
 const expectReactScriptsFiveModifications = (webpackConfig: Configuration) => {
-  const definePlugin: any = webpackConfig.plugins.find((plugin) => plugin.constructor.name === 'DefinePlugin')
+  const definePlugin: any = webpackConfig.plugins?.find((plugin) => plugin.constructor.name === 'DefinePlugin')
 
   if (!definePlugin) {
     throw new Error('Expected to find DefinePlugin in webpack config')
@@ -55,14 +55,18 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
     expectEslintModifications(webpackConfig)
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('react-scripts')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
   })
 
   it('sources the config from react-scripts v5', async () => {
@@ -70,8 +74,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
@@ -79,6 +84,9 @@ describe('createReactAppHandler', function () {
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
     expectReactScriptsFiveModifications(webpackConfig)
+
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include('react-scripts')
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 
   it('sources the config from ejected cra', async () => {
@@ -86,8 +94,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+      framework: 'create-react-app',
     } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
@@ -95,5 +104,8 @@ describe('createReactAppHandler', function () {
     expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
     expectBabelRuleModifications(webpackConfig, projectRoot)
     expectReactScriptsFiveModifications(webpackConfig)
+
+    expect(sourceWebpackModulesResult.framework).to.be.null
+    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(5)
   })
 })

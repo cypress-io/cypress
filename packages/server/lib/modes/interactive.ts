@@ -1,17 +1,21 @@
 import _ from 'lodash'
 import os from 'os'
 import { app, nativeImage as image } from 'electron'
-// eslint-disable-next-line no-duplicate-imports
-import type { WebContents } from 'electron'
+
 import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, getCtx } from '@packages/data-context'
-import type { LaunchArgs, PlatformName } from '@packages/types'
-import { EventEmitter } from 'events'
-import Events from '../gui/events'
+import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { WebContents } from 'electron'
+import type { LaunchArgs } from '@packages/types'
+
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:server:interactive')
 
 const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
@@ -150,25 +154,48 @@ export = {
       return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
-        Events.start({
-          ...(options as LaunchArgs),
-          onFocusTests () {
-            // @ts-ignore
-            return app.focus({ steal: true }) || win.focus()
-          },
-          os: os.platform() as PlatformName,
-        }, new EventEmitter())
 
         return win
       })
     })
   },
 
-  async run (options, ctx: DataContext) {
+  async run (options: LaunchArgs, _loading: Promise<void>) {
     const [, port] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
     ])
+
+    // Before the electron app quits, we interrupt and ensure the current
+    // DataContext is completely destroyed prior to quitting the process.
+    // Parts of the DataContext teardown are asynchronous, particularly the
+    // closing of open file watchers, and not awaiting these can cause
+    // the electron process to throw.
+    // https://github.com/cypress-io/cypress/issues/22026
+
+    app.once('will-quit', (event: Event) => {
+      // We must call synchronously call preventDefault on the will-quit event
+      // to halt the current quit lifecycle
+      event.preventDefault()
+
+      debug('clearing DataContext prior to quit')
+
+      // We use setImmediate to guarantee that app.quit will be called asynchronously;
+      // synchronously calling app.quit in the will-quit handler prevent the subsequent
+      // close from occurring
+      setImmediate(async () => {
+        try {
+          await clearCtx()
+        } catch (e) {
+          // Silently handle clearCtx errors, we still need to quit the app
+          debug(`DataContext cleared with error: ${e?.message}`)
+        }
+
+        debug('DataContext cleared, quitting app')
+
+        app.quit()
+      })
+    })
 
     return this.ready(options, port)
   },

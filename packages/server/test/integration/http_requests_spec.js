@@ -92,7 +92,7 @@ describe('Routes', () => {
 
     Fixtures.scaffold()
 
-    this.setup = (initialUrl, obj = {}, spec) => {
+    this.setup = async (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
@@ -102,7 +102,7 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.lifecycleManager.setCurrentProject(obj.projectRoot)
+      await ctx.lifecycleManager.setCurrentProject(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them

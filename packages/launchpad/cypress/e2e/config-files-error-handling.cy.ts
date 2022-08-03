@@ -158,6 +158,7 @@ describe('Launchpad: Error System Tests', () => {
   })
 
   it(`clears the error correctly after first 'try again' attempt`, () => {
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
     cy.scaffoldProject('config-with-ts-syntax-error')
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
@@ -165,6 +166,8 @@ describe('Launchpad: Error System Tests', () => {
 
     // Try again while the config is still invalid
     cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.wait('@resetErrorsAndLoadConfig')
 
     // Wait until config error is on screen again
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
@@ -290,5 +293,39 @@ describe('setupNodeEvents', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
+  })
+
+  it('handles a devServer function returning wrong structure', () => {
+    cy.scaffoldProject('dev-server-invalid')
+
+    // sets the current project to enable writeFileInProject
+    cy.openProject('dev-server-invalid')
+
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingtype=component]').click()
+
+    cy.get('body')
+    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .and('contain.text', 'The returned value of the devServer function is not valid.')
+
+    cy.get('[data-cy="collapsible-header"]')
+    .should('have.attr', 'aria-expanded', 'true')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+
+    cy.log('Fix error and validate it reloads configuration')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js',
+        `module.exports = {
+          devServer: () => ({ port: '3000' })
+        }`)
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.get('body')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('contain.text', 'Welcome to Cypress!')
   })
 })

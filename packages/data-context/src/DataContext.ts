@@ -133,7 +133,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return this.appData.isInGlobalMode
+    return this.appData.isGlobalMode
   }
 
   get modeOptions () {
@@ -429,10 +429,14 @@ export class DataContext {
   }
 
   async destroy () {
-    const destroy = util.promisify(this.coreData.servers.gqlServer?.destroy || (() => {}))
+    let destroyGqlServer = () => Promise.resolve()
+
+    if (this.coreData.servers.gqlServer?.destroy) {
+      destroyGqlServer = util.promisify(this.coreData.servers.gqlServer.destroy)
+    }
 
     return Promise.all([
-      destroy(),
+      destroyGqlServer(),
       this._reset(),
     ])
   }

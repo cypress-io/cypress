@@ -1,68 +1,16 @@
 <template>
   <div class="p-24px spec-container">
-    <Alert
-      v-if="isAlertOpen"
-      v-model="isAlertOpen"
-      status="error"
-      :title="t('specPage.noSpecError.title')"
-      class="mb-16px"
-      :icon="WarningIcon"
-      dismissible
-    >
-      <p class="mb-24px">
-        {{ t('specPage.noSpecError.intro') }} <InlineCodeFragment variant="error">
-          {{ route.params.unrunnable }}
-        </InlineCodeFragment>
-      </p>
-      <p>{{ t('specPage.noSpecError.explainer') }}</p>
-    </Alert>
-    <Alert
-      v-if="isOffline"
-      v-model="isOffline"
-      data-cy="offline-alert"
-      status="warning"
-      :title="t('specPage.offlineWarning.title')"
-      class="mb-16px"
-      :icon="WarningIcon"
-      dismissible
-    >
-      <p class="mb-24px">
-        {{ t('specPage.offlineWarning.explainer') }}
-      </p>
-    </Alert>
-    <Alert
-      v-if="shouldShowFetchError"
-      v-model="shouldShowFetchError"
-      status="warning"
-      :title="t('specPage.fetchFailedWarning.title')"
-      class="mb-16px"
-      :icon="WarningIcon"
-      dismissible
-    >
-      <p>
-        {{ t('specPage.fetchFailedWarning.explainer1') }}
-      </p>
-      <p>
-        <i18n-t
-          scope="global"
-          keypath="specPage.fetchFailedWarning.explainer2"
-        >
-          <ExternalLink
-            href="https://www.cypressstatus.com"
-            class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
-          >
-            Status Page
-          </ExternalLink>
-        </i18n-t>
-      </p>
-      <Button
-        :prefix-icon="RefreshIcon"
-        class="mt-24px"
-        @click="refetchFailedCloudData"
-      >
-        {{ t('specPage.fetchFailedWarning.refreshButton') }}
-      </Button>
-    </Alert>
+    <SpecsListBanners
+      :gql="props.gql"
+      :is-spec-not-found="isSpecNotFound"
+      :is-offline="isOffline"
+      :is-fetch-error="shouldShowFetchError"
+      :is-project-not-found="cloudProjectType === 'CloudProjectNotFound'"
+      :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
+      :has-requested-access="hasRequestedAccess"
+      @refetch-failed-cloud-data="refetchFailedCloudData"
+      @reconnect-project="showConnectToProject"
+    />
     <SpecsListHeader
       v-model="search"
       :specs-list-input-ref-fn="specsListInputRefFn"
@@ -127,7 +75,7 @@
     >
       <div
         v-bind="wrapperProps"
-        class="divide-y-1 children:h-40px"
+        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
       >
         <SpecsListRowItem
           v-for="row in list"
@@ -216,11 +164,10 @@
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
+import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
@@ -240,10 +187,6 @@ import { useVirtualList } from '@packages/frontend-shared/src/composables/useVir
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
-import Alert from '../../../frontend-shared/src/components/Alert.vue'
-import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
-import WarningIcon from '~icons/cy/warning_x16.svg'
-import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
 
@@ -258,6 +201,16 @@ watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { imm
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
 const loginUtmMedium = ref('')
+
+const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
+
+const hasRequestedAccess = computed(() => {
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    return props.gql.currentProject.cloudProject.hasRequestedAccess || false
+  }
+
+  return false
+})
 
 const showLogin = (utmMedium: string) => {
   loginUtmMedium.value = utmMedium
@@ -335,6 +288,7 @@ fragment Specs_SpecsList on Query {
     ...SpecPatternModal
   }
   ...SpecHeaderCloudDataTooltip
+  ...SpecsListBanners
 }
 `
 
@@ -353,7 +307,7 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
-const isAlertOpen = ref(!!route.params?.unrunnable)
+const isSpecNotFound = ref(!!route.params?.unrunnable)
 
 const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
@@ -437,7 +391,7 @@ mutation CloudData_Refetch ($ids: [ID!]!) {
 
 const refetchMutation = useMutation(CloudData_RefetchDocument)
 
-const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'))
+const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
 const refetch = async (ids: string[]) => {
   if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {

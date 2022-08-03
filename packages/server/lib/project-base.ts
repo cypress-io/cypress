@@ -37,7 +37,7 @@ export interface Cfg extends ReceivedCypressOptions {
   }
   e2e: Partial<Cfg>
   component: Partial<Cfg>
-  additionalIgnorePattern?: string
+  additionalIgnorePattern?: string | string[]
 }
 
 const localCwd = process.cwd()
@@ -104,8 +104,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       onWarning: this.ctx.onWarning,
       ...options,
     }
-
-    this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
   }
 
   protected ensureProp = ensureProp

@@ -72,5 +72,12 @@ for (const project of WEBPACK_REACT) {
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
+
+    it('should allow import of global styles in support file', () => {
+      cy.visitApp()
+      cy.contains('styles.cy.js').click()
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+    })
   })
 }
