@@ -8,19 +8,7 @@
     "build:test": "tsc -p tsconfig.spec.json",
     "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "clean13": "git checkout HEAD -- sandbox13 && git clean -f -d sandbox13",
-    "launch13": "yarn link:sandbox13 && cd sandbox13 && ng add @cypress/schematic && cd ..",
-    "launch:test13": "yarn link:sandbox13 && cd sandbox13 && ng add @cypress/schematic --e2eUpdate && cd ..",
-    "link:sandbox13": "yarn link && cd sandbox13 && yarn link @cypress/schematic",
-    "clean14": "git checkout HEAD -- sandbox14 && git clean -f -d sandbox14",
-    "launch14": "yarn link:sandbox14 && cd sandbox14 && ng add @cypress/schematic && cd ..",
-    "launch:test14": "yarn link:sandbox14 && cd sandbox14 && ng add @cypress/schematic --e2eUpdate && cd ..",
-    "link:sandbox14": "yarn link && cd sandbox14 && yarn link @cypress/schematic",
-    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
-    "test:e2e:sandbox13": "cd sandbox13 && ng run sandbox13:cypress-run",
-    "unlink:sandbox13": "cd sandbox13 && yarn unlink @cypress/schematic && cd .. && yarn unlink",
-    "test:e2e:sandbox14": "cd sandbox14 && ng run sandbox14:cypress-run",
-    "unlink:sandbox14": "cd sandbox14 && yarn unlink @cypress/schematic && cd .. && yarn unlink"
+    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts"
   },
   "dependencies": {
     "@angular-devkit/architect": "^0.1401.0",
@@ -37,9 +25,8 @@
     "@types/mocha": "8.0.3",
     "@types/node": "^18.0.6",
     "chai": "4.2.0",
-    "cypress": "latest",
     "mocha": "3.5.3",
-    "typescript": "~4.7.4"
+    "typescript": "~4.2.3"
   },
   "peerDependencies": {
     "@angular/cli": ">=14.1.0",
