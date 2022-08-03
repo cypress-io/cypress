@@ -178,7 +178,9 @@ Read our docs to learn more about working with [reporters](https://on.cypress.io
 
 ### Running the builder with a different baseUrl
 
-You can specify a `baseUrl` that is different than the one in `cypress.json`. To do this, add `baseUrl` to `configurations` like the following: 
+You can specify a `baseUrl` that is different than the one in `cypress.json`. There are two ways to do this.
+
+1. Add `baseUrl` to `configurations` like the following: 
 
 ```json
 "cypress-open": {
@@ -202,6 +204,15 @@ You can specify a `baseUrl` that is different than the one in `cypress.json`. To
     }
   }
 }
+```
+
+2. Add custom options to `devServerTarget` in `angular.json`:
+
+```json
+"options": {
+  "host": "localhost",
+  "port": 4200
+},
 ```
 
 In order to prevent the application from building, add the following to the end of your command:

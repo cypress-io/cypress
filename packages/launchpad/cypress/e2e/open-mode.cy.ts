@@ -28,21 +28,53 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
   })
 
-  it('includes x-framework and x-dev-server in request to Cypress manifest, even when launched in e2e mode', () => {
-    cy.withCtx((ctx, o) => {
-      o.sinon.spy(ctx.util.fetch)
+  describe('request for Cypress manifest', () => {
+    beforeEach(() => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx.util.fetch)
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos', ['--e2e'])
     })
 
-    cy.scaffoldProject('todos')
-    cy.openProject('todos', ['--e2e'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.withCtx((ctx, o) => {
-      expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
-        headers: {
-          'x-framework': 'react',
-          'x-dev-server': 'webpack',
-        },
+    it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+          headers: {
+            'x-framework': 'react',
+            'x-dev-server': 'webpack',
+          },
+        })
+      })
+    })
+
+    describe('logged-in state', () => {
+      it(`sends 'false' when not logged in`, () => {
+        cy.visitLaunchpad()
+        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+            headers: {
+              'x-logged-in': 'false',
+            },
+          })
+        })
+      })
+
+      it(`sends 'true' when logged in`, () => {
+        cy.loginUser()
+        cy.visitLaunchpad()
+        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+            headers: {
+              'x-logged-in': 'true',
+            },
+          })
+        })
       })
     })
   })
@@ -117,39 +149,6 @@ describe('Launchpad: Open Mode', () => {
 
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
-    })
-
-    it('updates the breadcrumb when navigating forward and back', () => {
-      const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
-        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
-      }
-
-      cy.scaffoldProject('todos')
-      cy.openProject('todos')
-      cy.visitLaunchpad()
-
-      cy.contains('h1', 'Welcome to Cypress!')
-
-      getBreadcrumbLink('todos', { disabled: true })
-
-      cy.get('[data-cy-testingtype="e2e"]').click()
-
-      cy.contains('h1', 'Choose a Browser')
-
-      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
-
-      cy.withCtx((ctx, { sinon }) => {
-        sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
-      })
-
-      getBreadcrumbLink('todos').click()
-
-      cy.contains('h1', 'Welcome to Cypress!')
-      getBreadcrumbLink('todos', { disabled: true })
-
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
     })
   })
 

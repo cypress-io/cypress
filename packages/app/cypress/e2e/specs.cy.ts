@@ -711,8 +711,8 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
-        cy.findByRole('button', { name: 'New Spec' }).click()
+        cy.contains('No Specs Found', { timeout: 12000 }).should('be.visible')
+        cy.findByRole('button', { name: 'New Spec' }).click({ timeout: 12000 })
 
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',

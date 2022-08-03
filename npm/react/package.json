@@ -14,9 +14,6 @@
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
-  "dependencies": {
-    "debug": "^4.3.2"
-  },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
@@ -24,7 +21,6 @@
     "@vitejs/plugin-react": "1.3.1",
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
-    "cypress-plugin-snapshots": "1.4.4",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
@@ -33,7 +29,7 @@
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.2.3",
-    "vite": "2.9.5",
+    "vite": "3.0.3",
     "vite-plugin-require-transform": "1.0.3"
   },
   "peerDependencies": {
