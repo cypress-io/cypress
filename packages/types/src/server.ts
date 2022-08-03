@@ -30,7 +30,6 @@ export interface LaunchArgs {
   projectRoot: string // same as above
   testingType: Cypress.TestingType
   invokedFromCli: boolean
-  runAllSpecsInSameBrowserSession?: boolean
   onError?: (error: Error) => void
   os: PlatformName
   exit?: boolean
