@@ -1,5 +1,6 @@
 <template>
   <FlakySpecSummary
+    v-if="flakyStatus?.severity"
     :spec-name="specName"
     :spec-extension="specExtension"
     :severity="flakyStatus?.severity ?? 'NONE'"
@@ -77,8 +78,8 @@ const flakyStatus = computed(() => {
 })
 
 onBeforeMount(async () => {
-  // We can't tell when the flaky data was retrieved since the retrieval timestamp is maintained at the cloudSpec-level
-  // To ensure we display the latest data, invalidate the current cache entry for our query and refetch
+  // Ensure we have the latest flaky data - since we manually query for flaky data here the background polling
+  // won't auto-refetch it for us when stale data is detected based on lastProjectUpdate
   await purgeCloudSpecCacheMutation.executeMutation({ projectSlug: props.projectId, specPaths: [props.specPath] })
   await query.executeQuery({ requestPolicy: 'network-only' })
 })
