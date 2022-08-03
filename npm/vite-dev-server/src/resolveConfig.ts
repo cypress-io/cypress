@@ -82,6 +82,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
           cypressConfig.cypressBinaryRoot,
         ],
       },
+      host: '127.0.0.1',
     },
     plugins: [
       Cypress(config, vite),
