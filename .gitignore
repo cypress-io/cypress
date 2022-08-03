@@ -78,9 +78,6 @@ system-tests/lib/fixtureDirs.ts
 # from npm/webpack-dev-server
 /npm/webpack-dev-server/cypress/videos
 
-# from runner
-/packages/runner/cypress/screenshots
-
 # from errors
 /packages/errors/__snapshot-images__
 /packages/errors/__snapshot-md__
