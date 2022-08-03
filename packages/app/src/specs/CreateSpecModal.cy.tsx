@@ -33,7 +33,8 @@ describe('<CreateSpecModal />', () => {
               value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            }],
+            },
+            { field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
@@ -96,7 +97,8 @@ describe('Modal Text Input', () => {
               value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            }],
+            },
+            { field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
@@ -144,7 +146,8 @@ describe('Modal Text Input', () => {
               value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            }],
+            },
+            { field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'this/path/does/not/produce/regex/match-',
@@ -196,7 +199,7 @@ describe('playground', () => {
               value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            }],
+            }, { field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
