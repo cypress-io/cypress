@@ -1,65 +1,86 @@
-import Bluebird from 'bluebird'
 import debugModule from 'debug'
-import errors from '../errors'
 
-import * as CriClient from './cri-client'
-import { CdpAutomation } from './cdp_automation'
-import utils from './utils'
-import { Browser } from './types'
+import type { Browser } from './types'
+import type { Automation } from '../automation'
+import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import { WebkitAutomation } from './webkit-automation'
+import { EventEmitter } from 'stream'
+import type playwright from 'playwright-webkit'
 
 const debug = debugModule('cypress:server:browsers:webkit')
 
-function getProxyArgs (proxyServer: string): string[] {
-  if (process.platform === 'win32') {
-    return [`--curl-proxy=${proxyServer}`]
-  }
+let wkAutomation: WebkitAutomation | undefined
 
-  // TODO: bypass loopback?
-  return [`--proxy=${proxyServer}`]
+export async function connectToNewSpec (browser: Browser, options, automation: Automation) {
+  if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
+
+  automation.use(wkAutomation)
+  await options.onInitializeNewBrowserTab()
+  await wkAutomation.reset(options.url)
 }
 
-export async function open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
-  const { isTextTerminal } = options
+export async function open (browser: Browser, url, options: any = {}, automation: Automation): Promise<LaunchedBrowser> {
+  // resolve pw from user's project path
+  const pwModulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
+  const pw = require(pwModulePath) as typeof playwright
 
-  const userDir = utils.getProfileDir(browser, isTextTerminal)
-
-  const launchedBrowser = await utils.launch(browser, 'about:blank', [
-    '--inspector-pipe',
-    `--user-data-dir=${userDir}`,
-    ...getProxyArgs(options.proxyServer),
-    ...(browser.isHeadless ? ['--headless'] : []),
-  ], {
-    pipeStdio: true,
+  const pwBrowser = await pw.webkit.launch({
+    proxy: {
+      server: options.proxyServer
+    },
+    downloadsPath: options.downloadsFolder,
+    headless: browser.isHeadless
   })
 
-  const client = await CriClient.create({ process: launchedBrowser }, options.onError)
-  .timeout(5000)
-  .catch(Bluebird.TimeoutError, async () => {
-    errors.throwErr('CDP_STDIO_TIMEOUT', browser.displayName, 5000)
-  })
+  // const launchedBrowser = await launch(browser, 'about:blank', null, [
+  //   '--inspector-pipe',
+  //   `--user-data-dir=${userDir}`,
+  //   ...getProxyArgs(options.proxyServer),
+  //   ...(browser.isHeadless ? ['--headless'] : []),
+  // ], null, {
+  //   pipeStdio: true,
+  // })
 
-  if (!client) {
-    throw new Error('missing CriClient')
+  // let pwPage = await pwBrowser.newPage()
+
+  let pwPage: playwright.Page
+
+  async function resetPage (_url) {
+    // new context comes with new cache + storage
+    const newContext = await pwBrowser.newContext({
+      ignoreHTTPSErrors: true
+    })
+    const oldPwPage = pwPage
+
+    pwPage = await newContext.newPage()
+
+    let promises: Promise<any>[] = []
+
+    if (oldPwPage) promises.push(oldPwPage.context().close())
+
+    if (_url) promises.push(pwPage.goto(_url))
+
+    if (promises.length) await Promise.all(promises)
+
+    return pwPage
   }
 
-  automation.use(
-    CdpAutomation(client.send),
-  )
+  pwPage = await resetPage(url)
 
-  // monkey-patch the .kill method to that the CDP connection is closed
-  const originalBrowserKill = launchedBrowser.kill
+  wkAutomation = new WebkitAutomation(resetPage, pwPage)
 
-  launchedBrowser.kill = async (...args) => {
-    debug('closing remote interface client')
+  automation.use(wkAutomation)
 
-    await client.close()
-    debug('closing chrome')
+  function getStubBrowser () {
+    const b = new EventEmitter()
 
-    await originalBrowserKill.apply(launchedBrowser, args)
+    b.kill = () => {
+      pwBrowser.close()
+      wkAutomation = undefined
+    }
+
+    return b
   }
 
-  await client.navigate(url)
-  await client.handleDownloads(options.downloadsFolder, automation)
-
-  return launchedBrowser
+  return getStubBrowser()
 }

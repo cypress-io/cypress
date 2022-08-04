@@ -91,7 +91,7 @@ function checkBrowser (browser: Browser): Bluebird<(boolean | HasVersion)[]> {
     try {
       browser.binary = browser.getBinaryPath(require(browser.module))
     } catch (e) {
-      log('error ', e)
+      debug('error ', e)
 
       return Bluebird.resolve([])
     }

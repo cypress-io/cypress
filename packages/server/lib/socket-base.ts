@@ -138,8 +138,7 @@ export class SocketBase {
         name: cookie,
       },
       destroyUpgrade: false,
-      serveClient: false,
-      transports: ['websocket'],
+      serveClient: false
     })
   }
 

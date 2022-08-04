@@ -31,8 +31,7 @@ let _eventManager: EventManager | undefined
 
 export function createWebsocket (socketIoRoute: string) {
   const socketConfig = {
-    path: socketIoRoute,
-    transports: ['websocket'],
+    path: socketIoRoute
   }
 
   const ws = client(socketConfig)
