@@ -106,3 +106,22 @@ describe(`React major versions with Webpack`, function () {
     })
   }
 })
+
+describe('experimentalSingleTabRunMode', function () {
+  systemTests.setup()
+
+  systemTests.it('executes all specs in a single tab', {
+    project: 'react18',
+    configFile: 'cypress-webpack.config.ts',
+    testingType: 'component',
+    spec: '**/*.cy.jsx',
+    browser: 'chrome',
+    config: {
+      component: {
+        experimentalSingleTabRunMode: true,
+      },
+    },
+    snapshot: true,
+    expectedExitCode: 3,
+  })
+})
