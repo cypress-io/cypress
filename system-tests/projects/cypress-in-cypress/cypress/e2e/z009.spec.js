@@ -1,6 +1,6 @@
 describe('Blank Contents', () => {
   it('renders the blank page', () => {
-    cy.contains('cy.visit()')
+    cy.get('svg')
   })
 
   it('renders the visit failure page', () => {
