@@ -85,9 +85,7 @@ export function getAngularBuildOptions (projectConfig: AngularJsonProjectConfig,
     assets: [],
     styles: [],
     scripts: [],
-    budgets: [],
     fileReplacements: [],
-    outputHashing: 'all',
     inlineStyleLanguage: 'css',
     stylePreprocessorOptions: { includePaths: [] },
     resourcesOutputPath: undefined,
@@ -121,6 +119,8 @@ export function getAngularBuildOptions (projectConfig: AngularJsonProjectConfig,
     ...projectConfig.architect.build.configurations?.development || {},
     tsConfig,
     aot: false,
+    outputHashing: 'none',
+    budgets: undefined,
   }
 }
 
@@ -153,6 +153,7 @@ export async function generateTsConfig (devServerConfig: WebpackDevServerConfig,
     compilerOptions: {
       outDir: getProjectFilePath('out-tsc/cy'),
       allowSyntheticDefaultImports: true,
+      skipLibCheck: true,
     },
     include: includePaths,
   })
