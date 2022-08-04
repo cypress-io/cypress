@@ -7,9 +7,19 @@ import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import os from 'os'
 import { log } from '../log'
+import * as linuxHelper from '../../lib/linux'
+import * as darwinHelper from '../../lib/darwin'
+import * as windowsHelper from '../../lib/windows'
+import type { Browser } from '@packages/types'
 
 const isWindows = () => {
   return os.platform() === 'win32'
+}
+
+const stubHelpers = (detect) => {
+  sinon.stub(linuxHelper, 'detect').callsFake(detect)
+  sinon.stub(darwinHelper, 'detect').callsFake(detect)
+  sinon.stub(windowsHelper, 'detect').callsFake(detect)
 }
 
 describe('browser detection', () => {
@@ -36,6 +46,72 @@ describe('browser detection', () => {
   // real browsers
   it('detects available browsers', () => {
     return detect().then(checkBrowsers)
+  })
+
+  context('#detect', () => {
+    const testBrowser = {
+      name: 'test-browser',
+      family: 'chromium',
+      channel: 'test-channel',
+      displayName: 'Test Browser',
+      minSupportedVersion: 1,
+      versionRegex: /Test Browser (\S+)/m,
+      binary: 'test-browser-beta',
+      validator: sinon.stub().returns({ isValid: true }),
+    }
+
+    it('finds supported browser', async () => {
+      stubHelpers((browser) => {
+        return Promise.resolve({
+          name: browser.name,
+          path: '/path/to/test-browser',
+          version: `${browser.minSupportedVersion}`,
+        })
+      })
+
+      const mockValidator = sinon.stub().returns({ isValid: true })
+
+      const foundBrowsers = await detect([{ ...testBrowser as Browser, validator: mockValidator }])
+
+      expect(foundBrowsers).to.have.length(1)
+
+      const foundTestBrowser = foundBrowsers[0]
+
+      expect(foundTestBrowser.name).to.eq('test-browser')
+      expect(foundTestBrowser.displayName).to.eq('Test Browser')
+      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
+      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.false
+      expect(foundTestBrowser.warning, 'warning').to.be.undefined
+      expect(mockValidator).to.have.been.called
+    })
+
+    it('finds unsupported browser', async () => {
+      stubHelpers((browser) => {
+        return Promise.resolve({
+          name: browser.name,
+          path: '/path/to/test-browser',
+          version: `${browser.minSupportedVersion}`,
+        })
+      })
+
+      const mockValidator = sinon.stub().returns({
+        isValid: false,
+        warningMessage: 'This is a bad version',
+      })
+
+      const foundBrowsers = await detect([{ ...testBrowser as Browser, validator: mockValidator }])
+
+      expect(foundBrowsers).to.have.length(1)
+
+      const foundTestBrowser = foundBrowsers[0]
+
+      expect(foundTestBrowser.name).to.eq('test-browser')
+      expect(foundTestBrowser.displayName).to.eq('Test Browser')
+      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
+      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.true
+      expect(foundTestBrowser.warning, 'warning').to.eq('This is a bad version')
+      expect(mockValidator).to.have.been.called
+    })
   })
 
   context('#detectByPath', () => {
