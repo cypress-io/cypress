@@ -65,7 +65,7 @@ const _getAutomation = async function (win, options, parent) {
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
         if (!options.onScreencastFrame) {
-          await sendCommand('Page.startScreencast', screencastOpts)
+          await sendCommand('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
           await sendCommand('Page.stopScreencast')
@@ -117,7 +117,7 @@ const _maybeRecordVideo = async function (webContents, options) {
     }
   })
 
-  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
+  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts())
 }
 
 module.exports = {
@@ -243,6 +243,13 @@ module.exports = {
 
       if (ua) {
         this._setUserAgent(win.webContents, ua)
+        // @see https://github.com/cypress-io/cypress/issues/22953
+      } else if (options.experimentalModifyObstructiveThirdPartyCode) {
+        const userAgent = this._getUserAgent(win.webContents)
+        // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
+        const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
+
+        this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
       }
 
       const setProxy = () => {
@@ -413,6 +420,14 @@ module.exports = {
     debug('clearing cache')
 
     return webContents.session.clearCache()
+  },
+
+  _getUserAgent (webContents) {
+    const userAgent = webContents.session.getUserAgent()
+
+    debug('found user agent: %s', userAgent)
+
+    return userAgent
   },
 
   _setUserAgent (webContents, userAgent) {

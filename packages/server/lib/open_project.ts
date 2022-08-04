@@ -84,6 +84,7 @@ export class OpenProject {
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
+      experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
     })
 
     // if we don't have the isHeaded property

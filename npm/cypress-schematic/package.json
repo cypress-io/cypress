@@ -10,7 +10,7 @@
     "build:watch": "tsc -p tsconfig.json --watch",
     "clean12": "git checkout HEAD -- sandbox12 && git clean -f -d sandbox12",
     "launch12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic && cd ..",
-    "launch:test12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic --e2eUpdate=true && cd ..",
+    "launch:test12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic --e2eUpdate && cd ..",
     "link:sandbox12": "yarn link && cd sandbox12 && yarn link @cypress/schematic",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
     "test:e2e:sandbox12": "cd sandbox12 && ng run sandbox:cypress-run",
