@@ -88,7 +88,9 @@ function retrySelector (command: $Command, ret: any, isCy) {
 
   const onRetry = () => {
     try {
-      ret(cy.currentSubject(command.get('chainerId')))
+      const subject = cy.currentSubject(command.get('chainerId'))
+      cy.ensureSubjectByType(subject, command.get('prevSubject'))
+      ret(subject)
     } catch (err) {
       options.error = err
       if (err.retry === false) {

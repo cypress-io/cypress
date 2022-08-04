@@ -820,6 +820,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         chainerId: chainer.chainerId,
         userInvocationStack,
         selector: true,
+        prevSubject,
       })
 
       const cyFn = function (chainerId, ...args) {

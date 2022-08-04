@@ -491,7 +491,9 @@ describe('driver/src/cypress/cy', () => {
     })
   })
 
-  context('selectors', () => {
+  context('selectors', {
+    defaultCommandTimeout: 30,
+  }, () => {
     const emptySelector = (args) => (subject) => {}
 
     it('allows parent or child use when prevSubject is null', () => {

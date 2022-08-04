@@ -61,7 +61,10 @@ export const allCommands = {
   Agents,
   Aliasing,
   Angular,
-  Asserting,
+
+// Toggle between Asserting (for old .should())
+// and AssertingSelector (for selector-based .should()).
+//   Asserting,
   AssertingSelector,
   Clock,
   Commands,

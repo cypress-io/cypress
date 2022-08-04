@@ -614,6 +614,10 @@ class LogManager {
 
       log.wrapConsoleProps()
 
+      // Action commands use verifyUpcomingAssertions to run both their own implicit assertions, as well as any
+      // upcoming explicit ones. As part of this, `overrideAssert` sets onBeforeLog to a function that returns
+      // false if the upcoming assertion has already been run and created a log message. This prevents `assertFn`
+      // from creating duplicate logs each time it runs.
       const onBeforeLog = state('onBeforeLog')
 
       // dont trigger log if this function
@@ -624,8 +628,19 @@ class LogManager {
         }
       }
 
-      // set the log on the command
       const current = state('current')
+
+      // Selectors, on the other hand, function in a rather simpler manner:
+      // If they attempt to create a second log message with the same name and message as a previous one,
+      // we update the old message instead. No relying on registering and unregistering callbacks.
+      const matchingOldLog = current?.get('selector') && current.get('logs').find((oldLog) => {
+        return oldLog.get('name') === log.get('name') && oldLog.get('message') === log.get('message')
+      })
+
+      if (matchingOldLog) {
+        matchingOldLog.merge(log)
+        return
+      }
 
       if (current) {
         current.log(log)
