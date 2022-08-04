@@ -1184,7 +1184,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1260,7 +1260,8 @@ module.exports = {
         }
       }
 
-      if (!config.experimentalSingleTabRunMode) {
+      // we do not support experimentalSingleTabRunMode for e2e
+      if (testingType === 'e2e' || !config.experimentalSingleTabRunMode) {
         debug('attempting to close the browser tab')
 
         await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
@@ -1493,6 +1494,7 @@ module.exports = {
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
           exit: options.exit,
+          testingType: options.testingType,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
