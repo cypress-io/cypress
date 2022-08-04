@@ -1,5 +1,4 @@
 import '@packages/server/test/spec_helper'
-import { getCtx } from '@packages/data-context/src/globalContext'
 
 import _ from 'lodash'
 import { expect } from 'chai'
@@ -23,6 +22,7 @@ import {
   setSupportFileAndFolder,
   mergeDefaults,
 } from '../../src/project/utils'
+import path from 'node:path'
 
 const debug = Debug('test')
 
@@ -120,8 +120,10 @@ describe('config/src/project/utils', () => {
       }
       const options = {}
 
+      const getFilesByGlob = sinon.stub().returns(['path/to/file'])
+
       try {
-        await mergeDefaults(cfg, options, {}, getCtx().file.getFilesByGlob)
+        await mergeDefaults(cfg, options, {}, getFilesByGlob)
       } catch {
         //
       }
@@ -138,7 +140,9 @@ describe('config/src/project/utils', () => {
       }
       const options = {}
 
-      await mergeDefaults(cfg, options, {}, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns(['path/to/file'])
+
+      await mergeDefaults(cfg, options, {}, getFilesByGlob)
 
       expect(errors.throwErr).not.to.be.called
     })
@@ -473,7 +477,9 @@ describe('config/src/project/utils', () => {
         projectRoot: '/_test-output/path/to/project',
       }
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         expect(result).to.eql(obj)
       })
@@ -487,7 +493,9 @@ describe('config/src/project/utils', () => {
         supportFile: 'test/project/utils.spec.ts',
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([path.join(projectRoot, obj.supportFile)])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -505,7 +513,9 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([path.join(projectRoot, obj.supportFile)])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -523,7 +533,9 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([path.join(projectRoot, obj.supportFile)])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -541,7 +553,9 @@ describe('config/src/project/utils', () => {
         supportFile: false,
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -564,7 +578,9 @@ describe('config/src/project/utils', () => {
         },
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .catch((err) => {
         expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
@@ -585,7 +601,9 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support/index.ts',
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([path.join(projectRoot, obj.supportFile)])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         debug('result is', result)
 
@@ -612,7 +630,9 @@ describe('config/src/project/utils', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return setSupportFileAndFolder(obj, getCtx().file.getFilesByGlob)
+      const getFilesByGlob = sinon.stub().returns([path.join(projectRoot, obj.supportFile)])
+
+      return setSupportFileAndFolder(obj, getFilesByGlob)
       .then((result) => {
         debug('result is', result)
 
@@ -627,10 +647,12 @@ describe('config/src/project/utils', () => {
 
   context('.mergeDefaults', () => {
     beforeEach(function () {
+      this.getFilesByGlob = sinon.stub().returns(['path/to/file'])
+
       this.defaults = (prop, value, cfg: any = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options, {}, getCtx().file.getFilesByGlob)
+        return mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options, {}, this.getFilesByGlob)
         .then((mergedConfig) => {
           expect(mergedConfig[prop]).to.deep.eq(value)
         })
@@ -833,42 +855,42 @@ describe('config/src/project/utils', () => {
       })
     })
 
-    it('resets numTestsKeptInMemory to 0 when runMode', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
+    it('resets numTestsKeptInMemory to 0 when runMode', function () {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.numTestsKeptInMemory).to.eq(0)
       })
     })
 
-    it('resets watchForFileChanges to false when runMode', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
+    it('resets watchForFileChanges to false when runMode', function () {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.watchForFileChanges).to.be.false
       })
     })
 
-    it('can override morgan in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false }, {}, getCtx().file.getFilesByGlob)
+    it('can override morgan in options', function () {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false }, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.morgan).to.be.false
       })
     })
 
-    it('can override isTextTerminal in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, getCtx().file.getFilesByGlob)
+    it('can override isTextTerminal in options', function () {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.isTextTerminal).to.be.true
       })
     })
 
-    it('can override socketId in options', () => {
-      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' }, {}, getCtx().file.getFilesByGlob)
+    it('can override socketId in options', function () {
+      return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' }, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.socketId).to.eq('1234')
       })
     })
 
-    it('deletes envFile', () => {
+    it('deletes envFile', function () {
       const obj = {
         projectRoot: '/foo/bar/',
         supportFile: false,
@@ -882,7 +904,7 @@ describe('config/src/project/utils', () => {
         },
       }
 
-      return mergeDefaults(obj, {}, {}, getCtx().file.getFilesByGlob)
+      return mergeDefaults(obj, {}, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           foo: 'bar',
@@ -896,7 +918,7 @@ describe('config/src/project/utils', () => {
       })
     })
 
-    it('merges env into @env', () => {
+    it('merges env into @env', function () {
       const obj = {
         projectRoot: '/foo/bar/',
         supportFile: false,
@@ -914,7 +936,7 @@ describe('config/src/project/utils', () => {
         },
       }
 
-      return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
+      return mergeDefaults(obj, options, {}, this.getFilesByGlob)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           host: 'localhost',
@@ -1009,7 +1031,9 @@ describe('config/src/project/utils', () => {
           port: 1234,
         }
 
-        return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
+        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+        return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
@@ -1096,7 +1120,9 @@ describe('config/src/project/utils', () => {
           },
         }
 
-        return mergeDefaults(obj, options, {}, getCtx().file.getFilesByGlob)
+        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+        return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             arch: { value: os.arch(), from: 'default' },
