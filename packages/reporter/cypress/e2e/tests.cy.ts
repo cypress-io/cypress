@@ -33,7 +33,6 @@ describe('tests', () => {
             absolute: '/absolute/path/to/foo.js',
           },
         },
-        experimentalStudioEnabled: true,
       })
     })
 
@@ -70,7 +69,7 @@ describe('tests', () => {
       .parents('.collapsible').first()
       .should('not.have.class', 'is-open')
       .find('.collapsible-content')
-      .should('not.be.visible')
+      .should('not.exist')
     })
 
     it('failed tests expands automatically', () => {
@@ -94,7 +93,7 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
     })
 
     it('expands/collapses on enter', () => {
@@ -112,7 +111,7 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
     })
 
     it('expands/collapses on space', () => {
@@ -130,7 +129,7 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
     })
   })
 

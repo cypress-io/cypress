@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - revert-22742
+        - reapply-state-refactor
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +36,6 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'revert-22742', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +44,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'revert-22742', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'fix-system-test-glob-pattern', << pipeline.git.branch >> ]
+    - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -129,7 +127,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "revert-22742" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -883,7 +881,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else
+            else 
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
@@ -2062,9 +2060,12 @@ jobs:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
           # https://github.com/cypress-io/cypress/issues/6690
+
+          # Todo: Add `jest` back into the list once https://github.com/yargs/yargs-parser/issues/452
+          # is resolved.
           command: |
             npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
+              typescript @types/jest enzyme @types/enzyme
       - run:
           name: Test types clash ⚔️
           working_directory: <<parameters.wd>>

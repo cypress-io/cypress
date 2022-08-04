@@ -69,7 +69,7 @@ describe('test errors', () => {
 
     it('does not expand or collapse stack trace when clicking', () => {
       cy.get('.runnable-err-print').click()
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+      cy.get('.runnable-err-stack-trace').should('not.exist')
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
       cy.get('.runnable-err-print').click()
@@ -82,8 +82,8 @@ describe('test errors', () => {
       setError(commandErr)
     })
 
-    it('hides stack trace by default', () => {
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+    it('does not render stack trace by default', () => {
+      cy.get('.runnable-err-stack-trace').should('not.exist')
     })
 
     it('opens stack trace on click', () => {
