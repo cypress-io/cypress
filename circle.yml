@@ -1564,6 +1564,13 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
+  driver-integration-tests-webkit:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+
   driver-integration-tests-chrome-experimentalSessionAndOrigin:
     <<: *defaults
     resource_class: medium
