@@ -111,10 +111,9 @@ describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 
   systemTests.it('executes all specs in a single tab', {
-    project: 'react18',
-    configFile: 'cypress-webpack.config.ts',
+    project: 'component-tests',
     testingType: 'component',
-    spec: '**/*.cy.jsx',
+    spec: '**/*.spec.js',
     browser: 'chrome',
     config: {
       component: {
@@ -122,6 +121,6 @@ describe('experimentalSingleTabRunMode', function () {
       },
     },
     snapshot: true,
-    expectedExitCode: 3,
+    expectedExitCode: 2,
   })
 })
