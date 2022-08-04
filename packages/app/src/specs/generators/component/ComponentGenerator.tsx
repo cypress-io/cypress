@@ -6,11 +6,8 @@ import ComponentGeneratorCard from './ComponentGeneratorCard.vue'
 export const ComponentGenerator: SpecGenerator = {
   card: ComponentGeneratorCard,
   entry: ComponentGeneratorStepOne,
-  disabled: () => { },
-  show: (currentProject) => {
-    const specPattern = currentProject?.config.find((item) => item.field === 'specPattern')
-
-    if (specPattern && specPattern.from !== 'default') {
+  show: (currentProject, isDefaultSpecPattern) => {
+    if (!isDefaultSpecPattern) {
       return false
     }
 

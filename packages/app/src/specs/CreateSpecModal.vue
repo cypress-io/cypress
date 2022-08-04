@@ -25,7 +25,7 @@
         :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
-        :has-custom-spec-pattern="hasCustomSpecPattern"
+        :is-default-spec-pattern="props.gql.currentProject?.isDefaultSpecPattern"
         @restart="currentGeneratorId = undefined; iteration++"
         @close="close"
       />
@@ -83,6 +83,7 @@ fragment CreateSpecModal on Query {
       id
       component
     }
+    isDefaultSpecPattern
     ...EmptyGenerator
   }
 }
@@ -111,12 +112,6 @@ const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const hasCustomSpecPattern = computed(() => {
-  const specPatternConfig = props.gql.currentProject?.config.find((item) => item.field === 'specPattern')
-
-  return specPatternConfig.from !== 'default'
-})
-
 const codeGenGlob = computed(() => {
   if (!generator.value) {
     return null
@@ -125,7 +120,7 @@ const codeGenGlob = computed(() => {
   return props.gql.currentProject?.codeGenGlobs[generator.value.id]
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject, props.gql.currentProject?.isDefaultSpecPattern)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 

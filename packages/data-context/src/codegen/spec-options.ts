@@ -9,7 +9,7 @@ interface CodeGenOptions {
   codeGenType: CodeGenType
   erroredCodegenCandidate?: string | null
   specFileExtension?: string
-  hasCustomSpecPattern?: boolean | null
+  isDefaultSpecPattern?: boolean | null
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -62,7 +62,7 @@ export class SpecOptions {
     }
 
     // This only works for Vue projects with default spec patterns right now. If the framework is not Vue, we're generating an empty component test
-    if (frontendFramework.codeGenFramework !== 'vue' || this.options.hasCustomSpecPattern) {
+    if (frontendFramework.codeGenFramework !== 'vue' || !this.options.isDefaultSpecPattern) {
       return {
         codeGenType: this.options.codeGenType,
         fileName: await this.buildFileName(),
@@ -98,7 +98,6 @@ export class SpecOptions {
       codeGenType: this.options.codeGenType,
       componentName,
       componentPath,
-      mountModule: framework.mountModule,
       fileName: await this.buildComponentSpecFilename(await this.getVueExtension()),
       templateKey,
     }

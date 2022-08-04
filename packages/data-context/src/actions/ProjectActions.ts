@@ -331,7 +331,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null, hasCustomSpecPattern?: boolean | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null, isDefaultSpecPattern?: boolean | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -353,7 +353,7 @@ export class ProjectActions {
       codeGenPath,
       codeGenType,
       erroredCodegenCandidate,
-      hasCustomSpecPattern,
+      isDefaultSpecPattern,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()

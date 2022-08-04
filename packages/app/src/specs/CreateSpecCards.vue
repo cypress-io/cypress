@@ -4,7 +4,6 @@
       :is="generator.card"
       v-for="generator in generators"
       :key="generator.id"
-      :disabled="generator.disabled(props.gql.currentProject) || false"
       @click="$emit('select', generator.id)"
     />
   </div>
@@ -15,7 +14,7 @@ import type { GeneratorId, SpecGenerator } from './generators'
 import type { CreateSpecCardsFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 
-const props = defineProps<{
+defineProps<{
   generators: SpecGenerator[]
   gql: CreateSpecCardsFragment
 }>()

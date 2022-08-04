@@ -92,7 +92,7 @@ import EmptyGenerator from '../EmptyGenerator.vue'
 const props = defineProps<{
   title: string
   codeGenGlob: string
-  hasCustomSpecPattern: boolean
+  isDefaultSpecPattern: boolean
 }>()
 const { t } = useI18n()
 const emits = defineEmits<{
@@ -136,8 +136,8 @@ query ComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $hasCustomSpecPattern: Boolean) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, hasCustomSpecPattern: $hasCustomSpecPattern) {
+mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $isDefaultSpecPattern: Boolean) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, isDefaultSpecPattern: $isDefaultSpecPattern) {
     ...GeneratorSuccess
     currentProject {
       id
@@ -183,7 +183,7 @@ const makeSpec = async (file) => {
   const { data } = await mutation.executeMutation({
     codeGenCandidate: file.absolute,
     type: 'component',
-    hasCustomSpecPattern: props.hasCustomSpecPattern,
+    isDefaultSpecPattern: props.isDefaultSpecPattern,
   })
 
   generateSpecFromSource.value = data?.generateSpecFromSource

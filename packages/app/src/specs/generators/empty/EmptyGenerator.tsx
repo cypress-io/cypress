@@ -6,11 +6,12 @@ export const EmptyGenerator: SpecGenerator = {
   card: EmptyGeneratorCard,
   entry: EmptyGeneratorCardStepOne,
   matches: () => true,
-  disabled: () => false,
-  show: (currentProject) => {
-    const specPattern = currentProject?.config.find((item) => item.field === 'specPattern')
+  show: (currentProject, isDefaultSpecPattern) => {
+    if (!isDefaultSpecPattern) {
+      return true
+    }
 
-    return currentProject?.codeGenGlobs?.component !== '*.vue' || (specPattern && specPattern.from !== 'default')
+    return currentProject?.codeGenGlobs?.component !== '*.vue'
   },
   id: 'empty',
 }
