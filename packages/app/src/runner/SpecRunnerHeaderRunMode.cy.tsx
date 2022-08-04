@@ -1,5 +1,6 @@
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import { useAutStore } from '../store'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 
 const browser = {
   displayName: 'Chrome',
@@ -73,6 +74,22 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.get('[data-cy="select-browser"] > button').should('be.disabled')
 
+      cy.percySnapshot()
+    })
+  })
+
+  it('shows generic browser icon when current browser icon is not configured', () => {
+    cy.window().then((win) => {
+      win.__CYPRESS_BROWSER__ = { ...browser, displayName: 'Fake Browser' }
+      win.__CYPRESS_TESTING_TYPE__ = 'e2e'
+      const autStore = useAutStore()
+
+      autStore.updateUrl('http://localhost:4000')
+      autStore.setIsRunning(true)
+
+      cy.mount(<SpecRunnerHeaderRunMode />)
+
+      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
       cy.percySnapshot()
     })
   })
