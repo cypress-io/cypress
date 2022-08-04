@@ -278,21 +278,24 @@ export class EventManager {
 
     const studioInit = () => {
       this.ws.emit('studio:init', (showedStudioModal) => {
-        if (!showedStudioModal) {
-          this.studioRecorder.showInitModal()
-        } else {
+        // if (!showedStudioModal) {
+        //   this.studioRecorder.showInitModal()
+        // } else {
+          console.log('re run!')
           rerun()
-        }
+        // }
       })
     }
 
     this.reporterBus.on('studio:init:test', (testId) => {
+      console.log('init studio test', testId)
       this.studioRecorder.setTestId(testId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
+      console.log('init studio suite')
       this.studioRecorder.setSuiteId(suiteId)
 
       studioInit()
@@ -696,12 +699,14 @@ export class EventManager {
   }
 
   _runDriver (state) {
+    console.log('Run driver')
     performance.mark('run-s')
     Cypress.run(() => {
       performance.mark('run-e')
       performance.measure('run', 'run-s', 'run-e')
     })
 
+    console.log(this.studioRecorder)
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
       numPassed: state.passed,

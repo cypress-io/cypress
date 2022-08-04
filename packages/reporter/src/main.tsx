@@ -64,9 +64,11 @@ class Reporter extends Component<SingleReporterProps> {
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
+    console.log({experimentalStudioEnabled})
+
     return (
       <div className={cs(className, 'reporter', {
-        'experimental-studio-enabled': experimentalStudioEnabled,
+        'experimental-studio-enabled': true,
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}

@@ -19,7 +19,6 @@ export type BreakingOptionErrorKey =
   | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
   | 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED'
   | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
-  | 'EXPERIMENTAL_STUDIO_REMOVED'
   | 'FIREFOX_GC_INTERVAL_REMOVED'
   | 'NODE_VERSION_DEPRECATION_SYSTEM'
   | 'NODE_VERSION_DEPRECATION_BUNDLED'
@@ -605,11 +604,6 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
-    showInLaunchpad: true,
-  }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
@@ -659,11 +653,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  }, {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
     testingTypes: ['component', 'e2e'],
   }, {
     name: 'indexHtmlFile',

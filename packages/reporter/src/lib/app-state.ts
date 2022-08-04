@@ -89,6 +89,7 @@ class AppState {
   }
 
   setStudioActive (studioActive: boolean) {
+    console.log(`Set Active ${studioActive}`)
     this.studioActive = studioActive
   }
 
