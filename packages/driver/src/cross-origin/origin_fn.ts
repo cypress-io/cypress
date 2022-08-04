@@ -4,6 +4,7 @@ import $utils from '../cypress/utils'
 import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
+import $networkUtils from '../cypress/network_utils'
 
 interface RunOriginFnOptions {
   config: Cypress.Config
@@ -126,8 +127,20 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     })
 
     try {
-      const value = window.eval(`(${fn})`)(args)
-      // const value = window.eval(fn)
+      let value
+
+      if (_.isString(fn)) {
+        value = window.eval(`(${fn})`)(args)
+      } else {
+        // @ts-ignore TODO (wip): update this type
+        const contents = await $networkUtils.fetch(`/__cypress/gimme_file?file=${encodeURIComponent(fn.outputFilePath)}`) as string
+
+        value = window.eval(`(args) => {
+          let __callback;
+          ${contents}
+          return __callback(args)
+        }`)(args)
+      }
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {

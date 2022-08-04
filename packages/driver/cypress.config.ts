@@ -16,5 +16,6 @@ export default defineConfig({
       return require('./cypress/plugins')(on, config)
     },
     'baseUrl': 'http://localhost:3500',
+    'experimentalSessionAndOrigin': true,
   },
 })

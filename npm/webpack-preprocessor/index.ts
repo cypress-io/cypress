@@ -1,19 +1,20 @@
+import Bluebird from 'bluebird'
+import _ from 'lodash'
+import * as events from 'events'
+import webpack from 'webpack'
+import utils from './lib/utils'
+import { crossOriginCallbackStore } from './lib/cross-origin-callback-store'
 import { overrideSourceMaps } from './lib/typescript-overrides'
 
-import * as Promise from 'bluebird'
-import * as events from 'events'
-import * as _ from 'lodash'
-import * as webpack from 'webpack'
-import { createDeferred } from './deferred'
-
+const VirtualModulesPlugin = require('webpack-virtual-modules')
 const path = require('path')
 const debug = require('debug')('cypress:webpack')
 const debugStats = require('debug')('cypress:webpack:stats')
 
 type FilePath = string
 interface BundleObject {
-  promise: Promise<FilePath>
-  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Promise<string> }>
+  promise: Bluebird<FilePath>
+  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Bluebird<string> }>
   initial: boolean
 }
 
@@ -114,7 +115,7 @@ interface FileEvent extends events.EventEmitter {
  * Cypress asks file preprocessor to bundle the given file
  * and return the full path to produced bundle.
  */
-type FilePreprocessor = (file: FileEvent) => Promise<FilePath>
+type FilePreprocessor = (file: FileEvent) => Bluebird<FilePath>
 
 type WebpackPreprocessorFn = (options: PreprocessorOptions) => FilePreprocessor
 
@@ -141,6 +142,69 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
   defaultOptions: Omit<PreprocessorOptions, 'additionalEntries'>
 }
 
+// TODO: trying to do this in one extra pass of webpack, but it's not
+// working so far
+
+const compile = (files, { originalFilePath, webpackOptions, log }) => {
+  const context = path.dirname(originalFilePath)
+  const { entry, virtualConfig } = files.reduce((memo, { inputFileName, outputFilePath, source }) => {
+    const inputPath = path.join(context, inputFileName)
+
+    memo.entry[inputFileName] = {
+      import: inputPath,
+      filename: path.basename(outputFilePath),
+    }
+
+    memo.virtualConfig[inputPath] = source
+
+    return memo
+  }, { entry: {}, virtualConfig: {} })
+
+  log('entry:', entry)
+  log('---')
+  log('virtualConfig:', virtualConfig)
+
+  // log('inputFileName:', inputFileName)
+  // log('entry:', entry)
+  // log('outputFilePath:', outputFilePath)
+  // log('--- source ---')
+  // console.log(source)
+  // log('--- /source --')
+
+  const modifiedWebpackOptions = _.extend({}, webpackOptions, {
+    entry,
+    output: {
+      path: path.dirname(files[0].outputFilePath),
+      // filename: path.basename(outputFilePath),
+    },
+  })
+  const plugins = modifiedWebpackOptions.plugins || []
+
+  modifiedWebpackOptions.plugins = plugins.concat(
+    new VirtualModulesPlugin(virtualConfig),
+  )
+
+  return new Promise((resolve, reject) => {
+    const compiler = webpack(modifiedWebpackOptions)
+
+    const handle = (err: Error) => {
+      log('handle:', files[0].inputFileName)
+
+      if (err) {
+        log('finished with error', err.message)
+
+        return reject(err)
+      }
+
+      log('finished successfully')
+
+      resolve(files[0].outputFilePath)
+    }
+
+    compiler.run(handle)
+  })
+}
+
 /**
  * Webpack preprocessor configuration function. Takes configuration object
  * and returns file preprocessor.
@@ -152,6 +216,8 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
 // @ts-ignore
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
+
+  let crossOriginCallbackLoader = false
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -166,6 +232,12 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
   // the supported file and spec file to be requested again
   return (file: FileEvent) => {
     const filePath = file.filePath
+
+    const log = (...messages) => {
+      console.log(`🟢 (${path.basename(filePath)}):`, ...messages)
+    }
+
+    log('wp bundle')
 
     debug('get', filePath)
 
@@ -223,6 +295,19 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
+    if (!crossOriginCallbackLoader) {
+      // webpack runs loaders last-to-first and we want ours to run last
+      // so that it's working with plain javascript
+      webpackOptions.module.rules.unshift({
+        test: /\.(js|ts|jsx|tsx)$/,
+        use: [{
+          loader: path.join(__dirname, 'lib/extract-cross-origin-callback-loader'),
+        }],
+      })
+
+      crossOriginCallbackLoader = true
+    }
+
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
     if (options.typescript) debug('typescript: %s', options.typescript)
@@ -232,7 +317,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const compiler = webpack(webpackOptions)
 
-    let firstBundle = createDeferred<string>()
+    let firstBundle = utils.createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
@@ -266,108 +351,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         return rejectWithErr(err)
       }
 
+      log('compile finished')
+
       const jsonStats = stats.toJson()
-
-      // NOTE: Might need something from these stats to resolve
-      // console.log('stats:', stats)
-      /*
-    assets: {
-      '7f4e078c10c66ebbf76cb07000ba0732.js': [RawSource],
-      'dependencies.spec.ts..main.js': [ConcatSource],
-      'index.html': [Object],
-      'favicon.ico': [Object]
-    },
-    assetsInfo: Map(3) {
-      '__child-HtmlWebpackPlugin_0' => {},
-      '7f4e078c10c66ebbf76cb07000ba0732.js' => [Object],
-      'dependencies.spec.ts..main.js' => {}
-    },
-      */
-
-      // console.log('jsonStats:', jsonStats)
-      /*
-    hash: 'ddb0d9e53ebb62975ff3',
-    assetsByChunkName: { main: 'dependencies.spec.ts..main.js' },
-    assets: [
-    {
-      name: '7f4e078c10c66ebbf76cb07000ba0732.js',
-      size: 183,
-      chunks: [],
-      chunkNames: [],
-      info: [Object],
-      emitted: true,
-      isOverSizeLimit: undefined
-    },
-    {
-      name: 'dependencies.spec.ts..main.js',
-      size: 11394,
-      chunks: [Array],
-      chunkNames: [Array],
-      info: {},
-      emitted: true,
-      isOverSizeLimit: undefined
-    },
-    {
-      name: 'favicon.ico',
-      size: 32038,
-      chunks: [],
-      chunkNames: [],
-      info: {},
-      emitted: true,
-      isOverSizeLimit: undefined
-    },
-    {
-      name: 'index.html',
-      size: 761,
-      chunks: [],
-      chunkNames: [],
-      info: {},
-      emitted: true,
-      isOverSizeLimit: undefined
-    }
-  ],
-
-  entrypoints: {
-    main: {
-      chunks: [Array],
-      assets: [Array],
-      children: [Object: null prototype] {},
-      childAssets: [Object: null prototype] {},
-      isOverSizeLimit: undefined
-    }
-  },
-
-  namedChunkGroups: {
-    main: {
-      chunks: [Array],
-      assets: [Array],
-      children: [Object: null prototype] {},
-      childAssets: [Object: null prototype] {},
-      isOverSizeLimit: undefined
-    }
-  },
-  chunks: [
-    {
-      id: 'main',
-      rendered: true,
-      initial: true,
-      entry: true,
-      recorded: undefined,
-      reason: undefined,
-      size: 727,
-      names: [Array],
-      files: [Array],
-      hash: '8f266091c6c87d8fe3c1',
-      siblings: [],
-      parents: [],
-      children: [],
-      childrenByOrder: [Object: null prototype] {},
-      modules: [Array],
-      filteredModules: 0,
-      origins: [Array]
-    }
-  ],
-      */
 
       // these stats are really only useful for debugging
       if (jsonStats.warnings.length > 0) {
@@ -396,29 +382,51 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         console.error(stats.toString({ colors: true }))
       }
 
-      // resolve with the outputPath so Cypress knows where to serve
-      // the file from
-      // Seems to be a race condition where changing file before next tick
-      // does not cause build to rerun
-      Promise.delay(0).then(() => {
-        if (!bundles[filePath]) {
-          return
-        }
-
+      const resolveAllBundles = () => {
         bundles[filePath].deferreds.forEach((deferred) => {
           deferred.resolve(outputPath)
         })
 
         bundles[filePath].deferreds.length = 0
+      }
+
+      // resolve with the outputPath so Cypress knows where to serve
+      // the file from
+      // Seems to be a race condition where changing file before next tick
+      // does not cause build to rerun
+      Bluebird.delay(0).then(() => {
+        if (!bundles[filePath]) {
+          return
+        }
+
+        log('current filePath:', filePath)
+
+        if (!crossOriginCallbackStore.hasFilesFor(filePath)) {
+          log('resolve all, no custom files')
+
+          return resolveAllBundles()
+        }
+
+        compile(crossOriginCallbackStore.files[filePath], {
+          originalFilePath: filePath,
+          webpackOptions,
+          log,
+        })
+        .then(() => {
+          crossOriginCallbackStore.reset(filePath)
+
+          log('resolve all after custom files')
+          resolveAllBundles()
+        })
       })
     }
 
-    // this event is triggered when watching and a file is saved
     const plugin = { name: 'CypressWebpackPreprocessor' }
 
+    // this event is triggered when watching and a file is saved
     const onCompile = () => {
       debug('compile', filePath)
-      const nextBundle = createDeferred<string>()
+      const nextBundle = utils.createDeferred<string>()
 
       bundles[filePath].promise = nextBundle.promise
       bundles[filePath].deferreds.push(nextBundle)

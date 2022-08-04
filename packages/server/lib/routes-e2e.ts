@@ -28,6 +28,11 @@ export const createRoutesE2E = ({
     specController.handle(test, req, res, config, next, onError)
   })
 
+  // TODO (wip): diferent route name
+  routesE2E.get(`/${config.namespace}/gimme_file`, (req, res) => {
+    res.sendFile(req.query.file as string)
+  })
+
   routesE2E.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
   })

@@ -213,17 +213,15 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
             await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
 
-            // @ts-ignore
-            const fn = _.isObject(callbackFn) ? callbackFn.callback : callbackFn
-
-            console.log('fn:', fn)
+            // @ts-ignore TODO (wip): update this type
+            const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
             try {
               communicator.toSpecBridge(originPolicy, 'run:origin:fn', {
                 args: options?.args || undefined,
-                fn: fn.toString(),
+                fn,
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
                 // this should only be used for internal testing. Cast to boolean to guarantee serialization
                 // @ts-ignore
