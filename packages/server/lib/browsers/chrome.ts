@@ -1,10 +1,12 @@
 import Bluebird from 'bluebird'
+import check from 'check-more-types'
 import debugModule from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
+import mime from 'mime'
 import { launch } from '@packages/launcher'
 import type { Protocol } from 'devtools-protocol'
 
@@ -16,7 +18,7 @@ import utils from './utils'
 import type { Browser } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
-import type { Client } from './cri-client'
+import type { CRIWrapper } from './cri-client'
 import type { Automation } from '../automation'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
@@ -267,10 +269,58 @@ const _maybeRecordVideo = async function (client, options, browserMajorVersion) 
   return client
 }
 
+// a utility function that navigates to the given URL
+// once Chrome remote interface client is passed to it.
+const _navigateUsingCRI = async function (client, url) {
+  // @ts-ignore
+  la(check.url(url), 'missing url to navigate to', url)
+  la(client, 'could not get CRI client')
+  debug('received CRI client')
+  debug('navigating to page %s', url)
+
+  // when opening the blank page and trying to navigate
+  // the focus gets lost. Restore it and then navigate.
+  await client.send('Page.bringToFront')
+  await client.send('Page.navigate', { url })
+}
+
+const _handleDownloads = async function (client, dir, automation) {
+  client.on('Page.downloadWillBegin', (data) => {
+    const downloadItem = {
+      id: data.guid,
+      url: data.url,
+    }
+
+    const filename = data.suggestedFilename
+
+    if (filename) {
+      // @ts-ignore
+      downloadItem.filePath = path.join(dir, data.suggestedFilename)
+      // @ts-ignore
+      downloadItem.mime = mime.getType(data.suggestedFilename)
+    }
+
+    automation.push('create:download', downloadItem)
+  })
+
+  client.on('Page.downloadProgress', (data) => {
+    if (data.state !== 'completed') return
+
+    automation.push('complete:download', {
+      id: data.guid,
+    })
+  })
+
+  await client.send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: dir,
+  })
+}
+
 let frameTree
 let gettingFrameTree
 
-const onReconnect = (client: Client) => {
+const onReconnect = (client: CRIWrapper.Client) => {
   // if the client disconnects (e.g. due to a computer sleeping), update
   // the frame tree on reconnect in cases there were changes while
   // the client was disconnected
@@ -278,7 +328,7 @@ const onReconnect = (client: Client) => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const _updateFrameTree = (client: Client, eventName) => async () => {
+const _updateFrameTree = (client: CRIWrapper.Client, eventName) => async () => {
   debug(`update frame tree for ${eventName}`)
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
@@ -383,7 +433,7 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client: Client, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: CypressConfiguration = {}) => {
+const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: CypressConfiguration = {}) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
 
   return automation.use(cdpAutomation)
@@ -401,6 +451,10 @@ export = {
   _removeRootExtension,
 
   _maybeRecordVideo,
+
+  _navigateUsingCRI,
+
+  _handleDownloads,
 
   _handlePausedRequests,
 
@@ -512,10 +566,10 @@ export = {
 
     await Promise.all([
       this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
-      pageCriClient.handleDownloads(options.downloadsFolder, automation),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
-    await pageCriClient.navigate(options.url)
+    await this._navigateUsingCRI(pageCriClient, options.url)
 
     if (options.experimentalSessionAndOrigin) {
       await this._handlePausedRequests(pageCriClient)
@@ -631,10 +685,10 @@ export = {
 
     await Promise.all([
       this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
-      pageCriClient.handleDownloads(options.downloadsFolder, automation),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
-    await pageCriClient.navigate(url)
+    await this._navigateUsingCRI(pageCriClient, url)
 
     if (options.experimentalSessionAndOrigin) {
       await this._handlePausedRequests(pageCriClient)

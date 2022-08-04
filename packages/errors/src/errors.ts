@@ -1561,19 +1561,6 @@ export const AllCypressErrors = {
       https://on.cypress.io/configuration
     `
   },
-
-  CDP_STDIO_ERROR: () => {
-    return errTemplate`The connection between Cypress and Chrome has unexpectedly ended. Please restart the browser.`
-  },
-
-  CDP_STDIO_TIMEOUT: (browserName: string, timeout: number) => {
-    return errTemplate`Warning: Cypress failed to connect to ${fmt.highlight(browserName)} via stdio after ${humanTime.long(timeout)}. Falling back to TCP...`
-  },
-
-  CDP_FALLBACK_SUCCEEDED: (browserName: string) => {
-    return errTemplate`Connecting to ${fmt.highlight(browserName)} via TCP was successful, continuing with tests.`
-  },
-
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

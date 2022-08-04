@@ -1,11 +1,7 @@
 import debugModule from 'debug'
 import _ from 'lodash'
-import type { ChildProcess } from 'child_process'
 import CRI from 'chrome-remote-interface'
 import * as errors from '../errors'
-import mime from 'mime'
-import check from 'check-more-types'
-import la from 'lazy-ass'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -16,114 +12,110 @@ const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-cli
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 
 /**
- * Url returned by the Chrome Remote Interface
-*/
-type websocketUrl = string
+ * Enumerations to make programming CDP slightly simpler - provides
+ * IntelliSense whenever you use named types.
+ */
+export namespace CRIWrapper {
+  export type Command =
+    'Page.enable' |
+    'Network.enable' |
+    'Console.enable' |
+    'Browser.getVersion' |
+    'Page.bringToFront' |
+    'Page.captureScreenshot' |
+    'Page.navigate' |
+    'Page.startScreencast' |
+    'Page.screencastFrameAck' |
+    'Page.setDownloadBehavior' |
+    string
 
-/**
- * Wrapper for Chrome Remote Interface client. Only allows "send" method.
- * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
-*/
-export interface Client {
-  navigate(url): Promise<void>
-  handleDownloads(dir, automation): Promise<void>
+  export type EventName =
+    'Page.screencastFrame' |
+    'Page.downloadWillBegin' |
+    'Page.downloadProgress' |
+    string
+
   /**
-   * The target id attached to by this client
+   * Wrapper for Chrome Remote Interface client. Only allows "send" method.
+   * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
    */
-  targetId: string
-  /**
-   * Sends a command to the Chrome remote interface.
-   * @example client.send('Page.navigate', { url })
-   */
-  send (command: string, params?: object): Promise<any>
-  /**
-   * Registers callback for particular event.
-   * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
-   */
-  on (eventName: string, cb: Function): void
-  /**
-   * Calls underlying remote interface client close
-   */
-  close (): Promise<void>
+  export interface Client {
+    /**
+     * The target id attached to by this client
+     */
+    targetId: string
+    /**
+     * Sends a command to the Chrome remote interface.
+     * @example client.send('Page.navigate', { url })
+     */
+    send (command: Command, params?: object): Promise<any>
+    /**
+     * Registers callback for particular event.
+     * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
+     */
+    on (eventName: EventName, cb: Function): void
+    /**
+     * Calls underlying remote interface client close
+     */
+    close (): Promise<void>
+  }
 }
 
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
-    const handleMessage = cri._handleMessage
+    cri._ws.on('message', (data) => {
+      data = _
+      .chain(JSON.parse(data))
+      .tap((data) => {
+        ([
+          'params.data', // screencast frame data
+          'result.data', // screenshot data
+        ]).forEach((truncatablePath) => {
+          const str = _.get(data, truncatablePath)
 
-    cri._handleMessage = (message) => {
-      const formatted = _.cloneDeep(message)
+          if (!_.isString(str)) {
+            return
+          }
 
-      ;([
-        'params.data', // screencast frame data
-        'result.data', // screenshot data
-      ]).forEach((truncatablePath) => {
-        const str = _.get(formatted, truncatablePath)
+          _.set(data, truncatablePath, _.truncate(str, {
+            length: 100,
+            omission: `... [truncated string of total bytes: ${str.length}]`,
+          }))
+        })
 
-        if (!_.isString(str)) {
-          return
-        }
-
-        _.set(formatted, truncatablePath, _.truncate(str, {
-          length: 100,
-          omission: `... [truncated string of total bytes: ${str.length}]`,
-        }))
+        return data
       })
+      .value()
 
-      debugVerboseReceive('received CDP message %o', formatted)
-
-      return handleMessage.call(cri, message)
-    }
+      debugVerboseReceive('received CDP message %o', data)
+    })
   }
 
   if (debugVerboseSend.enabled) {
-    const send = cri._send
+    const send = cri._ws.send
 
-    cri._send = (data, callback) => {
+    cri._ws.send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri, data, callback)
+      return send.call(cri._ws, data, callback)
     }
   }
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-type CreateOpts = {
-  target: websocketUrl
-  process?: ChildProcess
-  host?: string
-  port?: number
-  onReconnect?: (client: Client) => void
-  onAsynchronousError: Function
-}
-
-type Message = {
-  method: string
-  params?: any
-  sessionId?: string
-}
-
-export const create = async (opts: CreateOpts): Promise<Client> => {
-  const subscriptions: {eventName: string, cb: Function}[] = []
-  const enableCommands: string[] = []
-  let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
+export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number, onReconnect?: (client: CRIWrapper.Client) => void): Promise<CRIWrapper.Client> => {
+  const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
+  const enableCommands: CRIWrapper.Command[] = []
+  let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
-  let client: Client
-  let sessionId: string | undefined
+  let client: CRIWrapper.Client
 
   const reconnect = async () => {
-    if (opts.process) {
-      // reconnecting doesn't make sense for stdio
-      opts.onAsynchronousError(errors.get('CDP_STDIO_ERROR'))
-
-      return
-    }
-
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -150,31 +142,33 @@ export const create = async (opts: CreateOpts): Promise<Client> => {
       })
 
       enqueuedCommands.forEach((cmd) => {
-        cri.sendRaw(cmd.message)
+        cri.send(cmd.command, cmd.params)
         .then(cmd.p.resolve, cmd.p.reject)
       })
 
       enqueuedCommands = []
 
-      if (opts.onReconnect) {
-        opts.onReconnect(client)
+      if (onReconnect) {
+        onReconnect(client)
       }
     } catch (err) {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
       // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
       cdpError.isFatalApiErr = true
-      opts.onAsynchronousError(cdpError)
+      onAsynchronousError(cdpError)
     }
   }
 
   const connect = async () => {
     await cri?.close()
 
-    debug('connecting %o', opts)
+    debug('connecting %o', { target })
 
     cri = await CRI({
-      ...opts,
+      host,
+      port,
+      target,
       local: true,
     })
 
@@ -184,111 +178,16 @@ export const create = async (opts: CreateOpts): Promise<Client> => {
 
     // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
     cri._notifier.on('disconnect', reconnect)
-
-    if (opts.process) {
-      // if using stdio, we need to find the target before declaring the connection complete
-      return findTarget()
-    }
-
-    return
-  }
-
-  const findTarget = async () => {
-    debug('finding CDP target...')
-
-    return
-
-    // return new Promise<void>((resolve, reject) => {
-    //   const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
-
-    //   const attachToTarget = _.once(({ targetId }) => {
-    //     debug('attaching to target %o', { targetId })
-    //     cri.send('Target.attachToTarget', {
-    //       targetId,
-    //       flatten: true, // enable selecting via sessionId
-    //     }).then((result) => {
-    //       debug('attached to target %o', result)
-    //       sessionId = result.sessionId
-    //       resolve()
-    //     }).catch(reject)
-    //   })
-
-    //   cri.send('Target.setDiscoverTargets', { discover: true })
-    //   .then(() => {
-    //     cri.on('Target.targetCreated', (target) => {
-    //       if (isAboutBlank(target)) {
-    //         attachToTarget(target)
-    //       }
-    //     })
-
-    //     return cri.send('Target.getTargets')
-    //     .then(({ targetInfos }) => targetInfos.filter(isAboutBlank).map(attachToTarget))
-    //   })
-    //   .catch(reject)
-    // })
   }
 
   await connect()
 
   client = {
-    targetId: opts.target,
-    async navigate (url) {
-      // @ts-ignore
-      la(check.url(url), 'missing url to navigate to', url)
-      la(client, 'could not get CRI client')
-      debug('received CRI client')
-      debug('navigating to page %s', url)
-
-      // when opening the blank page and trying to navigate
-      // the focus gets lost. Restore it and then navigate.
-      await client.send('Page.bringToFront')
-      await client.send('Page.navigate', { url })
-    },
-    async handleDownloads (dir, automation) {
-      client.on('Page.downloadWillBegin', (data) => {
-        const downloadItem = {
-          id: data.guid,
-          url: data.url,
-        }
-
-        const filename = data.suggestedFilename
-
-        if (filename) {
-          // @ts-ignore
-          downloadItem.filePath = path.join(dir, data.suggestedFilename)
-          // @ts-ignore
-          downloadItem.mime = mime.getType(data.suggestedFilename)
-        }
-
-        automation.push('create:download', downloadItem)
-      })
-
-      client.on('Page.downloadProgress', (data) => {
-        if (data.state !== 'completed') return
-
-        automation.push('complete:download', {
-          id: data.guid,
-        })
-      })
-
-      await client.send('Page.setDownloadBehavior', {
-        behavior: 'allow',
-        downloadPath: dir,
-      })
-    },
-    async send (command: string, params?: object) {
-      const message: Message = {
-        method: command,
-        params,
-      }
-
-      if (sessionId) {
-        message.sessionId = sessionId
-      }
-
+    targetId: target,
+    async send (command: CRIWrapper.Command, params?: object) {
       const enqueue = () => {
         return new Promise((resolve, reject) => {
-          enqueuedCommands.push({ message, params, p: { resolve, reject } })
+          enqueuedCommands.push({ command, params, p: { resolve, reject } })
         })
       }
 
@@ -300,7 +199,7 @@ export const create = async (opts: CreateOpts): Promise<Client> => {
 
       if (connected) {
         try {
-          return await cri.sendRaw(message)
+          return await cri.send(command, params)
         } catch (err) {
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The

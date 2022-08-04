@@ -2,7 +2,7 @@ import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create, Client } from './cri-client'
+import { create, CRIWrapper } from './cri-client'
 
 const HOST = '127.0.0.1'
 
@@ -67,8 +67,8 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 }
 
 export class BrowserCriClient {
-  currentlyAttachedTarget: Client | undefined
-  private constructor (private browserClient: Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
+  currentlyAttachedTarget: CRIWrapper.Client | undefined
+  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -79,16 +79,12 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: Client) => void): Promise<BrowserCriClient> {
+  static async create (port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CRIWrapper.Client) => void): Promise<BrowserCriClient> {
     await ensureLiveBrowser(port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host: HOST, port })
-      const browserClient = await create({
-        target: versionInfo.webSocketDebuggerUrl,
-        onAsynchronousError,
-        onReconnect,
-      })
+      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
       return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
     }, browserName, port)
@@ -114,7 +110,7 @@ export class BrowserCriClient {
    * @param url the url to attach to
    * @returns the chrome remote interface wrapper for the target
    */
-  attachToTargetUrl = async (url: string): Promise<Client> => {
+  attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
     // Continue trying to re-attach until succcessful.
     // If the browser opens slowly, this will fail until
     // The browser and automation API is ready, so we try a few
@@ -129,12 +125,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({
-        target: target.targetId,
-        onAsynchronousError: this.onAsynchronousError,
-        host: HOST,
-        port: this.port,
-      })
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -166,12 +157,7 @@ export class BrowserCriClient {
     ])
 
     if (target) {
-      this.currentlyAttachedTarget = await create({
-        target: target.targetId,
-        onAsynchronousError: this.onAsynchronousError,
-        host: HOST,
-        port: this.port,
-      })
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
     }
   }
 

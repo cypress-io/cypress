@@ -12,29 +12,22 @@ describe('lib/browsers/cri-client', function () {
     create: typeof create
   }
   let send: sinon.SinonStub
-  let sendRaw: sinon.SinonStub
   let criImport: sinon.SinonStub & {
     New: sinon.SinonStub
   }
   let criStub: {
     send: typeof send
-    sendRaw: typeof sendRaw
-    on: sinon.SinonStub
     close: sinon.SinonStub
     _notifier: EventEmitter
   }
   let onError: sinon.SinonStub
-  let getClient: (opts?: any) => ReturnType<typeof create>
+  let getClient: () => ReturnType<typeof create>
 
   beforeEach(function () {
     send = sinon.stub()
-    sendRaw = sinon.stub()
     onError = sinon.stub()
-
     criStub = {
       send,
-      sendRaw,
-      on: sinon.stub(),
       close: sinon.stub(),
       _notifier: new EventEmitter(),
     }
@@ -52,11 +45,10 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = (opts) => {
+    getClient = () => {
       return criClient.create({
         target: DEBUGGER_URL,
         onError,
-        ...opts,
       })
     }
   })
@@ -68,65 +60,19 @@ describe('lib/browsers/cri-client', function () {
       expect(client.send).to.be.instanceOf(Function)
     })
 
-    context('with process', function () {
-      let process: any
-
-      beforeEach(function () {
-        process = { /** stubbed */}
-
-        criImport.withArgs({
-          process,
-          local: true,
-        })
-        .resolves(criStub)
-      })
-
-      it('finds and attaches to target and persists sessionId', async function () {
-        const target = {
-          targetId: 'good',
-          type: 'page',
-          url: 'about:blank',
-        }
-
-        const otherTarget = {
-          targetId: 'bad',
-        }
-
-        send
-        .withArgs('Target.setDiscoverTargets').resolves()
-        .withArgs('Target.getTargets').resolves({ targetInfos: [otherTarget, target] })
-        .withArgs('Target.attachToTarget', { targetId: 'good', flatten: true }).resolves({ sessionId: 'session-1' })
-
-        sendRaw.resolves()
-
-        const client = await getClient({ process })
-
-        await client.send('Browser.getVersion')
-
-        expect(sendRaw).to.be.calledWith({
-          method: 'Browser.getVersion',
-          params: undefined,
-          sessionId: 'session-1',
-        })
-      })
-    })
-
     context('#send', function () {
-      it('calls cri.sendRaw with command and data', async function () {
-        sendRaw.resolves()
+      it('calls cri.send with command and data', async function () {
+        send.resolves()
         const client = await getClient()
 
         client.send('Browser.getVersion', { baz: 'quux' })
-        expect(sendRaw).to.be.calledWith({
-          method: 'Browser.getVersion',
-          params: { baz: 'quux' },
-        })
+        expect(send).to.be.calledWith('Browser.getVersion', { baz: 'quux' })
       })
 
-      it('rejects if cri.sendRaw rejects', async function () {
+      it('rejects if cri.send rejects', async function () {
         const err = new Error
 
-        sendRaw.rejects(err)
+        send.rejects(err)
         const client = await getClient()
 
         await expect(client.send('Browser.getVersion', { baz: 'quux' }))
@@ -142,14 +88,14 @@ describe('lib/browsers/cri-client', function () {
           it(`with '${msg}'`, async function () {
             const err = new Error(msg)
 
-            sendRaw.onFirstCall().rejects(err)
-            sendRaw.onSecondCall().resolves()
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().resolves()
 
             const client = await getClient()
 
             await client.send('Browser.getVersion', { baz: 'quux' })
 
-            expect(sendRaw).to.be.calledTwice
+            expect(send).to.be.calledTwice
           })
         })
       })
