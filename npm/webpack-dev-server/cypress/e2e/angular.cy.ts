@@ -69,13 +69,5 @@ for (const project of WEBPACK_REACT) {
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
-
-    it('proves out mount API', () => {
-      cy.visitApp()
-
-      cy.contains('mount.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 10)
-    })
   })
 }
