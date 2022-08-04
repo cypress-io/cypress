@@ -115,7 +115,12 @@ function bootstrapModule<T> (
     testModuleMetaData.imports = []
   }
 
-  testModuleMetaData.declarations.push(component)
+  // check if the component is a standalone component
+  if ((component as any).ɵcmp.standalone) {
+    testModuleMetaData.imports.push(component)
+  } else {
+    testModuleMetaData.declarations.push(component)
+  }
 
   if (!testModuleMetaData.imports.includes(CommonModule)) {
     testModuleMetaData.imports.push(CommonModule)

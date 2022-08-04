@@ -6,7 +6,13 @@ import { ChildComponent } from "./components/child.component";
 import { WithDirectivesComponent } from "./components/with-directives.component";
 import { ButtonOutputComponent } from "./components/button-output.component";
 import { createOutputSpy } from 'cypress/angular';
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, Component } from '@angular/core';
+import { ProjectionComponent } from "./components/projection.component";
+
+@Component({
+  template: `<app-projection>Hello World</app-projection>`
+})
+class WrapperComponent {}
 
 describe("angular mount", () => {
   it("pushes CommonModule into component", () => {
@@ -45,6 +51,31 @@ describe("angular mount", () => {
         cy.contains("h1", "I just changed!");
       });
   });
+
+  it('can bind the spy to the componentProperties bypassing types', () => {
+    cy.mount(ButtonOutputComponent, {
+      componentProperties: { 
+        clicked: {
+          emit: cy.spy().as('onClickedSpy')
+        } as any
+      }
+    })
+    cy.get('button').click()
+    cy.get('@onClickedSpy').should('have.been.calledWith', true)
+  })
+
+  it('can bind the spy to the componentProperties bypassing types using template', () => {
+    cy.mount('<app-button-output (clicked)="clicked.emit($event)"></app-button-output>', {
+      declarations: [ButtonOutputComponent],
+      componentProperties: { 
+        clicked: {
+          emit: cy.spy().as('onClickedSpy')
+        } as any
+      }
+    })
+    cy.get('button').click()
+    cy.get('@onClickedSpy').should('have.been.calledWith', true)
+  })
 
   it('can spy on EventEmitters', () => {
     cy.mount(ButtonOutputComponent).then(({ component }) => {
@@ -88,6 +119,17 @@ describe("angular mount", () => {
     cy.get('@mySpy').should('have.been.calledWith', true)
   })
 
+  it('can accept a createOutputSpy for an Output property with a template', () => {
+    cy.mount('<app-button-output (click)="clicked.emit($event)"></app-button-output>', {
+      declarations: [ButtonOutputComponent],
+      componentProperties: {
+        clicked: createOutputSpy<boolean>('mySpy')
+      }
+    })
+    cy.get('button').click()
+    cy.get('@mySpy').should('have.been.called')
+  })
+
   it('can reference the autoSpyOutput alias on component @Outputs()', () => {
     cy.mount(ButtonOutputComponent, {
       autoSpyOutputs: true,
@@ -105,4 +147,31 @@ describe("angular mount", () => {
       cy.mount(ButtonOutputComponent);
     });
   });
+  it('can reference the autoSpyOutput alias on component @Outputs() with a template', () => {
+    cy.mount('<app-button-output (clicked)="clicked.emit($event)"></app-button-output>', {
+      declarations: [ButtonOutputComponent],
+      autoSpyOutputs: true,
+      componentProperties: {
+        clicked: new EventEmitter()
+      }
+    })
+    cy.get('button').click()
+    cy.get('@clickedSpy').should('have.been.calledWith', true)
+  })
+
+
+
+  it('can handle content projection with a WrapperComponent', () => {
+    cy.mount(WrapperComponent, {
+      declarations: [ProjectionComponent]
+    })
+    cy.get('h3').contains('Hello World')
+  })
+
+  it('can handle content projection using template', () => {
+    cy.mount('<app-projection>Hello World</app-projection>', {
+      declarations: [ProjectionComponent]
+    })
+    cy.get('h3').contains('Hello World')
+  })
 });
