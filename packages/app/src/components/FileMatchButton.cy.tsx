@@ -43,4 +43,17 @@ describe('<FileMatchButton />', () => {
     .click()
     .should('be.focused')
   })
+
+  it('takes in an optional disabled prop', () => {
+    cy.mount(() => (<div class="p-12">
+      <FileMatchButton disabled>
+        *.stories.*
+      </FileMatchButton>
+    </div>))
+    .get(fileMatchButtonSelector)
+    .should('be.disabled')
+
+    // Expand arrow should not exist if button is disabled
+    cy.get('svg').should('not.exist')
+  })
 })

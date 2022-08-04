@@ -31,6 +31,7 @@
     <div class="rounded border-1 h-40px w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
+        :disabled="fileMatchButtonDisabled"
         @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
@@ -99,6 +100,7 @@ const props = defineProps<{
   extensionPattern: string
   pattern: string
   matches: Matches
+  fileMatchButtonDisabled?: boolean
 }>()
 
 const emits = defineEmits<{
