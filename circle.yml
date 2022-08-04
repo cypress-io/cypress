@@ -65,7 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'fix-system-test-glob-pattern', << pipeline.git.branch >> ]
+    - equal: [ 'marktnoonan/16098', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
