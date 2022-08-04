@@ -77,7 +77,6 @@ Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver 
 registerMountFn()
 addVueCommand()
 installCustomPercyCommand({
-  isComponentTesting: true,
   elementOverrides: {
     'svg.animate-spin': ($el) => {
       $el.attr('style', 'animation: none !important')

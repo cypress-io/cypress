@@ -55,8 +55,8 @@ declare global {
   }
 }
 
-function setupAxeAndCheckA11y (isComponentTesting?: boolean) {
-  if (isComponentTesting) {
+function setupAxeAndCheckA11y () {
+  if (Cypress.testingType === 'component') {
     Cypress.Commands.add('injectAxe', () => {
       // this is a work around for the issue with require.resolve in CT
       // described here: https://github.com/component-driven/cypress-axe/issues/134
@@ -72,7 +72,7 @@ function setupAxeAndCheckA11y (isComponentTesting?: boolean) {
 
   cy.injectAxe()
 
-  if (isComponentTesting) {
+  if (Cypress.testingType === 'component') {
     // since components are isolated fragments, right off the bat
     // there are some things we should avoid checking
     cy.configureAxe({
@@ -238,7 +238,7 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides, isComponentTesting }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -291,7 +291,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides, isComponen
       // since Percy snapshots represent visually unique states in the application
       // doing an accessibility check here should cover all situations that need to a11y checks
 
-      setupAxeAndCheckA11y(isComponentTesting)
+      setupAxeAndCheckA11y()
 
       return applySnapshotMutations({
         ...snapshotMutationOptions,
