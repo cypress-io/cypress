@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - revert-22742
+        - reapply-state-refactor
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -881,7 +881,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else
+            else 
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
