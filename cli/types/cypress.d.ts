@@ -2850,11 +2850,6 @@ declare namespace Cypress {
      */
     experimentalSessionAndOrigin: boolean
     /**
-     * Enables running all specs in a single tab in run mode for faster run mode execution.
-     * @default false
-     */
-    experimentalSingleTabRunMode: boolean
-    /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
@@ -3060,6 +3055,11 @@ declare namespace Cypress {
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
+    /**
+     * Enables running all specs in a single tab in run mode for faster run mode execution.
+     * @default false
+     */
+    experimentalSingleTabRunMode?: boolean
   }
 
   /**
