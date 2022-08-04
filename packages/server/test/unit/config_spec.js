@@ -1488,6 +1488,7 @@ describe('lib/config', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
@@ -1574,6 +1575,7 @@ describe('lib/config', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
