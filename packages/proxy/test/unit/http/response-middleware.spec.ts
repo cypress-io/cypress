@@ -932,7 +932,6 @@ describe('http/response-middleware', function () {
         req: {
           proxiedUrl: 'http://www.foobar.com/login',
           headers: {},
-          isAUTFrame: true,
           ...props.req,
         },
         incomingResStream: {

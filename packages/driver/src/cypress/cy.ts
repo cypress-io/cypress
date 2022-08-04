@@ -868,18 +868,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   replayCommandsFrom (current) {
     const cy = this
 
-    // reset each chainerId to the
-    // current value
-    const chainerId = this.state('chainerId')
-
-    const insert = function (command) {
-      command.set('chainerId', chainerId)
-
-      // clone the command to prevent
-      // mutating its properties
-      return cy.enqueue(command.clone())
-    }
-
     // - starting with the aliased command
     // - walk up to each prev command
     // - until you reach a parent command
@@ -919,8 +907,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return memo
       }, [initialCommand])
 
+      const chainerId = this.state('chainerId')
+
       for (let c of commandsToInsert) {
-        insert(c)
+        // clone the command to prevent
+        // mutating its properties
+        const command = c.clone()
+
+        command.set('chainerId', chainerId)
+        cy.enqueue(command)
       }
     }
 
