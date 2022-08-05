@@ -274,6 +274,7 @@ function openFile () {
     },
   })
 }
+
 onMounted(() => {
   const eventManager = getEventManager()
 

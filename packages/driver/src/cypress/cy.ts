@@ -642,6 +642,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     try {
       const s = this.state()
 
+      console.log('reset', test.title, s.activeSessions)
       const backup = {
         window: s.window,
         document: s.document,

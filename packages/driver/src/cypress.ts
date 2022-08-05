@@ -169,7 +169,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  configure (config: Cypress.ObjectLike = {}) {
+  configure (config: Record<string, any> = {}, cachedState: Promise<Record<string, any>>) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -216,8 +216,25 @@ class $Cypress {
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
+    // cachedState.then((cache) => {
+    // const cache = this.emit('get:cached:state', (cache) => {
+    //   console.log('in cypress', cache)
 
-    this.state = $SetterGetter.create({}) as unknown as StateFunc
+    //   return {
+    //     activeSessions: cache.globalSessions,
+    //   }
+    // })
+
+    // console.log('cache in cy', window.getEventNames())
+    this.state = $SetterGetter.create({
+      ...cachedState.then((state) => {
+        console.log(state.globalSessions)
+
+        return {
+          activeSessions: state.globalSessions || {},
+        }
+      }),
+    }) as unknown as StateFunc
 
     /*
      * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.
@@ -312,6 +329,7 @@ class $Cypress {
   // Method to manually re-execute Runner (usually within $autIframe)
   // used mainly by Component Testing
   restartRunner () {
+    console.log('[cypres] restartrunner')
     if (!window.top!.Cypress) {
       throw Error('Cannot re-run spec without Cypress')
     }
@@ -378,7 +396,7 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-
+      console.log(this.state())
       this.onSpecReady()
     })
   }
@@ -815,10 +833,10 @@ class $Cypress {
     }
   }
 
-  static create (config) {
+  static create (config: Record<string, any>, cachedState: Promise<Record<string, any>>) {
     const cypress = new $Cypress()
 
-    cypress.configure(config)
+    cypress.configure(config, cachedState)
 
     return cypress
   }

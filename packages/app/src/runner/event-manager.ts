@@ -85,12 +85,11 @@ export class EventManager {
 
     const rerun = () => {
       if (!this) {
-        // if the tests have been reloaded
-        // then there is nothing to rerun
+        // if the tests have been reloaded then there is nothing to rerun
         return
       }
 
-      return this.runSpec(state)
+      return this.rerunSpec()
     }
 
     const connectionInfo: AddGlobalListenerOptions = {
@@ -251,10 +250,10 @@ export class EventManager {
       this.saveState(state)
     })
 
-    this.reporterBus.on('clear:session', () => {
+    this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 
-      Cypress.backend('clear:session')
+      Cypress.backend('clear:all:sessions')
       .then(() => {
         rerun()
       })
@@ -341,7 +340,7 @@ export class EventManager {
     const $window = this.$CypressDriver.$(window)
 
     // This is a test-only even. It's used to
-    // trigger a re-reun for the drive rerun.cy.js spec.
+    // trigger a re-run for the drive rerun.cy.js spec.
     $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
@@ -372,13 +371,22 @@ export class EventManager {
   }
 
   setup (config) {
-    Cypress = this.Cypress = this.$CypressDriver.create(config)
+    const cachedState = new Promise((resolve) => {
+      this.ws.emit('get:cached:state', (cachedState = {}) => {
+        resolve(cachedState)
+      })
+    })
+
+    Cypress = this.Cypress = this.$CypressDriver.create(config, cachedState)
 
     // expose Cypress globally
     // @ts-ignore
     window.Cypress = Cypress
 
     this._addListeners()
+
+    // console.log('clear spec sessions')
+    // Cypress.backend('clear:spec:sessions')
 
     this.ws.emit('watch:test:file', config.spec)
   }
@@ -600,6 +608,7 @@ export class EventManager {
 
     // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
+      console.log('window:before:unload')
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
@@ -719,12 +728,21 @@ export class EventManager {
     this.ws.off()
   }
 
-  async teardown (state: MobxRunnerStore) {
+  async teardown (state, isRerun = false) {
+    console.log('teardown', isRerun, !Cypress)
     if (!Cypress) {
       return
     }
 
     state.setIsLoading(true)
+
+    if (!isRerun) {
+      console.log('teardown--clear:spec:sessions')
+      // only clear spec sessions when a new spec is selected
+      Cypress.backend('clear:spec:sessions')
+    }
+
+    console.log('stop')
 
     // when we are re-running we first
     // need to stop cypress always
@@ -744,26 +762,19 @@ export class EventManager {
     })
   }
 
-  async _rerun () {
-    await this.resetReporter()
-
-    // this probably isn't 100% necessary
-    // since Cypress will fall out of scope
-    // but we want to be aggressive here
-    // and force GC early and often
-    Cypress.removeAllListeners()
-
-    this.localBus.emit('restart')
-  }
-
-  async runSpec (state: MobxRunnerStore) {
-    if (!Cypress) {
+  async rerunSpec () {
+    if (!this || !Cypress) {
+      // if the tests have been reloaded then there is nothing to rerun
       return
     }
 
-    await this.teardown(state)
+    await this.resetReporter()
 
-    return this._rerun()
+    // this probably isn't 100% necessary since Cypress will fall out of scope
+    // but we want to be aggressive here and force GC early and often
+    Cypress.removeAllListeners()
+
+    this.localBus.emit('restart')
   }
 
   _interceptStudio (displayProps) {

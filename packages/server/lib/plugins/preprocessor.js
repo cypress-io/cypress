@@ -69,8 +69,7 @@ const API = {
       // vs config.isInterativeMode
       const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
-      const baseFilePath = filePath
-      .replace(config.projectRoot, '')
+      const baseFilePath = filePath.replace(config.projectRoot, '')
 
       fileObject = (fileObjects[filePath] = _.extend(new EE(), {
         filePath,

@@ -165,10 +165,11 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec () {
+function teardownSpec (isRerun = false) {
+  console.log('teardown spec')
   useSnapshotStore().$reset()
 
-  return getEventManager().teardown(getMobxRunnerStore())
+  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
 let isTorndown = false
@@ -210,12 +211,7 @@ export function addCrossOriginIframe (location) {
   })
 }
 
-/**
- * Set up a spec by creating a fresh AUT and initializing
- * Cypress on it.
- *
- */
-function runSpecCT (spec: SpecFile) {
+function setupDriver (spec: SpecFile) {
   // TODO: UNIFY-1318 - figure out how to manage window.config.
   const config = getRunnerConfigFromWindow()
 
@@ -241,11 +237,31 @@ function runSpecCT (spec: SpecFile) {
 
   // create new AUT
   const autIframe = getAutIframeModel()
+
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  return {
+    autIframe,
+    config,
+    $container,
+    $autIframe,
+  }
+}
+
+/**
+ * Set up a spec by creating a fresh AUT and initializing
+ * Cypress on it.
+ *
+ */
+function runSpecCT (spec: SpecFile) {
+  const {
+    autIframe,
+    config,
+    $autIframe,
+  } = setupDriver(spec)
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.showInitialBlankContentsCT()
+  autIframe.showInitialBlankContents('component')
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -281,40 +297,19 @@ function setSpecForDriver (spec: SpecFile) {
  * initialize Cypress on the AUT.
  */
 function runSpecE2E (spec: SpecFile) {
-  // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
-  const $runnerRoot = getRunnerElement()
-
-  // clear AUT, if there is one.
-  empty($runnerRoot)
-
-  // create root for new AUT
-  const $container = document.createElement('div')
-
-  $container.classList.add('screenshot-height-container')
-
-  $runnerRoot.append($container)
-
-  // create new AUT
-  const autIframe = getAutIframeModel()
-
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  const {
+    autIframe,
+    config,
+    $autIframe,
+    $container,
+  } = setupDriver(spec)
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
     el.remove()
   })
 
-  autIframe.showInitialBlankContentsE2E()
+  autIframe.showInitialBlankContents('e2e')
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
@@ -399,8 +394,9 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
-  await teardownSpec()
+async function executeSpec (spec: SpecFile, isRerun = false) {
+  console.log('execute spec', isRerun)
+  await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
 

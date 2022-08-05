@@ -123,6 +123,7 @@ export default class SessionsManager {
         setup: options.setup,
         hydrated: false,
         validate: options.validate,
+        cacheAcrossSpecs: options.cacheAcrossSpecs,
       }
 
       this.setActiveSession({ [sess_state.id]: sess_state })
@@ -133,7 +134,13 @@ export default class SessionsManager {
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
 
-      return this.Cypress.backend('clear:session', null)
+      return this.Cypress.backend('clear:all:sessions', null)
+    },
+
+    clearAllSpecSessions: async () => {
+      this.clearActiveSessions()
+
+      return this.Cypress.backend('clear:spec:sessions', null)
     },
 
     clearCurrentSessionData: async () => {

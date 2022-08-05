@@ -12,6 +12,11 @@ import {
 
 type SessionData = Cypress.Commands.Session.SessionData
 
+type SessionOptions = {
+  cacheAcrossSpecs: boolean
+  validate?: Function
+}
+
 /**
  * Session data should be cleared with spec browser launch.
  *
@@ -52,7 +57,8 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id, setup?: Function, options: { validate?: Function } = {}) {
+    session (id, setup?: Function, options: SessionOptions = { cacheAcrossSpecs: false }) {
+      console.log('session command', Cypress.state('activeSessions'))
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
@@ -72,6 +78,7 @@ export default function (Commands, Cypress, cy) {
 
         const validOpts = {
           'validate': 'function',
+          'cacheAcrossSpecs': 'boolean',
         }
 
         Object.entries(options).forEach(([key, value]) => {
@@ -108,6 +115,7 @@ export default function (Commands, Cypress, cy) {
             id,
             setup,
             validate: options.validate,
+            cacheAcrossSpecs: options.cacheAcrossSpecs,
           })
 
           sessionsManager.currentTestRegisteredSessions.set(id, true)
@@ -355,6 +363,7 @@ export default function (Commands, Cypress, cy) {
           if (!existingSession.hydrated) {
             const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
 
+            console.log('serverStoredSession', serverStoredSession)
             // we have a saved session on the server and setup matches
             if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
               _.extend(existingSession, _.omit(serverStoredSession, 'setup'))

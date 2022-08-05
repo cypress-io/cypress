@@ -35,12 +35,14 @@ export class AutIframe {
     return $iframe
   }
 
-  showInitialBlankContentsE2E () {
-    this._showContents(blankContents.initial())
-  }
+  showInitialBlankContents (testingType) {
+    if (testingType === 'component') {
+      this._showContents(blankContents.initialCT())
 
-  showInitialBlankContentsCT () {
-    this._showContents(blankContents.initialCT())
+      return
+    }
+
+    this._showContents(blankContents.initial())
   }
 
   showSessionBlankContents () {

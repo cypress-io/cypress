@@ -27,18 +27,7 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
-
-const runnerEvents: RunnerEvent[] = [
+const runnerEvents = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -48,18 +37,9 @@ const runnerEvents: RunnerEvent[] = [
   'paused',
   'test:after:hooks',
   'run:end',
-]
+] as const
 
-type ReporterEvent =
-  'runner:restart'
-  | 'runner:abort'
-  | 'runner:console:log'
-  | 'runner:console:error'
-  | 'runner:show:snapshot'
-  | 'runner:hide:snapshot'
-  | 'reporter:restarted'
-
-const reporterEvents: ReporterEvent[] = [
+const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -68,7 +48,7 @@ const reporterEvents: ReporterEvent[] = [
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',
-]
+] as const
 
 const debug = Debug('cypress:server:socket-base')
 
@@ -119,7 +99,7 @@ export class SocketBase {
     // instead of throwing immediately here perhaps we need
     // to make this more resilient by automatically retrying
     // up to 1 second in the case where our automation room
-    // is empty. that would give padding for reconnections
+    // is empty. that would give padding for reconnection s
     // to automatically happen.
     // for instance when socket.io detects a disconnect
     // does it immediately remove the member from the room?
@@ -336,7 +316,6 @@ export class SocketBase {
       })
 
       // TODO: what to do about runner disconnections?
-
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
@@ -347,6 +326,12 @@ export class SocketBase {
 
       socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
         return options.onTestsReceivedAndMaybeRecord(runnables, cb)
+      })
+
+      socket.on('get:cached:state', (cb) => {
+        console.log('on get:cached:state')
+
+        return cb({ globalSessions: session.getGlobalSessions() })
       })
 
       socket.on('mocha', (...args: unknown[]) => {
@@ -452,17 +437,33 @@ export class SocketBase {
             case 'task':
               return task.run(cfgFile ?? null, args[0])
             case 'save:session':
+              console.log('save:session', args)
+
               return session.saveSession(args[0])
-            case 'clear:session':
-              return session.clearSessions()
+            case 'clear:spec:sessions':
+              console.log('clear spec sessons')
+
+              return session.clearSpecSessions() // pass in arg for boolean for clear all?
+              // return session.clearSessions(args[0])
+            case 'clear:all:sessions':
+              console.log('clear all sessons')
+
+              return session.clearAllSessions()
             case 'get:session':
               return session.getSession(args[0])
+
             case 'reset:session:state':
               cookieJar.removeAllCookies()
-              session.clearSessions()
+              session.clearAllSessions()
               resetRenderedHTMLOrigins()
 
               return
+            case 'get:cached:state':
+              console.log('backend request....get:cached:state')
+
+              return {
+                sessions: session.getGlobalSessions(),
+              }
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
@@ -564,7 +565,8 @@ export class SocketBase {
       })
 
       runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
+        socket.on(event, (data): any => {
+          console.log('event', event)
           this.toReporter(event, data)
         })
       })

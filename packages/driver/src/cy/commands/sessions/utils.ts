@@ -44,6 +44,41 @@ const getCurrentOriginStorage = () => {
   return value
 }
 
+const getConsoleProps = (sessState: SessionData) => {
+  const sessionDetails = getSessionDetailsForTable(sessState)
+
+  const tables = _.flatMap(sessionDetails, (val, domain) => {
+    const cookiesTable = () => {
+      return {
+        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
+        data: val.cookies,
+      }
+    }
+
+    const localStorageTable = () => {
+      return {
+        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
+        data: _.map(val.localStorage.value, (value, key) => {
+          return {
+            key,
+            value,
+          }
+        }),
+      }
+    }
+
+    return [
+      val.cookies && cookiesTable,
+      val.localStorage && localStorageTable,
+    ]
+  })
+
+  return {
+    id: sessState.id,
+    table: _.compact(tables),
+  }
+}
+
 const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   const origins = originOptions.map((v) => v.origin) as string[]
 
@@ -96,7 +131,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   .timeout(2000)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
-    $iframeContainer.remove()
+    // $iframeContainer.remove()
   })
   .catch(() => {
     Cypress.log({
@@ -106,48 +141,13 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState: SessionData) => {
-  const sessionDetails = getSessionDetailsForTable(sessState)
-
-  const tables = _.flatMap(sessionDetails, (val, domain) => {
-    const cookiesTable = () => {
-      return {
-        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
-        data: val.cookies,
-      }
-    }
-
-    const localStorageTable = () => {
-      return {
-        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
-        data: _.map(val.localStorage.value, (value, key) => {
-          return {
-            key,
-            value,
-          }
-        }),
-      }
-    }
-
-    return [
-      val.cookies && cookiesTable,
-      val.localStorage && localStorageTable,
-    ]
-  })
-
-  return {
-    id: sessState.id,
-    table: _.compact(tables),
-  }
-}
-
 const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   const results = [] as any[]
   const iframes: JQuery<HTMLElement>[] = []
   let onPostMessage
   const successOrigins = [] as string[]
 
-  const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
+  const $iframeContainer = $(`<div id="sessions-iframe-container" style="display:none"></div>`).appendTo($('body', specWindow.document))
 
   _.each(origins, (u) => {
     const $iframe = $(`<iframe src="${`${u}/__cypress/automation/getLocalStorage`}"></iframe>`)
@@ -180,7 +180,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   .timeout(2000)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
-    $iframeContainer.remove()
+    // $iframeContainer.remove()
   })
   .catch((err) => {
     Cypress.log({
