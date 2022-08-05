@@ -1658,7 +1658,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('passes filtered options to Project#open and sets cli config', async function () {
+    // TODO: fix https://github.com/cypress-io/cypress/issues/23149
+    it.skip('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       sinon.stub(interactiveMode, 'ready')
