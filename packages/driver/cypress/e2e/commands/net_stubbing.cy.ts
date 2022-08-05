@@ -1944,7 +1944,8 @@ describe('network stubbing', function () {
             cy.wait('@getUrl')
           })
 
-          it('setPrototypeOf', (done) => {
+          // TODO: fix https://github.com/cypress-io/cypress/issues/23100
+          it.skip('setPrototypeOf', (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
 
