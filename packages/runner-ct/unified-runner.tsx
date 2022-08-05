@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 import {
-  StudioRecorder,
+  // StudioRecorder,
   dom,
 } from '@packages/runner-shared'
 import { Reporter } from '@packages/reporter/src/main'
@@ -16,7 +16,7 @@ export const UnifiedRunner = {
 
   dom,
 
-  StudioRecorder,
+  // StudioRecorder,
 
   shortcuts,
 

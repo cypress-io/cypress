@@ -13,6 +13,8 @@
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
+
+        <button @click="visitUrl">Go Studio</button>
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
@@ -165,6 +167,14 @@ import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineC
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import BookIcon from '~icons/cy/book_x16'
+import { useStudioRecorderStore } from '../store/studio-store'
+
+
+const studioRecorder = useStudioRecorderStore()
+
+function visitUrl () {
+  studioRecorder.visitUrl(`http://google.com`)
+}
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {

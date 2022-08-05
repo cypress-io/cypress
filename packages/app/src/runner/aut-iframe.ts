@@ -4,6 +4,7 @@ import { logger } from './logger'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
+import { useStudioRecorderStore } from '../store/studio-store'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -18,7 +19,6 @@ export class AutIframe {
     private eventManager: any,
     private $: $CypressJQuery,
     private dom: any,
-    private studioRecorder: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -477,15 +477,19 @@ export class AutIframe {
     })
   }
 
-  startStudio = () => {
-    if (this.studioRecorder.isLoading) {
-      this.studioRecorder.start(this._body()?.[0])
+  startStudio () {
+    const studioRecorder = useStudioRecorderStore()
+    if (studioRecorder.isLoading) {
+      debugger
+      studioRecorder.start(this._body()?.[0])
     }
   }
 
-  reattachStudio = () => {
-    if (this.studioRecorder.isActive) {
-      this.studioRecorder.attachListeners(this._body()?.[0])
+  reattachStudio () {
+    const studioRecorder = useStudioRecorderStore()
+    if (studioRecorder.isActive) {
+      debugger
+      studioRecorder.attachListeners(this._body()?.[0])
     }
   }
 }

@@ -39,6 +39,10 @@ export function useEventManager () {
       getAutIframeModel().visitBlank({ type })
     })
 
+    eventManager.on('run:end', () => {
+      getAutIframeModel().startStudio();
+    })
+
     eventManager.on('expect:origin', addCrossOriginIframe)
   }
 

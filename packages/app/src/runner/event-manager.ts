@@ -11,6 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { useStudioRecorderStore } from '../store/studio-store'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -51,7 +52,7 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  studioRecorder: any
+  studioRecorder: ReturnType<typeof useStudioRecorderStore>
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
 
@@ -66,7 +67,7 @@ export class EventManager {
     StudioRecorderCtor: any,
     private ws: Socket,
   ) {
-    this.studioRecorder = new StudioRecorderCtor(this)
+    this.studioRecorder = useStudioRecorderStore() // new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
   }
 
@@ -466,7 +467,11 @@ export class EventManager {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studio: this.studioRecorder.state,
+            studio: {
+              testId: this.studioRecorder.testId,
+              suiteId: this.studioRecorder.suiteId,
+              url: this.studioRecorder.url,
+            }
           })
         })
       })
@@ -706,7 +711,8 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    console.log(this.studioRecorder)
+    console.log(this.studioRecorder, this.studioRecorder.hasRunnableId)
+
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
       numPassed: state.passed,

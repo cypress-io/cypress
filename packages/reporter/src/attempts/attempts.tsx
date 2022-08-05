@@ -45,6 +45,7 @@ const StudioError = () => (
 )
 
 function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
+  console.log(model.state, studioActive)
   // performance optimization - don't render contents if not open
   return (
     <div className={`attempt-${model.id + 1}`}>
