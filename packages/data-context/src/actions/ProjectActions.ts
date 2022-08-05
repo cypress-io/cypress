@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, BannerState } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
@@ -35,10 +35,13 @@ export interface ProjectApiShape {
   getConfig(): ReceivedCypressOptions | undefined
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
-  getCurrentProjectSavedState(): {} | undefined
+  getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
+  setBannerShown(bannerId: string): void
+  setBannerDismissed(bannerId: string): void
+  setBannerState(bannerId: string, state: Partial<BannerState>): void
   getDevServer (): {
     updateSpecs(specs: FoundSpec[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
@@ -311,6 +314,14 @@ export class ProjectActions {
 
   setPromptShown (slug: string) {
     this.api.setPromptShown(slug)
+  }
+
+  setBannerShown (bannerId: string) {
+    this.api.setBannerShown(bannerId)
+  }
+
+  setBannerDismissed (bannerId: string) {
+    this.api.setBannerDismissed(bannerId)
   }
 
   setSpecs (specs: FoundSpec[]) {

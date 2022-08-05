@@ -45,3 +45,12 @@ export interface SettingsOptions {
   testingType?: 'component' |'e2e'
   args?: AllModeOptions
 }
+
+export type BannerState = {
+  lastShown?: number | null
+  dismissed?: number | null
+}
+
+export type BannersState = {
+  [bannerId: string]: BannerState | null
+}
