@@ -35,7 +35,7 @@ body:
     attributes:
       label: Cypress Version
       description: Provide the version of Cypress where the flake is occurring.
-      placeholder: ex. 7.6.0
+      placeholder: ex. 10.4.0
     validations:
       required: true
   - type: textarea
