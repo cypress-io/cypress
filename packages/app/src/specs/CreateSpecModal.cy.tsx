@@ -1,6 +1,6 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
-import { CreateSpecModalFragmentDoc } from '../generated/graphql-test'
+import { CreateSpecModalFragmentDoc, EmptyGenerator_MatchSpecFileDocument } from '../generated/graphql-test'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
@@ -65,10 +65,28 @@ describe('<CreateSpecModal />', () => {
 
   describe('form behavior', () => {
     it('enter should call create spec function', () => {
+      //submit default path
       cy.get('input')
       .type('{enter}')
 
+      //should switch to success state
       cy.contains('h2', 'Great! The spec was successfully added')
+      .should('be.visible')
+    })
+
+    it('enter should not call create spec function if spec file path is invalid', () => {
+      cy.stubMutationResolver(EmptyGenerator_MatchSpecFileDocument, (defineResult, variables) => {
+        //mocking one pattern use case
+        return defineResult({ matchesSpecPattern: variables.specFile !== '' })
+      })
+
+      //try to submit an empty path which is invalid
+      cy.get('input')
+      .clear()
+      .type('{enter}')
+
+      //should stay on current state
+      cy.contains('h2', 'Enter the path for your new spec')
       .should('be.visible')
     })
   })

@@ -225,6 +225,10 @@ whenever(result, () => {
 })
 
 const createSpec = async () => {
+  if (!isValidSpecFile.value) {
+    return
+  }
+
   const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
