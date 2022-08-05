@@ -4,7 +4,6 @@ import $stackUtils from './stack_utils'
 export class $Chainer {
   specWindow: Window
   chainerId: string
-  firstCall: boolean
 
   constructor (specWindow) {
     this.specWindow = specWindow
@@ -12,14 +11,6 @@ export class $Chainer {
     // collisions when chainers created in a secondary origin are passed
     // to the primary origin for the command log, etc.
     this.chainerId = _.uniqueId(`ch-${window.location.origin}-`)
-
-    // firstCall is used to throw a useful error if the user leads off with a
-    // parent command.
-
-    // TODO: Refactor firstCall out of the chainer and into the command function,
-    // since cy.ts already has all the necessary information to throw this error
-    // without an instance variable, in one localized place in the code.
-    this.firstCall = true
   }
 
   static remove (key) {

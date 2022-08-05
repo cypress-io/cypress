@@ -205,8 +205,7 @@ describe('detectFramework', () => {
   })
 
   ;['13.0.0', '14.0.0'].forEach((v) => {
-    // TODO: revert once Angular is slated for release
-    it.skip(`Angular CLI v${v}`, async () => {
+    it(`Angular CLI v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
