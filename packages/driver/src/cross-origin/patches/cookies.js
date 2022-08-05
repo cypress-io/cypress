@@ -13,9 +13,14 @@
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const patchDocumentCookie = (Cypress, window) => {
+export const patchDocumentCookie = (Cypress, win) => {
+  // If document.cookie has already been patched, no need to do it again.
+  if (Object.getOwnPropertyDescriptor(win.document, 'cookie')?.configurable === false) {
+    return
+  }
+
   const setAutomationCookie = (toughCookie) => {
-    const { superDomain } = Cypress.Location.create(window.location.href)
+    const { superDomain } = Cypress.Location.create(win.location.href)
     const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
 
     Cypress.automation('set:cookie', automationCookie)
@@ -25,9 +30,11 @@ export const patchDocumentCookie = (Cypress, window) => {
     })
   }
 
+  // Because document.cookie can be patched after cookies have already been set, capture existing cookies.
+  const existingCookieValue = win.document.cookie
   let documentCookieValue = ''
 
-  Object.defineProperty(window.document, 'cookie', {
+  Object.defineProperty(win.document, 'cookie', {
     get () {
       return documentCookieValue
     },
@@ -51,6 +58,9 @@ export const patchDocumentCookie = (Cypress, window) => {
     },
   })
 
+  // reset the existing cookie value
+  win.document.cookie = existingCookieValue
+
   // The interval value is arbitrary; it shouldn't be too often, but needs to
   // be fairly frequent so that the local value is kept as up-to-date as
   // possible. It's possible there could be a race condition where
@@ -58,7 +68,7 @@ export const patchDocumentCookie = (Cypress, window) => {
   // way around that since it's a synchronous API and we can only get the
   // browser's true cookie values asynchronously.
   const intervalId = setInterval(async () => {
-    const { superDomain: domain } = Cypress.Location.create(window.location.href)
+    const { superDomain: domain } = Cypress.Location.create(win.location.href)
 
     try {
       const cookies = await Cypress.automation('get:cookies', { domain })
@@ -72,9 +82,9 @@ export const patchDocumentCookie = (Cypress, window) => {
   }, 250)
 
   const onUnload = () => {
-    window.removeEventListener('unload', onUnload)
+    win.removeEventListener('unload', onUnload)
     clearInterval(intervalId)
   }
 
-  window.addEventListener('unload', onUnload)
+  win.addEventListener('unload', onUnload)
 }

@@ -59,11 +59,11 @@ context('cy.origin log', () => {
       cy.wrap(afterLogAdded)
     }).then((id) => {
       // Verify the log is also fired in the primary origin.
-      expect(logs[7].get('message')).to.eq('test log in cy.origin')
+      expect(logs[6].get('message')).to.eq('test log in cy.origin')
       // Verify the log has the same ID as was generated in the cross-origin
-      expect(logs[7].get('id')).to.equal(id)
-      expect(logs[7].get('id')).to.not.equal(lastTestLogId)
-      assertLogLength(logs, 13)
+      expect(logs[6].get('id')).to.equal(id)
+      expect(logs[6].get('id')).to.not.equal(lastTestLogId)
+      assertLogLength(logs, 12)
     })
   })
 })

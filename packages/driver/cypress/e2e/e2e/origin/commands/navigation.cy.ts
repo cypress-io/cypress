@@ -77,7 +77,7 @@ context('cy.origin navigation', () => {
         })
       }).then(() => {
         expect(primaryCyBeforeLoadSpy).to.be.calledOnce
-        expect(primaryCyLoadSpy).to.be.calledTwice
+        expect(primaryCyLoadSpy).to.be.calledThrice // The call in cy.origin also causes an on load event in the primary origin.
         expect(primaryVisitBeforeLoadSpy).to.be.calledOnce
         expect(primaryVisitLoadSpy).to.be.calledOnce
       })
@@ -253,12 +253,28 @@ context('cy.origin navigation', () => {
       })
     })
 
-    it('can send a POST request', () => {
+    it.only('can send a POST request', () => {
+      // cy.visit('http://www.foobar.com:3500/post-only', {
+      cy.visit('/post-only', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar: 'baz',
+        }),
+      })
+
+      cy.contains('it worked!').contains('{"bar":"baz"}')
+    })
+
+    it.only('can send a POST request', () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/post-only', {
+        cy.visit('http://foobar.com:3500/post-only', {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
+            // 'cookie': '__cypress.initial=true',
           },
           body: JSON.stringify({
             bar: 'baz',

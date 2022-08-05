@@ -45,10 +45,16 @@ window.addEventListener('message', (event) => {
   }
 })
 
+// Post the before unload event. We post the load event here instead of in the cross origin communicator
+// because we want to notify the primary cypress instance of unload events even if a corresponding spec bridge
+// has not been created.
+window.addEventListener('beforeunload', () => {
+  parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
+})
+
 const Cypress = findCypress()
 
 if (Cypress) {
-
   // the timers are wrapped in the injection code similar to the primary origin
   const timers = createTimers()
 

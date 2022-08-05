@@ -599,7 +599,7 @@ export class EventManager {
 
     // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', window.origin)
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
@@ -607,12 +607,12 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:duringUserTestExecution', cy.state('duringUserTestExecution'))
     })
 
-    Cypress.primaryOriginCommunicator.on('before:unload', (__unused, originPolicy) => {
+    Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
       // Unstable is unstable regardless of where it initiated from.
       cy.state('isStable', false)
       // Re-broadcast to any other specBridges.
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', originPolicy)
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', origin)
     })
 
     Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {

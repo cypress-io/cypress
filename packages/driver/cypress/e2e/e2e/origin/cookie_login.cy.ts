@@ -86,7 +86,8 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.getCookie('user').its('value').should('equal', username)
+        cy.wait(500)
+        cy.getCookie('user').its('value').should('equal', username) // TODO run only on the originating domain.
       }, {
         validate () {
           cy.getCookie('user').its('value').should('equal', username)
@@ -131,7 +132,8 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.clearCookie('user')
+      cy.wait(500)
+      cy.clearCookie('user') // TODO Run only on the originating domain
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
@@ -144,7 +146,8 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.clearCookies()
+      cy.wait(500)
+      cy.clearCookies() // TODO run only on the originating domain.
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
@@ -477,7 +480,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1000) // give cookie time to expire
+      cy.wait(1500) // give cookie time to expire
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
@@ -493,7 +496,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1000) // give cookie time to expire
+      cy.wait(1500) // give cookie time to expire
       cy.reload()
       cy.getCookie('user').should('be.null')
     })
@@ -507,7 +510,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       cy.origin('http://idp.com:3500', () => {
-        cy.wait(1000) // give cookie time to expire
+        cy.wait(1500) // give cookie time to expire
         cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
       })
@@ -527,7 +530,7 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(1000) // give cookie time to expire
+        cy.wait(1500) // give cookie time to expire
         cy.reload()
         verifyLocalhostNotLoggedIn()
       })
@@ -541,7 +544,7 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(1000) // ensure cookie doesn't expire in this time
+        cy.wait(1500) // ensure cookie doesn't expire in this time
         cy.reload()
         verifyLoggedIn(username)
       })

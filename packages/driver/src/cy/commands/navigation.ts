@@ -1105,7 +1105,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // if the origin currently matches
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy || previouslyVisitedLocation) {
+          if (remote.originPolicy === existing.originPolicy || (previouslyVisitedLocation && Cypress.config('experimentalSessionAndOrigin'))) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
