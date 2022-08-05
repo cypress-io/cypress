@@ -22,10 +22,11 @@ export class LocalSettingsActions {
     }
 
     if (type === 'global') {
-      // persist to appData - projects/__global__/state.json
+      // persist to global appData - projects/__global__/state.json
       return this.ctx._apis.localSettingsApi.setPreferences(toJson)
     }
 
+    // persist to project appData - for example projects/launchpad/state.json
     return this.ctx._apis.projectApi.setProjectPreferences(toJson)
   }
 

@@ -348,7 +348,7 @@ export const mutation = mutationType({
 
     t.nonNull.field('setProjectPreferencesInGlobalCache', {
       type: Query,
-      description: 'Save the projects preferences to cache',
+      description: 'Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
       },

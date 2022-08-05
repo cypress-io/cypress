@@ -1310,7 +1310,9 @@ type Mutation {
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query
 
-  """Save the projects preferences to cache"""
+  """
+  Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache
+  """
   setProjectPreferencesInGlobalCache(testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
