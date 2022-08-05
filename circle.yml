@@ -466,7 +466,8 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ "<<parameters.browser>>" = "webkit" ]]; then
-              npx playwright install
+              npx playwright install webkit
+              npx playwright install-deps webkit
             fi
 
             if [[ -v MAIN_RECORD_KEY ]]; then
