@@ -244,6 +244,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'angular',
+    glob: '*.component.ts',
     mountModule: 'cypress/angular',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),

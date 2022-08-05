@@ -688,8 +688,8 @@ describe('App: Specs', () => {
           cy.findByRole('button', { name: 'Create another spec' }).click()
         })
 
-        // 'Choose a component' dialog appears again when the user selects "create another spec"
-        cy.findByRole('dialog', { name: 'Choose a component' }).should('be.visible')
+        // 'Create from component' card appears again when the user selects "create another spec"
+        cy.findByText('Create from component').should('be.visible')
       })
     })
 
