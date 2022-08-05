@@ -343,7 +343,8 @@ describe('e2e record', () => {
 
     setupStubbedServer(routes)
 
-    it('passes in parallel with group', function () {
+    // TODO: fix https://github.com/cypress-io/cypress/issues/23152
+    it.skip('passes in parallel with group', function () {
       this.retries(3)
 
       return Promise.all([
