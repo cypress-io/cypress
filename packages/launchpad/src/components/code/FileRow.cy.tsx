@@ -15,6 +15,8 @@ export default defineConfig({
   },
 })`
 
+faker.seed(1)
+
 const description = faker.hacker.phrase()
 const messages = defaultMessages.setupPage.configFile
 
