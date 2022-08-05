@@ -7,6 +7,8 @@ describe('initial', () => {
   })
 
   it('works', () => {
+    cy.get('[data-cy="cypress-logo"]')
+
     cy.percySnapshot()
   })
 })
@@ -14,6 +16,10 @@ describe('initial', () => {
 describe('session', () => {
   it('works', () => {
     getContainerEl()!.innerHTML = session()
+
+    cy.get('[data-cy="cypress-logo"]')
+    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
+    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.')
 
     cy.percySnapshot()
   })
@@ -29,6 +35,10 @@ describe('session', () => {
 describe('sessionLifecycle', () => {
   it('works', () => {
     getContainerEl()!.innerHTML = sessionLifecycle()
+
+    cy.get('[data-cy="cypress-logo"]')
+    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
+    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
 
     cy.percySnapshot()
   })

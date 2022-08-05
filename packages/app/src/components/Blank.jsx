@@ -140,24 +140,27 @@ const blankContentsHtml = (text = '', subtext = '') => {
     <div class='outer-container'>
       <div class='inner-container'>
         ${svgCy}
-        <p class="text">${text}</p>
-        <p class="subtext">${subtext}</p>
+        <p data-cy="text" class="text">${text}</p>
+        <p data-cy="subtext" class="subtext">${subtext}</p>
       </div>
     </div>
   `
 }
+
+const blankPageHeader = 'Default blank page'
+const blankPageSubtext = 'This page was cleared by navigating to about:blank.'
 
 export const initial = () => {
   return blankContentsHtml()
 }
 
 export const sessionLifecycle = () => {
-  return blankContentsHtml('Default blank page',
-    'This page was cleared by navigating to about:blank.<br>All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
+  return blankContentsHtml(blankPageHeader,
+    `${blankPageSubtext}<br>All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.`)
 }
 
 export const session = () => {
-  return blankContentsHtml('Default blank page', 'This page was cleared by navigating to about:blank.')
+  return blankContentsHtml(blankPageHeader, blankPageSubtext)
 }
 
 export const visitFailure = (props) => {
