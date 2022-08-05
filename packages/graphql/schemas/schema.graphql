@@ -1311,7 +1311,7 @@ type Mutation {
   setProjectIdInConfigFile(projectId: String!): Query
 
   """Save the projects preferences to cache"""
-  setProjectPreferences(testingType: TestingTypeEnum!): Query!
+  setProjectPreferencesInGlobalCache(testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean

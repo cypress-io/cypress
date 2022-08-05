@@ -356,14 +356,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setProjectPreferences', {
+    t.nonNull.field('setProjectPreferencesInGlobalCache', {
       type: Query,
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
       },
       async resolve (_, args, ctx) {
-        await ctx.actions.project.setProjectPreferences(args)
+        await ctx.actions.project.setProjectPreferencesInGlobalCache(args)
 
         return {}
       },

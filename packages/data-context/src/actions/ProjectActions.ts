@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationsetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
@@ -328,7 +328,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
-  setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+  setProjectPreferencesInGlobalCache (args: MutationsetProjectPreferencesInGlobalCacheArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
