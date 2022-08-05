@@ -1615,7 +1615,8 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can modify the request body', function (done) {
+    // TODO: fix https://github.com/cypress-io/cypress/issues/23145
+    it.skip('can modify the request body', function (done) {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only', function (req) {
