@@ -30,14 +30,14 @@ export type Browser = {
   versionRegex: RegExp
   /** If set, this is the base path that will be used for setting userDataDir. Useful for creating profiles in snap confinement. */
   profilePath?: string
+  /** A single binary name or array of binary names for this browser. Not used on Windows. */
+  binary: string | string[]
   /** optional warning that will be shown in the GUI */
   warning?: string
   /** optional info that will be shown in the GUI */
   info?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
   minSupportedVersion?: number
-  /** A single binary name or array of binary names for this browser. Not used on Windows. */
-  binary: string | string[]
 }
 
 /**

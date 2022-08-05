@@ -1,4 +1,4 @@
-import debugModule from 'debug'
+// import debugModule from 'debug'
 
 import type { Browser } from './types'
 import type { Automation } from '../automation'
@@ -7,7 +7,7 @@ import { WebkitAutomation } from './webkit-automation'
 import { EventEmitter } from 'stream'
 import type playwright from 'playwright-webkit'
 
-const debug = debugModule('cypress:server:browsers:webkit')
+// const debug = debugModule('cypress:server:browsers:webkit')
 
 let wkAutomation: WebkitAutomation | undefined
 
@@ -26,29 +26,18 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   const pwBrowser = await pw.webkit.launch({
     proxy: {
-      server: options.proxyServer
+      server: options.proxyServer,
     },
     downloadsPath: options.downloadsFolder,
-    headless: browser.isHeadless
+    headless: browser.isHeadless,
   })
-
-  // const launchedBrowser = await launch(browser, 'about:blank', null, [
-  //   '--inspector-pipe',
-  //   `--user-data-dir=${userDir}`,
-  //   ...getProxyArgs(options.proxyServer),
-  //   ...(browser.isHeadless ? ['--headless'] : []),
-  // ], null, {
-  //   pipeStdio: true,
-  // })
-
-  // let pwPage = await pwBrowser.newPage()
 
   let pwPage: playwright.Page
 
   async function resetPage (_url) {
     // new context comes with new cache + storage
     const newContext = await pwBrowser.newContext({
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
     })
     const oldPwPage = pwPage
 
