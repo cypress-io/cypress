@@ -173,7 +173,8 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
     })
 
-    it('can forcibly click even when element is invisible', (done) => {
+    // TODO: fix https://github.com/cypress-io/cypress/issues/23157
+    it.skip('can forcibly click even when element is invisible', (done) => {
       const select = cy.$$('#select-maps').hide()
 
       select.click(() => {
