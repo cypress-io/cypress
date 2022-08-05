@@ -253,7 +253,7 @@ context('cy.origin navigation', () => {
       })
     })
 
-    it.only('can send a POST request', () => {
+    it('can send a POST request', () => {
       // cy.visit('http://www.foobar.com:3500/post-only', {
       cy.visit('/post-only', {
         method: 'POST',
@@ -268,7 +268,7 @@ context('cy.origin navigation', () => {
       cy.contains('it worked!').contains('{"bar":"baz"}')
     })
 
-    it.only('can send a POST request', () => {
+    it('can send a POST request', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/post-only', {
           method: 'POST',
