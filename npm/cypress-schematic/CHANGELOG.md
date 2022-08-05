@@ -25,6 +25,15 @@
 * **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
 * **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
 
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
 # [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-07-25)
 
 
