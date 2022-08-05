@@ -385,9 +385,6 @@ export class EventManager {
 
     this._addListeners()
 
-    // console.log('clear spec sessions')
-    // Cypress.backend('clear:spec:sessions')
-
     this.ws.emit('watch:test:file', config.spec)
   }
 
@@ -608,7 +605,6 @@ export class EventManager {
 
     // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
-      console.log('window:before:unload')
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
@@ -729,7 +725,6 @@ export class EventManager {
   }
 
   async teardown (state, isRerun = false) {
-    console.log('teardown', isRerun, !Cypress)
     if (!Cypress) {
       return
     }
@@ -737,12 +732,9 @@ export class EventManager {
     state.setIsLoading(true)
 
     if (!isRerun) {
-      console.log('teardown--clear:spec:sessions')
       // only clear spec sessions when a new spec is selected
       Cypress.backend('clear:spec:sessions')
     }
-
-    console.log('stop')
 
     // when we are re-running we first
     // need to stop cypress always

@@ -5,6 +5,12 @@ it.only('s1 - t1', () => {
     cacheAcrossSpecs: true,
   })
 
+  cy.session('session2', () => {
+    // do something
+    // something else
+  }, {
+  })
+
   cy.visit('https://example.cypress.io')
 })
 

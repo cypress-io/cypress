@@ -1,5 +1,9 @@
 .sessions-container.instruments-container {
   .instrument-content {
+    font-family: $monospace;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
     padding: 0;
   }
 
@@ -8,8 +12,9 @@
     color: $gray-400;
     display: flex;
     align-items: center;
-    padding: 4px 10px;
+    padding: 4px;
     cursor: pointer;
+
     &:hover,
     &:focus {
       color: $gray-50;
@@ -17,15 +22,37 @@
   }
 
   .session-item {
-    padding: 3px 10px;
-
-    background-color: $gray-1000;
+    align-items: center;
+    display: flex;
     color: $gray-400;
+    flex-flow: row nowrap;
+    justify-content: space-between;
     min-height: 20px;
+    padding: 3px 2px 3px 10px;
 
     &:hover {
       cursor: pointer;
       background-color: $gray-900;
+    }
+  }
+
+  .session-info {
+    padding-left: 8px;
+
+    &.spec-session {
+      padding-left: 24px;
+    }
+  }
+  .session-tag {
+    margin-left: 4px;
+  }
+
+  .global-session {
+    margin-right: 4px;
+    vertical-align: middle;
+    
+    circle {
+      fill: $gray-200;
     }
   }
 }

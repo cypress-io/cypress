@@ -117,6 +117,10 @@ export default class Attempt {
     if (log) {
       log.update(props)
     }
+
+    if (log.name === 'session' && !log.displayName) {
+      this._updateSession(props)
+    }
   }
 
   removeLog = (props: LogProps) => {
@@ -177,10 +181,42 @@ export default class Attempt {
     return agent
   }
 
-  _addSession (props: SessionProps) {
-    const session = new Session(props)
+  _addSession (props: CommandProps) {
+    const updated = this._updateSession(props)
 
-    this.sessions[props.sessionInfo.id] = session
+    console.log('updated?', props.id)
+    if (!updated) {
+      console.log('add new session', props)
+      const session = new Session({
+        state: props.state,
+        testCurrentRetry: props.testCurrentRetry || 0,
+        testId: props.testId,
+        id: props.id,
+        name: props.message || '',
+        status: props.renderProps?.status,
+        isGlobalSession: props.renderProps?.isGlobalSession,
+      })
+
+      this.sessions[props.id] = session
+    }
+  }
+
+  _updateSession (props: LogProps) {
+    const session = this.sessions[props.id]
+
+    if (session) {
+      console.log('update session')
+      session.update({
+        state: props.state,
+        testCurrentRetry: props.testCurrentRetry || 0,
+        name: props.message || '',
+        status: props.renderProps?.status,
+      })
+
+      return true
+    }
+
+    return false
   }
 
   _addRoute (props: RouteProps) {
@@ -198,6 +234,10 @@ export default class Attempt {
     this._logs[props.id] = command
 
     this.commands.push(command)
+
+    if (props.name === 'session' && !props.displayName) {
+      this._addSession(props)
+    }
 
     const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
 

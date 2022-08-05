@@ -216,20 +216,9 @@ class $Cypress {
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
-    // cachedState.then((cache) => {
-    // const cache = this.emit('get:cached:state', (cache) => {
-    //   console.log('in cypress', cache)
 
-    //   return {
-    //     activeSessions: cache.globalSessions,
-    //   }
-    // })
-
-    // console.log('cache in cy', window.getEventNames())
     this.state = $SetterGetter.create({
       ...cachedState.then((state) => {
-        console.log(state.globalSessions)
-
         return {
           activeSessions: state.globalSessions || {},
         }
@@ -396,7 +385,7 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-      console.log(this.state())
+      // console.log(this.state())
       this.onSpecReady()
     })
   }

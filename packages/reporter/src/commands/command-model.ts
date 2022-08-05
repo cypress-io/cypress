@@ -20,7 +20,9 @@ export interface RenderProps {
 }
 
 export interface SessionRenderProps {
+  id: string
   status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
+  isGlobalSession: boolean
 }
 
 export interface CommandProps extends InstrumentProps {

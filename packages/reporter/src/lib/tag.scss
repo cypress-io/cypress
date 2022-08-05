@@ -6,7 +6,7 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: inherit;
+  line-height: initial;
   height: 18px;
   max-width: 200px;
   overflow: hidden;
@@ -62,6 +62,7 @@
   }
 }
 
+.session-item:hover > .session-tag > .reporter-tag.successful-status,
 .command-wrapper:hover > .command-pin-target > .command-wrapper-text > .command-controls > .reporter-tag.successful-status {
   border-color: $gray-700;
 }

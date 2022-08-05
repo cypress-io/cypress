@@ -58,7 +58,6 @@ export default function (Commands, Cypress, cy) {
 
   Commands.addAll({
     session (id, setup?: Function, options: SessionOptions = { cacheAcrossSpecs: false }) {
-      console.log('session command', Cypress.state('activeSessions'))
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
@@ -96,22 +95,22 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession: SessionData = sessionsManager.getActiveSession(id)
+      let session: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForTest = sessionsManager.currentTestRegisteredSessions.has(id)
 
       if (!setup) {
-        if (!existingSession || !isRegisteredSessionForTest) {
+        if (!session || !isRegisteredSessionForTest) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
         }
       } else {
-        const isUniqSessionDefinition = !existingSession || existingSession.setup.toString().trim() !== setup.toString().trim()
+        const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
 
         if (isUniqSessionDefinition) {
           if (isRegisteredSessionForTest) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: existingSession.id } })
+            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: session.id } })
           }
 
-          existingSession = sessions.defineSession({
+          session = sessions.defineSession({
             id,
             setup,
             validate: options.validate,
@@ -300,7 +299,13 @@ export default function (Commands, Cypress, cy) {
        */
       const createSessionWorkflow = (existingSession, recreateSession = false) => {
         return cy.then(async () => {
-          _log.set({ renderProps: { status: recreateSession ? 'recreating' : 'creating' } })
+          _log.set({
+            renderProps: {
+              status: recreateSession ? 'recreating' : 'creating',
+              isGlobalSession: existingSession.cacheAcrossSpecs,
+            },
+          })
+
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
@@ -324,7 +329,12 @@ export default function (Commands, Cypress, cy) {
        */
       const restoreSessionWorkflow = (existingSession) => {
         return cy.then(async () => {
-          _log.set({ renderProps: { status: 'restoring' } })
+          _log.set({
+            renderProps: {
+              status: 'restoring',
+            },
+          })
+
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
@@ -352,28 +362,30 @@ export default function (Commands, Cypress, cy) {
        */
       let _log
       const groupDetails = {
-        message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
-        sessionInfo: getSessionDetails(existingSession),
+        message: `${session.id.length > 50 ? `${session.id.substring(0, 47)}...` : session.id}`,
+        sessionInfo: getSessionDetails(session),
+        renderProps: {
+          isGlobalSession: session.cacheAcrossSpecs,
+        },
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
         return cy.then(async () => {
           _log = log
 
-          if (!existingSession.hydrated) {
-            const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
+          if (!session.hydrated) {
+            const serverStoredSession = await sessions.getSession(session.id).catch(_.noop)
 
-            console.log('serverStoredSession', serverStoredSession)
             // we have a saved session on the server and setup matches
-            if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
-              _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
-              existingSession.hydrated = true
+            if (serverStoredSession && serverStoredSession.setup === session.setup.toString()) {
+              _.extend(session, _.omit(serverStoredSession, 'setup'))
+              session.hydrated = true
             } else {
-              return createSessionWorkflow(existingSession)
+              return createSessionWorkflow(session)
             }
           }
 
-          return restoreSessionWorkflow(existingSession)
+          return restoreSessionWorkflow(session)
         }).then(async () => {
           await navigateAboutBlank()
           _log.set({ state: 'passed' })

@@ -633,10 +633,6 @@ class LogManager {
 
       this.addToLogs(log)
 
-      if (options.sessionInfo) {
-        Cypress.emit('session:add', log.toJSON())
-      }
-
       if (options.emitOnly) {
         return
       }

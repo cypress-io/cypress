@@ -9,7 +9,6 @@ import RouteModel, { RouteProps } from '../routes/route-model'
 import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 import RunnableModel from './runnable-model'
 import SuiteModel, { SuiteProps } from './suite-model'
-import { SessionProps } from '../sessions/sessions-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -25,7 +24,7 @@ interface Props {
   scroller: Scroller
 }
 
-export type LogProps = AgentProps | CommandProps | RouteProps | SessionProps
+export type LogProps = AgentProps | CommandProps | RouteProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 
@@ -162,9 +161,9 @@ export class RunnablesStore {
     return this._tests[id]
   }
 
-  addLog (log: LogProps) {
-    this._withTest(log.testId, (test) => {
-      test.addLog(log)
+  addLog (props: LogProps) {
+    this._withTest(props.testId, (test) => {
+      test.addLog(props)
     })
   }
 
