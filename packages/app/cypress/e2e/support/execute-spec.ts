@@ -1,3 +1,5 @@
+import { shouldHaveTestResults } from '../runner/support/spec-loader'
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -9,7 +11,11 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish(): void
+      waitForSpecToFinish(expectedResults?: {
+        passCount?: number
+        failCount?: number
+        pendingCount?: number
+      }): void
     }
   }
 }
@@ -17,7 +23,7 @@ declare global {
 // Here we export the function with no intention to import it
 // This only tells the typescript type checker that this definitely is a module
 // This way, we are allowed to use the global namespace declaration
-export const waitForSpecToFinish = () => {
+export const waitForSpecToFinish = (expectedResults) => {
   // First ensure the test is loaded
   cy.get('.passed > .num').should('contain', '--')
   cy.get('.failed > .num').should('contain', '--')
@@ -27,6 +33,8 @@ export const waitForSpecToFinish = () => {
 
   // Then ensure the tests have finished
   cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
+
+  return shouldHaveTestResults(expectedResults)
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)

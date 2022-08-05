@@ -90,7 +90,7 @@ export class EventManager {
         return
       }
 
-      return this.runSpec(state)
+      return this.rerunSpec()
     }
 
     const connectionInfo: AddGlobalListenerOptions = {
