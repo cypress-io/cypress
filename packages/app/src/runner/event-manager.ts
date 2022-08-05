@@ -719,15 +719,19 @@ export class EventManager {
     this.ws.off()
   }
 
-  async teardown (state: MobxRunnerStore) {
+  async teardown (state: MobxRunnerStore, isRerun = false) {
     if (!Cypress) {
       return
     }
 
     state.setIsLoading(true)
 
-    // when we are re-running we first
-    // need to stop cypress always
+    if (!isRerun) {
+      // only clear session state when a new spec is selected
+      Cypress.backend('reset:session:state')
+    }
+
+    // when we are re-running we first need to stop cypress always
     Cypress.stop()
     // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
     Cypress.primaryOriginCommunicator.removeAllListeners()
@@ -744,26 +748,19 @@ export class EventManager {
     })
   }
 
-  async _rerun () {
-    await this.resetReporter()
-
-    // this probably isn't 100% necessary
-    // since Cypress will fall out of scope
-    // but we want to be aggressive here
-    // and force GC early and often
-    Cypress.removeAllListeners()
-
-    this.localBus.emit('restart')
-  }
-
-  async runSpec (state: MobxRunnerStore) {
-    if (!Cypress) {
+  async rerunSpec () {
+    if (!this || !Cypress) {
+      // if the tests have been reloaded then there is nothing to rerun
       return
     }
 
-    await this.teardown(state)
+    await this.resetReporter()
 
-    return this._rerun()
+    // this probably isn't 100% necessary since Cypress will fall out of scope
+    // but we want to be aggressive here and force GC early and often
+    Cypress.removeAllListeners()
+
+    this.localBus.emit('restart')
   }
 
   _interceptStudio (displayProps) {

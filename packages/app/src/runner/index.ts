@@ -399,7 +399,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
+async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   await teardownSpec()
 
   const mobxRunnerStore = getMobxRunnerStore()
