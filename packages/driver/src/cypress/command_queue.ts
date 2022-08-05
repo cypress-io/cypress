@@ -15,8 +15,8 @@ import type { ITimeouts } from '../cy/timeouts'
 
 const debugErrors = Debug('cypress:driver:errors')
 
-const __stackReplacementMarker = (fn, ctx, args) => {
-  return fn.apply(ctx, args)
+const __stackReplacementMarker = (fn, args) => {
+  return fn(...args)
 }
 
 const commandRunningFailed = (Cypress, state, err) => {
@@ -64,6 +64,7 @@ export class CommandQueue extends Queue<$Command> {
   fail: $Cy['fail']
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
+  setSubjectForChainer: $Cy['setSubjectForChainer']
 
   constructor (
     state: StateFunc,
@@ -73,6 +74,7 @@ export class CommandQueue extends Queue<$Command> {
     fail: $Cy['fail'],
     isCy: $Cy['isCy'],
     clearTimeout: ITimeouts['clearTimeout'],
+    setSubjectForChainer: $Cy['setSubjectForChainer'],
   ) {
     super()
     this.state = state
@@ -82,6 +84,7 @@ export class CommandQueue extends Queue<$Command> {
     this.fail = fail
     this.isCy = isCy
     this.clearTimeout = clearTimeout
+    this.setSubjectForChainer = setSubjectForChainer
   }
 
   logs (filter) {
@@ -173,9 +176,11 @@ export class CommandQueue extends Queue<$Command> {
         Cypress.once('command:enqueued', commandEnqueued)
       }
 
+      args = [command.get('chainerId'), ...args]
+
       // run the command's fn with runnable's context
       try {
-        ret = __stackReplacementMarker(command.get('fn'), this.state('ctx'), args)
+        ret = __stackReplacementMarker(command.get('fn'), args)
       } catch (err) {
         throw err
       } finally {
@@ -255,7 +260,7 @@ export class CommandQueue extends Queue<$Command> {
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
-      this.state('subject', subject)
+      this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
     })
@@ -286,7 +291,8 @@ export class CommandQueue extends Queue<$Command> {
         })
 
         this.state('index', index + 1)
-        this.state('subject', command.get('subject'))
+
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 

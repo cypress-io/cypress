@@ -13,7 +13,7 @@ const debug = Debug('cypress:server:validation')
 
 const str = JSON.stringify
 
-type ErrResult = {
+export type ErrResult = {
   key: string
   value: any
   type: string
