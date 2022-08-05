@@ -1,5 +1,6 @@
 {
   "norewrite": [
+    "./@babel/parser/lib/index.js",
     "./evil-dns/evil-dns.js",
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
@@ -32,6 +33,7 @@
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/signal-exit/index.js",
     "./process-nextick-args/index.js",
+    "./regenerator-runtime/runtime.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
   ],
@@ -276,8 +278,6 @@
     "./node_modules/gifwrap/src/gifutil.js",
     "./node_modules/gifwrap/src/index.js",
     "./node_modules/glob-parent/index.js",
-    "./node_modules/glob/glob.js",
-    "./node_modules/glob/sync.js",
     "./node_modules/global-agent/dist/Logger.js",
     "./node_modules/global-agent/dist/classes/Agent.js",
     "./node_modules/global-agent/dist/classes/HttpProxyAgent.js",
@@ -1862,7 +1862,6 @@
     "./node_modules/glob-base/index.js",
     "./node_modules/glob-base/node_modules/glob-parent/index.js",
     "./node_modules/glob-base/node_modules/is-glob/index.js",
-    "./node_modules/glob/common.js",
     "./node_modules/global-agent/dist/errors.js",
     "./node_modules/global-agent/dist/index.js",
     "./node_modules/global-agent/dist/utilities/isUrlMatchingNoProxy.js",
@@ -3621,7 +3620,6 @@
     "./packages/rewriter/node_modules/parse5/lib/utils/merge-options.js",
     "./packages/rewriter/node_modules/parse5/lib/utils/mixin.js",
     "./packages/root/index.js",
-    "./packages/scaffold-config/src/commandFile.ts",
     "./packages/scaffold-config/src/component-index-template.ts",
     "./packages/scaffold-config/src/dependencies.ts",
     "./packages/scaffold-config/src/frameworks.ts",

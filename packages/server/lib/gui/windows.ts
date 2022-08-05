@@ -3,12 +3,6 @@ import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
-import path from 'path'
-import util from 'util'
-import glob from 'glob'
-import fs from 'fs-extra'
-
-const globPromise = util.promisify(glob)
 
 const debug = Debug('cypress:server:windows')
 
@@ -144,73 +138,9 @@ export function defaults (options = {}) {
       webSecurity: true,
       nodeIntegration: false,
       backgroundThrottling: false,
+      additionalArguments: ['--custom-v8-snapshot-file-name=custom_v8_context_snapshot.bin'],
     },
   })
-}
-
-export async function snapshotDance (remove: boolean) {
-  const platformString = process.platform
-  const projectBaseDir = path.join(__dirname, '../../../../')
-
-  const cypressAppSnapshotDir = (() => {
-    const electronPackageDir = path.join(projectBaseDir, 'packages/electron')
-
-    let cypressApp
-    let electronPath
-
-    switch (platformString) {
-      case 'darwin': {
-        cypressApp = 'dist/Cypress/Cypress.app'
-        electronPath = 'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/'
-        break
-      }
-      case 'win32':
-      case 'cygwin': {
-        cypressApp = 'dist/Cypress'
-        electronPath = ''
-        break
-      }
-
-      // TODO(thlorenz): verify Linux location
-      case 'linux':
-        cypressApp = 'dist/Cypress'
-        electronPath = ''
-        break
-
-      // TODO(thlorenz): verify BSD location
-      case 'openbsd':
-      case 'netbsd': {
-        cypressApp = 'dist/Cypress'
-        electronPath = ''
-        break
-      }
-
-      case 'sunos':
-        // TODO: Do we support sunos???
-        // eslint-disable-next-line no-fallthrough
-      default: {
-        throw new Error(`Unable to determine Cypress App location for '${platformString}' platform.`)
-      }
-    }
-
-    const cypressAppDir = path.join(electronPackageDir, cypressApp)
-
-    return path.join(
-      cypressAppDir,
-      electronPath,
-    )
-  })()
-
-  const matches = await globPromise(path.join(cypressAppSnapshotDir, 'v8*.bin'))
-  const cypressAppSnapshotFile = matches[0]
-
-  if (remove) {
-    await fs.move(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.custom`)
-    await fs.move(`${cypressAppSnapshotFile}.default`, cypressAppSnapshotFile)
-  } else {
-    await fs.move(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
-    await fs.move(`${cypressAppSnapshotFile}.custom`, cypressAppSnapshotFile)
-  }
 }
 
 export async function create (projectRoot, _options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {

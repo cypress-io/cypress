@@ -2,7 +2,7 @@
 // @ts-check
 
 const path = require('path')
-const { promises: fs, existsSync } = require('fs')
+const { promises: fs } = require('fs')
 
 const { SnapshotGenerator, prettyPrintError } = require('v8-snapshot')
 
@@ -139,10 +139,6 @@ module.exports = async function installSnapshot (
       cypressAppSnapshotDir,
       v8ContextFile,
     )
-
-    if (!existsSync(`${cypressAppSnapshotFile}.default`)) {
-      await fs.copyFile(cypressAppSnapshotFile, `${cypressAppSnapshotFile}.default`)
-    }
 
     // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
     await fs.copyFile(

@@ -446,7 +446,7 @@ module.exports = {
 
     debug('open %o', { browser, url })
 
-    return Windows.snapshotDance(true).then(() => savedState.create(projectRoot, isTextTerminal))
+    return savedState.create(projectRoot, isTextTerminal)
     .then((state) => {
       return state.get()
     }).then((state) => {
@@ -511,7 +511,7 @@ module.exports = {
           },
         })
 
-        return Windows.snapshotDance(false).then(() => instance)
+        return instance
       })
     })
   },
