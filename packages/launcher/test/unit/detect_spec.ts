@@ -1,6 +1,7 @@
 require('../spec_helper')
 import _ from 'lodash'
 import { detect, detectByPath } from '../../lib/detect'
+import * as browsers from '../../lib/browsers'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
@@ -59,7 +60,7 @@ describe('browser detection', () => {
       binary: 'test-browser-beta',
     }
 
-    it('finds supported browser', async () => {
+    it('validates browser with own validator property', async () => {
       stubHelpers((browser) => {
         return Promise.resolve({
           name: browser.name,
@@ -84,7 +85,7 @@ describe('browser detection', () => {
       expect(mockValidator).to.have.been.called
     })
 
-    it('finds unsupported browser', async () => {
+    it('validates browser with default minVersionValidator', async () => {
       stubHelpers((browser) => {
         return Promise.resolve({
           name: browser.name,
@@ -93,12 +94,12 @@ describe('browser detection', () => {
         })
       })
 
-      const mockValidator = sinon.stub().returns({
+      const mockValidator = sinon.stub(browsers, 'validateMinVersion').returns({
         isSupported: false,
         warningMessage: 'This is a bad version',
       })
 
-      const foundBrowsers = await detect([{ ...testBrowser as Browser, validator: mockValidator }])
+      const foundBrowsers = await detect([{ ...testBrowser as Browser }])
 
       expect(foundBrowsers).to.have.length(1)
 
