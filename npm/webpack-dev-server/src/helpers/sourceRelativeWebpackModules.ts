@@ -61,7 +61,7 @@ type FrameworkWebpackMapper = { [Property in typeof ALL_FRAMEWORKS[number]]: str
 const frameworkWebpackMapper: FrameworkWebpackMapper = {
   'create-react-app': 'react-scripts',
   'vue-cli': '@vue/cli-service',
-  'nuxt': '@nuxt/webpack',
+  'nuxt': '@nuxt/webpack-builder',
   react: undefined,
   vue: undefined,
   next: 'next',

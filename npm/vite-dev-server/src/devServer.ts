@@ -4,7 +4,7 @@ import { createViteDevServerConfig } from './resolveConfig'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
-const ALL_FRAMEWORKS = ['react', 'vue'] as const
+const ALL_FRAMEWORKS = ['react', 'vue', 'nuxt'] as const
 
 export type ViteDevServerConfig = {
   specs: Cypress.Spec[]

@@ -13,30 +13,39 @@ import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressInspect } from './plugins/index'
 import type { Vite } from './getVite'
+import { nuxtHandler } from './handlers/nuxtHandler'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
   const { specs, cypressConfig, viteConfig: viteOverrides } = config
   const root = cypressConfig.projectRoot
-  const { default: findUp } = await importModule('find-up')
-  const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
+  let configFile: string | undefined = undefined
+  let frameworkConfig: any = {}
 
-  // INFO logging, a lot is logged here.
-  // debug('all dev-server options are', options)
-
-  if (configFile) {
-    debug('resolved config file at', configFile, 'using root', root)
-  } else if (viteOverrides) {
-    debug(`Couldn't find a Vite config file, however we received a custom viteConfig`, viteOverrides)
+  if (config.framework === 'nuxt') {
+    frameworkConfig = await nuxtHandler(config)
   } else {
-    if (config.onConfigNotFound) {
-      config.onConfigNotFound('vite', root, configFiles)
-      // The config process will be killed from the parent, but we want to early exit so we don't get
-      // any additional errors related to not having a config
-      process.exit(0)
+    const { default: findUp } = await importModule('find-up')
+
+    configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
+
+    // INFO logging, a lot is logged here.
+    // debug('all dev-server options are', options)
+
+    if (configFile) {
+      debug('resolved config file at', configFile, 'using root', root)
+    } else if (viteOverrides) {
+      debug(`Couldn't find a Vite config file, however we received a custom viteConfig`, viteOverrides)
     } else {
-      throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+      if (config.onConfigNotFound) {
+        config.onConfigNotFound('vite', root, configFiles)
+        // The config process will be killed from the parent, but we want to early exit so we don't get
+        // any additional errors related to not having a config
+        process.exit(0)
+      } else {
+        throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+      }
     }
   }
 
@@ -90,7 +99,9 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     ].filter((p) => p != null),
   }
 
-  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
+  const anotherConfig = vite.mergeConfig(viteBaseConfig, frameworkConfig)
+
+  const finalConfig = vite.mergeConfig(anotherConfig, viteOverrides as Record<string, any>)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 
