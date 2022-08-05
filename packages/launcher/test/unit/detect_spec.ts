@@ -57,7 +57,6 @@ describe('browser detection', () => {
       minSupportedVersion: 1,
       versionRegex: /Test Browser (\S+)/m,
       binary: 'test-browser-beta',
-      validator: sinon.stub().returns({ isValid: true }),
     }
 
     it('finds supported browser', async () => {
@@ -69,7 +68,7 @@ describe('browser detection', () => {
         })
       })
 
-      const mockValidator = sinon.stub().returns({ isValid: true })
+      const mockValidator = sinon.stub().returns({ isSupported: true })
 
       const foundBrowsers = await detect([{ ...testBrowser as Browser, validator: mockValidator }])
 
@@ -80,7 +79,7 @@ describe('browser detection', () => {
       expect(foundTestBrowser.name).to.eq('test-browser')
       expect(foundTestBrowser.displayName).to.eq('Test Browser')
       expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
-      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.false
+      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.undefined
       expect(foundTestBrowser.warning, 'warning').to.be.undefined
       expect(mockValidator).to.have.been.called
     })
@@ -95,7 +94,7 @@ describe('browser detection', () => {
       })
 
       const mockValidator = sinon.stub().returns({
-        isValid: false,
+        isSupported: false,
         warningMessage: 'This is a bad version',
       })
 

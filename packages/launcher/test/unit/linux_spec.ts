@@ -73,8 +73,6 @@ describe('linux browser detection', () => {
         path: 'chromium',
         profilePath: '/home/foo/snap/chromium/current',
         version: '64.2.3',
-        unsupportedVersion: false,
-        warning: undefined,
       })
     }
 
@@ -93,8 +91,6 @@ describe('linux browser detection', () => {
       path: 'firefox',
       profilePath: '/home/foo/snap/firefox/current',
       version: '99.2.3',
-      unsupportedVersion: false,
-      warning: undefined,
     }
 
     beforeEach(() => {
