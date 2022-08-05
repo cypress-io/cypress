@@ -2,7 +2,7 @@ name: "❄️ Flaky test in `cypress-io/cypress` repository"
 title: "[Flaky test in `cypress-io/cypress` repository]: "
 labels: ["topic: flake ❄️", "stage: fire watch"]
 epics: ["Restore confidence in CI"]
-description: Report a flaky test in the Cypress app open-source code.
+description: Report a flaky test in the Cypress open-source repository.
 body:
   - type: markdown
     attributes:
@@ -34,8 +34,8 @@ body:
     id: version
     attributes:
       label: Cypress Version
-      description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
-      placeholder: ex. 10.4.0
+      description: Provide the version of Cypress where the flake is occurring.
+      placeholder: ex. 7.6.0
     validations:
       required: true
   - type: textarea
