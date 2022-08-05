@@ -62,6 +62,16 @@ describe('<CreateSpecModal />', () => {
       .should('not.exist')
     })
   })
+
+  describe('form behavior', () => {
+    it('enter should call create spec function', () => {
+      cy.get('input')
+      .type('{enter}')
+
+      cy.contains('h2', 'Great! The spec was successfully added')
+      .should('be.visible')
+    })
+  })
 })
 
 describe('Modal Text Input', () => {
