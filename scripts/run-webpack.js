@@ -21,10 +21,10 @@ if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && s
 }
 
 function buildCommand () {
-  const file = process.argv.slice(2).join(' ') ?? ''
+  const file = process.argv.slice(2)
   let program = `node "${webpackCli}"`
 
-  return file ? `${program } "${file}"` : program
+  return file.length ? `${program } "${file.join('" "')}"` : program
 }
 
 const program = buildCommand()

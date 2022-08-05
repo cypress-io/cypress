@@ -1,6 +1,8 @@
 import Collapsible from './Collapsible.vue'
 import faker from 'faker'
 
+faker.seed(1)
+
 const targetText = 'Target'
 const contentText = 'Content'
 const targetSelector = '[data-testid=target]'
@@ -135,11 +137,11 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
 
     const target = ({ open }) => (<h1 class={['text-xl', { 'pb-2': open }]}>Click here to open</h1>)
 
-    cy.mount(() => (<div class="mx-auto text-center w-300px my-4 border-1 p-4 rounded">
+    cy.mount(() => (<div class="rounded mx-auto border-1 my-4 text-center p-4 w-300px">
 
       <Collapsible v-slots={{ target }}>
         <div class="space-y-2">
-          <h2 class="text-center text-lg bg-gray-50">
+          <h2 class="bg-gray-50 text-center text-lg">
             Content Header
           </h2>
           <p class="bg-red-500 h-900px">{ text }</p>

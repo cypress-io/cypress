@@ -10,7 +10,7 @@ import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
-import { AppState } from '../lib/app-state'
+import appState, { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
 import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
@@ -63,8 +63,12 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
             </a>
           </OpenFileInIDE>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
-          <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
-          <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
+          {appState.studioActive && (
+            <>
+              <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
+              <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
+            </>
+          )}
         </>
       )}
       <hr />
