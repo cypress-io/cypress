@@ -267,7 +267,8 @@ describe('Choose a Browser Page', () => {
       })
     })
 
-    it('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', () => {
+    // TODO: fix https://github.com/cypress-io/cypress/issues/23158
+    it.skip('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
