@@ -78,6 +78,7 @@ import StandardModal from '../components/StandardModal.vue'
 import Button from '../components/Button.vue'
 import type { ChooseExternalEditorModalFragment } from '../generated/graphql'
 import { ChooseExternalEditorModal_SetPreferredEditorBinaryDocument } from '../generated/graphql'
+// import type { PreferencesTypeEnum } from '@packages/graphql/src/schemaTypes/enumTypes/gql-PreferencesTypeEnum'
 
 const { t } = useI18n()
 
@@ -88,7 +89,7 @@ fragment ChooseExternalEditorModal on Query {
 
 gql`
 mutation ChooseExternalEditorModal_SetPreferredEditorBinary ($value: String!) {
-  setPreferences (value: $value) {
+  setPreferences (value: $value, type: global) {
     localSettings {
       preferences {
         preferredEditorBinary

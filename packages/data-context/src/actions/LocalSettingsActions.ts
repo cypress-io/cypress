@@ -13,7 +13,7 @@ export interface LocalSettingsApiShape {
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  setPreferences (stringifiedJson: string) {
+  setPreferences (stringifiedJson: string, type: 'global' | 'project') {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
     // update local data
@@ -21,8 +21,12 @@ export class LocalSettingsActions {
       this.ctx.coreData.localSettings.preferences[key as keyof AllowedState] = value as any
     }
 
-    // persist to appData
-    return this.ctx._apis.localSettingsApi.setPreferences(toJson)
+    if (type === 'global') {
+      // persist to appData - projects/__global__/state.json
+      return this.ctx._apis.localSettingsApi.setPreferences(toJson)
+    }
+
+    return this.ctx._apis.projectApi.setProjectPreferences(toJson)
   }
 
   async refreshLocalSettings () {

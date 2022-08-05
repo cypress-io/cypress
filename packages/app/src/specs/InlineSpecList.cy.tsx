@@ -1,4 +1,4 @@
-import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecsList_SetSpecFilterDocument } from '../generated/graphql-test'
+import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -162,7 +162,9 @@ describe('InlineSpecList', () => {
     it('calls gql mutation to save updated filter', () => {
       const setSpecFilterStub = cy.stub()
 
-      cy.stubMutationResolver(SpecsList_SetSpecFilterDocument, (defineResult, { specFilter }) => {
+      cy.stubMutationResolver(SpecFilter_SetPreferencesDocument, (defineResult, variables) => {
+        const specFilter = JSON.parse(variables.value)?.specFilter
+
         setSpecFilterStub(specFilter)
       })
 

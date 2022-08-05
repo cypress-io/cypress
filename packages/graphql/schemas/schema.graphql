@@ -1303,9 +1303,9 @@ type Mutation {
   setCurrentProject(path: String!): Query
 
   """
-  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`
   """
-  setPreferences(value: String!): Query
+  setPreferences(type: PreferencesTypeEnum!, value: String!): Query
 
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query
@@ -1315,9 +1315,6 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
-
-  """Save the filter state for this project"""
-  setSpecFilter(specFilter: String!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1368,6 +1365,11 @@ enum PluginsState {
   initialized
   initializing
   uninitialized
+}
+
+enum PreferencesTypeEnum {
+  global
+  project
 }
 
 """Common base fields inherited by GlobalProject / CurrentProject"""

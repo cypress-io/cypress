@@ -1,11 +1,11 @@
-import type { CodeGenType, MutationsetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig } from '@packages/types'
+import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { Maybe, ProjectShape, SavedStateShape } from '../data/coreDataShape'
+import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
@@ -36,8 +36,8 @@ export interface ProjectApiShape {
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
-  setSpecFilter(specFilter: string): void
-  makeProjectSavedState(projectRoot: string): () => Promise<Maybe<SavedStateShape>>
+  setProjectPreferences(stated: AllowedState): void
+  makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
     updateSpecs(specs: FoundSpec[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
@@ -309,10 +309,6 @@ export class ProjectActions {
     this.api.setPromptShown(slug)
   }
 
-  setSpecFilter (specFilter: string) {
-    this.api.setSpecFilter(specFilter)
-  }
-
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
@@ -328,7 +324,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
-  setProjectPreferencesInGlobalCache (args: MutationsetProjectPreferencesInGlobalCacheArgs) {
+  setProjectPreferencesInGlobalCache (args: MutationSetProjectPreferencesInGlobalCacheArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }

@@ -1,5 +1,5 @@
 import SpecsList from './SpecsList.vue'
-import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecsList_SetSpecFilterDocument } from '../generated/graphql-test'
+import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
@@ -226,7 +226,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       it('calls gql mutation to save updated filter', () => {
         const setSpecFilterStub = cy.stub()
 
-        cy.stubMutationResolver(SpecsList_SetSpecFilterDocument, (defineResult, { specFilter }) => {
+        cy.stubMutationResolver(SpecFilter_SetPreferencesDocument, (defineResult, variables) => {
+          const specFilter = JSON.parse(variables.value)?.specFilter
+
           setSpecFilterStub(specFilter)
         })
 

@@ -48,7 +48,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
   context('as e2e testing type with localSettings', () => {
     it('use saved state for nav size', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
+        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }), 'global')
       })
 
       cy.scaffoldProject('todos')

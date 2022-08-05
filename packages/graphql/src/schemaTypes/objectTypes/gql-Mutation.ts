@@ -2,6 +2,7 @@ import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, lis
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -193,17 +194,6 @@ export const mutation = mutationType({
       args: { slug: nonNull('String') },
       resolve: (_, args, ctx) => {
         ctx.actions.project.setPromptShown(args.slug)
-
-        return true
-      },
-    })
-
-    t.field('setSpecFilter', {
-      type: 'Boolean',
-      description: 'Save the filter state for this project',
-      args: { specFilter: nonNull('String') },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.setSpecFilter(args.specFilter)
 
         return true
       },
@@ -427,13 +417,16 @@ export const mutation = mutationType({
         'Update local preferences (also known as  appData).',
         'The payload, `value`, should be a `JSON.stringified()`',
         'object of the new values you\'d like to persist.',
-        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`',
       ].join(' '),
       args: {
         value: nonNull(stringArg()),
+        type: nonNull(arg({
+          type: PreferencesTypeEnum,
+        })),
       },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setPreferences(args.value)
+      resolve: async (_, { value, type }, ctx) => {
+        await ctx.actions.localSettings.setPreferences(value, type)
 
         return {}
       },
