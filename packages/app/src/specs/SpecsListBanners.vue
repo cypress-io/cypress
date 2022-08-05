@@ -16,7 +16,7 @@
     <p>{{ t('specPage.noSpecError.explainer') }}</p>
   </Alert>
   <Alert
-    v-if="showOffline"
+    v-else-if="showOffline"
     v-model="showOffline"
     data-cy="offline-alert"
     status="warning"
@@ -30,7 +30,7 @@
     </p>
   </Alert>
   <Alert
-    v-if="showFetchError"
+    v-else-if="showFetchError"
     v-model="showFetchError"
     status="warning"
     :title="t('specPage.fetchFailedWarning.title')"
@@ -64,7 +64,7 @@
     </Button>
   </Alert>
   <Alert
-    v-if="showProjectNotFound"
+    v-else-if="showProjectNotFound"
     v-model="showProjectNotFound"
     data-cy="project-not-found-alert"
     status="warning"
@@ -96,7 +96,7 @@
     </Button>
   </Alert>
   <Alert
-    v-if="showProjectRequestAccess"
+    v-else-if="showProjectRequestAccess"
     v-model="showProjectRequestAccess"
     data-cy="project-request-access-alert"
     status="warning"
@@ -110,6 +110,22 @@
     </p>
     <RequestAccessButton :gql="props.gql" />
   </Alert>
+  <RecordBanner
+    v-else-if="showRecordBanner"
+    v-model="showRecordBanner"
+  />
+  <ConnectProjectBanner
+    v-else-if="showConnectBanner"
+    v-model="showConnectBanner"
+  />
+  <CreateOrganizationBanner
+    v-else-if="showCreateOrganizationBanner"
+    v-model="showCreateOrganizationBanner"
+  />
+  <LoginBanner
+    v-else-if="showLoginBanner"
+    v-model="showLoginBanner"
+  />
 </template>
 
 <script setup lang="ts">
@@ -127,6 +143,13 @@ import { ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import type { SpecsListBannersFragment } from '../generated/graphql'
+import interval from 'human-interval'
+import type { AllowedState } from '@packages/types/src'
+import RecordBanner from './banners/RecordBanner.vue'
+import ConnectProjectBanner from './banners/ConnectProjectBanner.vue'
+import CreateOrganizationBanner from './banners/CreateOrganizationBanner.vue'
+import LoginBanner from './banners/LoginBanner.vue'
+import { BannerIds } from './banners'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -134,6 +157,31 @@ const { t } = useI18n()
 gql`
 fragment SpecsListBanners on Query {
   ...RequestAccessButton
+  cloudViewer {
+    id
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
+  }
+  currentProject {
+    id
+    projectId
+    savedState
+  }
+}
+`
+
+gql`
+mutation SpecsListBanners_SetBannerShown($bannerId: String!) {
+  setBannerShown(bannerId: $bannerId)
+}
+`
+
+gql`
+mutation SpecsListBanners_SetBannerDismissed($bannerId: String!) {
+  setBannerDismissed(bannerId: $bannerId)
 }
 `
 
@@ -158,11 +206,20 @@ const emit = defineEmits<{
   (e: 'reconnectProject'): void
 }>()
 
+const isLoggedIn = !!props.gql.cloudViewer?.id
+const isMemberOfOrganization = !!props.gql.cloudViewer?.firstOrganization
+const isProjectConnected = !!props.gql.currentProject?.projectId
+const hasFourDaysOfCypressUse = (Date.now() - props.gql.currentProject?.savedState.value?.firstOpened) > interval('4 days')
+
 const showSpecNotFound = ref(props.isSpecNotFound)
 const showOffline = ref(props.isOffline)
 const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
+const showRecordBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasFourDaysOfCypressUse)
+const showConnectBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse)
+const showCreateOrganizationBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && !isMemberOfOrganization && hasFourDaysOfCypressUse)
+const showLoginBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse)
 
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
@@ -174,5 +231,11 @@ watch(
     showProjectRequestAccess.value = props.isProjectUnauthorized
   },
 )
+
+function hasBannerBeenDismissed (bannerId: string) {
+  const bannersState = (props.gql.currentProject?.savedState.value as Maybe<AllowedState>)?.banners
+
+  return !!bannersState?.[bannerId]?.dismissed
+}
 
 </script>

@@ -198,6 +198,28 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('setBannerShown', {
+      type: 'Boolean',
+      description: 'Save the banner-shown state for this project',
+      args: { bannerId: nonNull('String') },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.setBannerShown(args.bannerId)
+
+        return true
+      },
+    })
+
+    t.field('setBannerDismissed', {
+      type: 'Boolean',
+      description: 'Save the banner-dismissed state for this project',
+      args: { bannerId: nonNull('String') },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.setBannerDismissed(args.bannerId)
+
+        return true
+      },
+    })
+
     t.field('wizardUpdate', {
       type: Wizard,
       description: 'Updates the different fields of the wizard data store',
