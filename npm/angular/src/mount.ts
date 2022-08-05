@@ -219,7 +219,7 @@ function setupComponent<T> (
   }
 
   if (config.autoSpyOutputs) {
-    Object.keys(component).map((key: string, index: number, keys: string[]) => {
+    Object.keys(component).forEach((key: string, index: number, keys: string[]) => {
       const property = component[key]
 
       if (property instanceof EventEmitter) {

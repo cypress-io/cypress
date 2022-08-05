@@ -138,15 +138,7 @@ describe("angular mount", () => {
     cy.get('@clickedSpy').should('have.been.calledWith', true)
   })
 
-  describe("teardown", () => {
-    beforeEach(() => {
-      cy.get("[id^=root]").should("not.exist");
-    });
-
-    it("should mount", () => {
-      cy.mount(ButtonOutputComponent);
-    });
-  });
+  
   it('can reference the autoSpyOutput alias on component @Outputs() with a template', () => {
     cy.mount('<app-button-output (clicked)="clicked.emit($event)"></app-button-output>', {
       declarations: [ButtonOutputComponent],
@@ -158,20 +150,28 @@ describe("angular mount", () => {
     cy.get('button').click()
     cy.get('@clickedSpy').should('have.been.calledWith', true)
   })
-
-
-
+  
   it('can handle content projection with a WrapperComponent', () => {
     cy.mount(WrapperComponent, {
       declarations: [ProjectionComponent]
     })
     cy.get('h3').contains('Hello World')
   })
-
+  
   it('can handle content projection using template', () => {
     cy.mount('<app-projection>Hello World</app-projection>', {
       declarations: [ProjectionComponent]
     })
     cy.get('h3').contains('Hello World')
   })
+  
+  describe("teardown", () => {
+    beforeEach(() => {
+      cy.get("[id^=root]").should("not.exist");
+    });
+
+    it("should mount", () => {
+      cy.mount(ButtonOutputComponent);
+    });
+  });
 });
