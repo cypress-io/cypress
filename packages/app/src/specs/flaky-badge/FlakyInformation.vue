@@ -16,16 +16,16 @@
     </ExternalLink>
     <template #popper="{ shown }">
       <ExternalLink
-        v-if="shown && projectId && specPath"
+        v-if="shown && props.projectGql?.projectId && props.specGql?.relative"
         :href="dashboardUrl"
         class="hocus:no-underline"
       >
         <FlakySpecSummaryAdapter
-          :project-id="projectId"
-          :from-branch="fromBranch"
-          :spec-path="specPath"
-          :spec-name="specName"
-          :spec-extension="specExtension"
+          :project-id="props.projectGql.projectId"
+          :from-branch="props.projectGql?.branch || ''"
+          :spec-path="props.specGql.relative"
+          :spec-name="props.specGql?.fileName ?? ''"
+          :spec-extension="props.specGql?.fileExtension ?? ''"
         />
       </ExternalLink>
     </template>
@@ -97,11 +97,5 @@ const dashboardUrl = computed(() => {
     },
   })
 })
-
-const projectId = computed(() => props.projectGql?.projectId)
-const fromBranch = computed(() => props.projectGql?.branch ?? '')
-const specPath = computed(() => props.specGql?.relative)
-const specName = computed(() => props.specGql?.fileName ?? '')
-const specExtension = computed(() => props.specGql?.fileExtension ?? '')
 
 </script>

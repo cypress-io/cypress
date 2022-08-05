@@ -1,6 +1,5 @@
 <template>
   <FlakySpecSummary
-    v-if="flakyStatus?.severity"
     :spec-name="specName"
     :spec-extension="specExtension"
     :severity="flakyStatus?.severity ?? 'NONE'"

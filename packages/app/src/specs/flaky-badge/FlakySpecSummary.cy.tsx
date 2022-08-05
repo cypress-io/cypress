@@ -46,7 +46,7 @@ describe('<FlakySpecSummary />', () => {
     cy.percySnapshot()
   })
 
-  it('fallback state', () => {
+  it('loading state', () => {
     // Ensure component handles malformed/incomplete data without blowing up
     cy.mount(
       <FlakySpecSummary
@@ -58,6 +58,8 @@ describe('<FlakySpecSummary />', () => {
         runsSinceLastFlake={null as any}
       />,
     )
+
+    cy.findByTestId('flaky-specsummary-loading-1').should('be.visible')
 
     cy.percySnapshot()
   })

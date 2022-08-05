@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-t-4px min-w-200px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
+    class="border-t-4px min-w-250px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
     :class="severity.accentClass"
     data-cy="flaky-spec-summary"
   >
@@ -8,27 +8,39 @@
       :spec-file-name="specName"
       :spec-file-extension="specExtension"
     />
-    <div class="flex flex-row w-full text-size-14px justify-center items-center">
-      <component :is="severity.icon" />
-      <span
-        class="font-medium ml-2"
-        :class="severity.textClass"
-      >{{ severity?.label }}</span>
-      <span
-        class="ml-4 text-gray-800"
-        data-cy="flaky-rate"
-      >{{ t('specPage.flaky.flakyRate', [flakyRate]) }}</span>
-    </div>
-
-    <div class="flex flex-row text-gray-700 text-size-14px items-center">
-      <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
-      <i-cy-dot-solid_x4
-        width="4"
-        height="4"
-        class="mx-2 icon-light-gray-200"
+    <template v-if="severity === SEVERITIES.LOADING">
+      <div
+        class="bg-gray-50 rounded-[20px] h-20px w-full animate-pulse"
+        data-cy="flaky-specsummary-loading-1"
       />
-      <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', { count: runsSinceLastFlake, runsSinceLastFlake }) }}</span>
-    </div>
+      <div
+        class="bg-gray-50 rounded-[20px] h-20px w-full animate-pulse "
+        data-cy="flaky-specsummary-loading-2"
+      />
+    </template>
+    <template v-else>
+      <div class="flex flex-row w-full text-size-14px justify-center items-center">
+        <component :is="severity.icon" />
+        <span
+          class="font-medium ml-2"
+          :class="severity.textClass"
+        >{{ severity?.label }}</span>
+        <span
+          class="ml-4 text-gray-800"
+          data-cy="flaky-rate"
+        >{{ t('specPage.flaky.flakyRate', [flakyRate]) }}</span>
+      </div>
+
+      <div class="flex flex-row text-gray-700 text-size-14px items-center">
+        <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
+        <i-cy-dot-solid_x4
+          width="4"
+          height="4"
+          class="mx-2 icon-light-gray-200"
+        />
+        <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', { count: runsSinceLastFlake, runsSinceLastFlake }) }}</span>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -44,7 +56,7 @@ import HighRateIcon from '~icons/cy/rate-high_x16'
 const { t } = useI18n()
 
 const SEVERITIES = {
-  DEFAULT: {
+  LOADING: {
     accentClass: 'border-t-orange-400',
     textClass: null,
     label: null,
@@ -94,6 +106,6 @@ const flakyRate = computed(() => {
   return Math.ceil(rawRate)
 })
 
-const severity = computed(() => SEVERITIES[props.severity?.toUpperCase()] || SEVERITIES.DEFAULT)
+const severity = computed(() => SEVERITIES[props.severity?.toUpperCase()] || SEVERITIES.LOADING)
 
 </script>

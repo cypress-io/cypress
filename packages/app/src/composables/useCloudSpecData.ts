@@ -94,7 +94,7 @@ export function useCloudSpecData (
     await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
   }
 
-  const displayedSpecIds = computed(() => displayedSpecs.value.map((v) => v?.cloudSpec?.id).join('|'))
+  const displayedSpecIds = computed(() => displayedSpecs.value.map((v) => v?.cloudSpec?.id).filter((id) => !!id).join('|'))
   const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
 
   /*
