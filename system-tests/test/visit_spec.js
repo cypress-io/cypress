@@ -173,7 +173,7 @@ describe('e2e visit', () => {
       expectedExitCode: 1,
     })
 
-    systemTests.it('fails when file server responds with 404', {
+    systemTests.it.skip('fails when file server responds with 404', {
       spec: 'visit_file_404_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
