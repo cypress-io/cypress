@@ -25,7 +25,7 @@
 
     <CloudConnectModals
       v-if="isProjectConnectOpen"
-      :gql="cloudModalsQuery.data"
+      :gql="cloudModalsQuery.data.value!"
       @cancel="handleCancel"
       @success="handleSuccess"
     />
@@ -41,6 +41,7 @@ import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from './index'
 import { ref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
+import CloudConnectModals from '../../runs/modals/CloudConnectModals.vue'
 
 gql`
 query ConnectProjectBanner {

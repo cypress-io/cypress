@@ -24,7 +24,7 @@
     </Button>
     <LoginModal
       v-model="isLoginOpen"
-      :gql="loginModalQuery.data.value"
+      :gql="loginModalQuery.data.value!"
       utm-medium="login-banner"
     />
   </TrackedBanner>
@@ -39,6 +39,7 @@ import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from './index'
+import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
 gql`
 query LoginBanner {

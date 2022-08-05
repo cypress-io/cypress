@@ -169,6 +169,17 @@ fragment SpecsListBanners on Query {
     id
     projectId
     savedState
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runs(first: 1) {
+          nodes {
+            id
+          }
+        }
+      }
+    }
   }
 }
 `
@@ -209,14 +220,15 @@ const emit = defineEmits<{
 const isLoggedIn = !!props.gql.cloudViewer?.id
 const isMemberOfOrganization = !!props.gql.cloudViewer?.firstOrganization
 const isProjectConnected = !!props.gql.currentProject?.projectId
-const hasFourDaysOfCypressUse = (Date.now() - props.gql.currentProject?.savedState.value?.firstOpened) > interval('4 days')
+const hasNoRecordedRuns = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && (props.gql.currentProject.cloudProject.runs?.nodes?.length ?? 0) === 0
+const hasFourDaysOfCypressUse = (Date.now() - props.gql.currentProject?.savedState?.value?.firstOpened) > interval('4 days')
 
 const showSpecNotFound = ref(props.isSpecNotFound)
 const showOffline = ref(props.isOffline)
 const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
-const showRecordBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasFourDaysOfCypressUse)
+const showRecordBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse)
 const showConnectBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse)
 const showCreateOrganizationBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && !isMemberOfOrganization && hasFourDaysOfCypressUse)
 const showLoginBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse)
@@ -233,7 +245,7 @@ watch(
 )
 
 function hasBannerBeenDismissed (bannerId: string) {
-  const bannersState = (props.gql.currentProject?.savedState.value as Maybe<AllowedState>)?.banners
+  const bannersState = (props.gql.currentProject?.savedState?.value as Maybe<AllowedState>)?.banners
 
   return !!bannersState?.[bannerId]?.dismissed
 }
