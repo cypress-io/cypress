@@ -2060,9 +2060,12 @@ jobs:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
           # https://github.com/cypress-io/cypress/issues/6690
+
+          # Todo: Add `jest` back into the list once https://github.com/yargs/yargs-parser/issues/452
+          # is resolved.
           command: |
             npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
+              typescript @types/jest enzyme @types/enzyme
       - run:
           name: Test types clash ⚔️
           working_directory: <<parameters.wd>>
