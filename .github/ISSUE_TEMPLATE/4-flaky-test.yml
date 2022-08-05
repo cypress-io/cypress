@@ -1,5 +1,5 @@
-name: "❄️ Flaky internal test"
-title: "[Flaky internal test]: "
+name: "❄️ Flaky test in `cypress-io/cypress` repository"
+title: "[Flaky test in `cypress-io/cypress` repository]: "
 labels: ["topic: flake ❄️", "stage: fire watch"]
 epics: ["Restore confidence in CI"]
 description: Report a flaky test in the Cypress app open-source code.
@@ -11,8 +11,8 @@ body:
   - type: textarea
     id: dashboard
     attributes:
-      label: Link to dashboard
-      description: Please include a link to the failure in the Cypress Dashboard
+      label: Link to dashboard or CircleCI failure
+      description: Please include a link to the failure in the Cypress Dashboard or in CircleCI.
     validations:
       required: true
   - type: textarea
@@ -35,7 +35,7 @@ body:
     attributes:
       label: Cypress Version
       description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
-      placeholder: ex. 7.6.0
+      placeholder: ex. 10.4.0
     validations:
       required: true
   - type: textarea
