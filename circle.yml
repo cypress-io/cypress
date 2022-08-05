@@ -1613,6 +1613,15 @@ jobs:
           browser: electron
           experimentalSessionAndOrigin: true
 
+  driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+          experimentalSessionAndOrigin: true
+
   run-reporter-component-tests-chrome:
     <<: *defaults
     parameters:
