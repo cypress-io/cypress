@@ -10,11 +10,11 @@
     />
     <template v-if="severity === SEVERITIES.LOADING">
       <div
-        class="bg-gray-50 rounded-[20px] h-20px w-full animate-pulse"
+        class="bg-gray-50 rounded-[20px] h-15px w-full animate-pulse"
         data-cy="flaky-specsummary-loading-1"
       />
       <div
-        class="bg-gray-50 rounded-[20px] h-20px w-full animate-pulse "
+        class="bg-gray-50 rounded-[20px] h-15px w-full animate-pulse "
         data-cy="flaky-specsummary-loading-2"
       />
     </template>
