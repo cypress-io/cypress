@@ -34,7 +34,7 @@ body:
     id: version
     attributes:
       label: Cypress Version
-      description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
+      description: Provide the version of Cypress where the flake is occurring.
       placeholder: ex. 7.6.0
     validations:
       required: true
