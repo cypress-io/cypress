@@ -18,6 +18,13 @@
       {{ t('versions.beta') }}
     </div>
     <div
+      v-if="title === t('createSpec.component.importFromComponent.header')"
+      class="top-0 right-0 text-teal-600 ribbon absolute"
+      aria-hidden="true"
+    >
+      {{ t('versions.new') }}
+    </div>
+    <div
       class="mx-auto children:transition-all children:duration-300"
       :class="`w-${iconSize}px h-${iconSize}px mb-${iconMargin}px`"
     >

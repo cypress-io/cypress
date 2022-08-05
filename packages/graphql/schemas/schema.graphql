@@ -544,6 +544,7 @@ type CodeGenGlobs implements Node {
 
 enum CodeGenType {
   component
+  componentEmpty
   e2e
   scaffoldIntegration
 }

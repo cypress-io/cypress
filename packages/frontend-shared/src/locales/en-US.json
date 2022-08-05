@@ -780,6 +780,7 @@
   },
   "versions": {
     "alpha": "Alpha",
-    "beta": "Beta"
+    "beta": "Beta",
+    "new": "New"
   }
 }

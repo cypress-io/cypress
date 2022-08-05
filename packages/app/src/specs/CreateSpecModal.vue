@@ -22,7 +22,7 @@
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
-        :type="props.gql.currentProject?.currentTestingType"
+        :type="props.gql.currentProject?.currentTestingType === 'e2e' ? props.gql.currentProject?.currentTestingType : 'componentEmpty'"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
         :is-default-spec-pattern="props.gql.currentProject?.isDefaultSpecPattern"

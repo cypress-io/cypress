@@ -6,12 +6,6 @@ export const EmptyGenerator: SpecGenerator = {
   card: EmptyGeneratorCard,
   entry: EmptyGeneratorCardStepOne,
   matches: () => true,
-  show: (currentProject, isDefaultSpecPattern) => {
-    if (!isDefaultSpecPattern) {
-      return true
-    }
-
-    return currentProject?.codeGenGlobs?.component !== '*.vue'
-  },
+  show: () => true,
   id: 'empty',
 }

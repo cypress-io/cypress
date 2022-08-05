@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
-        :has-custom-spec-pattern="hasCustomSpecPattern"
+        :is-default-spec-pattern="isDefaultSpecPattern"
         @restart="cancelSpecNameCreation"
         @updateTitle="(value) => emits('update:title', value)"
       />
