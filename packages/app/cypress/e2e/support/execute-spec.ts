@@ -34,7 +34,9 @@ export const waitForSpecToFinish = (expectedResults) => {
   // Then ensure the tests have finished
   cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
 
-  return shouldHaveTestResults(expectedResults)
+  if (expectedResults) {
+    shouldHaveTestResults(expectedResults)
+  }
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)
