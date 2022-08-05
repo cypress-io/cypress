@@ -1,13 +1,11 @@
-// import debugModule from 'debug'
-
-import type { Browser } from './types'
-import type { Automation } from '../automation'
-import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
-import { WebkitAutomation } from './webkit-automation'
-import { EventEmitter } from 'stream'
+import Debug from 'debug'
+import { EventEmitter } from 'events'
 import type playwright from 'playwright-webkit'
+import type { Browser, BrowserInstance } from './types'
+import type { Automation } from '../automation'
+import { WebkitAutomation } from './webkit-automation'
 
-// const debug = debugModule('cypress:server:browsers:webkit')
+const debug = Debug('cypress:server:browsers:webkit')
 
 let wkAutomation: WebkitAutomation | undefined
 
@@ -19,7 +17,7 @@ export async function connectToNewSpec (browser: Browser, options, automation: A
   await wkAutomation.reset(options.url)
 }
 
-export async function open (browser: Browser, url, options: any = {}, automation: Automation): Promise<LaunchedBrowser> {
+export async function open (browser: Browser, url, options: any = {}, automation: Automation): Promise<BrowserInstance> {
   // resolve pw from user's project path
   const pwModulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
   const pw = require(pwModulePath) as typeof playwright
@@ -60,16 +58,25 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   automation.use(wkAutomation)
 
-  function getStubBrowser () {
-    const b = new EventEmitter()
+  class WkInstance extends EventEmitter implements BrowserInstance {
+    // TODO: how to obtain launched process PID from PW? this is used for process_profiler
+    pid = NaN
 
-    b.kill = () => {
+    constructor () {
+      super()
+
+      pwBrowser.on('disconnected', () => {
+        debug('pwBrowser disconnected')
+        this.emit('exit')
+      })
+    }
+
+    kill () {
+      debug('closing pwBrowser')
       pwBrowser.close()
       wkAutomation = undefined
     }
-
-    return b
   }
 
-  return getStubBrowser()
+  return new WkInstance()
 }
