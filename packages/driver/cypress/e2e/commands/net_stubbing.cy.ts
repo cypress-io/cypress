@@ -2527,7 +2527,7 @@ describe('network stubbing', function () {
         })
       })
 
-      // TODO: https://github.com/cypress-io/cypress/issues/23101
+      // TODO: fix https://github.com/cypress-io/cypress/issues/23101
       it.skip('when body contains ascii', function (done) {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('18')
@@ -2541,7 +2541,8 @@ describe('network stubbing', function () {
         })
       })
 
-      it('when body contains unicode', function (done) {
+      // TODO: fix https://github.com/cypress-io/cypress/issues/23150
+      it.skip('when body contains unicode', function (done) {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('8')
 
