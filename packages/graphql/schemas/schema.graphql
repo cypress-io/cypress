@@ -903,6 +903,7 @@ type FileParts implements Node {
 }
 
 enum FrontendFrameworkEnum {
+  angular
   nextjs
   nuxtjs
   react
