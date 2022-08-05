@@ -11,6 +11,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
+import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -153,8 +154,84 @@ export class ProjectConfigManager {
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
+      this.setupNodeEvents(this._cachedLoadConfig)
+      .then(async () => {
+        if (this._testingType === 'component') {
+          await this.checkDependenciesForComponentTesting()
+        }
+      })
+      .catch(this.onLoadError)
     }
+  }
+
+  async checkDependenciesForComponentTesting () {
+    // if it's a function, for example, the user is created their own dev server,
+    // and not using one of our presets. Assume they know what they are doing and
+    // what dependencies they require.
+    if (typeof this._cachedLoadConfig?.initialConfig?.component?.devServer !== 'object') {
+      return
+    }
+
+    const devServerOptions = this._cachedLoadConfig.initialConfig.component.devServer
+
+    const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
+
+    // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
+    // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
+    const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
+
+    if (!bundler) {
+      return
+    }
+
+    const result = await isDependencyInstalled(bundler, this.options.projectRoot)
+
+    if (!result.satisfied) {
+      unsupportedDeps.set(result.dependency.type, result)
+    }
+
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
+      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+        const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
+
+        if (!res.satisfied) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    const frameworks = WIZARD_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+
+    const mismatchedFrameworkDeps = new Map<typeof WIZARD_DEPENDENCIES[number]['type'], DependencyToInstall>()
+
+    let isSatisfied = false
+
+    for (const framework of frameworks) {
+      if (await isFrameworkSatisfied(bundler, framework)) {
+        isSatisfied = true
+        break
+      } else {
+        for (const dep of await framework.dependencies(bundler.type, this.options.projectRoot)) {
+          mismatchedFrameworkDeps.set(dep.dependency.type, dep)
+        }
+      }
+    }
+
+    if (!isSatisfied) {
+      for (const dep of Array.from(mismatchedFrameworkDeps.values())) {
+        if (!dep.satisfied) {
+          unsupportedDeps.set(dep.dependency.type, dep)
+        }
+      }
+    }
+
+    if (unsupportedDeps.size === 0) {
+      return
+    }
+
+    this.options.ctx.onWarning(getError('COMPONENT_TESTING_MISMATCHED_DEPENDENCIES', Array.from(unsupportedDeps.values())))
   }
 
   private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
