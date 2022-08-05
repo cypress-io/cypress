@@ -2,7 +2,7 @@ name: "❄️ Flaky internal test"
 title: "[Flaky internal test]: "
 labels: ["topic: flake ❄️", "stage: fire watch"]
 epics: ["Restore confidence in CI"]
-description: Report a flaky test in the Cypress app open-source code.
+description: Report a flaky test in the Cypress open-source repository.
 body:
   - type: markdown
     attributes:
