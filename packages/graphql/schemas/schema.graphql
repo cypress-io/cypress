@@ -1310,6 +1310,12 @@ type Mutation {
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
+  """Save the banner-dismissed state for this project"""
+  setBannerDismissed(bannerId: String!): Boolean
+
+  """Save the banner-shown state for this project"""
+  setBannerShown(bannerId: String!): Boolean
+
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Query
 
