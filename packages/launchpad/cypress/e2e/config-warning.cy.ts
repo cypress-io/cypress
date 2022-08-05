@@ -131,7 +131,8 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  it('warns against outdated @vue/cli dependency', () => {
+  // TODO: fix https://github.com/cypress-io/cypress/issues/23154
+  it.skip('warns against outdated @vue/cli dependency', () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
