@@ -151,41 +151,6 @@ describe('<FileMatch />', { viewportWidth: 600, viewportHeight: 300 }, () => {
     })
   })
 
-  describe('with file match button disabled', () => {
-    before(() => {
-      const extensionPattern = ref(initialExtension)
-      const pattern = ref(initialPattern)
-      const matches = { total: 10, found: 9 }
-
-      const onUpdateExtensionPatternSpy = cy.spy().as('onUpdateExtensionPatternSpy')
-      const onUpdatePatternSpy = cy.spy().as('onUpdatePatternSpy')
-
-      const methods = {
-        'onUpdate:extensionPattern': (newValue) => {
-          extensionPattern.value = newValue
-          onUpdateExtensionPatternSpy(newValue)
-        },
-        'onUpdate:pattern': (newValue) => {
-          pattern.value = newValue
-          onUpdatePatternSpy(newValue)
-        },
-      }
-
-      cy.mount(() => (<div class="p-12 resize overflow-auto">
-        <FileMatch
-          matches={matches}
-          extensionPattern={extensionPattern.value}
-          pattern={pattern.value}
-          fileMatchButtonDisabled
-          {...methods} />
-      </div>))
-    })
-
-    it('disables file match button', () => {
-      cy.get(fileMatchButtonSelector).should('be.disabled')
-    })
-  })
-
   describe('indicator', () => {
     /*----------  Fixtures  ----------*/
     // Matches

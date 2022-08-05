@@ -30,7 +30,6 @@
           v-model:extensionPattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
-          :file-match-button-disabled="true"
           @selectFile="makeSpec"
         />
         <GeneratorSuccess

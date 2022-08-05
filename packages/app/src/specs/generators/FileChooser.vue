@@ -27,7 +27,6 @@
       v-model:extensionPattern="localExtensionPattern"
       class="bg-white pt-24px pb-12px top-0px z-10 sticky"
       :matches="matches"
-      :file-match-button-disabled="fileMatchButtonDisabled"
     >
       <template
         v-if="loading"
@@ -79,8 +78,8 @@ const props = withDefaults(defineProps<{
   files: any[]
   extensionPattern: string
   loading?: boolean
-  fileMatchButtonDisabled?: boolean
 }>(), {
+
   loading: false,
 })
 
