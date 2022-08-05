@@ -113,7 +113,7 @@ module.exports = {
       overwrite: true,
       electronVersion,
       icon: iconPath,
-      electronZipDir: '/Users/ryanm/v8-snapshots/electron/src/out/Release',
+      electronZipDir: path.join(__dirname),
     })
 
     log('packager options %j', options)
