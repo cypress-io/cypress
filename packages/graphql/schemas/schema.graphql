@@ -66,6 +66,12 @@ type CachedUser implements Node {
   id: ID!
 }
 
+"""Feature not available for subscription"""
+type CloudFeatureNotEnabled {
+  """an error message"""
+  message: String!
+}
+
 """
 Represents a pollable status for clients to know when refetching data is required.
 """
@@ -209,6 +215,15 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+  flakyStatus(
+    """The number of runs to consider when counting flaky runs."""
+    flakyRunsWindow: Int!
+
+    """
+    The branch to measure average duration against. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+  ): CloudProjectSpecFlakyResult
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -244,6 +259,23 @@ type CloudProjectSpec implements Node {
     """Returns the last n elements from the list."""
     last: Int
   ): CloudSpecRunConnection
+}
+
+union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
+
+type CloudProjectSpecFlakyStatus {
+  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  dashboardUrl: String
+
+  """Number of flaky runs from the considered runs"""
+  flakyRuns: Int
+  flakyRunsWindow: Int
+
+  """
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  """
+  lastFlaky: Int
+  severity: String
 }
 
 """Unable to find cloud spec in project"""
@@ -669,10 +701,7 @@ enum ErrorTypeEnum {
   CANNOT_TRASH_ASSETS
   CDP_COULD_NOT_CONNECT
   CDP_COULD_NOT_RECONNECT
-  CDP_FALLBACK_SUCCEEDED
   CDP_RETRYING_CONNECTION
-  CDP_STDIO_ERROR
-  CDP_STDIO_TIMEOUT
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
   COMPONENT_FOLDER_REMOVED

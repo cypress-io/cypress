@@ -36,16 +36,8 @@ export type Browser = {
   info?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
   minSupportedVersion?: number
-} & (BrowserBinary | BrowserNpm)
-
-type BrowserBinary = {
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
-}
-
-type BrowserNpm = {
-  module: string
-  getBinaryPath: (module: any) => string
 }
 
 /**
@@ -179,16 +171,6 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Dev (\S+)/m,
     binary: ['edge-dev', 'microsoft-edge-dev'],
     minSupportedVersion: MIN_EDGE_VERSION,
-  },
-  {
-    name: 'webkit',
-    family: 'webkit',
-    channel: 'dev',
-    displayName: 'WebKit',
-    // WebKitGTK 2.31.1 (r272495)
-    versionRegex: /WebKitGTK (\S+)/m,
-    module: 'playwright-webkit',
-    getBinaryPath: (pw) => pw.webkit.executablePath(),
   },
 ]
 

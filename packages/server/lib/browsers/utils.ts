@@ -182,44 +182,90 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const getBrowsers = () => {
+const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
+
+const getWebKitBrowserVersion = async () => {
+  try {
+    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
+    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
+    const wkBrowserPath = require.resolve('playwright-core/lib/server/webkit/wkBrowser', { paths: [process.cwd()] })
+    const wkBrowserContents = await fs.readFile(wkBrowserPath)
+    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+
+    if (!result || !result.groups!.version) return '0'
+
+    return result.groups!.version
+  } catch (err) {
+    return '0'
+  }
+}
+
+const getWebKitBrowser = async () => {
+  try {
+    const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
+    const mod = require(modulePath) as typeof import('playwright-webkit')
+    const version = await getWebKitBrowserVersion()
+
+    const browser: FoundBrowser = {
+      name: 'webkit',
+      channel: 'stable',
+      family: 'webkit',
+      displayName: 'WebKit',
+      version,
+      path: mod.webkit.executablePath(),
+      majorVersion: version.split('.')[0],
+      warning: 'WebKit support is experimental.',
+    }
+
+    return browser
+  } catch (err) {
+    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+
+    return
+  }
+}
+
+const getBrowsers = async () => {
   debug('getBrowsers')
 
-  return launcher.detect()
-  .then((browsers: FoundBrowser[] = []) => {
-    let majorVersion
+  const browsers: FoundBrowser[] = await launcher.detect()
+  let majorVersion
 
-    debug('found browsers %o', { browsers })
+  debug('found browsers %o', { browsers })
 
-    if (!process.versions.electron) {
-      debug('not in electron, skipping adding electron browser')
+  if (!process.versions.electron) {
+    debug('not in electron, skipping adding electron browser')
 
-      return browsers
-    }
+    return browsers
+  }
 
-    // @ts-ignore
-    const version = process.versions.chrome || ''
+  // @ts-ignore
+  const version = process.versions.chrome || ''
 
-    if (version) {
-      majorVersion = getMajorVersion(version)
-    }
+  if (version) {
+    majorVersion = getMajorVersion(version)
+  }
 
-    const electronBrowser: FoundBrowser = {
-      name: 'electron',
-      channel: 'stable',
-      family: 'chromium',
-      displayName: 'Electron',
-      version,
-      path: '',
-      majorVersion,
-      info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
-    }
+  const electronBrowser: FoundBrowser = {
+    name: 'electron',
+    channel: 'stable',
+    family: 'chromium',
+    displayName: 'Electron',
+    version,
+    path: '',
+    majorVersion,
+    info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+  }
 
-    // the internal version of Electron, which won't be detected by `launcher`
-    debug('adding Electron browser %o', electronBrowser)
+  browsers.push(electronBrowser)
 
-    return browsers.concat(electronBrowser)
-  })
+  if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+    const wkBrowser = await getWebKitBrowser()
+
+    if (wkBrowser) browsers.push(wkBrowser)
+  }
+
+  return browsers
 }
 
 const isValidPathToBrowser = (str) => {
