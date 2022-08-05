@@ -329,9 +329,9 @@ export class SocketBase {
       })
 
       socket.on('get:cached:state', (cb) => {
-        console.log('on get:cached:state')
-
-        return cb({ globalSessions: session.getGlobalSessions() })
+        return cb({
+          globalSessions: session.getGlobalSessions(),
+        })
       })
 
       socket.on('mocha', (...args: unknown[]) => {
@@ -437,17 +437,11 @@ export class SocketBase {
             case 'task':
               return task.run(cfgFile ?? null, args[0])
             case 'save:session':
-              console.log('save:session', args)
-
               return session.saveSession(args[0])
             case 'clear:spec:sessions':
-              console.log('clear spec sessons')
-
               return session.clearSpecSessions() // pass in arg for boolean for clear all?
               // return session.clearSessions(args[0])
             case 'clear:all:sessions':
-              console.log('clear all sessons')
-
               return session.clearAllSessions()
             case 'get:session':
               return session.getSession(args[0])
@@ -459,8 +453,6 @@ export class SocketBase {
 
               return
             case 'get:cached:state':
-              console.log('backend request....get:cached:state')
-
               return {
                 sessions: session.getGlobalSessions(),
               }
