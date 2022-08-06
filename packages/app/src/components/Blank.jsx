@@ -23,19 +23,6 @@ const defaultStyles = `
     height: 100%;
   }
 
-  pre {
-    text-align: left;
-    display: flex;
-  }
-
-  code {
-    font-family: 'Fira Code', monospace;
-  }
-
-  pre code {
-    margin: 0 auto;
-  }
-
   .container {
     background-color: #f3f4fa;
     border-radius: 8px;
@@ -60,16 +47,6 @@ const defaultStyles = `
     line-height: 1.4;
   }
 
-  kbd {
-    background-color: #747994;
-    border-radius: 3px;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-    color: #fff;
-    display: inline-block;
-    font-size: 85%;
-    padding: 2px 4px;
-  }
-
   a,
   a:hover,
   a:focus,
@@ -80,27 +57,25 @@ const defaultStyles = `
 `
 
 const blankStyles = `
+  * { 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    margin: 0;
-    width: 100%;
-    height: 100%;
+    min-height: 100vh;
+    background-color: #f3f4fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   svg {
     display: inline-block;
     stroke-width: 0;
-    margin: 0 0 24px 0;
-  }
-
-  .outer-container {
-    background-color: #f3f4fa;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: auto;
+    margin: 0 0 24px;
   }
 
   .inner-container {
@@ -108,6 +83,7 @@ const blankStyles = `
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    margin: 32px;
   }
 
   .text {
@@ -117,7 +93,7 @@ const blankStyles = `
     line-height: 28px;
     text-align: center;
     color: #2E3247;
-    margin: 0 32px 4px;
+    margin: 0 0 4px;
   }
 
   .subtext {
@@ -127,7 +103,6 @@ const blankStyles = `
     line-height: 20px;
     text-align: center;
     color: #747994;
-    margin: 0 32px;
   }
 `
 
@@ -137,12 +112,10 @@ const blankContentsHtml = (text = '', subtext = '') => {
       ${blankStyles}
     </style>
 
-    <div class='outer-container'>
-      <div class='inner-container'>
-        ${svgCy}
-        <p data-cy="text" class="text">${text}</p>
-        <p data-cy="subtext" class="subtext">${subtext}</p>
-      </div>
+    <div class='inner-container'>
+      ${svgCy}
+      <p data-cy="text" class="text">${text}</p>
+      <p data-cy="subtext" class="subtext">${subtext}</p>
     </div>
   `
 }
