@@ -217,7 +217,8 @@ class Test extends Component<TestProps> {
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
         <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
-        {appState.studioActive && <StudioControls model={model} />}
+        <div>Studio controls</div>
+        <StudioControls model={model} />
       </div>
     )
   }

@@ -173,7 +173,7 @@ import { useStudioRecorderStore } from '../store/studio-store'
 const studioRecorder = useStudioRecorderStore()
 
 function visitUrl () {
-  studioRecorder.visitUrl(`http://google.com`)
+  studioRecorder.visitUrl(`https://lmiller1990.github.io`)
 }
 
 gql`

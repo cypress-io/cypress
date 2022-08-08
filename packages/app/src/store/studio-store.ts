@@ -167,9 +167,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         }
       }
 
-      console.log(this.testId, this.suiteId)
       if (Boolean(this.testId || this.suiteId)) {
-        debugger
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
 
@@ -346,6 +344,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
     },
 
     _addLog (log: StudioLog) {
+      console.log('Adding log', log)
       log.id = this._getId()
 
       this.logs.push(log)
@@ -840,9 +839,6 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
 
   getters: {
     hasRunnableId(state) {
-      console.log('state...', state.testId, state.suiteId)
-      debugger
-
       return !!state.testId || !!state.suiteId
     },
 
@@ -851,6 +847,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
     },
 
     isEmpty: (state): boolean => {
+      console.log(`Is Empty? ${state.logs.length}`)
       return state.logs.length === 0
     },
 

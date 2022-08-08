@@ -96,8 +96,8 @@ const events: Events = {
     runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
+      console.log(`studioActive = ${startInfo.studioActive}`)
       appState.setStudioActive(startInfo.studioActive)
-      console.log(startInfo.studioActive)
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
       }

@@ -91,6 +91,7 @@ export default class Attempt {
   }
 
   @computed get studioIsNotEmpty () {
+    console.log(this.hooks)
     return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
   }
 

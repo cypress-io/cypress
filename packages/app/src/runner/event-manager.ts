@@ -711,7 +711,9 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    console.log(this.studioRecorder, this.studioRecorder.hasRunnableId)
+
+    const hasRunnableId = !!this.studioRecorder.testId || !!this.studioRecorder.suiteId
+    console.log({ hasRunnableId })
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -721,7 +723,7 @@ export class EventManager {
       autoScrollingEnabled: state.autoScrollingEnabled,
       isSpecsListOpen: state.isSpecsListOpen,
       scrollTop: state.scrollTop,
-      studioActive: this.studioRecorder.hasRunnableId,
+      studioActive: hasRunnableId,
     })
   }
 
