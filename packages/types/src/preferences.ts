@@ -12,6 +12,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'appX',
   'appY',
   'autoScrollingEnabled',
+  'banners',
   'browserWidth',
   'browserHeight',
   'browserX',
