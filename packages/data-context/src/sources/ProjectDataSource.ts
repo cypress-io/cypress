@@ -481,7 +481,7 @@ export class ProjectDataSource {
   async getCodeGenGlobs () {
     assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
-    const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
+    const looseComponentGlob = '*.{js,jsx,ts,tsx,vue}'
 
     const framework = this.ctx.actions.project.getWizardFrameworkFromConfig()
 

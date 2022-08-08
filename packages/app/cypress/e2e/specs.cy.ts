@@ -691,6 +691,24 @@ describe('App: Specs', () => {
         // 'Create from component' card appears again when the user selects "create another spec"
         cy.findByText('Create from component').should('be.visible')
       })
+
+      it('runs generated spec', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByText('HelloWorld').should('be.visible').click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.createSpec.successPage.header,
+        }).as('SuccessDialog').within(() => {
+          cy.contains(getPathForPlatform('src/components/HelloWorld.cy.js')).should('be.visible')
+          cy.findByRole('button', { name: 'Close' }).should('be.visible')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=src/components/HelloWorld.cy.js`).click()
+        })
+
+        cy.findByText('<HelloWorld ... />').should('be.visible')
+      })
     })
 
     context('project with custom spec pattern', () => {

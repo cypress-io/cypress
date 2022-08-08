@@ -56,7 +56,7 @@ export class SpecOptions {
     const isDefaultSpecPattern = await this.ctx.project.getIsDefaultSpecPattern()
 
     // This only works for Vue projects with default spec patterns right now. If the framework is not Vue, we're generating an empty component test
-    if (frontendFramework.codeGenFramework !== 'vue' || isDefaultSpecPattern) {
+    if (frontendFramework.codeGenFramework !== 'vue' || !isDefaultSpecPattern) {
       return {
         codeGenType: this.options.codeGenType,
         fileName: await this.buildFileName(),
