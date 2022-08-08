@@ -13,6 +13,7 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
+import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export interface ProjectApiShape {
   /**
@@ -512,5 +513,17 @@ export class ProjectActions {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
     }
+  }
+
+  getWizardFrameworkFromConfig (): WizardFrontendFramework | undefined {
+    const config = this.ctx.lifecycleManager.loadedConfigFile
+
+    // If devServer is a function, they are using a custom dev server.
+    if (typeof config?.component?.devServer === 'function') {
+      return undefined
+    }
+
+    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
+    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }

@@ -2,7 +2,6 @@ import assert from 'assert'
 import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, WizardFrontendFramework } from '@packages/scaffold-config'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -22,16 +21,10 @@ interface CodeGenOptions {
 export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
 type ComponentExtension = `.cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
-type TemplateKey = 'e2e' | 'componentEmpty' | 'vue2Component' | 'vue3Component'
+type TemplateKey = 'e2e' | 'componentEmpty' | 'vueComponent'
 export class SpecOptions {
   private parsedPath: ParsedPath;
   private parsedErroredCodegenCandidate?: ParsedPath
-
-  private async getFrontendFramework () {
-    const detected = await detectFramework(this.ctx.currentProject || '')
-
-    return await detected.framework
-  }
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
     assert(this.ctx.currentProject)
@@ -55,7 +48,7 @@ export class SpecOptions {
   }
 
   private async getComponentCodeGenOptions () {
-    const frontendFramework = await this.getFrontendFramework()
+    const frontendFramework = this.ctx.actions.project.getWizardFrameworkFromConfig()
 
     if (!frontendFramework) {
       throw new Error('Cannot generate a spec without a framework')
@@ -70,7 +63,7 @@ export class SpecOptions {
       }
     }
 
-    const frameworkOptions = await this.getFrameworkComponentOptions(frontendFramework)
+    const frameworkOptions = await this.getFrameworkComponentOptions()
 
     return frameworkOptions
   }
@@ -87,19 +80,17 @@ export class SpecOptions {
     return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
   }
 
-  private async getFrameworkComponentOptions (framework: WizardFrontendFramework) {
+  private async getFrameworkComponentOptions () {
     const componentName = this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name
 
     const componentPath = this.relativePath()
-
-    const templateKey: TemplateKey = framework.mountModule === 'cypress/vue' ? 'vue3Component' : 'vue2Component'
 
     return {
       codeGenType: this.options.codeGenType,
       componentName,
       componentPath,
       fileName: await this.buildComponentSpecFilename(await this.getVueExtension()),
-      templateKey,
+      templateKey: 'vueComponent' as TemplateKey,
     }
   }
 

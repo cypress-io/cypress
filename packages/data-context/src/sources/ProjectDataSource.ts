@@ -1,7 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
-import { detectFramework } from '@packages/scaffold-config'
 import minimatch from 'minimatch'
 import _ from 'lodash'
 import path from 'path'
@@ -484,10 +483,10 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
-    const detected = await detectFramework(this.ctx.currentProject || '')
+    const framework = this.ctx.actions.project.getWizardFrameworkFromConfig()
 
     return {
-      component: detected.framework?.glob ?? looseComponentGlob,
+      component: framework?.glob ?? looseComponentGlob,
     }
   }
 
