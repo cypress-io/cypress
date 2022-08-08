@@ -440,7 +440,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (this.getCurrentBrowser && this.getCurrentBrowser().name === 'webkit') {
+      if (this.getCurrentBrowser && this.getCurrentBrowser()?.name === 'webkit') {
         // webkit uses polling transport for websocket, which will not trigger socketAllowed.add(...)
         // skip isRequestAllowed for webkit
         return
