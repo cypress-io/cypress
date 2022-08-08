@@ -2383,10 +2383,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
-    - driver-integration-tests-webkit:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
+    # TODO: Fix keyboard tests to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:
@@ -2403,10 +2404,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
-    - driver-integration-tests-webkit-experimentalSessionAndOrigin:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
+    # TODO: Implement WebKit network automation to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - run-frontend-shared-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true

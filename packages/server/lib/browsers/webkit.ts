@@ -71,9 +71,9 @@ export async function open (browser: Browser, url, options: any = {}, automation
       })
     }
 
-    kill () {
+    async kill () {
       debug('closing pwBrowser')
-      pwBrowser.close()
+      await pwBrowser.close()
       wkAutomation = undefined
     }
   }
