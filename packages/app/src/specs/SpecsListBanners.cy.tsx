@@ -6,6 +6,7 @@ import interval from 'human-interval'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import type { AllowedState } from '@packages/types/src'
 import { assignIn, set } from 'lodash'
+import { BannerIds } from './banners'
 
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
@@ -60,6 +61,12 @@ describe('<SpecsListBanners />', () => {
 
       cy.findByTestId(AlertSelector).should('be.visible')
     })
+  }
+
+  const stateWithFirstOpenedDaysAgo = (days: number) => {
+    return {
+      firstOpened: Date.now() - interval(`${days} days`),
+    }
   }
 
   describe('spec not found', () => {
@@ -208,18 +215,29 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    it('should render when not logged in and cypress use >= 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('4 days'),
+    context('banner conditions are met and when cypress use >= 4 days', () => {
+      it('should render when not previously-dismissed', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
-      cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      it('should not render when previously-dismissed', () => {
+        mountWithState(gql, {
+          ...stateWithFirstOpenedDaysAgo(4),
+          banners: {
+            [BannerIds.ACI_082022_LOGIN]: {
+              dismissed: Date.now(),
+            },
+          },
+        })
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
     })
 
     it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('3 days'),
-      })
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })
@@ -238,18 +256,29 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    it('should render when logged in but no organization and cypress use >= 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('4 days'),
+    context('banner conditions are met and when cypress use >= 4 days', () => {
+      it('should render when not previously-dismissed', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
-      cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      it('should not render when previously-dismissed', () => {
+        mountWithState(gql, {
+          ...stateWithFirstOpenedDaysAgo(4),
+          banners: {
+            [BannerIds.ACI_082022_CREATE_ORG]: {
+              dismissed: Date.now(),
+            },
+          },
+        })
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
     })
 
     it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('3 days'),
-      })
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })
@@ -272,18 +301,29 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    it('should render when logged in with org but no projectId and cypress use >= 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('4 days'),
+    context('banner conditions are met and when cypress use >= 4 days', () => {
+      it('should render when not previously-dismissed', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
-      cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      it('should not render when previously-dismissed', () => {
+        mountWithState(gql, {
+          ...stateWithFirstOpenedDaysAgo(4),
+          banners: {
+            [BannerIds.ACI_082022_CONNECT_PROJECT]: {
+              dismissed: Date.now(),
+            },
+          },
+        })
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
     })
 
     it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('3 days'),
-      })
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })
@@ -321,21 +361,34 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    it('should render when logged in with org and connected but no runs and cypress use >= 4 days', () => {
-      cy.gqlStub.Query.currentProject = gql.currentProject as any
-      cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
-
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('4 days'),
+    context('banner conditions are met and when cypress use >= 4 days', () => {
+      beforeEach(() => {
+        cy.gqlStub.Query.currentProject = gql.currentProject as any
+        cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
       })
 
-      cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      it('should render when not previously-dismissed', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      })
+
+      it('should not render when previously-dismissed', () => {
+        mountWithState(gql, {
+          ...stateWithFirstOpenedDaysAgo(4),
+          banners: {
+            [BannerIds.ACI_082022_RECORD]: {
+              dismissed: Date.now(),
+            },
+          },
+        })
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
     })
 
     it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, {
-        firstOpened: Date.now() - interval('3 days'),
-      })
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })

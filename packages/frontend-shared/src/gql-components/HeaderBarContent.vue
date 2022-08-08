@@ -179,6 +179,7 @@ import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
+import type { AllowedState } from '@packages/types'
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -245,7 +246,7 @@ const userData = computed(() => {
 })
 
 const savedState = computed(() => {
-  return props.gql?.currentProject?.savedState
+  return props.gql?.currentProject?.savedState as AllowedState
 })
 const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
@@ -305,8 +306,9 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   }
 
   const now = Date.now()
-  const timeSinceOpened = now - savedState.value?.firstOpened
+  const timeSinceOpened = now - (savedState.value?.firstOpened ?? now)
   const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => banner?.lastShown).filter((val): val is number => !!val)
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
@@ -315,6 +317,11 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // any other prompt has been shown in the last 24 hours
   if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+    return false
+  }
+
+  // If any tracked banners have been shown in the last 24 hours
+  if (bannersLastShown.some((bannerLastShown) => (now - bannerLastShown) < interval('24 hours'))) {
     return false
   }
 
