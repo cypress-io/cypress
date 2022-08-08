@@ -1,6 +1,9 @@
 import _ from 'lodash'
-import { options } from '@packages/config'
+import { testOverrideLevels, validateConfigValues, validateOverridableAtTestTest } from '@packages/config/src/driver'
 import { preprocessForSerialization } from './serialization'
+import $errUtils from '../cypress/error_utils'
+
+import type { ErrResult, OverrideLevel } from '@packages/config/src/driver'
 
 /**
  * Mutates the config/env object serialized from the other origin to omit read-only values
@@ -12,18 +15,16 @@ import { preprocessForSerialization } from './serialization'
  * @returns a reference to the config/env object passed in
  */
 const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => {
-  Object.keys(objectLikeConfig).forEach((key) => {
-    const option = options.find((option) => option.name === key)
+  Object.keys(objectLikeConfig).forEach((configKey) => {
+    const overrideLevels = testOverrideLevels[configKey]
 
     // allow user defined config values
-    if (!option) {
+    if (!overrideLevels) {
       return
     }
 
-    const overrideLevels = option.overrideLevels || 'never'
-
     if (overrideLevels === 'never') {
-      delete objectLikeConfig[key]
+      delete objectLikeConfig[configKey]
     }
   })
 
@@ -68,4 +69,84 @@ export const preprocessConfig = (config: Cypress.Config) => {
 
 export const preprocessEnv = (env: Cypress.ObjectLike) => {
   return preprocessForSerialization(env) as Cypress.Config
+}
+
+export const getOverrideLevel = (state): OverrideLevel => {
+  const test = state('test')
+  let overrideLevel
+
+  if (state('duringUserTestExecution')) {
+    overrideLevel = 'runtime'
+  } else if (test) {
+    if (test?._fired?.hasOwnProperty('runner:test:before:run:async')) {
+      overrideLevel = 'test:before:run:async'
+    } else if (test?._fired?.hasOwnProperty('runner:test:before:run')) {
+      overrideLevel = 'test:before:run'
+    } else {
+      overrideLevel = test._testConfig.applied // either suite or test
+    }
+  } else {
+    overrideLevel = 'code'
+  }
+
+  return overrideLevel as OverrideLevel
+}
+
+export const validateConfig = (state: Record<string, any>, config: Record<string, any>, isRunMode: boolean, skipConfigOverrideValidation: boolean = false): boolean => {
+  const overrideLevel = getOverrideLevel(state)
+
+  // FIXME: https://github.com/cypress-io/cypress/issues/23039
+  // bug in runner causes browser to hang in run mode when test:before:run throws an exception
+  if (overrideLevel === 'test:before:run' && isRunMode) {
+    return false
+  }
+
+  if (!skipConfigOverrideValidation) {
+    validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
+      const isReadOnly = validationResult.supportedOverrideLevels === 'never'
+      let errMsg
+
+      if (overrideLevel === 'runtime' || overrideLevel === 'code') {
+        errMsg = $errUtils.errByPath('config.cypress_config_api', {
+          ...validationResult,
+          isReadOnly,
+          runnableType: state('runnable')?.type,
+        })
+        // } else if (overrideLevel === 'event') {
+      } else if (overrideLevel.includes('test:before:run')) {
+        const test = state('test')
+        const event = _.last(Object.keys(test._fired))
+
+        errMsg = $errUtils.errByPath('config.invalid_event_override', {
+          ...validationResult,
+          isReadOnly,
+          event: event?.replace('runner:', ''),
+        })
+      } else {
+        errMsg = $errUtils.errByPath('config.invalid_mocha_config_override', {
+          ...validationResult,
+          isReadOnly,
+        })
+      }
+
+      throw new (state('specWindow').Error)(errMsg)
+    })
+  }
+
+  validateConfigValues(config, (errResult: ErrResult | string) => {
+    const stringify = (str) => format(JSON.stringify(str))
+
+    const format = (str) => `\`${str}\``
+
+    // TODO: this does not use the @packages/error rewriting rules
+    // for stdout vs markdown - it always inserts back ticks for markdown
+    // and those leak out into the stdout formatting.
+    const errMsg = _.isString(errResult)
+      ? errResult
+      : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
+
+    throw new (state('specWindow').Error)(errMsg)
+  })
+
+  return true
 }

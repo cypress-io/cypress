@@ -9,8 +9,9 @@ import {
   testingTypeBreakingOptions,
 } from './options'
 
-import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel, OverrideLevels } from './options'
 import type { TestingType } from '@packages/types'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel, OverrideLevels } from './options'
+import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
@@ -153,7 +154,7 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: string) => void) => {
+export const validate = (cfg: any, onErr: (property: ErrResult | string) => void) => {
   debug('validating configuration')
 
   return _.each(cfg, (value, key) => {

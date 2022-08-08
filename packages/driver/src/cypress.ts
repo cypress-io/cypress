@@ -1,4 +1,3 @@
-import { validate as validateConfigValues, validateOverridableAtTestTest } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -26,6 +25,7 @@ import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
 import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
+import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
@@ -238,71 +238,10 @@ class $Cypress {
 
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      let overrideLevel
-      const test = this.state('test')
+      const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
+      const isRunMode = this.config('isTextTerminal')
 
-      if (this.state('duringUserTestExecution')) {
-        overrideLevel = 'runtime'
-      } else if (test) {
-        if (test?._fired?.hasOwnProperty('runner:test:before:run:async')) {
-          overrideLevel = 'test:before:run:async'
-        } else if (test?._fired?.hasOwnProperty('runner:test:before:run')) {
-          overrideLevel = 'test:before:run'
-        } else {
-          overrideLevel = test._testConfig.applied // either suite or test
-        }
-      } else {
-        overrideLevel = 'code'
-      }
-
-      // FIXME: https://github.com/cypress-io/cypress/issues/23039
-      // bug in runner causes browser to hang in run mode when test:before:run throws an exception
-      if (overrideLevel === 'test:before:run' && this.config('isTextTerminal')) {
-        return
-      }
-
-      const skipValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig || false
-
-      if (!skipValidation) {
-        validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
-          const isReadOnly = validationResult.supportedOverrideLevels === 'never'
-          let errMsg
-
-          if (overrideLevel === 'runtime') {
-            const errKey = isReadOnly ? 'config.cypress_config_api.cannot_override_readonly' : 'config.cypress_config_api.invalid_override'
-
-            errMsg = $errUtils.errByPath(errKey, {
-              ...validationResult,
-              runnableType: this.state('runnable')?.type,
-            })
-          } else if (overrideLevel.includes('test:before:run')) {
-            const errKey = isReadOnly ? 'config.event.cannot_override_readonly' : 'config.event.invalid_override'
-
-            errMsg = $errUtils.errByPath(errKey, validationResult)
-          } else {
-            const errKey = isReadOnly ? 'config.test_config.cannot_override_readonly' : 'config.test_config.invalid_override'
-
-            errMsg = $errUtils.errByPath(errKey, validationResult)
-          }
-
-          throw new (this.state('specWindow').Error)(errMsg)
-        })
-      }
-
-      validateConfigValues(config, (errResult) => {
-        const stringify = (str) => format(JSON.stringify(str))
-
-        const format = (str) => `\`${str}\``
-
-        // TODO: this does not use the @packages/error rewriting rules
-        // for stdout vs markdown - it always inserts backticks for markdown
-        // and those leak out into the stdout formatting.
-        const errMsg = _.isString(errResult)
-          ? errResult
-          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
-
-        throw new (this.state('specWindow').Error)(errMsg)
-      })
+      return validateConfig(this.state, config, isRunMode, skipConfigOverrideValidation)
     })
 
     this.env = $SetterGetter.create(env)
