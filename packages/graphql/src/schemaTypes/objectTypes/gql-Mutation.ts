@@ -346,6 +346,7 @@ export const mutation = mutationType({
       },
     })
 
+    // TODO: #23202 hopefully we can stop using this for project data, and use `setPreferences` instead
     t.nonNull.field('setProjectPreferencesInGlobalCache', {
       type: Query,
       description: 'Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache',
