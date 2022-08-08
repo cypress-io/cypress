@@ -1,6 +1,6 @@
 require('../spec_helper')
 import _ from 'lodash'
-import { detect, detectByPath } from '../../lib/detect'
+import { detect, detectByPath, getMajorVersion } from '../../lib/detect'
 import * as browsers from '../../lib/browsers'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
@@ -23,7 +23,7 @@ const stubHelpers = (detect) => {
   sinon.stub(windowsHelper, 'detect').callsFake(detect)
 }
 
-describe('browser detection', () => {
+describe('detect', () => {
   // making simple to debug tests
   // using DEBUG=... flag
   const checkBrowsers = (browsers) => {
@@ -49,7 +49,15 @@ describe('browser detection', () => {
     return detect().then(checkBrowsers)
   })
 
-  context('#detect', () => {
+  describe('#getMajorVersion', () => {
+    it('parses major version from provided string', () => {
+      expect(getMajorVersion('123.45.67')).to.eq('123')
+      expect(getMajorVersion('Browser 77.1.0')).to.eq('Browser 77')
+      expect(getMajorVersion('999')).to.eq('999')
+    })
+  })
+
+  describe('#detect', () => {
     const testBrowser = {
       name: 'test-browser',
       family: 'chromium',
@@ -114,7 +122,7 @@ describe('browser detection', () => {
     })
   })
 
-  context('#detectByPath', () => {
+  describe('#detectByPath', () => {
     let execa: SinonStub
 
     beforeEach(() => {

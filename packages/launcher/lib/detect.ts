@@ -26,8 +26,8 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   name: string
 }
 
-const getMajorVersion = (version: string): string => {
-  return version.split('.')[0] ?? version
+export const getMajorVersion = (version: string): string => {
+  return version.split('.')[0]
 }
 
 // Determines if found browser is supported by Cypress. If found to be
