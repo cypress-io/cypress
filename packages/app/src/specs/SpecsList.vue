@@ -143,7 +143,7 @@
     </div>
     <NoResults
       v-show="!specs.length"
-      :spec-filter-model="specFilterModel"
+      :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
       @clear="handleClear"

@@ -54,7 +54,7 @@
       <template #no-results>
         <NoResults
           empty-search
-          :spec-filter-model="noResults.search"
+          :search-term="noResults.search"
           :message="noResults.message"
           @clear="noResults.clear"
         />

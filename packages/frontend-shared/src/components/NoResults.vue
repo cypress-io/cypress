@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="specFilterModel || emptySearch"
+    v-if="searchTerm || emptySearch"
     data-testid="no-results"
     class="text-center"
   >
@@ -11,9 +11,9 @@
     <p class="leading-normal text-gray-500 text-18px">
       {{ message || t('noResults.defaultMessage') }}
       <span
-        v-if="specFilterModel"
+        v-if="searchTerm"
         class="text-purple-500 truncate"
-      >{{ specFilterModel }}</span>
+      >{{ searchTerm }}</span>
     </p>
     <Button
       data-cy="no-results-clear"
@@ -36,7 +36,7 @@ import { useI18n } from '@cy/i18n'
 import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 
 defineProps<{
-  specFilterModel?: string
+  searchTerm?: string
   message?: string
   emptySearch?: boolean
 }>()
