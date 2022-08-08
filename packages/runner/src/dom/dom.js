@@ -307,23 +307,6 @@ function getZIndex (el) {
   return _.toNumber(el.css('zIndex'))
 }
 
-function isInViewport (win, el) {
-  let rect = el.getBoundingClientRect()
-
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= win.innerHeight &&
-    rect.right <= win.innerWidth
-  )
-}
-
-function scrollIntoView (win, el) {
-  if (!el || isInViewport(win, el)) return
-
-  el.scrollIntoView()
-}
-
 const sizzleRe = /sizzle/i
 
 function getElementsForSelector ({ $root, selector, method, cypressDom }) {
@@ -354,5 +337,4 @@ export const dom = {
   closeStudioAssertionsMenu,
   getElementsForSelector,
   getOuterSize: $dimensions.getOuterSize,
-  scrollIntoView,
 }

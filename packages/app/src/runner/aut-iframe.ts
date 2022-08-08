@@ -432,7 +432,7 @@ export class AutIframe {
       selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
-        this.dom.scrollIntoView(this._window(), $el[0])
+        this.scrollIntoView(this._window(), $el[0])
       }
     }
 
@@ -501,5 +501,22 @@ export class AutIframe {
 
       studioStore.attachListeners(body)
     }
+  }
+
+  private scrollIntoView (win: Window, el: HTMLElement) {
+    if (!el || this.isInViewport(win, el)) return
+
+    el.scrollIntoView()
+  }
+
+  private isInViewport = (win: Window, el: HTMLElement) => {
+    let rect = el.getBoundingClientRect()
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= win.innerHeight &&
+      rect.right <= win.innerWidth
+    )
   }
 }
