@@ -138,7 +138,8 @@ export class SocketBase {
         name: cookie,
       },
       destroyUpgrade: false,
-      serveClient: false
+      serveClient: false,
+      transports: ['websocket', 'polling'],
     })
   }
 

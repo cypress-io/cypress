@@ -217,7 +217,7 @@ const getWebKitBrowser = async () => {
       version,
       path: mod.webkit.executablePath(),
       majorVersion: version.split('.')[0],
-      warning: 'WebKit support is experimental.',
+      warning: 'WebKit support is not currently available in production.',
     }
 
     return browser

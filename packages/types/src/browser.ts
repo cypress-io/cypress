@@ -1,4 +1,4 @@
-export const BROWSER_FAMILY = ['chromium', 'firefox', 'webkit'] as const
+export const BROWSER_FAMILY = process.env.CYPRESS_INTERNAL_ENV === 'production' ? ['chromium', 'firefox'] : ['chromium', 'firefox', 'webkit']
 
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
 

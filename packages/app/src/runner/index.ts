@@ -31,7 +31,9 @@ let _eventManager: EventManager | undefined
 
 export function createWebsocket (socketIoRoute: string) {
   const socketConfig = {
-    path: socketIoRoute
+    path: socketIoRoute,
+    // fall back to polling if websocket fails to connect (webkit)
+    transports: ['websocket', 'polling'],
   }
 
   const ws = client(socketConfig)
