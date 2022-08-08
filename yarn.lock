@@ -7059,6 +7059,11 @@
     "@types/glob" "*"
     "@types/node" "*"
 
+"@types/semver@7.3.10":
+  version "7.3.10"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.10.tgz#5f19ee40cbeff87d916eedc8c2bfe2305d957f73"
+  integrity sha512-zsv3fsC7S84NN6nPK06u79oWgrPVd0NvOyqgghV1haPaFcVxIrP4DLomRwGAXk0ui4HZA7mOcSFL98sMVW9viw==
+
 "@types/semver@7.3.9":
   version "7.3.9"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.9.tgz#152c6c20a7688c30b967ec1841d31ace569863fc"
