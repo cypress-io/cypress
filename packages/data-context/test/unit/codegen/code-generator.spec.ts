@@ -10,6 +10,7 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -183,12 +184,12 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
-  it('should generate from Vue 2 component template', async () => {
+  it('should generate from Vue component template', async () => {
     const fileName = 'MyComponent.vue'
     const target = path.join(tmpPath, 'component')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
-      templateDir: templates.vue2Component,
+      templateDir: templates.vueComponent,
       target,
     }
     const codeGenArgs = {
@@ -208,52 +209,8 @@ describe('code-generator', () => {
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
-              // see: https://vue-test-utils.vuejs.org/
-              cy.mount(${codeGenArgs.componentName}, { propsData: {} })
-            })
-          })`,
-        },
-      ],
-      failed: [],
-    }
-
-    expect(codeGenResults).deep.eq(expected)
-
-    const fileContent = (await fs.readFile(fileAbsolute)).toString()
-
-    expect(fileContent).eq(expected.files[0].content)
-
-    expect(() => babelParse(fileContent)).not.throw()
-  })
-
-  it('should generate from Vue 3 component template', async () => {
-    const fileName = 'HelloWorld.vue'
-    const target = path.join(tmpPath, 'component')
-    const fileAbsolute = path.join(target, fileName)
-    const action: Action = {
-      templateDir: templates.vue3Component,
-      target,
-    }
-    const codeGenArgs = {
-      componentName: 'HelloWorld',
-      componentPath: 'path/to/component',
-      fileName,
-    }
-
-    const codeGenResults = await codeGenerator(action, codeGenArgs)
-    const expected: CodeGenResults = {
-      files: [
-        {
-          type: 'text',
-          status: 'add',
-          file: fileAbsolute,
-          content: dedent`
-          import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
-          
-          describe('<${codeGenArgs.componentName} />', () => {
-            it('renders', () => {
               // see: https://test-utils.vuejs.org/guide/
-              cy.mount(${codeGenArgs.componentName}, { props: {} })
+              cy.mount(${codeGenArgs.componentName})
             })
           })`,
         },
@@ -299,10 +256,12 @@ describe('code-generator', () => {
       target,
     }
 
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+    const newSpecCodeGenOptions = new SpecOptions({
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
       specFileExtension: '.cy',
+      framework: WIZARD_FRAMEWORKS[1],
+      isDefaultSpecPattern: true,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()

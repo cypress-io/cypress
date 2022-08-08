@@ -353,10 +353,12 @@ export class ProjectActions {
 
     const codeGenPath = getCodeGenPath()
 
-    const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
+    const newSpecCodeGenOptions = new SpecOptions({
       codeGenPath,
       codeGenType,
       erroredCodegenCandidate,
+      framework: this.getWizardFrameworkFromConfig(),
+      isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()

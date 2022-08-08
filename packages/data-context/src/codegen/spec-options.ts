@@ -1,13 +1,16 @@
-import assert from 'assert'
-import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
+import type { WizardFrontendFramework } from '@packages/scaffold-config'
+import fs from 'fs-extra'
+import path from 'path'
 
 interface CodeGenOptions {
   codeGenPath: string
   codeGenType: CodeGenType
+  isDefaultSpecPattern: boolean
   erroredCodegenCandidate?: string | null
   specFileExtension?: string
+  framework?: WizardFrontendFramework
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -25,12 +28,11 @@ export class SpecOptions {
   private parsedPath: ParsedPath;
   private parsedErroredCodegenCandidate?: ParsedPath
 
-  constructor (private ctx: DataContext, private options: CodeGenOptions) {
-    assert(this.ctx.currentProject)
-    this.parsedPath = this.ctx.path.parse(options.codeGenPath)
+  constructor (private options: CodeGenOptions) {
+    this.parsedPath = path.parse(options.codeGenPath)
 
     if (options.erroredCodegenCandidate) {
-      this.parsedErroredCodegenCandidate = this.ctx.path.parse(options.erroredCodegenCandidate)
+      this.parsedErroredCodegenCandidate = path.parse(options.erroredCodegenCandidate)
     }
   }
 
@@ -47,16 +49,12 @@ export class SpecOptions {
   }
 
   private async getComponentCodeGenOptions () {
-    const frontendFramework = this.ctx.actions.project.getWizardFrameworkFromConfig()
-
-    if (!frontendFramework) {
+    if (!this.options.framework) {
       throw new Error('Cannot generate a spec without a framework')
     }
 
-    const isDefaultSpecPattern = await this.ctx.project.getIsDefaultSpecPattern()
-
     // This only works for Vue projects with default spec patterns right now. If the framework is not Vue, we're generating an empty component test
-    if (frontendFramework.codeGenFramework !== 'vue' || !isDefaultSpecPattern) {
+    if (this.options.framework.codeGenFramework !== 'vue' || !this.options.isDefaultSpecPattern) {
       return {
         codeGenType: this.options.codeGenType,
         fileName: await this.buildFileName(),
@@ -74,9 +72,9 @@ export class SpecOptions {
       return `./${this.parsedPath.base}`
     }
 
-    const componentPathRelative = this.ctx.path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
+    const componentPathRelative = path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
 
-    const componentPath = this.ctx.path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
+    const componentPath = path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
 
     return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
   }
@@ -97,7 +95,7 @@ export class SpecOptions {
 
   private async getVueExtension (): Promise<ComponentExtension> {
     try {
-      const fileContent = await this.ctx.fs
+      const fileContent = await fs
       .readFile(this.options.codeGenPath, 'utf8')
 
       return ['lang="ts"', 'lang="typescript"'].some((lang) => fileContent.includes(lang)) ? '.cy.ts' : '.cy.js'
@@ -130,7 +128,7 @@ export class SpecOptions {
     const cyWithExt = this.getSpecExtension() + specExt
     const name = base.slice(0, -ext.length)
 
-    return this.getFinalFileName(dir, name, cyWithExt, this.ctx.path.join(dir, `${name}${cyWithExt}`))
+    return this.getFinalFileName(dir, name, cyWithExt, path.join(dir, `${name}${cyWithExt}`))
   }
 
   private async buildFileName () {
@@ -139,7 +137,7 @@ export class SpecOptions {
     const cyWithExt = this.getSpecExtension() + ext
     const name = base.slice(0, -cyWithExt.length)
 
-    return this.getFinalFileName(dir, name, cyWithExt, this.ctx.path.join(dir, `${name}${cyWithExt}`))
+    return this.getFinalFileName(dir, name, cyWithExt, path.join(dir, `${name}${cyWithExt}`))
   }
 
   private async getFinalFileName (dir: string, name: string, cyWithExt: string, fileToTry: string) {
@@ -151,18 +149,18 @@ export class SpecOptions {
     let i = 0
 
     while (await this.fileExists(finalFileName)) {
-      finalFileName = this.ctx.path.join(
+      finalFileName = path.join(
         dir,
         `${name}-copy-${++i}${cyWithExt}`,
       )
     }
 
-    return this.ctx.path.parse(finalFileName).base
+    return path.parse(finalFileName).base
   }
 
   private async fileExists (absolute: string) {
     try {
-      await this.ctx.fs.access(absolute, this.ctx.fs.constants.F_OK)
+      await fs.access(absolute, fs.constants.F_OK)
 
       return true
     } catch (e) {
