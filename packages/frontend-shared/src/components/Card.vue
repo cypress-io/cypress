@@ -11,18 +11,11 @@
     @click="!disabled && emits('click')"
   >
     <div
-      v-if="title === t('testingType.component.name')"
+      v-if="badgeText"
       class="top-0 right-0 text-teal-600 ribbon absolute"
       aria-hidden="true"
     >
-      {{ t('versions.beta') }}
-    </div>
-    <div
-      v-if="title === t('createSpec.component.importFromComponent.header')"
-      class="top-0 right-0 text-teal-600 ribbon absolute"
-      aria-hidden="true"
-    >
-      {{ t('versions.new') }}
+      {{ badgeText }}
     </div>
     <div
       class="mx-auto children:transition-all children:duration-300"
@@ -84,9 +77,11 @@ const props = withDefaults(defineProps<{
   variant: 'indigo' | 'jade'
   iconSize: 64 | 48
   disabled?: boolean
+  badgeText?: string
 }>(), {
   disabled: false,
   hoverIcon: undefined,
+  badgeText: '',
 })
 
 const classMap = {

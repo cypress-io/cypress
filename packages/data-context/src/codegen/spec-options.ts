@@ -21,7 +21,7 @@ interface CodeGenOptions {
 //   Button.foo.js  -> Button.foo-copy-1.js
 export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
-type ComponentExtension = `cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
+type ComponentExtension = `.cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
 type TemplateKey = 'e2e' | 'componentEmpty' | 'vue2Component' | 'vue3Component'
 export class SpecOptions {
   private parsedPath: ParsedPath;
