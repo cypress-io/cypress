@@ -43,7 +43,7 @@ interface ConfigOption {
   requireRestartOnChange?: 'server' | 'browser'
   /**
    * The list of test-time overrides levels supported by the configuration option. When undefined,
-   * it indicates the configuration value cannot be override via suite-/test-specific
+   * it indicates the configuration value cannot be overridden via suite-/test-specific
    * overrides or at run-time with Cypress.Config().
    */
   overrideLevels?: OverrideLevels

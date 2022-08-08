@@ -18,11 +18,13 @@ import * as validation from './validation'
 
 export {
   defaultSpecPattern,
-  validation,
   options,
   breakingOptions,
   BreakingOption,
   BreakingOptionErrorKey,
+  ErrResult,
+  OverrideLevel,
+  validation,
 }
 
 const debug = Debug('cypress:config:browser')
@@ -46,7 +48,9 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const testOverrideLevels = createIndex(options, 'name', 'overrideLevels', 'never')
+
+export const testOverrideLevels = createIndex(options, 'name', 'overrideLevels', 'never')
+
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()

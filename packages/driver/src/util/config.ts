@@ -1,9 +1,9 @@
 import _ from 'lodash'
-import { testOverrideLevels, validateConfigValues, validateOverridableAtTestTest } from '@packages/config/src/driver'
+import { testOverrideLevels, validate as validateConfigValues, validateOverridableAtTestTest } from '@packages/config'
 import { preprocessForSerialization } from './serialization'
 import $errUtils from '../cypress/error_utils'
 
-import type { ErrResult, OverrideLevel } from '@packages/config/src/driver'
+import type { ErrResult, OverrideLevel } from '@packages/config'
 
 /**
  * Mutates the config/env object serialized from the other origin to omit read-only values
