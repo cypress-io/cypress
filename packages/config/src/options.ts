@@ -30,9 +30,9 @@ export type BreakingOptionErrorKey =
   | 'TEST_FILES_RENAMED'
 
 // The test-time override levels
-export const ALL_OVERRIDE_LEVELS = ['code', 'test:before:run', 'test:before:run:async', 'suite', 'test', 'runtime'] as const
+export const ALL_OVERRIDE_LEVELS = ['code', 'event', 'suite', 'test', 'runtime'] as const
 
-export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number] | 'never'
+export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number]
 
 export type OverrideLevels = Readonly<Array<typeof ALL_OVERRIDE_LEVELS[number]> | 'never'>
 

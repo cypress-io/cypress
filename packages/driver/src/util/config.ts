@@ -3,6 +3,8 @@ import { testOverrideLevels, validate as validateConfigValues, validateOverridab
 import { preprocessForSerialization } from './serialization'
 import $errUtils from '../cypress/error_utils'
 
+import type { StateFunc as State } from '../cypress/state'
+
 import type { ErrResult, OverrideLevel } from '@packages/config'
 
 /**
@@ -78,27 +80,29 @@ export const getOverrideLevel = (state): OverrideLevel => {
   if (state('duringUserTestExecution')) {
     overrideLevel = 'runtime'
   } else if (test) {
-    if (test?._fired?.hasOwnProperty('runner:test:before:run:async')) {
-      overrideLevel = 'test:before:run:async'
-    } else if (test?._fired?.hasOwnProperty('runner:test:before:run')) {
-      overrideLevel = 'test:before:run'
+    if (Object.keys(test?._fired || {}).length) {
+      overrideLevel = 'event'
     } else {
       overrideLevel = test._testConfig.applied // either suite or test
     }
   } else {
-    overrideLevel = 'code'
+    overrideLevel = 'code' // supportFile or spec load execution
   }
 
   return overrideLevel as OverrideLevel
 }
 
-export const validateConfig = (state: Record<string, any>, config: Record<string, any>, isRunMode: boolean, skipConfigOverrideValidation: boolean = false): boolean => {
+export const validateConfig = (state: State, config: Record<string, any>, isRunMode: boolean, skipConfigOverrideValidation: boolean = false): boolean => {
   const overrideLevel = getOverrideLevel(state)
 
   // FIXME: https://github.com/cypress-io/cypress/issues/23039
   // bug in runner causes browser to hang in run mode when test:before:run throws an exception
-  if (overrideLevel === 'test:before:run' && isRunMode) {
-    return false
+  if (overrideLevel === 'event' && isRunMode) {
+    const event = _.last(Object.keys(state('test')._fired || {}))
+
+    if (event === 'runner:test:before:run') {
+      return false
+    }
   }
 
   if (!skipConfigOverrideValidation) {
@@ -112,10 +116,8 @@ export const validateConfig = (state: Record<string, any>, config: Record<string
           isReadOnly,
           runnableType: state('runnable')?.type,
         })
-        // } else if (overrideLevel === 'event') {
-      } else if (overrideLevel.includes('test:before:run')) {
-        const test = state('test')
-        const event = _.last(Object.keys(test._fired))
+      } else if (overrideLevel === 'event') {
+        const event = _.last(Object.keys(state('test')._fired))
 
         errMsg = $errUtils.errByPath('config.invalid_event_override', {
           ...validationResult,
