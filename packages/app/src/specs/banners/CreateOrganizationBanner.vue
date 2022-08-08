@@ -6,7 +6,7 @@
     status="info"
     :title="t('specPage.banners.createOrganization.title')"
     class="mb-16px"
-    :icon="ConnectIcon"
+    :icon="OrganizationIcon"
     dismissible
     @update:model-value="emit('update:modelValue')"
   >
@@ -15,10 +15,12 @@
     </p>
 
     <Button
-      :prefix-icon="ConnectIcon"
+      :prefix-icon="OrganizationIcon"
+      prefix-icon-class="icon-dark-indigo-50 icon-light-indigo-500"
       class="mt-24px"
       data-cy="refresh-button"
-      @click="handleButtonClick"
+      variant="primary"
+      :href="query.data.value?.cloudViewer?.createCloudOrganizationUrl || '#'"
     >
       {{ t('specPage.banners.createOrganization.buttonLabel') }}
     </Button>
@@ -26,11 +28,22 @@
 </template>
 
 <script setup lang="ts">
-import ConnectIcon from '~icons/cy/chain-link_x16.svg'
+import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from './index'
+import { CreateOrganizationBannerDocument } from '../../generated/graphql'
+import { gql, useQuery } from '@urql/vue'
+
+gql`
+query CreateOrganizationBanner {
+  cloudViewer {
+    id
+    createCloudOrganizationUrl
+  }
+}
+`
 
 withDefaults(defineProps<{
   modelValue: boolean
@@ -42,8 +55,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-async function handleButtonClick () {
-  // TODO
-}
+const query = useQuery({ query: CreateOrganizationBannerDocument })
 
 </script>

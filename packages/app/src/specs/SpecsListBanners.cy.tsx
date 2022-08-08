@@ -257,6 +257,10 @@ describe('<SpecsListBanners />', () => {
     }
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
+      beforeEach(() => {
+        cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
+      })
+
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
 
