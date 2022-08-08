@@ -18,9 +18,8 @@ export function launch (
   url: string,
   debuggingPort: number,
   args: string[] = [],
-  defaultBrowserEnv = [],
-  opts: { pipeStdio?: boolean } = {},
-) {
+  defaultBrowserEnv = {},
+): LaunchedBrowser {
   debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
@@ -33,24 +32,17 @@ export function launch (
 
   debug('spawning browser with args %o', { args })
 
-  const stdio: ('ignore' | 'pipe')[] = ['ignore', 'pipe', 'pipe']
-
-  if (opts.pipeStdio) {
-    // also pipe stdio 3 and 4 for access to debugger protocol
-    stdio.push('pipe', 'pipe')
-  }
-
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
   const env = Object.assign({}, defaultBrowserEnv, process.env)
 
-  const proc = cp.spawn(browser.path, args, { stdio, env })
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
-  proc.stdout!.on('data', (buf) => {
+  proc.stdout.on('data', (buf) => {
     debug('%s stdout: %s', browser.name, String(buf).trim())
   })
 
-  proc.stderr!.on('data', (buf) => {
+  proc.stderr.on('data', (buf) => {
     debug('%s stderr: %s', browser.name, String(buf).trim())
   })
 
