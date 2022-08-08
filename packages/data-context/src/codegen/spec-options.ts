@@ -8,7 +8,6 @@ interface CodeGenOptions {
   codeGenType: CodeGenType
   erroredCodegenCandidate?: string | null
   specFileExtension?: string
-  isDefaultSpecPattern?: boolean | null
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -54,8 +53,10 @@ export class SpecOptions {
       throw new Error('Cannot generate a spec without a framework')
     }
 
+    const isDefaultSpecPattern = await this.ctx.project.getIsDefaultSpecPattern()
+
     // This only works for Vue projects with default spec patterns right now. If the framework is not Vue, we're generating an empty component test
-    if (frontendFramework.codeGenFramework !== 'vue' || !this.options.isDefaultSpecPattern) {
+    if (frontendFramework.codeGenFramework !== 'vue' || isDefaultSpecPattern) {
       return {
         codeGenType: this.options.codeGenType,
         fileName: await this.buildFileName(),

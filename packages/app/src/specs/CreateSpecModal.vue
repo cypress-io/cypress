@@ -25,7 +25,6 @@
         :type="props.gql.currentProject?.currentTestingType === 'e2e' ? props.gql.currentProject?.currentTestingType : 'componentEmpty'"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
-        :is-default-spec-pattern="props.gql.currentProject?.isDefaultSpecPattern"
         @restart="currentGeneratorId = undefined; iteration++"
         @close="close"
       />

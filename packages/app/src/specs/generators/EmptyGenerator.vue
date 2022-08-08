@@ -146,7 +146,6 @@ const props = defineProps<{
   erroredCodegenCandidate?: string
   /** is there any other generator available when clicking "Back" */
   otherGenerators: boolean
-  isDefaultSpecPattern: boolean
 }>()
 
 const { t } = useI18n()
@@ -166,8 +165,8 @@ mutation EmptyGenerator_MatchSpecFile($specFile: String!) {
 `
 
 gql`
-mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $erroredCodegenCandidate: String, $isDefaultSpecPattern: Boolean) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, erroredCodegenCandidate: $erroredCodegenCandidate, isDefaultSpecPattern: $isDefaultSpecPattern) {
+mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $erroredCodegenCandidate: String) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, erroredCodegenCandidate: $erroredCodegenCandidate) {
     ...GeneratorSuccess
   }
 }`
@@ -224,7 +223,7 @@ whenever(result, () => {
 })
 
 const createSpec = async () => {
-  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null, isDefaultSpecPattern: props.isDefaultSpecPattern })
+  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }

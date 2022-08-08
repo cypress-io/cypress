@@ -243,10 +243,9 @@ export const mutation = mutationType({
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
         erroredCodegenCandidate: stringArg(),
-        isDefaultSpecPattern: booleanArg({ description: 'Whether or not the project has a custom spec pattern defined' }),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate, args.isDefaultSpecPattern)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
       },
     })
 
