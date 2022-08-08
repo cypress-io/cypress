@@ -38,7 +38,6 @@ interface ResolvedConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
-  specificTestingType?: TestingType
   requireRestartOnChange?: 'server' | 'browser'
 }
 
