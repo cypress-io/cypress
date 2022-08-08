@@ -16,7 +16,7 @@ describe('<SpecsListBanners />', () => {
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
         assignIn(result, query)
-        set(result, 'currentProject.savedState.value', state)
+        set(result, 'currentProject.savedState', state)
       },
       render: (gql) => <SpecsListBanners gql={gql} />,
     })
