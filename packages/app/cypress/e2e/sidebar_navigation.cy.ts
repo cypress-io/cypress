@@ -271,7 +271,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
       cy.withRetryableCtx((ctx, o) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.eq('{"reporterWidth":336}')
       })
     })
 
