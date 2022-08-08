@@ -1,13 +1,7 @@
-import Bluebird from 'bluebird'
-import debugModule from 'debug'
 import _ from 'lodash'
 
 import type playwright from 'playwright-webkit'
 
-const dbg = debugModule('cypress:playwright_automation')
-
-// Type definiton for the convertSameSiteExtensionToCdp which is converting the Playwright cookie format into
-// the internal cookie format used by Cypress
 export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
   sameSite?: 'no_restriction' | 'lax' | 'strict'
@@ -80,35 +74,40 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
 
 export class WebkitAutomation {
   private context: playwright.BrowserContext
-  public reset: (url: string) => Promise<void>
+  public reset: (url?: string) => Promise<void>
 
-  constructor(resetPage, private page: playwright.Page) {
+  constructor (resetPage, private page: playwright.Page) {
     this.context = page.context()
-    this.reset = async (url: string) => {
+    this.reset = async (url?: string) => {
       this.page = await resetPage(url)
       this.context = this.page.context()
     }
   }
 
-  private async getCookies() {
+  private async getCookies () {
     const cookies = await this.context.cookies()
+
     return cookies.map(normalizeGetCookieProps)
   }
 
-  private async getCookie(filter: CookieFilter) {
+  private async getCookie (filter: CookieFilter) {
     const cookies = await this.context.cookies()
+
     if (!cookies.length) return null
+
     const cookie = cookies.find((cookie) => {
       return _cookieMatches(cookie, {
         domain: filter.domain,
         name: filter.name,
       })
     })
+
     if (!cookie) return null
+
     return normalizeGetCookieProps(cookie)
   }
 
-  private async clearCookie(filter: CookieFilter) {
+  private async clearCookie (filter: CookieFilter) {
     const allCookies = await this.context.cookies()
     const persistCookies = allCookies.filter((cookie) => {
       return !_cookieMatches(cookie, filter)
@@ -116,6 +115,18 @@ export class WebkitAutomation {
 
     await this.context.clearCookies()
     if (persistCookies.length) await this.context.addCookies(persistCookies)
+  }
+
+  private async takeScreenshot (data) {
+    const buffer = await this.page.screenshot({
+      fullPage: data.capture === 'fullPage',
+      timeout: 0,
+      type: 'png',
+    })
+
+    const b64data = buffer.toString('base64')
+
+    return `data:image/png;base64,${b64data}`
   }
 
   onRequest = async (message, data) => {
@@ -136,21 +147,14 @@ export class WebkitAutomation {
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':
-        const buffer = await this.page.screenshot({
-          fullPage: data.capture === 'fullPage',
-          timeout: 0,
-          type: 'png',
-        })
-
-        const b64data = buffer.toString('base64')
-
-        return `data:image/png;base64,${b64data}`
+        return await this.takeScreenshot(data)
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
       case 'reset:browser:state':
         return
       case 'reset:browser:tabs:for:next:test':
         if (data.shouldKeepTabOpen) return await this.reset()
+
         return await this.context.browser()?.close()
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
