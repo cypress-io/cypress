@@ -3,11 +3,11 @@ import type {
   InterceptionState,
 } from './types'
 import { getAliasedRequests } from './aliasing'
-import type { StateFunc } from '../../cypress/state'
+import type { State } from '../../cypress/state'
 
 const RESPONSE_WAITED_STATES: InterceptionState[] = ['Complete', 'Errored']
 
-export function waitForRoute (alias: string, state: StateFunc, specifier: 'request' | 'response' | string): Interception | null {
+export function waitForRoute (alias: string, state: State, specifier: 'request' | 'response' | string): Interception | null {
   // 1. Create an array of known requests that have this alias.
   const candidateRequests = getAliasedRequests(alias, state)
 

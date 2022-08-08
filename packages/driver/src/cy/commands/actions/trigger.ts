@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
+import type { State } from '../../../cypress/state'
 
 export const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
@@ -49,7 +50,7 @@ export const addEventCoords = (eventOptions, coords) => {
   }, eventOptions)
 }
 
-export default (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state: State, config) => {
   return Commands.addAll({ prevSubject: ['element', 'window', 'document'] }, {
     trigger (subject, eventName, positionOrX, y, userOptions = {}) {
       let position

@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import { create as createClock, Clock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
+import type { State } from '../../cypress/state'
 
 type CyClock = Clock & {
   tick(ms, options?: any): number
@@ -11,7 +12,7 @@ type CyClock = Clock & {
 // create a global clock
 let clock: CyClock | null = null
 
-export default function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state: State) {
   const reset = () => {
     if (clock) {
       clock.restore({ log: false })

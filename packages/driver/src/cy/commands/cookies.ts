@@ -103,7 +103,7 @@ interface InternalClearCookiesOptions extends Partial<Cypress.Loggable & Cypress
   domain?: any
 }
 
-export default function (Commands, Cypress, cy, state, config) {
+export default function (Commands, Cypress, cy, _state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))

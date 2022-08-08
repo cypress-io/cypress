@@ -9,7 +9,7 @@ interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Time
   verify: boolean
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({
     focused (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalFocusedOptions = _.defaults({}, userOptions, {

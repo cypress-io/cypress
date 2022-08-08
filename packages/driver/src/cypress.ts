@@ -33,7 +33,7 @@ import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
 import ProxyLogging from './cypress/proxy-logging'
-import type { StateFunc } from './cypress/state'
+import type { State } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
@@ -94,7 +94,7 @@ class $Cypress {
   browser: any
   platform: any
   testingType: any
-  state!: StateFunc
+  state!: State
   originalConfig: any
   config: any
   env: any
@@ -217,7 +217,7 @@ class $Cypress {
 
     _.extend(this, browserInfo(config))
 
-    this.state = $SetterGetter.create({}) as unknown as StateFunc
+    this.state = $SetterGetter.create({}) as State
 
     /*
      * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.

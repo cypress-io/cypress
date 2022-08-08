@@ -2,8 +2,9 @@ import _ from 'lodash'
 
 import $utils from '../../cypress/utils'
 import type { Log } from '../../cypress/log'
+import type { State } from '../../cypress/state'
 
-const resume = (state, resumeAll = true) => {
+const resume = (state: State, resumeAll = true) => {
   const onResume = state('onResume')
 
   // dont do anything if this isnt a fn
@@ -19,7 +20,7 @@ const resume = (state, resumeAll = true) => {
   return onResume(resumeAll)
 }
 
-const getNextQueuedCommand = (state, queue) => {
+const getNextQueuedCommand = (state: State, queue) => {
   const search = (i) => {
     const cmd = queue.at(i)
 

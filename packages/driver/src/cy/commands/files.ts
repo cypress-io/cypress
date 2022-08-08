@@ -3,6 +3,7 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
+import type { State } from '../../cypress/state'
 
 interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -13,7 +14,7 @@ interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cy
   _log?: Log
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   Commands.addAll({
     readFile (file, encoding, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
@@ -87,7 +88,7 @@ export default (Commands, Cypress, cy, state) => {
           }
 
           // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-          state('current').set('fileName', basename(filePath))
+          state('current')?.set('fileName', basename(filePath))
 
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents

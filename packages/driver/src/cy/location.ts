@@ -1,9 +1,9 @@
 import { $Location } from '../cypress/location'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 import $utils from '../cypress/utils'
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (state: StateFunc) => ({
+export const create = (state: State) => ({
   getRemoteLocation (key?: string | undefined, win?: Window) {
     try {
       const remoteUrl = $utils.locToString(win ?? state('window'))

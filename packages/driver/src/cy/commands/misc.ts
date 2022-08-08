@@ -5,13 +5,14 @@ import $Command from '../../cypress/command'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
+import type { State } from '../../cypress/state'
 
 interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
   timeout: number
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   Commands.addAll({ prevSubject: 'optional' }, {
     end () {
       return null
@@ -28,7 +29,7 @@ export default (Commands, Cypress, cy, state) => {
       // The return value of cy.log() corrupts the command stack, so cy.then() returned the wrong value
       // when cy.log() is used inside it.
       // The code below restore the stack when cy.log() is injected in cy.then().
-      if (state('current').get('injected')) {
+      if (state('current')?.get('injected')) {
         const restoreCmdIndex = state('index') + 1
 
         cy.queue.insert(restoreCmdIndex, $Command.create({

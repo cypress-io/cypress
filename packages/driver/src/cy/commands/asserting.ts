@@ -3,11 +3,12 @@ import Promise from 'bluebird'
 
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
+import type { State } from '../../cypress/state'
 
 const reExistence = /exist/
 const reHaveLength = /length/
 
-export default function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state: State) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 

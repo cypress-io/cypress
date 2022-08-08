@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
 import $errUtils, { CypressError } from '../../cypress/error_utils'
+import type { State } from '../../cypress/state'
 
 const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
@@ -44,7 +45,7 @@ const getFormattedElement = ($el) => {
   return $el
 }
 
-export default function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state: State) {
   // thens can return more "thenables" which are not resolved
   // until they're 'really' resolved, so naturally this API
   // supports nesting promises
@@ -79,7 +80,7 @@ export default function (Commands, Cypress, cy, state) {
     args = hasSpreadArray ? args : [args]
 
     // name could be invoke or its!
-    const name = state('current').get('name')
+    const name = state('current')?.get('name')
 
     const cleanup = () => {
       state('onInjectCommand', undefined)
@@ -166,7 +167,7 @@ export default function (Commands, Cypress, cy, state) {
   }
 
   const invokeBaseFn = (userOptions, subject, str, ...args) => {
-    const name = state('current').get('name')
+    const name = state('current')?.get('name')
 
     const isCmdIts = name === 'its'
     const isCmdInvoke = name === 'invoke'

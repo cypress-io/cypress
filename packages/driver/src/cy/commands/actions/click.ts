@@ -47,7 +47,7 @@ type MouseActionOptions = {
   defaultOptions?: Record<string, any>
 }
 
-export default (Commands, Cypress, cy: $Cy, state, config) => {
+export default (Commands, Cypress, cy: $Cy, _state, config) => {
   const { mouse, keyboard } = cy.devices
 
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }: MouseActionOptions) => {

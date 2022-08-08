@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import $dom from '../../dom'
+import type { State } from '../../cypress/state'
 
-export default function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state: State) {
   Commands.addAll({ type: 'utility', prevSubject: true }, {
     as (subject, str) {
       const ctx = this

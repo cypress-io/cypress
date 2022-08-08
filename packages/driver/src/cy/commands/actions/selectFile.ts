@@ -6,6 +6,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
+import type { State } from '../../../cypress/state'
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
@@ -82,7 +83,7 @@ interface InternalSelectFileOptions extends Cypress.SelectFileOptions {
 }
 
 const ACTIONS = {
-  select: (element, dataTransfer, coords, state) => {
+  select: (element, dataTransfer, coords, state: State) => {
     (element as HTMLInputElement).files = dataTransfer.files
     const inputEventOptions = addEventCoords({
       bubbles: true,
@@ -96,7 +97,7 @@ const ACTIONS = {
     dispatch(element, state('window'), 'input', inputEventOptions)
     dispatch(element, state('window'), 'change', changeEventOptions)
   },
-  'drag-drop': (element, dataTransfer, coords, state) => {
+  'drag-drop': (element, dataTransfer, coords, state: State) => {
     const dragEventOptions = addEventCoords({
       bubbles: true,
       composed: true,
@@ -119,7 +120,7 @@ const ACTIONS = {
   },
 }
 
-export default (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state: State, config) => {
   const handleAlias = (file, options) => {
     const aliasObj = cy.getAlias(file.contents, 'selectFile', options._log)
 

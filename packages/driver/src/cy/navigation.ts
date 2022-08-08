@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../cypress/location'
+import type { State } from '../cypress/state'
 
 export const bothUrlsMatchAndOneHasHash = (current, remote, eitherShouldHaveHash: boolean = false): boolean => {
   // the current has a hash or the last char of href is a hash
@@ -18,7 +19,7 @@ export const bothUrlsMatchAndOneHasHash = (current, remote, eitherShouldHaveHash
       current.search === remote.search
 }
 
-export const historyNavigationTriggeredHashChange = (state): boolean => {
+export const historyNavigationTriggeredHashChange = (state: State): boolean => {
   const delta = state('navHistoryDelta') || 0
 
   if (delta === 0 || delta == null) { // page refresh
@@ -32,9 +33,11 @@ export const historyNavigationTriggeredHashChange = (state): boolean => {
     return false
   }
 
+  // @ts-ignore
   const currentUrl = $Location.create(urls[urlPosition])
 
   const nextPosition = urlPosition + delta
+  // @ts-ignore
   const nextUrl = $Location.create(urls[nextPosition])
 
   return bothUrlsMatchAndOneHasHash(currentUrl, nextUrl, true)

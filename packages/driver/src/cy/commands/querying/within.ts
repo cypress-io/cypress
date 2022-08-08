@@ -3,13 +3,14 @@ import _ from 'lodash'
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
 import group from '../../logGroup'
+import type { State } from '../../../cypress/state'
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   const withinFn = (subject, fn) => {
     // reference the next command after this
     // within.  when that command runs we'll
     // know to remove withinSubject
-    const next = state('current').get('next')
+    const next = state('current')?.get('next')
 
     // backup the current withinSubject
     // this prevents a bug where we null out

@@ -8,7 +8,7 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
-import type { StateFunc } from './state'
+import type { State } from './state'
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
@@ -114,7 +114,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state: StateFunc, config, obj) {
+const defaults = function (state: State, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -231,7 +231,7 @@ const defaults = function (state: StateFunc, config, obj) {
 
 export class Log {
   cy: any
-  state: StateFunc
+  state: State
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any

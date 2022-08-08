@@ -13,7 +13,7 @@ import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import * as chaiInspect from './chai/inspect'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
 // all words between single quotes
@@ -35,7 +35,7 @@ const imageMarkdown = /!\[.*?\]\(.*?\)/g
 const doubleslashRe = /\\\\/g
 const escapedDoubleslashRe = /__double_slash__/g
 
-type CreateFunc = (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) => ({
+type CreateFunc = (specWindow: SpecWindow, state: State, assertFn: $Cy['assert']) => ({
   chai: Chai.ChaiStatic
   expect: (val: any, message?: string) => Chai.Assertion
   assert: any
@@ -212,7 +212,7 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (specWindow, state: StateFunc, assertFn) {
+  const overrideChaiAsserts = function (specWindow, state: State, assertFn) {
     chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
 
     const _origGetmessage = function (obj, args) {
@@ -439,7 +439,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const captureUserInvocationStack = (specWindow: SpecWindow, state: StateFunc, ssfi) => {
+  const captureUserInvocationStack = (specWindow: SpecWindow, state: State, ssfi) => {
     // we need a user invocation stack with the top line being the point where
     // the error occurred for the sake of the code frame
     // in chrome, stack lines from another frame don't appear in the
@@ -455,7 +455,7 @@ chai.use((chai, u) => {
     state('currentAssertionUserInvocationStack', userInvocationStack)
   }
 
-  const createPatchedAssert = (specWindow, state: StateFunc, assertFn) => {
+  const createPatchedAssert = (specWindow, state: State, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args as Chai.AssertionArgs)
@@ -493,7 +493,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const overrideExpect = (specWindow, state: StateFunc) => {
+  const overrideExpect = (specWindow, state: State) => {
     // only override assertions for this specific
     // expect function instance so we do not affect
     // the outside world
@@ -505,7 +505,7 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideAssert = function (specWindow, state: StateFunc) {
+  const overrideAssert = function (specWindow, state: State) {
     const fn = (express, errmsg) => {
       state('assertUsed', true)
       captureUserInvocationStack(specWindow, state, fn)
@@ -527,7 +527,7 @@ chai.use((chai, u) => {
     return fn
   }
 
-  const setSpecWindowGlobals = function (specWindow, state: StateFunc) {
+  const setSpecWindowGlobals = function (specWindow, state: State) {
     const expect = overrideExpect(specWindow, state)
     const assert = overrideAssert(specWindow, state)
 
@@ -542,7 +542,7 @@ chai.use((chai, u) => {
     }
   }
 
-  create = function (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) {
+  create = function (specWindow: SpecWindow, state: State, assertFn: $Cy['assert']) {
     restoreAsserts()
 
     overrideChaiInspect()

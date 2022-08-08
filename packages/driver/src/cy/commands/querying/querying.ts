@@ -7,6 +7,7 @@ import $errUtils from '../../../cypress/error_utils'
 import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
+import type { State } from '../../../cypress/state'
 
 interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
   _log?: Log
@@ -20,7 +21,7 @@ interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Tim
   _log?: Log
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   Commands.addAll({
     get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> = {}) {
       const ctx = this

@@ -121,7 +121,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       cmd.set('assertionIndex', 0)
 
       if (cy.state('current') != null) {
-        cy.state('current').set('currentAssertionCommand', cmd)
+        cy.state('current')?.set('currentAssertionCommand', cmd)
       }
 
       return cmd.get('fn').originalFn.apply(

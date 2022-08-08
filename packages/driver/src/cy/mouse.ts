@@ -5,7 +5,7 @@ import $elements from '../dom/elements'
 import $Keyboard, { Keyboard, ModifiersEventOptions } from './keyboard'
 import $selection from '../dom/selection'
 import debugFn from 'debug'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 import type { IFocused } from './focused'
 import type { ICypress } from '../cypress'
 import type { ElViewportPostion } from '../dom/coordinates'
@@ -23,7 +23,7 @@ export type MouseCoords = { x?: number, y?: number}
  * @property {Document} doc
  */
 
-const getLastHoveredEl = (state: StateFunc): HTMLElement | null => {
+const getLastHoveredEl = (state: State): HTMLElement | null => {
   let lastHoveredEl = state('mouseLastHoveredEl')
   const lastHoveredElAttached = lastHoveredEl && $elements.isAttachedEl(lastHoveredEl)
 
@@ -45,7 +45,7 @@ const defaultPointerDownUpOptions = {
   pressure: 0.5,
 }
 
-const getMouseCoords = (state: StateFunc) => {
+const getMouseCoords = (state: State) => {
   return state('mouseCoords')
 }
 
@@ -55,7 +55,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
   relatedTarget: HTMLElement | null
 }
 
-export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
+export const create = (state: State, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {

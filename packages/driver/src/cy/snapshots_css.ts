@@ -4,6 +4,7 @@ import path from 'path'
 import url from 'url'
 import $utils from '../cypress/utils'
 import LimitedMap from '../util/limited_map'
+import type { State } from '../cypress/state'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
 const screenStylesheetRe = /(screen|all)/
@@ -89,7 +90,7 @@ const getInlineCssContents = (stylesheet, $$) => {
   })
 }
 
-export const create = ($$, state) => {
+export const create = ($$, state: State) => {
   const cssIdToContentsMap = new WeakMap()
   const cssHashedContentsToIdMap = new LimitedMap()
   const cssHrefToIdMap = new LimitedMap()

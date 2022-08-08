@@ -3,11 +3,11 @@ import { registerFetch } from 'unfetch'
 import $selection from '../dom/selection'
 
 import type { ICypress } from '../cypress'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 import type { IFocused } from './focused'
 import type { ISnapshots } from './snapshots'
 
-export const create = (state: StateFunc, config: ICypress['config'], focused: IFocused, snapshots: ISnapshots) => {
+export const create = (state: State, config: ICypress['config'], focused: IFocused, snapshots: ISnapshots) => {
   const wrapNativeMethods = function (contentWindow) {
     try {
       // return null to trick contentWindow into thinking

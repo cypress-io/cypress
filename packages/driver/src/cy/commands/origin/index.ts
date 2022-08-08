@@ -8,7 +8,7 @@ import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCu
 import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
-import type { StateFunc } from '../../../cypress/state'
+import type { State } from '../../../cypress/state'
 
 const reHttp = /^https?:\/\//
 
@@ -23,7 +23,7 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
-export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
+export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State, config: Cypress.InternalConfig) => {
   let timeoutId
 
   const communicator = Cypress.primaryOriginCommunicator
@@ -54,7 +54,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
-      const userInvocationStack = state('current').get('userInvocationStack')
+      const userInvocationStack = state('current')?.get('userInvocationStack')
 
       // store the invocation stack in the case that `cy.origin` errors
       communicator.userInvocationStack = userInvocationStack

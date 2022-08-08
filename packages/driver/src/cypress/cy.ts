@@ -36,7 +36,7 @@ import { EventEmitter2 } from 'eventemitter2'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
-import type { StateFunc } from './state'
+import type { State } from './state'
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
@@ -49,7 +49,7 @@ const getContentWindow = ($autIframe) => {
   return $autIframe.prop('contentWindow')
 }
 
-const setWindowDocumentProps = function (contentWindow, state) {
+const setWindowDocumentProps = function (contentWindow, state: State) {
   state('window', contentWindow)
 
   return state('document', contentWindow.document)
@@ -136,7 +136,7 @@ interface ICySnapshots extends Omit<
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
-  state: StateFunc
+  state: State
   config: any
   Cypress: ICypress
   Cookies: ICookies
@@ -223,7 +223,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private commandFns: Record<string, Function> = {}
   private selectorFns: Record<string, Function> = {}
 
-  constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
+  constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: State, config: ICypress['config']) {
     super()
 
     state('specWindow', specWindow)

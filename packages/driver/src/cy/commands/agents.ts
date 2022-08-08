@@ -5,6 +5,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import type { State } from '../../cypress/state'
 
 type Counts = {
   spy: number
@@ -137,7 +138,7 @@ const reset = () => {
   return null
 }
 
-export default function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state: State) {
   // reset initially on a new run because we could be
   // re-running from the UI or from a spec file change
   reset()

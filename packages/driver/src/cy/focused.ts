@@ -2,7 +2,7 @@ import $dom from '../dom'
 import $window from '../dom/window'
 import $elements from '../dom/elements'
 import $actionability from './actionability'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 
 const simulateBlurEvent = (el, win) => {
   // todo handle relatedTarget's per the spec
@@ -50,7 +50,7 @@ const simulateFocusEvent = (el, win) => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (state: StateFunc) => ({
+export const create = (state: State) => ({
   documentHasFocus () {
     // hardcode document has focus as true
     // since the test should assume the window

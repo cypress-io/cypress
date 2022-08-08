@@ -13,7 +13,7 @@ import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
 import type { Log } from '../cypress/log'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -687,7 +687,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  constructor (private state: StateFunc) {}
+  constructor (private state: State) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {

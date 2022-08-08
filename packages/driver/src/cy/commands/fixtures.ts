@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
+import type { State } from '../../cypress/state'
 
 const clone = (obj) => {
   if (Buffer.isBuffer(obj)) {
@@ -12,7 +13,7 @@ const clone = (obj) => {
   return JSON.parse(JSON.stringify(obj))
 }
 
-export default (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state: State, config) => {
   // this is called at the beginning of run, so clear the cache
   let cache = {}
 
@@ -84,7 +85,7 @@ export default (Commands, Cypress, cy, state, config) => {
         cache[fixture] = response
 
         // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-        state('current').set('fileName', basename(fixture))
+        state('current')?.set('fileName', basename(fixture))
 
         // return the cloned response
         return clone(response)

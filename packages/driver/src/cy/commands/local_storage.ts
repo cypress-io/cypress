@@ -2,8 +2,9 @@ import _ from 'lodash'
 
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
+import type { State } from '../../cypress/state'
 
-const clearLocalStorage = (state, keys) => {
+const clearLocalStorage = (state: State, keys) => {
   const local = window.localStorage
   const remote = state('window').localStorage
 
@@ -20,7 +21,7 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   // this MUST be prepended before anything else
   Cypress.prependListener('test:before:run', () => {
     try {

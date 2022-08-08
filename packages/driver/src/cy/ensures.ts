@@ -3,7 +3,7 @@ import $dom from '../dom'
 import $utils from '../cypress/utils'
 import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
-import type { StateFunc } from '../cypress/state'
+import type { State } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
@@ -16,7 +16,7 @@ const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft botto
 
 let returnFalse = () => false
 
-export const create = (state: StateFunc, expect: $Cy['expect']) => {
+export const create = (state: State, expect: $Cy['expect']) => {
   // TODO: we should probably normalize all subjects
   // into an array and loop through each and verify
   // each element in the array is valid. as it stands
@@ -118,7 +118,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // greater than a default of '5' between
     // the points
     if ($utils.getDistanceBetween(point1, point2) > threshold) {
-      const cmd = state('current').get('name')
+      const cmd = state('current')?.get('name')
       const node = $dom.stringify($el)
 
       $errUtils.throwErrByPath('dom.animating', {
@@ -128,7 +128,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureNotDisabled = (subject, onFail) => {
-    const cmd = state('current').get('name')
+    const cmd = state('current')?.get('name')
 
     if (subject.prop('disabled')) {
       const node = $dom.stringify(subject)
@@ -141,7 +141,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureNotReadonly = (subject, onFail) => {
-    const cmd = state('current').get('name')
+    const cmd = state('current')?.get('name')
 
     // readonly can only be applied to input/textarea
     // not on checkboxes, radios, etc..
@@ -161,7 +161,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     })
 
     if (subject.length !== visibleSubjects.length) {
-      const cmd = state('current').get('name')
+      const cmd = state('current')?.get('name')
       const reason = $dom.getReasonIsHidden(subject, { checkOpacity: false })
       const node = $dom.stringify(subject)
 
@@ -188,9 +188,9 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     if ($dom.isDetached(subject)) {
       const current = state('current')
 
-      const cmd = name ?? current.get('name')
+      const cmd = name ?? current?.get('name')
 
-      const prev = current.get('prev') ? current.get('prev').get('name') : current.get('name')
+      const prev = current?.get('prev') ? current?.get('prev').get('name') : current?.get('name')
       const node = $dom.stringify(subject)
 
       $errUtils.throwErrByPath('subject.not_attached', {
@@ -202,7 +202,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
   const ensureElement = (subject, name, onFail?) => {
     if (!$dom.isElement(subject)) {
-      const prev = state('current').get('prev')
+      const prev = state('current')?.get('prev')
 
       $errUtils.throwErrByPath('subject.not_element', {
         onFail,
@@ -217,7 +217,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
   const ensureWindow = (subject, name) => {
     if (!$dom.isWindow(subject)) {
-      const prev = state('current').get('prev')
+      const prev = state('current')?.get('prev')
 
       $errUtils.throwErrByPath('subject.not_window_or_document', {
         args: {
@@ -232,7 +232,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
   const ensureDocument = (subject, name) => {
     if (!$dom.isDocument(subject)) {
-      const prev = state('current').get('prev')
+      const prev = state('current')?.get('prev')
 
       $errUtils.throwErrByPath('subject.not_window_or_document', {
         args: {
@@ -287,7 +287,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) => {
-    const cmd = state('current').get('name')
+    const cmd = state('current')?.get('name')
     const el = $el[0]
     const win = $dom.getWindowByElement(el)
     const value = win.getComputedStyle(el)[cssProperty]
@@ -327,7 +327,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureDescendents = ($el1, $el2, onFail) => {
-    const cmd = state('current').get('name')
+    const cmd = state('current')?.get('name')
 
     if (!$dom.isDescendent($el1, $el2)) {
       // https://github.com/cypress-io/cypress/issues/18008
@@ -389,7 +389,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
 
     // prep args to throw in error since we can't scroll
-    cmd = cmd ?? state('current').get('name')
+    cmd = cmd ?? state('current')?.get('name')
 
     const node = $dom.stringify($el)
 

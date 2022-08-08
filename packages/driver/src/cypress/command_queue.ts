@@ -8,7 +8,7 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import type $Command from './command'
-import type { StateFunc } from './state'
+import type { State } from './state'
 import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
 import type { ITimeouts } from '../cy/timeouts'
@@ -57,7 +57,7 @@ const commandRunningFailed = (Cypress, state, err) => {
 }
 
 export class CommandQueue extends Queue<$Command> {
-  state: StateFunc
+  state: State
   timeout: $Cy['timeout']
   stability: IStability
   cleanup: $Cy['cleanup']
@@ -65,7 +65,7 @@ export class CommandQueue extends Queue<$Command> {
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
 
-  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
+  constructor (state: State, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
     super()
     this.state = state
     this.timeout = timeout

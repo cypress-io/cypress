@@ -2,14 +2,15 @@ import _ from 'lodash'
 import whatIsCircular from '@cypress/what-is-circular'
 import UrlParse from 'url-parse'
 import Promise from 'bluebird'
+import debugFn from 'debug'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
+import type { State } from '../../cypress/state'
 
-import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -156,7 +157,7 @@ const aboutBlank = (cy, win) => {
   })
 }
 
-const navigationChanged = (Cypress, cy, state, source, arg) => {
+const navigationChanged = (Cypress, cy, state: State, source, arg) => {
   // get the current url of our remote application
   const url = cy.getRemoteLocation('href')
 
@@ -1138,6 +1139,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // throw an error, else we'd be in a endless loop,
           // we also need to disable retries to prevent the endless loop
           if (previouslyVisitedLocation) {
+            // @ts-ignore - Property '_retries' is private and only accessible within class 'Runnable'.
             $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
             const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }

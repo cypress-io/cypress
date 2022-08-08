@@ -6,6 +6,7 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import type { Log } from '../../../cypress/log'
+import type { State } from '../../../cypress/state'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
@@ -46,7 +47,7 @@ interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
   axis: string
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   Commands.addAll({ prevSubject: 'element' }, {
     scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
       if (!_.isObject(userOptions)) {

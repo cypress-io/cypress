@@ -1,11 +1,12 @@
 import _ from 'lodash'
 import type { Log } from '../../../cypress/log'
+import type { State } from '../../../cypress/state'
 
 interface InternalRootOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state: State) => {
   Commands.addAll({
     root (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalRootOptions = _.defaults({}, userOptions, { log: true })

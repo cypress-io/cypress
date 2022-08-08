@@ -50,7 +50,7 @@ export const create = (cy: $Cy) => ({
   // know about them and are expected to call them
 
   getNextAlias () {
-    const next = cy.state('current').get('next')
+    const next = cy.state('current')?.get('next')
 
     if (next && (next.get('name') === 'as')) {
       return next.get('args')[0]
@@ -99,7 +99,7 @@ export const create = (cy: $Cy) => ({
       })
     }
 
-    cmd = cmd ?? ((log && log.get('name')) || cy.state('current').get('name'))
+    cmd = cmd ?? ((log && log.get('name')) || cy.state('current')?.get('name'))
     displayName = aliasDisplayName(name)
 
     const errPath = availableAliases.length
