@@ -424,10 +424,6 @@ module.exports = {
 
     if (spec) {
       try {
-        const resolvePath = (p) => {
-          return path.resolve(options.cwd, p)
-        }
-
         // https://github.com/cypress-io/cypress/issues/8818
         // Sometimes spec is parsed to array. Because of that, we need check.
         if (typeof spec === 'string') {
@@ -437,9 +433,9 @@ module.exports = {
             spec = spec.substring(1, spec.length - 1)
           }
 
-          options.spec = parseSpecArgv(spec).map(resolvePath)
+          options.spec = parseSpecArgv(spec)
         } else {
-          options.spec = spec.map(resolvePath)
+          options.spec = spec
         }
       } catch (err) {
         debug('could not parse config spec value %s', spec)
