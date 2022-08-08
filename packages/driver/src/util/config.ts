@@ -107,13 +107,11 @@ export const validateConfig = (state: State, config: Record<string, any>, isRunM
 
   if (!skipConfigOverrideValidation) {
     validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
-      const isReadOnly = validationResult.supportedOverrideLevels === 'never'
       let errMsg
 
       if (overrideLevel === 'runtime' || overrideLevel === 'code') {
         errMsg = $errUtils.errByPath('config.cypress_config_api', {
           ...validationResult,
-          isReadOnly,
           runnableType: state('runnable')?.type,
         })
       } else if (overrideLevel === 'event') {
@@ -121,14 +119,10 @@ export const validateConfig = (state: State, config: Record<string, any>, isRunM
 
         errMsg = $errUtils.errByPath('config.invalid_event_override', {
           ...validationResult,
-          isReadOnly,
           event: event?.replace('runner:', ''),
         })
       } else {
-        errMsg = $errUtils.errByPath('config.invalid_mocha_config_override', {
-          ...validationResult,
-          isReadOnly,
-        })
+        errMsg = $errUtils.errByPath('config.invalid_mocha_config_override', validationResult)
       }
 
       throw new (state('specWindow').Error)(errMsg)

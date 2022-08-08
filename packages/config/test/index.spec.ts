@@ -215,11 +215,11 @@ describe('config/src/index', () => {
         expect(errorFn).to.have.callCount(0)
       })
 
-      ;['code', 'test:before:run', 'test:before:run:async', 'test', 'runtime'].forEach((overrideLevel) => {
+      ;['code', 'event', 'test', 'runtime'].forEach((overrideLevel) => {
         it(`calls onError handler if configuration can be overridden from ${overrideLevel} level`, () => {
           const errorFn = sinon.spy()
 
-          configUtil.validateOverridableAtTestTest({ testIsolation: false }, overrideLevel, errorFn)
+          configUtil.validateOverridableAtTestTest({ testIsolation: false }, overrideLevel as OverrideLevel, errorFn)
 
           expect(errorFn).to.have.callCount(1)
           expect(errorFn).to.have.been.calledWithMatch({

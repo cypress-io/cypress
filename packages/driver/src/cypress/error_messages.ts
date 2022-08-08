@@ -267,13 +267,15 @@ export default {
 
   config: {
     cypress_config_api (obj) {
-      let message = `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\``
+      const isReadOnly = obj.supportedOverrideLevels === 'never'
+
+      let message = `\`Cypress.config()\` ${isReadOnly ? 'can never' : 'cannot'} override \`{{invalidConfigKey}}\``
 
       if (obj.overrideLevel === 'runtime') {
         message += ` in a {{runnableType}} at {{overrideLevel}}`
       }
 
-      if (obj.isReadOnly) {
+      if (isReadOnly) {
         message += ' because it is a read-only configuration option.'
       } else {
         message += `. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
@@ -291,7 +293,7 @@ export default {
     invalid_event_override (obj) {
       let message = `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` in a {{event}} event handler because it is a read-only configuration option.'`
 
-      if (!obj.isReadOnly) {
+      if (obj.supportedOverrideLevels !== 'never') {
         message = `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` in a {{event}} event handler. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
       }
 
@@ -301,10 +303,10 @@ export default {
       }
     },
     invalid_mocha_config_override (obj) {
-      let message = `The \`{{invalidConfigKey}}\` configuration cannot been overridden from a {{overrideLevel}}-level override because it is a read-only configuration option.`
+      let message = `The \`{{invalidConfigKey}}\` configuration can never be overridden from a {{overrideLevel}}-level override because it is a read-only configuration option.`
 
-      if (!obj.isReadOnly) {
-        message = `The \`{{invalidConfigKey}}\` configuration cannot been overridden from a {{overrideLevel}}-level override. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
+      if (obj.supportedOverrideLevels !== 'never') {
+        message = `The \`{{invalidConfigKey}}\` configuration cannot be overridden from a {{overrideLevel}}-level override. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
       }
 
       return {

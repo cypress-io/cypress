@@ -123,7 +123,7 @@ describe('driver/src/cypress/validate_config', () => {
 
           expect(() => {
             validateConfig(state, { chromeWebSecurity: true }, isRunMode)
-          }).to.throw(`\`Cypress.config()\` cannot override \`chromeWebSecurity\` in a suite at runtime because it is a read-only configuration option.`)
+          }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` in a suite at runtime because it is a read-only configuration option.`)
         })
 
         it('and config override invalid at runtime', () => {
@@ -197,7 +197,7 @@ describe('driver/src/cypress/validate_config', () => {
 
           expect(() => {
             validateConfig(state, { chromeWebSecurity: true }, isRunMode)
-          }).to.throw(`The \`chromeWebSecurity\` configuration cannot been overridden from a suite-level override because it is a read-only configuration option.`)
+          }).to.throw(`The \`chromeWebSecurity\` configuration can never be overridden from a suite-level override because it is a read-only configuration option.`)
         })
 
         it('and config override invalid for override level', () => {
@@ -215,7 +215,7 @@ describe('driver/src/cypress/validate_config', () => {
 
           expect(() => {
             validateConfig(state, { testIsolation: 'strict' }, isRunMode)
-          }).to.throw(`The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
+          }).to.throw(`The \`testIsolation\` configuration cannot be overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
 
@@ -232,7 +232,7 @@ describe('driver/src/cypress/validate_config', () => {
 
           expect(() => {
             validateConfig(state, { chromeWebSecurity: true }, isRunMode)
-          }).to.throw(`\`Cypress.config()\` cannot override \`chromeWebSecurity\` because it is a read-only configuration option.`)
+          }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.`)
         })
 
         it('and config override invalid at runtime', () => {

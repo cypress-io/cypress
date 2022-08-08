@@ -146,7 +146,7 @@ Instead the value was: \`"null"\`
   3) throws error when invalid test-level override:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be set from suite-level overrides.
+CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -692,7 +692,7 @@ Instead the value was: \`"null"\`
   3) throws error when invalid test-level override:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be set from suite-level overrides.
+CypressError: The \`testIsolation\` configuration cannot been overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.
 
 https://on.cypress.io/config
   Error
