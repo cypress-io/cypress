@@ -17,6 +17,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Download Fossa binary and install
+# This step utilizes a curl of the latest install pkg from Fossa.  Using a git action from 
+# Fossa doesn't produce the SBOM artifact needed. This manual approach is the only way to 
+# create the report to upload as a release artifact.
         run:  |
           curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
       - name: Generate SBOM
