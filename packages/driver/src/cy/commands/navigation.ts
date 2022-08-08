@@ -1138,7 +1138,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // throw an error, else we'd be in a endless loop,
           // we also need to disable retries to prevent the endless loop
           if (previouslyVisitedLocation) {
-            // _retires is `private`. We're not using `retries()` method here because it breaks some tests.
+            // _retries is `private`. We're not using `retries()` method here because it breaks some tests.
             // @ts-ignore
             $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
