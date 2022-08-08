@@ -100,7 +100,7 @@ export class SpecOptions {
       const fileContent = await this.ctx.fs
       .readFile(this.options.codeGenPath, 'utf8')
 
-      return fileContent.includes('lang="ts"' || 'lang="typescript"') ? '.cy.ts' : '.cy.js'
+      return ['lang="ts"', 'lang="typescript"'].some((lang) => fileContent.includes(lang)) ? '.cy.ts' : '.cy.js'
     } catch (e) {
       const validExtensions = ['cy.js', '.cy.jsx', '.cy.ts', '.cy.tsx']
       const possibleExtension = this.parsedPath.ext
