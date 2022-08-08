@@ -80,7 +80,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import type { GeneratorSuccessFileFragment } from '../../../generated/graphql'
+import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
@@ -89,7 +89,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
 const props = defineProps<{
   title: string
-  codeGenGlob: string
+  gql: ComponentGeneratorStepOne_CodeGenGlobFragment
 }>()
 const { t } = useI18n()
 const emits = defineEmits<{
@@ -150,7 +150,7 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
 }`
 
 const mutation = useMutation(ComponentGeneratorStepOne_GenerateSpecDocument)
-const extensionPattern = ref(props.codeGenGlob)
+const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
   query: ComponentGeneratorStepOneDocument,
