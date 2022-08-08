@@ -83,10 +83,13 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
-      d.baseError = null
       d.activeBrowser = null
       d.currentProject = null
-      d.currentProjectData = null
+      d.diagnostics = {
+        error: null,
+        warnings: [],
+      }
+
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
