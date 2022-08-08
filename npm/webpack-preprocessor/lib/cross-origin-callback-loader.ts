@@ -11,10 +11,6 @@ import utils from './utils'
 export default function (source, map, meta, store = crossOriginCallbackStore) {
   const { resourcePath } = this
 
-  const log = (...messages) => {
-    console.log(`🟠 (${pathUtil.basename(resourcePath)}):`, ...messages)
-  }
-
   let ast
 
   try {
@@ -24,7 +20,6 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
     })
   } catch (err) {
     // TODO: actually error somehow?
-    log('parse error:', err.stack)
 
     return source
   }
@@ -80,7 +75,7 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       // eval the code, so the variable is set up and then invoked. it ends up
       // like this:
       //
-      // let __cypressCrossOriginCallback              】added before eval
+      // let __cypressCrossOriginCallback              】added at runtime
       // (function () {                                ┓ added by webpack
       //   // ... webpack stuff stuff ...              ┛
       //   __cypressCrossOriginCallback = (args) => {  ┓ extracted callback
@@ -89,31 +84,33 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       //   }                                           ┛
       //   // ... webpack stuff stuff ...              ┓ added by webpack
       // }())                                          ┛
-      // __cypressCrossOriginCallback(args)            】added before eval
+      // __cypressCrossOriginCallback(args)            】added at runtime
       //
+      const callbackName = '__cypressCrossOriginCallback'
       const generatedCode = generate(lastArg.node, {}).code
-      const modifiedGeneratedCode = `__cypressCrossOriginCallback = ${generatedCode}`
-      const generatedHash = utils.hash(modifiedGeneratedCode)
-      const fileDir = utils.tmpdir()
-      const inputFileName = `cross-origin-cb-${generatedHash}-input.js`
-      const outputFilePath = pathUtil.join(fileDir, `cross-origin-cb-${generatedHash}-output.js`)
+      const modifiedGeneratedCode = `${callbackName} = ${generatedCode}`
+      const hash = utils.hash(modifiedGeneratedCode)
+      const outputDir = utils.tmpdir()
+      const inputFileName = `cross-origin-cb-${hash}`
+      const outputFilePath = `${pathUtil.join(outputDir, inputFileName)}.js`
 
       store.addFile(resourcePath, {
+        callbackName,
         inputFileName,
         outputFilePath,
         source: modifiedGeneratedCode,
       })
 
       // replaces callback function with object referencing the extracted
-      // function's input and output file paths in the form
-      // { inputFileName: <inputFileName>, outputFilePath: <outputFilePath> }
+      // function's callback name and output file path in the form
+      // { callbackName: <callbackName>, outputFilePath: <outputFilePath> }
       // this is used at runtime when cy.origin() is run to run the bundle
       // generated for the extracted callback function
       lastArg.replaceWith(
         t.objectExpression([
           t.objectProperty(
-            t.stringLiteral('inputFileName'),
-            t.stringLiteral(inputFileName),
+            t.stringLiteral('callbackName'),
+            t.stringLiteral(callbackName),
           ),
           t.objectProperty(
             t.stringLiteral('outputFilePath'),

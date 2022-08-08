@@ -44,15 +44,6 @@ describe('cy.origin dependencies', () => {
     })
   })
 
-  // FIXME: import() returns a promise that doesn't resolve
-  it.skip('works with import() instead of require()', () => {
-    cy.origin('http://foobar.com:3500', () => {
-      const lodash = import('lodash')
-
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-    })
-  })
-
   it('works with a yielded value', () => {
     cy.origin('http://foobar.com:3500', () => {
       const lodash = Cypress.require('lodash')
@@ -117,7 +108,7 @@ describe('cy.origin dependencies', () => {
     })
   })
 
-  it.only('fails appropriately when dependency is invalid', () => {
+  it('fails appropriately when dependency is invalid', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include('Cannot find module')
     })

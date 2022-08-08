@@ -15,7 +15,7 @@ const expectAddFileSource = (store) => {
   return expect(store.addFile.lastCall.args[1].source)
 }
 
-describe('./lib/extract-cross-origin-callback-loader', () => {
+describe('./lib/cross-origin-callback-loader', () => {
   const callLoader = (source) => {
     const store = new CrossOriginCallbackStore()
 

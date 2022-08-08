@@ -1,15 +1,16 @@
 import Bluebird from 'bluebird'
+import Debug from 'debug'
 import _ from 'lodash'
 import * as events from 'events'
+import * as path from 'path'
 import webpack from 'webpack'
 import utils from './lib/utils'
 import { crossOriginCallbackStore } from './lib/cross-origin-callback-store'
 import { overrideSourceMaps } from './lib/typescript-overrides'
+import { compileCrossOriginCallbackFiles } from './lib/cross-origin-callback-compile'
 
-const VirtualModulesPlugin = require('webpack-virtual-modules')
-const path = require('path')
-const debug = require('debug')('cypress:webpack')
-const debugStats = require('debug')('cypress:webpack:stats')
+const debug = Debug('cypress:webpack')
+const debugStats = Debug('cypress:webpack:stats')
 
 type FilePath = string
 interface BundleObject {
@@ -142,69 +143,6 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
   defaultOptions: Omit<PreprocessorOptions, 'additionalEntries'>
 }
 
-// TODO: trying to do this in one extra pass of webpack, but it's not
-// working so far
-
-const compile = (files, { originalFilePath, webpackOptions, log }) => {
-  const context = path.dirname(originalFilePath)
-  const { entry, virtualConfig } = files.reduce((memo, { inputFileName, outputFilePath, source }) => {
-    const inputPath = path.join(context, inputFileName)
-
-    memo.entry[inputFileName] = {
-      import: inputPath,
-      filename: path.basename(outputFilePath),
-    }
-
-    memo.virtualConfig[inputPath] = source
-
-    return memo
-  }, { entry: {}, virtualConfig: {} })
-
-  log('entry:', entry)
-  log('---')
-  log('virtualConfig:', virtualConfig)
-
-  // log('inputFileName:', inputFileName)
-  // log('entry:', entry)
-  // log('outputFilePath:', outputFilePath)
-  // log('--- source ---')
-  // console.log(source)
-  // log('--- /source --')
-
-  const modifiedWebpackOptions = _.extend({}, webpackOptions, {
-    entry,
-    output: {
-      path: path.dirname(files[0].outputFilePath),
-      // filename: path.basename(outputFilePath),
-    },
-  })
-  const plugins = modifiedWebpackOptions.plugins || []
-
-  modifiedWebpackOptions.plugins = plugins.concat(
-    new VirtualModulesPlugin(virtualConfig),
-  )
-
-  return new Promise((resolve, reject) => {
-    const compiler = webpack(modifiedWebpackOptions)
-
-    const handle = (err: Error) => {
-      log('handle:', files[0].inputFileName)
-
-      if (err) {
-        log('finished with error', err.message)
-
-        return reject(err)
-      }
-
-      log('finished successfully')
-
-      resolve(files[0].outputFilePath)
-    }
-
-    compiler.run(handle)
-  })
-}
-
 /**
  * Webpack preprocessor configuration function. Takes configuration object
  * and returns file preprocessor.
@@ -217,7 +155,7 @@ const compile = (files, { originalFilePath, webpackOptions, log }) => {
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
 
-  let crossOriginCallbackLoader = false
+  let crossOriginCallbackLoaderAdded = false
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -232,12 +170,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
   // the supported file and spec file to be requested again
   return (file: FileEvent) => {
     const filePath = file.filePath
-
-    const log = (...messages) => {
-      console.log(`🟢 (${path.basename(filePath)}):`, ...messages)
-    }
-
-    log('wp bundle')
 
     debug('get', filePath)
 
@@ -295,17 +227,17 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
-    if (!crossOriginCallbackLoader) {
+    if (!crossOriginCallbackLoaderAdded) {
       // webpack runs loaders last-to-first and we want ours to run last
       // so that it's working with plain javascript
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
         use: [{
-          loader: path.join(__dirname, 'lib/extract-cross-origin-callback-loader'),
+          loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
         }],
       })
 
-      crossOriginCallbackLoader = true
+      crossOriginCallbackLoaderAdded = true
     }
 
     debug('webpackOptions: %o', webpackOptions)
@@ -350,8 +282,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
         return rejectWithErr(err)
       }
-
-      log('compile finished')
 
       const jsonStats = stats.toJson()
 
@@ -399,23 +329,21 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           return
         }
 
-        log('current filePath:', filePath)
-
         if (!crossOriginCallbackStore.hasFilesFor(filePath)) {
-          log('resolve all, no custom files')
+          debug('no cross-origin callback files')
 
           return resolveAllBundles()
         }
 
-        compile(crossOriginCallbackStore.files[filePath], {
+        compileCrossOriginCallbackFiles(crossOriginCallbackStore.files[filePath], {
           originalFilePath: filePath,
           webpackOptions,
-          log,
         })
-        .then(() => {
+        // TODO: how to handle errors? reject original deferred?
+        .finally(() => {
           crossOriginCallbackStore.reset(filePath)
 
-          log('resolve all after custom files')
+          debug('resolve all after handling cross-origin callback files')
           resolveAllBundles()
         })
       })

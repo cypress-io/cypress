@@ -1,3 +1,4 @@
+import type { CrossOriginCallbackStoreFile } from '@cypress/webpack-preprocessor/lib/cross-origin-callback-store'
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
@@ -10,7 +11,7 @@ interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
-  fn: string
+  fn: string | CrossOriginCallbackStoreFile
   skipConfigValidation: boolean
   state: {}
   logCounter: number
@@ -132,13 +133,13 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       if (_.isString(fn)) {
         value = window.eval(`(${fn})`)(args)
       } else {
-        // @ts-ignore TODO (wip): update this type
-        const contents = await $networkUtils.fetch(`/__cypress/gimme_file?file=${encodeURIComponent(fn.outputFilePath)}`) as string
+        const { callbackName, outputFilePath } = fn
+        const contents = await $networkUtils.fetch(`/__cypress/get-file/${encodeURIComponent(outputFilePath)}`) as string
 
         value = window.eval(`(args) => {
-          let __callback;
+          let ${callbackName};
           ${contents}
-          return __callback(args)
+          return ${callbackName}(args);
         }`)(args)
       }
 
@@ -174,8 +175,6 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         }
       }
     } catch (err) {
-      console.log('eval error:', err.stack)
-
       setRunnableStateToPassed()
       Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
 
