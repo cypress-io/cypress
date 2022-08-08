@@ -4,7 +4,7 @@ import { TrackedBanner_RecordShownDocument, TrackedBanner_RecordDismissedDocumen
 
 describe('<TrackedBanner />', () => {
   it('should pass through props and child content', () => {
-    cy.mount({ render: () => <TrackedBanner banner-id="test-banner" dismissible modelValue={true}>Test Content</TrackedBanner> })
+    cy.mount({ render: () => <TrackedBanner bannerId="test-banner" dismissible modelValue={true}>Test Content</TrackedBanner> })
 
     cy.findByText('Test Content').should('be.visible')
     cy.findByTestId('alert-suffix-icon').should('be.visible')
@@ -23,7 +23,8 @@ describe('<TrackedBanner />', () => {
     })
 
     // Initially mount as visible
-    cy.mount({ render: () => <TrackedBanner data-cy="banner" banner-id="test-banner" v-model={shown.value} /> })
+    // @ts-ignore
+    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} /> })
 
     cy.get('[data-cy="banner"]').as('banner')
 
@@ -57,7 +58,8 @@ describe('<TrackedBanner />', () => {
     })
 
     // Initially mount as visible
-    cy.mount({ render: () => <TrackedBanner data-cy="banner" banner-id="test-banner" v-model={shown.value} dismissible /> })
+    // @ts-ignore
+    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} dismissible /> })
 
     cy.get('[data-cy="banner"]').as('banner')
 

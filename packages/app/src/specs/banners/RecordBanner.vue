@@ -17,7 +17,7 @@
     <TerminalPrompt
       :command="recordCommand"
       :project-folder-name="query.data?.value?.currentProject?.title"
-      class="max-w-700px"
+      class="bg-white max-w-700px"
     />
   </TrackedBanner>
 </template>

@@ -219,7 +219,7 @@ const emit = defineEmits<{
 
 const isLoggedIn = !!props.gql.cloudViewer?.id
 const isMemberOfOrganization = !!props.gql.cloudViewer?.firstOrganization
-const isProjectConnected = !!props.gql.currentProject?.projectId
+const isProjectConnected = !!props.gql.currentProject?.projectId && props.gql.currentProject.cloudProject?.__typename === 'CloudProject'
 const hasNoRecordedRuns = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && (props.gql.currentProject.cloudProject.runs?.nodes?.length ?? 0) === 0
 const hasFourDaysOfCypressUse = (Date.now() - props.gql.currentProject?.savedState?.value?.firstOpened) > interval('4 days')
 
@@ -245,7 +245,7 @@ watch(
 )
 
 function hasBannerBeenDismissed (bannerId: string) {
-  const bannersState = (props.gql.currentProject?.savedState?.value as Maybe<AllowedState>)?.banners
+  const bannersState = (props.gql.currentProject?.savedState?.value as AllowedState)?.banners
 
   return !!bannersState?.[bannerId]?.dismissed
 }
