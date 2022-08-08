@@ -269,12 +269,10 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'projectId',
     defaultValue: null,
     validation: validate.isString,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
@@ -357,11 +355,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'testIsolation',
     // TODO: https://github.com/cypress-io/cypress/issues/23093
     // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'strict' and
+    // update the defaultValue from 'lax' to 'strict' and
     // update this code to remove the check/override specific to enable
     // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'legacy',
-    validation: validate.isOneOf('legacy', 'strict'),
+    defaultValue: 'lax',
+    validation: validate.isOneOf('lax', 'strict'),
     overrideLevels: ['suite'],
   }, {
     name: 'trashAssetsBeforeRuns',
