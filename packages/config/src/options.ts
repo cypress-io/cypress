@@ -55,7 +55,7 @@ interface DriverConfigOption extends ConfigOption {
 }
 
 // Cypress run-time options
-interface RuntimeConfigOptions extends ConfigOption {
+interface RuntimeConfigOption extends ConfigOption {
   defaultValue: any
   isInternal?: boolean
 }
@@ -415,7 +415,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   },
 ]
 
-const runtimeOptions: Array<RuntimeConfigOptions> = [
+const runtimeOptions: Array<RuntimeConfigOption> = [
   {
     // Internal config field, useful to ignore the e2e specPattern set by the user
     // or the default one when looking fot CT, it needs to be a config property because after
@@ -517,7 +517,7 @@ const runtimeOptions: Array<RuntimeConfigOptions> = [
   },
 ]
 
-export const options: Array<DriverConfigOption | RuntimeConfigOptions> = [
+export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
   ...driverConfigOptions,
   ...runtimeOptions,
 ]
