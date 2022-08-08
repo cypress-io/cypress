@@ -93,7 +93,7 @@
             query: {
               file: result.file.relative?.replace(/\\/g, '/')
             },
-            params: props.type === 'component'
+            params: props.type === 'component' || 'componentEmpty'
               ? {
                 shouldShowTroubleRenderingAlert: true
               }
