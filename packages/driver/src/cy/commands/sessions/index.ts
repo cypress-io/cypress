@@ -47,7 +47,6 @@ export default function (Commands, Cypress, cy) {
         return clearPage
         .then(() => sessions.clearCurrentSessionData())
         .then(() => Cypress.backend('reset:rendered:html:origins'))
-        .then(() => 'successfully cleared sessions data')
       }
 
       return

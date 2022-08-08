@@ -178,7 +178,8 @@ export default function (Commands, Cypress, cy, state, config) {
     }
   }
 
-  // TODO: Cypress sessions will clear cookies on its own before each test.
+  // TODO: https://github.com/cypress-io/cypress/issues/23093
+  // Cypress sessions will clear cookies on its own before each test.
   // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
   // session data (cookies / local storage / session storage) to reset functionality.
   if (!Cypress.config('experimentalSessionAndOrigin')) {
