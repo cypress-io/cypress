@@ -12,8 +12,7 @@ for (const project of WEBPACK_REACT) {
     continue
   }
 
-  // TODO: revert once Angular is slated for release
-  describe.skip(`Working with ${project}`, () => {
+  describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
       cy.openProject(project)
@@ -69,14 +68,6 @@ for (const project of WEBPACK_REACT) {
       cy.contains('new.component.cy.ts').click()
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
-    })
-
-    it('proves out mount API', () => {
-      cy.visitApp()
-
-      cy.contains('mount.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 6)
     })
   })
 }
