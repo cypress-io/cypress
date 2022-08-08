@@ -159,6 +159,7 @@ class Test extends Component<TestProps> {
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
+        hideExpander
       >
         {this._contents()}
       </Collapsible>
@@ -174,19 +175,42 @@ class Test extends Component<TestProps> {
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>
-      <span className='runnable-controls'>
-        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+      {this._controls()}
+    </>)
+  }
+
+  _controls () {
+    let controls: Array<JSX.Element> = []
+
+    if (this.props.model.state) {
+      controls.push(
+        <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
             <WarningIcon className="runnable-controls-status" />
           </span>
-        </Tooltip>
-        <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
+        </Tooltip>,
+      )
+    }
+
+    if (appState.studioActive) {
+      controls.push(
+        <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>
             <WandIcon />
           </a>
-        </Tooltip>
+        </Tooltip>,
+      )
+    }
+
+    if (controls.length === 0) {
+      return null
+    }
+
+    return (
+      <span className='runnable-controls'>
+        {controls}
       </span>
-    </>)
+    )
   }
 
   _contents () {
@@ -195,7 +219,7 @@ class Test extends Component<TestProps> {
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
         <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
-        { appState.studioActive && <StudioControls model={model} /> }
+        {appState.studioActive && <StudioControls model={model} />}
       </div>
     )
   }
