@@ -9,7 +9,6 @@ import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 import type {
   AllModeOptions,
   AllowedState,
-  BannerState,
   FoundBrowser,
   InitializeProjectOptions,
   LaunchOpts,
@@ -157,24 +156,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       setProjectPreferences (state) {
         return openProject.getProject()?.saveState(state)
-      },
-      setBannerState (bannerId: string, state: Partial<BannerState>) {
-        return openProject.getProject()
-        ?.saveState({
-          banners: {
-            ...(openProject.getProject()?.state?.banners ?? {}),
-            [bannerId]: {
-              ...openProject.getProject()?.state?.banners?.[bannerId],
-              ...state,
-            },
-          },
-        })
-      },
-      setBannerShown (bannerId) {
-        this.setBannerState(bannerId, { lastShown: Date.now() })
-      },
-      setBannerDismissed (bannerId) {
-        this.setBannerState(bannerId, { dismissed: Date.now() })
       },
       makeProjectSavedState (projectRoot: string) {
         return () => savedState.create(projectRoot).then((s) => s.get())

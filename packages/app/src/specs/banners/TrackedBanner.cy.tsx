@@ -1,6 +1,6 @@
 import TrackedBanner from './TrackedBanner.vue'
 import { ref } from 'vue'
-import { TrackedBanner_RecordShownDocument, TrackedBanner_RecordDismissedDocument } from '../../generated/graphql'
+import { TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 
 describe('<TrackedBanner />', () => {
   it('should pass through props and child content', () => {
@@ -13,13 +13,14 @@ describe('<TrackedBanner />', () => {
   })
 
   it('should record when banner is made visible', () => {
+    cy.clock(1234)
     const recordStub = cy.stub()
     const shown = ref(true)
 
-    cy.stubMutationResolver(TrackedBanner_RecordShownDocument, (defineResult, { bannerId }) => {
-      recordStub(bannerId)
+    cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, { value }) => {
+      recordStub(value)
 
-      return defineResult({ setBannerShown: true })
+      return defineResult({ setPreferences: {} as any })
     })
 
     // Initially mount as visible
@@ -30,31 +31,19 @@ describe('<TrackedBanner />', () => {
 
     cy.get('@banner').should('be.visible')
     .then(() => {
-      expect(recordStub).to.have.been.calledOnceWith('test-banner')
-
-      shown.value = false
-    })
-
-    cy.get('@banner').should('not.exist')
-    .then(() => {
-      shown.value = true
-    })
-
-    cy.get('@banner').should('be.visible')
-    .then(() => {
-      expect(recordStub).to.have.been.calledTwice
-      expect(recordStub).to.have.been.always.calledWith('test-banner')
+      expect(recordStub).to.have.been.calledWith('{"banners":{"test-banner":{"lastShown":1234}}}')
     })
   })
 
-  it('should record when banner is made visible', () => {
+  it('should record when banner is dismissed', () => {
+    cy.clock(1234)
     const dismissStub = cy.stub()
     const shown = ref(true)
 
-    cy.stubMutationResolver(TrackedBanner_RecordDismissedDocument, (defineResult, { bannerId }) => {
-      dismissStub(bannerId)
+    cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, { value }) => {
+      dismissStub(value)
 
-      return defineResult({ setBannerDismissed: true })
+      return defineResult({ setPreferences: {} as any })
     })
 
     // Initially mount as visible
@@ -64,16 +53,13 @@ describe('<TrackedBanner />', () => {
     cy.get('[data-cy="banner"]').as('banner')
 
     cy.get('@banner').should('be.visible')
-    .then(() => {
-      expect(dismissStub).not.to.have.been.called
-    })
 
     cy.get('@banner').findByTestId('alert-suffix-icon').click()
 
     cy.get('@banner').should('not.exist')
     .then(() => {
-      expect(dismissStub).to.have.been.calledOnce
-      expect(dismissStub).to.have.been.calledWith('test-banner')
+      expect(dismissStub).to.have.been.calledTwice
+      expect(dismissStub).to.have.been.calledWith('{"banners":{"test-banner":{"dismissed":1234}}}')
     })
   })
 })

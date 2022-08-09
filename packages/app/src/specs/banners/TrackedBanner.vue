@@ -11,8 +11,9 @@
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { watch } from 'vue'
-import { gql, useMutation } from '@urql/vue'
-import { TrackedBanner_RecordShownDocument, TrackedBanner_RecordDismissedDocument } from '../../generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { TrackedBanner_ProjectStateDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { set } from 'lodash'
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
 type AlertComponentEmits = InstanceType<typeof Alert>['$emit']
@@ -25,14 +26,20 @@ interface TrackedBannerComponentEmits extends AlertComponentEmits {
 }
 
 gql`
-mutation TrackedBanner_RecordShown($bannerId: String!) {
-  setBannerShown(bannerId: $bannerId)
+query TrackedBanner_ProjectState {
+  currentProject {
+  id
+    savedState
+  }
 }
 `
 
 gql`
-mutation TrackedBanner_RecordDismissed($bannerId: String!) {
-  setBannerDismissed(bannerId: $bannerId)
+mutation TrackedBanner_SetProjectState($value: String!) {
+  setPreferences(type: project, value: $value) {
+    ...TestingPreferences
+    ...SpecRunner_Preferences
+  }
 }
 `
 
@@ -40,29 +47,35 @@ const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {})
 
 const emit = defineEmits<TrackedBannerComponentEmits>()
 
-const recordShownMutation = useMutation(TrackedBanner_RecordShownDocument)
-const recordDismissedMutation = useMutation(TrackedBanner_RecordDismissedDocument)
+const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
+const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 
 watch(
   () => props.modelValue,
   (visible) => {
     if (visible) {
-      const { bannerId } = props
-
-      recordShownMutation.executeMutation({ bannerId })
+      updateBannerState('lastShown')
     }
   },
   { immediate: true },
 )
 
 function handleBannerDismissed (visible: boolean) {
-  const { bannerId } = props
-
   if (!visible) {
-    recordDismissedMutation.executeMutation({ bannerId })
+    updateBannerState('dismissed')
   }
 
   emit('update:modelValue', visible)
+}
+
+async function updateBannerState (field: 'lastShown' | 'dismissed') {
+  const { bannerId } = props
+
+  const savedState = stateQuery.data.value?.currentProject?.savedState ?? {}
+
+  set(savedState, ['banners', bannerId, field], Date.now())
+
+  await setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
 }
 
 </script>
