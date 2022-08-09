@@ -1,12 +1,8 @@
-# packherd [![](https://github.com/thlorenz/packherd/workflows/Node/badge.svg?branch=master)](https://github.com/thlorenz/packherd/actions)
+## @packages/packherd
 
 Herds all dependencies reachable from an entry and packs them.
 
-[API Documentation](https://thlorenz.github.io/packherd/docs/index.html)
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
 - [Summary](#summary)
 - [Creating a Bundle with Packherd](#creating-a-bundle-with-packherd)
@@ -18,8 +14,6 @@ Herds all dependencies reachable from an entry and packs them.
   - [Import Caveats](#import-caveats)
 - [Env Vars](#env-vars)
 - [LICENSE](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Summary
 
@@ -34,8 +28,6 @@ While `1.` and `2.` are very related and work hand in hand, `3.` is unrelated to
 just added here since it is another feature that requires to intercept module loads.
 
 ## Creating a Bundle with Packherd
-
-- [implemented inside the packherd module](https://thlorenz.com/packherd/docs/modules/packherd.html)
 
 Calling the [packherd function][packherd fn] and providing the desired [packherd opts][packherd
 opts] will return the `Buffer` of the bundle,  a `meta` [esbuild metafile][esbuild metafile], a
@@ -63,8 +55,8 @@ be invoked in order to obtain the `module.exports`, thus incurring some overhead
 Since packherd cannot know how the modules are keyed inside the maps you should pass a  `getModuleKey`
 function of [this type][GetModuleKey] in order to resolve those keys. 
 
-For example in the case of [v8-snapshot][v8-snapshot] the [getModuleKey
-implementation][v8-snapshot module key] implementation relies on a resolver map that is
+For example in the case of [v8-snapshot][v8-snapshot] (TODO: Update this link when snapshot module is added) the [getModuleKey
+implementation][v8-snapshot module key] (TODO: Update this link when snapshot module is added) implementation relies on a resolver map that is
 embedded inside the app's snapshot. Additionally it knows how modules are keyed via the
 [modified esbuild][cypress esbuild] bundler it uses.
 
@@ -119,11 +111,7 @@ with tests that relied on being able to patch/`sinon.stub` modules even after th
 imported. 
 
 In general I recommend doing this _properly_ via a tool like
-[proxyquire][proxyquire], but attempts have been made to work around this by rewriting the JS
-that esbuild emits.
-
-Please see the ongoing work inside the `feat/stubbable` branch, particularly the
-[transpile-ts-rewrite.ts][packherd rewrite] module.
+[proxyquire][proxyquire].
 
 ## Env Vars
 
@@ -134,21 +122,20 @@ Please see the ongoing work inside the `feat/stubbable` branch, particularly the
 
 MIT
 
-[packherd fn]:https://thlorenz.com/packherd/docs/modules/packherd.html#packherd-1
-[packherd opts]:https://thlorenz.com/packherd/docs/modules/packherd.html#PackherdOpts
+[packherd fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L44
+[packherd opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L14-L27
 [esbuild metafile]:https://esbuild.github.io/api/#metafile
 
-[require fn]:https://thlorenz.com/packherd/docs/modules/require.html#packherdRequire
-[require opts]:https://thlorenz.com/packherd/docs/modules/require.html#PackherdRequireOpts
-[transpile opts]:https://thlorenz.com/packherd/docs/modules/types.html#PackherdTranspileOpts
-[init transpile cache fn]:https://thlorenz.com/packherd/docs/modules/types.html#InitTranspileCache
-[transpile-ts]:https://thlorenz.com/packherd/docs/modules/transpile_ts.html
-[packherd rewrite]:https://github.com/thlorenz/packherd/blob/feat/stubbable/src/transpile-ts-rewrite.ts
-[GetModuleKey]:https://thlorenz.com/packherd/docs/modules/loader.html#GetModuleKey
-[packherd module loader]:https://thlorenz.com/packherd/docs/classes/loader.PackherdModuleLoader.html
-[try load]:https://thlorenz.com/packherd/docs/classes/loader.PackherdModuleLoader.html#tryLoad
-[try resolve]:https://thlorenz.com/packherd/docs/classes/loader.PackherdModuleLoader.html#tryResolve
-[sourcemap docs]:https://thlorenz.com/packherd/docs/modules/sourcemap_support.html
+[require fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L71
+[require opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L23-L32
+[transpile opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/types.ts#L187-L195
+[init transpile cache fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/types.ts#L177-L185
+[transpile-ts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/transpile-ts.ts
+[GetModuleKey]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L35-L45
+[packherd module loader]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L226
+[try load]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L536
+[try resolve]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L458
+[sourcemap docs]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/sourcemap-support.ts
 
 [v8-snapshot]:https://github.com/thlorenz/v8-snapshot
 [v8-snapshot module key]:https://github.com/thlorenz/v8-snapshot/blob/master/src/loading/snapshot-require.ts#L20
