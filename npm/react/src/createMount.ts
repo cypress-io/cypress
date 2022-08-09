@@ -19,7 +19,7 @@ const injectStyles = (options: MountOptions) => {
   }
 }
 
-export let mountCleanup: InternalMountOptions['cleanup']
+let mountCleanup: InternalMountOptions['cleanup']
 
 /**
  * Create an `mount` function. Performs all the non-React-version specific
@@ -160,9 +160,7 @@ export const makeUnmountFn = (options: UnmountArgs) => {
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
 const preMountCleanup = () => {
-  if (mountCleanup) {
-    mountCleanup()
-  }
+  mountCleanup?.()
 }
 
 const _mount = (jsx: React.ReactNode, options: MountOptions = {}) => makeMountFn('mount', jsx, options)
