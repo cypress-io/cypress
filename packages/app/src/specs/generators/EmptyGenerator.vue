@@ -56,6 +56,7 @@
       >
         <Button
           size="lg"
+          type="submit"
           :disabled="!isValidSpecFile"
           @click="createSpec"
         >
