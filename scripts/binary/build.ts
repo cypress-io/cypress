@@ -264,11 +264,9 @@ require('./packages/server')\
   // lsDistFolder
   console.log('in build folder %s', meta.buildDir())
 
-  if (os.platform() !== 'win32') {
-    const { stdout } = await execa('ls', ['-la', meta.buildDir()])
+  const { stdout } = await execa('ls', ['-la', meta.buildDir()])
 
-    console.log(stdout)
-  }
+  console.log(stdout)
 
   // testVersion(buildAppDir)
   await testVersion(meta.buildAppDir(), version)
