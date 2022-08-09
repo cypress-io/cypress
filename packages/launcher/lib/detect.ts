@@ -31,7 +31,7 @@ export const getMajorVersion = (version: string): string => {
 }
 
 // Determines if found browser is supported by Cypress. If found to be
-// unsupported, the the browser will be unavailable for selection and
+// unsupported, the browser will be unavailable for selection and
 // will present the determined warning message to the user.
 const validateCypressSupport = (validator: BrowserValidator | undefined, browser: FoundBrowser, platform: NodeJS.Platform) => {
   // If no validator parameter is provided, we fall back to validating against
