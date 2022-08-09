@@ -73,15 +73,37 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
 }
 
 export class WebkitAutomation {
-  private context: playwright.BrowserContext
-  public reset: (url?: string) => Promise<void>
+  private context!: playwright.BrowserContext
+  private page!: playwright.Page
 
-  constructor (resetPage, private page: playwright.Page) {
-    this.context = page.context()
-    this.reset = async (url?: string) => {
-      this.page = await resetPage(url)
-      this.context = this.page.context()
-    }
+  private constructor (private browser: playwright.Browser) {
+  }
+
+  static async create (browser: playwright.Browser, initialUrl: string) {
+    const wkAutomation = new WebkitAutomation(browser)
+
+    await wkAutomation.reset(initialUrl)
+
+    return wkAutomation
+  }
+
+  public async reset (_url?: string) {
+    // new context comes with new cache + storage
+    const newContext = await this.browser.newContext({
+      ignoreHTTPSErrors: true,
+    })
+    const oldPwPage = this.page
+
+    this.page = await newContext.newPage()
+    this.context = this.page.context()
+
+    let promises: Promise<any>[] = []
+
+    if (oldPwPage) promises.push(oldPwPage.context().close())
+
+    if (_url) promises.push(this.page.goto(_url))
+
+    if (promises.length) await Promise.all(promises)
   }
 
   private async getCookies () {
