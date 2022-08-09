@@ -163,6 +163,10 @@ export default class Test extends Runnable {
   }
 
   @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
+    if (this.state === 'processing' && !props.state) {
+      cb()
+    }
+
     if (props.isOpen != null) {
       this.setIsOpenWhenActive(props.isOpen)
 

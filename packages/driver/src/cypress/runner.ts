@@ -19,6 +19,7 @@ const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
+const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
 const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
@@ -26,11 +27,18 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
 
+const RUNNER_EVENTS = [
+  TEST_BEFORE_RUN_ASYNC_EVENT,
+  TEST_BEFORE_RUN_EVENT,
+  TEST_AFTER_RUN_EVENT,
+  TEST_AFTER_RUN_ASYNC_EVENT,
+] as const
+
 const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event, runnable, Cypress) => {
+const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -38,7 +46,7 @@ const fire = (event, runnable, Cypress) => {
 
   runnable._fired[event] = true
 
-  // dont fire anything again if we are skipped
+  // don't fire anything again if we are skipped
   if (runnable._ALREADY_RAN) {
     return
   }
@@ -46,7 +54,7 @@ const fire = (event, runnable, Cypress) => {
   return Cypress.action(event, wrap(runnable), runnable)
 }
 
-const fired = (event, runnable) => {
+const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 
@@ -63,7 +71,7 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
 
   return Promise.try(() => {
     // NOTE: other events we do not fire more than once, but this needed to change for test-retries
-    return fire('runner:runnable:after:run:async', runnable, Cypress)
+    return fire(TEST_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
   })
 }
 
@@ -1426,23 +1434,27 @@ export default {
 
         const isHook = runnable.type === 'hook'
 
+        let runnableName = 'test'
+        let runnableId = runnable.id
+
+        if (isHook) {
         // if this isn't a hook, then the name is 'test'
-        const hookName = isHook ? getHookName(runnable) : 'test'
+          runnableName = getHookName(runnable)
 
-        // set hook id to hook id or test id
-        const hookId = isHook ? runnable.hookId : runnable.id
+          // set hook id to hook id or test id
+          runnableId = runnable.hookId
 
-        const isAfterEachHook = isHook && hookName.match(/after each/)
-        const isBeforeEachHook = isHook && hookName.match(/before each/)
+          const isAfterEachHook = runnableName.match(/after each/)
+          const isBeforeEachHook = runnableName.match(/before each/)
 
-        // if we've been told to skip hooks at a certain nested level
-        // this happens if we're handling a runnable that is going to retry due to failing in a hook
-        const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
-          && isHook
+          // if we've been told to skip hooks at a certain nested level
+          // this happens if we're handling a runnable that is going to retry due to failing in a hook
+          const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
           && (isBeforeEachHook || isAfterEachHook && runnable.titlePath().length > test._skipHooksWithLevelGreaterThan)
 
-        if (shouldSkipRunnable) {
-          return _next.call(this)
+          if (shouldSkipRunnable) {
+            return _next.call(this)
+          }
         }
 
         const next = (err) => {
@@ -1456,8 +1468,8 @@ export default {
               // this is what it 'feels' like to the user
               runnable.duration = duration(wallClockEnd, wallClockStartedAt)
 
-              setTestTimingsForHook(test, hookName, {
-                hookId: runnable.hookId,
+              setTestTimingsForHook(test, runnableName, {
+                hookId: runnableId,
                 fnDuration: duration(fnDurationEnd!, fnDurationStart!),
                 afterFnDuration: duration(afterFnDurationEnd, afterFnDurationStart!),
               })
@@ -1472,7 +1484,7 @@ export default {
 
               // but still preserve its actual function
               // body duration for timings
-              setTestTimings(test, 'test', {
+              setTestTimings(test, runnableName, {
                 fnDuration: duration(fnDurationEnd!, fnDurationStart!),
                 afterFnDuration: duration(afterFnDurationEnd!, afterFnDurationStart!),
               })
@@ -1534,6 +1546,23 @@ export default {
           })
         }
 
+        // if either the TEST_BEFORE_RUN_EVENT or TEST_BEFORE_RUN_ASYNC_EVENT throws
+        // then override the test function to associate the error to the test
+        const handleBeforeTestEventError = (err: Error): boolean => {
+          const { fn } = runnable
+
+          const restore = () => {
+            return runnable.fn = fn
+          }
+
+          runnable.fn = () => {
+            restore()
+            throw err
+          }
+
+          return false
+        }
+
         // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
         // we figure out what test its associated to
@@ -1548,6 +1577,10 @@ export default {
             fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
           }
 
+          return true
+        })
+        .catch(handleBeforeTestEventError)
+        .then((ranSuccessfulBeforeRunEvent: boolean) => {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
 
@@ -1556,28 +1589,16 @@ export default {
           // running lifecycle events
           // and also get back a function result handler that we use as
           // an async seam
-          cy.setRunnable(runnable, hookId)
-        })
-        .then(() => {
-          return testBeforeRunAsync(test, Cypress)
-        })
-        .catch((err) => {
-          // TODO: if our async tasks fail
-          // then allow us to cause the test
-          // to fail here by blowing up its fn
-          // callback
-          const { fn } = runnable
+          cy.setRunnable(runnable, runnableId)
 
-          const restore = () => {
-            return runnable.fn = fn
+          if (ranSuccessfulBeforeRunEvent) {
+            return testBeforeRunAsync(test, Cypress)
           }
 
-          runnable.fn = () => {
-            restore()
-
-            throw err
-          }
-        }).finally(() => {
+          return null
+        })
+        .catch(handleBeforeTestEventError)
+        .finally(() => {
           if (lifecycleStart) {
             // capture how long the lifecycle took as part
             // of the overall wallClockDuration of our test
