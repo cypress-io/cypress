@@ -8,7 +8,7 @@
     class="mb-16px"
     :icon="RecordIcon"
     dismissible
-    @update:model-value="emit('update:modelValue')"
+    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.record.content') }}
@@ -57,7 +57,7 @@ withDefaults(defineProps<{
 }>(), {})
 
 const emit = defineEmits<{
-  (e: 'update:modelValue'): void
+  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
