@@ -195,6 +195,26 @@ describe('App: Specs', () => {
 
           cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
         })
+
+        it('should not show trouble rendering alert', () => {
+          cy.get('@EmptySpecCard').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          // Create spec
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/spec.cy.ts')).click()
+
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=cypress/e2e/spec.cy.ts`).click()
+
+          cy.contains('Review the docs').should('not.exist')
+        })
       })
     })
 
