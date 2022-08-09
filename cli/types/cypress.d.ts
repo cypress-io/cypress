@@ -3056,7 +3056,7 @@ declare namespace Cypress {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
     /**
-     * Enables running all specs in a single tab in run mode for faster run mode execution.
+     * Runs all component specs in a single tab, trading spec isolation for faster run mode execution.
      * @default false
      */
     experimentalSingleTabRunMode?: boolean

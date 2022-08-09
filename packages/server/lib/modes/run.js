@@ -777,7 +777,7 @@ module.exports = {
   displayRunStarting,
 
   navigateToNextSpec (spec) {
-    debug('navigating to next spec')
+    debug('navigating to next spec %s', spec)
 
     return openProject.changeUrlToSpec(spec)
   },
