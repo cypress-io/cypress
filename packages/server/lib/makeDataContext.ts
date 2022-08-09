@@ -154,6 +154,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           },
         })
       },
+      setProjectPreferences (state) {
+        return openProject.getProject()?.saveState(state)
+      },
       makeProjectSavedState (projectRoot: string) {
         return () => savedState.create(projectRoot).then((s) => s.get())
       },

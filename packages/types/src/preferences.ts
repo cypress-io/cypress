@@ -32,6 +32,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'lastOpened',
   'lastProjectId',
   'promptsShown',
+  'specFilter',
   'preferredEditorBinary',
   'isSideNavigationOpen',
   'lastBrowser',
@@ -65,6 +66,7 @@ export type AllowedState = Partial<{
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
   promptsShown: Maybe<object>
+  specFilter: Maybe<string>
   preferredEditorBinary: Maybe<string>
   isSideNavigationOpen: Maybe<boolean>
   testingType: 'e2e' | 'component'

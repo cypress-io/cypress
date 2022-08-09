@@ -10,6 +10,7 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -144,22 +145,15 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
-  it('should generate from component template', async () => {
+  it('should generate from empty component template', async () => {
     const fileName = 'Button.tsx'
     const target = path.join(tmpPath, 'component')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
-      templateDir: templates.component,
+      templateDir: templates.componentEmpty,
       target,
     }
     const codeGenArgs = {
-      imports: [
-        'import { mount } from "@cypress/react"',
-        'import Button from "./Button"',
-      ],
-      componentName: 'Button',
-      docsLink: '// see: https://on.cypress.io/component-testing',
-      mount: 'mount(<Button />)',
       fileName,
     }
 
@@ -176,6 +170,49 @@ describe('code-generator', () => {
                 // cy.mount()
               })
             })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from Vue component template', async () => {
+    const fileName = 'MyComponent.vue'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.vueComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'MyComponent',
+      componentPath: 'path/to/component',
+      fileName,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://test-utils.vuejs.org/guide/
+              cy.mount(${codeGenArgs.componentName})
+            })
+          })`,
         },
       ],
       failed: [],
@@ -212,17 +249,19 @@ describe('code-generator', () => {
     }
   })
 
-  it('should generate from react component', async () => {
+  it('should generate empty test from react component', async () => {
     const target = path.join(tmpPath, 'react-component')
     const action: Action = {
-      templateDir: templates.component,
+      templateDir: templates.componentEmpty,
       target,
     }
 
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+    const newSpecCodeGenOptions = new SpecOptions({
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
       specFileExtension: '.cy',
+      framework: WIZARD_FRAMEWORKS[1],
+      isDefaultSpecPattern: true,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
@@ -230,25 +269,5 @@ describe('code-generator', () => {
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
     expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
-  })
-
-  it('should generate from vue component', async () => {
-    const target = path.join(tmpPath, 'vue-component')
-    const action: Action = {
-      templateDir: templates.component,
-      target,
-    }
-
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
-      codeGenType: 'component',
-      specFileExtension: '.cy',
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResult = await codeGenerator(action, codeGenOptions)
-
-    expect(() => codeGenResult.files[0].content).not.throw()
   })
 })
