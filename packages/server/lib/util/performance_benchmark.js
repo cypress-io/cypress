@@ -8,12 +8,13 @@ function threeDecimals (n) {
 }
 
 const initializeStartTime = () => {
-  global.startTime = getTime()
+  // This needs to be a global since this file is included inside of and outside of the v8 snapshot
+  global.cypressServerStartTime = getTime()
 }
 
 const debugElapsedTime = (event) => {
   const now = getTime()
-  const delta = now - global.startTime
+  const delta = now - global.cypressServerStartTime
 
   debug(`elapsed time at ${event}: ${threeDecimals(delta)}`)
 }
