@@ -33,7 +33,7 @@ describe('browsers', () => {
         const result = firefoxBrowser.validator(foundBrowser, 'win32')
 
         expect(result.isSupported).to.be.false
-        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 101 on Windows due to an unpatched defect.')
+        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 101 on Windows due to a blocking bug in Firefox.')
       })
 
       it('validates against version 102', () => {
@@ -47,7 +47,7 @@ describe('browsers', () => {
         const result = firefoxBrowser.validator(foundBrowser, 'win32')
 
         expect(result.isSupported).to.be.false
-        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 102 on Windows due to an unpatched defect.')
+        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 102 on Windows due to a blocking bug in Firefox.')
       })
 
       it('validates against minimum supported version', () => {
