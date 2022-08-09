@@ -341,7 +341,7 @@ const specs = computed(() => {
 const treeExpansionCache = ref(new Map<string, boolean>())
 
 // When search value changes or when specs are added/removed, reset the tree expansion cache so that any collapsed directories re-expand
-watch([() => specFilterModel.value, () => specFilterModel.value.length], () => treeExpansionCache.value.clear())
+watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
