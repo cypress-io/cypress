@@ -150,7 +150,7 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   return setCookieRequest
 }
 
-const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
+export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
   resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
   if (validResourceTypes.includes(resourceType as ResourceType)) {
     return resourceType as ResourceType

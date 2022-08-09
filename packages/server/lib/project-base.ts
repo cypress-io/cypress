@@ -431,13 +431,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   shouldCorrelatePreRequests = () => {
-    if (!this.browser) {
-      return false
-    }
-
-    const { family, majorVersion } = this.browser
-
-    return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
+    return !!this.browser
   }
 
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {

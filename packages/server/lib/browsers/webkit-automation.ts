@@ -1,6 +1,10 @@
 import _ from 'lodash'
-
+import Debug from 'debug'
 import type playwright from 'playwright-webkit'
+import type { Automation } from '../automation'
+import { normalizeResourceType } from './cdp_automation'
+
+const debug = Debug('cypress:server:browsers:webkit-automation')
 
 export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
@@ -31,6 +35,8 @@ const normalizeGetCookieProps = (cookie: any): CyCookie => {
 
   if (cookie.sameSite === 'None') {
     cookie.sameSite = 'no_restriction'
+  } else if (cookie.sameSite) {
+    cookie.sameSite = cookie.sameSite.toLowerCase()
   }
 
   return cookie as CyCookie
@@ -72,22 +78,26 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
   return true
 }
 
+let requestIdCounter = 1
+const requestIdMap = new WeakMap<playwright.Request, string>()
+
 export class WebkitAutomation {
   private context!: playwright.BrowserContext
   private page!: playwright.Page
 
-  private constructor (private browser: playwright.Browser) {
-  }
+  private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
-  static async create (browser: playwright.Browser, initialUrl: string) {
-    const wkAutomation = new WebkitAutomation(browser)
+  // static initializer to avoid "not definitively declared"
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string) {
+    const wkAutomation = new WebkitAutomation(automation, browser)
 
     await wkAutomation.reset(initialUrl)
 
     return wkAutomation
   }
 
-  public async reset (_url?: string) {
+  public async reset (newUrl?: string) {
+    debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
@@ -97,13 +107,60 @@ export class WebkitAutomation {
     this.page = await newContext.newPage()
     this.context = this.page.context()
 
+    this.attachListeners(this.page)
+
     let promises: Promise<any>[] = []
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 
-    if (_url) promises.push(this.page.goto(_url))
+    if (newUrl) promises.push(this.page.goto(newUrl))
 
     if (promises.length) await Promise.all(promises)
+  }
+
+  private attachListeners (page: playwright.Page) {
+    // emit preRequest to proxy
+    page.on('request', async (request) => {
+      // ignore socket.io events
+      // TODO: use config.socketIoRoute here instead
+      if (request.url().includes('/__socket') || request.url().includes('/__cypress')) return
+
+      // pw does not expose an ID on requests, so create one
+      const requestId = String(requestIdCounter++)
+
+      requestIdMap.set(request, requestId)
+
+      const browserPreRequest = {
+        requestId,
+        method: request.method(),
+        url: request.url(),
+        // TODO: await request.allHeaders() causes this to not resolve in time
+        headers: request.headers(),
+        resourceType: normalizeResourceType(request.resourceType()),
+        originalResourceType: request.resourceType(),
+      }
+
+      debug('received request %o', { browserPreRequest })
+      this.automation.onBrowserPreRequest?.(browserPreRequest)
+    })
+
+    page.on('requestfinished', async (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (!requestId) return
+
+      const response = await request.response()
+
+      const responseReceived = {
+        requestId,
+        status: response?.status(),
+        headers: await response?.allHeaders(),
+      }
+
+      debug('received requestfinished %o', { responseReceived })
+
+      this.automation.onRequestEvent?.('response:received', responseReceived)
+    })
   }
 
   private async getCookies () {

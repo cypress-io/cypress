@@ -1029,7 +1029,9 @@ describe('src/cy/commands/xhr', () => {
 
           try {
             assertLogLength(this.logs, 1)
-            expect(lastLog.get('error').message).contain('foo is not defined')
+            const undefinedError = Cypress.browser.family === 'webkit' ? 'Can\'t find variable: foo' : 'foo is not defined'
+
+            expect(lastLog.get('error').message).contain(undefinedError)
 
             done()
           } catch (err) {

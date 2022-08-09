@@ -13,6 +13,7 @@ export async function connectToNewSpec (browser: Browser, options, automation: A
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
 
   automation.use(wkAutomation)
+  wkAutomation.automation = automation
   await options.onInitializeNewBrowserTab()
   await wkAutomation.reset(options.url)
 }
@@ -30,7 +31,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     headless: browser.isHeadless,
   })
 
-  wkAutomation = await WebkitAutomation.create(pwBrowser, url)
+  wkAutomation = await WebkitAutomation.create(automation, pwBrowser, url)
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {
