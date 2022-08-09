@@ -33,7 +33,7 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  systemTests.it.only('fails when setting invalid config opt with Cypress.config() in before:test:run', {
+  systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run', {
     spec: 'testConfigOverrides/invalid_before_test_event.js',
     snapshot: true,
     outputPath,
@@ -41,7 +41,7 @@ describe('testConfigOverrides', () => {
     expectedExitCode: 2,
   })
 
-  systemTests.it.only('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
+  systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
     spec: 'testConfigOverrides/invalid_before_test_async_event.js',
     snapshot: true,
     outputPath,
