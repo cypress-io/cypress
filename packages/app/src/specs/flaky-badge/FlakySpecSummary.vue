@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-t-4px min-w-250px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
+    class="border-t-4px min-w-300px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
     :class="severity.accentClass"
     data-cy="flaky-spec-summary"
   >
