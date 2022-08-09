@@ -139,7 +139,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import type { SpecsListBannersFragment } from '../generated/graphql'
@@ -150,6 +150,7 @@ import ConnectProjectBanner from './banners/ConnectProjectBanner.vue'
 import CreateOrganizationBanner from './banners/CreateOrganizationBanner.vue'
 import LoginBanner from './banners/LoginBanner.vue'
 import { BannerIds } from './banners'
+import { debouncedWatch } from '@vueuse/core'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -184,18 +185,6 @@ fragment SpecsListBanners on Query {
 }
 `
 
-gql`
-mutation SpecsListBanners_SetBannerShown($bannerId: String!) {
-  setBannerShown(bannerId: $bannerId)
-}
-`
-
-gql`
-mutation SpecsListBanners_SetBannerDismissed($bannerId: String!) {
-  setBannerDismissed(bannerId: $bannerId)
-}
-`
-
 const props = withDefaults(defineProps<{
   gql: SpecsListBannersFragment
   hasRequestedAccess?: boolean
@@ -217,21 +206,15 @@ const emit = defineEmits<{
   (e: 'reconnectProject'): void
 }>()
 
-const isLoggedIn = !!props.gql.cloudViewer?.id
-const isMemberOfOrganization = !!props.gql.cloudViewer?.firstOrganization
-const isProjectConnected = !!props.gql.currentProject?.projectId && props.gql.currentProject.cloudProject?.__typename === 'CloudProject'
-const hasNoRecordedRuns = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && (props.gql.currentProject.cloudProject.runs?.nodes?.length ?? 0) === 0
-const hasFourDaysOfCypressUse = (Date.now() - props.gql.currentProject?.savedState?.firstOpened) > interval('4 days')
-
 const showSpecNotFound = ref(props.isSpecNotFound)
 const showOffline = ref(props.isOffline)
 const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
-const showRecordBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse)
-const showConnectBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse)
-const showCreateOrganizationBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && !isMemberOfOrganization && hasFourDaysOfCypressUse)
-const showLoginBanner = ref(!hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse)
+const showRecordBanner = ref(false)
+const showConnectBanner = ref(false)
+const showCreateOrganizationBanner = ref(false)
+const showLoginBanner = ref(false)
 
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
@@ -241,6 +224,36 @@ watch(
     showFetchError.value = props.isFetchError
     showProjectNotFound.value = props.isProjectNotFound
     showProjectRequestAccess.value = props.isProjectUnauthorized
+  },
+)
+
+const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.currentProject] as const))
+
+/**
+ * It takes a non-zero amount of time for cloud data to be fetched, during which we can't reliably tell whether the user is really
+ * logged in/has an org/etc. Here we attempt to delay this watcher to give the cloud GQL a little time to resolve before deciding
+ * which banners to display. Not doing this causes us to immediately show the "login" banner then have it disappear a second later
+ * once login state resolves
+ */
+debouncedWatch(
+  cloudData,
+  ([cloudViewer, currentProject]) => {
+    const isLoggedIn = !!cloudViewer?.id
+    // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
+    // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
+    const isOrganizationLoaded = !!cloudViewer?.firstOrganization
+    const isMemberOfOrganization = (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
+    const isProjectConnected = !!currentProject?.projectId && currentProject.cloudProject?.__typename === 'CloudProject'
+    const hasNoRecordedRuns = currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject.runs?.nodes?.length ?? 0) === 0
+    const hasFourDaysOfCypressUse = (Date.now() - currentProject?.savedState?.firstOpened) > interval('4 days')
+
+    showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse
+    showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
+    showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
+    showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
+  },
+  {
+    debounce: 1000,
   },
 )
 

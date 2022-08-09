@@ -8,7 +8,7 @@
     class="mb-16px"
     :icon="ConnectIcon"
     dismissible
-    @update:model-value="emit('update:modelValue')"
+    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.connectProject.content') }}
@@ -26,8 +26,8 @@
     <CloudConnectModals
       v-if="isProjectConnectOpen"
       :gql="cloudModalsQuery.data.value!"
-      @cancel="handleCancel"
-      @success="handleSuccess"
+      @cancel="handleModalClose"
+      @success="handleModalClose"
     />
   </TrackedBanner>
 </template>
@@ -54,7 +54,7 @@ withDefaults(defineProps<{
 }>(), {})
 
 const emit = defineEmits<{
-  (e: 'update:modelValue'): void
+  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
@@ -68,12 +68,9 @@ async function handleButtonClick () {
   isProjectConnectOpen.value = true
 }
 
-function handleCancel () {
+function handleModalClose () {
   isProjectConnectOpen.value = false
-}
-
-function handleSuccess () {
-  // TODO Reload?
+  emit('update:modelValue', false)
 }
 
 </script>
