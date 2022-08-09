@@ -11,6 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { getAutIframeModel } from '.'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -54,6 +55,8 @@ export class EventManager {
   studioRecorder: any
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
+  // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
+  autDestroyedCount = 0
 
   constructor (
     // import '@packages/driver'
@@ -335,6 +338,14 @@ export class EventManager {
     this.localBus.on('studio:cancel', () => {
       this.studioRecorder.cancel()
       rerun()
+    })
+
+    this.ws.on('aut:destroy:init', () => {
+      const autIframe = getAutIframeModel()
+
+      autIframe.destroy()
+      this.ws.emit('aut:destroy:complete')
+      this.autDestroyedCount++
     })
 
     // @ts-ignore

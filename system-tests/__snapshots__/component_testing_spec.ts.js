@@ -581,15 +581,15 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        3 found (fails.spec.js, foo.spec.js, retries.spec.js)                            │
-  │ Searched:     **/*.spec.js                                                                     │
+  │ Specs:        4 found (1_fails.cy.js, 2_foo.cy.js, 3_retries.cy.js, 999_final.cy.js)           │
+  │ Searched:     **/*.cy.js                                                                       │
   │ Experiments:  experimentalSingleTabRunMode=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fails.spec.js                                                                   (1 of 3)
+  Running:  1_fails.cy.js                                                                   (1 of 4)
 
 
   simple failing spec
@@ -636,38 +636,35 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fails.spec.js                                                                    │
+  │ Spec Ran:     1_fails.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple failing spec -- fails (fai     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1866x933)
      led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple failing spec -- fails agai     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1866x933)
      n (failed).png                                                                                 
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/fails.spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/1_fails.cy.js.mp4                   (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  foo.spec.js                                                                     (2 of 3)
+  Running:  2_foo.cy.js                                                                     (2 of 4)
 
 
   component
-    ✓ has spec with window same as app window
+    ✓ passes
 
 
   1 passing
 
-
-
-  component
 
   (Results)
 
@@ -680,19 +677,19 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     foo.spec.js                                                                      │
+  │ Spec Ran:     2_foo.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/foo.spec.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/2_foo.cy.js.mp4                     (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  retries.spec.js                                                                 (3 of 3)
+  Running:  3_retries.cy.js                                                                 (3 of 4)
 
 
   retries
@@ -714,14 +711,45 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     retries.spec.js                                                                  │
+  │ Spec Ran:     3_retries.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/retries.spec.js.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/3_retries.cy.js.mp4                 (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  999_final.cy.js                                                                 (4 of 4)
+
+
+  ✓ verifies AUT is destroyed after each spec
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     999_final.cy.js                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/999_final.cy.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -731,13 +759,15 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  fails.spec.js                            XX:XX        2        -        2        -        - │
+  │ ✖  1_fails.cy.js                            XX:XX        2        -        2        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  foo.spec.js                              XX:XX        1        1        -        -        - │
+  │ ✔  2_foo.cy.js                              XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  retries.spec.js                          XX:XX        1        1        -        -        - │
+  │ ✔  3_retries.cy.js                          XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  999_final.cy.js                          XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 3 failed (33%)                      XX:XX        4        2        2        -        -  
+    ✖  1 of 4 failed (25%)                      XX:XX        5        3        2        -        -  
 
 
 `
