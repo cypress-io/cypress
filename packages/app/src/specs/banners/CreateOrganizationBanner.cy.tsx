@@ -12,8 +12,6 @@ describe('<CreateOrganizationBanner />', () => {
 
     cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} /> })
 
-    cy.get('a').should('have.attr', 'href', linkHref)
-
     cy.percySnapshot()
   })
 })
