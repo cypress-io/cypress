@@ -534,8 +534,17 @@ type CodeFrame {
   line: Int
 }
 
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+}
+
 enum CodeGenType {
   component
+  componentEmpty
   e2e
   scaffoldIntegration
 }
@@ -575,6 +584,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
