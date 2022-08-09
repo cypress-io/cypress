@@ -16,6 +16,7 @@ Require stack:
 - lib/makeDataContext.ts
 - lib/modes/index.ts
 - lib/cypress.js
+- server-entry.js
 - index.js
 - 
       [stack trace lines]

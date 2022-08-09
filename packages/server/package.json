@@ -193,7 +193,8 @@
   "files": [
     "config",
     "lib",
-    "patches"
+    "patches",
+    "server-entry.js"
   ],
   "types": "index.d.ts",
   "productName": "Cypress",

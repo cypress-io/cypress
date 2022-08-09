@@ -13,6 +13,8 @@ import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import type { WebContents } from 'electron'
 import type { LaunchArgs } from '@packages/types'
 
+import { debugElapsedTime } from '../util/performance_benchmark'
+
 import debugLib from 'debug'
 
 const debug = debugLib('cypress:server:interactive')
@@ -196,6 +198,8 @@ export = {
         app.quit()
       })
     })
+
+    debugElapsedTime('open mode ready')
 
     return this.ready(options, port)
   },
