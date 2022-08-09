@@ -64,7 +64,7 @@ class ShardedStackMap<T> {
 
     this.shards[shardKey].splice(i, 1)
   }
-  _length () {
+  get length () {
     return Object.values(this.shards).reduce((prev, cur) => prev + cur.length, 0)
   }
 }

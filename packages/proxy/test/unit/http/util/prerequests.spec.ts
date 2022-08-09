@@ -7,8 +7,8 @@ describe('http/util/prerequests', () => {
   let preRequests: PreRequests
 
   function expectPendingCounts (pendingRequests: number, pendingPreRequests: number) {
-    expect(preRequests.pendingRequests._length()).to.eq(pendingRequests, 'wrong number of pending requests')
-    expect(preRequests.pendingPreRequests._length()).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
+    expect(preRequests.pendingRequests.length).to.eq(pendingRequests, 'wrong number of pending requests')
+    expect(preRequests.pendingPreRequests.length).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
   }
 
   beforeEach(() => {
