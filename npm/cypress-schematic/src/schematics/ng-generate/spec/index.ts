@@ -53,10 +53,11 @@ export default function (options: Schema): Rule {
     }
 
     if (options.path === undefined) {
-      options.path = `${project.root}/cypress/ct`
+      options.path = options.testingType === 'component' ? `${project.root}/cypress/ct` : `${project.root}/cypress/e2e`
     }
 
-    const templateSource = apply(url('../files/ct/__path__'), [
+    const templatePath = options.testingType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
+    const templateSource = apply(url(templatePath), [
       applyTemplates({
         classify: strings.classify,
         dasherize: strings.dasherize,

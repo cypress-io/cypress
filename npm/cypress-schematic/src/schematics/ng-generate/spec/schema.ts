@@ -7,4 +7,7 @@ export interface Schema {
 
   // The name of the project.
   project?: string
+
+  // The name of the project.
+  testingType: 'e2e' | 'component'
 }

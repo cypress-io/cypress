@@ -237,6 +237,7 @@ function modifyAngularJson (options: any): Rule {
             devServerTarget: `${project}:serve`,
             watch: true,
             headless: false,
+            testingType: 'component',
           },
           configurations: {
             production: {

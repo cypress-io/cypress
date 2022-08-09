@@ -7,7 +7,7 @@
     "path": {
       "type": "string",
       "format": "path",
-      "description": "The path where the e2e test will be created.",
+      "description": "The path where the component test will be created.",
       "visible": false
     },
     "project": {
@@ -19,12 +19,18 @@
     },
     "name": {
       "type": "string",
-      "description": "The name of the e2e test.",
+      "description": "The name of the component test.",
       "$default": {
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What is the name of the e2e test?"
+      "x-prompt": "What is the name of the component test?"
+    },
+    "testingType": {
+      "type": "string",
+      "description": "The type of test to generate - e2e or component. e2e is default.",
+      "$default": "e2e",
+      "x-prompt": "What type of test should be generated (e2e | component)?"
     }
   },
   "required": [

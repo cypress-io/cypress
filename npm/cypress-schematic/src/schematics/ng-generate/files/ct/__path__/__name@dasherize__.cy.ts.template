@@ -1,10 +1,7 @@
-import { mount } from '@cypress/angular'
 import { <%= classify(name) %> } from './<%= classify(name) %>.component'
 
 describe('<%= classify(name) %>', () => {
-  it('works', () => {
-    mount(<%= classify(name) %>)
-    // now use standard Cypress commands
-    cy.contains('Hello World!').should('be.visible')
+  it('should mount', () => {
+    cy.mount(<%= classify(name) %>)
   })
 })

@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   <% if (e2e) { %>
   e2e: {
-    'baseUrl': '<%= baseUrl%>',
+    'baseUrl': '<%= baseUrl%>'
   },
   <% } %>
   <% if (ct) { %>
@@ -12,7 +12,7 @@ export default defineConfig({
       framework: 'angular',
       bundler: 'webpack',
     },
-    specPattern: '**/*.cy.ts',
+    specPattern: '**/*.cy.ts'
   }
   <% } %>
 })

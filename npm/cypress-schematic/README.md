@@ -19,17 +19,19 @@
 
 ✅  Install Cypress
 
-✅  Add npm scripts for running Cypress in `run` mode and `open` mode
+✅  Add npm scripts for running Cypress e2e tests in `run` mode and `open` mode
 
 ✅  Scaffold base Cypress files and directories
 
-✅  Provide the ability to add new e2e files easily using `ng-generate`
+✅  Provide the ability to add new e2e and component specs easily using `ng-generate`
 
-✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
+✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress for e2e tests.
+
+✅  Optional: prompt you to add a `ng ct` command to use Cypress component testing.
 
 ## Requirements
 
-- Angular 12+
+- Angular 13+
 
 ## Usage ⏯
 
@@ -57,11 +59,28 @@ If you have chosen to add or update the `ng e2e` command, you can also run Cypre
 ng e2e
 ```
 
+If you have chosen to add the `ng ct` command, you can also run Cypress component testing in `open` mode using this:
+
+```shell script
+ng ct
+```
+
 To generate new e2e spec files:
 
 ```shell script
+<<<<<<< HEAD
 ng generate @cypress/schematic:e2e
 ``` 
+=======
+ng generate @cypress/schematic:spec --testing-type=e2e
+```
+
+To generate new component spec files:
+
+```shell script
+ng generate @cypress/schematic:spec --testing-type=ct
+```
+>>>>>>> 2ba147e9ee (update ng-generate to be test-type agnostic - ng generate @cypress/schematic:spec. update readme. add tests.)
 
 ## Builder Options 🛠
 
@@ -223,12 +242,22 @@ In order to prevent the application from building, add the following to the end 
 
 ## Generator Options
 
-### Specify Filename (bypassing CLI prompt)
+### Specify Testing Type 
 
-In order to bypass the prompt asking for your e2e spec name, simply add a `--name=` flag like this:
+The default generated spec is E2E.  In order to generate a component test you can run:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login
+ng generate @cypress/schematic:spec --name=button --testingType=component
+```
+
+If you are using the CLI tool, a prompt will appear asking which spec type you want to generate.
+
+### Specify Filename (bypassing CLI prompt)
+
+In order to bypass the prompt asking for your spec name add a `--name=` flag like this:
+
+```shell script
+ng generate @cypress/schematic:spec --name=login
 ```
 
 This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
@@ -238,17 +267,17 @@ This will create a new spec file named `login.cy.ts` in the default Cypress fold
 Add a `--project=` flag to specify the project:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login --project=sandbox
+ng generate @cypress/schematic:spec --name=login --project=sandbox
 ```
 ### Specify Path
 
 Add a `--path=` flag to specify the project:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login --path=src/app/tests
+ng generate @cypress/schematic:spec --name=login --path=src/app/tests
 ```
 
-This will create the e2e spec file in your specific location, creating folders as needed.
+This will create a spec file in your specific location, creating folders as needed. By default, new specs are created in either `cypress/e2e` for E2E specs or `cypress/ct` for component specs.
 
 ## Migrating from Protractor to Cypress?
 

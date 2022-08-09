@@ -88,23 +88,9 @@
       "description": "Recompile and run tests when files change.",
       "default": false
     },
-    "excludeSpecPattern": {
-      "type": [
-        "string",
-        "array"
-      ],
-      "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests."
-    },
-    "specPattern": {
-      "type": [
-        "string",
-        "array"
-      ],
-      "description": "A String or Array of glob patterns of the test files to load."
-    },
-    "supportFile": {
+    "testingType": {
       "type": "string",
-      "description": "Path to file to load before spec files load. This file is compiled and bundled. (Pass false to disable)"
+      "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e."
     }
   },
   "additionalProperties": true
