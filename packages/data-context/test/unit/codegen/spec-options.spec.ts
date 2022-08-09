@@ -1,3 +1,4 @@
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import fs from 'fs-extra'
 import path from 'path'
@@ -27,10 +28,11 @@ describe('spec-options', () => {
 
     context('unique file names', () => {
       for (const specExtension of expectedSpecExtensions) {
-        it(`generates options for name names with extension ${specExtension}`, async () => {
-          const testSpecOptions = new SpecOptions(ctx, {
+        it(`generates options for names with extension ${specExtension}`, async () => {
+          const testSpecOptions = new SpecOptions({
             codeGenPath: `${tmpPath}/TestName${specExtension}.js`,
             codeGenType: 'e2e',
+            isDefaultSpecPattern: true,
           })
 
           const result = await testSpecOptions.getCodeGenOptions()
@@ -41,9 +43,10 @@ describe('spec-options', () => {
       }
 
       it('generates options for file name without spec extension', async () => {
-        const testSpecOptions = new SpecOptions(ctx, {
+        const testSpecOptions = new SpecOptions({
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'e2e',
+          isDefaultSpecPattern: true,
         })
 
         const result = await testSpecOptions.getCodeGenOptions()
@@ -53,9 +56,10 @@ describe('spec-options', () => {
       })
 
       it('generates options for file name with multiple extensions', async () => {
-        const testSpecOptions = new SpecOptions(ctx, {
+        const testSpecOptions = new SpecOptions({
           codeGenPath: `${tmpPath}/TestName.foo.bar.js`,
           codeGenType: 'e2e',
+          isDefaultSpecPattern: true,
         })
 
         const result = await testSpecOptions.getCodeGenOptions()
@@ -65,9 +69,11 @@ describe('spec-options', () => {
       })
 
       it('generates options with given codeGenType', async () => {
-        const testSpecOptions = new SpecOptions(ctx, {
+        const testSpecOptions = new SpecOptions({
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'component',
+          isDefaultSpecPattern: true,
+          framework: WIZARD_FRAMEWORKS[1],
         })
 
         const result = await testSpecOptions.getCodeGenOptions()
@@ -79,9 +85,10 @@ describe('spec-options', () => {
     context('duplicate files names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for file name with extension ${specExtension}`, async () => {
-          const testSpecOptions = new SpecOptions(ctx, {
+          const testSpecOptions = new SpecOptions({
             codeGenPath: `${tmpPath}/TestName${specExtension}.js`,
             codeGenType: 'e2e',
+            isDefaultSpecPattern: true,
           })
 
           await fs.outputFile(`${tmpPath}/TestName${specExtension}.js`, '// foo')
@@ -102,9 +109,10 @@ describe('spec-options', () => {
       }
 
       it('generates options for file name without spec extension', async () => {
-        const testSpecOptions = new SpecOptions(ctx, {
+        const testSpecOptions = new SpecOptions({
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'e2e',
+          isDefaultSpecPattern: true,
         })
 
         await fs.outputFile(`${tmpPath}/TestName.js`, '// foo')
@@ -124,9 +132,10 @@ describe('spec-options', () => {
       })
 
       it('generates options for file name with multiple extensions', async () => {
-        const testSpecOptions = new SpecOptions(ctx, {
+        const testSpecOptions = new SpecOptions({
           codeGenPath: `${tmpPath}/TestName.foo.bar.js`,
           codeGenType: 'e2e',
+          isDefaultSpecPattern: true,
         })
 
         await fs.outputFile(`${tmpPath}/TestName.foo.bar.js`, '// foo')
