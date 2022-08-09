@@ -78,6 +78,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -97,6 +98,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -116,6 +118,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -135,6 +138,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'alpha',
     /**
@@ -160,6 +164,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -178,6 +183,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -196,6 +202,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -215,6 +222,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -236,6 +244,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'angular',
+    glob: '*.component.ts',
     mountModule: 'cypress/angular',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),

@@ -1,7 +1,6 @@
 name: "❄️ Flaky test in `cypress-io/cypress` repository"
-title: "[Flaky test in `cypress-io/cypress` repository]: "
+title: "Flaky test: "
 labels: ["topic: flake ❄️", "stage: fire watch"]
-epics: ["Restore confidence in CI"]
 description: Report a flaky test in the Cypress open-source repository.
 body:
   - type: markdown
