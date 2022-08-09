@@ -13,6 +13,14 @@
       "aliases": [
         "e2e-spec"
       ]
+    },
+    "ct": {
+      "description": "Create a component spec file",
+      "factory": "./ng-generate/ct/index",
+      "schema": "./ng-generate/ct/schema.json",
+      "aliases": [
+        "ct-spec"
+      ]
     }
   }
 }

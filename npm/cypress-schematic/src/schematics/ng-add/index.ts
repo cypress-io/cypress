@@ -29,12 +29,33 @@ export default function (_options: any): Rule {
     _options = { ..._options, __version__: getAngularVersion(tree) }
 
     return chain([
-      updateDependencies(),
-      addCypressFiles(),
+      updateDependencies(_options),
+      addCypressFiles(_options),
       addCypressTestScriptsToPackageJson(),
       modifyAngularJson(_options),
     ])(tree, _context)
   }
+}
+
+export const supportFileContent = (type: string): string => {
+  return `// ***********************************************************
+// This example support/${type}.ts is processed and
+// loaded automatically before your test files.
+//
+// This is a great place to put global configuration and
+// behavior that modifies Cypress.
+//
+// You can change the location of this file or turn off
+// automatically serving support files with the
+// 'supportFile' configuration option.
+//
+// You can read more here:
+// https://on.cypress.io/configuration
+// ***********************************************************
+
+// When a command from ./commands is ready to use, import with \`import './commands'\` syntax
+// import './commands';
+`
 }
 
 function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
@@ -43,12 +64,18 @@ function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue)
   json.modify(path, value)
 }
 
-function updateDependencies (): Rule {
+function updateDependencies (options: any): Rule {
   return (tree: Tree, context: SchematicContext): any => {
     context.logger.debug('Updating dependencies...')
     context.addTask(new NodePackageInstallTask({ allowScripts: true }))
 
-    const addDependencies = of('cypress').pipe(
+    const dependencies = ['cypress']
+
+    if (options.ct) {
+      dependencies.push('@cypress/angular', '@cypress/webpack-dev-server')
+    }
+
+    const addDependencies = of(...dependencies).pipe(
       concatMap((packageName: string) => getLatestNodeVersion(packageName)),
       map((packageFromRegistry: NodePackage) => {
         const { name, version } = packageFromRegistry
@@ -72,6 +99,7 @@ function updateDependencies (): Rule {
 function addCypressTestScriptsToPackageJson (): Rule {
   return (tree: Tree) => {
     addPropertyToPackageJson(tree, ['scripts'], {
+      'ct': 'ng ct',
       'e2e': 'ng e2e',
       'cypress:open': 'cypress open',
       'cypress:run': 'cypress run',
@@ -79,7 +107,7 @@ function addCypressTestScriptsToPackageJson (): Rule {
   }
 }
 
-function addCypressFiles (): Rule {
+function addCypressFiles (options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.debug('Adding cypress files')
     const angularJsonValue = getAngularJsonValue(tree)
@@ -97,12 +125,14 @@ function addCypressFiles (): Rule {
           apply(url('./files'), [
             move(project.root),
             template({
+              ...options,
               ...strings,
               root: project.root ? `${project.root}/` : project.root,
               baseUrl,
               relativeToWorkspace,
             }),
           ]),
+          options.ct && !tree.exists(`${project.root}/cypress/support/component.ts`) && tree.create(`${project.root}/cypress/support/component.ts`, supportFileContent('component')),
         )
       }),
     )(tree, context)
@@ -129,14 +159,20 @@ function addNewCypressCommands (
   runJson: JsonObject,
   openJson: JsonObject,
   e2eJson: JsonObject,
-  e2eUpdate: boolean,
+  e2e: boolean,
+  ctJson: JsonObject,
+  ct: boolean,
 ) {
   const projectArchitectJson = angularJsonVal['projects'][project]['architect']
 
   projectArchitectJson['cypress-run'] = runJson
   projectArchitectJson['cypress-open'] = openJson
 
-  if (e2eUpdate || !projectArchitectJson['e2e']) {
+  if (ct) {
+    projectArchitectJson['ct'] = ctJson
+  }
+
+  if (e2e || !projectArchitectJson['e2e']) {
     projectArchitectJson['e2e'] = e2eJson
   }
 
@@ -195,6 +231,20 @@ function modifyAngularJson (options: any): Rule {
           },
         }
 
+        const ctJson = {
+          builder,
+          options: {
+            devServerTarget: `${project}:serve`,
+            watch: true,
+            headless: false,
+          },
+          configurations: {
+            production: {
+              devServerTarget: `${project}:serve:production`,
+            },
+          },
+        }
+
         const configFile = getCypressConfigFile(angularJsonVal, project)
 
         if (configFile) {
@@ -202,7 +252,7 @@ function modifyAngularJson (options: any): Rule {
           Object.assign(openJson.options, { configFile })
         }
 
-        if (options.e2eUpdate) {
+        if (options.e2e) {
           context.logger.debug(`Replacing e2e command with cypress-run in angular.json`)
           removeE2ELinting(tree, angularJsonVal, project)
         }
@@ -220,7 +270,9 @@ function modifyAngularJson (options: any): Rule {
           runJson,
           openJson,
           e2eJson,
-          options.e2eUpdate,
+          options.e2e,
+          ctJson,
+          options.ct,
         )
       })
     } else {
