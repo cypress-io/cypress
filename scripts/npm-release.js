@@ -142,7 +142,7 @@ const releasePackages = async (packages) => {
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'], { env: { NPM_CONFIG_LEGACY_PEER_DEPS: true } })
 
     console.log(`Released ${name} successfully:`)
     console.log(stdout)
