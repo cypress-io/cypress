@@ -217,8 +217,9 @@ describe('<SpecsListBanners />', () => {
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
       it('should render when not previously-dismissed', () => {
+        cy.clock(Date.now())
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-
+        cy.tick(1050)
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
@@ -248,7 +249,10 @@ describe('<SpecsListBanners />', () => {
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: {
         ...CloudUserStubs.me,
-        firstOrganization: null,
+        firstOrganization: {
+          __typename: 'CloudOrganizationConnection',
+          nodes: [],
+        },
       },
       currentProject: {
         __typename: 'CurrentProject',
@@ -262,8 +266,9 @@ describe('<SpecsListBanners />', () => {
       })
 
       it('should render when not previously-dismissed', () => {
+        cy.clock(Date.now())
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-
+        cy.tick(1050)
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
@@ -307,8 +312,9 @@ describe('<SpecsListBanners />', () => {
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
       it('should render when not previously-dismissed', () => {
+        cy.clock(Date.now())
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-
+        cy.tick(1050)
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
@@ -372,8 +378,9 @@ describe('<SpecsListBanners />', () => {
       })
 
       it('should render when not previously-dismissed', () => {
+        cy.clock(Date.now())
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-
+        cy.tick(1050)
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 

@@ -254,6 +254,7 @@ debouncedWatch(
   },
   {
     debounce: 1000,
+    immediate: true,
   },
 )
 
