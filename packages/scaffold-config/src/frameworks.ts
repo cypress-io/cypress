@@ -78,6 +78,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -97,6 +98,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -116,6 +118,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -135,6 +138,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'alpha',
     /**
@@ -160,6 +164,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -178,6 +183,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue2',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -196,6 +202,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
+    glob: '*.vue',
     mountModule: 'cypress/vue',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -215,31 +222,32 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
+    glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
-  // TODO: revert once Angular is slated for release
-  // {
-  //   type: 'angular',
-  //   configFramework: 'angular',
-  //   category: 'template',
-  //   name: 'Angular',
-  //   detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
-  //   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-  //   dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-  //     return [
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
-  //     ]
-  //   },
-  //   codeGenFramework: 'angular',
-  //   mountModule: 'cypress/angular',
-  //   supportStatus: 'full',
-  //   componentIndexHtml: componentIndexHtmlGenerator(),
-  //   specPattern: '**/*.cy.ts',
-  // },
+  {
+    type: 'angular',
+    configFramework: 'angular',
+    category: 'template',
+    name: 'Angular',
+    detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+      ])
+    },
+    codeGenFramework: 'angular',
+    glob: '*.component.ts',
+    mountModule: 'cypress/angular',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: '**/*.cy.ts',
+  },
 ] as const

@@ -120,7 +120,7 @@ describe('Choose a Browser Page', () => {
         body: {
           data: {
             launchOpenProject: true,
-            setProjectPreferences: {
+            setProjectPreferencesInGlobalCache: {
               currentProject: {
                 id: 'test-id',
                 title: 'launchpad',
