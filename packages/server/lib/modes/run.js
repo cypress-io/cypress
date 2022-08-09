@@ -29,6 +29,7 @@ const humanTime = require('../util/human_time')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
+const { debugElapsedTime } = require('../util/performance_benchmark')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -1661,6 +1662,9 @@ module.exports = {
     }
 
     await loading
+
+    debugElapsedTime('run mode ready')
+
     try {
       return this.ready(options)
     } catch (e) {
