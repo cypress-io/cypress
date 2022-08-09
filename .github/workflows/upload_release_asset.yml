@@ -1,7 +1,7 @@
-# fossa report attribution --debug --format spdx >> myFile
 name: Upload SBOM as Release Asset
-# Ensures that this is only run once, either when pushing
-# directly to main OR when pushing to a PR against main.
+# This workflow triggers whenever there is a new release published.  The 
+# action generates a Software Bill of Materials and uploads it as a
+# release artifact.  This satisfies compliance initiatives.
 on:
   release:
     types:
