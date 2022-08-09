@@ -98,6 +98,7 @@
     "ospath": "1.2.2",
     "p-defer": "^3.0.0",
     "p-queue": "6.1.0",
+    "performance-now": "^2.1.0",
     "pluralize": "8.0.0",
     "randomstring": "1.1.5",
     "recast": "0.20.4",
