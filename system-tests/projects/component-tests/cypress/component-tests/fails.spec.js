@@ -1,4 +1,4 @@
-describe('simple passing spec', () => {
+describe('simple failing spec', () => {
   it('fails', () => {
     expect(1).to.eq(2)
   })

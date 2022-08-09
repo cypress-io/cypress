@@ -107,6 +107,24 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
+const ANGULAR_MAJOR_VERSIONS = ['13', '14']
+
+describe(`Angular CLI major versions`, () => {
+  systemTests.setup()
+
+  for (const majorVersion of ANGULAR_MAJOR_VERSIONS) {
+    const spec = `${majorVersion === '14' ? 'src/app/components/standalone.component.cy.ts,src/app/mount.cy.ts' : 'src/app/mount.cy.ts'}`
+
+    systemTests.it(`v${majorVersion} with mount tests`, {
+      project: `angular-${majorVersion}`,
+      spec,
+      testingType: 'component',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+})
+
 describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 

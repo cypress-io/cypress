@@ -572,7 +572,7 @@ We detected that you have versions of dependencies that are not officially suppo
 
 If you're experiencing problems, downgrade dependencies and restart Cypress.
 
-   28 modules
+   29 modules
 
 ====================================================================================================
 
@@ -581,7 +581,7 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (fails.spec.js, foo.spec.js)                                             │
+  │ Specs:        3 found (fails.spec.js, foo.spec.js, retries.spec.js)                            │
   │ Searched:     **/*.spec.js                                                                     │
   │ Experiments:  experimentalSingleTabRunMode=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -589,10 +589,10 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fails.spec.js                                                                   (1 of 2)
+  Running:  fails.spec.js                                                                   (1 of 3)
 
 
-  simple passing spec
+  simple failing spec
     1) fails
     2) fails again
 
@@ -600,7 +600,7 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   0 passing
   2 failing
 
-  1) simple passing spec
+  1) simple failing spec
        fails:
 
       AssertionError: expected 1 to equal 2
@@ -611,7 +611,7 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
       
       [stack trace lines]
 
-  2) simple passing spec
+  2) simple failing spec
        fails again:
 
       AssertionError: expected 1 to equal 3
@@ -642,9 +642,9 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple passing spec -- fails (fai     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple failing spec -- fails (fai     (1280x720)
      led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple passing spec -- fails agai     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/fails.spec.js/simple failing spec -- fails agai     (1280x720)
      n (failed).png                                                                                 
 
 
@@ -656,7 +656,7 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  foo.spec.js                                                                     (2 of 2)
+  Running:  foo.spec.js                                                                     (2 of 3)
 
 
   component
@@ -690,6 +690,40 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/foo.spec.js.mp4                     (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  retries.spec.js                                                                 (3 of 3)
+
+
+  retries
+    (Attempt 1 of 2) passes after 1 failure
+    ✓ passes after 1 failure
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     retries.spec.js                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/retries.spec.js.mp4                 (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -700,8 +734,10 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
   │ ✖  fails.spec.js                            XX:XX        2        -        2        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  foo.spec.js                              XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  retries.spec.js                          XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        3        1        2        -        -  
+    ✖  1 of 3 failed (33%)                      XX:XX        4        2        2        -        -  
 
 
 `
