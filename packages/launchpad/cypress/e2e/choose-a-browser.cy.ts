@@ -215,7 +215,8 @@ describe('Choose a Browser Page', () => {
       cy.wait('@closeBrowser')
     })
 
-    it('performs mutation to focus open browser when focus button is pressed', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23220
+    it.skip('performs mutation to focus open browser when focus button is pressed', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
