@@ -1642,7 +1642,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    # parallelism: 3 TODO: Add parallelism once we have more specs
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
