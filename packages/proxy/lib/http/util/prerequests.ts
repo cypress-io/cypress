@@ -24,7 +24,49 @@ export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
 type PendingRequest = {
   ctxDebug
   callback: GetPreRequestCb
-  timeout: ReturnType<typeof setTimeout>
+  timeout: NodeJS.Timeout
+}
+
+type PendingPreRequest = {
+  browserPreRequest: BrowserPreRequest
+  timestamp: number
+}
+
+/**
+ * Data structure that shards multiple items with duplicated keys into stacks.
+ */
+class ShardedStackMap<T> {
+  private shards: Record<string, Array<T>> = {}
+  push (shardKey: string, value: T) {
+    if (!this.shards[shardKey]) this.shards[shardKey] = []
+
+    this.shards[shardKey].push(value)
+  }
+  pop (shardKey: string): T | undefined {
+    const shard = this.shards[shardKey]
+
+    if (!shard) return
+
+    const item = shard.pop()
+
+    if (shard.length === 0) delete this.shards[shardKey]
+
+    return item
+  }
+  removeMatching (filterFn: (value: T) => boolean) {
+    Object.entries(this.shards).forEach(([shardKey, shard]) => {
+      this.shards[shardKey] = shard.filter(filterFn)
+      if (this.shards[shardKey].length === 0) delete this.shards[shardKey]
+    })
+  }
+  removeExact (shardKey: string, value: T) {
+    const i = this.shards[shardKey].findIndex((v) => v === value)
+
+    this.shards[shardKey].splice(i, 1)
+  }
+  _length () {
+    return Object.values(this.shards).reduce((prev, cur) => prev + cur.length, 0)
+  }
 }
 
 // This class' purpose is to match up incoming "requests" (requests from the browser received by the http proxy)
@@ -35,9 +77,8 @@ type PendingRequest = {
 // ever comes in, we don't want to block proxied requests indefinitely.
 export class PreRequests {
   requestTimeout: number
-  pendingPreRequests: Record<string, BrowserPreRequest> = {}
-  pendingRequests: Record<string, PendingRequest> = {}
-  prerequestTimestamps: Record<string, number> = {}
+  pendingPreRequests = new ShardedStackMap<PendingPreRequest>()
+  pendingRequests = new ShardedStackMap<PendingRequest>()
   sweepInterval: ReturnType<typeof setInterval>
 
   constructor (requestTimeout = 500) {
@@ -55,13 +96,15 @@ export class PreRequests {
     this.sweepInterval = setInterval(() => {
       const now = Date.now()
 
-      Object.entries(this.prerequestTimestamps).forEach(([key, timestamp]) => {
+      this.pendingPreRequests.removeMatching(({ timestamp, browserPreRequest }) => {
         if (timestamp + this.requestTimeout * 2 < now) {
-          debugVerbose('timed out unmatched pre-request %s: %o', key, this.pendingPreRequests[key])
+          debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
-          delete this.pendingPreRequests[key]
-          delete this.prerequestTimestamps[key]
+
+          return false
         }
+
+        return true
       })
     }, this.requestTimeout * 2)
   }
@@ -69,45 +112,47 @@ export class PreRequests {
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
     const key = `${browserPreRequest.method}-${browserPreRequest.url}`
+    const pendingRequest = this.pendingRequests.pop(key)
 
-    if (this.pendingRequests[key]) {
+    if (pendingRequest) {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
-      clearTimeout(this.pendingRequests[key].timeout)
-      this.pendingRequests[key].callback(browserPreRequest)
-      delete this.pendingRequests[key]
+      clearTimeout(pendingRequest.timeout)
+      pendingRequest.callback(browserPreRequest)
+
+      return
     }
 
     debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
-    this.pendingPreRequests[key] = browserPreRequest
-    this.prerequestTimestamps[key] = Date.now()
+    this.pendingPreRequests.push(key, {
+      browserPreRequest,
+      timestamp: Date.now(),
+    })
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
+    const pendingPreRequest = this.pendingPreRequests.pop(key)
 
-    if (this.pendingPreRequests[key]) {
+    if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, this.pendingPreRequests[key])
-      callback(this.pendingPreRequests[key])
-
-      delete this.pendingPreRequests[key]
-      delete this.prerequestTimestamps[key]
+      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+      callback(pendingPreRequest.browserPreRequest)
 
       return
     }
 
-    const timeout = setTimeout(() => {
-      callback()
-      ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
-      metrics.unmatchedRequests++
-      delete this.pendingRequests[key]
-    }, this.requestTimeout)
-
-    this.pendingRequests[key] = {
+    const pendingRequest: PendingRequest = {
       ctxDebug,
       callback,
-      timeout,
+      timeout: setTimeout(() => {
+        ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        metrics.unmatchedRequests++
+        this.pendingRequests.removeExact(key, pendingRequest)
+        callback()
+      }, this.requestTimeout),
     }
+
+    this.pendingRequests.push(key, pendingRequest)
   }
 }
