@@ -371,9 +371,9 @@ export class Server {
     // cancel any outstanding xhr's
     // which aren't already complete
     // or already canceled
+
     return _
     .chain(this.xhrs)
-    .reject({ readyState: 4 })
     .reject({ canceled: true })
     .map(this.cancelXhr)
     .value()
