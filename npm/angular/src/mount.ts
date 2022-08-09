@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Type } from '@angular/core'
+import { Component, EventEmitter, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -19,23 +19,54 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing'
+import {
+  setupHooks,
+} from '@cypress/mount-utils'
 
 /**
  * Additional module configurations needed while mounting the component, like
  * providers, declarations, imports and even component @Inputs()
  *
  *
- * @interface TestBedConfig
+ * @interface MountConfig
  * @see https://angular.io/api/core/testing/TestModuleMetadata
  */
-export interface TestBedConfig<T extends object> extends TestModuleMetadata {
+export interface MountConfig<T> extends TestModuleMetadata {
   /**
-   * @memberof TestBedConfig
+   * @memberof MountConfig
+   * @description flag to automatically create a cy.spy() for every component @Output() property
+   * @example
+   * export class ButtonComponent {
+   *  @Output clicked = new EventEmitter()
+   * }
+   *
+   * cy.mount(ButtonComponent, { autoSpyOutputs: true })
+   * cy.get('@clickedSpy).should('have.been.called')
+   */
+  autoSpyOutputs?: boolean
+
+  /**
+   * @memberof MountConfig
+   * @description flag defaulted to true to automatically detect changes in your components
+   */
+  autoDetectChanges?: boolean
+  /**
+   * @memberof MountConfig
    * @example
    * import { ButtonComponent } from 'button/button.component'
    * it('renders a button with Save text', () => {
    *  cy.mount(ButtonComponent, { componentProperties: { text: 'Save' }})
    *  cy.get('button').contains('Save')
+   * })
+   *
+   * it('renders a button with a cy.spy() replacing EventEmitter', () => {
+   *  cy.mount(ButtonComponent, {
+   *    componentProperties: {
+   *      clicked: cy.spy().as('mySpy)
+   *    }
+   *  })
+   *  cy.get('button').click()
+   *  cy.get('@mySpy').should('have.been.called')
    * })
    */
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
@@ -45,7 +76,7 @@ export interface TestBedConfig<T extends object> extends TestModuleMetadata {
  * Type that the `mount` function returns
  * @type MountResponse<T>
  */
-export type MountResponse<T extends object> = {
+export type MountResponse<T> = {
   /**
    * Fixture for debugging and testing a component.
    *
@@ -53,14 +84,6 @@ export type MountResponse<T extends object> = {
    * @see https://angular.io/api/core/testing/ComponentFixture
    */
   fixture: ComponentFixture<T>
-
-  /**
-   * Configures and initializes environment and provides methods for creating components and services.
-   *
-   * @memberof MountResponse
-   * @see https://angular.io/api/core/testing/TestBed
-   */
-  testBed: TestBed
 
   /**
    * The instance of the root component class
@@ -75,13 +98,13 @@ export type MountResponse<T extends object> = {
  * Bootstraps the TestModuleMetaData passed to the TestBed
  *
  * @param {Type<T>} component Angular component being mounted
- * @param {TestBedConfig} config TestBed configuration passed into the mount function
- * @returns {TestBedConfig} TestBedConfig
+ * @param {MountConfig} config TestBed configuration passed into the mount function
+ * @returns {MountConfig} MountConfig
  */
-function bootstrapModule<T extends object> (
+function bootstrapModule<T> (
   component: Type<T>,
-  config: TestBedConfig<T>,
-): TestBedConfig<T> {
+  config: MountConfig<T>,
+): MountConfig<T> {
   const { componentProperties, ...testModuleMetaData } = config
 
   if (!testModuleMetaData.declarations) {
@@ -92,7 +115,12 @@ function bootstrapModule<T extends object> (
     testModuleMetaData.imports = []
   }
 
-  testModuleMetaData.declarations.push(component)
+  // check if the component is a standalone component
+  if ((component as any).ɵcmp.standalone) {
+    testModuleMetaData.imports.push(component)
+  } else {
+    testModuleMetaData.declarations.push(component)
+  }
 
   if (!testModuleMetaData.imports.includes(CommonModule)) {
     testModuleMetaData.imports.push(CommonModule)
@@ -104,74 +132,84 @@ function bootstrapModule<T extends object> (
 /**
  * Initializes the TestBed
  *
- * @param {Type<T>} component Angular component being mounted
- * @param {TestBedConfig} config TestBed configuration passed into the mount function
- * @returns {TestBed} TestBed
+ * @param {Type<T> | string} component Angular component being mounted or its template
+ * @param {MountConfig} config TestBed configuration passed into the mount function
+ * @returns {Type<T>} componentFixture
  */
-function initTestBed<T extends object> (
-  component: Type<T>,
-  config: TestBedConfig<T>,
-): TestBed {
+function initTestBed<T> (
+  component: Type<T> | string,
+  config: MountConfig<T>,
+): Type<T> {
   const { providers, ...configRest } = config
 
-  const testBed: TestBed = getTestBed()
+  const componentFixture = createComponentFixture(component) as Type<T>
 
-  testBed.resetTestEnvironment()
-
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-    {
-      teardown: { destroyAfterEach: false },
-    },
-  )
-
-  testBed.configureTestingModule({
-    ...bootstrapModule(component, configRest),
+  TestBed.configureTestingModule({
+    ...bootstrapModule(componentFixture, configRest),
   })
 
   if (providers != null) {
-    testBed.overrideComponent(component, {
+    TestBed.overrideComponent(componentFixture, {
       add: {
         providers,
       },
     })
   }
 
-  return testBed
+  return componentFixture
+}
+
+@Component({ selector: 'cy-wrapper-component', template: '' })
+class WrapperComponent { }
+
+/**
+ * Returns the Component if Type<T> or creates a WrapperComponent
+ *
+ * @param {Type<T> | string} component The component you want to create a fixture of
+ * @returns {Type<T> | WrapperComponent}
+ */
+function createComponentFixture<T> (
+  component: Type<T> | string,
+): Type<T | WrapperComponent> {
+  if (typeof component === 'string') {
+    TestBed.overrideTemplate(WrapperComponent, component)
+
+    return WrapperComponent
+  }
+
+  return component
 }
 
 /**
  * Creates the ComponentFixture
  *
- * @param component Angular component being mounted
- * @param testBed TestBed
- * @param autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
+ * @param {Type<T>} component Angular component being mounted
+ * @param {MountConfig<T>} config MountConfig
+
  * @returns {ComponentFixture<T>} ComponentFixture
  */
-function setupFixture<T extends object> (
+function setupFixture<T> (
   component: Type<T>,
-  testBed: TestBed,
-  autoDetectChanges: boolean,
+  config: MountConfig<T>,
 ): ComponentFixture<T> {
-  const fixture = testBed.createComponent(component)
+  const fixture = TestBed.createComponent(component)
 
   fixture.whenStable().then(() => {
-    fixture.autoDetectChanges(autoDetectChanges)
+    fixture.autoDetectChanges(config.autoDetectChanges ?? true)
   })
 
   return fixture
 }
 
 /**
- * Gets the componentInstance and Object.assigns any componentProperties() passed in the TestBedConfig
+ * Gets the componentInstance and Object.assigns any componentProperties() passed in the MountConfig
  *
- * @param {TestBedConfig} config TestBed configuration passed into the mount function
+ * @param {MountConfig} config TestBed configuration passed into the mount function
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
  * @returns {T} Component being mounted
  */
-function setupComponent<T extends object> (
-  config: TestBedConfig<T>,
+function setupComponent<T> (
+  config: MountConfig<T>,
   fixture: ComponentFixture<T>,
 ): T {
   let component: T = fixture.componentInstance
@@ -180,15 +218,24 @@ function setupComponent<T extends object> (
     component = Object.assign(component, config.componentProperties)
   }
 
+  if (config.autoSpyOutputs) {
+    Object.keys(component).forEach((key: string, index: number, keys: string[]) => {
+      const property = component[key]
+
+      if (property instanceof EventEmitter) {
+        component[key] = createOutputSpy(`${key}Spy`)
+      }
+    })
+  }
+
   return component
 }
 
 /**
  * Mounts an Angular component inside Cypress browser
  *
- * @param {Type<T>} component imported from angular file
- * @param {TestBedConfig<T>} config configuration used to configure the TestBed
- * @param {boolean} autoDetectChanges boolean flag defaulted to true that turns on change detection automatically
+ * @param {Type<T> | string} component Angular component being mounted or its template
+ * @param {MountConfig<T>} config configuration used to configure the TestBed
  * @example
  * import { HelloWorldComponent } from 'hello-world/hello-world.component'
  * import { MyService } from 'services/my.service'
@@ -201,28 +248,67 @@ function setupComponent<T extends object> (
  *  })
  *  cy.get('h1').contains('Hello World')
  * })
+ *
+ * or
+ *
+ * it('can mount with template', () => {
+ *  mount('<app-hello-world></app-hello-world>', {
+ *    declarations: [HelloWorldComponent],
+ *    providers: [MyService],
+ *    imports: [SharedModule]
+ *  })
+ * })
  * @returns Cypress.Chainable<MountResponse<T>>
  */
-export function mount<T extends object> (
-  component: Type<T>,
-  config: TestBedConfig<T> = {},
-  autoDetectChanges = true,
+export function mount<T> (
+  component: Type<T> | string,
+  config: MountConfig<T> = { },
 ): Cypress.Chainable<MountResponse<T>> {
-  const testBed: TestBed = initTestBed(component, config)
-  const fixture = setupFixture(component, testBed, autoDetectChanges)
+  const componentFixture = initTestBed(component, config)
+  const fixture = setupFixture(componentFixture, config)
   const componentInstance = setupComponent(config, fixture)
 
   const mountResponse: MountResponse<T> = {
-    testBed,
     fixture,
     component: componentInstance,
   }
 
+  const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
+
   Cypress.log({
     name: 'mount',
-    message: component.name,
+    message: logMessage,
     consoleProps: () => ({ result: mountResponse }),
   })
 
   return cy.wrap(mountResponse, { log: false })
 }
+
+/**
+ * Creates a new Event Emitter and then spies on it's `emit` method
+ *
+ * @param {string} alias name you want to use for your cy.spy() alias
+ * @returns EventEmitter<T>
+ */
+export const createOutputSpy = <T>(alias: string) => {
+  const emitter = new EventEmitter<T>()
+
+  cy.spy(emitter, 'emit').as(alias)
+
+  return emitter as any
+}
+
+// Only needs to run once, we reset before each test
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+  {
+    teardown: { destroyAfterEach: false },
+  },
+)
+
+setupHooks(() => {
+  // Not public, we need to call this to remove the last component from the DOM
+  TestBed['tearDownTestingModule']()
+  TestBed.resetTestingModule()
+})
