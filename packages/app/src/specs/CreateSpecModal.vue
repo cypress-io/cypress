@@ -77,11 +77,8 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
-    codeGenGlobs {
-      id
-      component
-    }
     isDefaultSpecPattern
+    ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
 }
