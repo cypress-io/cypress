@@ -12,7 +12,7 @@
       @reconnect-project="showConnectToProject"
     />
     <SpecsListHeader
-      v-model="search"
+      v-model="specFilterModel"
       :specs-list-input-ref-fn="specsListInputRefFn"
       class="pb-32px"
       :result-count="specs.length"
@@ -143,7 +143,7 @@
     </div>
     <NoResults
       v-show="!specs.length"
-      :search="search"
+      :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
       @clear="handleClear"
@@ -189,6 +189,7 @@ import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import { useSpecFilter } from '../composables/useSpecFilter'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -285,6 +286,7 @@ fragment Specs_SpecsList on Query {
       ...SpecsList
     }
     config
+    savedState
     ...SpecPatternModal
   }
   ...SpecHeaderCloudDataTooltip
@@ -313,25 +315,25 @@ const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
 )
 
-const search = ref('')
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
+
 const specsListInputRef = ref<HTMLInputElement>()
-const debouncedSearchString = useDebounce(search, 200)
 
 const specsListInputRefFn = () => specsListInputRef
 
 function handleClear () {
-  search.value = ''
+  specFilterModel.value = ''
   specsListInputRef.value?.focus()
 }
 
 const specs = computed(() => {
   const fuzzyFoundSpecs = cachedSpecs.value.map(makeFuzzyFoundSpec)
 
-  if (!debouncedSearchString.value) {
+  if (!debouncedSpecFilterModel?.value) {
     return fuzzyFoundSpecs
   }
 
-  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSearchString.value)
+  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSpecFilterModel.value)
 })
 
 // Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved
@@ -339,7 +341,7 @@ const specs = computed(() => {
 const treeExpansionCache = ref(new Map<string, boolean>())
 
 // When search value changes or when specs are added/removed, reset the tree expansion cache so that any collapsed directories re-expand
-watch([() => search.value, () => specs.value.length], () => treeExpansionCache.value.clear())
+watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
@@ -368,9 +370,11 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
-// If you are scrolled down the virtual list and the search filter changes,
-// reset scroll position to top of list
-watch(() => debouncedSearchString.value, () => scrollTo(0))
+watch(() => debouncedSpecFilterModel?.value, () => {
+  // If you are scrolled down the virtual list and the search filter changes,
+  // reset scroll position to top of list
+  scrollTo(0)
+})
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
