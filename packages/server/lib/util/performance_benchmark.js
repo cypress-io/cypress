@@ -7,15 +7,13 @@ function threeDecimals (n) {
   return Math.round(n * 1000) / 1000
 }
 
-let startTime
-
 const initializeStartTime = () => {
-  startTime = getTime()
+  global.startTime = getTime()
 }
 
 const debugElapsedTime = (event) => {
   const now = getTime()
-  const delta = now - startTime
+  const delta = now - global.startTime
 
   debug(`elapsed time at ${event}: ${threeDecimals(delta)}`)
 }
