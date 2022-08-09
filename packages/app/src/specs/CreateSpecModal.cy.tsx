@@ -15,6 +15,11 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -29,6 +34,7 @@ describe('<CreateSpecModal />', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             }],
+            isDefaultSpecPattern: true,
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
@@ -73,6 +79,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -87,6 +98,7 @@ describe('Modal Text Input', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             }],
+            isDefaultSpecPattern: true,
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
@@ -116,6 +128,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -130,6 +147,7 @@ describe('Modal Text Input', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             }],
+            isDefaultSpecPattern: true,
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'this/path/does/not/produce/regex/match-',
@@ -163,6 +181,11 @@ describe('playground', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -177,6 +200,7 @@ describe('playground', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             }],
+            isDefaultSpecPattern: true,
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',

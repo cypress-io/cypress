@@ -6,6 +6,6 @@ export const EmptyGenerator: SpecGenerator = {
   card: EmptyGeneratorCard,
   entry: EmptyGeneratorCardStepOne,
   matches: () => true,
-  disabled: () => false,
+  show: () => true,
   id: 'empty',
 }
