@@ -78,7 +78,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23159
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
     it.skip('redirects to the specs list with error if a spec is not found', () => {
       cy.visitApp()
       const { title, intro, explainer } = defaultMessages.specPage.noSpecError

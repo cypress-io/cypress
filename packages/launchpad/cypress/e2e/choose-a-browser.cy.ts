@@ -268,7 +268,7 @@ describe('Choose a Browser Page', () => {
       })
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23158
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
     it.skip('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', () => {
       cy.openProject('launchpad', ['--e2e'])
 

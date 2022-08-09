@@ -1615,7 +1615,7 @@ describe('network stubbing', function () {
       })
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23145
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23145
     it.skip('can modify the request body', function (done) {
       const body = '{"foo":"bar"}'
 
@@ -1944,7 +1944,7 @@ describe('network stubbing', function () {
             cy.wait('@getUrl')
           })
 
-          // TODO: fix https://github.com/cypress-io/cypress/issues/23100
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23100
           it.skip('setPrototypeOf', (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
@@ -2529,7 +2529,7 @@ describe('network stubbing', function () {
         })
       })
 
-      // TODO: fix https://github.com/cypress-io/cypress/issues/23101
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23101
       it.skip('when body contains ascii', function (done) {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('18')
@@ -2543,7 +2543,7 @@ describe('network stubbing', function () {
         })
       })
 
-      // TODO: fix https://github.com/cypress-io/cypress/issues/23150
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23150
       it.skip('when body contains unicode', function (done) {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('8')

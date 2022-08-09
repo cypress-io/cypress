@@ -173,7 +173,7 @@ describe('e2e visit', () => {
       expectedExitCode: 1,
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23162
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
     systemTests.it.skip('fails when file server responds with 404', {
       spec: 'visit_file_404_response_failing.cy.js',
       snapshot: true,

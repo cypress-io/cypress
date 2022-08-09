@@ -343,7 +343,7 @@ describe('e2e record', () => {
 
     setupStubbedServer(routes)
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23152
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23152
     it.skip('passes in parallel with group', function () {
       this.retries(3)
 
@@ -393,7 +393,7 @@ describe('e2e record', () => {
   context('metadata', () => {
     setupStubbedServer(createRoutes())
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23151
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23151
     it.skip('sends Studio usage metadata', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',

@@ -785,7 +785,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/1311
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23201
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23201
     it.skip('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', () => {
       const onLoad = cy.stub()
 

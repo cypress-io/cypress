@@ -153,7 +153,7 @@ describe('Proxy Logging', () => {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23203
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23203
     it.skip('xhr log has response body/status code when xhr response is logged second', (done) => {
       cy.visit('/fixtures/empty.html')
 

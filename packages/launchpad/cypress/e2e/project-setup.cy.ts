@@ -579,7 +579,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'pnpm install -D ')
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23153
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
     it.skip('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 

@@ -146,7 +146,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-maps').select('de_train')
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23156
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23156
     it.skip('can forcibly click even when being covered by another element', (done) => {
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
@@ -174,7 +174,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
     })
 
-    // TODO: fix https://github.com/cypress-io/cypress/issues/23157
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23157
     it.skip('can forcibly click even when element is invisible', (done) => {
       const select = cy.$$('#select-maps').hide()
 
