@@ -33,39 +33,39 @@ type PendingPreRequest = {
 }
 
 /**
- * Data structure that shards multiple items with duplicated keys into stacks.
+ * Data structure that organizes items with duplicated keys into stacks.
  */
-class ShardedStackMap<T> {
-  private shards: Record<string, Array<T>> = {}
-  push (shardKey: string, value: T) {
-    if (!this.shards[shardKey]) this.shards[shardKey] = []
+class StackMap<T> {
+  private stacks: Record<string, Array<T>> = {}
+  push (stackKey: string, value: T) {
+    if (!this.stacks[stackKey]) this.stacks[stackKey] = []
 
-    this.shards[shardKey].push(value)
+    this.stacks[stackKey].push(value)
   }
-  pop (shardKey: string): T | undefined {
-    const shard = this.shards[shardKey]
+  pop (stackKey: string): T | undefined {
+    const stack = this.stacks[stackKey]
 
-    if (!shard) return
+    if (!stack) return
 
-    const item = shard.pop()
+    const item = stack.pop()
 
-    if (shard.length === 0) delete this.shards[shardKey]
+    if (stack.length === 0) delete this.stacks[stackKey]
 
     return item
   }
   removeMatching (filterFn: (value: T) => boolean) {
-    Object.entries(this.shards).forEach(([shardKey, shard]) => {
-      this.shards[shardKey] = shard.filter(filterFn)
-      if (this.shards[shardKey].length === 0) delete this.shards[shardKey]
+    Object.entries(this.stacks).forEach(([stackKey, stack]) => {
+      this.stacks[stackKey] = stack.filter(filterFn)
+      if (this.stacks[stackKey].length === 0) delete this.stacks[stackKey]
     })
   }
-  removeExact (shardKey: string, value: T) {
-    const i = this.shards[shardKey].findIndex((v) => v === value)
+  removeExact (stackKey: string, value: T) {
+    const i = this.stacks[stackKey].findIndex((v) => v === value)
 
-    this.shards[shardKey].splice(i, 1)
+    this.stacks[stackKey].splice(i, 1)
   }
   get length () {
-    return Object.values(this.shards).reduce((prev, cur) => prev + cur.length, 0)
+    return Object.values(this.stacks).reduce((prev, cur) => prev + cur.length, 0)
   }
 }
 
@@ -77,8 +77,8 @@ class ShardedStackMap<T> {
 // ever comes in, we don't want to block proxied requests indefinitely.
 export class PreRequests {
   requestTimeout: number
-  pendingPreRequests = new ShardedStackMap<PendingPreRequest>()
-  pendingRequests = new ShardedStackMap<PendingRequest>()
+  pendingPreRequests = new StackMap<PendingPreRequest>()
+  pendingRequests = new StackMap<PendingRequest>()
   sweepInterval: ReturnType<typeof setInterval>
 
   constructor (requestTimeout = 500) {
