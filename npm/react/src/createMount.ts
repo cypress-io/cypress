@@ -137,7 +137,7 @@ export const makeMountFn = (
  */
 export const makeUnmountFn = (options: UnmountArgs) => {
   return cy.then(() => {
-    const wasUnmounted = mountCleanup()
+    const wasUnmounted = mountCleanup?.()
 
     if (wasUnmounted && options.log) {
       Cypress.log({

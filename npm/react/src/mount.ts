@@ -10,7 +10,7 @@ import type {
   InternalMountOptions,
 } from './types'
 
-let lastReactDom: any
+let lastReactDom: typeof ReactDOM
 
 const cleanup = () => {
   if (lastReactDom) {
