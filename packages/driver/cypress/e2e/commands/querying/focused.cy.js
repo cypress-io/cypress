@@ -215,7 +215,7 @@ describe('src/cy/commands/querying', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 1)
 
           done()
         })

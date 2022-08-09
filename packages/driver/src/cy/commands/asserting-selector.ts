@@ -18,7 +18,7 @@ const reHaveLength = /length/
  */
 export default function (Commands, Cypress, cy, state) {
   Cypress.on('command:enqueued', (obj) => {
-    if ((obj.name === 'shouldS' || obj.name === 'andS')) {
+    if ((obj.name === 'should' || obj.name === 'and')) {
       const isCheckingLengthOrExistence = reExistence.test(obj.args[0]) || reHaveLength.test(obj.args[0])
 
       if (isCheckingLengthOrExistence) {
@@ -48,16 +48,24 @@ export default function (Commands, Cypress, cy, state) {
 
         if (_.isFunction(cmd)) {
           return cmd.apply(memo, args)
-        } else {
-          return cmd
         }
-      } else {
-        return memo[value]
+
+        return cmd
       }
+
+      return memo[value]
+    }
+
+    // .should() is a special case: it inherits timeouts from previous commands, rather than having the option to pass
+    // one in directly. This is a relic of the time when it was executed as part of the resolution of previous
+    // commands, rather than as its own separate thing.
+    const prevTimeout = this.get('prev').get('timeout')
+
+    if (prevTimeout != null) {
+      this.set('timeout', prevTimeout)
     }
 
     return function (subject) {
-
       let exp = cy.expect(subject).to
 
       // if we're not doing existence or length assertions

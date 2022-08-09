@@ -248,9 +248,26 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
     // TODO: define the specific type of options
     verifyUpcomingAssertions (subject, options: Record<string, any> = {}, callbacks: VerifyUpcomingAssertionsCallbacks = {}) {
+      const command = cy.state('current')
       const cmds = getUpcomingAssertions()
 
       cy.state('upcomingAssertions', cmds)
+
+      // Commands that use "verifyUpcomingAssertions" pass their timeout in the `options`, and from here it makes its
+      // way into cy.retry. However, selectors use a different pattern: since they are not responsible for retrying
+      // (the command_queue retries them), they instead set `this.set('timeout', 2000)`, and the command queue later
+      // reads this value.
+
+      // Usually, these two systems do not need to interact; however .should() is a special case, since it inherits
+      // the timeout of previous commands. This is a remnant of the initial design, where it was executed as part of
+      // the previous command (thus the name of this function: "verify upcoming assertions").
+
+      // We here knit the two systems together: Action commands get .set('timeout') called on them, so that .should()
+      // can read the timeout of the previous command from the same place, whether that previous command is a selector
+      // or an action.
+      if (options.timeout) {
+        command.set('timeout', options.timeout)
+      }
 
       // we're applying the default assertion in the
       // case where there are no upcoming assertion commands
@@ -275,10 +292,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
               return
             }
 
-            return cy.ensureElExistence($el)
+            return cy.ensureElExistence($el, command)
           }
           case 'subject':
-            return cy.ensureExistence(subject)
+            return cy.ensureExistence(subject, command)
 
           default:
             return
@@ -566,6 +583,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // if we've temporarily overridden assertions
       // then just bail early with this function
       const overrideAssert = cy.state('overrideAssert')
+
       if (overrideAssert) {
         return overrideAssert.apply(this, args)
       }

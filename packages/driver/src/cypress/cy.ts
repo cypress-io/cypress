@@ -1342,10 +1342,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return undefined
     }
 
+    // If we're getting the subject of a previous command, then any assertions have already
+    // been added to the command log; We don't want to re-add them every time we query
+    // the current subject.
+    this.state('onBeforeLog', () => false)
+
     let subject = subjectChain[0]
 
-    for (let i = 1; i < subjectChain.length; i++) {
-      subject = subjectChain[i](subject)
+    try {
+      for (let i = 1; i < subjectChain.length; i++) {
+        subject = subjectChain[i](subject)
+      }
+    } finally {
+      this.state('onBeforeLog', null)
     }
 
     return subject
