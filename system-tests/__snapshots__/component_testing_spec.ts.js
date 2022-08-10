@@ -642,9 +642,9 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1866x933)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1280x720)
      led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1866x933)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1280x720)
      n (failed).png                                                                                 
 
 
