@@ -9,6 +9,8 @@ import { useStudioStore } from '../store/studio-store'
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
 
+const sizzleRe = /sizzle/i
+
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
@@ -432,7 +434,7 @@ export class AutIframe {
       selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
-        this.scrollIntoView(this._window(), $el[0])
+        this._scrollIntoView(this._window(), $el[0])
       }
     }
 
@@ -450,7 +452,7 @@ export class AutIframe {
 
     if (!$contents || !selectorPlaygroundStore.selector) return
 
-    return this.dom.getElementsForSelector({
+    return this._getElementsForSelector({
       method: selectorPlaygroundStore.method,
       selector: selectorPlaygroundStore.selector,
       cypressDom,
@@ -503,13 +505,13 @@ export class AutIframe {
     }
   }
 
-  private scrollIntoView (win: Window, el: HTMLElement) {
-    if (!el || this.isInViewport(win, el)) return
+  private _scrollIntoView (win: Window, el: HTMLElement) {
+    if (!el || this._isInViewport(win, el)) return
 
     el.scrollIntoView()
   }
 
-  private isInViewport = (win: Window, el: HTMLElement) => {
+  private _isInViewport = (win: Window, el: HTMLElement) => {
     let rect = el.getBoundingClientRect()
 
     return (
@@ -518,5 +520,25 @@ export class AutIframe {
       rect.bottom <= win.innerHeight &&
       rect.right <= win.innerWidth
     )
+  }
+
+  private _getElementsForSelector ({ $root, selector, method, cypressDom }) {
+    let $el: JQuery<HTMLElement> | null = null
+
+    try {
+      if (method === 'contains') {
+        $el = $root.find(cypressDom.getContainsSelector(selector)) as JQuery<HTMLElement>
+        if ($el.length) {
+          $el = cypressDom.getFirstDeepestElement($el)
+        }
+      } else {
+        $el = $root.find(selector)
+      }
+    } catch (err) {
+      // if not a sizzle error, ignore it and let $el be null
+      if (!sizzleRe.test(err.stack)) throw err
+    }
+
+    return $el
   }
 }
