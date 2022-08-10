@@ -45,12 +45,4 @@ describe('@cypress/schematic:spec ng-generate', () => {
       expect(files).to.contain('/projects/sandbox/cypress/ct/foo.cy.ts')
     })
   })
-
-  it('should create cypress ct spec file when spec-ct alias is used', async () => {
-    return schematicRunner.runSchematicAsync('spec-ct', { name: 'foo', project: 'sandbox' }, appTree).toPromise().then((tree) => {
-      const files = tree.files
-
-      expect(files).to.contain('/projects/sandbox/cypress/ct/foo.cy.ts')
-    })
-  })
 })

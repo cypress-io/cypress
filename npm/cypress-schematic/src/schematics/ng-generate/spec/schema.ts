@@ -10,4 +10,8 @@ export interface Schema {
 
   // The name of the project.
   testingType: 'e2e' | 'component'
+
+  e2e?: boolean
+
+  component?: boolean
 }

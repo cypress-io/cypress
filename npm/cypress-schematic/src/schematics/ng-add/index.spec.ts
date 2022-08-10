@@ -49,6 +49,7 @@ describe('@cypress/schematic: ng-add', () => {
       const files = tree.files
 
       expect(files).to.contain('/projects/sandbox/cypress/support/component.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/component-index.html')
       expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
       expect(files).to.contain('/projects/sandbox/cypress/support/e2e.ts')
       expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')

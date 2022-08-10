@@ -55,7 +55,7 @@ npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
 npm/webpack-preprocessor/examples/use-babelrc/cypress/e2e/spec.cy.js
 
 npm/cypress-schematic/src/**/*.js
-npm/cypress-schematic/src/schematics/ng-add/files/cypress.config.ts
+npm/cypress-schematic/src/schematics/ng-add/files-core/cypress.config.ts
 
 **/.projects
 **/*.d.ts

@@ -29,33 +29,13 @@ export default function (_options: any): Rule {
     _options = { ..._options, __version__: getAngularVersion(tree) }
 
     return chain([
-      updateDependencies(_options),
-      addCypressFiles(_options),
+      updateDependencies(),
+      addCypressCoreFiles(_options),
+      addCypressComponentTestingFiles(_options),
       addCypressTestScriptsToPackageJson(),
       modifyAngularJson(_options),
     ])(tree, _context)
   }
-}
-
-export const supportFileContent = (type: string): string => {
-  return `// ***********************************************************
-// This example support/${type}.ts is processed and
-// loaded automatically before your test files.
-//
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
-
-// When a command from ./commands is ready to use, import with \`import './commands'\` syntax
-// import './commands';
-`
 }
 
 function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
@@ -64,18 +44,12 @@ function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue)
   json.modify(path, value)
 }
 
-function updateDependencies (options: any): Rule {
+function updateDependencies (): Rule {
   return (tree: Tree, context: SchematicContext): any => {
     context.logger.debug('Updating dependencies...')
     context.addTask(new NodePackageInstallTask({ allowScripts: true }))
 
-    const dependencies = ['cypress']
-
-    if (options.ct) {
-      dependencies.push('@cypress/angular', '@cypress/webpack-dev-server')
-    }
-
-    const addDependencies = of(...dependencies).pipe(
+    const addDependencies = of('cypress').pipe(
       concatMap((packageName: string) => getLatestNodeVersion(packageName)),
       map((packageFromRegistry: NodePackage) => {
         const { name, version } = packageFromRegistry
@@ -107,7 +81,7 @@ function addCypressTestScriptsToPackageJson (): Rule {
   }
 }
 
-function addCypressFiles (options: any): Rule {
+function addCypressCoreFiles (options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.debug('Adding cypress files')
     const angularJsonValue = getAngularJsonValue(tree)
@@ -122,7 +96,7 @@ function addCypressFiles (options: any): Rule {
         const baseUrl = getBaseUrl(project)
 
         return mergeWith(
-          apply(url('./files'), [
+          apply(url('./files-core'), [
             move(project.root),
             template({
               ...options,
@@ -132,10 +106,44 @@ function addCypressFiles (options: any): Rule {
               relativeToWorkspace,
             }),
           ]),
-          options.ct && !tree.exists(`${project.root}/cypress/support/component.ts`) && tree.create(`${project.root}/cypress/support/component.ts`, supportFileContent('component')),
         )
       }),
     )(tree, context)
+  }
+}
+
+function addCypressComponentTestingFiles (options: any): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    if (options.ct) {
+      context.logger.debug('Adding cypress component testing files')
+      const angularJsonValue = getAngularJsonValue(tree)
+      const { projects } = angularJsonValue
+
+      return chain(
+        Object.keys(projects).map((name) => {
+          const project = projects[name]
+          const projectPath = resolve(getSystemPath(normalize(project.root)))
+          const workspacePath = resolve(getSystemPath(normalize('')))
+
+          const relativeToWorkspace = relative(`${projectPath}/cypress`, workspacePath)
+
+          const baseUrl = getBaseUrl(project)
+
+          return mergeWith(
+            apply(url('./files-ct'), [
+              move(`${project.root}/cypress/support`),
+              template({
+                ...options,
+                ...strings,
+                root: project.root ? `${project.root}/` : project.root,
+                baseUrl,
+                relativeToWorkspace,
+              }),
+            ]),
+          )
+        }),
+      )(tree, context)
+    }
   }
 }
 
