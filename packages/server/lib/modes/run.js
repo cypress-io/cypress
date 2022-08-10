@@ -1112,7 +1112,7 @@ module.exports = {
     }
 
     if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
-      // reset browser state to match e2e behavior when opening/closing a new tab
+      // reset browser state to match default behavior when opening/closing a new tab
       return openProject.resetBrowserState().then(() => {
         // If we do not launch the browser,
         // we tell it that we are ready
