@@ -8,6 +8,8 @@
     "build": "tsc",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf dist",
     "test": "yarn test-unit",
     "test-unit": "(cd test/fixtures/minimal && yarn) && mocha -r @packages/ts/register --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
@@ -21,9 +23,6 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
-    "@types/convert-source-map": "^1.5.1",
-    "@types/debug": "^4.1.5",
-    "@types/mocha": "^8.0.3",
     "mocha": "7.0.1",
     "spok": "^1.3.0"
   },
