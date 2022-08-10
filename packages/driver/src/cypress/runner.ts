@@ -1551,12 +1551,8 @@ export default {
         const handleBeforeTestEventError = (err: Error): boolean => {
           const { fn } = runnable
 
-          const restore = () => {
-            return runnable.fn = fn
-          }
-
           runnable.fn = () => {
-            restore()
+            runnable.fn = fn
             throw err
           }
 
