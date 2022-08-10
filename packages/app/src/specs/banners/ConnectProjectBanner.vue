@@ -24,8 +24,8 @@
     </Button>
 
     <CloudConnectModals
-      v-if="isProjectConnectOpen"
-      :gql="cloudModalsQuery.data.value!"
+      v-if="isProjectConnectOpen && cloudModalsQuery.data.value"
+      :gql="cloudModalsQuery.data.value"
       @cancel="handleModalClose"
       @success="handleModalClose"
     />

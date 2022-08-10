@@ -19,17 +19,12 @@
       prefix-icon-class="icon-dark-indigo-50 icon-light-indigo-500"
       class="mt-24px"
       data-cy="create-organization-button"
-      @click="handleButtonClick"
+      variant="primary"
+      :include-graphql-port="true"
+      :href="query.data.value?.cloudViewer?.createCloudOrganizationUrl || '#'"
     >
       {{ t('specPage.banners.createOrganization.buttonLabel') }}
     </Button>
-
-    <CloudConnectModals
-      v-if="isModalOpen"
-      :gql="cloudModalsQuery.data.value!"
-      @cancel="handleModalClose"
-      @success="handleModalClose"
-    />
   </TrackedBanner>
 </template>
 
@@ -41,12 +36,13 @@ import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from './index'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
-import CloudConnectModals from '../../runs/modals/CloudConnectModals.vue'
-import { ref } from 'vue'
 
 gql`
 query CreateOrganizationBanner {
-  ...CloudConnectModals
+  cloudViewer {
+    id
+    createCloudOrganizationUrl
+  }
 }
 `
 
@@ -60,19 +56,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const isModalOpen = ref(false)
-
-const cloudModalsQuery = useQuery({ query: CreateOrganizationBannerDocument, pause: true })
-
-async function handleButtonClick () {
-  await cloudModalsQuery.executeQuery()
-
-  isModalOpen.value = true
-}
-
-function handleModalClose () {
-  isModalOpen.value = false
-  emit('update:modelValue', false)
-}
+const query = useQuery({ query: CreateOrganizationBannerDocument })
 
 </script>

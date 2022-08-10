@@ -141,8 +141,8 @@ import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { computed, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
-import { gql } from '@urql/vue'
-import type { SpecsListBannersFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import interval from 'human-interval'
 import type { AllowedState } from '@packages/types/src'
 import RecordBanner from './banners/RecordBanner.vue'
@@ -185,6 +185,21 @@ fragment SpecsListBanners on Query {
 }
 `
 
+gql`
+subscription SpecsListBanners_CheckCloudOrgMembership {
+  cloudViewerChange {
+    cloudViewer {
+      id
+      firstOrganization: organizations(first: 1) {
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+`
+
 const props = withDefaults(defineProps<{
   gql: SpecsListBannersFragment
   hasRequestedAccess?: boolean
@@ -205,6 +220,8 @@ const emit = defineEmits<{
   (e: 'refetchFailedCloudData'): void
   (e: 'reconnectProject'): void
 }>()
+
+useSubscription({ query: SpecsListBanners_CheckCloudOrgMembershipDocument })
 
 const showSpecNotFound = ref(props.isSpecNotFound)
 const showOffline = ref(props.isOffline)
@@ -244,7 +261,7 @@ debouncedWatch(
     const isOrganizationLoaded = !!cloudViewer?.firstOrganization
     const isMemberOfOrganization = (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
     const isProjectConnected = !!currentProject?.projectId && currentProject.cloudProject?.__typename === 'CloudProject'
-    const hasNoRecordedRuns = currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject.runs?.nodes?.length ?? 0) === 0
+    const hasNoRecordedRuns = currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0
     const hasFourDaysOfCypressUse = (Date.now() - currentProject?.savedState?.firstOpened) > interval('4 days')
 
     showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse
