@@ -216,7 +216,7 @@ export function mergeDefaults (
 
   // TODO: https://github.com/cypress-io/cypress/issues/23093
   // testIsolation should equal 'strict' by default when experimentalSessionAndOrigin=true
-  // Once experimentalSessionAndOrigin is made GA, remove this logic  and update the defaultValue
+  // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
   // to be be 'strict'
   if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
     if (config.rawJson.testIsolation) {
