@@ -14,9 +14,6 @@
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
-  "dependencies": {
-    "semver": "^7.3.2"
-  },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
@@ -32,6 +29,7 @@
     "react-router-dom": "6.0.0-alpha.1",
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
+    "semver": "^7.3.2",
     "typescript": "^4.2.3",
     "vite": "3.0.3",
     "vite-plugin-require-transform": "1.0.3"
