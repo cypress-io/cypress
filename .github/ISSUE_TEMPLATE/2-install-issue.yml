@@ -64,7 +64,7 @@ body:
     id: os-version
     attributes:
       label: Operating System Version
-      description: What version of your operating system are you running Cyrpess on?
+      description: What version of your operating system are you running Cypress on?
       placeholder: ex 12.4
     validations:
       required: true
