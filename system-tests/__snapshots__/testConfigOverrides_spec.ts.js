@@ -7,14 +7,14 @@ exports['testConfigOverrides / fails when passing invalid config value browser']
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-invalid-browser.js)                                   │
-  │ Searched:   cypress/e2e/testConfigOverrides-invalid-browser.js                                 │
+  │ Specs:      1 found (invalid-browser.js)                                                       │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid-browser.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-invalid-browser.js                                          (1 of 1)
+  Running:  invalid-browser.js                                                              (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -48,14 +48,14 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-invalid-browser.js                                           │
+  │ Spec Ran:     invalid-browser.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
-     ght error was detected outside of a test (failed).png                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid-browser.js/An uncaught error was detect     (1280x720)
+     ed outside of a test (failed).png                                                              
 
 
 ====================================================================================================
@@ -65,8 +65,7 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-invalid-browser      XX:XX        1        -        1        -        - │
-  │    .js                                                                                         │
+  │ ✖  invalid-browser.js                       XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -82,14 +81,14 @@ exports['testConfigOverrides / has originalTitle when skip due to browser config
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-skip-browser.js)                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides-skip-browser.js                                    │
+  │ Specs:      1 found (skip-browser.js)                                                          │
+  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-skip-browser.js                                             (1 of 1)
+  Running:  skip-browser.js                                                                 (1 of 1)
 
 
   suite
@@ -111,15 +110,14 @@ exports['testConfigOverrides / has originalTitle when skip due to browser config
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-skip-browser.js                                              │
+  │ Spec Ran:     skip-browser.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-skip-browse     (X second)
-                          r.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -129,7 +127,7 @@ exports['testConfigOverrides / has originalTitle when skip due to browser config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  testConfigOverrides-skip-browser.js      XX:XX        1        -        -        1        - │
+  │ ✔  skip-browser.js                          XX:XX        1        -        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        -        -        1        -  
 
@@ -145,14 +143,14 @@ exports['testConfigOverrides / fails when passing invalid config values - [chrom
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-invalid.js)                                           │
-  │ Searched:   cypress/e2e/testConfigOverrides-invalid.js                                         │
+  │ Specs:      1 found (invalid.js)                                                               │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-invalid.js                                                  (1 of 1)
+  Running:  invalid.js                                                                      (1 of 1)
 
 
   1) inline test config override throws error
@@ -280,16 +278,16 @@ https://on.cypress.io/config
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-invalid.js                                                   │
+  │ Spec Ran:     invalid.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
-     ig override throws error (failed).png                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
-     ig override throws error when executed within cy cmd (failed).png                              
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
+     rror (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
+     rror when executed within cy cmd (failed).png                                                  
 
 
 ====================================================================================================
@@ -299,7 +297,7 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-invalid.js           XX:XX        9        1        8        -        - │
+  │ ✖  invalid.js                               XX:XX        9        1        8        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
 
@@ -315,14 +313,14 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-before-invalid.js)                                    │
-  │ Searched:   cypress/e2e/testConfigOverrides-before-invalid.js                                  │
+  │ Specs:      1 found (before-invalid.js)                                                        │
+  │ Searched:   cypress/e2e/testConfigOverrides/before-invalid.js                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-before-invalid.js                                           (1 of 1)
+  Running:  before-invalid.js                                                               (1 of 1)
 
 
   runs all tests
@@ -455,17 +453,16 @@ https://on.cypress.io/config
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-before-invalid.js                                            │
+  │ Spec Ran:     before-invalid.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
-     tests -- inline test config override throws error (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
-     tests -- inline test config override throws error when executed within cy cmd (f               
-     ailed).png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
+      config override throws error (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
+      config override throws error when executed within cy cmd (failed).png                         
 
 
 ====================================================================================================
@@ -475,8 +472,7 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-before-invalid.      XX:XX        9        1        8        -        - │
-  │    js                                                                                          │
+  │ ✖  before-invalid.js                        XX:XX        9        1        8        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
 
@@ -492,14 +488,14 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-only-invalid.js)                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides-only-invalid.js                                    │
+  │ Specs:      1 found (only-invalid.js)                                                          │
+  │ Searched:   cypress/e2e/testConfigOverrides/only-invalid.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-only-invalid.js                                             (1 of 1)
+  Running:  only-invalid.js                                                                 (1 of 1)
 
 
   nested contexts 
@@ -537,7 +533,7 @@ https://on.cypress.io/config
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-only-invalid.js                                              │
+  │ Spec Ran:     only-invalid.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -548,7 +544,7 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-only-invalid.js      XX:XX        1        -        1        -        - │
+  │ ✖  only-invalid.js                          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -564,14 +560,14 @@ exports['testConfigOverrides / fails when passing invalid config values - [firef
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-invalid.js)                                           │
-  │ Searched:   cypress/e2e/testConfigOverrides-invalid.js                                         │
+  │ Specs:      1 found (invalid.js)                                                               │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-invalid.js                                                  (1 of 1)
+  Running:  invalid.js                                                                      (1 of 1)
 
 
   1) inline test config override throws error
@@ -693,16 +689,16 @@ https://on.cypress.io/config
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-invalid.js                                                   │
+  │ Spec Ran:     invalid.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
-     ig override throws error (failed).png                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
-     ig override throws error when executed within cy cmd (failed).png                              
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
+     rror (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
+     rror when executed within cy cmd (failed).png                                                  
 
 
 ====================================================================================================
@@ -712,7 +708,7 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-invalid.js           XX:XX        9        1        8        -        - │
+  │ ✖  invalid.js                               XX:XX        9        1        8        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
 
@@ -728,14 +724,14 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-before-invalid.js)                                    │
-  │ Searched:   cypress/e2e/testConfigOverrides-before-invalid.js                                  │
+  │ Specs:      1 found (before-invalid.js)                                                        │
+  │ Searched:   cypress/e2e/testConfigOverrides/before-invalid.js                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-before-invalid.js                                           (1 of 1)
+  Running:  before-invalid.js                                                               (1 of 1)
 
 
   runs all tests
@@ -862,17 +858,16 @@ https://on.cypress.io/config
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-before-invalid.js                                            │
+  │ Spec Ran:     before-invalid.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
-     tests -- inline test config override throws error (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
-     tests -- inline test config override throws error when executed within cy cmd (f               
-     ailed).png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
+      config override throws error (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
+      config override throws error when executed within cy cmd (failed).png                         
 
 
 ====================================================================================================
@@ -882,8 +877,7 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-before-invalid.      XX:XX        9        1        8        -        - │
-  │    js                                                                                          │
+  │ ✖  before-invalid.js                        XX:XX        9        1        8        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        9        1        8        -        -  
 
@@ -899,14 +893,14 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (testConfigOverrides-only-invalid.js)                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides-only-invalid.js                                    │
+  │ Specs:      1 found (only-invalid.js)                                                          │
+  │ Searched:   cypress/e2e/testConfigOverrides/only-invalid.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  testConfigOverrides-only-invalid.js                                             (1 of 1)
+  Running:  only-invalid.js                                                                 (1 of 1)
 
 
   nested contexts 
@@ -943,7 +937,7 @@ https://on.cypress.io/config
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     testConfigOverrides-only-invalid.js                                              │
+  │ Spec Ran:     only-invalid.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -954,9 +948,175 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  testConfigOverrides-only-invalid.js      XX:XX        1        -        1        -        - │
+  │ ✖  only-invalid.js                          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['testConfigOverrides / fails when setting invalid config opt with Cypress.config() in before:test:run:async'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (invalid_before_test_async_event.js)                                       │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid_before_test_async_event.js                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  invalid_before_test_async_event.js                                              (1 of 1)
+
+
+  1) does not run
+  nested
+    2) does not run 2
+
+
+  0 passing
+  2 failing
+
+  1) does not run:
+     Error: CypressError: \`Cypress.config()\` cannot mutate option \`chromeWebSecurity\` because it is a read-only property.
+      [stack trace lines]
+
+  2) nested
+       does not run 2:
+     Error: CypressError: \`Cypress.config()\` cannot mutate option \`chromeWebSecurity\` because it is a read-only property.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     invalid_before_test_async_event.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do     (1280x720)
+     es not run 2 (failed).png                                                                      
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/invalid_before_test_async_event     (X second)
+                          .js.mp4                                                                   
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  invalid_before_test_async_event.js       XX:XX        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
+
+
+`
+
+exports['testConfigOverrides / fails when setting invalid config opt with Cypress.config() in before:test:run'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (invalid_before_test_event.js)                                             │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid_before_test_event.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  invalid_before_test_event.js                                                    (1 of 1)
+
+
+  1) does not run
+  nested
+    2) does not run 2
+
+
+  0 passing
+  2 failing
+
+  1) does not run:
+     Error: CypressError: Cypress test configuration cannot mutate option \`chromeWebSecurity\` because it is a read-only property.
+      [stack trace lines]
+
+  2) nested
+       does not run 2:
+     Error: CypressError: Cypress test configuration cannot mutate option \`chromeWebSecurity\` because it is a read-only property.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     invalid_before_test_event.js                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail     (1280x720)
+     ed).png                                                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not     (1280x720)
+      run 2 (failed).png                                                                            
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/invalid_before_test_event.js.mp     (X second)
+                          4                                                                         
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  invalid_before_test_event.js             XX:XX        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

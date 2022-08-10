@@ -15,7 +15,6 @@ import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
-import 'cypress-axe'
 import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })

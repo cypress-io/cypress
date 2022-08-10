@@ -157,10 +157,10 @@ const dotClasses = computed(() => {
       case 'ERRORED':
       case 'TIMEDOUT':
         return 'icon-light-orange-400'
-      case 'UNCLAIMED':
       case 'NOTESTS':
         return 'icon-light-gray-400'
       case 'CANCELLED':
+      case 'UNCLAIMED':
       default:
         return 'icon-light-gray-300'
     }
