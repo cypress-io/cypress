@@ -1633,7 +1633,8 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can add a body to a request that does not have one', function (done) {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23264
+    it.skip('can add a body to a request that does not have one', function (done) {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only*', function (req) {
