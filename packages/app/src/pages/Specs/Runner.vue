@@ -108,7 +108,6 @@ const configChangeHandler: SubscriptionHandlerArg<any, any> = (
 
       eventManager.runSpec(isRerun)
     } catch (e) {
-      console.warn(e)
       // eventManager may not be defined, for example if the spec
       // is still loading.
       // In that case, just do nothing - the spec will be executed soon.
