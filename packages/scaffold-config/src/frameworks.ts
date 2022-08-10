@@ -70,7 +70,11 @@ const mountModule = (mountModule: WizardMountModule) => async (projectRoot: stri
 const reactMountModule = async (projectPath: string) => {
   const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
 
-  return semver.major(reactPkg.detectedVersion || '') === 18 ? 'cypress/react18' : 'cypress/react'
+  try {
+    return semver.major(reactPkg.detectedVersion!) === 18 ? 'cypress/react18' : 'cypress/react'
+  } catch (e) {
+    return 'cypress/react'
+  }
 }
 
 export const WIZARD_FRAMEWORKS = [
