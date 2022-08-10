@@ -118,10 +118,6 @@ In general I recommend doing this _properly_ via a tool like
 - `PACKHERD_CODE_FRAMES` if set will include code snippets for error messages that have been
   sourcemapped
 
-## LICENSE
-
-MIT
-
 [packherd fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L44
 [packherd opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L14-L27
 [esbuild metafile]:https://esbuild.github.io/api/#metafile
