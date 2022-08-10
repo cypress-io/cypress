@@ -1669,7 +1669,7 @@ describe('lib/config', () => {
         })
       })
 
-      it('honors user config for testIsolation when experimental=true and e2e testing', () => {
+      it('honors user config for testIsolation when experimentalSessionAndOrigin=true and e2e testing', () => {
         sinon.stub(configUtil, 'getProcessEnvVars').returns({})
 
         const obj = {
