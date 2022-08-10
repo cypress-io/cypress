@@ -142,7 +142,11 @@ const releasePackages = async (packages) => {
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'], { env: { NPM_CONFIG_LEGACY_PEER_DEPS: true } })
+    // semantic-release v19 upgraded to npm v8 which supports workspaces. When running semantic-release, npm thinks that our lerna workspace
+    // is an npm workspace. When npm executes commands that modify the workspace, it will check the validity of the workspace.
+    // We don't want this to happen since we don't use npm and our links/peerDependencies make npm unhappy.
+    // We disable the workspace update via the NPM_CONFIG_WORKSPACES_UDPATE=false env variable.
+    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'], { env: { NPM_CONFIG_WORKSPACES_UPDATE: false } })
 
     console.log(`Released ${name} successfully:`)
     console.log(stdout)
