@@ -324,7 +324,7 @@ export class AutIframe {
 
     if (coords) {
       requestAnimationFrame(() => {
-        this.dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
+        this._addHitBoxLayer(coords, $body).setAttribute('data-highlight-hitbox', 'true')
       })
     }
   }
@@ -540,5 +540,86 @@ export class AutIframe {
     }
 
     return $el
+  }
+
+  private _addHitBoxLayer (coords: { x: number, y: number }, body: HTMLBodyElement) {
+    const height = 10
+    const width = 10
+
+    const dotHeight = 4
+    const dotWidth = 4
+
+    const top = coords.y - height / 2
+    const left = coords.x - width / 2
+
+    const dotTop = height / 2 - dotHeight / 2
+    const dotLeft = width / 2 - dotWidth / 2
+
+    const resetStyles: Partial<CSSStyleDeclaration> = {
+      border: 'none !important',
+      margin: '0 !important',
+      padding: '0 !important',
+    }
+
+    // Create box
+
+    const boxStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'absolute',
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      backgroundColor: 'red',
+      borderRadius: '5px',
+      boxShadow: '0 0 5px #333',
+      zIndex: '2147483647',
+    }
+
+    const box = document.createElement('div')
+
+    box.classList.add('__cypress-highlight')
+
+    for (const key in boxStyles) {
+      box.style[key!] = boxStyles[key]
+    }
+
+    // Create wrapper
+
+    const wrapperStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'relative',
+    }
+
+    const wrapper = document.createElement('div')
+
+    for (const key in wrapperStyles) {
+      wrapper.style[key!] = wrapperStyles[key]
+    }
+
+    // Create dot
+
+    const dotStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'absolute',
+      top: `${dotTop}px`,
+      left: `${dotLeft}px`,
+      height: `${dotHeight}px`,
+      width: `${dotWidth}px`,
+      backgroundColor: 'pink',
+      borderRadius: '5px',
+    }
+
+    const dot = document.createElement('div')
+
+    for (const key in dotStyles) {
+      dot.style[key!] = dotStyles[key]
+    }
+
+    body.appendChild(box)
+    box.appendChild(wrapper)
+    wrapper.appendChild(dot)
+
+    return box
   }
 }

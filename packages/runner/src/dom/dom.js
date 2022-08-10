@@ -15,61 +15,6 @@ const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
 }
 
-const resetStyles = `
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-`
-
-function addHitBoxLayer (coords, $body) {
-  $body = $body || $('body')
-
-  const height = 10
-  const width = 10
-
-  const dotHeight = 4
-  const dotWidth = 4
-
-  const top = coords.y - height / 2
-  const left = coords.x - width / 2
-
-  const dotTop = height / 2 - dotHeight / 2
-  const dotLeft = width / 2 - dotWidth / 2
-
-  const boxStyles = styles(`
-    ${resetStyles}
-    position: absolute;
-    top: ${top}px;
-    left: ${left}px;
-    width: ${width}px;
-    height: ${height}px;
-    background-color: red;
-    border-radius: 5px;
-    box-shadow: 0 0 5px #333;
-    z-index: 2147483647;
-  `)
-
-  const $box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
-
-  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo($box)
-
-  const dotStyles = styles(`
-    ${resetStyles}
-    position: absolute;
-    top: ${dotTop}px;
-    left: ${dotLeft}px;
-    height: ${dotHeight}px;
-    width: ${dotWidth}px;
-    height: ${dotHeight}px;
-    background-color: pink;
-    border-radius: 5px;
-  `)
-
-  $(`<div style="${dotStyles}">`).appendTo(wrapper)
-
-  return $box.appendTo($body)
-}
-
 function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
 
@@ -309,7 +254,6 @@ function getZIndex (el) {
 
 export const dom = {
   addElementBoxModelLayers,
-  addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
   openStudioAssertionsMenu,
   closeStudioAssertionsMenu,
