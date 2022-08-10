@@ -103,7 +103,8 @@ describe('Proxy Logging', () => {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code when xhr response is logged first', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23250
+    it.skip('xhr log has response body/status code when xhr response is logged first', {
       // TODO: unskip in Electron: https://cypress-io.atlassian.net/browse/UNIFY-1753
       browser: '!electron',
     }, (done) => {
