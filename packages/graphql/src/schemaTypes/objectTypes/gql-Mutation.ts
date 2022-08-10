@@ -2,6 +2,7 @@ import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, lis
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -176,7 +177,7 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           // Component Testing has a wizard to help users configure their project
           if (ctx.coreData.currentTestingType === 'component') {
-            ctx.actions.wizard.initialize()
+            await ctx.actions.wizard.initialize()
           } else {
             // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
             await ctx.actions.wizard.scaffoldTestingType()
@@ -345,14 +346,15 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setProjectPreferences', {
+    // TODO: #23202 hopefully we can stop using this for project data, and use `setPreferences` instead
+    t.nonNull.field('setProjectPreferencesInGlobalCache', {
       type: Query,
-      description: 'Save the projects preferences to cache',
+      description: 'Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
       },
       async resolve (_, args, ctx) {
-        await ctx.actions.project.setProjectPreferences(args)
+        await ctx.actions.project.setProjectPreferencesInGlobalCache(args)
 
         return {}
       },
@@ -416,13 +418,16 @@ export const mutation = mutationType({
         'Update local preferences (also known as  appData).',
         'The payload, `value`, should be a `JSON.stringified()`',
         'object of the new values you\'d like to persist.',
-        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`',
       ].join(' '),
       args: {
         value: nonNull(stringArg()),
+        type: nonNull(arg({
+          type: PreferencesTypeEnum,
+        })),
       },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setPreferences(args.value)
+      resolve: async (_, { value, type }, ctx) => {
+        await ctx.actions.localSettings.setPreferences(value, type)
 
         return {}
       },

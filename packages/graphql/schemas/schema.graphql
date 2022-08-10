@@ -534,8 +534,17 @@ type CodeFrame {
   line: Int
 }
 
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+}
+
 enum CodeGenType {
   component
+  componentEmpty
   e2e
   scaffoldIntegration
 }
@@ -575,6 +584,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -903,6 +913,7 @@ type FileParts implements Node {
 }
 
 enum FrontendFrameworkEnum {
+  angular
   nextjs
   nuxtjs
   react
@@ -1303,15 +1314,17 @@ type Mutation {
   setCurrentProject(path: String!): Query
 
   """
-  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`
   """
-  setPreferences(value: String!): Query
+  setPreferences(type: PreferencesTypeEnum!, value: String!): Query
 
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query
 
-  """Save the projects preferences to cache"""
-  setProjectPreferences(testingType: TestingTypeEnum!): Query!
+  """
+  Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache
+  """
+  setProjectPreferencesInGlobalCache(testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
@@ -1365,6 +1378,11 @@ enum PluginsState {
   initialized
   initializing
   uninitialized
+}
+
+enum PreferencesTypeEnum {
+  global
+  project
 }
 
 """Common base fields inherited by GlobalProject / CurrentProject"""

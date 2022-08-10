@@ -28,6 +28,10 @@ class Sessions extends React.Component<SessionsProps> {
   render () {
     const model = this.props.model
 
+    if (!_.size(model)) {
+      return null
+    }
+
     return (
       <div className={cs('runnable-agents-region', { 'no-agents': !_.size(model) })}>
         <div className='instruments-container sessions-container'>

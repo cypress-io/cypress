@@ -35,13 +35,7 @@ export class AutIframe {
     return $iframe
   }
 
-  showInitialBlankContents (testingType) {
-    if (testingType === 'component') {
-      this._showContents(blankContents.initialCT())
-
-      return
-    }
-
+  showInitialBlankContents () {
     this._showContents(blankContents.initial())
   }
 
@@ -136,7 +130,7 @@ export class AutIframe {
             this.showSessionLifecycleBlankContents()
             break
           default:
-            this.showInitialBlankContentsE2E()
+            this.showInitialBlankContents()
         }
 
         resolve()

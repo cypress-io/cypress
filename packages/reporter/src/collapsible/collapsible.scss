@@ -1,12 +1,4 @@
 .reporter {
-  .collapsible-content {
-    display: none;
-  }
-
-  .is-open > .collapsible-content {
-    display: block;
-  }
-
   .collapsible-indicator {
     margin-right: 8px;
     transform: rotate(-90deg);
