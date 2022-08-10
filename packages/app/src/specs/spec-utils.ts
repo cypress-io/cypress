@@ -98,7 +98,7 @@ export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchVal
   const transformedSpecs = addDirectoryToSpecs(specs)
 
   return fuzzySort
-  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'], allowTypo: false })
+  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'], allowTypo: false, threshold: -100 })
   .map((result) => {
     const [file, dir] = result
 
