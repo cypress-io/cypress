@@ -1,5 +1,10 @@
 {
   "npmClient": "yarn",
+  "command": {
+    "run": {
+      "npmClient": "yarn"
+    }
+  },
   "packages": [
     "cli",
     "packages/*",

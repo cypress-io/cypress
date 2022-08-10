@@ -1,4 +1,5 @@
 import chai from 'chai'
+import path from 'path'
 import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
@@ -46,6 +47,9 @@ describe('config/src/index', () => {
 
       expect(defaultValues.env).to.deep.eq({})
 
+      expect(defaultValues.cypressBinaryRoot.split(path.sep).pop()).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = '/root/cypress'
+
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
         expect(defaultValues[x]).to.exist
@@ -65,6 +69,9 @@ describe('config/src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+
+      expect(defaultValues.cypressBinaryRoot.split(path.sep).pop()).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = '/root/cypress'
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
