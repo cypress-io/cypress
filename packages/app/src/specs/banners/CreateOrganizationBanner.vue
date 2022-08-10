@@ -21,7 +21,7 @@
       data-cy="create-organization-button"
       variant="primary"
       :include-graphql-port="true"
-      :href="query.data.value?.cloudViewer?.createCloudOrganizationUrl || '#'"
+      :href="query.data.value?.cloudViewer?.cloudOrganizationsUrl || '#'"
     >
       {{ t('specPage.banners.createOrganization.buttonLabel') }}
     </Button>
@@ -41,7 +41,7 @@ gql`
 query CreateOrganizationBanner {
   cloudViewer {
     id
-    createCloudOrganizationUrl
+    cloudOrganizationsUrl
   }
 }
 `

@@ -7,10 +7,12 @@ describe('<CreateOrganizationBanner />', () => {
     cy.gqlStub.Query.cloudViewer = {
       __typename: 'CloudUser',
       id: 'test123',
-      createCloudOrganizationUrl: linkHref,
+      cloudOrganizationsUrl: linkHref,
     } as any
 
     cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} /> })
+
+    cy.get('a').should('have.attr', 'href', linkHref)
 
     cy.percySnapshot()
   })
