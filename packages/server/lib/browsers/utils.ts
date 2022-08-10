@@ -1,7 +1,7 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import { browsers as supportedBrowsers } from '@packages/types'
+import { browsers as supportedBrowsers, DEFAULT_ELECTRON_BROWSER } from '@packages/types'
 import type { FoundBrowser } from '@packages/types'
 
 import { getError } from '@packages/errors'
@@ -200,22 +200,18 @@ const getBrowsers = () => {
     }
 
     // @ts-ignore
-    const version = process.versions.chrome || ''
+    const version = process.versions.electron || ''
 
     if (version) {
       majorVersion = getMajorVersion(version)
     }
 
-    const electronBrowser: FoundBrowser = {
-      name: 'electron',
-      channel: 'stable',
-      family: 'chromium',
-      displayName: 'Electron',
+    const electronBrowser = {
+      ...DEFAULT_ELECTRON_BROWSER,
       version,
       path: '',
       majorVersion,
-      info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
-    }
+    } as FoundBrowser
 
     // the internal version of Electron, which won't be detected by `launcher`
     debug('adding Electron browser %o', electronBrowser)

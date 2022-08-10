@@ -66,6 +66,14 @@ export const MIN_FIREFOX_VERSION = 86
 // Edge switched to Blink in 79
 export const MIN_EDGE_VERSION = 79
 
+export const DEFAULT_ELECTRON_BROWSER = {
+  name: 'electron',
+  channel: 'stable',
+  family: 'chromium',
+  displayName: 'Electron',
+  info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+}
+
 export const browsers: Browser[] = [
   {
     name: 'chrome',
@@ -172,6 +180,7 @@ export const browsers: Browser[] = [
     binary: ['edge-dev', 'microsoft-edge-dev'],
     minSupportedVersion: MIN_EDGE_VERSION,
   },
+  DEFAULT_ELECTRON_BROWSER as Browser,
 ]
 
 export const BROWSER_STATUS = ['closed', 'opening', 'open'] as const
