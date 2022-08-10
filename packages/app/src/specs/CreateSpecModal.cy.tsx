@@ -86,6 +86,8 @@ describe('<CreateSpecModal />', () => {
         return defineResult({ matchesSpecPattern: variables.specFile !== '' })
       })
 
+      cy.get('button[type="submit"').as('submit').should('not.be.disabled')
+
       //try to submit an empty path which is invalid
       cy.get('input')
       .clear()
@@ -94,6 +96,8 @@ describe('<CreateSpecModal />', () => {
       //should stay on current state
       cy.contains('h2', 'Enter the path for your new spec')
       .should('be.visible')
+
+      cy.get('@submit').should('be.disabled')
     })
   })
 })
