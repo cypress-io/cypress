@@ -63,6 +63,7 @@ class StackMap<T> {
     const i = this.stacks[stackKey].findIndex((v) => v === value)
 
     this.stacks[stackKey].splice(i, 1)
+    if (this.stacks[stackKey].length === 0) delete this.stacks[stackKey]
   }
   get length () {
     return Object.values(this.stacks).reduce((prev, cur) => prev + cur.length, 0)
