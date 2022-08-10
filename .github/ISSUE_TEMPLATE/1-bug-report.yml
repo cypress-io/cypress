@@ -9,7 +9,7 @@ body:
     id: current-behavior
     attributes:
       label: Current behavior
-      description: A description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      description: A description including screenshots, stack traces, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
       placeholder: Currently...
     validations:
       required: true
@@ -33,6 +33,30 @@ body:
       label: Cypress Version
       description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
       placeholder: ex. 7.6.0
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      description: What version of node.js are you using to run Cypress?
+      placeholder: ex. v16.16.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system is Cypress running on when you are encountering your problem?  The more specific the better  ie macOS 12.4 or Windows 10.0.19044.1889
+      placeholder: ex. macOS 12.4
+    validations:
+      required: true
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Debug Logs
+      description: Please run Cypress in [debug mode](https://docs.cypress.io/guides/guides/debugging#Debug-the-Command-Line) and print the entire set of logs here
+      placeholder: Debug logging output
     validations:
       required: true
   - type: textarea
