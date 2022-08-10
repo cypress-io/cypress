@@ -161,7 +161,8 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it('fails when network connection immediately fails', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23252
+    systemTests.it.skip('fails when network connection immediately fails', {
       spec: 'visit_http_network_error_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
