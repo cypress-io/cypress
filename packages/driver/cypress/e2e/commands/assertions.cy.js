@@ -62,7 +62,7 @@ describe('src/cy/commands/assertions', () => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
-          { name: 'should', snapshots: 1, retries: 0 },
+          { name: 'should', snapshots: 1, retries: 1 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -164,7 +164,8 @@ describe('src/cy/commands/assertions', () => {
         expect(testCommands()).to.containSubset([
           { name: 'wrap', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
-          { name: 'wrap', snapshots: 2, retries: (r) => r > 1 },
+          { name: 'wrap', snapshots: 1, retries: 0 },
+          { name: 'should', snapshots: 1, retries: (r) => r > 1 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -202,7 +203,8 @@ describe('src/cy/commands/assertions', () => {
             // TODO: Investigate whether or not the 2 commands are
             // snapshotted at the same time. If there's no tick between
             // them, we could reuse the snapshots
-            { name: 'get', snapshots: 2, retries: 2 },
+            { name: 'get', snapshots: 1, retries: 0 },
+            { name: 'should', snapshots: 1, retries: 2 },
             { name: 'then', snapshots: 0, retries: 0 },
           ])
         })
@@ -391,8 +393,7 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 6)
 
           expect(this.logs[3].get('name')).to.eq('get')
-          expect(this.logs[3].get('state')).to.eq('failed')
-          expect(this.logs[3].get('error')).to.eq(err)
+          expect(this.logs[3].get('state')).to.eq('passed')
 
           expect(this.logs[4].get('name')).to.eq('assert')
           expect(this.logs[4].get('state')).to.eq('failed')
@@ -401,9 +402,11 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy
-        .root().should('exist').and('contain', 'foo')
-        .get('button').should('have.length', 'asdf')
+        cy.root()
+        .should('exist')
+        .and('contain', 'foo')
+        .get('button')
+        .should('have.length', 'asdf')
       })
 
       it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {

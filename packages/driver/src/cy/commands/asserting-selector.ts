@@ -28,15 +28,15 @@ export default function (Commands, Cypress, cy, state) {
   })
 
   function should (chainers, ...args) {
-    if (_.isFunction(chainers)) {
-      throw new Error('TODO')
-    }
-
     const originalChainers = chainers
     const isCheckingExistence = reExistence.test(chainers)
     const isCheckingLengthOrExistence = isCheckingExistence || reHaveLength.test(chainers)
+    const command = this
 
-    chainers = chainers.split('.')
+    if (!_.isFunction(chainers)) {
+      chainers = chainers.split('.')
+    }
+
     const lastChainer = _.last(chainers)
 
     const applyChainer = function (memo, value) {
@@ -76,6 +76,30 @@ export default function (Commands, Cypress, cy, state) {
       // want to auto-fail on those
       if (!isCheckingLengthOrExistence && $dom.isElement(subject)) {
         cy.ensureAttached(subject, 'should')
+      }
+
+      if (command.get('logs').length) {
+        cy.state('onBeforeLog', function (log) {
+          const oldLog = command.get('logs')[0]
+
+          log.set('snapshots', oldLog.get('snapshots'))
+
+          oldLog.merge(log)
+
+          if (!oldLog.get('snapshots')) {
+            oldLog.snapshot()
+          }
+
+          this.state('onBeforeLog', null)
+
+          return false
+        })
+      }
+
+      if (_.isFunction(chainers)) {
+        const remoteSubject = cy.getRemotejQueryInstance(subject) || subject
+
+        return chainers.call(this, remoteSubject)
       }
 
       exp = _.reduce(chainers, (memo, value) => {

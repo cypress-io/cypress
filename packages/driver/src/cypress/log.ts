@@ -596,12 +596,6 @@ class LogManager {
 
       log.set(options)
 
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
       // if end was passed in
       // go ahead and end
       if (log.get('end')) {
@@ -630,16 +624,10 @@ class LogManager {
 
       const current = state('current')
 
-      // Selectors, on the other hand, function in a rather simpler manner:
-      // If they attempt to create a second log message with the same name and message as a previous one,
-      // we update the old message instead. No relying on registering and unregistering callbacks.
-      const matchingOldLog = current?.get('selector') && current.get('logs').find((oldLog) => {
-        return oldLog.get('name') === log.get('name') && oldLog.get('message') === log.get('message')
-      })
-
-      if (matchingOldLog) {
-        matchingOldLog.merge(log)
-        return
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
       }
 
       if (current) {
