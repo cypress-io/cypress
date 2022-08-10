@@ -15,6 +15,7 @@
       :icon-size="64"
       :disabled="tt.status === 'disabled'"
       variant="jade"
+      :badge-text="tt.badgeText"
       @click="emits('pick', tt.key, currentTestingType)"
       @keyup.enter="emits('pick', tt.key, currentTestingType)"
       @keyup.space="emits('pick', tt.key, currentTestingType)"
@@ -102,6 +103,7 @@ const testingTypes = computed(() => {
       icon: IconE2E,
       iconSolid: IconE2ESolid,
       status: e2eStatus.value,
+      badgeText: '',
     },
     {
       key: 'component',
@@ -110,6 +112,7 @@ const testingTypes = computed(() => {
       icon: IconComponent,
       iconSolid: IconComponentSolid,
       status: componentStatus.value,
+      badgeText: t('versions.beta'),
     },
   ] as const
 })
