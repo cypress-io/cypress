@@ -28,7 +28,7 @@ interface TrackedBannerComponentEmits extends AlertComponentEmits {
 gql`
 query TrackedBanner_ProjectState {
   currentProject {
-  id
+    id
     savedState
   }
 }
@@ -69,11 +69,9 @@ function handleBannerDismissed (visible: boolean) {
 }
 
 async function updateBannerState (field: 'lastShown' | 'dismissed') {
-  const { bannerId } = props
-
   const savedState = stateQuery.data.value?.currentProject?.savedState ?? {}
 
-  set(savedState, ['banners', bannerId, field], Date.now())
+  set(savedState, ['banners', props.bannerId, field], Date.now())
 
   await setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
 }

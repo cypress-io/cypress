@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { SpecsListBannersFragment, SpecsListBannersFragmentDoc } from '../generated/graphql-test'
 import interval from 'human-interval'
-import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import type { AllowedState } from '@packages/types/src'
 import { assignIn, set } from 'lodash'
 import { BannerIds } from './banners'
@@ -12,16 +12,6 @@ const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
 describe('<SpecsListBanners />', () => {
-  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>) => {
-    cy.mountFragment(SpecsListBannersFragmentDoc, {
-      onResult: (result) => {
-        assignIn(result, query)
-        set(result, 'currentProject.savedState', state)
-      },
-      render: (gql) => <SpecsListBanners gql={gql} />,
-    })
-  }
-
   const validateBaseRender = () => {
     it('should render as expected', () => {
       cy.findByTestId(AlertSelector).should('be.visible')
@@ -67,6 +57,48 @@ describe('<SpecsListBanners />', () => {
     return {
       firstOpened: Date.now() - interval(`${days} days`),
     }
+  }
+
+  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>) => {
+    cy.clock(Date.now())
+    cy.mountFragment(SpecsListBannersFragmentDoc, {
+      onResult: (result) => {
+        assignIn(result, query)
+        set(result, 'currentProject.savedState', state)
+      },
+      render: (gql) => <SpecsListBanners gql={gql} />,
+    })
+
+    // Initial watcher for cloud-based banners debounces @ 1000, so mock that much time elapsing
+    cy.tick(1050)
+  }
+
+  const validateSmartNotificationBehaviors = (bannerId: string, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
+    context('banner conditions are met and when cypress use >= 4 days', () => {
+      it('should render when not previously-dismissed', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      })
+
+      it('should not render when previously-dismissed', () => {
+        mountWithState(gql, {
+          ...stateWithFirstOpenedDaysAgo(4),
+          banners: {
+            [bannerId]: {
+              dismissed: Date.now(),
+            },
+          },
+        })
+
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
+    })
+
+    it('should not render when using cypress < 4 days', () => {
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
+
+      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+    })
   }
 
   describe('spec not found', () => {
@@ -206,7 +238,6 @@ describe('<SpecsListBanners />', () => {
   })
 
   describe('login', () => {
-    const bannerTestId = 'login-banner'
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: null,
       currentProject: {
@@ -215,37 +246,10 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    context('banner conditions are met and when cypress use >= 4 days', () => {
-      it('should render when not previously-dismissed', () => {
-        cy.clock(Date.now())
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-        cy.tick(1050)
-        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
-      })
-
-      it('should not render when previously-dismissed', () => {
-        mountWithState(gql, {
-          ...stateWithFirstOpenedDaysAgo(4),
-          banners: {
-            [BannerIds.ACI_082022_LOGIN]: {
-              dismissed: Date.now(),
-            },
-          },
-        })
-
-        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-      })
-    })
-
-    it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
-
-      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-    })
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_LOGIN, 'login-banner', gql)
   })
 
   describe('create organization', () => {
-    const bannerTestId = 'create-organization-banner'
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: {
         ...CloudUserStubs.me,
@@ -260,41 +264,14 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    context('banner conditions are met and when cypress use >= 4 days', () => {
-      beforeEach(() => {
-        cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
-      })
-
-      it('should render when not previously-dismissed', () => {
-        cy.clock(Date.now())
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-        cy.tick(1050)
-        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
-      })
-
-      it('should not render when previously-dismissed', () => {
-        mountWithState(gql, {
-          ...stateWithFirstOpenedDaysAgo(4),
-          banners: {
-            [BannerIds.ACI_082022_CREATE_ORG]: {
-              dismissed: Date.now(),
-            },
-          },
-        })
-
-        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-      })
+    beforeEach(() => {
+      cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
     })
 
-    it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
-
-      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-    })
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CREATE_ORG, 'create-organization-banner', gql)
   })
 
   describe('connect project', () => {
-    const bannerTestId = 'connect-project-banner'
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: {
         ...CloudUserStubs.me,
@@ -310,37 +287,10 @@ describe('<SpecsListBanners />', () => {
       } as any,
     }
 
-    context('banner conditions are met and when cypress use >= 4 days', () => {
-      it('should render when not previously-dismissed', () => {
-        cy.clock(Date.now())
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-        cy.tick(1050)
-        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
-      })
-
-      it('should not render when previously-dismissed', () => {
-        mountWithState(gql, {
-          ...stateWithFirstOpenedDaysAgo(4),
-          banners: {
-            [BannerIds.ACI_082022_CONNECT_PROJECT]: {
-              dismissed: Date.now(),
-            },
-          },
-        })
-
-        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-      })
-    })
-
-    it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
-
-      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-    })
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CONNECT_PROJECT, 'connect-project-banner', gql)
   })
 
   describe('record', () => {
-    const bannerTestId = 'record-banner'
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: {
         ...CloudUserStubs.me,
@@ -356,52 +306,20 @@ describe('<SpecsListBanners />', () => {
         currentTestingType: 'component',
         projectId: 'abcd',
         cloudProject: {
-          __typename: 'CloudProject',
-          id: 'dlkj',
+          ...CloudProjectStubs.componentProject,
           runs: {
             __typename: 'CloudRunConnection',
             nodes: [],
           },
-          recordKeys: [{
-            __typename: 'CloudRecordKey',
-            id: 'abcd',
-            key: 'abcd-1234-9876',
-          }],
         },
       } as any,
     }
 
-    context('banner conditions are met and when cypress use >= 4 days', () => {
-      beforeEach(() => {
-        cy.gqlStub.Query.currentProject = gql.currentProject as any
-        cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
-      })
-
-      it('should render when not previously-dismissed', () => {
-        cy.clock(Date.now())
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-        cy.tick(1050)
-        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
-      })
-
-      it('should not render when previously-dismissed', () => {
-        mountWithState(gql, {
-          ...stateWithFirstOpenedDaysAgo(4),
-          banners: {
-            [BannerIds.ACI_082022_RECORD]: {
-              dismissed: Date.now(),
-            },
-          },
-        })
-
-        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-      })
+    beforeEach(() => {
+      cy.gqlStub.Query.currentProject = gql.currentProject as any
+      cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
     })
 
-    it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
-
-      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-    })
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_RECORD, 'record-banner', gql)
   })
 })

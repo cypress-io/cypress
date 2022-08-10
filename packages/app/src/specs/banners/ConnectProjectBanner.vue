@@ -17,7 +17,7 @@
     <Button
       :prefix-icon="ConnectIcon"
       class="mt-24px"
-      data-cy="refresh-button"
+      data-cy="connect-project-button"
       @click="handleButtonClick"
     >
       {{ t('specPage.banners.connectProject.buttonLabel') }}
