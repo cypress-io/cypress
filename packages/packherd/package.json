@@ -9,7 +9,7 @@
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js",
+    "test-unit": "(cd tests/fixtures/minimal && yarn) && mocha -r @packages/ts/register --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
