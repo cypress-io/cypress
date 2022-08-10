@@ -153,7 +153,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 16. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 
-17. Merge the new docker image PR created in step 23 to release the image.
+17. Merge the new docker image PR created in step 13 to release the image.
 
 18. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
 
