@@ -1646,7 +1646,7 @@ describe('lib/config', () => {
         })
       })
 
-      it('sets testIsolation=strict by default when experimental=true and e2e testing', () => {
+      it('sets testIsolation=strict by default when experimentalSessionAndOrigin=true and e2e testing', () => {
         sinon.stub(configUtil, 'getProcessEnvVars').returns({})
 
         const obj = {
