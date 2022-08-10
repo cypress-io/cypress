@@ -61,6 +61,18 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
+export const WIZARD_MOUNT_MODULES = ['cypress/react', 'cypress/react18', 'cypress/vue', 'cypress/vue2', 'cypress/angular'] as const
+
+export type WizardMountModule = typeof WIZARD_MOUNT_MODULES[number]
+
+const mountModule = (mountModule: WizardMountModule) => async (projectRoot: string) => Promise.resolve(mountModule)
+
+const reactMountModule = async (projectPath: string) => {
+  const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
+
+  return semver.major(reactPkg.detectedVersion || '') === 18 ? 'cypress/react18' : 'cypress/react'
+}
+
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
@@ -79,7 +91,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -99,7 +111,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -119,7 +131,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -139,7 +151,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
+    mountModule: reactMountModule,
     supportStatus: 'alpha',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
@@ -165,7 +177,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -184,7 +196,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -203,7 +215,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -223,7 +235,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -245,7 +257,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'angular',
     glob: '*.component.ts',
-    mountModule: 'cypress/angular',
+    mountModule: mountModule('cypress/angular'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',
