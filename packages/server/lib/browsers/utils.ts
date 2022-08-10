@@ -1,17 +1,19 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
+import { browsers as supportedBrowsers } from '@packages/types'
 import type { FoundBrowser } from '@packages/types'
-import * as errors from '../errors'
-import * as plugins from '../plugins'
-import { getError } from '@packages/errors'
 
+import { getError } from '@packages/errors'
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
-const launcher = require('@packages/launcher')
-const { fs } = require('../util/fs')
+const launcher = require('@packages/launcher') //her
 const extension = require('@packages/extension')
+
+import * as errors from '../errors'
+import * as plugins from '../plugins'
+const { fs } = require('../util/fs')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
 
@@ -301,7 +303,7 @@ const formatBrowsersToOptions = (browsers) => {
 }
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
-  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers), formatBrowsersToOptions(supportedBrowsers))
 }
 
 export = {
