@@ -29,7 +29,17 @@ export class FileDataSource {
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
-    const globs = ([] as string[]).concat(glob)
+    const globs = ([] as string[]).concat(glob).map((globPattern) => {
+      // If the pattern includes the working directory, we strip it from the pattern.
+      // The working directory path may include characters that conflict with glob
+      // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
+      // We scope our search to the working directory using the `cwd` globby option.
+      if (globPattern.includes(cwd)) {
+        return path.relative(cwd, globPattern)
+      }
+
+      return globPattern
+    })
 
     const ignoreGlob = (globOptions?.ignore ?? []).concat('**/node_modules/**')
 
