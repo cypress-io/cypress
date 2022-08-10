@@ -478,6 +478,18 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
+  async getCodeGenGlobs () {
+    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
+
+    const looseComponentGlob = '*.{js,jsx,ts,tsx,vue}'
+
+    const framework = this.ctx.actions.project.getWizardFrameworkFromConfig()
+
+    return {
+      component: framework?.glob ?? looseComponentGlob,
+    }
+  }
+
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
     const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
 
