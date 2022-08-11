@@ -1089,7 +1089,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         The ${fmt.highlight(`experimentalSingleTabRunMode`)} experiment is currently only supported for Component Testing.
 
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/experimental-single-tab-run-mode`
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
