@@ -40,8 +40,6 @@
 /packages/rewriter/  @cypress-io/end-to-end
 /packages/root/  @cypress-io/end-to-end
 /packages/runner/  @cypress-io/end-to-end
-/packages/runner-ct/  @cypress-io/component-testing
-/packages/runner-shared/  @cypress-io/end-to-end
 /packages/server/  @cypress-io/end-to-end
 /packages/socket/  @cypress-io/end-to-end
 /packages/static/  @cypress-io/end-to-end
