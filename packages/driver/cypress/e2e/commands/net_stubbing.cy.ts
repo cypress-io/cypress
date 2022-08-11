@@ -1660,7 +1660,8 @@ describe('network stubbing', function () {
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
-    it('can delay and throttle a StaticResponse', function (done) {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23303
+    it.skip('can delay and throttle a StaticResponse', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
       const delay = 250
