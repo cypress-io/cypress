@@ -1,0 +1,32 @@
+{
+  "name": "@packages/electron-mksnapshot",
+  "version": "0.0.0-develop",
+  "description": "Configurable electron version of the mksnapshot binary",
+  "private": true,
+  "main": "dist/mksnapshot.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf dist",
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@electron/get": "^1.12.4",
+    "debug": "^4.3.1",
+    "extract-zip": "^2.0.1",
+    "fs-extra": "^10.0.0",
+    "temp": "^0.9.4"
+  },
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development",
+    "mocha": "7.0.1"
+  },
+  "files": [
+    "dist/*"
+  ]
+}
