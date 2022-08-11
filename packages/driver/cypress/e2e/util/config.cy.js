@@ -1,4 +1,4 @@
-import $SetterGetter from '@packages/driver/src/cypress/setter_getter'
+import $SetterGetter from '../../../src/cypress/setter_getter'
 import { getOverrideLevel, validateConfig } from '../../../src/util/config'
 
 describe('driver/src/cypress/validate_config', () => {
