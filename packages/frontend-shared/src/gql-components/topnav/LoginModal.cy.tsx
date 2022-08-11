@@ -25,7 +25,7 @@ type TestCloudViewer = {
   fullName: string | null
 }
 
-const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
+const mountSuccess = (viewer: TestCloudViewer = cloudViewer, hasProjectId: boolean = true) => {
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
@@ -33,7 +33,15 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
-    render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+    render: (gqlVal) => (
+      <div class="border-current border-1 h-700px resize overflow-auto">
+        <LoginModal
+          gql={gqlVal}
+          modelValue={true}
+          utmMedium="testing"
+          showConnectButtonAfterLogin={!hasProjectId}
+        />
+      </div>),
   })
 }
 
@@ -77,6 +85,11 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleSuccess).should('be.visible')
       cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+    })
+
+    it('shows "connect project" after login if required', () => {
+      mountSuccess(cloudViewer, false)
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.connectProject).should('be.visible')
     })
   })
 

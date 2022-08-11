@@ -49,6 +49,17 @@
       </template>
       {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
     </Button>
+
+    <Button
+      v-else-if="cloudViewer && props.showConnectButtonAfterLogin"
+      size="lg"
+      variant="primary"
+      aria-live="polite"
+      :disabled="!cloudViewer && !isOnline"
+      @click="handleLoginOrContinue"
+    >
+      {{ t('runs.connect.modal.selectProject.connectProject') }}
+    </Button>
     <Button
       v-else
       ref="loginButtonRef"
@@ -88,6 +99,7 @@ const props = defineProps<{
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
+  showConnectButtonAfterLogin?: boolean
 }>()
 
 gql`
