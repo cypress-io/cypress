@@ -63,18 +63,18 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
 
 export const WIZARD_MOUNT_MODULES = ['cypress/react', 'cypress/react18', 'cypress/vue', 'cypress/vue2', 'cypress/angular'] as const
 
-export type WizardMountModule = typeof WIZARD_MOUNT_MODULES[number]
+export type WizardMountModule = 'cypress/react' | 'cypress/react18' | 'cypress/vue' | 'cypress/vue2' | 'cypress/angular'
 
-const mountModule = (mountModule: WizardMountModule) => async (projectRoot: string) => Promise.resolve(mountModule)
+const mountModule = (mountModule: WizardMountModule) => (projectPath: string) => Promise.resolve(mountModule)
 
 const reactMountModule = async (projectPath: string) => {
   const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
 
-  try {
-    return semver.major(reactPkg.detectedVersion!) === 18 ? 'cypress/react18' : 'cypress/react'
-  } catch (e) {
+  if (!reactPkg.detectedVersion || !semver.valid(reactPkg.detectedVersion)) {
     return 'cypress/react'
   }
+
+  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
 export const WIZARD_FRAMEWORKS = [
