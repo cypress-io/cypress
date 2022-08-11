@@ -1615,8 +1615,7 @@ describe('network stubbing', function () {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23145
-    it.skip('can modify the request body', function (done) {
+    it('can modify the request body', function () {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only', function (req) {
@@ -1627,8 +1626,6 @@ describe('network stubbing', function () {
       }).then(function () {
         $.post('/post-only', 'quuz').done((responseText) => {
           expect(responseText).to.contain(body)
-
-          done()
         })
       })
     })
