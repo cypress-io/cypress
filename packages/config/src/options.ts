@@ -34,7 +34,7 @@ export const ALL_OVERRIDE_LEVELS = ['code', 'event', 'suite', 'test', 'runtime']
 
 export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number]
 
-export type OverrideLevels = Readonly<Array<typeof ALL_OVERRIDE_LEVELS[number]> | 'never'>
+export type OverrideLevels = Readonly<Array<OverrideLevel> | 'never'>
 
 interface ConfigOption {
   name: string
