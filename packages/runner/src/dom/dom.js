@@ -3,12 +3,12 @@ import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import $Cypress from '@packages/driver'
 import $dimensions from './dimensions'
-import { selectorPlaygroundHighlight } from './selector-playground/highlight'
-import { studioAssertionsMenu } from './studio/assertions-menu'
+import { selectorPlaygroundHighlight } from '../selector-playground/highlight'
+import { studioAssertionsMenu } from '../studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
 // This disables the CSSExtractWebpackPlugin and allows us to get the CSS as a raw string instead of saving it to a separate file.
-import selectorPlaygroundCSS from '!./selector-playground/selector-playground.scss'
-import studioAssertionsMenuCSS from '!./studio/assertions-menu.scss'
+import selectorPlaygroundCSS from '!../selector-playground/selector-playground.scss'
+import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 
 const $ = $Cypress.$
 const styles = (styleString) => {
