@@ -1607,7 +1607,7 @@ jobs:
       percy:
         type: boolean
         default: false
-    parallelism: 4
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
