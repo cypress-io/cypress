@@ -11,6 +11,8 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     utm-medium="Runs Tab"
+    show-connect-button-after-login
+    @connect-project="isProjectConnectOpen = true"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
