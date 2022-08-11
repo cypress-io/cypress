@@ -10,7 +10,6 @@ import {
   template,
   Tree,
   url,
-
 } from '@angular-devkit/schematics'
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
@@ -46,6 +45,17 @@ export default function (_options: any): Rule {
       modifyAngularJson(_options),
     ])(tree, _context)
   }
+}
+
+const ctSpecContent = (componentName: string): string => {
+  return `import { ${componentName} } from './${componentName}.component'
+
+  describe('${componentName}', () => {
+    it('should mount', () => {
+      cy.mount(${componentName})
+    })
+  })
+  `
 }
 
 function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
@@ -170,7 +180,7 @@ function addCtSpecs (options: any): Rule {
 
             context.logger.debug(`Creating component test for: ${componentName}`)
 
-            return !tree.exists(`${appPath}/${componentName}.cy.ts`) && tree.create(`${appPath}/${componentName}.cy.ts`, '// TODO')
+            return !tree.exists(`${appPath}/${componentName}.cy.ts`) && tree.create(`${appPath}/${componentName}.cy.ts`, ctSpecContent(componentName))
           })
         }
 
