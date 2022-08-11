@@ -83,4 +83,15 @@ describe('<SelectCloudProjectModal />', () => {
     cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
     cy.get('[data-cy="selectProject"] button').should('have.text', 'Pick a project')
   })
+
+  it('shows the selected project when selecting from a list of >= 2 projects', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.get('[data-cy="selectProject"] button').click()
+    cy.contains('Test Project 2').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 2').click()
+    cy.contains('Test Project 1').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 1')
+  })
 })

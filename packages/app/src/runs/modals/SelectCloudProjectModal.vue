@@ -179,7 +179,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -294,13 +294,15 @@ const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.v
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const newProject = ref(projects.value.length === 0)
-const pickedProject = computed(() => {
-  if (pickedOrganization.value?.projects?.nodes?.length === 1) {
-    return pickedOrganization.value.projects.nodes[0]
-  }
+const pickedProject = ref()
 
-  return pickedOrganization.value?.projects?.nodes?.find((p) => p.name === projectName.value)
-})
+watch(() => [pickedOrganization.value], () => {
+  if (pickedOrganization.value?.projects?.nodes?.length === 1) {
+    pickedProject.value = pickedOrganization.value.projects.nodes[0]
+  } else {
+    pickedProject.value = pickedOrganization.value?.projects?.nodes?.find((p) => p.name === projectName.value)
+  }
+}, { immediate: true })
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {
