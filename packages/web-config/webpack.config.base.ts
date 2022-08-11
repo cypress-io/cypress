@@ -151,7 +151,7 @@ export const getCommonConfig = () => {
         },
 
         {
-          test: /\.(s?css|cjs)$/,
+          test: /\.s?css$/,
           exclude: /node_modules/,
           use: [
             { loader: MiniCSSExtractWebpackPlugin.loader },
@@ -159,6 +159,11 @@ export const getCommonConfig = () => {
         },
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
+        {
+          test: /\.css$/,
+          loader: require.resolve('css-loader'),
+          options: {},
+        },
         {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
@@ -206,7 +211,7 @@ export const getCommonConfig = () => {
       CyCSSWebpackPlugin({
         scan: {
           include: [
-            'src/lib/state-icon.tsx',
+            path.resolve('../reporter/src/lib/*.tsx'),
           ],
         },
       }),
