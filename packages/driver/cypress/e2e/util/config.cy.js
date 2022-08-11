@@ -76,36 +76,8 @@ describe('driver/src/cypress/validate_config', () => {
       const state = $SetterGetter.create({
         duringUserTestExecution: false,
       })
-      const isRunMode = true
-      const shouldSet = validateConfig(state, { hello: 'world' }, isRunMode)
 
-      expect(shouldSet).to.be.true
-    })
-
-    it('skips validation in run mode when override level is test:before:run', () => {
-      const state = $SetterGetter.create({
-        duringUserTestExecution: false,
-        test: {
-          _fired: { 'runner:test:before:run': true },
-        },
-      })
-      const isRunMode = true
-      const shouldSet = validateConfig(state, {}, isRunMode)
-
-      expect(shouldSet).to.be.false
-    })
-
-    it('run validation in open mode when override level is test:before:run', () => {
-      const state = $SetterGetter.create({
-        duringUserTestExecution: false,
-        test: {
-          _fired: { 'runner:test:before:run': true },
-        },
-      })
-      const isRunMode = false
-      const shouldSet = validateConfig(state, {}, isRunMode)
-
-      expect(shouldSet).to.be.true
+      expect(() => validateConfig(state, { hello: 'world' })).not.to.throw()
     })
 
     describe('ensures override level', () => {
@@ -119,10 +91,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('runtime')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { chromeWebSecurity: true }, isRunMode)
+            validateConfig(state, { chromeWebSecurity: true })
           }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` in a suite at runtime because it is a read-only configuration option.`)
         })
 
@@ -135,10 +106,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('runtime')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' }, isRunMode)
+            validateConfig(state, { testIsolation: 'strict' })
           }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\` in a test at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
@@ -155,10 +125,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('event')
-          const isRunMode = false
 
           expect(() => {
-            validateConfig(state, { chromeWebSecurity: true }, isRunMode)
+            validateConfig(state, { chromeWebSecurity: true })
           }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.`)
         })
 
@@ -173,10 +142,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('event')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' }, isRunMode)
+            validateConfig(state, { testIsolation: 'strict' })
           }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\` in a test:before:run:async event handler. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
@@ -193,10 +161,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('suite')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { chromeWebSecurity: true }, isRunMode)
+            validateConfig(state, { chromeWebSecurity: true })
           }).to.throw(`The \`chromeWebSecurity\` configuration can never be overridden from a suite-level override because it is a read-only configuration option.`)
         })
 
@@ -211,10 +178,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('test')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' }, isRunMode)
+            validateConfig(state, { testIsolation: 'strict' })
           }).to.throw(`The \`testIsolation\` configuration cannot be overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
@@ -228,10 +194,9 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('code')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { chromeWebSecurity: true }, isRunMode)
+            validateConfig(state, { chromeWebSecurity: true })
           }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.`)
         })
 
@@ -243,13 +208,26 @@ describe('driver/src/cypress/validate_config', () => {
           const overrideLevel = getOverrideLevel(state)
 
           expect(overrideLevel).to.eq('code')
-          const isRunMode = true
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' }, isRunMode)
+            validateConfig(state, { testIsolation: 'strict' })
           }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\`. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
+    })
+
+    it('skips checking override level when opted-out', () => {
+      const state = $SetterGetter.create({
+        duringUserTestExecution: true,
+        specWindow: { Error },
+        runnable: { type: 'test' },
+      })
+
+      const skipOverrideCHeck = true
+
+      expect(() => {
+        validateConfig(state, { chromeWebSecurity: true }, skipOverrideCHeck)
+      }).not.to.throw()
     })
 
     it('throws when invalid configuration value', () => {
@@ -258,10 +236,9 @@ describe('driver/src/cypress/validate_config', () => {
         specWindow: { Error },
         runnable: { type: 'test' },
       })
-      const isRunMode = true
 
       expect(() => {
-        validateConfig(state, { viewportHeight: '300' }, isRunMode)
+        validateConfig(state, { viewportHeight: '300' })
       }).to.throw(`Expected \`viewportHeight\` to be a number.\n\nInstead the value was: \`"300"\``)
     })
   })

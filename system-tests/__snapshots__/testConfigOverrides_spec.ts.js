@@ -162,12 +162,12 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   2 failing
 
   1) does not run:
-     Error: Test Override validation should have failed & it block should not have executed.
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.'
       [stack trace lines]
 
   2) nested
        does not run 2:
-     Error: Test Override validation should have failed & it block should not have executed.
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.'
       [stack trace lines]
 
 

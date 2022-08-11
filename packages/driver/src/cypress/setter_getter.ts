@@ -33,15 +33,11 @@ export default {
         ret = value
       }
 
-      let shouldSet = validate ? validate(obj) : true
+      validate && validate(obj)
 
-      if (shouldSet) {
-        extend(state, obj)
+      extend(state, obj)
 
-        return ret
-      }
-
-      return {}
+      return ret
     }
 
     // return the getter / setter function interface

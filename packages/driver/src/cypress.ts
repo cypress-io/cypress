@@ -239,9 +239,8 @@ class $Cypress {
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
-      const isRunMode = this.config('isTextTerminal')
 
-      return validateConfig(this.state, config, isRunMode, skipConfigOverrideValidation)
+      return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
     this.env = $SetterGetter.create(env)

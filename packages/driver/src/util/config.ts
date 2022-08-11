@@ -92,18 +92,8 @@ export const getOverrideLevel = (state): OverrideLevel => {
   return overrideLevel as OverrideLevel
 }
 
-export const validateConfig = (state: State, config: Record<string, any>, isRunMode: boolean, skipConfigOverrideValidation: boolean = false): boolean => {
+export const validateConfig = (state: State, config: Record<string, any>, skipConfigOverrideValidation: boolean = false) => {
   const overrideLevel = getOverrideLevel(state)
-
-  // FIXME: https://github.com/cypress-io/cypress/issues/23039
-  // bug in runner causes browser to hang in run mode when test:before:run throws an exception
-  if (overrideLevel === 'event' && isRunMode) {
-    const event = _.last(Object.keys(state('test')._fired || {}))
-
-    if (event === 'runner:test:before:run') {
-      return false
-    }
-  }
 
   if (!skipConfigOverrideValidation) {
     validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
@@ -143,6 +133,4 @@ export const validateConfig = (state: State, config: Record<string, any>, isRunM
 
     throw new (state('specWindow').Error)(errMsg)
   })
-
-  return true
 }
