@@ -1,6 +1,6 @@
 {
   "name": "@packages/electron-mksnapshot",
-  "version": "0.0.0-develop",
+  "version": "0.0.0-development",
   "description": "Configurable electron version of the mksnapshot binary",
   "private": true,
   "main": "dist/mksnapshot.js",
