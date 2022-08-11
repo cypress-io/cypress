@@ -2,7 +2,7 @@ import CreateOrganizationBanner from './CreateOrganizationBanner.vue'
 
 describe('<CreateOrganizationBanner />', () => {
   it('should render expected content', () => {
-    const linkHref = 'http://dummy.cypress.io/organization/create'
+    const linkHref = 'http://dummy.cypress.io/organizations/create'
 
     cy.gqlStub.Query.cloudViewer = {
       __typename: 'CloudUser',
@@ -12,7 +12,9 @@ describe('<CreateOrganizationBanner />', () => {
 
     cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} /> })
 
-    cy.get('a').should('have.attr', 'href', linkHref)
+    cy.get('a')
+    .should('have.attr', 'href')
+    .and('contain', linkHref)
 
     cy.percySnapshot()
   })

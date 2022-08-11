@@ -188,14 +188,7 @@ fragment SpecsListBanners on Query {
 gql`
 subscription SpecsListBanners_CheckCloudOrgMembership {
   cloudViewerChange {
-    cloudViewer {
-      id
-      firstOrganization: organizations(first: 1) {
-        nodes {
-          id
-        }
-      }
-    }
+    ...SpecsListBanners
   }
 }
 `

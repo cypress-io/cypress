@@ -26,7 +26,7 @@
       v-if="loginModalQuery.data.value"
       v-model="isLoginOpen"
       :gql="loginModalQuery.data.value"
-      utm-medium="login-banner"
+      utm-medium="Specs Login Banner"
     />
   </TrackedBanner>
 </template>
