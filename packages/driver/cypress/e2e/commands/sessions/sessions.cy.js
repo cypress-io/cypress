@@ -52,7 +52,7 @@ describe('cy.session', { retries: 0 }, () => {
       expect(clearCurrentSessionData).to.be.called
     })
 
-    it('clears session data before each run', async () => {
+    it('resets rendered html origins before each run', async () => {
       const backendSpy = cy.spy(Cypress, 'backend')
 
       await Cypress.action('runner:test:before:run:async', {})
