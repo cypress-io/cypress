@@ -49,17 +49,6 @@
       </template>
       {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
     </Button>
-
-    <Button
-      v-else-if="cloudViewer && props.showConnectButtonAfterLogin"
-      size="lg"
-      variant="primary"
-      aria-live="polite"
-      :disabled="!cloudViewer && !isOnline"
-      @click="handleLoginOrContinue"
-    >
-      {{ t('runs.connect.modal.selectProject.connectProject') }}
-    </Button>
     <Button
       v-else
       ref="loginButtonRef"
@@ -69,7 +58,7 @@
       :disabled="!cloudViewer && !isOnline"
       @click="handleLoginOrContinue"
     >
-      {{ cloudViewer ? t('topNav.login.actionContinue') : t('topNav.login.actionLogin') }}
+      {{ buttonText }}
     </Button>
   </div>
 </template>
@@ -91,6 +80,7 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 
 const isOnline = useOnline()
 
@@ -168,6 +158,7 @@ onBeforeUnmount(() => {
 
 const emit = defineEmits<{
   (event: 'continue', value: boolean): void
+  (event: 'connect-project'): void
 }>()
 
 const cloudViewer = computed(() => {
@@ -189,6 +180,12 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
+  if (cloudViewer.value && props.showConnectButtonAfterLogin) {
+    emit('connect-project')
+
+    return
+  }
+
   if (cloudViewer.value) {
     emit('continue', true)
 
@@ -214,6 +211,22 @@ const handleCancel = () => {
   emit('continue', true)
 }
 
-const { t } = useI18n()
+const buttonText = computed(() => {
+  const strings = {
+    login: t('topNav.login.actionLogin'),
+    connectProject: t('runs.connect.modal.selectProject.connectProject'),
+    continue: t('topNav.login.actionContinue'),
+  }
+
+  if (cloudViewer.value && props.showConnectButtonAfterLogin) {
+    return strings.connectProject
+  }
+
+  if (cloudViewer.value) {
+    return strings.continue
+  }
+
+  return strings.login
+})
 
 </script>

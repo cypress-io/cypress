@@ -82,6 +82,7 @@
             :utm-medium="props.utmMedium"
             :show-connect-button-after-login="props.showConnectButtonAfterLogin"
             @continue="continueAuth"
+            @connect-project="handleConnectProject"
           />
         </div>
       </div>
@@ -118,9 +119,16 @@ function continueAuth (isLoggedIn: boolean) {
   emit('update:modelValue', false)
 }
 
+function handleConnectProject () {
+  emit('loggedin')
+  emit('connect-project')
+  emit('update:modelValue', false)
+}
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
   (event: 'loggedin'): void
+  (event: 'connect-project'): void
 }>()
 
 const props = defineProps<{
