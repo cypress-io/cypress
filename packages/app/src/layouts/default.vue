@@ -16,7 +16,7 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
-      @connect-project="handleConnectProject"
+      @connect-project="showConnectDialog = true"
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
@@ -122,8 +122,5 @@ const resetErrorAndLoadConfig = (id: string) => {
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
 const showConnectDialog = ref(false)
-const handleConnectProject = () => {
-  // set the ref to true that would open the modal
-  showConnectDialog.value = true
-}
+
 </script>
