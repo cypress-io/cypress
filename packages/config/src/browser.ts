@@ -3,14 +3,13 @@ import Debug from 'debug'
 import {
   defaultSpecPattern,
   options,
-  ALL_OVERRIDE_LEVELS,
   breakingOptions,
   breakingRootOptions,
   testingTypeBreakingOptions,
 } from './options'
 
 import type { TestingType } from '@packages/types'
-import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel, OverrideLevels } from './options'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -23,7 +22,6 @@ export {
   BreakingOption,
   BreakingOptionErrorKey,
   ErrResult,
-  OverrideLevel,
   validation,
 }
 
@@ -49,7 +47,7 @@ const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 
-export const testOverrideLevels = createIndex(options, 'name', 'overrideLevels', 'never')
+export const testOverrideLevels = createIndex(options, 'name', 'overrideLevel', 'never')
 
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
@@ -57,8 +55,7 @@ const issuedWarnings = new Set()
 
 export type InvalidTestOverrideResult = {
   invalidConfigKey: string
-  overrideLevel: string
-  supportedOverrideLevels: OverrideLevels
+  supportedOverrideLevel: string
 }
 
 export type BreakingErrResult = {
@@ -193,21 +190,19 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateOverridableAtTestTest = (config: any, overrideLevel: Exclude<OverrideLevel, 'never'>, onErr: (result: InvalidTestOverrideResult) => void) => {
+export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: boolean, onErr: (result: InvalidTestOverrideResult) => void) => {
   Object.keys(config).some((configKey) => {
-    const runtimeValidation = ALL_OVERRIDE_LEVELS.includes(overrideLevel)
-    const overrideLevels = testOverrideLevels[configKey] as OverrideLevels
+    const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
-    if (!overrideLevels) {
+    if (!overrideLevel) {
       // non-cypress configuration option. skip validation
       return
     }
 
-    if (runtimeValidation && (overrideLevels === 'never' || !overrideLevels.includes(overrideLevel))) {
+    if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
       onErr({
         invalidConfigKey: configKey,
-        overrideLevel,
-        supportedOverrideLevels: overrideLevels,
+        supportedOverrideLevel: overrideLevel,
       })
     }
   })

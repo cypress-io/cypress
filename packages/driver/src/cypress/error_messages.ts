@@ -266,53 +266,25 @@ export default {
   },
 
   config: {
-    cypress_config_api (obj) {
-      const isReadOnly = obj.supportedOverrideLevels === 'never'
-
-      let message = `\`Cypress.config()\` ${isReadOnly ? 'can never' : 'cannot'} override \`{{invalidConfigKey}}\``
-
-      if (obj.overrideLevel === 'runtime') {
-        message += ` in a {{runnableType}} at {{overrideLevel}}`
-      }
-
-      if (isReadOnly) {
-        message += ' because it is a read-only configuration option.'
-      } else {
-        message += `. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
-      }
-
-      return {
-        message,
+    cypress_config_api: {
+      read_only: {
+        message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` because it is a read-only configuration option.`,
         docsUrl: 'https://on.cypress.io/config',
-      }
+      },
+    },
+    invalid_mocha_config_override: {
+      read_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can never be overridden because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      suite_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be overridden from a suite-level override.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_test_override: {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
-    },
-    invalid_event_override (obj) {
-      let message = `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` in a {{event}} event handler because it is a read-only configuration option.'`
-
-      if (obj.supportedOverrideLevels !== 'never') {
-        message = `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` in a {{event}} event handler. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
-      }
-
-      return {
-        message,
-        docsUrl: 'https://on.cypress.io/config',
-      }
-    },
-    invalid_mocha_config_override (obj) {
-      let message = `The \`{{invalidConfigKey}}\` configuration can never be overridden from a {{overrideLevel}}-level override because it is a read-only configuration option.`
-
-      if (obj.supportedOverrideLevels !== 'never') {
-        message = `The \`{{invalidConfigKey}}\` configuration cannot be overridden from a {{overrideLevel}}-level override. The \`{{invalidConfigKey}}\` option can only be overridden from ${obj.supportedOverrideLevels.join('-level and ')}-level overrides.`
-      }
-
-      return {
-        message,
-        docsUrl: 'https://on.cypress.io/config',
-      }
     },
   },
 

@@ -1,15 +1,15 @@
 import $SetterGetter from '../../../src/cypress/setter_getter'
-import { getOverrideLevel, validateConfig } from '../../../src/util/config'
+import { getMochaOverrideLevel, validateConfig } from '../../../src/util/config'
 
 describe('driver/src/cypress/validate_config', () => {
-  describe('getOverrideLevel', () => {
-    it('returns override level of runtime', () => {
+  describe('getMochaOverrideLevel', () => {
+    it('returns override level of undefined', () => {
       const state = $SetterGetter.create({
         duringUserTestExecution: true,
       })
-      const overrideLevel = getOverrideLevel(state)
+      const overrideLevel = getMochaOverrideLevel(state)
 
-      expect(overrideLevel).to.eq('runtime')
+      expect(overrideLevel).to.be.undefined
     })
 
     it('returns override level of test:before:run:async', () => {
@@ -19,21 +19,9 @@ describe('driver/src/cypress/validate_config', () => {
           _fired: { 'runner:test:before:run': true, 'runner:test:before:run:async': true },
         },
       })
-      const overrideLevel = getOverrideLevel(state)
+      const overrideLevel = getMochaOverrideLevel(state)
 
-      expect(overrideLevel).to.eq('event')
-    })
-
-    it('returns override level of test:before:run', () => {
-      const state = $SetterGetter.create({
-        duringUserTestExecution: false,
-        test: {
-          _fired: { 'runner:test:before:run': true },
-        },
-      })
-      const overrideLevel = getOverrideLevel(state)
-
-      expect(overrideLevel).to.eq('event')
+      expect(overrideLevel).to.be.undefined
     })
 
     it('returns override level of suite', () => {
@@ -43,7 +31,7 @@ describe('driver/src/cypress/validate_config', () => {
           _testConfig: { applied: 'suite' },
         },
       })
-      const overrideLevel = getOverrideLevel(state)
+      const overrideLevel = getMochaOverrideLevel(state)
 
       expect(overrideLevel).to.eq('suite')
     })
@@ -55,19 +43,19 @@ describe('driver/src/cypress/validate_config', () => {
           _testConfig: { applied: 'test' },
         },
       })
-      const overrideLevel = getOverrideLevel(state)
+      const overrideLevel = getMochaOverrideLevel(state)
 
       expect(overrideLevel).to.eq('test')
     })
 
-    it('returns override level of code', () => {
+    it('returns override level of fileLoad', () => {
       const state = $SetterGetter.create({
         duringUserTestExecution: false,
         test: undefined,
       })
-      const overrideLevel = getOverrideLevel(state)
+      const overrideLevel = getMochaOverrideLevel(state)
 
-      expect(overrideLevel).to.eq('code')
+      expect(overrideLevel).to.be.undefined
     })
   })
 
@@ -81,76 +69,23 @@ describe('driver/src/cypress/validate_config', () => {
     })
 
     describe('ensures override level', () => {
-      describe('throws when override level is runtime', () => {
-        it('and config override is read-only', () => {
-          const state = $SetterGetter.create({
-            duringUserTestExecution: true,
-            specWindow: { Error },
-            runnable: { type: 'suite' },
-          })
-          const overrideLevel = getOverrideLevel(state)
-
-          expect(overrideLevel).to.eq('runtime')
-
-          expect(() => {
-            validateConfig(state, { chromeWebSecurity: true })
-          }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` in a suite at runtime because it is a read-only configuration option.`)
+      it('throws when config override level is never', () => {
+        const state = $SetterGetter.create({
+          duringUserTestExecution: true,
+          specWindow: { Error },
+          runnable: { type: 'suite' },
         })
+        const overrideLevel = getMochaOverrideLevel(state)
 
-        it('and config override invalid at runtime', () => {
-          const state = $SetterGetter.create({
-            duringUserTestExecution: true,
-            specWindow: { Error },
-            runnable: { type: 'test' },
-          })
-          const overrideLevel = getOverrideLevel(state)
+        expect(overrideLevel).to.be.undefined
 
-          expect(overrideLevel).to.eq('runtime')
-
-          expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
-          }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\` in a test at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
-        })
+        expect(() => {
+          validateConfig(state, { chromeWebSecurity: true })
+        }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.`)
       })
 
-      describe('throws when override level is associated to an event config override', () => {
-        it('and config override is read-only', () => {
-          const state = $SetterGetter.create({
-            duringUserTestExecution: false,
-            test: {
-              _fired: { 'runner:test:before:run': true },
-            },
-            specWindow: { Error },
-          })
-          const overrideLevel = getOverrideLevel(state)
-
-          expect(overrideLevel).to.eq('event')
-
-          expect(() => {
-            validateConfig(state, { chromeWebSecurity: true })
-          }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.`)
-        })
-
-        it('and config override invalid for override level', () => {
-          const state = $SetterGetter.create({
-            duringUserTestExecution: false,
-            test: {
-              _fired: { 'runner:test:before:run': true, 'runner:test:before:run:async': true },
-            },
-            specWindow: { Error },
-          })
-          const overrideLevel = getOverrideLevel(state)
-
-          expect(overrideLevel).to.eq('event')
-
-          expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
-          }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\` in a test:before:run:async event handler. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
-        })
-      })
-
-      describe('throws when override level is associated to a mocha config override', () => {
-        it('and config override is read-only', () => {
+      describe('when config override level is suite', () => {
+        it('does not throw when runtime level is suite', () => {
           const state = $SetterGetter.create({
             duringUserTestExecution: false,
             test: {
@@ -158,16 +93,16 @@ describe('driver/src/cypress/validate_config', () => {
             },
             specWindow: { Error },
           })
-          const overrideLevel = getOverrideLevel(state)
+          const overrideLevel = getMochaOverrideLevel(state)
 
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            validateConfig(state, { chromeWebSecurity: true })
-          }).to.throw(`The \`chromeWebSecurity\` configuration can never be overridden from a suite-level override because it is a read-only configuration option.`)
+            validateConfig(state, { testIsolation: 'strict' })
+          }).not.to.throw()
         })
 
-        it('and config override invalid for override level', () => {
+        it('throws when runtime level is not suite', () => {
           const state = $SetterGetter.create({
             duringUserTestExecution: false,
             test: {
@@ -175,43 +110,48 @@ describe('driver/src/cypress/validate_config', () => {
             },
             specWindow: { Error },
           })
-          const overrideLevel = getOverrideLevel(state)
+          const overrideLevel = getMochaOverrideLevel(state)
 
           expect(overrideLevel).to.eq('test')
 
           expect(() => {
             validateConfig(state, { testIsolation: 'strict' })
-          }).to.throw(`The \`testIsolation\` configuration cannot be overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
+          }).to.throw(`The \`testIsolation\` configuration can only be overridden from a suite-level override.`)
         })
       })
 
-      describe('throws when override level is code', () => {
+      describe('when config override level is suite', () => {
         it('and config override is read-only', () => {
           const state = $SetterGetter.create({
             duringUserTestExecution: false,
             specWindow: { Error },
           })
-          const overrideLevel = getOverrideLevel(state)
+          const overrideLevel = getMochaOverrideLevel(state)
 
-          expect(overrideLevel).to.eq('code')
+          expect(overrideLevel).to.be.undefined
 
           expect(() => {
             validateConfig(state, { chromeWebSecurity: true })
           }).to.throw(`\`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.`)
         })
 
-        it('and config override invalid at runtime', () => {
-          const state = $SetterGetter.create({
-            duringUserTestExecution: false,
-            specWindow: { Error },
+        ;['test', 'suite'].forEach((mocha_runnable) => {
+          it(`and config override level is ${mocha_runnable}`, () => {
+            const state = $SetterGetter.create({
+              duringUserTestExecution: false,
+              test: {
+                _testConfig: { applied: mocha_runnable },
+              },
+              specWindow: { Error },
+            })
+            const overrideLevel = getMochaOverrideLevel(state)
+
+            expect(overrideLevel).to.eq(mocha_runnable)
+
+            expect(() => {
+              validateConfig(state, { chromeWebSecurity: false })
+            }).to.throw(`The \`chromeWebSecurity\` configuration can never be overridden because it is a read-only configuration option.`)
           })
-          const overrideLevel = getOverrideLevel(state)
-
-          expect(overrideLevel).to.eq('code')
-
-          expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
-          }).to.throw(`\`Cypress.config()\` cannot override \`testIsolation\`. The \`testIsolation\` option can only be overridden from suite-level overrides.`)
         })
       })
     })

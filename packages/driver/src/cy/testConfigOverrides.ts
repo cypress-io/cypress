@@ -3,6 +3,10 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
+const mochaOverrideLevel = ['suite', 'test'] as const
+
+export type MochaOverrideLevel = typeof mochaOverrideLevel[number]
+
 type ResolvedTestConfigOverride = {
   /**
    * The list of test config overrides and the invocation details used to add helpful
@@ -17,12 +21,12 @@ type ResolvedTestConfigOverride = {
    * The current runnable level of test config overrides that are being applied.
    * Used for accurate error reporting.
    */
-  applied?: string
+  applied?: MochaOverrideLevel | 'complete'
 }
 
 type TestConfig = {
   // The level in which the configuration override was set.
-  overrideLevel: 'suite' | 'test'
+  overrideLevel: MochaOverrideLevel
   // The configuration overrides. Browser is a valid configuration
   // to indicate the suite or test should run for that browser(s).
   overrides: Record<string, any>

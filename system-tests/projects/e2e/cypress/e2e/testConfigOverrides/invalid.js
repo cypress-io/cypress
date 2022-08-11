@@ -1,5 +1,5 @@
 const shouldNotExecute = () => {
-  throw new Error('Test Override validation should have failed & it block should not have executed.')
+  expect(1).to.eq(1) // should not execute - use passing test to ensure correct fail count in system test
 }
 
 it('inline test config override throws error', () => {

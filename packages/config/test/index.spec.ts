@@ -1,10 +1,10 @@
 import chai from 'chai'
+import path from 'path'
 import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 
 import * as configUtil from '../src/index'
-import { OverrideLevel, ALL_OVERRIDE_LEVELS } from '../src/options'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -46,6 +46,10 @@ describe('config/src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+      const cypressBinaryRoot = defaultValues.cypressBinaryRoot.split(path.sep).pop()
+
+      expect(cypressBinaryRoot).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = `/root/cypress`
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
@@ -66,6 +70,10 @@ describe('config/src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+      const cypressBinaryRoot = defaultValues.cypressBinaryRoot.split(path.sep).pop()
+
+      expect(cypressBinaryRoot).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = `/root/cypress`
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
@@ -190,61 +198,57 @@ describe('config/src/index', () => {
     })
   })
 
-  describe('.validateOverridableAtTestTest', () => {
-    ALL_OVERRIDE_LEVELS.forEach((overrideLevel) => {
-      it(`calls onError handler if configuration cannot be overridden from ${overrideLevel} level`, () => {
+  describe('.validateOverridableAtRunTime', () => {
+    it('calls onError handler if configuration override level=never', () => {
+      const errorFn = sinon.spy()
+
+      configUtil.validateOverridableAtRunTime({ chromeWebSecurity: false }, false, errorFn)
+
+      expect(errorFn).to.have.callCount(1)
+      expect(errorFn).to.have.been.calledWithMatch({
+        invalidConfigKey: 'chromeWebSecurity',
+        supportedOverrideLevel: 'never',
+      })
+    })
+
+    describe('configuration override level=suite', () => {
+      it('does not calls onError handler if validating level is suite', () => {
         const errorFn = sinon.spy()
 
-        configUtil.validateOverridableAtTestTest({ chromeWebSecurity: false }, overrideLevel as OverrideLevel, errorFn)
+        const isSuiteOverride = true
+
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'strict' }, isSuiteOverride, errorFn)
+
+        expect(errorFn).to.have.callCount(0)
+      })
+
+      it('calls onError handler if validating level is not suite', () => {
+        const errorFn = sinon.spy()
+
+        const isSuiteOverride = false
+
+        configUtil.validateOverridableAtRunTime({ testIsolation: false }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(1)
         expect(errorFn).to.have.been.calledWithMatch({
-          invalidConfigKey: 'chromeWebSecurity',
-          overrideLevel,
-          supportedOverrideLevels: 'never',
+          invalidConfigKey: 'testIsolation',
+          supportedOverrideLevel: 'suite',
         })
       })
     })
 
-    describe('testIsolation', () => {
-      it('does not calls onError handler if configuration can be overridden from suite level', () => {
-        const errorFn = sinon.spy()
+    it(`does not call onErr if config override level=any`, () => {
+      const errorFn = sinon.spy()
 
-        configUtil.validateOverridableAtTestTest({ testIsolation: 'strict' }, 'suite', errorFn)
+      configUtil.validateOverridableAtRunTime({ requestTimeout: 1000 }, false, errorFn)
 
-        expect(errorFn).to.have.callCount(0)
-      })
-
-      ;['code', 'event', 'test', 'runtime'].forEach((overrideLevel) => {
-        it(`calls onError handler if configuration can be overridden from ${overrideLevel} level`, () => {
-          const errorFn = sinon.spy()
-
-          configUtil.validateOverridableAtTestTest({ testIsolation: false }, overrideLevel as OverrideLevel, errorFn)
-
-          expect(errorFn).to.have.callCount(1)
-          expect(errorFn).to.have.been.calledWithMatch({
-            invalidConfigKey: 'testIsolation',
-            overrideLevel,
-            supportedOverrideLevels: ['suite'],
-          })
-        })
-      })
-    })
-
-    ALL_OVERRIDE_LEVELS.forEach((overrideLevel: OverrideLevel) => {
-      it(`does not call onErr if validation succeeds from ${overrideLevel} level`, () => {
-        const errorFn = sinon.spy()
-
-        configUtil.validateOverridableAtTestTest({ requestTimeout: 1000 }, overrideLevel as OverrideLevel, errorFn)
-
-        expect(errorFn).to.have.callCount(0)
-      })
+      expect(errorFn).to.have.callCount(0)
     })
 
     it('does not call onErr if configuration is a non-Cypress config option', () => {
       const errorFn = sinon.spy()
 
-      configUtil.validateOverridableAtTestTest({ foo: 'bar' }, 'runtime' as OverrideLevel, errorFn)
+      configUtil.validateOverridableAtRunTime({ foo: 'bar' }, true, errorFn)
 
       expect(errorFn).to.have.callCount(0)
     })

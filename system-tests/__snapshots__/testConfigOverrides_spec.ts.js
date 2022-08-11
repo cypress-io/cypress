@@ -162,12 +162,12 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   2 failing
 
   1) does not run:
-     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.'
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.
       [stack trace lines]
 
   2) nested
        does not run 2:
-     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run event handler because it is a read-only configuration option.'
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.
       [stack trace lines]
 
 
@@ -245,12 +245,12 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   2 failing
 
   1) does not run:
-     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run:async event handler because it is a read-only configuration option.'
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.
       [stack trace lines]
 
   2) nested
        does not run 2:
-     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` in a test:before:run:async event handler because it is a read-only configuration option.'
+     Error: CypressError: \`Cypress.config()\` can never override \`chromeWebSecurity\` because it is a read-only configuration option.
       [stack trace lines]
 
 
@@ -348,16 +348,14 @@ exports['testConfigOverrides / fails when passing invalid config values - [chrom
     12) "before each" hook for "5"
 
   throws error when invalid config opt in Cypress.config() in after hook
-    13) 5
-    14) "after all" hook for "5"
+    13) "after all" hook for "5"
 
   throws error when invalid config opt in Cypress.config() in afterEach hook
-    15) 5
-    16) "after each" hook for "5"
+    14) "after each" hook for "5"
 
 
   1 passing
-  16 failing
+  14 failing
 
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
@@ -374,14 +372,14 @@ Instead the value was: \`"null"\`
   3) throws error when invalid test-level override:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-CypressError: The \`testIsolation\` configuration cannot be overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.
+CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 https://on.cypress.io/config
   Error
       [stack trace lines]
 
   4) throws error when invalid config opt in Cypress.config() in test:
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
       [stack trace lines]
 
   5) context config overrides throws error
@@ -461,38 +459,28 @@ https://on.cypress.io/config
 
   11) throws error when invalid config opt in Cypress.config() in before hook
        "before all" hook for "4":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
   12) throws error when invalid config opt in Cypress.config() in beforeEach hook
        "before each" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
   13) throws error when invalid config opt in Cypress.config() in after hook
-       5:
-     Error: Test Override validation should have failed & it block should not have executed.
-      [stack trace lines]
-
-  14) throws error when invalid config opt in Cypress.config() in after hook
        "after all" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
-  15) throws error when invalid config opt in Cypress.config() in afterEach hook
-       5:
-     Error: Test Override validation should have failed & it block should not have executed.
-      [stack trace lines]
-
-  16) throws error when invalid config opt in Cypress.config() in afterEach hook
+  14) throws error when invalid config opt in Cypress.config() in afterEach hook
        "after each" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
@@ -508,7 +496,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  9                                                                                │
+  │ Screenshots:  7                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
@@ -528,11 +516,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in after hook -- 5 (failed).png                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in afterEach hook -- 5 (failed).png                                       
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
@@ -846,16 +830,14 @@ exports['testConfigOverrides / fails when passing invalid config values - [firef
     12) "before each" hook for "5"
 
   throws error when invalid config opt in Cypress.config() in after hook
-    13) 5
-    14) "after all" hook for "5"
+    13) "after all" hook for "5"
 
   throws error when invalid config opt in Cypress.config() in afterEach hook
-    15) 5
-    16) "after each" hook for "5"
+    14) "after each" hook for "5"
 
 
   1 passing
-  16 failing
+  14 failing
 
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
@@ -872,13 +854,13 @@ Instead the value was: \`"null"\`
   3) throws error when invalid test-level override:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-CypressError: The \`testIsolation\` configuration cannot be overridden from a test-level override. The \`testIsolation\` option can only be overridden from suite-level overrides.
+CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 https://on.cypress.io/config
       [stack trace lines]
 
   4) throws error when invalid config opt in Cypress.config() in test:
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a test at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
       [stack trace lines]
 
   5) context config overrides throws error
@@ -952,38 +934,28 @@ https://on.cypress.io/config
 
   11) throws error when invalid config opt in Cypress.config() in before hook
        "before all" hook for "4":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
   12) throws error when invalid config opt in Cypress.config() in beforeEach hook
        "before each" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
   13) throws error when invalid config opt in Cypress.config() in after hook
-       5:
-     Error: Test Override validation should have failed & it block should not have executed.
-      [stack trace lines]
-
-  14) throws error when invalid config opt in Cypress.config() in after hook
        "after all" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
 
-  15) throws error when invalid config opt in Cypress.config() in afterEach hook
-       5:
-     Error: Test Override validation should have failed & it block should not have executed.
-      [stack trace lines]
-
-  16) throws error when invalid config opt in Cypress.config() in afterEach hook
+  14) throws error when invalid config opt in Cypress.config() in afterEach hook
        "after each" hook for "5":
-     Error: CypressError: \`Cypress.config()\` cannot override \`testIsolation\` in a hook at runtime. The \`testIsolation\` option can only be overridden from suite-level overrides.
+     Error: CypressError: The \`testIsolation\` configuration can only be overridden from a suite-level override.
 
 Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`throws error when invalid c...\`
       [stack trace lines]
@@ -999,7 +971,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  9                                                                                │
+  │ Screenshots:  7                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
@@ -1019,11 +991,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in after hook -- 5 (failed).png                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in afterEach hook -- 5 (failed).png                                       
   -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
       in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 

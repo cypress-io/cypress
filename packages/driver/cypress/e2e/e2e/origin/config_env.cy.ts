@@ -20,7 +20,7 @@
         // @ts-ignore
         window.top.__cySkipValidateConfig = false
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` in a test at runtime because it is a read-only configuration option.')
+          expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option.')
           done()
         })
 

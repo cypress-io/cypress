@@ -29,18 +29,7 @@ export type BreakingOptionErrorKey =
   | 'RENAMED_CONFIG_OPTION'
   | 'TEST_FILES_RENAMED'
 
-// The test-time override levels (listed in order applied):
-//   fileLoad -  config override via Cypress.config() when either loading the supportFile or specFile in the
-//                 browser (this is before mocha as process the spec
-//   suite    - config override via describe('', {...}, () => {})
-//   test     - config override via it('', {...}, () => {})
-//   event    - config override via Cypress.config() in test:before:runner or test:before:runner:async event
-//   runtime  - config override via Cypress.config() when the test callback is executed
-export const ALL_OVERRIDE_LEVELS = ['fileLoad', 'event', 'suite', 'test', 'runtime'] as const
-
-export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number]
-
-export type OverrideLevels = Readonly<Array<OverrideLevel> | 'never'>
+export type OverrideLevel = 'any' | 'suite' | 'never'
 
 interface ConfigOption {
   name: string
@@ -52,7 +41,7 @@ interface ConfigOption {
    * it indicates the configuration value cannot be overridden via suite-/test-specific
    * overrides or at run-time with Cypress.Config().
    */
-  overrideLevels?: OverrideLevels
+  overrideLevel?: OverrideLevel
 }
 
 interface DriverConfigOption extends ConfigOption {
@@ -132,7 +121,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'arch',
     defaultValue: () => os.arch(),
@@ -141,13 +130,13 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
     requireRestartOnChange: 'server',
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -170,7 +159,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -188,12 +177,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
@@ -238,17 +227,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
@@ -261,7 +250,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'platform',
     defaultValue: () => os.platform(),
@@ -270,7 +259,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'port',
     defaultValue: null,
@@ -283,22 +272,22 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'redirectionLimit',
     defaultValue: 20,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: validate.isString,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'reporterOptions',
     defaultValue: null,
     validation: validate.isPlainObject,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
@@ -311,7 +300,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'retries',
     defaultValue: {
@@ -319,12 +308,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
       openMode: 0,
     },
     validation: validate.isValidRetriesConfig,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: validate.isBoolean,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
@@ -335,12 +324,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
@@ -356,7 +345,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'testIsolation',
     // TODO: https://github.com/cypress-io/cypress/issues/23093
@@ -366,7 +355,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     // strict by default when experimentalSessionAndOrigin=true
     defaultValue: 'legacy',
     validation: validate.isOneOf('legacy', 'strict'),
-    overrideLevels: ['suite'],
+    overrideLevel: 'suite',
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
@@ -397,17 +386,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'viewportWidth',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
-    overrideLevels: ALL_OVERRIDE_LEVELS,
+    overrideLevel: 'any',
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,

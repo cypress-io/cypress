@@ -1,11 +1,11 @@
 import _ from 'lodash'
-import { testOverrideLevels, validate as validateConfigValues, validateOverridableAtTestTest } from '@packages/config'
+import { testOverrideLevels, validate as validateConfigValues, validateOverridableAtRunTime } from '@packages/config'
 import { preprocessForSerialization } from './serialization'
 import $errUtils from '../cypress/error_utils'
 
 import type { StateFunc as State } from '../cypress/state'
-
-import type { ErrResult, OverrideLevel } from '@packages/config'
+import type { MochaOverrideLevel } from '../cy/testConfigOverrides'
+import type { ErrResult } from '@packages/config'
 
 /**
  * Mutates the config/env object serialized from the other origin to omit read-only values
@@ -73,49 +73,41 @@ export const preprocessEnv = (env: Cypress.ObjectLike) => {
   return preprocessForSerialization(env) as Cypress.Config
 }
 
-export const getOverrideLevel = (state): OverrideLevel => {
+export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => {
   const test = state('test')
-  let overrideLevel
 
-  if (state('duringUserTestExecution')) {
-    overrideLevel = 'runtime'
-  } else if (test) {
-    if (Object.keys(test?._fired || {}).length) {
-      overrideLevel = 'event'
-    } else {
-      overrideLevel = test._testConfig.applied // either suite or test
-    }
-  } else {
-    overrideLevel = 'fileLoad' // supportFile or specFile load execution
+  if (!state('duringUserTestExecution') && test && !Object.keys(test?._fired || {}).length) {
+    return test._testConfig.applied // either suite or test
   }
 
-  return overrideLevel as OverrideLevel
+  return undefined
 }
 
+// Configuration can be override at multiple run-time levels. Ensure the configuration keys can
+// be override and that the provided override values are the correct type.
+//
+// The run-time override levels (listed in order applied):
+//   fileLoad -  config override via Cypress.config() when either loading the supportFile or specFile in the
+//                 browser (this is before mocha as process the spec
+//   suite    - config override via describe('', {...}, () => {})
+//   test     - config override via it('', {...}, () => {})
+//   event    - config override via Cypress.config() in test:before:runner or test:before:runner:async event
+//   runtime  - config override via Cypress.config() when the test callback is executed
 export const validateConfig = (state: State, config: Record<string, any>, skipConfigOverrideValidation: boolean = false) => {
-  const overrideLevel = getOverrideLevel(state)
-
   if (!skipConfigOverrideValidation) {
-    validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
-      let errMsg
+    const mochaOverrideLevel = getMochaOverrideLevel(state)
+    const isSuiteOverride = mochaOverrideLevel === 'suite'
 
-      if (overrideLevel === 'runtime' || overrideLevel === 'fileLoad') {
-        errMsg = $errUtils.errByPath('config.cypress_config_api', {
-          ...validationResult,
-          runnableType: state('runnable')?.type,
-        })
-      } else if (overrideLevel === 'event') {
-        const event = _.last(Object.keys(state('test')._fired))
+    validateOverridableAtRunTime(config, isSuiteOverride, (validationResult) => {
+      let errKey = 'config.cypress_config_api.read_only'
 
-        errMsg = $errUtils.errByPath('config.invalid_event_override', {
-          ...validationResult,
-          event: event?.replace('runner:', ''),
-        })
-      } else {
-        errMsg = $errUtils.errByPath('config.invalid_mocha_config_override', validationResult)
+      if (validationResult.supportedOverrideLevel === 'suite') {
+        errKey = 'config.invalid_mocha_config_override.suite_only'
+      } else if (mochaOverrideLevel) {
+        errKey = 'config.invalid_mocha_config_override.read_only'
       }
 
-      throw new (state('specWindow').Error)(errMsg)
+      throw new (state('specWindow').Error)($errUtils.errByPath(errKey, validationResult))
     })
   }
 
