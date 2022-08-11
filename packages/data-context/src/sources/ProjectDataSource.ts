@@ -388,15 +388,13 @@ export class ProjectDataSource {
   async defaultSpecFileName (): Promise<string> {
     const { specPattern = [] } = await this.ctx.project.specPatterns()
 
-    const defaultName = this.ctx.actions.project.getDefaultSpecFileName({
+    return this.ctx.actions.project.getDefaultSpecFileName({
       currentProject: this.ctx.currentProject,
       testingType: this.ctx.coreData.currentTestingType,
       fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse,
       specs: this.specs,
       specPattern,
     })
-
-    return defaultName
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {

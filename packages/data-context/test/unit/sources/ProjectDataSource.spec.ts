@@ -772,6 +772,8 @@ describe('ProjectDataSource', () => {
 
   context('#defaultSpecFilename', () => {
     it('yields default if no spec pattern is set', async () => {
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [] })
+
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
       expect(defaultSpecFileName).to.equal('cypress/e2e/spec.cy.js')
