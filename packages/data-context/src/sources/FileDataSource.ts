@@ -1,6 +1,8 @@
 import assert from 'assert'
 import type { DataContext } from '..'
 import * as path from 'path'
+import os from 'os'
+
 import globby, { GlobbyOptions } from 'globby'
 import Debug from 'debug'
 import { toPosix } from '../util/file'
@@ -34,18 +36,15 @@ export class FileDataSource {
       // The working directory path may include characters that conflict with glob
       // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
       // We scope our search to the working directory using the `cwd` globby option.
-      if (globPattern.includes(cwd)) {
-        return path.relative(cwd, globPattern)
-      }
-
-      return globPattern
+      return globPattern.replace(cwd, '.')
     })
 
     const ignoreGlob = (globOptions?.ignore ?? []).concat('**/node_modules/**')
 
-    if (process.platform === 'win32') {
+    if (os.platform() === 'win32') {
       // globby can't work with backwards slashes
       // https://github.com/sindresorhus/globby/issues/179
+      debug('updating glob patterns to POSIX')
       for (const i in globs) {
         const cur = globs[i]
 
@@ -56,6 +55,9 @@ export class FileDataSource {
     }
 
     try {
+      debug('globbing pattern(s): %o', globs)
+      debug('within directory: %s', cwd)
+
       const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
 
       return files
