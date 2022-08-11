@@ -89,7 +89,7 @@ describe('FileDataSource', () => {
         { ignore: ['./scripts/**/*'] },
       )
 
-      // only scripts at should be found, as node_modules is implicitly ignored
+      // only scripts at root should be found, as node_modules is implicitly ignored
       // and ./scripts is explicitly ignored
       expect(files).to.have.length(2)
     })
