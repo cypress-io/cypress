@@ -152,7 +152,7 @@ function addCypressComponentTestingFiles (options: any): Rule {
 }
 
 function addCtSpecs (options: any): Rule {
-  return (tree: Tree) => {
+  return (tree: Tree, context: SchematicContext) => {
     if (options.addCtSpecs) {
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
@@ -164,19 +164,17 @@ function addCtSpecs (options: any): Rule {
 
         const componentPaths = appDir.subfiles.filter((file) => file.endsWith(`component.ts`))
 
-        console.log('🚀 ~ file: index.ts ~ line 165 ~ Object.keys ~ componentPaths', componentPaths)
-
         if (componentPaths) {
           return componentPaths.map((component: any) => {
             const componentName = component.split('.')[0]
 
-            console.log('🚀 ~ file: index.ts ~ line 174 ~ returncomponents.map ~ componentName', componentName)
-
-            console.log('🚀 ~ file: index.ts ~ line 171 ~ returncomponentPaths&&componentPaths.map ~ component', component)
+            context.logger.debug(`Creating component test for: ${componentName}`)
 
             return !tree.exists(`${appPath}/${componentName}.cy.ts`) && tree.create(`${appPath}/${componentName}.cy.ts`, '// TODO')
           })
         }
+
+        return context.logger.debug(`No components found in ${appPath}. Please check that the folder is correct.`)
       })
     }
   }
