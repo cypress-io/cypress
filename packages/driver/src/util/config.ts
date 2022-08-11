@@ -86,7 +86,7 @@ export const getOverrideLevel = (state): OverrideLevel => {
       overrideLevel = test._testConfig.applied // either suite or test
     }
   } else {
-    overrideLevel = 'code' // supportFile or spec load execution
+    overrideLevel = 'fileLoad' // supportFile or specFile load execution
   }
 
   return overrideLevel as OverrideLevel
@@ -99,7 +99,7 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     validateOverridableAtTestTest(config, overrideLevel, (validationResult) => {
       let errMsg
 
-      if (overrideLevel === 'runtime' || overrideLevel === 'code') {
+      if (overrideLevel === 'runtime' || overrideLevel === 'fileLoad') {
         errMsg = $errUtils.errByPath('config.cypress_config_api', {
           ...validationResult,
           runnableType: state('runnable')?.type,

@@ -29,8 +29,14 @@ export type BreakingOptionErrorKey =
   | 'RENAMED_CONFIG_OPTION'
   | 'TEST_FILES_RENAMED'
 
-// The test-time override levels
-export const ALL_OVERRIDE_LEVELS = ['code', 'event', 'suite', 'test', 'runtime'] as const
+// The test-time override levels (listed in order applied):
+//   fileLoad -  config override via Cypress.config() when either loading the supportFile or specFile in the
+//                 browser (this is before mocha as process the spec
+//   suite    - config override via describe('', {...}, () => {})
+//   test     - config override via it('', {...}, () => {})
+//   event    - config override via Cypress.config() in test:before:runner or test:before:runner:async event
+//   runtime  - config override via Cypress.config() when the test callback is executed
+export const ALL_OVERRIDE_LEVELS = ['fileLoad', 'event', 'suite', 'test', 'runtime'] as const
 
 export type OverrideLevel = typeof ALL_OVERRIDE_LEVELS[number]
 
