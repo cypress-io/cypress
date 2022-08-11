@@ -24,6 +24,14 @@ import {
 import { relative, resolve } from 'path'
 import { JSONFile, JSONPath } from '../utils/jsonFile'
 
+type HandleFilesType = {
+  projects: any
+  options: any
+  applyPath: string
+  movePath?: string
+  relativeToWorkspacePath: string
+}
+
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     _options = { ..._options, __version__: getAngularVersion(tree) }
@@ -81,34 +89,45 @@ function addCypressTestScriptsToPackageJson (): Rule {
   }
 }
 
+function handleFiles (tree: Tree, context: SchematicContext, { projects, options, applyPath, movePath, relativeToWorkspacePath }: HandleFilesType): any {
+  return chain(
+    Object.keys(projects).map((name) => {
+      const project = projects[name]
+      const projectPath = resolve(getSystemPath(normalize(project.root)))
+      const workspacePath = resolve(getSystemPath(normalize('')))
+
+      const relativeToWorkspace = relative(`${projectPath}${relativeToWorkspacePath}`, workspacePath)
+
+      const baseUrl = getBaseUrl(project)
+
+      return mergeWith(
+        apply(url(applyPath), [
+          move(movePath ? `${project.root}${movePath}` : project.root),
+          template({
+            ...options,
+            ...strings,
+            root: project.root ? `${project.root}/` : project.root,
+            baseUrl,
+            relativeToWorkspace,
+          }),
+        ]),
+      )
+    }),
+  )(tree, context)
+}
+
 function addCypressCoreFiles (options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.debug('Adding cypress files')
     const angularJsonValue = getAngularJsonValue(tree)
     const { projects } = angularJsonValue
 
-    return chain(
-      Object.keys(projects).map((name) => {
-        const project = projects[name]
-        const projectPath = resolve(getSystemPath(normalize(project.root)))
-        const workspacePath = resolve(getSystemPath(normalize('')))
-        const relativeToWorkspace = relative(`${projectPath}/cypress`, workspacePath)
-        const baseUrl = getBaseUrl(project)
-
-        return mergeWith(
-          apply(url('./files-core'), [
-            move(project.root),
-            template({
-              ...options,
-              ...strings,
-              root: project.root ? `${project.root}/` : project.root,
-              baseUrl,
-              relativeToWorkspace,
-            }),
-          ]),
-        )
-      }),
-    )(tree, context)
+    return handleFiles(tree, context, {
+      projects,
+      options,
+      applyPath: './files-core',
+      relativeToWorkspacePath: `/`,
+    })
   }
 }
 
@@ -119,30 +138,13 @@ function addCypressComponentTestingFiles (options: any): Rule {
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
 
-      return chain(
-        Object.keys(projects).map((name) => {
-          const project = projects[name]
-          const projectPath = resolve(getSystemPath(normalize(project.root)))
-          const workspacePath = resolve(getSystemPath(normalize('')))
-
-          const relativeToWorkspace = relative(`${projectPath}/cypress`, workspacePath)
-
-          const baseUrl = getBaseUrl(project)
-
-          return mergeWith(
-            apply(url('./files-ct'), [
-              move(`${project.root}/cypress/support`),
-              template({
-                ...options,
-                ...strings,
-                root: project.root ? `${project.root}/` : project.root,
-                baseUrl,
-                relativeToWorkspace,
-              }),
-            ]),
-          )
-        }),
-      )(tree, context)
+      return handleFiles(tree, context, {
+        projects,
+        options,
+        applyPath: './files-ct',
+        movePath: '/cypress/support',
+        relativeToWorkspacePath: `/cypress`,
+      })
     }
   }
 }
