@@ -317,9 +317,8 @@ describe('Proxy Logging', () => {
             })
 
             done()
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error('assertion failed:', err)
+          } catch (error) {
+            done(new Error(error))
           }
         })
       })
