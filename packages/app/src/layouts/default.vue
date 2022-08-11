@@ -16,6 +16,7 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
+      @connect-project="handleConnectProject"
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
@@ -48,6 +49,13 @@
           <component :is="Component" />
         </transition>
       </router-view>
+      <CloudConnectModals
+        v-if="showConnectDialog && query.data.value"
+        :show="showConnectDialog"
+        :gql="query.data.value"
+        @cancel="showConnectDialog = false"
+        @success="showConnectDialog = false"
+      />
     </main>
   </div>
 </template>
@@ -58,9 +66,10 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
+import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
@@ -75,6 +84,7 @@ fragment MainAppQueryData on Query {
       isLoadingConfigFile
       isLoadingNodeEvents
     }
+    ...CloudConnectModals
 }
 `
 
@@ -111,4 +121,9 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
+const showConnectDialog = ref(false)
+const handleConnectProject = () => {
+  // set the ref to true that would open the modal
+  showConnectDialog.value = true
+}
 </script>

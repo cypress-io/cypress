@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -136,6 +136,8 @@
                   :gql="props.gql"
                   :show-logout="true"
                   utm-medium="Nav"
+                  :show-connect-button-after-login="isApp"
+                  @connect-project="handleConnectProject"
                 />
               </div>
             </div>
@@ -157,6 +159,8 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
+        :show-connect-button-after-login="isApp && !cloudProjectId"
+        @connect-project="handleConnectProject"
       />
     </div>
   </div>
@@ -272,6 +276,16 @@ const props = defineProps<{
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
+
+const emit = defineEmits<{
+  (event: 'connect-project'): void
+}>()
+
+const isApp = window.__Cypress__
+
+const handleConnectProject = () => {
+  emit('connect-project')
+}
 
 const { t } = useI18n()
 const prompts = sortBy([
