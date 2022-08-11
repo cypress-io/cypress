@@ -10,6 +10,7 @@ import {
   template,
   Tree,
   url,
+
 } from '@angular-devkit/schematics'
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
@@ -40,6 +41,7 @@ export default function (_options: any): Rule {
       updateDependencies(),
       addCypressCoreFiles(_options),
       addCypressComponentTestingFiles(_options),
+      addCtSpecs(_options),
       addCypressTestScriptsToPackageJson(),
       modifyAngularJson(_options),
     ])(tree, _context)
@@ -144,6 +146,37 @@ function addCypressComponentTestingFiles (options: any): Rule {
         applyPath: './files-ct',
         movePath: '/cypress/support',
         relativeToWorkspacePath: `/cypress`,
+      })
+    }
+  }
+}
+
+function addCtSpecs (options: any): Rule {
+  return (tree: Tree) => {
+    if (options.addCtSpecs) {
+      const angularJsonValue = getAngularJsonValue(tree)
+      const { projects } = angularJsonValue
+
+      Object.keys(projects).map((name) => {
+        const project = projects[name]
+        const appPath = `${project.root}/${project.sourceRoot}/${project.prefix}`
+        const appDir = tree.getDir(appPath)
+
+        const componentPaths = appDir.subfiles.filter((file) => file.endsWith(`component.ts`))
+
+        console.log('🚀 ~ file: index.ts ~ line 165 ~ Object.keys ~ componentPaths', componentPaths)
+
+        if (componentPaths) {
+          return componentPaths.map((component: any) => {
+            const componentName = component.split('.')[0]
+
+            console.log('🚀 ~ file: index.ts ~ line 174 ~ returncomponents.map ~ componentName', componentName)
+
+            console.log('🚀 ~ file: index.ts ~ line 171 ~ returncomponentPaths&&componentPaths.map ~ component', component)
+
+            return !tree.exists(`${appPath}/${componentName}.cy.ts`) && tree.create(`${appPath}/${componentName}.cy.ts`, '// TODO')
+          })
+        }
       })
     }
   }

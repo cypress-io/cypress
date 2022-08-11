@@ -12,9 +12,15 @@
     },
     "ct": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "description": "When true, `ng ct` will be added to run Cypress component tests.",
       "x-prompt": "Would you like to add Cypress component testing?  This will add a new command `ng ct` and add files needed for Cypress component testing."
+    },
+    "addCtSpecs": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, Cypress component tests will be added alongside `.component` files.",
+      "x-prompt": "Would you like to add Cypress component tests alongside your existing components?"
     }
   },
   "required": []
