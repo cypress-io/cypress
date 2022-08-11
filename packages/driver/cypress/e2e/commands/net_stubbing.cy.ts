@@ -2535,12 +2535,9 @@ describe('network stubbing', function () {
         })
       })
 
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23150
-      it.skip('when body contains unicode', function (done) {
+      it('when body contains unicode', function () {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('8')
-
-          done()
         }).intercept('/post-only', function (req) {
           req.body = '🙃🤔'
         })
