@@ -1,5 +1,4 @@
 export interface CrossOriginCallbackStoreFile {
-  callbackName: string
   inputFileName: string
   outputFilePath: string
   source: string

@@ -95,7 +95,6 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       const outputFilePath = `${pathUtil.join(outputDir, inputFileName)}.js`
 
       store.addFile(resourcePath, {
-        callbackName,
         inputFileName,
         outputFilePath,
         source: modifiedGeneratedCode,
