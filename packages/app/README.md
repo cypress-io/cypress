@@ -91,13 +91,13 @@ The terminology can get a bit confusing as Vue Router's `params` are not the que
 
 ## Using existing, Vite-incompatible modules
 
-Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily
+Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner` cannot be easily
 used with Vite due to circular dependencies and modules that do not have compatible ESM builds.
 
 To work around this, when consuming existing code, it is bundled with webpack and made available under the
 `window.UnifiedRunner` namespace. It is injected via [`injectBundle`](./src/runner/injectBundle.ts).
 
-To add more code to the bundle, add it in the bundle root, `@packages/runner-ct/src/main.tsx` and attach it to
+To add more code to the bundle, add it in the bundle root, `@packages/runner/src/main.tsx` and attach it to
 `window.UnifiedRunner`.
 
 As a rule of thumb, avoid importing from the older, webpack based modules into this package. Instead, if you want to consume code from those older, webpack bundled modules, you should add them to the webpack root and consume them via `window.UnifiedRunner`. Ideally, update [`index.d.ts`](./index.d.ts) to add the types, as well.
