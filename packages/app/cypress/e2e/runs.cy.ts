@@ -349,8 +349,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').click()
-      cy.findByText('Mock Project').click()
+      cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
