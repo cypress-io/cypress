@@ -294,7 +294,17 @@ const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.v
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const newProject = ref(projects.value.length === 0)
-const pickedProject = ref(pickedOrganization.value?.projects ? pickedOrganization.value.projects.nodes.find((p) => p.name === projectName.value) : undefined)
+const pickedProject = computed(() => {
+  if (pickedOrganization.value?.projects) {
+    if (pickedOrganization.value.projects.nodes.length === 1) {
+      return pickedOrganization.value.projects.nodes[0]
+    }
+
+    return pickedOrganization.value.projects.nodes.find((p) => p.name === projectName.value)
+  }
+
+  return undefined
+})
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {
