@@ -2524,12 +2524,9 @@ describe('network stubbing', function () {
         })
       })
 
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23101
-      it.skip('when body contains ascii', function (done) {
+      it('when body contains ascii', function () {
         cy.intercept('/post-only', function (req) {
           expect(req.headers['content-length']).to.eq('18')
-
-          done()
         }).intercept('/post-only', function (req) {
           req.body = 'this is only ascii'
         })
