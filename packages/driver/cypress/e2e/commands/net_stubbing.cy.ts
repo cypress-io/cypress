@@ -1630,11 +1630,10 @@ describe('network stubbing', function () {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23264
-    it.skip('can add a body to a request that does not have one', function (done) {
+    it('can add a body to a request that does not have one', function () {
       const body = '{"foo":"bar"}'
 
-      cy.intercept('/post-only*', function (req) {
+      cy.intercept('/post-only', function (req) {
         expect(req.body).to.eq('')
         expect(req.method).to.eq('GET')
         req.method = 'POST'
@@ -1644,8 +1643,6 @@ describe('network stubbing', function () {
       }).then(function () {
         $.get('/post-only').done((responseText) => {
           expect(responseText).to.contain(body)
-
-          done()
         })
       })
     })
