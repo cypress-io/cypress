@@ -120,22 +120,6 @@ const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyV
   $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
-const cannotVisitPreviousOrigin = ({ remote, originalUrl, previouslyVisitedLocation, log }) => {
-  const errOpts = {
-    onFail: log,
-    args: {
-      attemptedUrl: remote,
-      previousUrl: previouslyVisitedLocation,
-      originalUrl,
-    },
-    errProps: {
-      isCrossOrigin: true,
-    },
-  }
-
-  $errUtils.throwErrByPath('origin.cannot_visit_previous_origin', errOpts)
-}
-
 const specifyFileByRelativePath = (url, log) => {
   $errUtils.throwErrByPath('visit.specify_file_by_relative_path', {
     onFail: log,
@@ -1073,7 +1057,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
         return requestUrl(url, options)
         .then((resp: any = {}) => {
-          let { url, originalUrl, cookies, redirects, filePath, isPrimaryOrigin } = resp
+          let { url, originalUrl, cookies, redirects, filePath } = resp
 
           // reapply the existing hash
           url += existingHash

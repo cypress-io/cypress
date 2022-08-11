@@ -24,7 +24,6 @@ import { patchDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
-import * as cors from '@packages/network/lib/cors'
 
 const createCypress = () => {
   // @ts-ignore

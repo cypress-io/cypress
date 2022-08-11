@@ -1437,6 +1437,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('http://localhost:3501/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws when attempting to visit a 2nd domain on different protocol', function (done) {
@@ -1470,6 +1475,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('https://localhost:3502/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws when attempting to visit a 2nd domain on different superdomain', function (done) {
@@ -1503,6 +1513,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws attempting to visit 2 unique ip addresses', function (done) {
@@ -1537,6 +1552,11 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('http://127.0.0.1:3500/fixtures/generic.html')
         .visit('http://0.0.0.0:3500/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('displays loading_network_failed when _resolveUrl throws', function (done) {
@@ -2200,6 +2220,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       return null
@@ -2330,24 +2355,11 @@ describe('src/cy/commands/navigation', () => {
       cy
       .visit('/fixtures/generic.html')
       .then((win) => {
-        // We do not wait if the experimentalSessionAndOrigin feature is enabled
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          const onLoad = cy.spy()
-
-          cy.on('window:load', onLoad)
-
+        cy.on('window:load', () => {
           cy.on('command:queue:end', () => {
-            expect(onLoad).not.have.been.called
             done()
           })
-        } else {
-          // We do wait if the experimentalSessionAndOrigin feature is not enabled
-          cy.on('window:load', () => {
-            cy.on('command:queue:end', () => {
-              done()
-            })
-          })
-        }
+        })
 
         cy.on('command:queue:before:end', () => {
           // force us to become unstable immediately
@@ -2698,18 +2710,29 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('history.pushState', () => {
-      it('emits url:changed event', () => {
-        const emit = cy.spy(Cypress, 'emit').log(false)
+      it('emits url:changed event', (done) => {
+        let times = 1
+
+        const listener = (url) => {
+          if (times === 1) {
+            expect(url).to.eq('http://localhost:3500/fixtures/generic.html')
+          }
+
+          if (times === 2) {
+            expect(url).to.eq('http://localhost:3500/fixtures/pushState.html')
+            Cypress.removeListener('url:changed', listener)
+            done()
+          }
+
+          times = times + 1
+        }
+
+        Cypress.on('url:changed', listener)
 
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
           win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
-
-          expect(emit).to.be.calledWith(
-            'url:changed',
-            'http://localhost:3500/fixtures/pushState.html',
-          )
         })
       })
 
@@ -2739,18 +2762,29 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('history.replaceState', () => {
-      it('emits url:changed event', () => {
-        const emit = cy.spy(Cypress, 'emit').log(false)
+      it('emits url:changed event', (done) => {
+        let times = 1
+
+        const listener = (url) => {
+          if (times === 1) {
+            expect(url).to.eq('http://localhost:3500/fixtures/generic.html')
+          }
+
+          if (times === 2) {
+            expect(url).to.eq('http://localhost:3500/fixtures/replaceState.html')
+            Cypress.removeListener('url:changed', listener)
+            done()
+          }
+
+          times = times + 1
+        }
+
+        Cypress.on('url:changed', listener)
 
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
           win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
-
-          expect(emit).to.be.calledWith(
-            'url:changed',
-            'http://localhost:3500/fixtures/replaceState.html',
-          )
         })
       })
 
