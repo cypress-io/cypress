@@ -134,7 +134,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, endIndex).join(path.sep)
 }
 
-export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts', name = '') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -152,7 +152,7 @@ export function getPathFromSpecPattern (specPattern: string, testingType: Testin
   if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
+  const fileName = replaceWildCard(parsedGlob.path.filename, name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
     || `.cy.${fileExtensionToUse}`
@@ -386,49 +386,17 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName (): Promise<string> {
-    const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
-    const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
+    const { specPattern = [] } = await this.ctx.project.specPatterns()
 
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
-    }
+    const defaultName = this.ctx.actions.project.getDefaultSpecFileName({
+      currentProject: this.ctx.currentProject,
+      testingType: this.ctx.coreData.currentTestingType,
+      fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse,
+      specs: this.specs,
+      specPattern,
+    })
 
-    try {
-      let specPatternSet: string | undefined
-      const { specPattern = [] } = await this.ctx.project.specPatterns()
-
-      if (Array.isArray(specPattern)) {
-        specPatternSet = specPattern[0]
-      }
-
-      // 1. If there is no spec pattern, use the default for this testing type.
-      if (!specPatternSet) {
-        return defaultPathname
-      }
-
-      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
-      if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
-        return defaultPathname
-      }
-
-      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
-      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
-
-      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
-      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
-
-      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
-
-      // 4. Otherwise, return a path that fulfills the spec pattern.
-      if (pathFromSpecPattern) return pathFromSpecPattern
-
-      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
-      return defaultPathname
-    } catch (err) {
-      debug('Error intelligently detecting default filename, using safe default %o', err)
-
-      return defaultPathname
-    }
+    return defaultName
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {

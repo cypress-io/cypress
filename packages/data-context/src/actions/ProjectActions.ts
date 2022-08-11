@@ -4,6 +4,7 @@ import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
+import Debug from 'debug'
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -12,8 +13,11 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
-import { resetIssuedWarnings } from '@packages/config'
+import { resetIssuedWarnings, defaultSpecPattern } from '@packages/config'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../sources'
+
+const debug = Debug('cypress:data-context:actions:ProjectActions')
 
 export interface ProjectApiShape {
   /**
@@ -354,18 +358,22 @@ export class ProjectActions {
 
     const codeGenPath = getCodeGenPath()
 
-    const newSpecCodeGenOptions = new SpecOptions({
+    const { specPattern = [] } = await this.ctx.project.specPatterns()
+
+    const newSpecCodeGenOptions = new SpecOptions(this.getDefaultSpecFileName, {
       codeGenPath,
       codeGenType,
       erroredCodegenCandidate,
       framework: this.getWizardFrameworkFromConfig(),
       isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
+      specPattern,
+      currentProject: this.ctx.currentProject,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenOptions.templateKey], target: path.parse(codeGenPath).dir },
+      { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
       codeGenOptions,
     )
 
@@ -530,5 +538,53 @@ export class ProjectActions {
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
     return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+  }
+
+  async getDefaultSpecFileName (
+    { currentProject, testingType, fileExtensionToUse, specPattern, specs = [], name }:
+    { currentProject: string | null, testingType: TestingType | null, fileExtensionToUse: 'js' | 'ts', specPattern: string[], specs?: FoundSpec[], name?: string },
+  ): Promise<string> {
+    const defaultFilename = `${name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${fileExtensionToUse}`
+    const defaultPathname = path.join('cypress', testingType ?? 'e2e', defaultFilename)
+
+    if (!currentProject || !testingType) {
+      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    }
+
+    try {
+      let specPatternSet: string | undefined
+
+      if (Array.isArray(specPattern)) {
+        specPatternSet = specPattern[0]
+      }
+
+      // 1. If there is no spec pattern, use the default for this testing type.
+      if (!specPatternSet) {
+        return defaultPathname
+      }
+
+      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
+      if (specPatternSet === defaultSpecPattern[testingType]) {
+        return defaultPathname
+      }
+
+      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, testingType, fileExtensionToUse, name)
+      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
+
+      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
+      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(specs.map((spec) => spec.relative))
+
+      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
+
+      // 4. Otherwise, return a path that fulfills the spec pattern.
+      if (pathFromSpecPattern) return pathFromSpecPattern
+
+      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
+      return defaultPathname
+    } catch (err) {
+      debug('Error intelligently detecting default filename, using safe default %o', err)
+
+      return defaultPathname
+    }
   }
 }

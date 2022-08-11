@@ -19,8 +19,8 @@ export const generatorList: SpecGenerator[] = [
   EmptyGenerator,
 ]
 
-export const getFilteredGeneratorList = (currentProject, isDefaultSpecPattern) => {
-  return computed(() => generatorList.filter((g) => g.matches(currentProject.currentTestingType) && (g.show === undefined ? true : g.show(currentProject, isDefaultSpecPattern))))
+export const getFilteredGeneratorList = (currentProject) => {
+  return computed(() => generatorList.filter((g) => g.matches(currentProject.currentTestingType) && (g.show === undefined ? true : g.show(currentProject))))
 }
 
 export const generators = keyBy(generatorList, 'id') as Record<GeneratorId, SpecGenerator>

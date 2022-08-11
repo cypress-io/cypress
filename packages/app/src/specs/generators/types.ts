@@ -15,6 +15,6 @@ export interface SpecGenerator {
   card: Component
   entry: Component
   matches: (testingType?: TestingType | null) => boolean
-  show: (currentProject?: CurrentProject, isDefaultSpecPattern?: boolean) => boolean
+  show: (currentProject?: CurrentProject) => boolean
   id: GeneratorId
 }

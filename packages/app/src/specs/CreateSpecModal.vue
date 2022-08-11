@@ -77,7 +77,6 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
-    isDefaultSpecPattern
     ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
@@ -107,7 +106,7 @@ const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject, props.gql.currentProject?.isDefaultSpecPattern)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 
