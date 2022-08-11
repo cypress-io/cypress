@@ -93,9 +93,10 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       const updateModelSpy = cy.spy().as('updateModelSpy')
 
       const props = {
-        'onUpdate:modelValue': (value) => {
+        'onUpdate:modelValue': (value: boolean) => {
           updateModelSpy(value)
         },
+        'onConnect-project': () => connectProjectSpy(),
       }
 
       // mount with extra event spies
@@ -113,7 +114,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
               modelValue={true}
               utmMedium="testing"
               showConnectButtonAfterLogin={true}
-              onConnectProject={connectProjectSpy}
               onLoggedin={loggedInSpy}
               {...props}
             />
