@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
+import { IconObjectBook } from '@cypress-design/react-icon'
 
 import { TestState } from '../test/test-model'
 
@@ -16,48 +17,55 @@ interface Props extends React.HTMLProps<HTMLDivElement> {
   isStudio?: boolean
 }
 
-const StateIcon = observer((props: Props) => {
-  const { state, isStudio, ...rest } = props
+const StateIcon = () => {
+  return (<button>
+    <IconObjectBook size="16" fillColor="red-200" secondaryStrokeColor="green-300" className="bg-red-100" />Read
+  </button>)
+}
 
-  if (state === 'active') {
-    return (
-      <RunningIcon {...rest} className={cs('fa-spin', rest.className)} />
-    )
-  }
+// const StateIcon = observer((props: Props) => {
+//   const { state, isStudio, ...rest } = props
 
-  if (state === 'failed') {
-    return (
-      <FailedIcon {...rest} />
-    )
-  }
+//   console.log('state', state, rest)
+//   if (state === 'active') {
+//     return (
+//       <RunningIcon {...rest} className={cs('fa-spin', rest.className)} />
+//     )
+//   }
 
-  if (state === 'passed') {
-    if (isStudio) {
-      return (
-        <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
-      )
-    }
+//   if (state === 'failed') {
+//     return (
+//       <FailedIcon {...rest} />
+//     )
+//   }
 
-    return (
-      <PassedIcon {...rest} />
-    )
-  }
+//   if (state === 'passed') {
+//     if (isStudio) {
+//       return (
+//         <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
+//       )
+//     }
 
-  if (state === 'pending') {
-    return (
-      <PendingIcon {...rest} />
-    )
-  }
+//     return (
+//       <PassedIcon {...rest} />
+//     )
+//   }
 
-  if (state === 'processing') {
-    return (
-      <ProcessingIcon {...rest} />
-    )
-  }
+//   if (state === 'pending') {
+//     return (
+//       <PendingIcon {...rest} />
+//     )
+//   }
 
-  return (
-    <PendingIcon />
-  )
-})
+//   if (state === 'processing') {
+//     return (
+//       <ProcessingIcon {...rest} />
+//     )
+//   }
+
+//   return (
+//     <PendingIcon className={cs(rest.className)} />
+//   )
+// })
 
 export default StateIcon
