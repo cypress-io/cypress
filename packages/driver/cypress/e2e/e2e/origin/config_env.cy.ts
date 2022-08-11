@@ -16,19 +16,17 @@
     })
 
     if (fnName === 'config') {
-      it(`throws if mutating read-only config values with Cypress.config()`, () => {
-        return new Promise<void>((resolve) => {
-          // @ts-ignore
-          window.top.__cySkipValidateConfig = false
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('`Cypress.config()` cannot override `chromeWebSecurity` in a test at runtime because it is a read-only configuration option.')
-            resolve()
-          })
+      it(`throws if mutating read-only config values with Cypress.config()`, (done) => {
+        // @ts-ignore
+        window.top.__cySkipValidateConfig = false
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` in a test at runtime because it is a read-only configuration option.')
+          done()
+        })
 
-          cy.origin('http://foobar.com:3500', () => {
-            // @ts-ignore
-            Cypress.config('chromeWebSecurity', false)
-          })
+        cy.origin('http://foobar.com:3500', () => {
+          // @ts-ignore
+          Cypress.config('chromeWebSecurity', false)
         })
       })
     }
