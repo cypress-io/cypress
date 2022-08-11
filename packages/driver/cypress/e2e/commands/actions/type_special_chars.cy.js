@@ -75,13 +75,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
   })
 
   context('parseSpecialCharSequences: false', () => {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('types special character sequences literally', (done) => {
+    it('types special character sequences literally', () => {
       cy.get(':text:first').invoke('val', 'foo')
       .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
         expect($input).to.have.value('foo{{}{backspace}')
-
-        done()
       })
     })
   })
