@@ -1,13 +1,14 @@
 import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
-import { browsers } from './browsers'
+import { browsers, validateMinVersion } from './browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import Debug from 'debug'
 import type {
   Browser,
+  BrowserValidator,
   DetectedBrowser,
   FoundBrowser,
 } from '@packages/types'
@@ -25,20 +26,24 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   name: string
 }
 
-export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
-  const ver = browser.version.split('.')[0] ?? browser.version
-  const majorVersion = parseInt(ver) || browser.version
+export const getMajorVersion = (version: string): string => {
+  return version.split('.')[0]
+}
 
-  const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
+// Determines if found browser is supported by Cypress. If found to be
+// unsupported, the browser will be unavailable for selection and
+// will present the determined warning message to the user.
+const validateCypressSupport = (validator: BrowserValidator | undefined, browser: FoundBrowser, platform: NodeJS.Platform) => {
+  // If no validator parameter is provided, we fall back to validating against
+  // the browser's minimum supported version
+  const { isSupported, warningMessage } = (validator || validateMinVersion)(browser, platform)
 
-  const foundBrowser = extend({}, browser, { majorVersion })
-
-  if (unsupportedVersion) {
-    foundBrowser.unsupportedVersion = true
-    foundBrowser.warning = `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.`
+  if (isSupported) {
+    return
   }
 
-  return foundBrowser
+  browser.unsupportedVersion = true
+  browser.warning = warningMessage
 }
 
 type PlatformHelper = {
@@ -126,8 +131,14 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
 
   return lookup(platform, browser)
   .then((val) => ({ ...browser, ...val }))
-  .then((val) => _.pick(val, pickBrowserProps) as HasVersion)
-  .then((browser) => setMajorVersion(browser))
+  .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
+  .then((foundBrowser) => {
+    foundBrowser.majorVersion = getMajorVersion(foundBrowser.version)
+
+    validateCypressSupport(browser.validator, foundBrowser, platform)
+
+    return foundBrowser
+  })
   .catch(failed)
 }
 
@@ -185,16 +196,19 @@ export const detectByPath = (
   const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
     const version = helper.getVersionNumber(versionStr, browser)
 
-    let parsedBrowser = extend({}, browser, {
+    const parsedBrowser = extend({}, browser, {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
       custom: true,
       path,
       version,
-    })
+      majorVersion: getMajorVersion(version),
+    }) as FoundBrowser
 
-    return setMajorVersion(parsedBrowser)
+    validateCypressSupport(browser.validator, parsedBrowser, os.platform())
+
+    return parsedBrowser
   }
 
   const pathData = helper.getPathData(path)
