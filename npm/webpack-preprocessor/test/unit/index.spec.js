@@ -171,7 +171,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('does not enable inline source maps when devtool is false', function () {
-          const options = { webpackOptions: { devtool: false } }
+          const options = { webpackOptions: { devtool: false, module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({
@@ -183,7 +183,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('always sets devtool even when mode is "production"', function () {
-          const options = { webpackOptions: { mode: 'production' } }
+          const options = { webpackOptions: { mode: 'production', module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({
@@ -205,7 +205,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('follows user mode if present', function () {
-          const options = { webpackOptions: { mode: 'production' } }
+          const options = { webpackOptions: { mode: 'production', module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({

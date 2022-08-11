@@ -81,8 +81,8 @@ describe('./lib/cross-origin-callback-loader', () => {
       expect(result).to.equal(stripIndent`
         it('test', () => {
           cy.origin('http://foobar.com:3500', {
-            "inputFileName": "cross-origin-cb-abc123-input.js",
-            "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123-output.js"
+            "callbackName": "__cypressCrossOriginCallback",
+            "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123.js"
           });
         });`)
     })
@@ -97,8 +97,8 @@ describe('./lib/cross-origin-callback-loader', () => {
       )
 
       expect(store.addFile).to.be.calledWithMatch('/path/to/file', {
-        inputFileName: 'cross-origin-cb-abc123-input.js',
-        outputFilePath: '/path/to/tmp/cross-origin-cb-abc123-output.js',
+        inputFileName: 'cross-origin-cb-abc123',
+        outputFilePath: '/path/to/tmp/cross-origin-cb-abc123.js',
       })
     })
 
