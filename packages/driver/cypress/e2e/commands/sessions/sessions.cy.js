@@ -75,7 +75,7 @@ describe('cy.session', { retries: 0 }, () => {
       })
     })
 
-    describe('testIsolation=lax', { testIsolation: 'lax' }, () => {
+    describe('testIsolation=legacy', { testIsolation: 'legacy' }, () => {
       it('does not clear page', () => {
         cy.visit('/fixtures/form.html')
         .then(async () => {
