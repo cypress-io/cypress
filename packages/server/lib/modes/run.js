@@ -1234,12 +1234,6 @@ module.exports = {
         .catch(warnVideoRecordingFailed)
       }
 
-      const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
-
-      if (usingExperimentalSingleTabMode) {
-        await openProject.projectBase.server.destroyAut()
-      }
-
       await runEvents.execute('after:spec', config, spec, results)
 
       const videoExists = videoName ? await fs.pathExists(videoName) : false
@@ -1264,6 +1258,12 @@ module.exports = {
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)
         }
+      }
+
+      const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
+
+      if (usingExperimentalSingleTabMode) {
+        await openProject.projectBase.server.destroyAut()
       }
 
       // we do not support experimentalSingleTabRunMode for e2e
