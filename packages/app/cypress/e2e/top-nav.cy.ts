@@ -406,7 +406,7 @@ describe('App Top Nav Workflows', () => {
       }
 
       const mockLogInActionsForUser = (user) => {
-        cy.withCtx((ctx, options) => {
+        cy.withCtx(async (ctx, options) => {
           options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
@@ -424,7 +424,8 @@ describe('App Top Nav Workflows', () => {
 
       beforeEach(() => {
         cy.findBrowsers()
-        cy.openProject('launchpad')
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
         cy.startAppServer()
         cy.visitApp()
       })
