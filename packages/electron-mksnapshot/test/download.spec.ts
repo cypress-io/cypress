@@ -7,6 +7,6 @@ describe('download', () => {
       const file = await attemptDownload(version, false)
 
       expect(file.startsWith(`mksnapshot-v${version}`), `downloads correcly versioned ${file}`).to.be.true
-    })
+    }).timeout(10000)
   })
 })
