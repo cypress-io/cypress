@@ -2,7 +2,6 @@ import { cors } from '@packages/network'
 import origin from './util/origin'
 import Debug from 'debug'
 import _ from 'lodash'
-import type EventEmitter from 'events'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -95,7 +94,7 @@ export class RemoteStates {
     return this.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
   }
 
-  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {}, isCrossOrigin?: boolean } = {}): Cypress.RemoteState {
+  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimaryOrigin: boolean = true): Cypress.RemoteState {
     let state
 
     if (_.isString(urlOrState)) {
@@ -127,9 +126,7 @@ export class RemoteStates {
 
     const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
 
-    if (options.isCrossOrigin) {
-      this.remoteStates.set(remoteOriginPolicy, state)
-    } else {
+    if (isPrimaryOrigin) {
       // convert map to array
       const stateArray = Array.from(this.remoteStates.entries())
 
@@ -139,33 +136,13 @@ export class RemoteStates {
 
       // automatically update the primary origin stack
       this.originStack[0] = remoteOriginPolicy
+    } else {
+      this.remoteStates.set(remoteOriginPolicy, state)
     }
 
     debug('setting remote state %o for %s', state, remoteOriginPolicy)
 
     return this.get(remoteOriginPolicy) as Cypress.RemoteState
-  }
-
-  addEventListeners (eventEmitter: EventEmitter) {
-    eventEmitter.on('cross:origin:bridge:ready', ({ originPolicy }) => {
-      debug(`received cross:origin:bridge:ready, add origin ${originPolicy} to remote states`)
-
-      const existingOrigin = this.remoteStates.get(originPolicy)
-
-      // since this is just the cy.origin starting, we don't want to override
-      // the existing origin if it already exists
-      if (!existingOrigin) {
-        this.set(originPolicy, { isCrossOrigin: true })
-      }
-
-      this.addOrigin(originPolicy)
-    })
-
-    eventEmitter.on('cross:origin:finished', (originPolicy) => {
-      debug(`received cross:origin:finished, remove ${originPolicy} from origin stack`)
-
-      this.removeCurrentOrigin(originPolicy)
-    })
   }
 
   private get config () {
@@ -174,23 +151,5 @@ export class RemoteStates {
     }
 
     return this._config
-  }
-
-  private addOrigin (originPolicy) {
-    this.originStack.push(originPolicy)
-
-    debug('added origin: ', originPolicy)
-  }
-
-  private removeCurrentOrigin (originPolicy) {
-    const currentOriginPolicy = this.originStack[this.originStack.length - 1]
-
-    if (originPolicy !== currentOriginPolicy) {
-      throw new Error(`Tried to remove origin ${originPolicy} but ${currentOriginPolicy} was found. This should never happen and likely is a bug. Please open an issue.`)
-    }
-
-    this.originStack.pop()
-
-    debug('removed current origin: ', originPolicy)
   }
 }

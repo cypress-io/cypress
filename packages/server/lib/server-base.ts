@@ -246,7 +246,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this.setupCrossOriginRequestHandling()
-    this._remoteStates.addEventListeners(this.socket.localBus)
 
     const runnerSpecificRouter = testingType === 'e2e'
       ? createRoutesE2E(routeOptions)

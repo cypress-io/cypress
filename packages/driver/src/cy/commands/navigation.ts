@@ -490,7 +490,7 @@ const normalizeOptions = (options) => {
   .pick(REQUEST_URL_OPTS)
   .extend({
     timeout: options.responseTimeout,
-    isCrossOrigin: Cypress.isCrossOriginSpecBridge,
+    isFromSpecBridge: Cypress.isCrossOriginSpecBridge,
     hasAlreadyVisitedUrl: options.hasAlreadyVisitedUrl,
   })
   .value()
@@ -1105,7 +1105,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // if the origin currently matches
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy || (previouslyVisitedLocation && Cypress.config('experimentalSessionAndOrigin'))) {
+          if (remote.originPolicy === existing.originPolicy || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1127,16 +1127,6 @@ export default (Commands, Cypress, cy, state, config) => {
             const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
 
             return cannotVisitDifferentOrigin(params)
-          }
-
-          // if we are in a cross origin spec bridge and the origin policies weren't the same,
-          // we need to throw an error since the user tried to visit a new
-          // origin which isn't allowed within a cy.origin block
-          if (Cypress.isCrossOriginSpecBridge) {
-            const existingAutOrigin = win ? $Location.create(win.location.href) : $Location.create(Cypress.state('currentActiveOriginPolicy'))
-            const params = { remote, existing, originalUrl, previouslyVisitedLocation: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true, isPrimaryOrigin }
-
-            return isPrimaryOrigin ? cannotVisitPreviousOrigin(params) : cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins

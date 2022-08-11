@@ -27,4 +27,12 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
       cy.state('isStable', false)
     }
   })
+
+  Cypress.specBridgeCommunicator.on('window:load', ({ url }) => {
+    cy.isStable(true, 'primary onload')
+
+    cy.state('autOrigin', cors.getOriginPolicy(url))
+    Cypress.action('app:window:load', undefined, url)
+    Cypress.emit('internal:window:load', { type: 'same:origin', url })
+  })
 }

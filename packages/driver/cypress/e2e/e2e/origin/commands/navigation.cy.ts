@@ -181,35 +181,12 @@ context('cy.origin navigation', () => {
       cy.location('href').should('equal', 'http://localhost:3500/fixtures/primary-origin.html')
     })
 
-    it('errors when visiting a new origin within origin', (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          You likely forgot to use \`cy.origin()\`:\n
-          \`cy.origin('http://foobar.com:3500', () => {\`
-          \`  cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')\`
-          \`  <commands targeting http://www.foobar.com:3500 go here>\`
-          \`})\`\n
-          \`cy.origin('http://idp.com:3500', () => {\`
-          \`  cy.visit('http://www.idp.com:3500/fixtures/dom.html')\`
-          \`  <commands targeting http://www.idp.com:3500 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > superdomain\n
-          You may only \`cy.visit()\` same-origin URLs within \`cy.origin()\`.\n
-          The previous URL you visited was:\n
-            > 'http://www.foobar.com:3500'\n
-          You're attempting to visit this URL:\n
-            > 'http://www.idp.com:3500'`)
-
-        done()
-      })
-
+    it('succeeds when visiting a new origin within origin', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
-        // this call should error since we can't visit a cross-origin
+        // this call should succeed because we can visit a cross-origin
         cy.visit('http://www.idp.com:3500/fixtures/dom.html')
       })
     })
@@ -254,23 +231,8 @@ context('cy.origin navigation', () => {
     })
 
     it('can send a POST request', () => {
-      // cy.visit('http://www.foobar.com:3500/post-only', {
-      cy.visit('/post-only', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          bar: 'baz',
-        }),
-      })
-
-      cy.contains('it worked!').contains('{"bar":"baz"}')
-    })
-
-    it('can send a POST request', () => {
-      cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://foobar.com:3500/post-only', {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('/post-only', {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
@@ -334,7 +296,7 @@ context('cy.origin navigation', () => {
       })
 
       cy.then(() => {
-        expect(primaryCyLoadSpy).to.not.have.been.called
+        expect(primaryCyLoadSpy).to.have.been.called
       })
     })
 
@@ -352,20 +314,7 @@ context('cy.origin navigation', () => {
       cy.visit('http://www.foobar.com:3500/redirect?href=http://localhost:3500/fixtures/generic.html')
     })
 
-    it('errors when trying to redirect from secondary to primary in cy.origin', (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal(stripIndent`
-            \`cy.visit()\` failed because you are attempting to visit a URL from a previous origin inside of \`cy.origin()\`.\n
-            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed outside of the \`cy.origin()\` block.\n
-            \`<commands targeting http://localhost:3500 go here>\`\n
-            \`cy.origin('http://foobar.com:3500', () => {\`
-            \`  <commands targeting http://foobar.com:3500 go here>\`
-            \`})\`\n
-            \`cy.visit('http://www.foobar.com:3500/redirect?href=http://localhost:3500/fixtures/generic.html')\``)
-
-        done()
-      })
-
+    it('succeeds when trying to redirect from secondary to primary in cy.origin', () => {
       cy.visit('http://localhost:3500/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
@@ -373,20 +322,7 @@ context('cy.origin navigation', () => {
       })
     })
 
-    it('errors when trying to visit primary in cy.origin', (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal(stripIndent`
-            \`cy.visit()\` failed because you are attempting to visit a URL from a previous origin inside of \`cy.origin()\`.\n
-            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed outside of the \`cy.origin()\` block.\n
-            \`<commands targeting http://localhost:3500 go here>\`\n
-            \`cy.origin('http://foobar.com:3500', () => {\`
-            \`  <commands targeting http://foobar.com:3500 go here>\`
-            \`})\`\n
-            \`cy.visit('http://localhost:3500/fixtures/generic.html')\``)
-
-        done()
-      })
-
+    it('succeeds when trying to visit primary in cy.origin', () => {
       cy.visit('http://localhost:3500/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
@@ -394,28 +330,7 @@ context('cy.origin navigation', () => {
       })
     })
 
-    it('errors when trying to redirect from primary to secondary outside of cy.origin', (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal(stripIndent`\
-            \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-            You likely forgot to use \`cy.origin()\`:\n
-            \`cy.visit('http://localhost:3500/fixtures/primary-origin.html')\`
-            \`<commands targeting http://localhost:3500 go here>\`\n
-            \`cy.origin('http://foobar.com:3500', () => {\`
-            \`  cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/generic.html')\`
-            \`  <commands targeting http://www.foobar.com:3500 go here>\`
-            \`})\`\n
-            The new URL is considered a different origin because the following parts of the URL are different:\n
-              > superdomain\n
-            You may only \`cy.visit()\` same-origin URLs within a single test.\n
-            The previous URL you visited was:\n
-              > 'http://localhost:3500'\n
-            You're attempting to visit this URL:\n
-              > 'http://www.foobar.com:3500'`)
-
-        done()
-      })
-
+    it('succeeds when trying to redirect from primary to secondary outside of cy.origin', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/generic.html')
     })

@@ -163,12 +163,14 @@ const attachToWindow = (autWindow: Window) => {
 
   cy.overrides.wrapNativeMethods(autWindow)
 
-  const onWindowLoadPrimary = ({ url }) => {
-    cy.isStable(true, 'primary onload')
+  // const onWindowLoadPrimary = ({ url }) => {
+  //   cy.isStable(true, 'primary onload')
 
-    cy.state('autOrigin', cors.getOriginPolicy(url))
-    Cypress.emit('internal:window:load', { type: 'same:origin', url })
-  }
+  //   cy.state('autOrigin', cors.getOriginPolicy(url))
+  //   Cypress.emit('internal:window:load', { type: 'same:origin', url })
+  // }
+
+  // Cypress.specBridgeCommunicator.on('window:load', onWindowLoadPrimary)
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
@@ -212,13 +214,13 @@ const attachToWindow = (autWindow: Window) => {
       cy.isStable(true, 'load')
 
       // If load happened in this spec bridge stop listening.
-      Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
+      // Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
       // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
-      Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
+      // Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
 
       return Cypress.action('app:window:unload', e)
     },
