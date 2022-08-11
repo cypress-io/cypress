@@ -27,6 +27,7 @@ describe('FileDataSource', () => {
 
   afterEach(() => {
     removeProject('globby-test-bed')
+    sinon.restore()
   })
 
   describe('#getFilesByGlob', () => {
