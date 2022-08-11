@@ -90,6 +90,37 @@ describe('spec-options', () => {
 
         expect(result.codeGenType).to.eq('component')
       })
+
+      it('generates options for Vue app with custom spec pattern', async () => {
+        const mockGetDefaultSpecFileName = sinon.fake(({ name }) => {
+          return Promise.resolve(`src/specs-folder/${name}.cy.js`)
+        })
+
+        const currentProject = 'path/to/myProject'
+        const specPattern = ['src/specs-folder/*.cy.{js,jsx}']
+        const componentName = 'MyComponent'
+
+        const testSpecOptions = new SpecOptions(mockGetDefaultSpecFileName, {
+          currentProject,
+          codeGenPath: `${tmpPath}/${componentName}.vue`,
+          codeGenType: 'component',
+          isDefaultSpecPattern: false,
+          framework: WIZARD_FRAMEWORKS[1],
+          specPattern,
+        })
+
+        const result = await testSpecOptions.getCodeGenOptions()
+
+        expect(mockGetDefaultSpecFileName).calledOnceWith({
+          currentProject,
+          specPattern,
+          testingType: 'component',
+          fileExtensionToUse: 'js',
+          name: componentName })
+
+        expect(result.codeGenType).to.eq('component')
+        expect(result.overrideCodeGenDir).to.eq('src/specs-folder')
+      })
     })
 
     context('duplicate files names', () => {
