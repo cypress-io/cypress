@@ -136,8 +136,6 @@
                   :gql="props.gql"
                   :show-logout="true"
                   utm-medium="Nav"
-                  :show-connect-button-after-login="isApp"
-                  @connect-project="handleConnectProject"
                 />
               </div>
             </div>
