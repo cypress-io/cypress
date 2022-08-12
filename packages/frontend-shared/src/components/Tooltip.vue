@@ -8,7 +8,7 @@
     :distance="distance"
     :skidding="skidding"
     :auto-hide="false /* to prevent the popper from getting focus */"
-    :delay="{show: 0, hide: hideDelay }"
+    :delay="{show: showDelay, hide: hideDelay }"
     :show-group="showGroup"
   >
     <slot />
@@ -25,7 +25,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Tooltip, Menu } from 'floating-vue'
+import { Tooltip, Menu, options } from 'floating-vue'
+
+// Override default of 5000 so that DOM elements are disposed immediately when tooltip closes
+options.disposeTimeout = 0
 
 const props = withDefaults(defineProps<{
   color?: string
@@ -36,6 +39,7 @@ const props = withDefaults(defineProps<{
   skidding?: number
   placement?: 'top' | 'right' | 'bottom' | 'left'
   popperClass?: string
+  showDelay?: number
   hideDelay?: number
   instantMove?: boolean
   showGroup?: string
@@ -48,6 +52,7 @@ const props = withDefaults(defineProps<{
   skidding: undefined,
   placement: undefined,
   popperClass: undefined,
+  showDelay: 0,
   hideDelay: 100,
   instantMove: undefined,
   showGroup: undefined,
