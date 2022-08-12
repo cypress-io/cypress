@@ -43,66 +43,61 @@ describe('GitDataSource', () => {
     sinon.restore()
   })
 
-  it(`gets correct status for files on ${os.platform()}`, async (done) => {
-    try {
-      const onBranchChange = sinon.stub()
-      const onGitInfoChange = sinon.stub()
-      const onError = sinon.stub()
+  it(`gets correct status for files on ${os.platform()}`, async () => {
+    const onBranchChange = sinon.stub()
+    const onGitInfoChange = sinon.stub()
+    const onError = sinon.stub()
 
-      // create a file and modify a file to express all
-      // git states we are interested in (created, unmodified, modified)
-      const fooSpec = toPosix(path.join(e2eFolder, 'foo.cy.js'))
-      const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
-      const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
+    // create a file and modify a file to express all
+    // git states we are interested in (created, unmodified, modified)
+    const fooSpec = toPosix(path.join(e2eFolder, 'foo.cy.js'))
+    const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
+    const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
 
-      gitInfo = new GitDataSource({
-        isRunMode: false,
-        projectRoot: projectPath,
-        onBranchChange,
-        onGitInfoChange,
-        onError,
-      })
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange,
+      onGitInfoChange,
+      onError,
+    })
 
-      fs.createFileSync(fooSpec)
-      fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
+    fs.createFileSync(fooSpec)
+    fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
 
-      gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
+    gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-      let result: any[] = []
+    let result: any[] = []
 
-      do {
-        result = await Promise.all([
-          gitInfo.gitInfoFor(fooSpec),
-          gitInfo.gitInfoFor(aRecordSpec),
-          gitInfo.gitInfoFor(xhrSpec),
-        ])
+    do {
+      result = await Promise.all([
+        gitInfo.gitInfoFor(fooSpec),
+        gitInfo.gitInfoFor(aRecordSpec),
+        gitInfo.gitInfoFor(xhrSpec),
+      ])
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      } while (result.some((r) => r == null))
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } while (result.some((r) => r == null))
 
-      const [created, unmodified, modified] = result
+    const [created, unmodified, modified] = result
 
-      expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
-      expect(created.statusType).to.eql('created')
-      // do not want to set this explicitly in the test, since it can mess up your local git instance
-      expect(created.author).not.to.be.undefined
-      expect(created.lastModifiedTimestamp).not.to.be.undefined
+    expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+    expect(created.statusType).to.eql('created')
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
+    expect(created.author).not.to.be.undefined
+    expect(created.lastModifiedTimestamp).not.to.be.undefined
 
-      expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
-      expect(unmodified.statusType).to.eql('unmodified')
-      // do not want to set this explicitly in the test, since it can mess up your local git instance
-      expect(unmodified.author).not.to.be.undefined
-      expect(unmodified.lastModifiedTimestamp).not.to.be.undefined
+    expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+    expect(unmodified.statusType).to.eql('unmodified')
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
+    expect(unmodified.author).not.to.be.undefined
+    expect(unmodified.lastModifiedTimestamp).not.to.be.undefined
 
-      expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
-      expect(modified.statusType).to.eql('modified')
-      // do not want to set this explicitly in the test, since it can mess up your local git instance
-      expect(modified.author).not.to.be.undefined
-      expect(modified.lastModifiedTimestamp).not.to.be.undefined
-      done()
-    } catch (error) {
-      done(new Error(error))
-    }
+    expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+    expect(modified.statusType).to.eql('modified')
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
+    expect(modified.author).not.to.be.undefined
+    expect(modified.lastModifiedTimestamp).not.to.be.undefined
   })
 
   it(`handles files with special characters on ${os.platform()}`, async () => {
