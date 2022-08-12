@@ -93,7 +93,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const ret = origFn.apply(this, mochaArgs)
 
-        // attached testConfigOverrides will executes on `runner:test:before:run` event
+        // attached testConfigOverrides will execute before `runner:test:before:run` event
         ret._testConfig = _testConfig
 
         return ret
@@ -267,7 +267,7 @@ const patchHookRetries = () => {
 }
 
 // matching the current Runner.prototype.fail except
-// changing the logic for determing whether this is a valid err
+// changing the logic for determining whether this is a valid err
 const patchRunnerFail = () => {
   Runner.prototype.fail = function (runnable, err) {
     const errMessage = _.get(err, 'message')

@@ -90,7 +90,6 @@ describe(ruleName, () => {
       })
 
       expect(result.errorCount).toBe(1)
-      // console.log(result.messages[0].message)
 
       expect(result.messages[0].message).toContain('someFn')
 
