@@ -1,4 +1,3 @@
-import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -26,6 +25,7 @@ import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
 import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
+import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
@@ -238,34 +238,9 @@ class $Cypress {
 
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
-        validateNoReadOnlyConfig(config, (errProperty) => {
-          const errPath = this.state('runnable')
-            ? 'config.invalid_cypress_config_override'
-            : 'config.invalid_test_config_override'
+      const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
 
-          const errMsg = $errUtils.errByPath(errPath, {
-            errProperty,
-          })
-
-          throw new (this.state('specWindow').Error)(errMsg)
-        })
-      }
-
-      validate(config, (errResult) => {
-        const stringify = (str) => format(JSON.stringify(str))
-
-        const format = (str) => `\`${str}\``
-
-        // TODO: this does not use the @packages/error rewriting rules
-        // for stdout vs markdown - it always inserts backticks for markdown
-        // and those leak out into the stdout formatting.
-        const errMsg = _.isString(errResult)
-          ? errResult
-          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
-
-        throw new (this.state('specWindow').Error)(errMsg)
-      })
+      return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
     this.env = $SetterGetter.create(env)
