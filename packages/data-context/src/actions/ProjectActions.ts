@@ -336,7 +336,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -344,7 +344,7 @@ export class ProjectActions {
     }
 
     const getCodeGenPath = () => {
-      return codeGenType === 'e2e' || erroredCodegenCandidate
+      return codeGenType === 'e2e'
         ? this.ctx.path.join(
           project,
           codeGenCandidate,
@@ -359,7 +359,6 @@ export class ProjectActions {
     const newSpecCodeGenOptions = new SpecOptions({
       codeGenPath,
       codeGenType,
-      erroredCodegenCandidate,
       framework: this.getWizardFrameworkFromConfig(),
       isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
       specPattern,

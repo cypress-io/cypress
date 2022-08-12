@@ -146,7 +146,6 @@ const props = defineProps<{
   gql: EmptyGeneratorFragment
   type: 'e2e' | 'component' | 'componentEmpty'
   specFileName: string
-  erroredCodegenCandidate?: string
   /** is there any other generator available when clicking "Back" */
   otherGenerators: boolean
 }>()
@@ -168,8 +167,8 @@ mutation EmptyGenerator_MatchSpecFile($specFile: String!) {
 `
 
 gql`
-mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $erroredCodegenCandidate: String) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, erroredCodegenCandidate: $erroredCodegenCandidate) {
+mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
   }
 }`
@@ -230,7 +229,7 @@ const createSpec = async () => {
     return
   }
 
-  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
+  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }

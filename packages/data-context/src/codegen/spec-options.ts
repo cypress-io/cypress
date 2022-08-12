@@ -11,7 +11,6 @@ interface CodeGenOptions {
   isDefaultSpecPattern: boolean
   specPattern: string[]
   currentProject: string | null
-  erroredCodegenCandidate?: string | null
   specFileExtension?: string
   framework?: WizardFrontendFramework
 }
@@ -29,14 +28,9 @@ type ComponentExtension = `.cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
 type TemplateKey = 'e2e' | 'componentEmpty' | 'vueComponent'
 export class SpecOptions {
   private parsedPath: ParsedPath;
-  private parsedErroredCodegenCandidate?: ParsedPath
 
   constructor (private options: CodeGenOptions) {
     this.parsedPath = path.parse(options.codeGenPath)
-
-    if (options.erroredCodegenCandidate) {
-      this.parsedErroredCodegenCandidate = path.parse(options.erroredCodegenCandidate)
-    }
   }
 
   async getCodeGenOptions () {
@@ -81,19 +75,11 @@ export class SpecOptions {
       return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
     }
 
-    if (this.parsedErroredCodegenCandidate?.base) {
-      const componentPathRelative = path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
-
-      const componentPath = path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
-
-      return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
-    }
-
     return `./${this.parsedPath.base}`
   }
 
   private async getFrameworkComponentOptions () {
-    const componentName = this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name
+    const componentName = this.parsedPath.name
 
     const extension = await this.getVueExtension()
 
@@ -141,10 +127,6 @@ export class SpecOptions {
   }
 
   private getSpecExtension = () => {
-    if (this.options.erroredCodegenCandidate) {
-      return ''
-    }
-
     const foundSpecExtension = expectedSpecExtensions.find((specExtension) => {
       return this.parsedPath.base.endsWith(specExtension + this.parsedPath.ext)
     })
