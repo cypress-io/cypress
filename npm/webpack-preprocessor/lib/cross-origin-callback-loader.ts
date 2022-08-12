@@ -55,9 +55,6 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
           if (callee.matchesPattern('Cypress.require')) {
             hasDependencies = true
 
-            // TODO: can we keep webpack from sending these deps through
-            // and remove the need for Cypress.require()?
-
             path.replaceWith(
               t.callExpression(
                 callee.node.property as t.Expression, // 'require'

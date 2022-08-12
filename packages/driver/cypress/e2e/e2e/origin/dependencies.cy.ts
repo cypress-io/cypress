@@ -24,17 +24,6 @@ describe('cy.origin dependencies', () => {
     })
   })
 
-  // FIXME: can this be made to work?
-  it.skip('works with the function assigned to a variable', () => {
-    const originCb = () => {
-      const lodash = Cypress.require('lodash')
-
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-    }
-
-    cy.origin('http://foobar.com:3500', originCb)
-  })
-
   it('works with options object + args', () => {
     cy.origin('http://foobar.com:3500', { args: ['arg1'] }, ([arg1]) => {
       const lodash = Cypress.require('lodash')
@@ -108,22 +97,31 @@ describe('cy.origin dependencies', () => {
     })
   })
 
-  it('fails appropriately when dependency is invalid', () => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('Cannot find module')
+  describe('errors', () => {
+    it('when dependency does not exist', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Cannot find module')
+      })
+
+      cy.origin('http://foobar.com:3500', () => {
+        Cypress.require('./does-not-exist')
+      })
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    it('when Cypress.require() is used outside cy.origin() callback', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`Cypress.require()` can only be used inside the `cy.origin()` callback.')
+      })
+
       Cypress.require('./does-not-exist')
     })
   })
 
   // Test cases
-  // - with syntax errors
-  // - error if using require w/o webpack-preprocessor
+  // - with syntax errors: cy-in-cy test? is this even possible? will get caught by original pass
+  // - with import syntax
+  // - error if using require w/o webpack-preprocessor: system test
   //   -> define Cypress.require and have it error
-  // - a different file type (use types, jsx, tsx, etc)
-  // - source maps?
-  // TODO:
-  // - types for Cypress.require
+  // - a different file type (use types, jsx, tsx, etc): system tests
+  // - source maps?: punt til later
 })

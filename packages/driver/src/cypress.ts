@@ -795,6 +795,10 @@ class $Cypress {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
+  require () {
+    $errUtils.throwErrByPath('require.invalid_outside_origin')
+  }
+
   get currentTest () {
     const r = this.cy.state('runnable')
 
