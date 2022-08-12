@@ -56,6 +56,7 @@
       variant="primary"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
+      :prefix-icon="buttonPrefixIcon"
       @click="handleLoginOrContinue"
     >
       {{ buttonText }}
@@ -69,6 +70,7 @@ import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import ChainIcon from '~icons/cy/chain-link_x16.svg'
 
 import {
   Auth_LoginDocument,
@@ -227,6 +229,10 @@ const buttonText = computed(() => {
   }
 
   return strings.login
+})
+
+const buttonPrefixIcon = computed(() => {
+  return cloudViewer.value && props.showConnectButtonAfterLogin ? ChainIcon : undefined
 })
 
 </script>
