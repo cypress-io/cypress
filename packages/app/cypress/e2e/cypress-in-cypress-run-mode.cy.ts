@@ -33,7 +33,8 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.percySnapshot()
   })
 
-  it('component testing run mode spec runner header is correct', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23306
+  it.skip('component testing run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
