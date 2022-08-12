@@ -30,7 +30,7 @@ describe('cy.origin logging', () => {
     })
   })
 
-  it('logs cy.origin as group when failing with validation failure', (done) => {
+  it('logs cy.origin as group when failing with validation failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -48,7 +48,7 @@ describe('cy.origin logging', () => {
       // We execute done after a brief timeout to ensure stability
       // is reached for the next test. This timeout can be removed with the
       // completion of: https://github.com/cypress-io/cypress/issues/21300
-      setTimeout(done, 0)
+      // setTimeout(done, 0)
     })
 
     cy.visit('/fixtures/primary-origin.html')
@@ -58,7 +58,7 @@ describe('cy.origin logging', () => {
     cy.origin(false, () => {})
   })
 
-  it('logs cy.origin as group when failing with serialization failure', (done) => {
+  it('logs cy.origin as group when failing with serialization failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -76,7 +76,7 @@ describe('cy.origin logging', () => {
       // We execute done after a brief timeout to ensure stability
       // is reached for the next test. This timeout can be removed with the
       // completion of: https://github.com/cypress-io/cypress/issues/21300
-      setTimeout(done, 0)
+      // setTimeout(done, 0)
     })
 
     cy.visit('/fixtures/primary-origin.html')
