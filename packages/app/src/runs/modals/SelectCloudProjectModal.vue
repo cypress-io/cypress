@@ -48,12 +48,12 @@
         data-cy="selectOrganization"
       >
         <template #label>
-          <span class="flex font-normal my-8px text-16px leading-24px items-end">
+          <span class="flex font-normal my-8px text-16px leading-24px items-end justify-between">
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
             <ExternalLink
-              class="cursor-pointer flex-grow text-right text-indigo-500 hover:underline"
+              class="cursor-pointer text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
               {{ t('runs.connect.modal.selectProject.manageOrgs') }}
@@ -80,13 +80,13 @@
         data-cy="selectProject"
       >
         <template #label>
-          <div class="flex font-normal text-16px leading-24px items-center">
+          <div class="flex font-normal text-16px leading-24px items-center justify-between">
             <p class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.project') }}
+              <span class="text-red-500">*</span>
             </p>
-            <span class="ml-4px text-red-500">*</span>
             <a
-              class="cursor-pointer flex-grow my-8px text-right text-indigo-500 hover:underline"
+              class="cursor-pointer my-8px text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
@@ -179,7 +179,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -194,7 +194,7 @@ import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
-import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
+import type { SelectCloudProjectModalFragment, CloudProjectNodeFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
@@ -203,6 +203,14 @@ import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlCli
 
 const { t } = useI18n()
 const online = useOnline()
+
+gql`
+fragment CloudProjectNode on CloudProject {
+  id
+  slug
+  name
+}
+`
 
 gql`
 fragment SelectCloudProjectModal on Query {
@@ -216,8 +224,7 @@ fragment SelectCloudProjectModal on Query {
         projects(first: 100) { # Not expecting there will be > 100 projects. If there are we will implement pagination
           nodes {
             id
-            slug
-            name
+            ...CloudProjectNode
           }
         }
       }
@@ -294,15 +301,15 @@ const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.v
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const newProject = ref(projects.value.length === 0)
-const pickedProject = ref()
+const pickedProject = ref<CloudProjectNodeFragment>()
 
-watch(() => [pickedOrganization.value], () => {
+watchEffect(() => {
   if (pickedOrganization.value?.projects?.nodes?.length === 1) {
     pickedProject.value = pickedOrganization.value.projects.nodes[0]
   } else {
-    pickedProject.value = pickedOrganization.value?.projects?.nodes?.find((p) => p.name === projectName.value)
+    pickedProject.value = undefined
   }
-}, { immediate: true })
+})
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {

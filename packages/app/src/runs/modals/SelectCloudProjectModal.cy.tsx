@@ -45,11 +45,6 @@ describe('<SelectCloudProjectModal />', () => {
     cy.contains('Test Project 1').click()
   })
 
-  it('preselects project matching current name if one exists', () => {
-    mountDialog('Test Project 2')
-    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 2')
-  })
-
   it('prefills new project name with the current one', () => {
     mountDialog()
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
