@@ -3,7 +3,6 @@ import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
@@ -258,7 +257,7 @@ describe('code-generator', () => {
       target,
     }
 
-    const newSpecCodeGenOptions = new SpecOptions(sinon.fake(), {
+    const newSpecCodeGenOptions = new SpecOptions({
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',

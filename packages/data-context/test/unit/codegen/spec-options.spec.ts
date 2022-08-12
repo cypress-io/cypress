@@ -7,6 +7,7 @@ import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import { SpecOptions, expectedSpecExtensions } from '../../../src/codegen/spec-options'
 import { createTestDataContext } from '../helper'
+import * as utils from '../../../src/sources/migration/utils'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -31,7 +32,7 @@ describe('spec-options', () => {
     context('unique file names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for names with extension ${specExtension}`, async () => {
-          const testSpecOptions = new SpecOptions(sinon.fake(), {
+          const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/TestName${specExtension}.js`,
             codeGenType: 'e2e',
@@ -47,7 +48,7 @@ describe('spec-options', () => {
       }
 
       it('generates options for file name without spec extension', async () => {
-        const testSpecOptions = new SpecOptions(sinon.fake(), {
+        const testSpecOptions = new SpecOptions({
           currentProject: 'path/to/myProject',
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'e2e',
@@ -62,7 +63,7 @@ describe('spec-options', () => {
       })
 
       it('generates options for file name with multiple extensions', async () => {
-        const testSpecOptions = new SpecOptions(sinon.fake(), {
+        const testSpecOptions = new SpecOptions({
           currentProject: 'path/to/myProject',
           codeGenPath: `${tmpPath}/TestName.foo.bar.js`,
           codeGenType: 'e2e',
@@ -77,7 +78,7 @@ describe('spec-options', () => {
       })
 
       it('generates options with given codeGenType', async () => {
-        const testSpecOptions = new SpecOptions(sinon.fake(), {
+        const testSpecOptions = new SpecOptions({
           currentProject: 'path/to/myProject',
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'component',
@@ -92,15 +93,13 @@ describe('spec-options', () => {
       })
 
       it('generates options for Vue app with custom spec pattern', async () => {
-        const mockGetDefaultSpecFileName = sinon.fake(({ name }) => {
-          return Promise.resolve(`src/specs-folder/${name}.cy.js`)
-        })
-
         const currentProject = 'path/to/myProject'
         const specPattern = ['src/specs-folder/*.cy.{js,jsx}']
         const componentName = 'MyComponent'
 
-        const testSpecOptions = new SpecOptions(mockGetDefaultSpecFileName, {
+        const getDefaultSpecFileNameStub = sinon.stub(utils, 'getDefaultSpecFileName').resolves(`src/specs-folder/${componentName}.cy.js`)
+
+        const testSpecOptions = new SpecOptions({
           currentProject,
           codeGenPath: `${tmpPath}/${componentName}.vue`,
           codeGenType: 'component',
@@ -111,7 +110,7 @@ describe('spec-options', () => {
 
         const result = await testSpecOptions.getCodeGenOptions()
 
-        expect(mockGetDefaultSpecFileName).calledOnceWith({
+        expect(getDefaultSpecFileNameStub).calledOnceWith({
           currentProject,
           specPattern,
           testingType: 'component',
@@ -126,7 +125,7 @@ describe('spec-options', () => {
     context('duplicate files names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for file name with extension ${specExtension}`, async () => {
-          const testSpecOptions = new SpecOptions(sinon.fake(), {
+          const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/TestName${specExtension}.js`,
             codeGenType: 'e2e',
@@ -152,7 +151,7 @@ describe('spec-options', () => {
       }
 
       it('generates options for file name without spec extension', async () => {
-        const testSpecOptions = new SpecOptions(sinon.fake(), {
+        const testSpecOptions = new SpecOptions({
           currentProject: 'path/to/myProject',
           codeGenPath: `${tmpPath}/TestName.js`,
           codeGenType: 'e2e',
@@ -177,7 +176,7 @@ describe('spec-options', () => {
       })
 
       it('generates options for file name with multiple extensions', async () => {
-        const testSpecOptions = new SpecOptions(sinon.fake(), {
+        const testSpecOptions = new SpecOptions({
           currentProject: 'path/to/myProject',
           codeGenPath: `${tmpPath}/TestName.foo.bar.js`,
           codeGenType: 'e2e',

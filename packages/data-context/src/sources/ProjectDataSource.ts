@@ -21,6 +21,7 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
+import { getDefaultSpecFileName } from './migration/utils'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -388,7 +389,7 @@ export class ProjectDataSource {
   async defaultSpecFileName (): Promise<string> {
     const { specPattern = [] } = await this.ctx.project.specPatterns()
 
-    return this.ctx.actions.project.getDefaultSpecFileName({
+    return getDefaultSpecFileName({
       currentProject: this.ctx.currentProject,
       testingType: this.ctx.coreData.currentTestingType,
       fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse,

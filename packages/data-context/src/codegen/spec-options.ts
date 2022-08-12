@@ -3,7 +3,7 @@ import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import path from 'path'
-import type { FoundSpec, TestingType } from '@packages/types'
+import { getDefaultSpecFileName } from '../sources/migration/utils'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -31,14 +31,7 @@ export class SpecOptions {
   private parsedPath: ParsedPath;
   private parsedErroredCodegenCandidate?: ParsedPath
 
-  constructor (private getDefaultSpecFileName: (params: {
-    currentProject: string | null
-    testingType: TestingType | null
-    fileExtensionToUse: 'js' | 'ts'
-    specs?: FoundSpec[]
-    specPattern: string[]
-    name?: string | undefined
-  }) => Promise<string>, private options: CodeGenOptions) {
+  constructor (private options: CodeGenOptions) {
     this.parsedPath = path.parse(options.codeGenPath)
 
     if (options.erroredCodegenCandidate) {
@@ -108,7 +101,7 @@ export class SpecOptions {
 
     // If we have a custom spec pattern, write the spec to a path that matches the pattern instead of the component directory
     if (!this.options.isDefaultSpecPattern) {
-      parsedSpecPath = path.parse(await this.getDefaultSpecFileName({
+      parsedSpecPath = path.parse(await getDefaultSpecFileName({
         currentProject: this.options.currentProject,
         testingType: this.options.codeGenType === 'componentEmpty' || this.options.codeGenType === 'component' ? 'component' : 'e2e',
         fileExtensionToUse: (extension === '.cy.ts' || extension === '.cy.tsx') ? 'ts' : 'js',
