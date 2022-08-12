@@ -14,6 +14,7 @@
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
+    "test-unit": "echo 'no unit tests'",
     "postinstall": "patch-package"
   },
   "dependencies": {},

@@ -21,7 +21,6 @@ describe('GitDataSource', () => {
     projectPath = await scaffoldMigrationProject('e2e')
     git = simpleGit({ baseDir: projectPath })
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
-    const allSpecs = fs.readdirSync(e2eFolder)
 
     if (process.env.CI) {
       // need to set a user on CI
@@ -32,7 +31,8 @@ describe('GitDataSource', () => {
     }
 
     await git.init()
-    await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
+    await git.add(`${e2eFolder}/*`)
+
     await git.commit('add all specs')
   })
 

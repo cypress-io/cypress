@@ -1,6 +1,6 @@
 exports['injects guessed next.js template cypress.config.ts'] = `
 export default {
-  specPattern: "src/**/*.spec.{js,ts,jsx,tsx}"
+  specPattern: "src/**/*.spec.{js,ts,jsx,tsx}",
 };
 
 `
@@ -20,7 +20,7 @@ module.exports = (on, config) => {
 
 exports['Injected overridden webpack template cypress.config.ts'] = `
 export default {
-  specPattern: "cypress/component/**/*.spec.{js,ts,jsx,tsx}"
+  specPattern: "cypress/component/**/*.spec.{js,ts,jsx,tsx}",
 };
 
 `

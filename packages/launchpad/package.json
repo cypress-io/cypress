@@ -15,6 +15,7 @@
     "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --e2e --project .",
     "dev": "yarn gulp dev --project .",
     "start": "echo 'run yarn dev from the root' && exit 1",
+    "test-unit": "echo 'no unit tests'",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
   "dependencies": {},

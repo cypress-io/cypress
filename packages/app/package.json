@@ -15,6 +15,7 @@
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project .",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "start": "echo \"run 'yarn dev' from the root\" && exit 1",
+    "test-unit": "echo 'no unit tests'",
     "watch": "echo \"run 'yarn dev' from the root\" && exit 1"
   },
   "dependencies": {},

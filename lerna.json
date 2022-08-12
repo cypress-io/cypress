@@ -1,10 +1,12 @@
 {
   "npmClient": "yarn",
+  "concurrency": 1,
   "command": {
     "run": {
       "npmClient": "yarn"
     }
   },
+  "env": "MY_ENV_VAR",
   "packages": [
     "cli",
     "packages/*",

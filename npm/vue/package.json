@@ -11,6 +11,7 @@
     "postbuild": "node --require @packages/ts/register ./inline-types.ts && node ../../scripts/sync-exported-npm-with-cli.js",
     "typecheck": "yarn tsd && vue-tsc --noEmit",
     "test": "yarn cy:run",
+    "test-unit": "echo 'no unit tests'",
     "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.tsd.json",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },

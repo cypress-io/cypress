@@ -9,6 +9,7 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "test": "echo \"Tests for @cypress/vue2 are run from system-tests\"",
+    "test-unit": "echo 'no unit tests'",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },

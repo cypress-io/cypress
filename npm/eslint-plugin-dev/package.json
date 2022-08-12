@@ -7,7 +7,8 @@
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
-    "test": "jest"
+    "test": "yarn test-unit",
+    "test-unit": "jest"
   },
   "dependencies": {
     "bluebird": "3.5.5",

@@ -8,6 +8,7 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
+    "test-unit": "echo 'no unit tests'",
     "watch": "tsc -w"
   },
   "dependencies": {},

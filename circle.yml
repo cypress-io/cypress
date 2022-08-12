@@ -1090,7 +1090,7 @@ commands:
           command: ls -la types
           working_directory: cli/build
       - run:
-          command: ls -la vue vue2 mount-utils react
+          command: ls -la vue vue2 mount-utils react react18
           working_directory: cli/build
       - unless:
           condition:
@@ -1213,14 +1213,17 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
-  check-ts:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - install-required-node
-      - run:
-          name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+  # check-ts:
+  #   <<: *defaults
+  #   steps:
+  #     - restore_cached_workspace
+  #     - install-required-node
+  #     - run:
+  #         name: Check TS Types
+  #         command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts
+  #     - run:
+  #         name: Check TS Types
+  #         command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts
 
 
   # a special job that keeps polling Circle and when all
@@ -1287,7 +1290,7 @@ jobs:
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
-  unit-tests:
+  ts-lint-and-unit-tests:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
@@ -1309,15 +1312,17 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
+            # run type checking for each individual package
+            - run: yarn lerna run types
+            # run type checking for each individual package
+            - run: yarn lerna run types
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream
             # run unit tests from each individual package
-            - run: yarn test
-            # run type checking for each individual package
-            - run: yarn lerna run types
+            - run: yarn unit-tests --ignore @packages/server
             - verify-mocha-results:
-                expectedResultCount: 10
+                expectedResultCount: 41
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
@@ -1350,10 +1355,9 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-  # todo(lachlan): do we need this? yarn check-ts does something very similar
-  #     - run:
-  #         name: "TypeScript check 🧩"
-  #         command: yarn type-check --ignore-progress
+      - run:
+          name: "TypeScript check 🧩"
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts
       - store-npm-logs
 
   server-unit-tests:
@@ -1361,7 +1365,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
+      - run: yarn workspace @packages/server test-unit
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1640,7 +1644,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-webpack-dev-server-integration-tests:
+  npm-webpack-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1662,7 +1666,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-vite-dev-server-integration-tests:
+  npm-vite-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1709,9 +1713,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
-      - run:
           name: Test babelrc
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-babelrc
@@ -1749,21 +1750,6 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
-
-  npm-vite-dev-server:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn test
-          working_directory: npm/vite-dev-server
-      - store_test_results:
-          path: npm/vite-dev-server/test_results
-      - store-npm-logs
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
@@ -1774,43 +1760,35 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
 
-  npm-vue:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: yarn workspace @cypress/vue build
-      - run:
-          name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
-      - store_test_results:
-          path: npm/vue/test_results
-      - store_artifacts:
-          path: npm/vue/test_results
-      - store-npm-logs
+  # npm-vue:
+  #   <<: *defaults
+  #   steps:
+  #     - restore_cached_workspace
+  #     - run:
+  #         name: Type Check
+  #         command: yarn typecheck
+  #         working_directory: npm/vue
+  #     - run:
+  #         name: Run tests
+  #         command: yarn test
+  #         working_directory: npm/vue
+  #     - store_test_results:
+  #         path: npm/vue/test_results
+  #     - store_artifacts:
+  #         path: npm/vue/test_results
+  #     - store-npm-logs
 
-  npm-angular:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: yarn workspace @cypress/angular build
-      - store-npm-logs
-
-  npm-react:
+  npm-react-integration:
     <<: *defaults
     parallelism: 8
     steps:
       - restore_cached_workspace
       - run:
-          name: Build
-          command: yarn workspace @cypress/react build
-      - run:
           name: Run tests
-          command: yarn test
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            yarn cypress:run --record --group @cypress/react
           working_directory: npm/react
       - store_test_results:
           path: npm/react/test_results
@@ -1818,21 +1796,17 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
-  npm-mount-utils:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: yarn workspace @cypress/mount-utils build
-      - store-npm-logs
-
   npm-create-cypress-tests:
     <<: *defaults
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Build + Install
+          command: yarn workspace create-cypress-tests build
+      - run:
+          name: Run Tests
+          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1842,25 +1816,22 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
 
-  npm-cypress-schematic:
+  npm-cypress-schematic-integration:
     <<: *defaults
     resource_class: small
     steps:
       - restore_cached_workspace
       - run:
-          name: Build + Install
-          command: |
-            yarn workspace @cypress/schematic build:all
-          working_directory: npm/cypress-schematic
-      - run:
-          name: Run unit tests
-          command: |
-            yarn test
+          name: Build
+          command: yarn workspace @cypress/schematic build:test
           working_directory: npm/cypress-schematic
       - run:
           name: Launch Sandbox and Install Schematic
-          command: |
-            yarn launch:test12
+          command: yarn launch:test12
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Test Schematic
+          command: yarn test:e2e:sandbox12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 
@@ -2288,9 +2259,9 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:env-canary
         requires:
           - node_modules_install
-    - check-ts:
-        requires:
-          - build
+    # - check-ts:
+    #     requires:
+    #       - build
     - lint:
         name: linux-lint
         requires:
@@ -2315,9 +2286,9 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:npm-release
         requires:
           - build
-    - server-unit-tests:
-        requires:
-          - build
+    # - server-unit-tests:
+    #     requires:
+    #       - build
     - server-integration-tests:
         requires:
           - build
@@ -2397,11 +2368,11 @@ linux-x64-workflow: &linux-x64-workflow
         percy: true
         requires:
           - build
-    - run-webpack-dev-server-integration-tests:
+    - npm-webpack-dev-server:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
-    - run-vite-dev-server-integration-tests:
+    - npm-vite-dev-server:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
@@ -2426,34 +2397,34 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-webpack-dev-server:
         requires:
           - system-tests-node-modules-install
-    - npm-vite-dev-server:
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
+    # - npm-webpack-preprocessor:
+    #     requires:
+    #       - build
+    - npm-unit-tests:
         requires:
           - build
-    - npm-webpack-preprocessor:
+    # - npm-webpack-batteries-included-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-vue:
+    #     requires:
+    #       - build
+    - npm-react-integration:
         requires:
           - build
-    - npm-webpack-batteries-included-preprocessor:
-        requires:
-          - build
-    - npm-vue:
-        requires:
-          - build
-    - npm-react:
-        requires:
-          - build
-    - npm-angular:
-        requires:
-          - build
-    - npm-mount-utils:
-        requires:
-          - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
-    - npm-cypress-schematic:
+    # - npm-angular: verified through system tests
+    # - npm-react18: verified through system tests
+    # - npm-vue2: verified through system tests
+    # - npm-create-cypress-tests:
+    #     requires:
+    #       - build
+    # - npm-eslint-plugin-dev:
+    #     requires:
+    #       - build
+    - npm-cypress-schematic-integration:
         requires:
           - build
     # This release definition must be updated with any new jobs
@@ -2463,18 +2434,18 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:npm-release
         requires:
           - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
+          # - check-ts
+          - npm-unit-tests
+          # - npm-eslint-plugin-dev
+          # - npm-create-cypress-tests
+          - npm-react-integration
+          # - npm-mount-utils
+          # - npm-vue
+          # - npm-webpack-batteries-included-preprocessor
+          # - npm-webpack-preprocessor
+          # - npm-vite-dev-server
+          # - npm-webpack-dev-server
+          - npm-cypress-schematic-integration
           - lint-types
           - linux-lint
           - percy-finalize
@@ -2499,6 +2470,9 @@ linux-x64-workflow: &linux-x64-workflow
           - unit-tests-release
           - cli-visual-tests
           - reporter-integration-tests
+          - npm-webpack-dev-server-integration-tests
+          - npm-vite-dev-server-integration-tests
+          - run-app-component-tests-chrome
           - run-app-component-tests-chrome
           - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome

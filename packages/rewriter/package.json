@@ -8,7 +8,8 @@
     "build-test": "yarn build-prod --noEmit",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "yarn test-unit",
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "ast-types": "0.13.3",

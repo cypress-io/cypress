@@ -11,6 +11,7 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "pretest": "npm run check-deps-pre",
+    "test-unit": "echo 'no unit tests'",
     "watch": "npm run build-for-tests -- --watch --progress"
   },
   "devDependencies": {

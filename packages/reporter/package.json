@@ -9,6 +9,7 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
+    "test-unit": "echo 'no unit tests'",
     "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {

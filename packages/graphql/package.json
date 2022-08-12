@@ -11,8 +11,8 @@
     "clean": "rimraf './{src,test}/**/*.js'",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
-    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
-    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
+    "test-unit": "echo 'no unit tests'",
+    "test-integration": "echo 'no integration tests'"
   },
   "dependencies": {
     "@graphql-tools/delegate": "8.2.1",

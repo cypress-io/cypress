@@ -10,6 +10,7 @@
     "cypress:open": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "cypress:run": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "postinstall": "echo '@packages/runner needs: yarn build'",
+    "test-unit": "echo 'no unit tests'",
     "watch": "node ../../scripts/run-webpack --watch --progress"
   },
   "devDependencies": {

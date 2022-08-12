@@ -6,7 +6,8 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "clean": "rimraf 'lib/**/*.js'",
-    "clean-deps": "rimraf node_modules"
+    "clean-deps": "rimraf node_modules",
+    "test-unit": "echo 'no unit tests'"
   },
   "dependencies": {
     "fs-extra": "9.1.0"

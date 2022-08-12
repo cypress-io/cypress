@@ -2,7 +2,7 @@
 
 > **Note** this package is not meant to be used outside of cypress component testing.
 
-This librares exports some shared types and utility functions designed to build adapters for components frameworks.
+This library exports some shared types and utility functions designed to build adapters for components frameworks.
 
 It is used in:
 
