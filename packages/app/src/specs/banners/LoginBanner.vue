@@ -50,7 +50,9 @@ query LoginBanner {
 
 withDefaults(defineProps<{
   modelValue: boolean
-}>(), {})
+}>(), {
+  modelValue: false,
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void

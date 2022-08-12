@@ -3,8 +3,12 @@ export const BannerIds = {
   ACI_082022_CREATE_ORG: 'aci_082022_createOrganization',
   ACI_082022_CONNECT_PROJECT: 'aci_082022_connectProject',
   ACI_082022_RECORD: 'aci_082022_record',
-}
+} as const
 
 export { default as LoginBanner } from './LoginBanner.vue'
 
 export { default as CreateOrganizationBanner } from './CreateOrganizationBanner.vue'
+
+export { default as ConnectProjectBanner } from './ConnectProjectBanner.vue'
+
+export { default as RecordBanner } from './RecordBanner.vue'

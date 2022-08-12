@@ -145,12 +145,7 @@ import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import interval from 'human-interval'
 import type { AllowedState } from '@packages/types/src'
-import RecordBanner from './banners/RecordBanner.vue'
-import ConnectProjectBanner from './banners/ConnectProjectBanner.vue'
-import CreateOrganizationBanner from './banners/CreateOrganizationBanner.vue'
-import LoginBanner from './banners/LoginBanner.vue'
-import { BannerIds } from './banners'
-import { debouncedWatch } from '@vueuse/core'
+import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner, BannerIds } from './banners'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -165,6 +160,9 @@ fragment SpecsListBanners on Query {
         id
       }
     }
+  }
+  cachedUser {
+    id
   }
   currentProject {
     id
@@ -237,18 +235,13 @@ watch(
   },
 )
 
-const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.currentProject] as const))
+const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
 
-/**
- * It takes a non-zero amount of time for cloud data to be fetched, during which we can't reliably tell whether the user is really
- * logged in/has an org/etc. Here we attempt to delay this watcher to give the cloud GQL a little time to resolve before deciding
- * which banners to display. Not doing this causes us to immediately show the "login" banner then have it disappear a second later
- * once login state resolves
- */
-debouncedWatch(
+watch(
   cloudData,
-  ([cloudViewer, currentProject]) => {
-    const isLoggedIn = !!cloudViewer?.id
+  ([cloudViewer, cachedUser, currentProject]) => {
+    // Cached user covers state where we're authenticated but data isn't loaded yet
+    const isLoggedIn = !!cachedUser?.id || !!cloudViewer?.id
     // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
     // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
     const isOrganizationLoaded = !!cloudViewer?.firstOrganization
@@ -261,10 +254,6 @@ debouncedWatch(
     showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
     showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
     showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
-  },
-  {
-    debounce: 1000,
-    immediate: true,
   },
 )
 

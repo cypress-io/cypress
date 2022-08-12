@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { watch } from 'vue'
+import { watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
@@ -50,15 +50,11 @@ const emit = defineEmits<TrackedBannerComponentEmits>()
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
 const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 
-watch(
-  () => props.modelValue,
-  (visible) => {
-    if (visible) {
-      updateBannerState('lastShown')
-    }
-  },
-  { immediate: true },
-)
+watchEffect(() => {
+  if (props.modelValue) {
+    updateBannerState('lastShown')
+  }
+})
 
 function handleBannerDismissed (visible: boolean) {
   if (!visible) {
@@ -68,12 +64,12 @@ function handleBannerDismissed (visible: boolean) {
   emit('update:modelValue', visible)
 }
 
-async function updateBannerState (field: 'lastShown' | 'dismissed') {
+function updateBannerState (field: 'lastShown' | 'dismissed') {
   const savedState = stateQuery.data.value?.currentProject?.savedState ?? {}
 
   set(savedState, ['banners', props.bannerId, field], Date.now())
 
-  await setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
+  setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
 }
 
 </script>

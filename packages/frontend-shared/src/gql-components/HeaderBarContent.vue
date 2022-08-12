@@ -164,7 +164,7 @@
 
 <script setup lang="ts">
 import { gql, useMutation, useSubscription } from '@urql/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
@@ -287,7 +287,20 @@ const prompts = sortBy([
   },
 ], 'interval')
 const isForceOpenAllowed = ref(true)
+const isOpenDelayElapsed = ref(false)
+
+onMounted(() => {
+  setTimeout(() => isOpenDelayElapsed.value = true, 2000)
+})
+
 const isShowablePromptInSavedState = computed(() => {
+  // We do not want to show a prompt if a banner is going to be shown, but some banners rely on cloud data
+  // getting loaded before deciding whether to display. Add a delay here of a few seconds to give banners
+  // a chance to display before deciding whether to show a prompt.
+  if (!isOpenDelayElapsed.value) {
+    return false
+  }
+
   if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {

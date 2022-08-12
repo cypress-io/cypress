@@ -54,7 +54,9 @@ query RecordBanner {
 
 withDefaults(defineProps<{
   modelValue: boolean
-}>(), {})
+}>(), {
+  modelValue: false,
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -65,9 +67,7 @@ const { t } = useI18n()
 const query = useQuery({ query: RecordBannerDocument })
 
 const firstRecordKey = computed(() => {
-  return query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key
-    ? query.data.value.currentProject.cloudProject.recordKeys[0].key
-    : '<record-key>'
+  return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
 const recordCommand = computed(() => {
   const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '

@@ -60,7 +60,6 @@ describe('<SpecsListBanners />', () => {
   }
 
   const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>) => {
-    cy.clock(Date.now())
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
         assignIn(result, query)
@@ -68,9 +67,6 @@ describe('<SpecsListBanners />', () => {
       },
       render: (gql) => <SpecsListBanners gql={gql} />,
     })
-
-    // Initial watcher for cloud-based banners debounces @ 1000, so mock that much time elapsing
-    cy.tick(1050)
   }
 
   const validateSmartNotificationBehaviors = (bannerId: string, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
