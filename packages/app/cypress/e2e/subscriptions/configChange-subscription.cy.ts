@@ -39,7 +39,7 @@ describe('configChange subscription', () => {
       cy.contains('a', 'Specs').click()
       updateViewportHeightInCypressConfig(888)
 
-      //validate the spinner appears and then goes away
+      // validate the spinner appears and then goes away
 
       cy.contains('[role="alert"]', 'Loading')
       cy.get('[data-cy="loading-spinner"]').should('be.visible')
