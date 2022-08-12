@@ -63,6 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - equal: [ 'fix-or-skip-flaky-tests', << pipeline.git.branch >> ]
     - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
     - matches:
