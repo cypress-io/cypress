@@ -5,7 +5,6 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
-import EventEmitter from 'events'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 
@@ -544,15 +543,13 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
       // set the secondary remote states
-      remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
+        remoteStates.set(originPolicy, {}, false)
       })
 
       ctx = {
@@ -717,15 +714,13 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://foobar.com')
 
       // set the secondary remote states
-      remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
+        remoteStates.set(originPolicy, {}, false)
       })
 
       remoteStates.isPrimaryOrigin = () => false

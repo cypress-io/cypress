@@ -190,8 +190,6 @@ describe('remote states', () => {
 
       const state = this.remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
-      // this.remoteStates.addOrigin('https://staging.google.com')
-
       expect(state).to.deep.equal({
         auth: undefined,
         origin: 'https://staging.google.com',
