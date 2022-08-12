@@ -55,8 +55,6 @@ describe('rewritePackageNames', () => {
   it('renames requires', () => {
     const fileStr = `
       const a = require('@packages/server')
-      const b = require('@packages/runner-ct/')
-      const c = require("@packages/runner-ct/lib/quux.js")
     `
 
     const stub = sinon.stub()
@@ -65,13 +63,9 @@ describe('rewritePackageNames', () => {
 
     expect(newStr).to.eq(`
       const a = require('../../build/packages/server')
-      const b = require('../../build/packages/runner-ct/')
-      const c = require("../../build/packages/runner-ct/lib/quux.js")
     `)
 
     expect(stub.getCall(0).args[0]).to.eq(`require('../../build/packages/server'`)
-    expect(stub.getCall(1).args[0]).to.eq(`require('../../build/packages/runner-ct/`)
-    expect(stub.getCall(2).args[0]).to.eq(`require("../../build/packages/runner-ct/`)
   })
 })
 

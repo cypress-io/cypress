@@ -230,7 +230,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     // Verify tooltip is no longer open once modal was opened
     cy.findByTestId('tooltip-content')
-    .should('not.be.visible')
+    .should('not.exist')
 
     cy.percySnapshot()
   })
