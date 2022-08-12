@@ -188,19 +188,19 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
     })
 
-    it('can prevent default esc movement', (done) => {
+    it('can prevent default esc movement', () => {
+      let didPreventDefault = false
+
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 27) {
           e.preventDefault()
-        } else {
-          done(new Error('esc button not invoked'))
+          didPreventDefault = true
         }
       })
 
       cy.get(':text:first').invoke('val', 'foo').type('d{esc}').then(($input) => {
         expect($input).to.have.value('food')
-
-        done()
+        expect(didPreventDefault).to.be.true
       })
     })
   })
