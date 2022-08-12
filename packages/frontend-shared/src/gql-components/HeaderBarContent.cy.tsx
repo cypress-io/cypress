@@ -370,11 +370,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
                 ...(options?.state ?? {}),
               }
 
-              const projectId = result.currentProject.config.find((item: {field: string, value: string}) => item.field = 'projectId')
-
-              if (projectId) {
-                projectId.value = options?.projectId
-              }
+              result.currentProject.projectId = options?.projectId ?? null
             },
             render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
           })
