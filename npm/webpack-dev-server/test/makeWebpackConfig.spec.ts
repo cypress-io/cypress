@@ -3,7 +3,7 @@ import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
 import { WebpackDevServerConfig } from '../src/devServer'
 import { sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
-import { makeWebpackConfig } from '../src/makeWebpackConfig'
+import { CYPRESS_WEBPACK_ENTRYPOINT, makeWebpackConfig } from '../src/makeWebpackConfig'
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
 
 describe('makeWebpackConfig', () => {
@@ -85,5 +85,55 @@ describe('makeWebpackConfig', () => {
 
     expect(actual.output.publicPath).to.eq('/test-public-path/')
     snapshot(actual)
+  })
+
+  it('removes entrypoint from merged webpackConfig', async () => {
+    const devServerConfig: WebpackDevServerConfig = {
+      specs: [],
+      cypressConfig: {
+        projectRoot: '.',
+        devServerPublicPathRoute: '/test-public-path',
+      } as Cypress.PluginConfigOptions,
+      webpackConfig: {
+        entry: { main: 'src/index.js' },
+      },
+      devServerEvents: new EventEmitter(),
+    }
+    const actual = await makeWebpackConfig({
+      devServerConfig,
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 4,
+        webpackDevServer: 4,
+      }),
+    })
+
+    expect(actual.entry).eq(CYPRESS_WEBPACK_ENTRYPOINT)
+  })
+
+  it('preserves entrypoint from merged webpackConfig if framework = angular', async () => {
+    const devServerConfig: WebpackDevServerConfig = {
+      specs: [],
+      cypressConfig: {
+        projectRoot: '.',
+        devServerPublicPathRoute: '/test-public-path',
+      } as Cypress.PluginConfigOptions,
+      webpackConfig: {
+        entry: { main: 'src/index.js' },
+      },
+      devServerEvents: new EventEmitter(),
+      framework: 'angular',
+    }
+    const actual = await makeWebpackConfig({
+      devServerConfig,
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 4,
+        webpackDevServer: 4,
+      }),
+    })
+
+    expect(actual.entry).deep.eq({
+      main: 'src/index.js',
+      'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
+    })
   })
 })
