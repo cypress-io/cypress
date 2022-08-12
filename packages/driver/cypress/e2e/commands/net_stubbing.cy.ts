@@ -1686,7 +1686,7 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can delay with deprecated delayMs param', function (done) {
+    it('can delay with deprecated delayMs param', function () {
       const delayMs = 250
 
       cy.intercept('/timeout*', (req) => {
@@ -1698,8 +1698,6 @@ describe('network stubbing', function () {
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
           expect(Date.now() - this.start).to.be.closeTo(delayMs + 100, 100)
-
-          done()
         })
       })
     })
