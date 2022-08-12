@@ -2307,6 +2307,7 @@ linux-x64-workflow: &linux-x64-workflow
     # unit, integration and e2e tests
     - cli-visual-tests:
         context: test-runner:percy
+        percy: true
         requires:
           - build
     - unit-tests:
@@ -2400,6 +2401,7 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
         requires:
           - system-tests-node-modules-install
     - run-vite-dev-server-integration-tests:
@@ -2418,6 +2420,7 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - reporter-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
         requires:
           - build
     - ui-components-integration-tests:
