@@ -2364,11 +2364,11 @@ linux-x64-workflow: &linux-x64-workflow
         percy: true
         requires:
           - build
-    - npm-webpack-dev-server:
+    - npm-webpack-dev-server-integration:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
-    - npm-vite-dev-server:
+    - npm-vite-dev-server-integration:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
