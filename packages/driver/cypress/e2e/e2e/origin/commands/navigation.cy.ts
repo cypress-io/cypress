@@ -236,7 +236,6 @@ context('cy.origin navigation', () => {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
-            // 'cookie': '__cypress.initial=true',
           },
           body: JSON.stringify({
             bar: 'baz',
