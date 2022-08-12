@@ -182,14 +182,12 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
-  if (cloudViewer.value && props.showConnectButtonAfterLogin) {
-    emit('connect-project')
-
-    return
-  }
-
   if (cloudViewer.value) {
-    emit('continue', true)
+    if (props.showConnectButtonAfterLogin) {
+      emit('connect-project')
+    } else {
+      emit('continue', true)
+    }
 
     return
   }
@@ -220,11 +218,11 @@ const buttonText = computed(() => {
     continue: t('topNav.login.actionContinue'),
   }
 
-  if (cloudViewer.value && props.showConnectButtonAfterLogin) {
-    return strings.connectProject
-  }
-
   if (cloudViewer.value) {
+    if (props.showConnectButtonAfterLogin) {
+      return strings.connectProject
+    }
+
     return strings.continue
   }
 
