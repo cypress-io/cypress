@@ -2282,9 +2282,9 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:npm-release
         requires:
           - build
-    # - server-unit-tests:
-    #     requires:
-    #       - build
+    - server-unit-tests:
+        requires:
+          - build
     - server-integration-tests:
         requires:
           - build
