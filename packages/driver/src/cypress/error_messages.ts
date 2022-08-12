@@ -1015,29 +1015,6 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    cross_origin_load_timed_out ({ ms, projectRoot, configFile, crossOriginUrl, originPolicies }) {
-      return {
-        message: stripIndent`\
-          Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
-
-          - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
-
-          A cross-origin request for \`${crossOriginUrl.href}\` was detected.
-
-          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
-
-          \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${crossOriginUrl.origin} go here>\`
-          \`})\`
-
-          If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(projectRoot, configFile)} to wait longer.
-
-          Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
-
-          When this \`load\` event occurs, Cypress will continue running commands.`,
-        docsUrl: 'https://on.cypress.io/origin',
-      }
-    },
   },
 
   net_stubbing: {
