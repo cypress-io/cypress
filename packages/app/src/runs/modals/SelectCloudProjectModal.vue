@@ -307,7 +307,7 @@ watchEffect(() => {
   if (pickedOrganization.value?.projects?.nodes?.length === 1) {
     pickedProject.value = pickedOrganization.value.projects.nodes[0]
   } else {
-    pickedProject.value = undefined
+    pickedProject.value = pickedOrganization.value?.projects?.nodes?.find((p) => p.name === projectName.value)
   }
 })
 
