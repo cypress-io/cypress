@@ -31,7 +31,6 @@ system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/config-with-ts-syntax-error/**
 system-tests/projects/config-with-ts-module-error/**
 system-tests/projects/no-specs-vue-2/**
-system-tests/projects/no-specs-custom-pattern-vue/**
 
 
 **/test/fixtures
