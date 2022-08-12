@@ -724,7 +724,7 @@ export class EventManager {
     this.ws.off()
   }
 
-  async teardown (state, isRerun = false) {
+  async teardown (state: MobxRunnerStore, isRerun = false) {
     if (!Cypress) {
       return
     }
@@ -732,12 +732,13 @@ export class EventManager {
     state.setIsLoading(true)
 
     if (!isRerun) {
-      // only clear spec sessions when a new spec is selected
-      Cypress.backend('clear:spec:sessions')
+      // Cypress.backend('clear:spec:sessions')
+
+      // only clear session state when a new spec is selected
+      Cypress.backend('reset:session:state')
     }
 
-    // when we are re-running we first
-    // need to stop cypress always
+    // when we are re-running we first need to stop cypress always
     Cypress.stop()
     // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
     Cypress.primaryOriginCommunicator.removeAllListeners()

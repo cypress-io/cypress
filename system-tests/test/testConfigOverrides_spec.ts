@@ -11,7 +11,7 @@ describe('testConfigOverrides', () => {
   systemTests.setup()
 
   systemTests.it('fails when passing invalid config value browser', {
-    spec: 'testConfigOverrides-invalid-browser.js',
+    spec: 'testConfigOverrides/invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,
     config: {
@@ -20,7 +20,7 @@ describe('testConfigOverrides', () => {
   })
 
   systemTests.it('has originalTitle when skip due to browser config', {
-    spec: 'testConfigOverrides-skip-browser.js',
+    spec: 'testConfigOverrides/skip-browser.js',
     snapshot: true,
     outputPath,
     browser: 'electron',
@@ -33,6 +33,22 @@ describe('testConfigOverrides', () => {
     },
   })
 
+  systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run', {
+    spec: 'testConfigOverrides/invalid_before_test_event.js',
+    snapshot: true,
+    outputPath,
+    browser: 'electron',
+    expectedExitCode: 2,
+  })
+
+  systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
+    spec: 'testConfigOverrides/invalid_before_test_async_event.js',
+    snapshot: true,
+    outputPath,
+    browser: 'electron',
+    expectedExitCode: 2,
+  })
+
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
   const permutations: BrowserName[][] = [
@@ -42,17 +58,17 @@ describe('testConfigOverrides', () => {
 
   permutations.forEach((browserList) => {
     systemTests.it(`fails when passing invalid config values - [${browserList}]`, {
-      spec: 'testConfigOverrides-invalid.js',
+      spec: 'testConfigOverrides/invalid.js',
       snapshot: true,
       browser: browserList,
-      expectedExitCode: 8,
+      expectedExitCode: 14,
       config: {
         video: false,
       },
     })
 
     systemTests.it(`fails when passing invalid config values with beforeEach - [${browserList}]`, {
-      spec: 'testConfigOverrides-before-invalid.js',
+      spec: 'testConfigOverrides/before-invalid.js',
       snapshot: true,
       browser: browserList,
       expectedExitCode: 8,
@@ -62,7 +78,7 @@ describe('testConfigOverrides', () => {
     })
 
     systemTests.it(`correctly fails when invalid config values for it.only [${browserList}]`, {
-      spec: 'testConfigOverrides-only-invalid.js',
+      spec: 'testConfigOverrides/only-invalid.js',
       snapshot: true,
       browser: browserList,
       expectedExitCode: 1,
