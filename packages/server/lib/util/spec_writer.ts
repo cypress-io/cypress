@@ -385,7 +385,7 @@ export const createFile = (path: string) => {
   return fs.writeFile(path, newFileTemplate(path))
 }
 
-// current un-used with 10.x release
+// currently un-used post 10.x release
 export const countStudioUsage = (path: string) => {
   return fs.readFile(path)
   .then((specBuffer) => {
