@@ -256,7 +256,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
-    const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+    const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
 
     if (this.config.experimentalSessionAndOrigin && isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
