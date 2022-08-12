@@ -61,7 +61,7 @@ describe('testConfigOverrides', () => {
       spec: 'testConfigOverrides/invalid.js',
       snapshot: true,
       browser: browserList,
-      expectedExitCode: 8,
+      expectedExitCode: 14,
       config: {
         video: false,
       },

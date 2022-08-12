@@ -1679,9 +1679,9 @@ describe('lib/cypress', () => {
         // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 
