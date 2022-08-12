@@ -37,11 +37,11 @@ describe('<TrackedBanner />', () => {
 
   it('should record when banner is dismissed', () => {
     cy.clock(1234)
-    const dismissStub = cy.stub()
+    const recordStub = cy.stub()
     const shown = ref(true)
 
     cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, { value }) => {
-      dismissStub(value)
+      recordStub(value)
 
       return defineResult({ setPreferences: {} as any })
     })
@@ -58,8 +58,7 @@ describe('<TrackedBanner />', () => {
 
     cy.get('@banner').should('not.exist')
     .then(() => {
-      expect(dismissStub).to.have.been.calledTwice
-      expect(dismissStub).to.have.been.calledWith('{"banners":{"test-banner":{"dismissed":1234}}}')
+      expect(recordStub).to.have.been.calledWith('{"banners":{"test-banner":{"dismissed":1234}}}')
     })
   })
 })

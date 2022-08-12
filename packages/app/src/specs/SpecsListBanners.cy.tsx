@@ -236,6 +236,7 @@ describe('<SpecsListBanners />', () => {
   describe('login', () => {
     const gql: Partial<SpecsListBannersFragment> = {
       cloudViewer: null,
+      cachedUser: null,
       currentProject: {
         __typename: 'CurrentProject',
         id: 'abc123',
