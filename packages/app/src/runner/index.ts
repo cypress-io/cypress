@@ -210,54 +210,35 @@ export function addCrossOriginIframe (location) {
   })
 }
 
-function setupDriver (spec: SpecFile) {
-  // TODO: UNIFY-1318 - figure out how to manage window.config.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
-  const $runnerRoot = getRunnerElement()
-
-  // clear AUT, if there is one.
-  empty($runnerRoot)
-
-  // create root for new AUT
-  const $container = document.createElement('div')
-
-  $container.classList.add('screenshot-height-container')
-
-  $runnerRoot.append($container)
-
-  // create new AUT
-  const autIframe = getAutIframeModel()
-
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-
-  return {
-    autIframe,
-    config,
-    $container,
-    $autIframe,
-  }
-}
-
 /**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
  *
  */
 function runSpecCT (spec: SpecFile) {
-  const {
-    autIframe,
-    config,
-    $autIframe,
-  } = setupDriver(spec)
+  // TODO: UNIFY-1318 - figure out how to manage window.config.
+  const config = getRunnerConfigFromWindow()
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = setSpecForDriver(spec)
+  // creates a new instance of the Cypress driver for this spec,
+  // initializes a bunch of listeners
+  // watches spec file for changes.
+  getEventManager().setup(config)
+  const $runnerRoot = getRunnerElement()
+
+  // clear AUT, if there is one.
+  empty($runnerRoot)
+  // create root for new AUT
+  const $container = document.createElement('div')
+
+  $container.classList.add('screenshot-height-container')
+  $runnerRoot.append($container)
+
+  // create new AUT
+  const autIframe = getAutIframeModel()
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
   autIframe.showInitialBlankContents()
@@ -297,12 +278,33 @@ function setSpecForDriver (spec: SpecFile) {
  * initialize Cypress on the AUT.
  */
 function runSpecE2E (spec: SpecFile) {
-  const {
-    autIframe,
-    config,
-    $autIframe,
-    $container,
-  } = setupDriver(spec)
+  // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
+  const config = getRunnerConfigFromWindow()
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = setSpecForDriver(spec)
+
+  // creates a new instance of the Cypress driver for this spec,
+  // initializes a bunch of listeners
+  // watches spec file for changes.
+  getEventManager().setup(config)
+
+  const $runnerRoot = getRunnerElement()
+
+  // clear AUT, if there is one.
+  empty($runnerRoot)
+
+  // create root for new AUT
+  const $container = document.createElement('div')
+
+  $container.classList.add('screenshot-height-container')
+
+  $runnerRoot.append($container)
+
+  // create new AUT
+  const autIframe = getAutIframeModel()
+
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
