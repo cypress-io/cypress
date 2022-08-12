@@ -321,7 +321,7 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   const now = Date.now()
   const timeSinceOpened = now - (savedState.value?.firstOpened ?? now)
   const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
-  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => banner?.lastShown).filter((val): val is number => !!val)
+  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => typeof banner === 'object' && banner?.lastShown).filter((val): val is number => !!val)
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
