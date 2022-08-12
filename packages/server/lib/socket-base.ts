@@ -470,12 +470,6 @@ export class SocketBase {
 
               return
             }
-            case 'cross:origin:bridge:ready':
-              return this.localBus.emit('cross:origin:bridge:ready', args[0])
-            case 'cross:origin:release:html':
-              return this.localBus.emit('cross:origin:release:html')
-            case 'cross:origin:finished':
-              return this.localBus.emit('cross:origin:finished', args[0])
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:

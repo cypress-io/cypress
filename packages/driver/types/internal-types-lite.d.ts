@@ -16,12 +16,6 @@ declare namespace Cypress {
     (action: 'after:screenshot', config: {})
   }
 
-  interface Backend {
-    (task: 'cross:origin:release:html'): boolean
-    (task: 'cross:origin:bridge:ready', args: { originPolicy?: string }): boolean
-    (task: 'cross:origin:finished', originPolicy: string): boolean
-  }
-
   interface cy {
     /**
      * If `as` is chained to the current command, return the alias name used.

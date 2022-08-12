@@ -173,14 +173,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setupCrossOriginRequestHandling () {
-    this._eventBus.on('cross:origin:delaying:html', (request) => {
-      this.socket.localBus.once('cross:origin:release:html', () => {
-        this._eventBus.emit('cross:origin:release:html')
-      })
-
-      this.socket.toDriver('cross:origin:delaying:html', request)
-    })
-
     this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
         this._eventBus.emit('cross:origin:automation:cookies:received')

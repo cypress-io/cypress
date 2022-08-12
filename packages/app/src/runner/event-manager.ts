@@ -167,10 +167,6 @@ export class EventManager {
       })
     })
 
-    this.ws.on('cross:origin:delaying:html', (request) => {
-      Cypress.primaryOriginCommunicator.emit('delaying:html', request)
-    })
-
     localToReporterEvents.forEach((event) => {
       this.localBus.on(event, (...args) => {
         this.reporterBus.emit(event, ...args)

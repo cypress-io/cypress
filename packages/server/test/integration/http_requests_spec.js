@@ -2656,10 +2656,6 @@ describe('Routes', () => {
           'Content-Type': 'text/html',
         })
 
-        this.server._eventBus.on('cross:origin:delaying:html', () => {
-          this.server._eventBus.emit('cross:origin:release:html')
-        })
-
         return this.rp({
           url: 'http://www.foobar.com',
           headers: {
