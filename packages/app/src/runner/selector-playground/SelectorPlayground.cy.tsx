@@ -165,21 +165,21 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-toggle"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
     cy.get('[data-cy="playground-toggle"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-copy"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied')
     cy.get('[data-cy="playground-copy"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-print"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed')
     cy.get('[data-cy="playground-print"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
   })
 
   it('ensures input autocomplete is disabled', () => {
