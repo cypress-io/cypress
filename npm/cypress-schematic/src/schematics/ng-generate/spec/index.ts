@@ -53,7 +53,7 @@ export default function (options: Schema): Rule {
     }
 
     if (options.path === undefined) {
-      options.path = options.testingType === 'component' ? `${project.root}/${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
+      options.path = options.testingType === 'component' ? `${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
     }
 
     context.logger.debug(`Creating new ${options.testingType} spec named: ${options.name}`)

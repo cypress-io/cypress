@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "cypress-schematics-e2e-spec",
+  "title": "Cypress E2E Spec Options Schema",
+  "type": "object",
+  "properties": {
+    "createSpecs": {
+      "type": "boolean",
+      "alias": "g",
+      "x-prompt": "Would you like to generate Cypress component tests alongside all components?",
+      "default": true
+    }
+  },
+  "required": [
+    "createSpecs"
+  ]
+}

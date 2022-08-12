@@ -17,9 +17,11 @@ import { concatMap, map } from 'rxjs/operators'
 
 import { addPackageJsonDependency, NodeDependencyType } from '../utils/dependencies'
 import {
+  getAngularJsonValue,
   getAngularVersion,
   getLatestNodeVersion,
   NodePackage,
+  getDirectoriesAndCreateSpecs,
 } from '../utils'
 import { relative, resolve } from 'path'
 import { JSONFile, JSONPath } from '../utils/jsonFile'
@@ -45,17 +47,6 @@ export default function (_options: any): Rule {
       modifyAngularJson(_options),
     ])(tree, _context)
   }
-}
-
-const ctSpecContent = (componentName: string): string => {
-  return `import { ${componentName} } from './${componentName}.component'
-
-  describe('${componentName}', () => {
-    it('should mount', () => {
-      cy.mount(${componentName})
-    })
-  })
-  `
 }
 
 function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
@@ -162,7 +153,7 @@ function addCypressComponentTestingFiles (options: any): Rule {
 }
 
 function addCtSpecs (options: any): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+  return (tree: Tree) => {
     if (options.addCtSpecs) {
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
@@ -170,21 +161,8 @@ function addCtSpecs (options: any): Rule {
       Object.keys(projects).map((name) => {
         const project = projects[name]
         const appPath = `${project.root}/${project.sourceRoot}/${project.prefix}`
-        const appDir = tree.getDir(appPath)
 
-        const componentPaths = appDir.subfiles.filter((file) => file.endsWith(`component.ts`))
-
-        if (componentPaths) {
-          return componentPaths.map((component: any) => {
-            const componentName = component.split('.')[0]
-
-            context.logger.debug(`Creating component test for: ${componentName}`)
-
-            return !tree.exists(`${appPath}/${componentName}.cy.ts`) && tree.create(`${appPath}/${componentName}.cy.ts`, ctSpecContent(componentName))
-          })
-        }
-
-        return context.logger.debug(`No components found in ${appPath}. Please check that the folder is correct.`)
+        getDirectoriesAndCreateSpecs({ tree, appPath })
       })
     }
   }
@@ -228,12 +206,6 @@ function addNewCypressCommands (
   }
 
   return tree.overwrite('./angular.json', JSON.stringify(angularJsonVal, null, 2))
-}
-
-function getAngularJsonValue (tree: Tree) {
-  const angularJson = new JSONFile(tree, './angular.json')
-
-  return angularJson.get([]) as any
 }
 
 function modifyAngularJson (options: any): Rule {

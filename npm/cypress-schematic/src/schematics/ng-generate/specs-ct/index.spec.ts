@@ -4,7 +4,7 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import { join } from 'path'
 import { expect } from 'chai'
 
-describe('ng-generate @cypress/schematic:spec', () => {
+describe('ng-generate @cypress/schematic:specs-ct', () => {
   const schematicRunner = new SchematicTestRunner(
     'schematics',
     join(__dirname, '../../collection.json'),
@@ -30,19 +30,13 @@ describe('ng-generate @cypress/schematic:spec', () => {
     appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
   })
 
-  it('should create cypress e2e spec file by default', async () => {
-    return schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', testingType: 'e2e' }, appTree).toPromise().then((tree) => {
+  it('should create cypress component tests alongside components', async () => {
+    return schematicRunner.runSchematicAsync('specs-ct', { createSpecs: true }, appTree).toPromise().then((tree) => {
       const files = tree.files
 
-      expect(files).to.contain('/projects/sandbox/cypress/e2e/foo.cy.ts')
-    })
-  })
+      console.log('🚀 ~ file: index.spec.ts ~ line 36 ~ returnschematicRunner.runSchematicAsync ~ files', files)
 
-  it('should create cypress ct spec file when testingType is component', async () => {
-    return schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', testingType: 'component' }, appTree).toPromise().then((tree) => {
-      const files = tree.files
-
-      expect(files).to.contain('/projects/sandbox/src/app/foo.cy.ts')
+      expect(files).to.contain('/projects/sandbox/app/src/app.component.cy.ts')
     })
   })
 })
