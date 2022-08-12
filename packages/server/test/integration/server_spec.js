@@ -1059,10 +1059,10 @@ describe('Server', () => {
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
+            expect(buffer).to.not.be.empty
           })
         })
 
@@ -1094,10 +1094,10 @@ describe('Server', () => {
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
+            expect(buffer).to.not.be.empty
           })
         })
       })
