@@ -2267,7 +2267,7 @@ linux-x64-workflow: &linux-x64-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
-    - lint-types:
+    - check-types:
         requires:
           - build
     # unit, integration and e2e tests
