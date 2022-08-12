@@ -43,7 +43,8 @@ const debug = Debug('cypress:server:remote-states')
  */
 export class RemoteStates {
   private remoteStates: Map<string, Cypress.RemoteState> = new Map()
-  private originStack: string[] = []
+  private primaryOriginKey: string = ''
+  private currentOriginKey: string = ''
   private configure: () => { serverPort: number, fileServerPort: number }
   private _config: { serverPort: number, fileServerPort: number } | undefined
 
@@ -67,17 +68,8 @@ export class RemoteStates {
     return state
   }
 
-  isInOriginStack (url: string): boolean {
-    return this.originStack.includes(cors.getOriginPolicy(url))
-  }
-
-  isSecondaryOrigin (url: string): boolean {
-    // start at 1 to exclude the primary origin
-    return this.originStack.indexOf(cors.getOriginPolicy(url), 1) !== -1
-  }
-
   isPrimaryOrigin (url: string): boolean {
-    return this.originStack[0] === cors.getOriginPolicy(url)
+    return this.primaryOriginKey === cors.getOriginPolicy(url)
   }
 
   reset () {
@@ -87,11 +79,11 @@ export class RemoteStates {
 
     // reset the remoteStates and originStack to the primary
     this.remoteStates = new Map(stateArray[0] ? [stateArray[0]] : [])
-    this.originStack = stateArray[0] ? [stateArray[0][0]] : []
+    this.currentOriginKey = this.primaryOriginKey
   }
 
   current (): Cypress.RemoteState {
-    return this.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
+    return this.get(this.currentOriginKey) as Cypress.RemoteState
   }
 
   set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimaryOrigin: boolean = true): Cypress.RemoteState {
@@ -126,6 +118,8 @@ export class RemoteStates {
 
     const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
 
+    this.currentOriginKey = remoteOriginPolicy
+
     if (isPrimaryOrigin) {
       // convert map to array
       const stateArray = Array.from(this.remoteStates.entries())
@@ -134,8 +128,7 @@ export class RemoteStates {
       stateArray[0] = [remoteOriginPolicy, state]
       this.remoteStates = new Map(stateArray)
 
-      // automatically update the primary origin stack
-      this.originStack[0] = remoteOriginPolicy
+      this.primaryOriginKey = remoteOriginPolicy
     } else {
       this.remoteStates.set(remoteOriginPolicy, state)
     }
