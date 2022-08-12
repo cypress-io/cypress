@@ -153,7 +153,7 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     :utm-medium="loginUtmMedium"
-    :show-connect-button-after-login="!props.gql?.currentProject.projectId"
+    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
     @loggedin="handleLoggedin"
     @connect-project="isProjectConnectOpen = true"
   />
