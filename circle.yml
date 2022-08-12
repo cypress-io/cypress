@@ -1259,8 +1259,8 @@ jobs:
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
             run-reporter-component-tests-chrome,
-            run-webpack-dev-server-integration-tests,
-            run-vite-dev-server-integration-tests
+            npm-webpack-dev-server-integration-tests
+            npm-vite-dev-server-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
@@ -1337,7 +1337,7 @@ jobs:
       - update_known_hosts
       - run: yarn test-npm-package-release-script
 
-  lint-types:
+  check-types:
     <<: *defaults
     parallelism: 1
     steps:
@@ -1738,14 +1738,14 @@ jobs:
           command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
 
-  npm-webpack-dev-server:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - restore_cached_system_tests_deps
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
+  # npm-webpack-dev-server:
+  #   <<: *defaults
+  #   steps:
+  #     - restore_cached_workspace
+  #     - restore_cached_system_tests_deps
+  #     - run:
+  #         name: Run tests
+  #         command: yarn workspace @cypress/webpack-dev-server test
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
@@ -2390,9 +2390,9 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
-    - npm-webpack-dev-server:
-        requires:
-          - system-tests-node-modules-install
+    # - npm-webpack-dev-server:
+    #     requires:
+    #       - system-tests-node-modules-install
     # - npm-vite-dev-server:
     #     requires:
     #       - build
@@ -2409,6 +2409,7 @@ linux-x64-workflow: &linux-x64-workflow
     #     requires:
     #       - build
     - npm-react-integration:
+        context: test-runner:cypress-record-key
         requires:
           - build
     # - npm-angular: verified through system tests
@@ -2442,7 +2443,7 @@ linux-x64-workflow: &linux-x64-workflow
           # - npm-vite-dev-server
           # - npm-webpack-dev-server
           - npm-cypress-schematic-integration
-          - lint-types
+          - check-types
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
@@ -2459,7 +2460,7 @@ linux-x64-workflow: &linux-x64-workflow
           - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
-          - server-unit-tests
+          # - server-unit-tests
           - test-kitchensink
           - ui-components-integration-tests
           - unit-tests
