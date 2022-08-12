@@ -153,7 +153,7 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     :utm-medium="loginUtmMedium"
-    show-connect-button-after-login
+    :show-connect-button-after-login="!cloudProjectId"
     @loggedin="handleLoggedin"
     @connect-project="isProjectConnectOpen = true"
   />
@@ -308,6 +308,10 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
 }>()
+
+const cloudProjectId = computed(() => {
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+})
 
 const showSpecPatternModal = ref(false)
 
