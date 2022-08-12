@@ -261,7 +261,7 @@ watch(
 function hasBannerBeenDismissed (bannerId: string) {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  return !!bannersState?.[bannerId]?.dismissed
+  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.dismissed
 }
 
 </script>

@@ -53,4 +53,4 @@ export type BannerState = {
 
 export type BannersState = {
   [bannerId: string]: BannerState | null
-}
+} & { _disabled?: boolean }
