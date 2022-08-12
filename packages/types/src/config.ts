@@ -2,7 +2,7 @@
 
 import type { AllModeOptions } from '.'
 
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
+export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
 
@@ -31,15 +31,6 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
 export type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
   & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'excludeSpecPattern' | 'specPattern' | 'experimentalSessionAndOrigin' | 'experimentalModifyObstructiveThirdPartyCode'> // TODO: Figure out how to type this better.
-
-export interface SampleConfigFile{
-  status: 'changes' | 'valid' | 'skipped' | 'error'
-  filePath: string
-  content: string
-  description?: string
-  warningText?: string
-  warningLink?: string
-}
 
 export interface SettingsOptions {
   testingType?: 'component' |'e2e'
