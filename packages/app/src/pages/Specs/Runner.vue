@@ -104,8 +104,9 @@ const configChangeHandler: SubscriptionHandlerArg<any, any> = (
       window.__CYPRESS_CONFIG__ = next.configChange.serveConfig
 
       const eventManager = useEventManager()
+      const isRerun = true
 
-      eventManager.runSpec()
+      eventManager.runSpec(isRerun)
     } catch (e) {
       // eventManager may not be defined, for example if the spec
       // is still loading.
