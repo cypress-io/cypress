@@ -490,9 +490,9 @@ function refreshPage () {
 }
 
 const handleLoggedin = () => {
-  // if there is no project id, there can be no cloud data to refresh
-  // so we want to stay on the page and move cleanly through to
-  // connecting the project
+  // if there is no project id, there can be no cloud data to refresh -
+  // we want to stay on the page and let the `connect-project` event take the user
+  // to the next step to connect their project
   if (props.gql.currentProject?.projectId) {
     refreshPage()
   }
