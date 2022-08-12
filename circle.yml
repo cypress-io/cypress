@@ -2399,9 +2399,9 @@ linux-x64-workflow: &linux-x64-workflow
     # - npm-webpack-preprocessor:
     #     requires:
     #       - build
-    - npm-unit-tests:
-        requires:
-          - build
+    # - npm-unit-tests:
+    #     requires:
+    #       - build
     # - npm-webpack-batteries-included-preprocessor:
     #     requires:
     #       - build
@@ -2431,7 +2431,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
           # - check-ts
-          - npm-unit-tests
+          # - npm-unit-tests
           # - npm-eslint-plugin-dev
           # - npm-create-cypress-tests
           - npm-react-integration
