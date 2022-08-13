@@ -1,0 +1,27 @@
+{
+  "name": "@packages/snapbuild",
+  "version": "0.0.0-development",
+  "description": "Downloads binary for your architecture of tool that makes code snapshotable.",
+  "private": true,
+  "main": "snapbuild.js",
+  "files": [
+    "snapbuild.js",
+    "snapbuild.d.ts"
+  ],
+  "types": "snapbuild.d.ts",
+  "optionalDependencies": {
+    "snapbuild-android-arm64": "0.0.133",
+    "snapbuild-darwin-64": "0.0.133",
+    "snapbuild-darwin-arm64": "0.0.133",
+    "snapbuild-freebsd-64": "0.0.133",
+    "snapbuild-freebsd-arm64": "0.0.133",
+    "snapbuild-linux-32": "0.0.133",
+    "snapbuild-linux-64": "0.0.133",
+    "snapbuild-linux-arm": "0.0.133",
+    "snapbuild-linux-arm64": "0.0.133",
+    "snapbuild-linux-mips64le": "0.0.133",
+    "snapbuild-linux-ppc64le": "0.0.133",
+    "snapbuild-windows-32": "0.0.133",
+    "snapbuild-windows-64": "0.0.133"
+  }
+}

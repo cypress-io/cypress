@@ -42,6 +42,7 @@ module.exports = {
         '**/test/**',
         '**/system-tests/**',
         'packages/electron-mksnapshot/**',
+        'packages/v8-snapshot/**',
         'packages/{app,driver,frontend-shared,launchpad}/cypress/**',
         '*.test.ts',
         // ignore in packages that don't run in the Cypress process

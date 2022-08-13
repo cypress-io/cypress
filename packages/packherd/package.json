@@ -27,7 +27,8 @@
     "spok": "^1.3.0"
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "src/packherd.ts"
   ],
-  "types": "dist/packherd.d.ts"
+  "types": "src/packherd.ts"
 }
