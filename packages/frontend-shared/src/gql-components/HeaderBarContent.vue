@@ -157,7 +157,7 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
-        :show-connect-button-after-login="isApp && !props.gql?.currentProject?.projectId"
+        :show-connect-button-after-login="isApp && !cloudProjectId"
         @connect-project="handleConnectProject"
       />
     </div>
@@ -234,7 +234,6 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
-    projectId
   }
   isGlobalMode
   ...TopNav
@@ -249,6 +248,10 @@ const userData = computed(() => {
 
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState
+})
+
+const cloudProjectId = computed(() => {
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
 const currentProject = computed(() => props.gql.currentProject)
@@ -336,7 +339,7 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // if prompt requires no project id,
   // check if project id exists
-  if (prompt.noProjectId && props.gql?.currentProject?.projectId) {
+  if (prompt.noProjectId && cloudProjectId.value) {
     return false
   }
 
