@@ -1316,7 +1316,7 @@ jobs:
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream
             # run unit tests from each individual package
-            - run: yarn unit-tests --ignore @packages/server
+            - run: yarn test-unit --ignore @packages/server
             - verify-mocha-results:
                 expectedResultCount: 41
       - store_test_results:
