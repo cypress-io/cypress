@@ -108,6 +108,7 @@ declare global {
       namespace: AutomationElementId
       hideCommandLog: boolean
     }
+    __Cypress__: boolean
   }
 }
 

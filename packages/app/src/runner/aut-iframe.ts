@@ -35,12 +35,8 @@ export class AutIframe {
     return $iframe
   }
 
-  showInitialBlankContentsE2E () {
+  showInitialBlankContents () {
     this._showContents(blankContents.initial())
-  }
-
-  showInitialBlankContentsCT () {
-    this._showContents(blankContents.initialCT())
   }
 
   showSessionBlankContents () {
@@ -134,7 +130,7 @@ export class AutIframe {
             this.showSessionLifecycleBlankContents()
             break
           default:
-            this.showInitialBlankContentsE2E()
+            this.showInitialBlankContents()
         }
 
         resolve()

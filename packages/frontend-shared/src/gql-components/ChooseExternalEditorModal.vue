@@ -88,7 +88,7 @@ fragment ChooseExternalEditorModal on Query {
 
 gql`
 mutation ChooseExternalEditorModal_SetPreferredEditorBinary ($value: String!) {
-  setPreferences (value: $value) {
+  setPreferences (value: $value, type: global) {
     localSettings {
       preferences {
         preferredEditorBinary
