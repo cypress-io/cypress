@@ -1,4 +1,4 @@
-it('t1', () => {
+it('multiple sessions in one test', () => {
   cy.session('user1', () => {
     window.localStorage.foo = 'val'
   })
