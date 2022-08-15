@@ -824,7 +824,7 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains(getPathForPlatform('src/specs-folder/*.{js,jsx}')).should('be.visible', { timeout: 12000 })
+        cy.contains('src/specs-folder/*.{js,jsx}').should('be.visible', { timeout: 20000 })
         cy.contains('No Specs Found').should('be.visible')
 
         cy.findByRole('button', { name: 'New Spec' }).click()
