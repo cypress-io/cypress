@@ -25,14 +25,37 @@ export default function (Commands, Cypress, cy, state) {
 
   const shouldFn = function (subject, chainers, ...args) {
     const command = cy.state('current')
+
+    // Most commands are responsible for creating and managing their own log messages directly.
+    // .should(), however, is an exception - it is invoked by earlier commands, as part of
+    // `verifyUpcomingAssertions`. This callback can also be invoked any number of times, but we only want
+    // to display a few log messages (one for each assertion).
+
+    // Therefore, we each time Cypress.log() is called, we need a way to identify: is this log call
+    // a duplicate of a previous one that's just being retried? This is the purpose of `commandLogId` - it should
+    // remain the same across multiple invocations of verifyUpcomingAssertions().
+
+    // It is composed of two parts: assertionIndex and logIndex. Assertion index is "which .should() command are we
+    // inside". Consider the following case:
+    // `cy.noop(3).should('be.lessThan', 4).should('be.greaterThan', 2)`
+    // cy.state('current') is always the 'noop' command, which rolls up the two upcoming assertions, lessThan and
+    // greaterThan. `assertionIndex` lets us tell them apart even though they have the same logIndex of 0 (since it
+    // resets each time .should() is called).
+
+    // As another case, consider:
+    // cy.noop(3).should((n) => { expect(n).to.be.lessThan(4); expect(n).to.be.greaterThan(2); })
+    // Here, assertionIndex is 0 for both - one .should() block generates two log messages. In this case, logIndex is
+    // used to tell them apart, since it increments each time Cypress.log() is called within a single retry of a single
+    // .should().
     const assertionIndex = cy.state('upcomingAssertions') ? cy.state('upcomingAssertions').indexOf(command.get('currentAssertionCommand')) : 0
     let logIndex = 0
 
     if (_.isFunction(chainers)) {
       cy.state('onBeforeLog', (log) => {
-        logIndex++
         log.set('command', command)
         log.set('commandLogId', `${assertionIndex}-${logIndex}`)
+
+        logIndex++
       })
 
       try {
