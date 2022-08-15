@@ -97,6 +97,18 @@ describe('cy.origin dependencies', () => {
     })
   })
 
+  it('works in support file', () => {
+    cy.origin('http://foobar.com:3500', () => {
+      expect(cy.getAll).to.be.undefined
+    })
+
+    cy.originLoadUtils('http://foobar.com:3500')
+
+    cy.origin('http://foobar.com:3500', () => {
+      expect(cy.getAll).to.be.a('function')
+    })
+  })
+
   describe('errors', () => {
     it('when dependency does not exist', () => {
       cy.on('fail', (err) => {
@@ -118,10 +130,6 @@ describe('cy.origin dependencies', () => {
   })
 
   // Test cases
-  // - with syntax errors: cy-in-cy test? is this even possible? will get caught by original pass
-  // - with import syntax
-  // - error if using require w/o webpack-preprocessor: system test
-  //   -> define Cypress.require and have it error
+  // - this failure: https://dashboard.cypress.io/projects/ypt4pf/runs/37853/specs
   // - a different file type (use types, jsx, tsx, etc): system tests
-  // - source maps?: punt til later
 })

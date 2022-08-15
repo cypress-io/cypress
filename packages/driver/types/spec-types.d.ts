@@ -2,6 +2,7 @@
 
 declare namespace Cypress {
   interface Chainable {
+    originLoadUtils(origin: string): Chainable
     getAll(...aliases: string[]): Chainable
     shouldWithTimeout(cb: (subj: {}) => void, timeout?: number): Chainable
   }

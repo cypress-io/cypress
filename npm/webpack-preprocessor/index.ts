@@ -329,13 +329,25 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           return
         }
 
-        if (!crossOriginCallbackStore.hasFilesFor(filePath)) {
+        // get the source file and any of its dependencies
+        const sourceFiles = jsonStats.modules
+        .filter((module) => {
+          // entries have duplicate modules whose ids are numbers
+          return _.isString(module.id)
+        })
+        .map((module) => {
+          // module id is the path relative to the cwd,
+          // e.g. ./cypress/support/e2e.js, but we need it absolute
+          return path.join(process.cwd(), module.id as string)
+        })
+
+        if (!crossOriginCallbackStore.hasFilesFor(sourceFiles)) {
           debug('no cross-origin callback files')
 
           return resolveAllBundles()
         }
 
-        compileCrossOriginCallbackFiles(crossOriginCallbackStore.files[filePath], {
+        compileCrossOriginCallbackFiles(crossOriginCallbackStore.getFilesFor(sourceFiles), {
           originalFilePath: filePath,
           webpackOptions,
         })

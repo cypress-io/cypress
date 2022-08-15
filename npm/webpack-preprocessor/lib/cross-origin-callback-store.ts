@@ -5,14 +5,20 @@ export interface CrossOriginCallbackStoreFile {
 }
 
 export class CrossOriginCallbackStore {
-  files: { [key: string]: CrossOriginCallbackStoreFile[] } = {}
+  private files: { [key: string]: CrossOriginCallbackStoreFile[] } = {}
 
   addFile (sourceFilePath: string, file: CrossOriginCallbackStoreFile) {
     this.files[sourceFilePath] = (this.files[sourceFilePath] || []).concat(file)
   }
 
-  hasFilesFor (sourceFilePath: string) {
-    return !!this.files[sourceFilePath]?.length
+  hasFilesFor (sourceFiles: string[]) {
+    return !!this.getFilesFor(sourceFiles)?.length
+  }
+
+  getFilesFor (sourceFiles: string[]) {
+    return Object.keys(this.files).reduce((files, sourceFilePath) => {
+      return sourceFiles.includes(sourceFilePath) ? files.concat(this.files[sourceFilePath]) : files
+    }, [])
   }
 
   reset (sourceFilePath: string) {

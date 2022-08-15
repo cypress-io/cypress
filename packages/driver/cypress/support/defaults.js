@@ -31,3 +31,9 @@ beforeEach(() => {
     $(cy.state('window')).off()
   } catch (error) {} // eslint-disable-line no-empty
 })
+
+Cypress.Commands.add('originLoadUtils', (origin) => {
+  cy.origin(origin, () => {
+    Cypress.require('./utils')
+  })
+})
