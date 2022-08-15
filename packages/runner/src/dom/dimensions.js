@@ -76,14 +76,6 @@ const getMargin = ($el, dir) => {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 
-const getOuterSize = ($el) => {
-  return {
-    width: $el.outerWidth(true),
-    height: $el.outerHeight(true),
-  }
-}
-
 export default {
-  getOuterSize,
   getElementDimensions,
 }

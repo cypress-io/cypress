@@ -309,10 +309,10 @@ export class AutIframe {
       // bail if our el no longer exists in the parent body
       if (!this.$.contains(body, element)) return
 
-      // switch to using outerWidth + outerHeight
+      // switch to using offsetWidth + offsetHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = this.dom.getOuterSize($_el)
+      const dimensions = this.getOffsetSize($_el.get(0))
 
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
@@ -621,5 +621,12 @@ export class AutIframe {
     wrapper.appendChild(dot)
 
     return box
+  }
+
+  private getOffsetSize (el: HTMLElement) {
+    return {
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+    }
   }
 }

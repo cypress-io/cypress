@@ -11,9 +11,6 @@ import selectorPlaygroundCSS from '!../selector-playground/selector-playground.s
 import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 
 const $ = $Cypress.$
-const styles = (styleString) => {
-  return styleString.replace(/\s*\n\s*/g, '')
-}
 
 function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
@@ -257,5 +254,4 @@ export const dom = {
   addOrUpdateSelectorPlaygroundHighlight,
   openStudioAssertionsMenu,
   closeStudioAssertionsMenu,
-  getOuterSize: $dimensions.getOuterSize,
 }
