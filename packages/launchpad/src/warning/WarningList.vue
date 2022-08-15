@@ -6,7 +6,7 @@
     :message="warning.errorMessage"
     :retryable="Boolean(retryables[warning.errorType])"
     dismissible
-    @update:modelValue="dismiss(warning.id)"
+    @update:modelValue="dismiss(warning.errorType)"
     @retry="retry(warning)"
   />
 </template>
@@ -26,7 +26,7 @@ fragment WarningList on Query {
 }`
 
 gql`
-mutation WarningList_removeWarning($id: ID!) {
+mutation WarningList_removeWarning($id: ErrorTypeEnum!) {
   dismissWarning(id: $id) {
     warnings {
       id
@@ -62,7 +62,7 @@ const retryables: Retryables = {
   },
 }
 
-const dismiss = (id: string) => {
+const dismiss = (id: ErrorTypeEnum) => {
   if (!dismissWarning.fetching.value) {
     dismissWarning.executeMutation({ id })
   }

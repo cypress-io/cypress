@@ -16,6 +16,19 @@ describe('baseUrl', () => {
   })
 
   it('should clear baseUrl warning if Cypress can connect to provided baseUrl', () => {
+    function updateBaseUrl (baseUrl: string) {
+      return cy.withCtx(async (ctx, { baseUrl }) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js', `
+          module.exports = {
+            e2e: {
+              supportFile: false,
+              baseUrl: '${baseUrl}',
+            },
+          }
+        `)
+      }, { baseUrl })
+    }
+
     cy.scaffoldProject('config-with-base-url-warning')
     cy.openProject('config-with-base-url-warning')
     cy.visitLaunchpad()
@@ -23,19 +36,20 @@ describe('baseUrl', () => {
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
 
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        module.exports = {
-          e2e: {
-            supportFile: false,
-            baseUrl: 'http://localhost:5555',
-          },
-        }
-      `)
-    })
+    updateBaseUrl('http://localhost:5555')
 
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('not.exist')
+
+    updateBaseUrl('http://localhost:3939')
+
+    cy.get('[data-cy="alert"]').should('have.length', 1).contains('Warning: Cannot Connect Base Url Warning')
+    cy.get('[data-cy="alert-body"]').contains('localhost:3939')
+
+    updateBaseUrl('http://localhost:5555')
+
+    cy.get('[data-cy="alert"]').should('not.exist')
+    cy.get('[data-cy="alert-body"]').should('not.exist')
   })
 
   it('should add baseUrl warning when going from good to bad config', () => {
