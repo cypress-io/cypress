@@ -1,5 +1,8 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudOrganizationConnectionStubs, CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import {
+  CloudOrganizationConnectionStubs,
+  CloudUserStubs,
+} from '@packages/graphql/test/stubCloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
 
@@ -64,5 +67,31 @@ describe('<SelectCloudProjectModal />', () => {
     cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
 
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
+  })
+
+  it('auto selects a project if it is the only project in the organization', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 3').click())
+
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 3')
+  })
+
+  it(`doesn't auto select a project if there are more than 1 projects in the org`, () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Pick a project')
+  })
+
+  it('shows the selected project when selecting from a list of >= 2 projects', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.get('[data-cy="selectProject"] button').click()
+    cy.contains('Test Project 2').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 2').click()
+    cy.contains('Test Project 1').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 1')
   })
 })
