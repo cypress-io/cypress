@@ -223,8 +223,8 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
   }
 
   const finishAssertions = () => {
-    return _.each(cy.state('current').get('logs'), (log) => {
-      if (!log.get('snapshots')) {
+    cy.state('current').get('logs').forEach((log) => {
+      if (log.get('next') || !log.get('snapshots')) {
         log.snapshot()
       }
 

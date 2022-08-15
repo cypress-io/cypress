@@ -348,10 +348,10 @@ export class Log {
       return this
     }
 
-    _.defaults(options, {
-      at: null,
-      next: null,
-    })
+    if (this.get('next')) {
+      name = this.get('next')
+      this.set('next', null)
+    }
 
     const snapshot = this.cy.createSnapshot(name, this.get('$el'))
 
@@ -368,15 +368,7 @@ export class Log {
     this.set('snapshots', snapshots)
 
     if (options.next) {
-      const fn = this.snapshot
-
-      this.snapshot = function () {
-        // restore the fn
-        this.snapshot = fn
-
-        // call orig fn with next as name
-        return fn.call(this, options.next)
-      }
+      this.set('next', options.next)
     }
 
     return this
