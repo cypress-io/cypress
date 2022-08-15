@@ -334,6 +334,10 @@ describe('Proxy Performance', function () {
   })
 
   before(function () {
+    setCtx(makeDataContext({}))
+
+    const getFilesByGlob = getCtx().file.getFilesByGlob
+
     return CA.create()
     .then((ca) => {
       return ca.generateServerCertificateKeys('localhost')
@@ -351,7 +355,7 @@ describe('Proxy Performance', function () {
           config: {
             supportFile: false,
           },
-        }, getCtx().file.getFilesByGlob).then((config) => {
+        }, getFilesByGlob).then((config) => {
           config.port = CY_PROXY_PORT
 
           // turn off morgan
