@@ -25,7 +25,7 @@
           :from-branch="props.projectGql?.branch || ''"
           :spec-path="props.specGql.relative"
           :spec-name="props.specGql?.fileName ?? ''"
-          :spec-extension="props.specGql?.fileExtension ?? ''"
+          :spec-extension="props.specGql?.specFileExtension ?? ''"
         />
       </ExternalLink>
     </template>
@@ -56,7 +56,7 @@ fragment FlakyInformationSpec on Spec {
   id
   relative
   fileName
-  fileExtension
+  specFileExtension
 }
 `
 
