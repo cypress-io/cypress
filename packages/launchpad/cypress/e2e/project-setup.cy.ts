@@ -34,8 +34,9 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject(name)
     cy.openProject(name, args)
 
-    // Delete the fixtures folder so it scaffold correctly the example
-    cy.withCtx(async (ctx) => {
+    cy.withCtx(async (ctx, o) => {
+      o.sinon.stub(ctx.project, 'projectId').resolves(null)
+      // Delete the fixtures folder so it scaffold correctly the example
       await ctx.actions.file.removeFileInProject('cypress/fixtures')
     })
   }

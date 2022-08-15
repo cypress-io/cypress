@@ -2,22 +2,24 @@
   <div class="flex flex-col flex-grow justify-between">
     <template v-if="!result">
       <div class="p-24px w-720px">
-        <Input
-          v-model="specFile"
-          :input-ref="inputRefFn"
-          :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-          :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-          :has-error="hasError"
-        >
-          <template #prefix>
-            <i-cy-document-blank_x16
-              class="icon-light-gray-50 icon-dark-gray-300"
-              :class="{
-                'icon-light-error-50 icon-dark-error-400': hasError,
-              }"
-            />
-          </template>
-        </Input>
+        <form @submit.prevent="createSpec">
+          <Input
+            v-model="specFile"
+            :input-ref="inputRefFn"
+            :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :has-error="hasError"
+          >
+            <template #prefix>
+              <i-cy-document-blank_x16
+                class="icon-light-gray-50 icon-dark-gray-300"
+                :class="{
+                  'icon-light-error-50 icon-dark-error-400': hasError,
+                }"
+              />
+            </template>
+          </Input>
+        </form>
 
         <div
           v-if="props.gql"
@@ -54,6 +56,7 @@
       >
         <Button
           size="lg"
+          type="submit"
           :disabled="!isValidSpecFile"
           @click="createSpec"
         >
@@ -223,6 +226,10 @@ whenever(result, () => {
 })
 
 const createSpec = async () => {
+  if (!isValidSpecFile.value) {
+    return
+  }
+
   const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null

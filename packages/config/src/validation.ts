@@ -78,7 +78,7 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
 /**
  * Validates the list of browsers.
  */
-export const isValidBrowserList = (key: string, browsers: any): ErrResult | true | string => {
+export const isValidBrowserList = (_key: string, browsers: any): ErrResult | true | string => {
   debug('browsers %o', browsers)
   if (!browsers) {
     return 'Missing browsers list'

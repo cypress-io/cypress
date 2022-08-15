@@ -1,19 +1,28 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
-import type { BreakingOption, BreakingOptionErrorKey } from './options'
+import {
+  defaultSpecPattern,
+  options,
+  breakingOptions,
+  breakingRootOptions,
+  testingTypeBreakingOptions,
+} from './options'
+
 import type { TestingType } from '@packages/types'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
+import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 
 export {
   defaultSpecPattern,
-  validation,
   options,
   breakingOptions,
   BreakingOption,
   BreakingOptionErrorKey,
+  ErrResult,
+  validation,
 }
 
 const debug = Debug('cypress:config:browser')
@@ -21,10 +30,12 @@ const debug = Debug('cypress:config:browser')
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
-function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T) {
+function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
-      memo[item[keyKey] as string] = item[valueKey]
+      memo[item[keyKey]] = item[valueKey]
+    } else {
+      memo[item[keyKey]] = defaultValueFallback
     }
 
     return memo
@@ -33,12 +44,19 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
+
+export const testOverrideLevels = createIndex(options, 'name', 'overrideLevel', 'never')
+
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
+
+export type InvalidTestOverrideResult = {
+  invalidConfigKey: string
+  supportedOverrideLevel: string
+}
 
 export type BreakingErrResult = {
   name: string
@@ -137,7 +155,7 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: string | validation.ErrResult) => void) => {
+export const validate = (cfg: any, onErr: (property: ErrResult | string) => void) => {
   debug('validating configuration')
 
   return _.each(cfg, (value, key) => {
@@ -172,16 +190,22 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
-  let errProperty
+export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: boolean, onErr: (result: InvalidTestOverrideResult) => void) => {
+  Object.keys(config).some((configKey) => {
+    const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
-  Object.keys(config).some((option) => {
-    return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
+    if (!overrideLevel) {
+      // non-cypress configuration option. skip validation
+      return
+    }
+
+    if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
+      onErr({
+        invalidConfigKey: configKey,
+        supportedOverrideLevel: overrideLevel,
+      })
+    }
   })
-
-  if (errProperty) {
-    return onErr(errProperty)
-  }
 }
 
 export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: any) => {
