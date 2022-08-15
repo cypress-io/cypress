@@ -2694,7 +2694,10 @@ describe('src/cy/commands/xhr', () => {
   })
 
   context('Cypress.on(window:unload)', () => {
-    it('cancels all open XHR\'s', () => {
+    // TODO(webkit): fix+unskip. XHRs are at { readyState: 4 } when they are canceled
+    // leading to a failure when we check `xhr.canceled`. `xhr.canceled` is non-standard so a better
+    // test may be needed here?
+    it('cancels all open XHR\'s', { browser: '!webkit' }, () => {
       const xhrs = []
 
       cy
@@ -2749,7 +2752,8 @@ describe('src/cy/commands/xhr', () => {
       .wait('@getFoo').its('url').should('include', '/foo')
     })
 
-    it('reapplies server + route automatically during page transitions', () => {
+    // TODO(webkit): fix+unskip. seems to be related to `cy.click` event not firing on the <a>, not an actual issue in cy.route
+    it('reapplies server + route automatically during page transitions', { browser: '!webkit' }, () => {
       // this tests that the server + routes are automatically reapplied
       // after the 2nd visit - which is an example of the remote iframe
       // causing an onBeforeLoad event

@@ -1905,7 +1905,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#page load', () => {
+  // TODO(webkit): fix+unskip for experimental webkit release
+  context('#page load', { browser: '!webkit' }, () => {
     it('sets initial=true and then removes', () => {
       Cookie.remove('__cypress.initial')
 

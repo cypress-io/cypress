@@ -588,7 +588,8 @@ is being covered by another element:
         cy.get('#hidden-basic-label').selectFile({ contents: '@foo' }, { force: true })
       })
 
-      it('can scroll to input', () => {
+      // TODO(webkit): fix+unskip for experimental webkit
+      it('can scroll to input', { browser: '!webkit' }, () => {
         const scrolled = []
 
         cy.on('scrolled', ($el, type) => {
