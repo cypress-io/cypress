@@ -1,3 +1,16 @@
+# [@cypress/react-v6.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.0.0...@cypress/react-v6.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+
+
+### Features
+
+* React 18 support ([#22876](https://github.com/cypress-io/cypress/issues/22876)) ([f0d3a48](https://github.com/cypress-io/cypress/commit/f0d3a4867907bf6e60468510daa883ccc8dcfb63))
+* update to Vite 3 ([#22915](https://github.com/cypress-io/cypress/issues/22915)) ([6adba46](https://github.com/cypress-io/cypress/commit/6adba462ea6b76dbb96f99aa3837492ca1f17ed3))
+
 # [@cypress/react-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.5...@cypress/react-v6.0.0) (2022-06-13)
 
 
