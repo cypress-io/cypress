@@ -27,6 +27,8 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
+        - reapply-state-refactor
+        - fix-or-skip-flaky-tests
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -1850,17 +1852,12 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build:all
+            yarn workspace @cypress/schematic build
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
           command: |
             yarn test
-          working_directory: npm/cypress-schematic
-      - run:
-          name: Launch Sandbox and Install Schematic
-          command: |
-            yarn launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 
