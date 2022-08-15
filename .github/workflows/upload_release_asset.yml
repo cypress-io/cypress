@@ -1,0 +1,39 @@
+name: Upload SBOM as Release Asset
+# This workflow triggers whenever there is a new release published.  The 
+# action generates a Software Bill of Materials and uploads it as a
+# release artifact.  This satisfies compliance initiatives.
+on:
+  release:
+    types:
+      - published
+jobs:
+  generate_SBOM:
+    runs-on: ubuntu-latest
+    env:
+          FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Download Fossa binary and install
+# This step utilizes a curl of the latest install pkg from Fossa.  Using a git action from 
+# Fossa doesn't produce the SBOM artifact needed. This manual approach is the only way to 
+# create the report to upload as a release artifact.
+        run:  |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+      - name: Generate SBOM
+        run:  |
+          fossa analyze 
+          fossa report attribution --debug --format spdx >> SBOM.rpt
+      - name: Verify report
+        run:  |
+          ls -lht|head
+          cat SBOM.rpt      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./SBOM.rpt
+          asset_name: SBOM.rpt
+          asset_content_type: text/plain

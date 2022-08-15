@@ -5,7 +5,7 @@ import { Preferences_SetPreferencesDocument } from '@packages/app/src/generated/
 
 gql`
 mutation Preferences_SetPreferences ($value: String!) {
-  setPreferences (value: $value) {
+  setPreferences (value: $value, type: global) {
     ...TestingPreferences
     ...SpecRunner_Preferences
   }

@@ -7,7 +7,7 @@
       @close="showModal = false"
     />
     <InlineSpecListHeader
-      v-model:search="search"
+      v-model:specFilterModel="specFilterModel"
       :result-count="specs.length"
       @newSpec="showModal = true"
     />
@@ -30,7 +30,7 @@ import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
-import { useDebounce } from '@vueuse/core'
+import { useSpecFilter } from '../composables/useSpecFilter'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -53,6 +53,7 @@ fragment Specs_InlineSpecList on Query {
     id
     projectRoot
     currentTestingType
+    savedState
     specs {
       id
       ...SpecNode_InlineSpecList
@@ -67,16 +68,16 @@ const props = defineProps<{
 
 const showModal = ref(false)
 
-const search = ref('')
-const debouncedSearchString = useDebounce(search, 200)
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
+
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!debouncedSearchString.value) return specs
+  if (!debouncedSpecFilterModel.value) return specs
 
-  return fuzzySortSpecs(specs, debouncedSearchString.value)
+  return fuzzySortSpecs(specs, debouncedSpecFilterModel.value)
 })
 
 </script>
