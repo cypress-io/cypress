@@ -28,10 +28,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { toRefs } from '@vueuse/core'
+import { computed } from 'vue'
 import DocumentIconBlank from '~icons/cy/document-blank_x16'
 import HighlightedText from './HighlightedText.vue'
-import { useSplitIndexes } from './spec-utils'
+import { deriveIndexes } from './spec-utils'
 
 const props = withDefaults(defineProps<{
   fileName: string
@@ -40,7 +40,8 @@ const props = withDefaults(defineProps<{
   indexes: number[]
 }>(), { indexes: () => [], selected: false })
 
-const refs = toRefs(props)
-const split = useSplitIndexes(refs.fileName, refs.indexes)
+const split = computed(() => {
+  return deriveIndexes(props.fileName, props.indexes)
+})
 
 </script>

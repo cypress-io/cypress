@@ -1,6 +1,6 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
-import { computed, ComputedRef, Ref, ref, watch } from 'vue'
+import { ComputedRef, Ref, ref, watch } from 'vue'
 import _ from 'lodash'
 import { getRunnerConfigFromWindow } from '../runner'
 
@@ -156,16 +156,14 @@ export function useCachedSpecs<S extends { absolute: string }> (
   return cachedSpecs
 }
 
-export function useSplitIndexes (fileName: Ref<string>, indexes: Ref<number[]>) {
-  return computed(() => {
-    return indexes.value.reduce((acc, idx) => {
-      if (idx < fileName.value.length) {
-        acc.fileNameIndexes.push(idx)
-      } else {
-        acc.extensionIndexes.push(idx - fileName.value.length)
-      }
+export function deriveIndexes (fileName: string, indexes: number[]) {
+  return indexes.reduce((acc, idx) => {
+    if (idx < fileName.length) {
+      acc.fileNameIndexes.push(idx)
+    } else {
+      acc.extensionIndexes.push(idx - fileName.length)
+    }
 
-      return acc
-    }, { fileNameIndexes: <number[]>[], extensionIndexes: <number[]>[] })
-  })
+    return acc
+  }, { fileNameIndexes: <number[]>[], extensionIndexes: <number[]>[] })
 }
