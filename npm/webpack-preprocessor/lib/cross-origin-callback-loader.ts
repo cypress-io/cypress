@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { parse } from '@babel/parser'
 import { default as traverse } from '@babel/traverse'
 import { default as generate } from '@babel/generator'
@@ -7,7 +7,24 @@ import * as pathUtil from 'path'
 import { crossOriginCallbackStore } from './cross-origin-callback-store'
 import utils from './utils'
 
-// TODO: add comment about the purpose of this loader
+// this loader makes supporting dependencies within the cy.origin() callbacks
+// possible. it does this by doing the following:
+// - extracting callback(s)
+//   - the callback(s) is/are kept in memory and then run back through webpack
+//     once the initial file compilation is complete
+//   - users use Cypress.require() in their test code instead of require().
+//     this is because we don't want require()s nested within the callback
+//     to be processed in the initial compilation. this both improves
+//     performance and prevents errors (when the dependency has ES import
+//     statements, babel will error because they're not top-level since
+//     the require is not top-level)
+// - replacing Cypress.require() with require()
+//   - this allows the require()s to be processed normally during the
+//     compilation of the callback itself.
+// - replacing the callback(s) with object(s)
+//   - this object references the file the callback will be output to by
+//     its own compilation. this allows the runtime to get the file and
+//     run it in its origin's context.
 export default function (source, map, meta, store = crossOriginCallbackStore) {
   const { resourcePath } = this
 
@@ -32,8 +49,7 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
 
       if (!callee.isMemberExpression()) return
 
-      // TODO: make this more customizable so it can support any other necessary
-      // commands (iframe, iframeSetup) in the future
+      // check if we're inside a cy.origin() callback
       if ((callee.node.property as t.Identifier).name !== 'origin') return
 
       const lastArg = _.last(path.get('arguments'))
@@ -47,6 +63,7 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
         return
       }
 
+      // replace instances of Cypress.require('dep') with require('dep')
       lastArg.traverse({
         CallExpression (path) {
           const callee = path.get('callee') as NodePath<t.MemberExpression>
@@ -100,7 +117,7 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       // replaces callback function with object referencing the extracted
       // function's callback name and output file path in the form
       // { callbackName: <callbackName>, outputFilePath: <outputFilePath> }
-      // this is used at runtime when cy.origin() is run to run the bundle
+      // this is used at runtime when cy.origin() is run to execute the bundle
       // generated for the extracted callback function
       lastArg.replaceWith(
         t.objectExpression([
@@ -117,7 +134,7 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
     },
   })
 
-  // if we found requires, re-generate the code from the AST
+  // if we found Cypress.require()s, re-generate the code from the AST
   if (hasDependencies) {
     // TODO: handle sourcemaps for this correctly.
     // the following causes error "Cannot read property 'replace' of undefined"
@@ -125,6 +142,6 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
     return generate(ast, {}).code
   }
 
-  // if no requires were found, return the original source
+  // if no Cypress.require()s were found, return the original source
   return source
 }
