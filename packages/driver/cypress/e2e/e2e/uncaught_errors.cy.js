@@ -117,7 +117,6 @@ describe('uncaught errors', () => {
 
   // if we mutate the error, the app's listeners for 'error' or
   // 'unhandledrejection' will have our wrapped error instead of the original
-  // TODO(webkit): fix+unskip. the browser emits the correct event, but not at the time expected
   it('original error is not mutated for "error"', { browser: '!webkit' }, () => {
     cy.once('uncaught:exception', () => false)
 
@@ -127,7 +126,8 @@ describe('uncaught errors', () => {
     cy.get('.error-two').invoke('text').should('equal', 'sync error')
   })
 
-  it('original error is not mutated for "unhandledrejection"', () => {
+  // TODO(webkit): fix+unskip. the browser emits the correct event, but not at the time expected
+  it('original error is not mutated for "unhandledrejection"', { browser: '!webkit' }, () => {
     cy.once('uncaught:exception', () => false)
 
     cy.visit('/fixtures/errors.html')

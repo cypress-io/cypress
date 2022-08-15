@@ -2609,7 +2609,9 @@ describe('network stubbing', function () {
     })
 
     it('intercepts cached responses as expected', {
-      browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
+      // TODO: why does firefox behave differently? transparently returns cached response
+      // TODO(webkit): fix+unskip. currently fails in WK because cache is disabled
+      browser: { family: 'chromium' },
     }, function () {
       cy.visit('/fixtures/empty.html')
 
@@ -3453,7 +3455,8 @@ describe('network stubbing', function () {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/8934
-    it('can spy on a 304 not modified image response', function () {
+    // TODO(webkit): fix+unskip. currently fails in WK because cache is disabled
+    it('can spy on a 304 not modified image response', { browser: '!webkit' }, function () {
       const url = `/fixtures/media/cypress.png?i=${Date.now()}`
 
       cy.intercept(url).as('image')
