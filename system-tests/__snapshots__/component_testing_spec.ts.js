@@ -539,7 +539,7 @@ We detected that you have versions of dependencies that are not officially suppo
 
 If you're experiencing problems, downgrade dependencies and restart Cypress.
 
-   29 modules
+   30 modules
 
 ====================================================================================================
 

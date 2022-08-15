@@ -8,7 +8,6 @@ module.exports = defineConfig({
   },
   component: {
     experimentalSingleTabRunMode: true,
-    supportFile: false,
     devServer: {
       bundler: 'webpack',
     },

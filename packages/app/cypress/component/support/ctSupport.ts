@@ -11,10 +11,14 @@ export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
 })
 
 beforeEach(() => {
-  // this is always 0, since we only destroy the AUT when using
-  // `experimentalSingleTabRunMode, which is not used in this package.
-  // @ts-expect-error
-  expect(window.top.getEventManager().autDestroyedCount).to.eq(0)
+  if (!window.top?.getEventManager) {
+    throw Error('Could not find `window.top.getEventManager`. Expected `getEventManager` to be defined.')
+  }
+
+  // this is always undefined, since we only define it when
+  // running CT with a project that sets `experimentalSingleTabRunMode: true`
+  // @ts-ignore - dynamically defined during tests using
+  expect(window.top.getEventManager().autDestroyedCount).to.be.undefined
 })
 
 // Event manager with Cypress driver dependencies stubbed out

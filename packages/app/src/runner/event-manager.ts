@@ -56,7 +56,7 @@ export class EventManager {
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
-  autDestroyedCount = 0
+  ws: Socket
 
   constructor (
     // import '@packages/driver'
@@ -67,10 +67,11 @@ export class EventManager {
     selectorPlaygroundModel: any,
     // StudioRecorder constructor
     StudioRecorderCtor: any,
-    private ws: Socket,
+    ws: Socket,
   ) {
     this.studioRecorder = new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
+    this.ws = ws
   }
 
   getCypress () {
@@ -345,7 +346,6 @@ export class EventManager {
 
       autIframe.destroy()
       this.ws.emit('aut:destroy:complete')
-      this.autDestroyedCount++
     })
 
     // @ts-ignore
