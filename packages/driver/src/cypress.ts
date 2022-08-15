@@ -232,7 +232,7 @@ class $Cypress {
       get: () => {
         $errUtils.warnByPath('subject.state_subject_deprecated')
 
-        return cy.currentSubject()
+        return this.cy.currentSubject()
       },
     })
 
