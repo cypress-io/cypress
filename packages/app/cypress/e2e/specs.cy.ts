@@ -454,7 +454,7 @@ describe('App: Specs', () => {
           })
 
           // Timeout is increased here to allow ample time for the config change to be processed
-          cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 20000 }).should('be.visible')
+          cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
           cy.contains('No Specs Found').should('be.visible')
 
           cy.findByRole('button', { name: 'New Spec' }).click()
@@ -824,7 +824,7 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('src/specs-folder/*.{js,jsx}').should('be.visible', { timeout: 20000 })
+        cy.contains('src/specs-folder/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
         cy.contains('No Specs Found').should('be.visible')
 
         cy.findByRole('button', { name: 'New Spec' }).click()
