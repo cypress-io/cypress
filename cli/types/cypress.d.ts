@@ -3073,7 +3073,12 @@ declare namespace Cypress {
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
    * so we have proper completion for `devServerConfig`
    */
-  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>>
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>> & {
+    /**
+     * Hosts mappings to IP addresses.
+     */
+     hosts?: null | {[key: string]: string}
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**

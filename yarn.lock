@@ -6429,6 +6429,11 @@
   resolved "https://registry.yarnpkg.com/@types/cors/-/cors-2.8.10.tgz#61cc8469849e5bcdd0c7044122265c39cec10cf4"
   integrity sha512-C7srjHiVG3Ey1nR6d511dtDkCEjxuN9W1HWAEjGq8kpcwmNM6JJkpC0xvabM7BXTG2wDq8Eu33iH9aQKa7IvLQ==
 
+"@types/crypto-js@4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/crypto-js/-/crypto-js-4.1.1.tgz#602859584cecc91894eb23a4892f38cfa927890d"
+  integrity sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA==
+
 "@types/debug@4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
