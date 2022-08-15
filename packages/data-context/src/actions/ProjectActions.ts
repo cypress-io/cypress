@@ -498,7 +498,7 @@ export class ProjectActions {
     const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
 
     if (baseUrlWarning) {
-      this.ctx.actions.error.clearWarning(baseUrlWarning.id)
+      this.ctx.actions.error.clearWarning(baseUrlWarning.cypressError.type)
       this.ctx.emitter.errorWarningChange()
     }
 

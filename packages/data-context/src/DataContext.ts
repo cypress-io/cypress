@@ -398,7 +398,14 @@ export class DataContext {
       }
 
       this.update((d) => {
-        d.diagnostics.warnings.push(warning)
+        const warningsIndex = d.diagnostics.warnings.findIndex((warning) => warning.cypressError.type === err.type)
+
+        if (warningsIndex !== -1) {
+          // older warning is superceeded by newer one (eg - warning same, but the details of the stack trace could be different)
+          d.diagnostics.warnings.splice(warningsIndex, 1)
+        } else {
+          d.diagnostics.warnings.push(warning)
+        }
       })
 
       this.emitter.errorWarningChange()

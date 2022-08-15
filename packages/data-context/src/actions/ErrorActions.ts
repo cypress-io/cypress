@@ -1,4 +1,5 @@
 import type { DataContext } from '../DataContext'
+import type { AllCypressErrorNames } from '@packages/errors'
 
 export class ErrorActions {
   constructor (private ctx: DataContext) {}
@@ -19,9 +20,9 @@ export class ErrorActions {
    * Finds the warning from the different possible locations where warnings can be stored,
    * and removes it from the array
    */
-  clearWarning (id: string) {
+  clearWarning (type: AllCypressErrorNames) {
     this.ctx.update((d) => {
-      const warningsIndex = d.diagnostics.warnings.findIndex((v) => v.id === id)
+      const warningsIndex = d.diagnostics.warnings.findIndex((v) => v.cypressError.type === type)
 
       if (warningsIndex !== -1) {
         d.diagnostics.warnings.splice(warningsIndex, 1)
