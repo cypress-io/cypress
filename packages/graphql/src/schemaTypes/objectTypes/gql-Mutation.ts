@@ -10,6 +10,9 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:graphql:mutation')
 
 export const mutation = mutationType({
   definition (t) {
@@ -649,6 +652,25 @@ export const mutation = mutationType({
         await ctx.cloud.invalidate('Query', 'cloudViewer')
 
         return {}
+      },
+    })
+
+    t.field('purgeCloudSpecByPathCache', {
+      type: 'Boolean',
+      args: {
+        projectSlug: nonNull(stringArg({})),
+        specPaths: nonNull(list(nonNull(stringArg({})))),
+      },
+      description: 'Removes the cache entries for specified cloudSpecByPath query records',
+      resolve: async (source, args, ctx) => {
+        const { projectSlug, specPaths } = args
+
+        debug('Purging %d `cloudSpecByPath` cache records for project %s: %o', specPaths.length, projectSlug, specPaths)
+        for (let specPath of specPaths) {
+          await ctx.cloud.invalidate('Query', 'cloudSpecByPath', { projectSlug, specPath })
+        }
+
+        return true
       },
     })
 
