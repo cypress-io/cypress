@@ -4,13 +4,7 @@ describe('errorWarningChange subscription', () => {
     cy.openProject('cypress-in-cypress')
   })
 
-  function assertLoadingSpinner () {
-    cy.get('[data-cy="loading-spinner"]').should('be.visible')
-    cy.contains('[role="alert"]', 'Loading')
-  }
-
   function assertLoadingIntoErrorWorks (errorName: string) {
-    assertLoadingSpinner()
     cy.contains('h3', errorName).should('be.visible')
     cy.contains('[role="alert"]', 'Loading').should('not.exist')
   }
@@ -49,7 +43,6 @@ module.exports = {
         })
 
         cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
-        assertLoadingSpinner()
         cy.contains('Error').should('not.exist')
       })
 
@@ -81,7 +74,6 @@ module.exports = {
         })
 
         cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
-        assertLoadingSpinner()
         cy.contains('h3', 'SyntaxError').should('not.exist')
       })
     })

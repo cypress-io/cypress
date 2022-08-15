@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -157,6 +157,8 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
+        :show-connect-button-after-login="isApp && !cloudProjectId"
+        @connect-project="handleConnectProject"
       />
     </div>
   </div>
@@ -248,11 +250,12 @@ const userData = computed(() => {
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState as AllowedState
 })
+
+const currentProject = computed(() => props.gql.currentProject)
+
 const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
-
-const currentProject = computed(() => props.gql.currentProject)
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
@@ -273,6 +276,16 @@ const props = defineProps<{
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
+
+const emit = defineEmits<{
+  (event: 'connect-project'): void
+}>()
+
+const isApp = window.__Cypress__
+
+const handleConnectProject = () => {
+  emit('connect-project')
+}
 
 const { t } = useI18n()
 const prompts = sortBy([
