@@ -7,8 +7,14 @@ const e2ePath = Fixtures.projectPath('e2e')
 const PORT = 3500
 const onServer = function (app) {
   app.get('/secondary_origin.html', (_, res) => {
-    res.sendFile(path.join(e2ePath, `secondary_origin.html`))
+    res.sendFile(path.join(e2ePath, 'secondary_origin.html'))
   })
+}
+const commonConfig = {
+  experimentalSessionAndOrigin: true,
+  hosts: {
+    '*.foobar.com': '127.0.0.1',
+  },
 }
 
 // TODO: This is probably more appropriate for a cy-in-cy test
@@ -19,12 +25,6 @@ describe('e2e cy.origin errors', () => {
       port: 4466,
       onServer,
     }],
-    settings: {
-      e2e: {},
-      hosts: {
-        '*.foobar.com': '127.0.0.1',
-      },
-    },
   })
 
   systemTests.it('captures the stack trace correctly for errors in cross origins to point users to their "cy.origin" callback', {
@@ -33,9 +33,7 @@ describe('e2e cy.origin errors', () => {
     spec: 'cy_origin_error.cy.ts',
     snapshot: true,
     expectedExitCode: 1,
-    config: {
-      experimentalSessionAndOrigin: true,
-    },
+    config: commonConfig,
     async onRun (exec) {
       const res = await exec()
 
@@ -44,6 +42,18 @@ describe('e2e cy.origin errors', () => {
 
       // check to make sure the snapshot contains the 'cy.origin' sourcemap
       expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/e2e/cy_origin_error.cy.ts:102:12')
+    },
+  })
+
+  systemTests.it('errors when not using webpack-preprocessor', {
+    project: 'passthru-preprocessor',
+    spec: 'cross_origin.cy.js',
+    expectedExitCode: 1,
+    config: commonConfig,
+    async onRun (exec) {
+      const res = await exec()
+
+      expect(res.stdout).to.contain('CypressError: Importing dependencies with `Cypress.require()` requires using the latest version of `@cypress/webpack-preprocessor`')
     },
   })
 })

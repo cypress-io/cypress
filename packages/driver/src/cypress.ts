@@ -795,6 +795,7 @@ class $Cypress {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
+  // Cypress.require() is only valid inside the cy.origin() callback
   require () {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
   }

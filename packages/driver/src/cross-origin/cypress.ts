@@ -23,6 +23,7 @@ import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
+import $errUtils from '../cypress/error_utils'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
 
@@ -88,6 +89,15 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.Commands = $Commands.create(Cypress, cy, state, config)
   // @ts-ignore
   Cypress.isCy = cy.isCy
+
+  // this is valid inside the cy.origin() callback, but it should be replaced
+  // by the webpack preprocessor with an actual require() before the spec code
+  // is run in the browser. if it's not, it means the user isn't using the
+  // webpack preprocessor or is using an older version of it. this error guides
+  // them to use webpack preprocessor on the latest version.
+  Cypress.require = () => {
+    $errUtils.throwErrByPath('require.invalid_inside_origin')
+  }
 
   handleOriginFn(Cypress, cy)
   handleLogs(Cypress)
