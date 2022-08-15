@@ -308,6 +308,8 @@ export default (Commands, Cypress, cy, state) => {
 
                 return false
               }
+
+              return true
             })
           }
 

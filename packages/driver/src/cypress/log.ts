@@ -280,7 +280,7 @@ export class Log {
   toJSON () {
     return _
     .chain(this.attributes)
-    .omit('error')
+    .omit(['error', 'command'])
     .omitBy(_.isFunction)
     .extend({
       err: $errUtils.wrapErr(this.get('error')),
