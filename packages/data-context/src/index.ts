@@ -1,3 +1,5 @@
+import type { DataContext } from './DataContext'
+
 export { DocumentNodeBuilder } from './util/DocumentNodeBuilder'
 
 export {
@@ -18,8 +20,6 @@ export * from './util/pluginHandlers'
 import { globalPubSub } from './globalPubSub'
 
 export { globalPubSub }
-
-import type { DataContext } from './DataContext'
 
 let ctx: DataContext | null = null
 
