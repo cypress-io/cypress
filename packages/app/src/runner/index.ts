@@ -165,10 +165,10 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec () {
+function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
 
-  return getEventManager().teardown(getMobxRunnerStore())
+  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
 let isTorndown = false
@@ -399,8 +399,8 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
-  await teardownSpec()
+async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
+  await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
 

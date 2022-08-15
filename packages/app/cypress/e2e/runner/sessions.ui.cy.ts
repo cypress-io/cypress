@@ -45,12 +45,12 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    validateSessionsInstrumentPanel(['user1'])
 
     cy.get('.command-name-session')
     .within(() => {
       cy.get('.command-expander').first().click()
-      cy.contains('blank_session')
+      cy.contains('user1')
       cy.contains('created')
 
       validateSetupSessionGroup()
@@ -307,5 +307,65 @@ describe('runner/cypress sessions.ui.spec', {
 
     validateSessionsInstrumentPanel(['user1', 'user2'])
     cy.percySnapshot()
+  })
+})
+
+describe('runner/cypress sessions.open_mode.spec', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+
+    cy.get('[data-cy-row="multiple_sessions.cy.js"]').click()
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'created')
+  })
+
+  it('persists spec sessions when clicking "rerun all tests" button', () => {
+    cy.get('.restart').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'restored')
+  })
+
+  it('persists spec sessions on refresh', () => {
+    cy.get('body').type('r')
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'restored')
+  })
+
+  it('does not persists spec sessions when selecting a different spec', () => {
+    cy.get('body').type('f')
+    cy.get('div[title="new_session.cy.js"]').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
   })
 })
