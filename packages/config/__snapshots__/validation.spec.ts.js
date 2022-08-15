@@ -177,7 +177,7 @@ exports['config/src/validation .isValidBrowser passes valid browsers and forms e
           "displayName": "Bad family browser",
           "family": "unknown family"
         },
-        "type": "either chromium or firefox"
+        "type": "either chromium, firefox or webkit"
       }
     }
   ]

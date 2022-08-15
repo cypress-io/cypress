@@ -42,6 +42,7 @@ type Browser implements Node {
 enum BrowserFamily {
   chromium
   firefox
+  webkit
 }
 
 enum BrowserStatus {
@@ -1278,6 +1279,9 @@ type Mutation {
 
   """Ping configured Base URL"""
   pingBaseUrl: Query
+
+  """Removes the cache entries for specified cloudSpecByPath query records"""
+  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
