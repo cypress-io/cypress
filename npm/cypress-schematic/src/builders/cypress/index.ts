@@ -119,7 +119,7 @@ export function startDevServer ({
   return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
     //@ts-ignore
     map((output: any) => {
-      if (!output.success) {
+      if (!output.success && !watch) {
         throw new Error('Could not compile application files')
       }
 
