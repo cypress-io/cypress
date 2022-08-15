@@ -16,12 +16,14 @@ type CookieFilter = {
   domain: string
 }
 
+const extensionMap = {
+  'no_restriction': 'None',
+  'lax': 'Lax',
+  'strict': 'Strict',
+} as const
+
 function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
-  return str ? ({
-    'no_restriction': 'None',
-    'lax': 'Lax',
-    'strict': 'Strict',
-  })[str] : str as any
+  return str ? extensionMap[str] : undefined
 }
 
 const normalizeGetCookieProps = (cookie: any): CyCookie => {
