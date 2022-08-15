@@ -109,7 +109,7 @@ export function startDevServer ({
   let overrides = {}
 
   if (devServerConfig.builder !== '@nguniversal/builders:ssr-dev-server') {
-    console.info('DevServer will be started in watch mode.')
+    console.info(`Passing watch mode to DevServer - watch mode is ${watch}`)
     overrides = {
       watch,
     }
