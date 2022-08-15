@@ -13,8 +13,6 @@ const AlertCloseBtnSelector = 'alert-suffix-icon'
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
-type SpecsListBannerProps = InstanceType<typeof SpecsListBanners>['$props']
-
 describe('<SpecsListBanners />', () => {
   const validateBaseRender = () => {
     it('should render as expected', () => {
@@ -63,7 +61,7 @@ describe('<SpecsListBanners />', () => {
     }
   }
 
-  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>, props?: Partial<SpecsListBannerProps>) => {
+  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>, props?: object) => {
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
         assignIn(result, query)
