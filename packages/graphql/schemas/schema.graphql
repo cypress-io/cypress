@@ -1200,7 +1200,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Dismisses a warning displayed by the frontend"""
-  dismissWarning(id: ID!): Query
+  dismissWarning(id: ErrorTypeEnum!): Query
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query

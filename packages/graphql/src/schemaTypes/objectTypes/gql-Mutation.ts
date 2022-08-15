@@ -10,6 +10,7 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { ErrorTypeEnum } from '../enumTypes'
 
 export const mutation = mutationType({
   definition (t) {
@@ -622,7 +623,7 @@ export const mutation = mutationType({
     t.field('dismissWarning', {
       type: Query,
       args: {
-        id: nonNull(idArg({})),
+        id: nonNull(arg({ type: ErrorTypeEnum })),
       },
       description: `Dismisses a warning displayed by the frontend`,
       resolve: (source, args, ctx) => {
