@@ -195,6 +195,26 @@ describe('App: Specs', () => {
 
           cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
         })
+
+        it('should not show trouble rendering alert', () => {
+          cy.get('@EmptySpecCard').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          // Create spec
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/spec.cy.ts')).click()
+
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=cypress/e2e/spec.cy.ts`).click()
+
+          cy.contains('Review the docs').should('not.exist')
+        })
       })
     })
 
@@ -434,7 +454,8 @@ describe('App: Specs', () => {
           })
 
           // Timeout is increased here to allow ample time for the config change to be processed
-          cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+          cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 10000 }).should('be.visible')
+          cy.contains('No Specs Found').should('be.visible')
 
           cy.findByRole('button', { name: 'New Spec' }).click()
           cy.contains('Create new empty spec').click()
@@ -619,6 +640,98 @@ describe('App: Specs', () => {
       })
     })
 
+    context('Create from component card', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-vue-2')
+        cy.openProject('no-specs-vue-2')
+        cy.startAppServer('component')
+        cy.visitApp()
+
+        cy.findAllByTestId('card').eq(0).as('ComponentCard')
+      })
+
+      it('Shows create from component card for Vue projects with default spec patterns', () => {
+        cy.get('@ComponentCard')
+        .within(() => {
+          cy.findByRole('button', {
+            name: 'Create from component',
+          }).should('be.visible')
+          .and('not.be.disabled')
+        })
+      })
+
+      it('Can be closed with the x button', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+
+        cy.get('@DialogCloseButton').click()
+        cy.findByRole('dialog', {
+          name: 'Choose a component',
+        }).should('not.exist')
+      })
+
+      it('Lists Vue components in the project', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByText('2 Matches').should('be.visible')
+
+        cy.findByText('App').should('be.visible')
+        cy.findByText('HelloWorld').should('be.visible')
+      })
+
+      it('Allows for the user to search through their components', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByText('*.vue').should('be.visible')
+        cy.findByText('2 Matches').should('be.visible')
+        cy.findByLabelText('file-name-input').type('HelloWorld')
+
+        cy.findByText('HelloWorld').should('be.visible')
+        cy.findByText('1 of 2 Matches').should('be.visible')
+        cy.findByText('App').should('not.exist')
+      })
+
+      it('shows success modal when component spec is created', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByText('HelloWorld').should('be.visible').click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.createSpec.successPage.header,
+        }).as('SuccessDialog').within(() => {
+          cy.contains(getPathForPlatform('src/components/HelloWorld.cy.js')).should('be.visible')
+          cy.findByRole('button', { name: 'Close' }).should('be.visible')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=src/components/HelloWorld.cy.js`)
+
+          cy.findByRole('button', { name: 'Create another spec' }).click()
+        })
+
+        // 'Create from component' card appears again when the user selects "create another spec"
+        cy.findByText('Create from component').should('be.visible')
+      })
+
+      it('runs generated spec', () => {
+        cy.get('@ComponentCard').click()
+
+        cy.findByText('HelloWorld').should('be.visible').click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.createSpec.successPage.header,
+        }).as('SuccessDialog').within(() => {
+          cy.contains(getPathForPlatform('src/components/HelloWorld.cy.js')).should('be.visible')
+          cy.findByRole('button', { name: 'Close' }).should('be.visible')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=src/components/HelloWorld.cy.js`).click()
+        })
+
+        cy.findByText('<HelloWorld ... />').should('be.visible')
+      })
+    })
+
     context('project with custom spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-custom-pattern')
@@ -711,8 +824,10 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('No Specs Found', { timeout: 12000 }).should('be.visible')
-        cy.findByRole('button', { name: 'New Spec' }).click({ timeout: 12000 })
+        cy.contains('src/specs-folder/*.{js,jsx}').should('be.visible', { timeout: 12000 })
+        cy.contains('No Specs Found').should('be.visible')
+
+        cy.findByRole('button', { name: 'New Spec' }).click()
 
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',

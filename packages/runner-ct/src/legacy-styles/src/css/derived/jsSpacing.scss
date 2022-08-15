@@ -1,8 +1,0 @@
-@use '../spacing.scss' as *;
-
-// Exposes $spacing, as a JS variable when directly imported
-:export {
-  @each $name, $size in $spacing {
-    #{$name}: #{$size};
-  }
-}

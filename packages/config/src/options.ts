@@ -1,9 +1,11 @@
 import os from 'os'
 import path from 'path'
 
-import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
+import type { TestingType } from '@packages/types'
+
+import * as validate from './validation'
 
 export type BreakingOptionErrorKey =
   | 'COMPONENT_FOLDER_REMOVED'
@@ -27,32 +29,30 @@ export type BreakingOptionErrorKey =
   | 'RENAMED_CONFIG_OPTION'
   | 'TEST_FILES_RENAMED'
 
-type TestingType = 'e2e' | 'component'
+export type OverrideLevel = 'any' | 'suite' | 'never'
 
-interface ResolvedConfigOption {
+interface ConfigOption {
   name: string
   defaultValue?: any
   validation: Function
-  isFolder?: boolean
-  isExperimental?: boolean
-  /**
-   * Can be mutated with Cypress.config() or test-specific configuration overrides
-   */
-  canUpdateDuringTestTime?: boolean
-  specificTestingType?: TestingType
   requireRestartOnChange?: 'server' | 'browser'
+  /**
+   * The list of test-time overrides levels supported by the configuration option. When undefined,
+   * it indicates the configuration value cannot be overridden via suite-/test-specific
+   * overrides or at run-time with Cypress.Config().
+   */
+  overrideLevel?: OverrideLevel
 }
 
-interface RuntimeConfigOption {
-  name: string
+interface DriverConfigOption extends ConfigOption {
+  isFolder?: boolean
+  isExperimental?: boolean
+}
+
+// Cypress run-time options
+interface RuntimeConfigOption extends ConfigOption {
   defaultValue: any
-  validation: Function
   isInternal?: boolean
-  /**
-   * Can be mutated with Cypress.config() or test-specific configuration overrides
-   */
-  canUpdateDuringTestTime?: boolean
-  requireRestartOnChange?: 'server' | 'browser'
 }
 
 export interface BreakingOption {
@@ -86,8 +86,8 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
-const isValidConfig = (key: string, config: any) => {
-  const status = validate.isPlainObject(key, config)
+const isValidConfig = (testingType: string, config: any) => {
+  const status = validate.isPlainObject(testingType, config)
 
   if (status !== true) {
     return status
@@ -95,7 +95,7 @@ const isValidConfig = (key: string, config: any) => {
 
   for (const rule of options) {
     if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name])
 
       if (status !== true) {
         return status
@@ -116,42 +116,36 @@ export const defaultSpecPattern = {
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
 //
 // Add options in alphabetical order for better readability
-
-// TODO - add boolean attribute to indicate read-only / static vs mutable options
-// that can be updated during test executions
-const resolvedOptions: Array<ResolvedConfigOption> = [
+const driverConfigOptions: Array<DriverConfigOption> = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'arch',
     defaultValue: () => os.arch(),
     validation: validate.isString,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
     requireRestartOnChange: 'server',
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'browser',
   }, {
     name: 'clientCertificates',
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'component',
@@ -161,18 +155,16 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
       indexHtmlFile: 'cypress/support/component-index.html',
     },
     validation: isValidConfig,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
     validation: validate.isString,
     isFolder: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
@@ -181,149 +173,134 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
       specPattern: defaultSpecPattern.e2e,
     },
     validation: isValidConfig,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
     isFolder: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
-    canUpdateDuringTestTime: false,
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'platform',
     defaultValue: () => os.platform(),
     validation: validate.isString,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
   }, {
     name: 'projectId',
     defaultValue: null,
     validation: validate.isString,
-    canUpdateDuringTestTime: true,
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: validate.isString,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'reporterOptions',
     defaultValue: null,
     validation: validate.isPlainObject,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
     validation: validate.isString,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'resolvedNodeVersion',
     defaultValue: null,
     validation: validate.isString,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'retries',
     defaultValue: {
@@ -331,106 +308,105 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
       openMode: 0,
     },
     validation: validate.isValidRetriesConfig,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
     validation: validate.isStringOrFalse,
     isFolder: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
+  }, {
+    name: 'testIsolation',
+    // TODO: https://github.com/cypress-io/cypress/issues/23093
+    // When experimentalSessionAndOrigin is removed and released as GA,
+    // update the defaultValue from 'legacy' to 'strict' and
+    // update this code to remove the check/override specific to enable
+    // strict by default when experimentalSessionAndOrigin=true
+    defaultValue: 'legacy',
+    validation: validate.isOneOf('legacy', 'strict'),
+    overrideLevel: 'suite',
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'userAgent',
     defaultValue: null,
     validation: validate.isString,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'browser',
   }, {
     name: 'video',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'videoCompression',
     defaultValue: 32,
     validation: validate.isNumberOrFalse,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',
     validation: validate.isString,
     isFolder: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'videoUploadOnPasses',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'viewportWidth',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: true,
+    overrideLevel: 'any',
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   },
-  // Possibly add a defaultValue for specPattern https://github.com/cypress-io/cypress/issues/22507
   {
     name: 'specPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.component : defaultSpecPattern.e2e,
     validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
   },
 ]
 
@@ -444,24 +420,20 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
     validation: validate.isStringOrArrayOfStrings,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'autoOpen',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
     defaultValue: '/__/',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.config.js',
@@ -469,102 +441,80 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'cypressBinaryRoot',
     defaultValue: path.join(__dirname, '..', '..', '..'),
     validation: validate.isString,
     isInternal: true,
   }, {
+    // ct-testing specific configuration
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'isInteractive',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'morgan',
     defaultValue: true,
     validation: validate.isBoolean,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'socketId',
     defaultValue: null,
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'version',
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     validation: validate.isString,
     isInternal: true,
-    canUpdateDuringTestTime: false,
   },
 ]
 
-export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
-  ...resolvedOptions,
+export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
+  ...driverConfigOptions,
   ...runtimeOptions,
-]
-
-// These properties are going to be added to the resolved properties of the
-// config, but do not mean that are valid config properties coming from the user.
-export const additionalOptionsToResolveConfig = [
-  {
-    name: 'specPattern',
-    isInternal: false,
-  },
 ]
 
 /**
@@ -685,6 +635,11 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'testIsolation',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
 
@@ -704,6 +659,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     },
     {
       name: 'experimentalSessionAndOrigin',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+      isWarning: false,
+    },
+    {
+      name: 'testIsolation',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },

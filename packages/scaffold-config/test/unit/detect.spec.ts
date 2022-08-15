@@ -76,7 +76,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('reactscripts')
   })
@@ -85,7 +85,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '4.0.0' }])
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('reactscripts')
   })
@@ -98,7 +98,7 @@ describe('detectFramework', () => {
       { devDependency: 'webpack', version: '5.0.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('react')
     expect(actual.bundler?.type).to.eq('webpack')
@@ -112,7 +112,7 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '2.5.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('vueclivue2')
     expect(actual.bundler?.type).to.eq('webpack')
@@ -126,7 +126,7 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('vueclivue3')
     expect(actual.bundler?.type).to.eq('webpack')
@@ -140,7 +140,7 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('vueclivue3')
     expect(actual.bundler?.type).to.eq('webpack')
@@ -154,7 +154,7 @@ describe('detectFramework', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('react')
     expect(actual.bundler?.type).to.eq('vite')
@@ -168,7 +168,7 @@ describe('detectFramework', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('react')
     expect(actual.bundler?.type).to.eq('vite')
@@ -182,7 +182,7 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.0.0' },
     ])
 
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework?.type).to.eq('vue3')
     expect(actual.bundler?.type).to.eq('vite')
@@ -197,7 +197,7 @@ describe('detectFramework', () => {
         { dependency: 'next', version: v },
       ])
 
-      const actual = detectFramework(projectPath)
+      const actual = await detectFramework(projectPath)
 
       expect(actual.framework?.type).to.eq('nextjs')
       expect(actual.bundler?.type).to.eq('webpack')
@@ -205,15 +205,14 @@ describe('detectFramework', () => {
   })
 
   ;['13.0.0', '14.0.0'].forEach((v) => {
-    // TODO: revert once Angular is slated for release
-    it.skip(`Angular CLI v${v}`, async () => {
+    it(`Angular CLI v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
         { dependency: '@angular/cli', version: v },
       ])
 
-      const actual = detectFramework(projectPath)
+      const actual = await detectFramework(projectPath)
 
       expect(actual.framework?.type).to.eq('angular')
       expect(actual.bundler?.type).to.eq('webpack')
@@ -228,7 +227,7 @@ describe('detectFramework', () => {
     // monorepo like situations where there can be multiple levels of
     // node_modules above the projectPath.
     fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
-    const actual = detectFramework(projectPath)
+    const actual = await detectFramework(projectPath)
 
     expect(actual.framework).to.be.undefined
     expect(actual.bundler).to.be.undefined

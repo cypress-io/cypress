@@ -23,6 +23,7 @@
         class="font-light group-hocus:text-gray-400"
         highlight-classes="text-gray-1000"
       />
+      <slot />
     </div>
   </div>
 </template>

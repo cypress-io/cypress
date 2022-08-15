@@ -61,6 +61,22 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
+export const WIZARD_MOUNT_MODULES = ['cypress/react', 'cypress/react18', 'cypress/vue', 'cypress/vue2', 'cypress/angular'] as const
+
+export type WizardMountModule = 'cypress/react' | 'cypress/react18' | 'cypress/vue' | 'cypress/vue2' | 'cypress/angular'
+
+const mountModule = (mountModule: WizardMountModule) => (projectPath: string) => Promise.resolve(mountModule)
+
+const reactMountModule = async (projectPath: string) => {
+  const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
+
+  if (!reactPkg.detectedVersion || !semver.valid(reactPkg.detectedVersion)) {
+    return 'cypress/react'
+  }
+
+  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
+}
+
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
@@ -78,7 +94,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    mountModule: 'cypress/react',
+    glob: '*.{js,jsx,tsx}',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -97,7 +114,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
-    mountModule: 'cypress/vue2',
+    glob: '*.vue',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -116,7 +134,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
-    mountModule: 'cypress/vue',
+    glob: '*.vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -135,7 +154,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    mountModule: 'cypress/react',
+    glob: '*.{js,jsx,tsx}',
+    mountModule: reactMountModule,
     supportStatus: 'alpha',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
@@ -160,7 +180,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
-    mountModule: 'cypress/vue2',
+    glob: '*.vue',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -178,7 +199,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
-    mountModule: 'cypress/vue2',
+    glob: '*.vue',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -196,7 +218,8 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'vue',
-    mountModule: 'cypress/vue',
+    glob: '*.vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -215,31 +238,32 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    mountModule: 'cypress/react',
+    glob: '*.{js,jsx,tsx}',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
-  // TODO: revert once Angular is slated for release
-  // {
-  //   type: 'angular',
-  //   configFramework: 'angular',
-  //   category: 'template',
-  //   name: 'Angular',
-  //   detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
-  //   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-  //   dependencies: (bundler: WizardBundler['type'], projectPath: string): DependencyToInstall[] => {
-  //     return [
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
-  //       isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
-  //     ]
-  //   },
-  //   codeGenFramework: 'angular',
-  //   mountModule: 'cypress/angular',
-  //   supportStatus: 'full',
-  //   componentIndexHtml: componentIndexHtmlGenerator(),
-  //   specPattern: '**/*.cy.ts',
-  // },
+  {
+    type: 'angular',
+    configFramework: 'angular',
+    category: 'template',
+    name: 'Angular',
+    detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
+      ])
+    },
+    codeGenFramework: 'angular',
+    glob: '*.component.ts',
+    mountModule: mountModule('cypress/angular'),
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+    specPattern: '**/*.cy.ts',
+  },
 ] as const

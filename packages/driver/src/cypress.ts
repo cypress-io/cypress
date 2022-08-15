@@ -1,4 +1,3 @@
-import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -26,6 +25,7 @@ import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
 import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
+import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
@@ -218,36 +218,29 @@ class $Cypress {
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({}) as unknown as StateFunc
+
+    /*
+     * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.
+     * While we usually consider cy.state() to be internal, in the case of cy.state('subject'),
+     * cypress-testing-library, one of our most popular plugins, relies on it.
+     * https://github.com/testing-library/cypress-testing-library/blob/1af9f2f28b2ca62936da8a8acca81fc87e2192f7/src/utils.js#L9
+     *
+     * Therefore, we've added this shim to continue to support them. The library is actively maintained, so this
+     * shouldn't need to stick around too long (written 07/22).
+     */
+    Object.defineProperty(this.state(), 'subject', {
+      get: () => {
+        $errUtils.warnByPath('subject.state_subject_deprecated')
+
+        return this.cy.currentSubject()
+      },
+    })
+
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
-        validateNoReadOnlyConfig(config, (errProperty) => {
-          const errPath = this.state('runnable')
-            ? 'config.invalid_cypress_config_override'
-            : 'config.invalid_test_config_override'
+      const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
 
-          const errMsg = $errUtils.errByPath(errPath, {
-            errProperty,
-          })
-
-          throw new (this.state('specWindow').Error)(errMsg)
-        })
-      }
-
-      validate(config, (errResult) => {
-        const stringify = (str) => format(JSON.stringify(str))
-
-        const format = (str) => `\`${str}\``
-
-        // TODO: this does not use the @packages/error rewriting rules
-        // for stdout vs markdown - it always inserts backticks for markdown
-        // and those leak out into the stdout formatting.
-        const errMsg = _.isString(errResult)
-          ? errResult
-          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
-
-        throw new (this.state('specWindow').Error)(errMsg)
-      })
+      return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
     this.env = $SetterGetter.create(env)
@@ -582,12 +575,14 @@ class $Cypress {
         return this.emit('after:all:screenshots', ...args)
 
       case 'command:log:added':
-        this.runner.addLog(args[0], this.config('isInteractive'))
+        this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
-        this.runner.addLog(args[0], this.config('isInteractive'))
+        // Cypress logs will only trigger an update every 4 ms so there is a
+        // chance the runner has been torn down when the update is triggered.
+        this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:changed', ...args)
 
@@ -639,9 +634,6 @@ class $Cypress {
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
-
-      case 'cy:next:subject:prepared':
-        return this.emit('next:subject:prepared', ...args)
 
       case 'cy:collect:run:state':
         return this.emitThen('collect:run:state')

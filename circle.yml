@@ -27,7 +27,8 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - revert-22742
+        - reapply-state-refactor
+        - fix-or-skip-flaky-tests
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,6 +37,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -63,6 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
+    - equal: [ 'fix-or-skip-flaky-tests', << pipeline.git.branch >> ]
     - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -127,7 +130,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/22272-globbing-working-dir" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -881,7 +884,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else
+            else 
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
@@ -1607,7 +1610,7 @@ jobs:
       percy:
         type: boolean
         default: false
-    parallelism: 7
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
