@@ -23,12 +23,13 @@
 
   .session-item {
     align-items: center;
-    display: flex;
     color: $gray-400;
+    display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
     min-height: 20px;
-    padding: 3px 2px 3px 10px;
+    padding: 11px 17px 0;
+    margin: -1px;
 
     &:hover {
       cursor: pointer;
@@ -37,22 +38,27 @@
   }
 
   .session-info {
-    padding-left: 8px;
+    align-items: center;
+    border-bottom: 1px $gray-900 solid;
+    display: inline-flex;
+    padding-bottom: 10px;
+    padding-left: 4px;
+    width: 100%;
 
     &.spec-session {
-      padding-left: 24px;
+      padding-left: 25px;
     }
-  }
-  .session-tag {
-    margin-left: 4px;
+
+    .global-session {
+      margin-right: 4px;
+    }
   }
 
-  .global-session {
-    margin-right: 4px;
-    vertical-align: middle;
-    
-    circle {
-      fill: $gray-200;
-    }
+  .session-tag {
+    align-items: center;
+    border-bottom: 1px $gray-900 solid;
+    display: inline-flex;
+    padding-bottom: 10px;
+    padding-left: 4px;
   }
 }

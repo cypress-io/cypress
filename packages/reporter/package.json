@@ -12,6 +12,7 @@
     "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {
+    "@cypress-design/react-icon": "0.4.2",
     "@cypress-design/react-statusicon": "0.0.2",
     "@cypress/react-tooltip": "0.5.3",
     "@fontsource/mulish": "4.3.0",

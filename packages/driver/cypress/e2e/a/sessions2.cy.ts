@@ -1,19 +1,19 @@
 it.only('s2 - t1', () => {
-  cy.session('session1', () => {
+  cy.session('global_session', () => {
     // do something
   }, {
     cacheAcrossSpecs: true,
+  })
+
+  cy.session('local_session', () => {
+    // do something
+    // something else
+  }, {
   })
 
   cy.visit('https://example.cypress.io')
 })
 
 it('s2 -t2', () => {
-  cy.session('session2', () => {
-    // do something
-    // something else
-  }, {
-  })
-
   cy.visit('https://example.cypress.io')
 })

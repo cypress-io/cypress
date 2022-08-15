@@ -12,11 +12,6 @@ import {
 
 type SessionData = Cypress.Commands.Session.SessionData
 
-type SessionOptions = {
-  cacheAcrossSpecs: boolean
-  validate?: Function
-}
-
 /**
  * Session data should be cleared with spec browser launch.
  *
@@ -59,7 +54,7 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id, setup?: Function, options: SessionOptions = { cacheAcrossSpecs: false }) {
+    session (id, setup?: Function, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {

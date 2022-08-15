@@ -1,11 +1,11 @@
 it.only('s1 - t1', () => {
-  cy.session('session1', () => {
+  cy.session('global_session', () => {
     // do something
   }, {
     cacheAcrossSpecs: true,
   })
 
-  cy.session('session2', () => {
+  cy.session('local_session', () => {
     // do something
     // something else
   }, {
@@ -15,13 +15,11 @@ it.only('s1 - t1', () => {
 })
 
 it('s1- t2', () => {
-  cy.session('session2', () => {
+  cy.session('local_session', () => {
     // do something
     // something else
   }, {
   })
 
-  cy.visit('https://example.cypress.io')
-  cy.visit('https://example.cypress.io')
   cy.visit('https://example.cypress.io')
 })

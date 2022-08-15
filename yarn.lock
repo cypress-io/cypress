@@ -2431,6 +2431,17 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-9.0.1.tgz#c27b391d8457d1e893f1eddeaf5e5412d12ffbb5"
   integrity sha512-6It2EVfGskxZCQhuykrfnALg7oVeiI6KclWSmGDqB0AiInVrTGB9Jp9i4/Ad21u9Jde/voVQz6eFX/eSg/UsPA==
 
+"@cypress-design/css@0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.6.2.tgz#75ab9d387a7fed1e57d61fd220a05a9f1058606a"
+  integrity sha512-nSh6SPSsGK8aN9gD8h5KQzynTfEJVekof4dbFnnF/dyOTwD6dZog4Ci+7ApstWRbjlfu9fOvu5lQA8X7o6L0og==
+  dependencies:
+    "@windicss/plugin-interaction-variants" "^1.0.0"
+    lodash "^4.17.21"
+    vite-plugin-windicss "^1.8.4"
+    windicss "^3.5.1"
+    windicss-webpack-plugin "^1.6.10"
+
 "@cypress-design/css@^0.5.2":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.5.2.tgz#bcb43bb2d6f872de8691d6acb546680b335ea757"
@@ -2454,7 +2465,7 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.6.1.tgz#a834e6a53fb5bb437876ce9e2ee10e89950da053"
   integrity sha512-5fNKHzXz02MDNhZBfa0ddk5Rzb071jDXTBDRZOmRTojsEftW3mERuOAUOwtcuE/KG0ZdO5swpM17WOo9HO1klw==
 
-"@cypress-design/react-icon@^0.4.1":
+"@cypress-design/react-icon@0.4.2", "@cypress-design/react-icon@^0.4.1":
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-0.4.2.tgz#bc76938fafdfbced55680fc24d2e8efd8c33e481"
   integrity sha512-qjT2o9eK+0cgwX2WuFdmKLysVS90KGfvCHjt2iGDX7p5Pnc/+WD3JvCpGRtHn894noL5wbynsD75SbO3u2rtZQ==

@@ -11,6 +11,7 @@
     "@babel/preset-react": "7.9.4",
     "@babel/preset-typescript": "7.9.0",
     "@babel/register": "7.9.0",
+    "@cypress-design/css": "0.6.2",
     "@types/jsdom": "16.2.13",
     "@types/mock-require": "2.0.0",
     "@types/webpack": "4.41.0",

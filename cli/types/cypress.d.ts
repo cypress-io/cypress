@@ -654,6 +654,7 @@ declare namespace Cypress {
   }
 
   interface SessionOptions {
+    cacheAcrossSpecs?: boolean,
     validate?: () => false | void
   }
 

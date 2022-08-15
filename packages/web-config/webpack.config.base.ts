@@ -1,9 +1,11 @@
 import chalk from 'chalk'
+import path from 'path'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
 const webpack = require('webpack')
 import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
+const { CyCSSWebpackPlugin } = require('@cypress-design/css')
 
 // @ts-ignore
 import sassGlobImporter = require('node-sass-glob-importer')
@@ -121,12 +123,10 @@ export const getCommonConfig = () => {
       module: 'empty',
     },
     resolve: {
-      extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
+      extensions: ['.ts', '.mjs', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },
-
     stats,
     optimization,
-
     module: {
       rules: [
         {
@@ -149,6 +149,7 @@ export const getCommonConfig = () => {
             },
           },
         },
+
         {
           test: /\.s?css$/,
           exclude: /node_modules/,
@@ -159,6 +160,11 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
+          test: /\.css$/,
+          loader: require.resolve('css-loader'),
+          options: {},
+        },
+        {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
             {
@@ -168,6 +174,11 @@ export const getCommonConfig = () => {
               },
             },
           ],
+        },
+        {
+          test: /\.mjs$/,
+          include: /node_modules\/@cypress-design/,
+          type: 'javascript/auto',
         },
         {
           test: /\.(png|gif)$/,
@@ -194,7 +205,16 @@ export const getCommonConfig = () => {
 
     plugins: [
       new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-      new MiniCSSExtractWebpackPlugin(),
+      new MiniCSSExtractWebpackPlugin({
+
+      }),
+      CyCSSWebpackPlugin({
+        scan: {
+          include: [
+            path.resolve('../reporter/src/lib/*.tsx'),
+          ],
+        },
+      }),
 
       // Enable source maps / eval maps
       // 'EvalDevtoolModulePlugin' is used in development
