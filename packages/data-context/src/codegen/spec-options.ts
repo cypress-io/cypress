@@ -4,6 +4,7 @@ import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import path from 'path'
 import { getDefaultSpecFileName } from '../sources/migration/utils'
+import { toPosix } from '../util'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -72,7 +73,7 @@ export class SpecOptions {
 
       const componentPath = path.join(componentPathRelative, this.parsedPath.base)
 
-      return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
+      return toPosix(componentPath.startsWith('.') ? componentPath : `./${componentPath}`)
     }
 
     return `./${this.parsedPath.base}`
