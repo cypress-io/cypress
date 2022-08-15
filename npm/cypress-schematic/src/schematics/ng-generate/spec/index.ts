@@ -1,7 +1,7 @@
 import {
   Rule, Tree, SchematicsException,
   apply, url, applyTemplates, move,
-  chain, mergeWith, SchematicContext,
+  chain, mergeWith,
 } from '@angular-devkit/schematics'
 
 import { strings, normalize, virtualFs, workspaces } from '@angular-devkit/core'
@@ -32,7 +32,7 @@ function createSpec (tree: Tree): workspaces.WorkspaceHost {
 }
 
 export default function (options: Schema): Rule {
-  return async (tree: Tree, context: SchematicContext) => {
+  return async (tree: Tree) => {
     const host = createSpec(tree)
     const { workspace } = await workspaces.readWorkspace('/', host)
 
@@ -56,14 +56,15 @@ export default function (options: Schema): Rule {
       options.path = options.testingType === 'component' ? `${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
     }
 
-    context.logger.debug(`Creating new ${options.testingType} spec named: ${options.name}`)
+    console.log(`Creating new ${options.testingType} spec named: ${options.name}`)
 
     const templatePath = options.testingType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
     const templateSource = apply(url(templatePath), [
       applyTemplates({
         classify: strings.classify,
         dasherize: strings.dasherize,
-        name: options.name,
+        name: options.testingType === 'component' ? `${options.name.toUpperCase()}Component` : options.name,
+        fileName: options.name,
       }),
       move(normalize(options.path as string)),
     ])

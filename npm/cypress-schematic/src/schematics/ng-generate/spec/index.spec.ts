@@ -42,7 +42,7 @@ describe('ng-generate @cypress/schematic:spec', () => {
     return schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', testingType: 'component' }, appTree).toPromise().then((tree) => {
       const files = tree.files
 
-      expect(files).to.contain('/projects/sandbox/src/app/foo.cy.ts')
+      expect(files).to.contain('/projects/sandbox/src/app/foo.component.cy.ts')
     })
   })
 })

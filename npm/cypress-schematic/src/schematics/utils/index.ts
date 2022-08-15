@@ -62,19 +62,17 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
   }
 }
 
-function generateCTSpecs ({ tree, appPath, components }: { tree: Tree, appPath: string, components: any[]}) {
-  return components.map((component: any) => {
-    const buffer = tree.read(`${appPath}/${component['name']}`)
-    const componentString = buffer?.toString()
-    const componentName = componentString?.match(/(?<=class )\S+/g)
-    const componentFilename = component['name'].split('.')[0]
+function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any}): void {
+  const buffer = tree.read(`${appPath}/${component['name']}`)
+  const componentString = buffer?.toString()
+  const componentName = componentString?.match(/(?<=class )\S+/g)
+  const componentFilename = component['name'].split('.')[0]
 
-    if (!tree.exists(`${appPath}/${componentFilename}.component.cy.ts`)) {
-      console.log(`Creating component test for: ${componentName ? componentName[0] : componentFilename}`)
+  if (!tree.exists(`${appPath}/${componentFilename}.component.cy.ts`)) {
+    console.log(`Creating component test for: ${componentName ? componentName[0] : componentFilename}`)
 
-      return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ component: componentName ? componentName[0] : componentFilename, file: componentFilename }))
-    }
-  })
+    return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ component: componentName ? componentName[0] : componentFilename, file: componentFilename }))
+  }
 }
 
 export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree}) {
@@ -89,12 +87,14 @@ export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: stri
     directories = contents.filter((file) => file.isDirectory())
 
     if (components) {
-      generateCTSpecs({ tree, appPath, components })
+      components.map((component) => {
+        return generateCTSpec({ tree, appPath, component })
+      })
     }
 
     if (directories) {
       directories.forEach((directory: any) => {
-        getDirectoriesAndCreateSpecs({ tree, appPath: `${appPath}/${directory['name']}` })
+        return getDirectoriesAndCreateSpecs({ tree, appPath: `${appPath}/${directory['name']}` })
       })
     }
   }

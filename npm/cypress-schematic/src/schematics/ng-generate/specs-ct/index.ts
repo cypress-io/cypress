@@ -1,24 +1,26 @@
-import { Rule, Tree } from '@angular-devkit/schematics'
+import { Rule, Tree, SchematicsException } from '@angular-devkit/schematics'
 
 import { Schema } from './schema'
 
 import {
-  getAngularJsonValue,
   getDirectoriesAndCreateSpecs,
+  getAngularJsonValue,
 } from '../../utils'
 
 export default function (options: Schema): Rule {
-  return async (tree: Tree) => {
+  return (tree: Tree) => {
     if (options.createSpecs) {
+      if (!options.project) {
+        throw new SchematicsException(`Invalid project name: ${options.project}`)
+      }
+
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
+      const project = projects[options.project]
 
-      Object.keys(projects).map((name) => {
-        const project = projects[name]
-        const appPath = `${project.sourceRoot}/${project.prefix}`
+      const appPath = `${project.sourceRoot}`
 
-        getDirectoriesAndCreateSpecs({ tree, appPath })
-      })
+      return getDirectoriesAndCreateSpecs({ tree, appPath })
     }
   }
 }

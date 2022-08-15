@@ -1,4 +1,4 @@
-import { <%= classify(name) %> } from './<%= classify(name) %>.component'
+import { <%= classify(name) %> } from './<%= classify(fileName) %>.component'
 
 describe('<%= classify(name) %>', () => {
   it('should mount', () => {

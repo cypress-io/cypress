@@ -247,10 +247,10 @@ In order to prevent the application from building, add the following to the end 
 The default generated spec is E2E.  In order to generate a component test you can run:
 
 ```shell script
-ng generate @cypress/schematic:spec --name=button --testingType=component
+ng generate @cypress/schematic:spec --name=button -t component
 ```
 
-If you are using the CLI tool, a prompt will appear asking which spec type you want to generate.
+`-t` is an alias for `testing-type`. It accepts `e2e` or `component` as arguments. If you are using the CLI tool, a prompt will appear asking which spec type you want to generate.
 
 ### Specify Filename (bypassing CLI prompt)
 
@@ -278,6 +278,22 @@ ng generate @cypress/schematic:spec --name=login --path=src/app/tests
 ```
 
 This will create a spec file in your specific location, creating folders as needed. By default, new specs are created in either `cypress/e2e` for E2E specs or `cypress/ct` for component specs.
+
+### Generate Tests for All Components
+
+You can scaffold component test specs alongside all your components in the default project by using:
+
+```shell script
+ng generate @cypress/schematic:specs-ct -g
+```
+
+This will identify files ending in `component.ts`. It will then create spec files alongside them - if they don't exist.
+
+If you would like to specify a project, you can use the command:
+
+```shell script
+ng generate @cypress/schematic:specs-ct -g -p {project-name}
+```
 
 ## Migrating from Protractor to Cypress?
 
