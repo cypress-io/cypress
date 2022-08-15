@@ -51,11 +51,11 @@ declare global {
 
       /**
        * Any React components or general code needed from
-       * runner-shared, reporter or driver are also bundled with
+       * runner, reporter or driver are also bundled with
        * webpack and made available via the window.UnifedRunner namespace.
        * 
        * We cannot import the correct types, because this causes the linter and type
-       * checker to run on runner-shared and reporter, and it blows up.
+       * checker to run on runner and reporter, and it blows up.
        */
       Reporter: any
       shortcuts: {

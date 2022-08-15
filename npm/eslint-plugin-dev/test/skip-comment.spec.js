@@ -54,7 +54,6 @@ describe('skip-comment', () => {
     })
 
     expect(result.errorCount).toBe(3)
-    // console.log(result.messages[0].message)
 
     expect(result.messages[0].message).toContain('it')
     expect(result.messages[0].message).toContain('NOTE:')
@@ -82,7 +81,6 @@ describe('skip-comment', () => {
       })
 
       expect(result.errorCount).toBe(1)
-      // console.log(result.messages[0].message)
 
       expect(result.messages[0].message).toContain('it')
       expect(result.messages[0].message).toContain('FOOBAR:')

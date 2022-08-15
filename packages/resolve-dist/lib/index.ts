@@ -2,7 +2,7 @@ import path from 'path'
 
 let fs: typeof import('fs-extra')
 
-export type RunnerPkg = 'app' | 'runner' | 'runner-ct'
+export type RunnerPkg = 'app' | 'runner'
 
 type FoldersWithDist = 'static' | 'driver' | RunnerPkg | 'launchpad'
 
