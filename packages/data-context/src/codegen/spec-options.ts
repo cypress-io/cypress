@@ -134,7 +134,7 @@ export class SpecOptions {
     return foundSpecExtension || ''
   }
 
-  private async buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
+  private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
     const { dir, base, ext } = filePath || this.parsedPath
     const cyWithExt = this.getSpecExtension() + specExt
     const name = base.slice(0, -ext.length)

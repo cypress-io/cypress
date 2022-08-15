@@ -23,7 +23,9 @@ export async function getDefaultSpecFileName (
   const defaultPathname = path.join('cypress', testingType ?? 'e2e', defaultFilename)
 
   if (!currentProject || !testingType) {
-    throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    debug('currentProject or testingType undefined. Error intelligently detecting default filename, using safe default %o', defaultPathname)
+
+    return defaultPathname
   }
 
   try {
@@ -43,7 +45,7 @@ export async function getDefaultSpecFileName (
       return defaultPathname
     }
 
-    const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, testingType, fileExtensionToUse, name)
+    const pathFromSpecPattern = getPathFromSpecPattern({ specPattern: specPatternSet, testingType, fileExtensionToUse, name })
     const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
 
     // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.

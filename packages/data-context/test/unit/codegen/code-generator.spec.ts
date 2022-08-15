@@ -206,7 +206,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
+          content: dedent`import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {

@@ -135,7 +135,15 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, endIndex).join(path.sep)
 }
 
-export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts', name = '') {
+export function getPathFromSpecPattern ({
+  specPattern,
+  testingType,
+  fileExtensionToUse,
+  name = '' }:
+{ specPattern: string
+  testingType: TestingType
+  fileExtensionToUse?: 'js' | 'ts'
+  name?: string}) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
