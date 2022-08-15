@@ -1560,7 +1560,13 @@ module.exports = {
 
         return Promise.all([
           system.info(),
-          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
+          (async () => {
+            const browsers = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
+
+            await removeOldProfiles(browsers)
+
+            return browsers
+          })(),
           trashAssets(config),
         ])
         .spread(async (sys = {}, browser = {}) => {
