@@ -4,12 +4,16 @@ import type { Ref } from 'vue'
 import { SpecsListBannersFragment, SpecsListBannersFragmentDoc } from '../generated/graphql-test'
 import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
-import type { AllowedState } from '@packages/types/src'
+import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
-import { BannerIds } from './banners'
 
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
+
+type BannerKey = keyof typeof BannerIds
+type BannerId = typeof BannerIds[BannerKey]
+
+type SpecsListBannerProps = InstanceType<typeof SpecsListBanners>['$props']
 
 describe('<SpecsListBanners />', () => {
   const validateBaseRender = () => {
@@ -59,21 +63,46 @@ describe('<SpecsListBanners />', () => {
     }
   }
 
-  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>) => {
+  const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>, props?: Partial<SpecsListBannerProps>) => {
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
         assignIn(result, query)
         set(result, 'currentProject.savedState', state)
       },
-      render: (gql) => <SpecsListBanners gql={gql} />,
+      render: (gql) => <SpecsListBanners gql={gql} {...props} />,
     })
   }
 
-  const validateSmartNotificationBehaviors = (bannerId: string, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
+  const validateSmartNotificationBehaviors = (bannerId: BannerId, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
     context('banner conditions are met and when cypress use >= 4 days', () => {
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+      })
+
+      it('should be preempted by spec not found banner', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isSpecNotFound: true })
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
+
+      it('should be preempted by offline warning banner', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isOffline: true })
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
+
+      it('should be preempted by fetch error banner', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isFetchError: true })
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
+
+      it('should be preempted by project not found banner', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isProjectNotFound: true })
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+      })
+
+      it('should be preempted by request access banner', () => {
+        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isProjectUnauthorized: true })
+        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should not render when previously-dismissed', () => {

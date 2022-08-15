@@ -38,10 +38,19 @@ export interface SettingsOptions {
 }
 
 export type BannerState = {
-  lastShown?: number | null
-  dismissed?: number | null
+  lastShown?: number
+  dismissed?: number
 }
 
+export const BannerIds = {
+  ACI_082022_LOGIN: 'aci_082022_login',
+  ACI_082022_CREATE_ORG: 'aci_082022_createOrganization',
+  ACI_082022_CONNECT_PROJECT: 'aci_082022_connectProject',
+  ACI_082022_RECORD: 'aci_082022_record',
+} as const
+
+type BannerKeys = keyof typeof BannerIds
+type BannerId = typeof BannerIds[BannerKeys]
 export type BannersState = {
-  [bannerId: string]: BannerState | null
+  [bannerId in BannerId]?: BannerState
 } & { _disabled?: boolean }

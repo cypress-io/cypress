@@ -144,8 +144,8 @@ import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import interval from 'human-interval'
-import type { AllowedState } from '@packages/types/src'
-import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner, BannerIds } from './banners'
+import { AllowedState, BannerIds } from '@packages/types'
+import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 
 const route = useRoute()
 const { t } = useI18n()

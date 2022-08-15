@@ -39,7 +39,7 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
-import { BannerIds } from './index'
+import { BannerIds } from '@packages/types'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
 gql`

@@ -28,7 +28,7 @@ import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import TrackedBanner from './TrackedBanner.vue'
-import { BannerIds } from './index'
+import { BannerIds } from '@packages/types'
 import { RecordBannerDocument } from '../../generated/graphql'
 import { computed } from 'vue'
 
