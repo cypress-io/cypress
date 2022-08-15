@@ -300,16 +300,14 @@ export default (Commands, Cypress, cy, state) => {
         if (responsesOrErr.hasSpecBridgeError) {
           delete responsesOrErr.hasSpecBridgeError
           if (options.log) {
+            // skip this 'wait' log since it was already added through the primary
             Cypress.state('onBeforeLog', (log) => {
-              // skip this 'wait' log since it was already added through the primary
               if (log.get('name') === 'wait') {
                 // unbind this function so we don't impact any other logs
                 cy.state('onBeforeLog', null)
 
                 return false
               }
-
-              return
             })
           }
 

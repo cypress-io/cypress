@@ -14,8 +14,6 @@ const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft botto
 // they may need to work with both element arrays, or specific items
 // such as a single element, a single document, or single window
 
-let returnFalse = () => false
-
 export const create = (state: StateFunc, expect: $Cy['expect']) => {
   // TODO: we should probably normalize all subjects
   // into an array and loop through each and verify
@@ -246,27 +244,14 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureExistence = (subject) => {
-    returnFalse = () => {
-      cleanup()
-
-      return false
-    }
-
-    const cleanup = () => {
-      return state('onBeforeLog', null)
-    }
-
-    // prevent any additional logs this is an implicit assertion
-    state('onBeforeLog', returnFalse)
+    // prevent any additional logs since this is an implicit assertion
+    state('onBeforeLog', () => false)
 
     // verify the $el exists and use our default error messages
-    // TODO: always unbind if our expectation failed
     try {
       expect(subject).to.exist
-    } catch (err) {
-      cleanup()
-
-      throw err
+    } finally {
+      state('onBeforeLog', null)
     }
   }
 

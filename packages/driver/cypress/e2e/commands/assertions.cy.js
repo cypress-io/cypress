@@ -715,7 +715,6 @@ describe('src/cy/commands/assertions', () => {
       it('does not log ensureElExistence errors', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 1)
-
           done()
         })
 
@@ -790,19 +789,18 @@ describe('src/cy/commands/assertions', () => {
       cy.noop({}).should('have.property', 'foo')
     })
 
-    it('ends and snapshots immediately and sets child', (done) => {
+    it('snapshots immediately and sets child', (done) => {
       cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-
-          expect(log.get('ended')).to.be.true
-          expect(log.get('state')).to.eq('passed')
-          expect(log.get('snapshots').length).to.eq(1)
-          expect(log.get('snapshots')[0]).to.be.an('object')
-          expect(log.get('type')).to.eq('child')
-
-          done()
+        if (attrs.name !== 'assert') {
+          return
         }
+
+        cy.removeAllListeners('log:added')
+        expect(log.get('snapshots').length).to.eq(1)
+        expect(log.get('snapshots')[0]).to.be.an('object')
+        expect(log.get('type')).to.eq('child')
+
+        done()
       })
 
       cy.get('body').then(() => {

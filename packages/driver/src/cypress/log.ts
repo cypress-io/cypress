@@ -596,24 +596,6 @@ class LogManager {
 
       log.set(options)
 
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
-      // if end was passed in
-      // go ahead and end
-      if (log.get('end')) {
-        log.end()
-      }
-
-      if (log.get('error')) {
-        log.error(log.get('error'))
-      }
-
-      log.wrapConsoleProps()
-
       const onBeforeLog = state('onBeforeLog')
 
       // dont trigger log if this function
@@ -624,12 +606,45 @@ class LogManager {
         }
       }
 
-      // set the log on the command
-      const current = state('current')
+      let command = log.get('command')
 
-      if (current) {
-        current.log(log)
+      if (!command) {
+        command = state('current')
+        log.set('command', command)
       }
+
+      if (command) {
+        let commandLogId = log.get('commandLogId')
+
+        if (commandLogId != null) {
+          const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
+
+          if (previousLogInstance) {
+            log.set('snapshots', previousLogInstance.get('snapshots'))
+            previousLogInstance.merge(log)
+
+            if (previousLogInstance.get('end')) {
+              previousLogInstance.end()
+            }
+
+            return
+          }
+        }
+
+        command.log(log)
+      }
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot') && !log.get('snapshots')) {
+        log.snapshot()
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'))
+      }
+
+      log.wrapConsoleProps()
 
       this.addToLogs(log)
 
@@ -643,9 +658,8 @@ class LogManager {
 
       this.triggerLog(log)
 
-      // if not current state then the log is being run
-      // with no command reference, so just end the log
-      if (!current) {
+      // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
+      if (!state('current') || log.get('end')) {
         log.end()
       }
 

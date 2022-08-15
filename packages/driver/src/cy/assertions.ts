@@ -222,9 +222,11 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = (assertions) => {
-    return _.each(assertions, (log) => {
-      log.snapshot()
+  const finishAssertions = () => {
+    return _.each(cy.state('current').get('logs'), (log) => {
+      if (!log.get('snapshots')) {
+        log.snapshot()
+      }
 
       const e = log.get('_error')
 
@@ -238,7 +240,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
   type VerifyUpcomingAssertionsCallbacks = {
     ensureExistenceFor?: 'subject' | 'dom' | boolean
-    onPass?: Function
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
     onRetry?: () => any
   }
@@ -255,10 +256,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // we're applying the default assertion in the
       // case where there are no upcoming assertion commands
       const isDefaultAssertionErr = cmds.length === 0
-
-      if (options.assertions == null) {
-        options.assertions = []
-      }
 
       _.defaults(callbacks, {
         ensureExistenceFor: 'dom',
@@ -296,9 +293,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
       const onPassFn = () => {
         cy.state('overrideAssert', undefined)
-        if (_.isFunction(callbacks.onPass)) {
-          return callbacks.onPass.call(this, cmds, options.assertions)
-        }
 
         return subject
       }
@@ -342,8 +336,9 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          finishAssertions(options.assertions)
           throw e3
+        } finally {
+          finishAssertions()
         }
 
         if (_.isFunction(onRetry)) {
@@ -380,108 +375,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         .catch(onFailFn)
       }
 
-      let i = 0
-
-      const cmdHasFunctionArg = (cmd) => {
-        return _.isFunction(cmd.get('args')[0])
-      }
-
       const overrideAssert = function (...args) {
-        let cmd = cmds[i]
-        const setCommandLog = (log) => {
-          // our next log may not be an assertion
-          // due to page events so make sure we wait
-          // until we see page events
-          if (log.get('name') !== 'assert') {
-            return
-          }
-
-          // when we do immediately unbind this function
-          cy.state('onBeforeLog', null)
-
-          const insertNewLog = (log) => {
-            cmd.log(log)
-
-            return options.assertions.push(log)
-          }
-
-          // its possible a single 'should' will assert multiple
-          // things such as the case with have.property. we can
-          // detect when that is happening because cmd will be null.
-          // if thats the case then just set cmd to be the previous
-          // cmd and do not increase 'i'
-          // this will prevent 2 logs from ever showing up but still
-          // provide errors when the 1st assertion fails.
-          if (!cmd) {
-            cmd = cmds[i - 1]
-          } else {
-            i += 1
-          }
-
-          // if our command has a function argument
-          // then we know it may contain multiple
-          // assertions
-          if (cmdHasFunctionArg(cmd)) {
-            let index = cmd.get('assertionIndex')
-            let assertions = cmd.get('assertions')
-
-            // https://github.com/cypress-io/cypress/issues/4981
-            // `assertions` is undefined because assertions added by
-            // `should` command are not handled yet.
-            // So, don't increase i and go back to the last command.
-            if (!assertions) {
-              i -= 1
-              cmd = cmds[i - 1]
-              index = cmd.get('assertionIndex')
-              assertions = cmd.get('assertions')
-            }
-
-            // always increase the assertionIndex
-            // so our next assertion matches up
-            // to the correct index
-            const incrementIndex = () => {
-              return cmd.set('assertionIndex', index += 1)
-            }
-
-            // if we dont have an assertion at this
-            // index then insert a new log
-            const assertion = assertions[index]
-
-            if (!assertion) {
-              assertions.push(log)
-              incrementIndex()
-
-              return insertNewLog(log)
-            }
-
-            // else just merge this log
-            // into the previous assertion log
-            incrementIndex()
-            assertion.merge(log)
-
-            // dont output a new log
-            return false
-          }
-
-          // if we already have a log
-          // then just update its attrs from
-          // the new log
-          const l = cmd.getLastLog()
-
-          if (l) {
-            l.merge(log)
-
-            // and make sure we return false
-            // which prevents a new log from
-            // being added
-            return false
-          }
-
-          return insertNewLog(log)
-        }
-
-        cy.state('onBeforeLog', setCommandLog)
-
         // send verify=true as the last arg
         return assertFn.apply(this, args.concat(true) as any)
       }
@@ -537,7 +431,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         setSubjectAndSkip()
 
-        finishAssertions(options.assertions)
+        finishAssertions()
 
         return onPassFn()
       })
@@ -547,7 +441,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // when we're told not to retry
         if (err.retry === false) {
           // finish the assertions
-          finishAssertions(options.assertions)
+          finishAssertions()
 
           // and then push our command into this err
           try {

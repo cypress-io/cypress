@@ -24,8 +24,22 @@ export default function (Commands, Cypress, cy, state) {
   }
 
   const shouldFn = function (subject, chainers, ...args) {
+    const command = cy.state('current')
+    const assertionIndex = cy.state('upcomingAssertions') ? cy.state('upcomingAssertions').indexOf(command.get('currentAssertionCommand')) : 0
+    let logIndex = 0
+
     if (_.isFunction(chainers)) {
-      return shouldFnWithCallback.apply(this, [subject, chainers])
+      cy.state('onBeforeLog', (log) => {
+        logIndex++
+        log.set('command', command)
+        log.set('commandLogId', `${assertionIndex}-${logIndex}`)
+      })
+
+      try {
+        return shouldFnWithCallback.apply(this, [subject, chainers])
+      } finally {
+        cy.state('onBeforeLog', undefined)
+      }
     }
 
     let exp = cy.expect(subject).to
@@ -35,6 +49,7 @@ export default function (Commands, Cypress, cy, state) {
       // since we are throwing our own error
       // without going through the assertion we need
       // to ensure our .should command gets logged
+      logIndex++
       const log = Cypress.log({
         name: 'should',
         type: 'child',
@@ -58,28 +73,38 @@ export default function (Commands, Cypress, cy, state) {
     const isCheckingLengthOrExistence = isCheckingExistence || reHaveLength.test(chainers)
 
     const applyChainer = function (memo, value) {
+      logIndex++
       if (value === lastChainer && !isCheckingExistence) {
         // https://github.com/cypress-io/cypress/issues/16006
         // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
         // It creates duplicated messages and confuses users.
         const cmd = memo[value]
 
-        if (_.isFunction(cmd)) {
-          try {
-            return cmd.apply(memo, args)
-          } catch (err: any) {
-            // if we made it all the way to the actual
-            // assertion but its set to retry false then
-            // we need to log out this .should since there
-            // was a problem with the actual assertion syntax
-            if (err.retry === false) {
-              return throwAndLogErr(err)
-            }
+        cy.state('onBeforeLog', (log) => {
+          log.set('command', command)
+          log.set('commandLogId', `${assertionIndex}-${logIndex}`)
+        })
 
-            throw err
+        try {
+          if (_.isFunction(cmd)) {
+            try {
+              return cmd.apply(memo, args)
+            } catch (err: any) {
+              // if we made it all the way to the actual
+              // assertion but its set to retry false then
+              // we need to log out this .should since there
+              // was a problem with the actual assertion syntax
+              if (err.retry === false) {
+                return throwAndLogErr(err)
+              }
+
+              throw err
+            }
+          } else {
+            return cmd
           }
-        } else {
-          return cmd
+        } finally {
+          cy.state('onBeforeLog', undefined)
         }
       } else {
         return memo[value]
