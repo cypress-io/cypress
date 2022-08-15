@@ -238,7 +238,7 @@ class $Cypress {
       get: () => {
         $errUtils.warnByPath('subject.state_subject_deprecated')
 
-        return cy.currentSubject()
+        return this.cy.currentSubject()
       },
     })
 
@@ -587,6 +587,8 @@ class $Cypress {
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
+        // Cypress logs will only trigger an update every 4 ms so there is a
+        // chance the runner has been torn down when the update is triggered.
         this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:changed', ...args)
