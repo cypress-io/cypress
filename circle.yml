@@ -27,7 +27,6 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - reapply-state-refactor
         - "lmiller/experimental-single-tab-component-testing"
 
 # usually we don't build Mac app - it takes a long time
@@ -66,7 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
