@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "10.4.0",
+  "version": "10.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -90,7 +90,7 @@
     "@graphql-tools/wrap": "8.1.1",
     "@octokit/auth-app": "3.6.1",
     "@octokit/core": "3.6.0",
-    "@percy/cli": "1.1.0",
+    "@percy/cli": "1.2.0",
     "@percy/cypress": "^3.1.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
