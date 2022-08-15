@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -157,6 +157,8 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
+        :show-connect-button-after-login="isApp && !props.gql?.currentProject?.projectId"
+        @connect-project="handleConnectProject"
       />
     </div>
   </div>
@@ -232,6 +234,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
+    projectId
   }
   isGlobalMode
   ...TopNav
@@ -246,9 +249,6 @@ const userData = computed(() => {
 
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState
-})
-const cloudProjectId = computed(() => {
-  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
 const currentProject = computed(() => props.gql.currentProject)
@@ -272,6 +272,16 @@ const props = defineProps<{
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
+
+const emit = defineEmits<{
+  (event: 'connect-project'): void
+}>()
+
+const isApp = window.__Cypress__
+
+const handleConnectProject = () => {
+  emit('connect-project')
+}
 
 const { t } = useI18n()
 const prompts = sortBy([
@@ -326,7 +336,7 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // if prompt requires no project id,
   // check if project id exists
-  if (prompt.noProjectId && cloudProjectId.value) {
+  if (prompt.noProjectId && props.gql?.currentProject?.projectId) {
     return false
   }
 

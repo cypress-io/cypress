@@ -466,9 +466,7 @@ export class SocketBase {
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
-              resetRenderedHTMLOrigins()
-
-              return
+              return resetRenderedHTMLOrigins()
             }
             case 'cross:origin:bridge:ready':
               return this.localBus.emit('cross:origin:bridge:ready', args[0])
@@ -479,9 +477,7 @@ export class SocketBase {
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
+              throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
         }
 

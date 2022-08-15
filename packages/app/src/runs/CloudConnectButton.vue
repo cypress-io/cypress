@@ -11,6 +11,8 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     utm-medium="Runs Tab"
+    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
+    @connect-project="isProjectConnectOpen = true"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
@@ -36,6 +38,10 @@ const { t } = useI18n()
 
 gql`
 fragment CloudConnectButton on Query {
+  currentProject {
+    id
+    projectId
+  }
   ...CloudConnectModals
   ...LoginModal
 }
@@ -63,4 +69,5 @@ function openConnection () {
     isProjectConnectOpen.value = true
   }
 }
+
 </script>
