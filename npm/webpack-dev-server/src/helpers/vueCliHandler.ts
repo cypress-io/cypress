@@ -17,8 +17,6 @@ export function vueCliHandler (devServerConfig: WebpackDevServerConfig): PresetH
 
     debug('webpack config %o', webpackConfig)
 
-    delete webpackConfig.entry
-
     return { frameworkConfig: webpackConfig, sourceWebpackModulesResult }
   } catch (e) {
     console.error(e) // eslint-disable-line no-console
