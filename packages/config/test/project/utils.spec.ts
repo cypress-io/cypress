@@ -1060,6 +1060,7 @@ describe('config/src/project/utils', () => {
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
+            nodeVersion: { value: undefined, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             platform: { value: os.platform(), from: 'default' },
@@ -1075,10 +1076,12 @@ describe('config/src/project/utils', () => {
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
+            testIsolation: { value: 'legacy', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1170,6 +1173,7 @@ describe('config/src/project/utils', () => {
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
+            nodeVersion: { value: undefined, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             platform: { value: os.platform(), from: 'default' },
@@ -1186,9 +1190,11 @@ describe('config/src/project/utils', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
+            specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
+            testIsolation: { value: 'legacy', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1201,6 +1207,57 @@ describe('config/src/project/utils', () => {
             scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
+        })
+      })
+
+      it('sets testIsolation=strict by default when experimentalSessionAndOrigin=true and e2e testing', () => {
+        sinon.stub(utils, 'getProcessEnvVars').returns({})
+
+        const obj = {
+          projectRoot: '/foo/bar',
+          supportFile: false,
+          baseUrl: 'http://localhost:8080',
+          experimentalSessionAndOrigin: true,
+        }
+
+        const options = {
+          testingType: 'e2e',
+        }
+
+        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+        return mergeDefaults(obj, options, {}, getFilesByGlob)
+        .then((cfg) => {
+          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
+          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
+          expect(cfg.resolved).to.have.property('testIsolation')
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'strict', from: 'default' })
+        })
+      })
+
+      it('honors user config for testIsolation when experimentalSessionAndOrigin=true and e2e testing', () => {
+        sinon.stub(utils, 'getProcessEnvVars').returns({})
+
+        const obj = {
+          projectRoot: '/foo/bar',
+          supportFile: false,
+          baseUrl: 'http://localhost:8080',
+          experimentalSessionAndOrigin: true,
+          testIsolation: 'legacy',
+        }
+
+        const options = {
+          testingType: 'e2e',
+        }
+
+        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
+
+        return mergeDefaults(obj, options, {}, getFilesByGlob)
+        .then((cfg) => {
+          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
+          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
+          expect(cfg.resolved).to.have.property('testIsolation')
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'legacy', from: 'config' })
         })
       })
     })

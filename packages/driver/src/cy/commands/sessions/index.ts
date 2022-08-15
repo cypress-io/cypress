@@ -42,7 +42,9 @@ export default function (Commands, Cypress, cy) {
       if (Cypress.config('experimentalSessionAndOrigin')) {
         sessionsManager.currentTestRegisteredSessions.clear()
 
-        return navigateAboutBlank(false)
+        const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+
+        return clearPage
         .then(() => sessions.clearCurrentSessionData())
         .then(() => Cypress.backend('reset:rendered:html:origins'))
       }
