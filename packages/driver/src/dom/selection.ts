@@ -420,12 +420,6 @@ const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement)
 
         return
       }
-      // const doc = $document.getDocumentFromElement(el)
-      // console.log(doc.activeElement)
-      // $elements.callNativeMethod(doc, 'execCommand', 'selectall', false)
-      // $elements.callNativeMethod(el, 'select')
-      // _getSelectionByEl(el).ca
-      // toStart ? _getSelectionByEl(el).collapseToStart : _getSelectionByEl(el).collapseToEnd()
 
       if (isTextarea) {
         const bounds = _getSelectionBoundsFromTextarea(el)

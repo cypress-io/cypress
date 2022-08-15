@@ -104,6 +104,7 @@ export function mergeDefaults (
   cliConfig: Record<string, any> = {},
 ) {
   const resolved = {}
+  const { testingType } = options
 
   config.rawJson = _.cloneDeep(config)
 
@@ -144,13 +145,13 @@ export function mergeDefaults (
 
   let additionalIgnorePattern = config.additionalIgnorePattern
 
-  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+  if (testingType === 'component' && config.e2e && config.e2e.specPattern) {
     additionalIgnorePattern = config.e2e.specPattern
   }
 
   config = {
     ...config,
-    ...config[options.testingType],
+    ...config[testingType],
     additionalIgnorePattern,
   }
 
@@ -199,8 +200,6 @@ export function mergeDefaults (
 
   debug('validate that there is no breaking config options before setupNodeEvents')
 
-  const { testingType } = options
-
   function makeConfigError (cyError: CypressError) {
     cyError.name = `Obsolete option used in config object`
 
@@ -214,6 +213,20 @@ export function mergeDefaults (
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
+
+  // TODO: https://github.com/cypress-io/cypress/issues/23093
+  // testIsolation should equal 'strict' by default when experimentalSessionAndOrigin=true
+  // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
+  // to be be 'strict'
+  if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
+    if (config.rawJson.testIsolation) {
+      config.resolved.testIsolation.from = 'config'
+    } else {
+      config.testIsolation = 'strict'
+      config.resolved.testIsolation.value = 'strict'
+      config.resolved.testIsolation.from === 'default'
+    }
+  }
 
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected
@@ -537,7 +550,7 @@ export function setUrls (obj) {
   return obj
 }
 
-export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {
+export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>, resolved: Record<string, any> = {}) {
   const envVars = (resolved.env = {})
 
   const resolveFrom = (from, obj = {}) => {
@@ -549,13 +562,13 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
     })
   }
 
-  const envCfg = cfg.env != null ? cfg.env : {}
+  const configEnv = cfg.env != null ? cfg.env : {}
   const envFile = cfg.envFile != null ? cfg.envFile : {}
-  let envProc = getProcessEnvVars(process.env) || {}
+  let processEnvs = getProcessEnvVars(process.env) || {}
 
-  envCLI = envCLI != null ? envCLI : {}
+  cliEnvs = cliEnvs != null ? cliEnvs : {}
 
-  const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
+  const configFromEnv = _.reduce(processEnvs, (memo: string[], val, key) => {
     const cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
@@ -576,21 +589,21 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   }
   , [])
 
-  envProc = _.chain(envProc)
+  processEnvs = _.chain(processEnvs)
   .omit(configFromEnv)
   .mapValues(hideSpecialVals)
   .value()
 
-  resolveFrom('config', envCfg)
+  resolveFrom('config', configEnv)
   resolveFrom('envFile', envFile)
-  resolveFrom('env', envProc)
-  resolveFrom('cli', envCLI)
+  resolveFrom('env', processEnvs)
+  resolveFrom('cli', cliEnvs)
 
-  // envCfg is from cypress.config.{js,ts,mjs,cjs}
+  // configEnvs is from cypress.config.{js,ts,mjs,cjs}
   // envFile is from cypress.env.json
-  // envProc is from process env vars
-  // envCLI is from CLI arguments
-  return _.extend(envCfg, envFile, envProc, envCLI)
+  // processEnvs is from process env vars
+  // cliEnvs is from CLI arguments
+  return _.extend(configEnv, envFile, processEnvs, cliEnvs)
 }
 
 export function getResolvedRuntimeConfig (config, runtimeConfig) {

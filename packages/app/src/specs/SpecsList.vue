@@ -161,7 +161,9 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     :utm-medium="loginUtmMedium"
-    @loggedin="refreshPage"
+    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
+    @loggedin="handleLoggedin"
+    @connect-project="isProjectConnectOpen = true"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
@@ -413,6 +415,15 @@ const { refetchFailedCloudData } = useCloudSpecData(
 
 function refreshPage () {
   location.reload()
+}
+
+const handleLoggedin = () => {
+  // if there is no project id, there can be no cloud data to refresh -
+  // we want to stay on the page and let the `connect-project` event take the user
+  // to the next step to connect their project
+  if (props.gql.currentProject?.projectId) {
+    refreshPage()
+  }
 }
 
 </script>

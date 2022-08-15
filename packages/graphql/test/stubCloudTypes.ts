@@ -284,7 +284,22 @@ export const CloudOrganizationConnectionStubs = {
             name: 'Test Project 1',
             slug: 'test-project',
           }),
-
+        ],
+      },
+    }),
+    // Organization with single project for auto select test
+    createCloudOrganization({
+      id: '3',
+      name: 'Test Org 3',
+      projects: {
+        __typename: 'CloudProjectConnection' as const,
+        edges: [] as any,
+        pageInfo: {} as any,
+        nodes: [
+          createCloudProject({
+            name: 'Test Project 3',
+            slug: 'test-project-3',
+          }),
         ],
       },
     }),
