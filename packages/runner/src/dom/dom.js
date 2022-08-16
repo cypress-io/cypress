@@ -2,7 +2,7 @@ import _ from 'lodash'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import $Cypress from '@packages/driver'
-import $dimensions from './dimensions'
+import { getElementDimensions } from './dimensions'
 import { selectorPlaygroundHighlight } from '../selector-playground/highlight'
 import { studioAssertionsMenu } from '../studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
@@ -15,7 +15,9 @@ const $ = $Cypress.$
 function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
 
-  const dimensions = $dimensions.getElementDimensions($el)
+  const el = $el.get(0)
+
+  const dimensions = getElementDimensions(el)
 
   const $container = $('<div class="__cypress-highlight">')
   .css({
