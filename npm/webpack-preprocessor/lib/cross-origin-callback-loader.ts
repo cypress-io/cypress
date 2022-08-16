@@ -58,7 +58,10 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       // last argument is not a function. in this case, we'll return the
       // unmodified code and it will be a runtime validation error
       if (
-        !lastArg.isArrowFunctionExpression() && !lastArg.isFunctionExpression()
+        !lastArg || (
+          !lastArg.isArrowFunctionExpression()
+          && !lastArg.isFunctionExpression()
+        )
       ) {
         return
       }
