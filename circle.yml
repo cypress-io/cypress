@@ -114,12 +114,12 @@ executors:
     environment:
       PLATFORM: windows
 
-  darwin-arm64:
+  darwin-arm64: &darwin-arm64-executor
     machine: true
     environment:
       PLATFORM: darwin
 
-  linux-arm64:
+  linux-arm64: &linux-arm64-executor
     machine:
       image: ubuntu-2004:2022.04.1
     resource_class: arm.medium
@@ -1311,7 +1311,10 @@ jobs:
             yarn test-integration --scope @tooling/packherd
       - unless:
           condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
+            or:
+              - equal: [ *windows-executor, << parameters.executor >> ]
+              - equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
           steps:
             - verify-mocha-results:
                 expectedResultCount: 1
