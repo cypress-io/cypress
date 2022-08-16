@@ -11,12 +11,12 @@ import type {
   UnmountArgs,
 } from '@cypress/react'
 
-let root: any
+let root: ReactDOM.Root | null = null
 
 const cleanup = () => {
   if (root) {
     root.unmount()
-
+    root = null
     return true
   }
 
@@ -27,7 +27,9 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement) => {
-      root = ReactDOM.createRoot(el)
+      if (!root) {
+        root = ReactDOM.createRoot(el)
+      }
 
       return root.render(reactComponent)
     },
