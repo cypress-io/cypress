@@ -213,7 +213,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
             await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
 
-            // @ts-ignore TODO (wip): update this type
             const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
 
             // once the secondary origin page loads, send along the
