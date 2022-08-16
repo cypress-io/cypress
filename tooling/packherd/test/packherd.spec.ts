@@ -16,6 +16,10 @@ const MINIMAL_PROJECT = 'v8-snapshot/minimal'
 
 const t = spok.adapters.chaiExpect(expect)
 
+const pathRelativeToCwd = (projectBaseDir, ...pathComponentsRelativeToProjectBaseDir) => {
+  return path.relative(process.cwd(), path.join(projectBaseDir, ...pathComponentsRelativeToProjectBaseDir))
+}
+
 describe('Packherd', () => {
   let projectBaseDir
 
@@ -31,22 +35,25 @@ describe('Packherd', () => {
     const entryFile = require.resolve(path.join(projectBaseDir, 'entry.js'))
     const { meta, bundle } = await packherd({ entryFile })
 
+    // eslint-disable-next-line no-console
+    console.log(meta)
+
     spok(t, meta, {
       inputs: {
-        [path.relative(process.cwd(), `${projectBaseDir}/node_modules/isobject/index.cjs.js`)]: {
+        [pathRelativeToCwd(projectBaseDir, 'node_modules', 'isobject', 'index.cjs.js')]: {
           bytes: spok.ge(200),
         },
-        [path.relative(process.cwd(), `${projectBaseDir}/node_modules/tmpfile/index.js`)]: {
+        [pathRelativeToCwd(projectBaseDir, 'node_modules', 'tmpfile', 'index.js')]: {
           bytes: spok.ge(800),
         },
-        [path.relative(process.cwd(), `${projectBaseDir}/entry.js`)]: {
+        [pathRelativeToCwd(projectBaseDir, 'entry.js')]: {
           bytes: spok.ge(100),
           imports: [
             {
-              path: path.relative(process.cwd(), `${projectBaseDir}/node_modules/isobject/index.cjs.js`),
+              path: pathRelativeToCwd(projectBaseDir, 'node_modules', 'isobject', 'index.cjs.js'),
             },
             {
-              path: path.relative(process.cwd(), `${projectBaseDir}/node_modules/tmpfile/index.js`),
+              path: pathRelativeToCwd(projectBaseDir, 'node_modules', 'tmpfile', 'index.js'),
             },
           ],
         },
