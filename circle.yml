@@ -1304,9 +1304,17 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
-      - run: yarn test-integration --scope @tooling/packherd
-      - verify-mocha-results:
-          expectedResultCount: 1
+      - run:
+          name: Run v8 integration tests
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn test-integration --scope @tooling/packherd
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - verify-mocha-results:
+                expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
