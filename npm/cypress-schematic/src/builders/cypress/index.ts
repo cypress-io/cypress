@@ -46,8 +46,8 @@ function runCypress (
     }),
     switchMap((options: CypressBuilderOptions) => {
       return (options.devServerTarget
-        ? forkJoin(startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context })).pipe(
-          map((devServerBaseUrlArray: [string]) => options.baseUrl || devServerBaseUrlArray[0]),
+        ? startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context }).pipe(
+          map((devServerBaseUrl: string) => options.baseUrl || devServerBaseUrl),
         )
         : of(options.baseUrl)
       ).pipe(
