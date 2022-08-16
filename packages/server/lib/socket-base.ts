@@ -448,7 +448,7 @@ export class SocketBase {
 
             case 'reset:session:state':
               cookieJar.removeAllCookies()
-              session.clearAllSessions()
+              session.clearSpecSessions()
               resetRenderedHTMLOrigins()
 
               return

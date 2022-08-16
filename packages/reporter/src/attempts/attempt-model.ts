@@ -184,9 +184,7 @@ export default class Attempt {
   _addSession (props: CommandProps) {
     const updated = this._updateSession(props)
 
-    console.log('updated?', props.id)
     if (!updated) {
-      console.log('add new session', props)
       const session = new Session({
         state: props.state,
         testCurrentRetry: props.testCurrentRetry || 0,
@@ -205,7 +203,6 @@ export default class Attempt {
     const session = this.sessions[props.id]
 
     if (session) {
-      console.log('update session')
       session.update({
         state: props.state,
         testCurrentRetry: props.testCurrentRetry || 0,

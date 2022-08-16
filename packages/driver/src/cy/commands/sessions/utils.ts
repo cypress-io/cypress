@@ -131,7 +131,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   .timeout(2000)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
-    // $iframeContainer.remove()
+    $iframeContainer.remove()
   })
   .catch(() => {
     Cypress.log({
@@ -180,7 +180,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   .timeout(2000)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
-    // $iframeContainer.remove()
+    $iframeContainer.remove()
   })
   .catch((err) => {
     Cypress.log({
