@@ -24,6 +24,10 @@ for (const project of WEBPACK_REACT) {
       cy.contains('app.component.cy.ts').click()
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
+      cy.get('li.command').first().within(() => {
+        cy.get('.command-method').should('contain', 'mount')
+        cy.get('.command-message').should('contain', 'AppComponent')
+      })
     })
 
     it('should live-reload on src changes', () => {

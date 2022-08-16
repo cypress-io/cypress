@@ -27,7 +27,6 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - tbiethman/electron-19
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,7 +35,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +44,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ "lmiller/experimental-single-tab-component-testing", << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +64,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/electron-19', << pipeline.git.branch >> ]
+    - equal: [ 'marktnoonan/windows-path-fix', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -129,7 +128,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/electron-19" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/22272-globbing-working-dir" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -460,11 +459,17 @@ commands:
                 channel: <<parameters.install-chrome-channel>>
                 version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
       - run:
+          name: Run driver tests in Cypress
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ "<<parameters.browser>>" = "webkit" ]]; then
+              npx playwright install webkit
+              npx playwright install-deps webkit
+            fi
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
@@ -873,7 +878,16 @@ commands:
           # Ensure we're installing the node-version for the cloned repo
           command: |
             if [[ -f .node-version ]]; then
-              curl -L https://raw.githubusercontent.com/cypress-io/cypress/<< pipeline.git.branch >>/scripts/ensure-node.sh --output ci-ensure-node.sh
+              branch="<< pipeline.git.branch >>"
+
+              externalBranchPattern='^pull\/[0-9]+'
+              if [[ $branch =~ $externalBranchPattern ]]; then
+                # We are unable to curl from the external PR branch location
+                # so we fall back to develop
+                branch="develop"
+              fi
+
+              curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
             else 
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
@@ -1555,6 +1569,13 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
+  driver-integration-tests-webkit:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+
   driver-integration-tests-chrome-experimentalSessionAndOrigin:
     <<: *defaults
     resource_class: medium
@@ -1593,6 +1614,15 @@ jobs:
           browser: electron
           experimentalSessionAndOrigin: true
 
+  driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+          experimentalSessionAndOrigin: true
+
   run-reporter-component-tests-chrome:
     <<: *defaults
     parameters:
@@ -1600,7 +1630,7 @@ jobs:
       percy:
         type: boolean
         default: false
-    parallelism: 7
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1791,14 +1821,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/angular build
-      - run:
-          name: Run tests
-          command: yarn test-ci
-          working_directory: npm/angular
-      - store_test_results:
-          path: npm/angular/test_results
-      - store_artifacts:
-          path: npm/angular/test_results
       - store-npm-logs
 
   npm-react:
@@ -1851,17 +1873,12 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build:all
+            yarn workspace @cypress/schematic build
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
           command: |
             yarn test
-          working_directory: npm/cypress-schematic
-      - run:
-          name: Launch Sandbox and Install Schematic
-          command: |
-            yarn launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 
@@ -2061,9 +2078,12 @@ jobs:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
           # https://github.com/cypress-io/cypress/issues/6690
+
+          # Todo: Add `jest` back into the list once https://github.com/yargs/yargs-parser/issues/452
+          # is resolved.
           command: |
             npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
+              typescript @types/jest enzyme @types/enzyme
       - run:
           name: Test types clash ⚔️
           working_directory: <<parameters.wd>>
@@ -2359,6 +2379,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    # TODO: Fix keyboard tests to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:
@@ -2375,6 +2400,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    # TODO: Implement WebKit network automation to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - run-frontend-shared-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true

@@ -1,3 +1,71 @@
+# [@cypress/schematic-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.1...@cypress/schematic-v2.0.2) (2022-08-10)
+
+
+### Bug Fixes
+
+* use legacy-peer-deps for semantic-release process ([#23231](https://github.com/cypress-io/cypress/issues/23231)) ([1a354b2](https://github.com/cypress-io/cypress/commit/1a354b237563df7c7cc47e28733a9dd1aa44a0b8))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-09)
+
+
+### Bug Fixes
+
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** add --e2e option. ensure binary is installed in Angular 14 ([#22922](https://github.com/cypress-io/cypress/issues/22922)) ([915859c](https://github.com/cypress-io/cypress/commit/915859c1a7e9546a040cacb21a15fc4d2ac98a73))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-07-25)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
+# [@cypress/schematic-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.0...@cypress/schematic-v2.0.1) (2022-07-25)
+
+
+### Bug Fixes
+
+* cypress-schematic ci issue with @types/eslint ([#22636](https://github.com/cypress-io/cypress/issues/22636)) ([62199b7](https://github.com/cypress-io/cypress/commit/62199b7379cbf600f045f9a8508b7d15af4c4359))
+* **cypress/schematic:** run configuration does not work anymore without baseUrl ([#21629](https://github.com/cypress-io/cypress/issues/21629)) ([3ed93e1](https://github.com/cypress-io/cypress/commit/3ed93e1dae8e540ab45cbbf4e3ff5e33630ff386))
+
 # [@cypress/schematic-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.7.0...@cypress/schematic-v2.0.0) (2022-06-01)
 
 

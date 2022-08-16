@@ -48,7 +48,7 @@ export class BrowserDataSource {
       }).catch((e) => {
         this.ctx.update((coreData) => {
           coreData.machineBrowsers = null
-          coreData.baseError = e
+          coreData.diagnostics.error = e
         })
 
         throw e

@@ -1,221 +1,154 @@
-# @cypress/angular
+> A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) test runner **v7.0.0+**
 
-## Installation
+**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
 
-NOTE: this is not published on npm yet. It's a work in progress. Consider [Cypress Angular
-](https://github.com/jscutlery/test-utils/tree/main/packages/cypress-angular) by [JS Cutlery](https://github.com/jscutlery) for a version that's currently working and available on npm.
+## TLDR
 
-```shell
-npm install -D cypress @cypress/angular
+- What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Angular components with zero effort. Here is a typical component testing, notice there is not external URL shown, since it is mounting the component directly.
+
+![Example component test](images/dynamic.gif)
+
+- How is this different from [Angular Testing](https://angular.io/guide/testing) or [ATL](https://testing-library.com/docs/angular-testing-library/intro/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/), and [visual testing](https://on.cypress.io/visual-testing). 
+- Read [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/) by Gleb Bahmutov
+
+## Comparison
+
+<!-- prettier-ignore-start -->
+Feature | Jest / Karma / ATL | Cypress + `@cypress/angular`
+--- | --- | ---
+Test runs in real browser | ❌ | ✅
+Supports shallow mount | ✅ | ❌
+Supports full mount | ✅ | ✅
+Test speed | 🏎 | [as fast as the app works in the browser](#fast-enough)
+Test can use additional plugins | maybe | use any [Cypress plugin](https://on.cypress.io/plugins)
+Test can interact with component | synthetic limited API | use any [Cypress command](https://on.cypress.io/api)
+Test can be debugged | via terminal and Node debugger | use browser DevTools
+Built-in time traveling debugger | ❌ | Cypress time traveling debugger
+Re-run tests on file or test change | ✅ | ✅
+Test output on CI | terminal | terminal, screenshots, videos
+Tests can be run in parallel | ✅ | ✅ via [parallelization](https://on.cypress.io/parallelization)
+Test against interface | if using `@testing-library/angular` | ✅ and can use `@testing-library/cypress`
+Spying and stubbing methods | Jest mocks | [Sinon library](https://on.cypress.io/stubs-spies-and-clocks)
+Stubbing imports | ✅ | ✅
+Stubbing clock | ✅ | ✅
+Code coverage | ✅ | ✅
+<!-- prettier-ignore-end -->
+
+If you are coming from Jest + ATL world, read [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/).
+
+## Blog posts
+
+- [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/)
+
+## Install
+
+Requires [Node](https://nodejs.org/en/) version 12 or above.
+
+```sh
+npm install --save-dev cypress @cypress/angular @cypress/webpack-dev-server
 ```
 
-Ensure you have a version of Cypress > 7. 
 
-Add the following to your support file:
+## API
 
-```js
-// cypress/support/component.js
-// core-js 3.*
-require('core-js/es/reflect');
-// core-js 2.*
-require('core-js/es7/reflect');
-require('@cypress/angular/support');
-```
-
-Enable component testing in `cypress.config.js`.
-
-```js
-module.exports = {
-  "component": {
-    "specPattern": "src/**/*.cy.ts"
-  }
-}
-```
-
-Configure `cypress.config.js` to transpile Angular code.
-
-```javascript
-import { defineConfig } from 'cypress'
-import * as webpackConfig from './webpack.config';
-
-export default defineConfig({
-  component: {
-    devServer: {
-      bundler: 'webpack',
-      webpackConfig
-    }
-  }
-})
-
-```
-
-The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts).
-
-## Use
-
-```js
-import { initEnv, mount } from '@cypress/angular'
-import { AppModule } from '../app.module'
-import { InputComponent } from './input.component'
-
-describe('InputComponent', () => {
-  it('should show default value input', () => {
-    initEnv(InputComponent)
-    mount(InputComponent)
-    cy.contains('My input value 4')
-  })
-
-  it('should replace default value input', () => {
-    initEnv({ declarations: [InputComponent] })
-    mount(InputComponent, { myInput: 9 })
-    cy.contains('My input value 9')
-  })
-
-  it('should show default value input with AppModule', () => {
-    initEnv({ imports: [AppModule] })
-    mount(InputComponent)
-    cy.contains('My input value 4')
-  })
-})
-
-```
-
-![Demo](images/demo.png)
+- `mount` allows you to mount a given Angular component as a mini web application and interact with it using Cypress commands
 
 ## Examples
 
-| Use case                                             | Description                                                                                  |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [Input](src/app/input)                               | Test inject `@Input()` value                                                                 |
-| [Output](src/app/output-subscribe)                   | Test catching `@Output()`                                                                    |
-| [Bootstrap](src/app/bootstrap-button)                | Bootstrap integration with style : `setConfig({ stylesheet: 'https://...});`                 |
-| [Add style](src/app/add-style)                       | Add custom style for testing : `setConfig({ style: 'p {background-color: blue;}' });`        |
-| [HTML mount](src/app/html-mount)                     | Mount a component with html, don't forget to call `detectChanges()` after                    |
-| [Image Snapshot](src/app/image-snapshot)             | Mount a component and visual asserting                                                       |
-| [Material](src/app/material-button)                  | Material integration                                                                         |
-| [Prime NG](src/app/primeng-button)                   | PrimeNG integration                                                                          |
-| [OnPush strategy](src/app/on-push-strat)             | Component with `changeDetection: ChangeDetectionStrategy.OnPush` need call `detectChanges()` |
-| [Directive](src/app/directives/highlight)            | Test directive with mountHtml                                                                |
-| [Pipe](src/app/pipes/capitalize)                     | Test pipe with mountHtml                                                                     |
-| [Stub service](src/app/service-stub)                 | Stub a service with Observable                                                               |
-| [Only service](src/app/my-values.service.cy-spec.ts) | Test a service without a component                                                           |
-| [Web Component](src/app/use-custom-element)          | Test a custom element with shadow dom                                                        |
-| [Assets](src/app/assets-image)                       | `assets` folder accessible by Cypress                                                        |
-| [Async](src/app/timeout)                             | Async test with `cy.tick`                                                                    |
-| [Routing](src/app/routing)                           | Test routing link                                                                            |
+```ts
+import { mount } from '@cypress/angular'
+import { HelloWorldComponent } from './hello-world.component'
+
+describe('HelloWorldComponent', () => {
+  it('works', () => {
+    mount(HelloWorldComponent)
+    // now use standard Cypress commands
+    cy.contains('Hello World!').should('be.visible')
+  })
+})
+```
+
+Look at the examples in [cypress/component](cypress/component) folder. Here is the list of examples showing various testing scenarios.
+
+### Basic examples
+Coming Soon...
+
+
+### Advanced examples
+Coming Soon...
+
+### Full examples
+Coming Soon...
+
+### External examples
+Coming Soon...
+
+## Options
+
 
 ## Code coverage
 
-### Integration test
+In order to use code coverage you can follow the instructions from [docs](https://github.com/cypress-io/code-coverage). In most of cases you need to install 2 dependencies: 
 
-- Install ngx-build-plus to extends the Angular CLI's build process and instrument the code
+```
+npm i @cypress/code-coverage babel-plugin-istanbul
 
-`npm i -D ngx-build-plus`
-
-- Add webpack coverage config file coverage.webpack.js to cypress folder
-
-```javascript
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.(js|ts)$/,
-        loader: 'istanbul-instrumenter-loader',
-        options: { esModules: true },
-        enforce: 'post',
-        include: require('path').join(__dirname, '..', 'src'),
-        exclude: [
-          /\.(e2e|spec)\.ts$/,
-          /node_modules/,
-          /(ngfactory|ngstyle)\.js/,
-        ],
-      },
-    ],
-  },
-};
+yarn add @cypress/code-coverage babel-plugin-istanbul
 ```
 
-- Update `angular.json` to use ngx-build with extra config
+If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the fly using `babel-plugin-istanbul` and generates report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your `cypress.json` file
 
 ```json
-"serve": {
-  "builder": "ngx-build-plus:dev-server",
-  "options": {
-    "browserTarget": "cypress-angular-coverage-example:build",
-    "extraWebpackConfig": "./cypress/coverage.webpack.js"
-  },
+{
+  "env": {
+    "coverage": false
+  }
 }
 ```
 
-- Instrument JS files with istanbul for code coverage reporting
+## Visual testing
 
-`npm i -D istanbul-instrumenter-loader`
+You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo has several example projects, see [visual-sudoku](examples/visual-sudoku), [visual-testing-with-percy](examples/visual-testing-with-percy), [visual-testing-with-happo](examples/visual-testing-with-happo), and [visual-testing-with-applitools](examples/visual-testing-with-applitools).
 
-- Add cypress code coverage plugin
+For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository. I explain how to write visual testing using open source tools in this [blog post](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/), [video talk](https://www.youtube.com/watch?v=00BNExlJUU8), and [slides](https://slides.com/bahmutov/i-see-what-is-going-on).
 
-`npm install -D @cypress/code-coverage`
+## Common problems
 
-- Then add the code below to your component support file
 
-```javascript
-import '@cypress/code-coverage/support';
-```
-- Then add the code below to your cypress configuration
-```js
-{
-  ...
-  component: {
-    setupNodeEvents(on, config) {
-      require('@cypress/code-coverage/task')(on, config);
-      return config;
-    }
-  }
-};
-```
+## Chat
 
-source : <https://github.com/skylock/cypress-angular-coverage-example>
-
-### Unit test
-
-- Instrument JS files with istanbul for code coverage reporting
-
-`npm i -D istanbul-instrumenter-loader`
-
-- In your `cypress/plugins/cy-ts-preprocessor.ts` add this rule
-
-```javascript
-rules: [
-  {
-    test: /\.(js|ts)$/,
-    loader: 'istanbul-instrumenter-loader',
-    options: { esModules: true },
-    enforce: 'post',
-    include: path.join(__dirname, '../..', 'src'),
-    exclude: [/\.(e2e|spec)\.ts$/, /node_modules/, /(ngfactory|ngstyle)\.js/],
-  },
-];
-```
-
-### Report
-
-You can find the HTML report at `coverage/lcov-report/index.html`
-
-## Debugging
-
-You can turn on debugging log by setting environment variable :
-
-```bash
-// Unix
-export DEBUG="@cypress/angular,cypress:webpack:dev-server"
-
-// PowerShell
-$env:DEBUG="@cypress/angular,cypress:webpack:dev-server"
-```
+Come chat with us [on discord](https://discord.gg/7ZHYhZSW) in the #component-testing channel.
 
 ## Development
 
-This project only transpiles the library, to see it in action:
+See [docs/development.md](./docs/development.md)
 
-- Install dependencies `yarn`
-- Compile the library `yarn build` or `yarn watch` for watch mode
-- Open Cypress with `yarn cy:open`
+## Debugging
+
+You can see verbose logs from this plugin by running with environment variable
+
+```
+DEBUG=@cypress/angular
+```
+
+Because finding and modifying Webpack settings while running this plugin is done by [find-webpack](https://github.com/bahmutov/find-webpack) module, you might want to enable its debug messages too.
+
+```
+DEBUG=@cypress/angular,find-webpack
+```
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)
+
+## Related tools
+
+Same feature for unit testing components from other frameworks using Cypress
+
+- [@cypress/react](https://github.com/cypress-io/cypress/tree/develop/npm/react)
+- [@cypress/vue](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
+- [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
+- [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
+- [@cypress/angular](https://github.com/bahmutov/@cypress/angular)
+- [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
+- [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)

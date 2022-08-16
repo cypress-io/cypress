@@ -36,12 +36,12 @@ describe('agents', () => {
     }
   })
 
-  it('does not display agents if there are no agents', () => {
+  it('does not render agents if there are no agents', () => {
     // @ts-ignore
     runnables.tests[0].agents = []
     start()
 
-    cy.contains('Spies / Stubs').should('not.be.visible')
+    cy.contains('Spies / Stubs').should('not.exist')
   })
 
   describe('when there are agents', () => {
@@ -52,7 +52,7 @@ describe('agents', () => {
 
     it('collapses agents by default', () => {
       start()
-      cy.get('.runnable-agents-region .instrument-content').should('not.be.visible')
+      cy.get('.runnable-agents-region .instrument-content').should('not.exist')
     })
 
     it('shows agents after expanding', () => {

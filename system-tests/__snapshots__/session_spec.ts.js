@@ -86,9 +86,6 @@ exports['e2e sessions / session tests'] = `
   can wait for login redirect automatically
     ✓ t1
 
-  can wait for a js redirect with an assertion
-    ✓ t1
-
   same session name, different options, multiple tests
     ✓ t1
     ✓ t2
@@ -107,15 +104,15 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
 
-  43 passing
+  42 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        44                                                                               │
-  │ Passing:      43                                                                               │
+  │ Tests:        43                                                                               │
+  │ Passing:      42                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -133,9 +130,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                            XX:XX       44       43        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       43       42        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       44       43        -        1        -  
+    ✔  All specs passed!                        XX:XX       43       42        -        1        -  
 
 
 `
@@ -225,6 +222,65 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   │ ✔  session_persist_spec_2.cy.js             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
+`
+
+exports['e2e sessions / sessions recreated on reload in open mode'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (session_recreate_reload.cy.js)                                          │
+  │ Searched:     cypress/e2e/session_recreate_reload.cy.js                                        │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  session_recreate_reload.cy.js                                                   (1 of 1)
+
+
+  recreates session on spec reload in open mode
+
+
+  recreates session on spec reload in open mode
+    ✓ sets session
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     session_recreate_reload.cy.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  session_recreate_reload.cy.js            XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

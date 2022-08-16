@@ -92,7 +92,7 @@ describe('GraphQLDataSource', () => {
         __typename: 'CurrentProject',
         cloudProject: {
           __typename: 'CloudProject',
-          id: 'Q2xvdWRQcm9qZWN0OjU=',
+          id: 'Q2xvdWRQcm9qZWN0OjY=',
           name: 'cloud-project-abc123',
         },
         id: Buffer.from(`CurrentProject:${projectPath}`, 'utf8').toString('base64'),

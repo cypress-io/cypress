@@ -5,6 +5,7 @@ export interface CypressBuilderOptions extends JsonObject {
   configFile: string
   browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
   devServerTarget: string
+  e2e: boolean
   env: Record<string, string>
   quiet: boolean
   exit: boolean

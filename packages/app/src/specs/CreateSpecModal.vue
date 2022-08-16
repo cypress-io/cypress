@@ -21,7 +21,7 @@
         :key="`${generator.id}-${iteration}`"
         v-model:title="title"
         :gql="props.gql.currentProject"
-        :type="props.gql.currentProject?.currentTestingType"
+        :type="props.gql.currentProject?.currentTestingType === 'e2e' ? props.gql.currentProject?.currentTestingType : 'componentEmpty'"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
         @restart="currentGeneratorId = undefined; iteration++"
@@ -77,6 +77,8 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
+    isDefaultSpecPattern
+    ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
 }
@@ -105,7 +107,7 @@ const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject, props.gql.currentProject?.isDefaultSpecPattern)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 

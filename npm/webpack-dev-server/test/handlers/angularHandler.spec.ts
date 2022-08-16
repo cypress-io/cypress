@@ -120,6 +120,8 @@ const expectLoadsAngularBuildOptions = () => {
   expect(buildOptions.aot).to.be.false
   expect(buildOptions.optimization).to.be.false
   expect(buildOptions.tsConfig).to.equal(tsConfig)
+  expect(buildOptions.outputHashing).to.equal('none')
+  expect(buildOptions.budgets).to.be.undefined
 
   const modifiedProjectConfig = cloneDeep(projectConfig)
 
@@ -144,6 +146,7 @@ const expectGeneratesTsConfig = async (devServerConfig: WebpackDevServerConfig) 
     compilerOptions: {
       outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
       allowSyntheticDefaultImports: true,
+      skipLibCheck: true,
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),

@@ -1172,5 +1172,33 @@ describe('visual error templates', () => {
         default: ['component'],
       }
     },
+
+    COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: () => {
+      return {
+        default: [
+          [
+            {
+              dependency: {
+                type: 'vite',
+                name: 'Vite',
+                package: 'vite',
+                installer: 'vite',
+                description: 'Vite is dev server that serves your source files over native ES modules',
+                minVersion: '^=2.0.0 || ^=3.0.0',
+              },
+              satisfied: false,
+              detectedVersion: '1.0.0',
+              loc: null,
+            },
+          ],
+        ],
+      }
+    },
+
+    EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

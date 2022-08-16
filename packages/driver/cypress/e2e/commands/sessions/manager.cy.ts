@@ -16,8 +16,8 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
     expect(sessionsManager).to.haveOwnProperty('cy')
     expect(sessionsManager).to.haveOwnProperty('Cypress')
-    expect(sessionsManager).to.haveOwnProperty('currentTestRegisteredSessions')
-    expect(sessionsManager.currentTestRegisteredSessions).to.be.instanceOf(Map)
+    expect(sessionsManager).to.haveOwnProperty('registeredSessions')
+    expect(sessionsManager.registeredSessions).to.be.instanceOf(Map)
   })
 
   describe('.setActiveSession()', () => {
@@ -245,7 +245,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('sessions.clearAllSavedSessions()', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').withArgs('clear:session').resolves(null)
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:session').resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')
@@ -256,27 +256,77 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(cypressSpy).to.be.calledOnceWith('clear:session', null)
     })
 
-    it('.clearCurrentSessionData()', async () => {
-      // Unable to cleanly mock localStorage or sessionStorage on Firefox,
+    describe('.clearCurrentSessionData()', () => {
+      it('logs message when running tests', async () => {
+        // Unable to cleanly mock localStorage or sessionStorage on Firefox,
+        // so add dummy values and ensure they are cleared as expected.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1141698
+        window.localStorage.foo = 'bar'
+        window.sessionStorage.jazzy = 'music'
+
+        expect(window.localStorage).of.have.lengthOf(1)
+        expect(window.sessionStorage).of.have.lengthOf(1)
+
+        CypressInstance.log = cy.stub()
+        const sessionsManager = new SessionsManager(CypressInstance, {
+          state: () => true,
+        })
+
+        const clearStorageSpy = cy.stub(sessionsManager.sessions, 'clearStorage')
+        const clearCookiesSpy = cy.stub(sessionsManager.sessions, 'clearCookies')
+
+        await sessionsManager.sessions.clearCurrentSessionData()
+
+        expect(clearStorageSpy).to.be.calledOnce
+        expect(clearCookiesSpy).to.be.calledOnce
+        expect(window.localStorage).of.have.lengthOf(0)
+        expect(window.sessionStorage).of.have.lengthOf(0)
+        expect(CypressInstance.log).to.be.calledOnce
+      })
+
+      it('does not log message when setting up tests', async () => {
+        // Unable to cleanly mock localStorage or sessionStorage on Firefox,
       // so add dummy values and ensure they are cleared as expected.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1141698
-      window.localStorage.foo = 'bar'
-      window.sessionStorage.jazzy = 'music'
+        window.localStorage.foo = 'bar'
+        window.sessionStorage.jazzy = 'music'
 
-      expect(window.localStorage).of.have.lengthOf(1)
-      expect(window.sessionStorage).of.have.lengthOf(1)
+        expect(window.localStorage).of.have.lengthOf(1)
+        expect(window.sessionStorage).of.have.lengthOf(1)
 
-      const sessionsManager = new SessionsManager(CypressInstance, () => {})
+        CypressInstance.log = cy.stub()
+        const sessionsManager = new SessionsManager(CypressInstance, {
+          state: () => false,
+        })
 
-      const clearStorageSpy = cy.stub(sessionsManager.sessions, 'clearStorage')
-      const clearCookiesSpy = cy.stub(sessionsManager.sessions, 'clearCookies')
+        const clearStorageSpy = cy.stub(sessionsManager.sessions, 'clearStorage')
+        const clearCookiesSpy = cy.stub(sessionsManager.sessions, 'clearCookies')
 
-      await sessionsManager.sessions.clearCurrentSessionData()
+        await sessionsManager.sessions.clearCurrentSessionData()
 
-      expect(clearStorageSpy).to.be.calledOnce
-      expect(clearCookiesSpy).to.be.calledOnce
-      expect(window.localStorage).of.have.lengthOf(0)
-      expect(window.sessionStorage).of.have.lengthOf(0)
+        expect(clearStorageSpy).to.be.calledOnce
+        expect(clearCookiesSpy).to.be.calledOnce
+        expect(window.localStorage).of.have.lengthOf(0)
+        expect(window.sessionStorage).of.have.lengthOf(0)
+        expect(CypressInstance.log).not.to.be.called
+      })
+    })
+
+    it('sessions.saveSessionData', async () => {
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('save:session').resolves(null)
+
+      const sessionsManager = new SessionsManager(CypressInstance, cy)
+      const sessionsSpy = cy.stub(sessionsManager, 'setActiveSession')
+
+      const setup = cy.stub()
+      const sess = { id: '1', setup }
+
+      await sessionsManager.sessions.saveSessionData(sess)
+
+      expect(sessionsSpy).to.be.calledOnce
+      expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
+
+      expect(cypressSpy).to.be.calledOnceWith('save:session')
     })
 
     // TODO:

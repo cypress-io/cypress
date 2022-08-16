@@ -161,7 +161,8 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it('fails when network connection immediately fails', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23252
+    systemTests.it.skip('fails when network connection immediately fails', {
       spec: 'visit_http_network_error_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -173,7 +174,8 @@ describe('e2e visit', () => {
       expectedExitCode: 1,
     })
 
-    systemTests.it('fails when file server responds with 404', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
+    systemTests.it.skip('fails when file server responds with 404', {
       spec: 'visit_file_404_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,

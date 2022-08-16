@@ -1,17 +1,5 @@
 .reporter {
   .instruments-container {
-    .route-alias-name {
-      border-radius: 4px;
-      background-color: $teal-500;
-      color: $white;
-      display: inline-block;
-      font-family: $font-sans;
-      font-style: normal;
-      font-size: 12px;
-      line-height: 16px;
-      padding: 0px 5px;
-    }
-
     .instrument-content {
       background-color: $reporter-section-background;
       border-left: 1px solid $reporter-section-background;
@@ -45,10 +33,5 @@
     .no-responses .route-num-responses {
       color: $fail;
     }
-  }
-
-  .no-agents .instruments-container,
-  .no-routes .instruments-container {
-    display: none;
   }
 }

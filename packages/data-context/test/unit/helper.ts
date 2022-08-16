@@ -3,7 +3,7 @@ import 'mocha'
 import path from 'path'
 import fs from 'fs-extra'
 import { Response } from 'cross-fetch'
-import Fixtures, { fixtureDirs, scaffoldProject } from '@tooling/system-tests'
+import Fixtures, { fixtureDirs, scaffoldProject, removeProject } from '@tooling/system-tests'
 import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
@@ -20,7 +20,7 @@ import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
 
-export { scaffoldProject }
+export { scaffoldProject, removeProject }
 
 export function getSystemTestProject<T extends typeof fixtureDirs[number]> (project: T): SystemTestProjectPath<T> {
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>

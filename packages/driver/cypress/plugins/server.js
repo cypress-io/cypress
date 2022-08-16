@@ -283,6 +283,14 @@ const createApp = (port) => {
     res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
   })
 
+  app.get('/set-cookie', (req, res) => {
+    const { cookie } = req.query
+
+    res
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
   let _var = ''
 
   app.get('/set-var', (req, res) => {
