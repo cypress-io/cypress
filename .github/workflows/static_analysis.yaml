@@ -6,7 +6,7 @@ name: Snyk Static Analysis Scan
 on:
   pull_request:
     branches: 
-      - main
+      - master
       - develop
 jobs:
   Snyk_SAST_Scan :
