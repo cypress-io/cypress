@@ -11,8 +11,8 @@ export type PathsMapper = (s: string) => string
 export const identityMapper: PathsMapper = (s: string) => s
 
 /**
- * The EntryGenerator creates and entry file which includes all dependencies reachable from the [entryFilePath] but
- * flattened. This is helpful while diagnosing problems as it is easier to exclude a dependency simly by commenting it
+ * The EntryGenerator creates an entry file which includes all dependencies reachable from the [entryFilePath] but
+ * flattened. This is helpful while diagnosing problems as it is easier to exclude a dependency simply by commenting it
  * out in the generated entry file. This entry file is then provided to packherd instead of the main app file when
  * generating the bundle.
  * Combined with the  `nodeModulesOnly` options allows to control which files are included in the bundle in the end that

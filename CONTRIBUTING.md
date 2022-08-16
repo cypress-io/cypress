@@ -285,7 +285,7 @@ Here is a list of the core packages in this repository with a short description,
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
 
-Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. These packages are used for various aspects of the development process 
+Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
 
 Here is a list of the packages in this repository with a short description, located within the [`tooling`](./tooling) directory:
 
@@ -293,7 +293,7 @@ Here is a list of the packages in this repository with a short description, loca
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [packherd](./tooling/packherd)        | `packherd`              | Herds all dependencies reachable from an entry and packs them.               |
 
-Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
+Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 
 Here is a list of the npm packages in this repository:
 

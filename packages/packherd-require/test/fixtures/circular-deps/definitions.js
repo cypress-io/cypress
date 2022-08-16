@@ -1,7 +1,5 @@
 'use strict'
 
-// Note that the below reproduces the scenario inside the lib folder which is shown to work with Node.js
-
 function foo(exports, module, __filename, __dirname, require) {
   const bar = require('./bar')
   exports.value = 1

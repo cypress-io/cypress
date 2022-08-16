@@ -21,7 +21,7 @@ const logError = debug('packherd:error')
 export * from './loader'
 
 /**
- * Configures how packerd require works.
+ * Configures how packherd require works.
  *
  * @property requireStatsFile: specifies where to write benchmarking stats if diagnose is active
  * @property transpileOpts: configures if/how TypeScript files are transpiled

@@ -15,7 +15,7 @@ export * from './types'
  * @property nodeModulesOnly: if `true` only `node_modules` are included in the
  * bundle
  *
- * @property pathsMapper: if provided that paths under which modules are
+ * @property pathsMapper: if provided, the paths under which modules are
  * included in the bundle will be mapped
  *
  * @property createBundle: allows overriding the function used to create the

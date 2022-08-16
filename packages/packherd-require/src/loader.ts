@@ -118,7 +118,7 @@ function defaultModuleNeedsReload (
  * Basically we register all loaded modules here and when loading a module we compare our record with the
  * {@see * _moduleCache}. If we have it, but the `_moduleCache` doesn't this means that it was deleted from the latter.
  * In that case we need to reload it fresh instead of pulling from any cache, including our {@link _moduleExports} in
- * order to replicate the behaviour that Node.js has by default.
+ * order to replicate the behavior that Node.js has by default.
  *
  * @category Loader
  */
@@ -375,7 +375,7 @@ export class PackherdModuleLoader {
    * If it fails to find either it returns `undefined`.
    *
    * @param moduleUri the uri as specified in the `require` or `import` statement used for diagnostics
-   * @param moduleKey the key under wich it could be stored inside the `moduleExports` or `moduleDefinitions`
+   * @param moduleKey the key under which it could be stored inside the `moduleExports` or `moduleDefinitions`
    * @param fullPath path to the module on Disk
    * @param parent the `module.parent`
    * @private

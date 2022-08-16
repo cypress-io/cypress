@@ -9,15 +9,15 @@ Herds all dependencies reachable from an entry and packs them.
 
 ## Summary
 
-packherd has three main tasks. 1 is provided by this package. 2 and 3 are provided by `@packages/packherd-require`
+packherd has three main tasks:
 
 1. bundling application files and providing related metadata
 2. loading modules that have been bundled previously and are provided via fully instantiated
    module exports or definition functions that return a module export when invoked
 3. transpiling TypeScript modules on demand and maintaining a cache of them 
 
-While `1.` and `2.` are very related and work hand in hand, `3.` is unrelated to them and was
-just added here since it is another feature that requires to intercept module loads.
+`1.` is provided by this package. `2.` and `3.` are provided by `@packages/packherd-require`. While `1.` and `2.` are very related 
+and work hand in hand, `3.` is unrelated to them and was just added here since it is another feature that requires to intercept module loads.
 
 ## Creating a Bundle with Packherd
 

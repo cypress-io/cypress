@@ -314,7 +314,7 @@ class SourcemapSupport {
   }
 
   retrieveSourceMap (script: FullScriptPath) {
-    // 1. Try to load previosuly cached source map
+    // 1. Try to load previously cached source map
     const fromMemory = this._sourcemapCache.get(script)
 
     if (fromMemory != null) {
@@ -453,7 +453,7 @@ function CallSiteToString (this: CallSite) {
   if (isMethodCall) {
     let typeName = this.getTypeName()
 
-    // Fixes shim to be backward compatable with Node v0 to v4
+    // Fixes shim to be backward compatible with Node v0 to v4
     if (typeName === '[object Object]') {
       typeName = 'null'
     }

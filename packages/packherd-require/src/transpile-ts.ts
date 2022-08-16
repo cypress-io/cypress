@@ -80,7 +80,7 @@ export function hookTranspileTs (
 
     // NOTE: I benchmarked bypassing the loader to avoid reading `code`
     // that goes unused in case the transpiled version is already in the cache.
-    // That optimiziation does not make a notable difference and thus we opt of
+    // That optimization does not make a notable difference and thus we opt of
     // the more robust approach of using the Node.js builtin compile which also
     // provides internal Node.js cache checks.
     mod._compile = (code: string) => {
