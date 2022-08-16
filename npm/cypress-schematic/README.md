@@ -62,7 +62,7 @@ ng e2e
 If you have chosen to add the `ng ct` command, you can also run Cypress component testing in `open` mode using this:
 
 ```shell script
-ng ct
+ng run {project-name}:ct
 ```
 
 To generate new e2e spec files:
@@ -72,13 +72,13 @@ To generate new e2e spec files:
 ng generate @cypress/schematic:e2e
 ``` 
 =======
-ng generate @cypress/schematic:spec --testing-type=e2e
+ng generate @cypress/schematic:spec -t e2e
 ```
 
 To generate new component spec files:
 
 ```shell script
-ng generate @cypress/schematic:spec --testing-type=ct
+ng generate @cypress/schematic:spec -t ct
 ```
 >>>>>>> 2ba147e9ee (update ng-generate to be test-type agnostic - ng generate @cypress/schematic:spec. update readme. add tests.)
 
@@ -128,7 +128,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
 
 Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
 
-### Specifying a custom `cypress.json` config file
+### Specifying a custom config file
 
 It may be useful to have different Cypress configuration files per environment (ie. development, staging, production).
 
