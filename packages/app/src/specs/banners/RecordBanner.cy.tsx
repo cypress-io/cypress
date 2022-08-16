@@ -1,3 +1,4 @@
+import { defaultMessages } from '@cy/i18n'
 import RecordBanner from './RecordBanner.vue'
 
 describe('<RecordBanner />', () => {
@@ -18,6 +19,9 @@ describe('<RecordBanner />', () => {
         }],
       } as any,
     } as any
+
+    cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
+    cy.contains(defaultMessages.specPage.banners.record.content).should('be.visible')
 
     cy.findByText('cypress run --component --record --key abcd-efg-1234')
 
