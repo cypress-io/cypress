@@ -4,7 +4,7 @@ import { BaseErrorFragmentDoc } from '../../../../launchpad/src/generated/graphq
 import dedent from 'dedent'
 
 // Selectors
-const headerSelector = 'h1[data-testid=error-header]'
+const headerSelector = 'h1[data-cy=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = 'button[data-testid=error-retry-button]'
 const docsButtonSelector = 'a[data-testid=error-docs-button]'
