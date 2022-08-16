@@ -17,7 +17,7 @@ const MINIMAL_PROJECT = 'v8-snapshot/minimal'
 const t = spok.adapters.chaiExpect(expect)
 
 const pathRelativeToCwd = (projectBaseDir, ...pathComponentsRelativeToProjectBaseDir) => {
-  return path.relative(process.cwd(), path.join(projectBaseDir, ...pathComponentsRelativeToProjectBaseDir))
+  return path.relative(process.cwd(), path.join(projectBaseDir, ...pathComponentsRelativeToProjectBaseDir)).split(path.sep).join(path.posix.sep)
 }
 
 describe('Packherd', () => {
@@ -34,9 +34,6 @@ describe('Packherd', () => {
   it('resolves paths relative to entry and creates entry content', async () => {
     const entryFile = require.resolve(path.join(projectBaseDir, 'entry.js'))
     const { meta, bundle } = await packherd({ entryFile })
-
-    // eslint-disable-next-line no-console
-    console.log(meta)
 
     spok(t, meta, {
       inputs: {
