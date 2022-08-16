@@ -92,6 +92,16 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   return
 }
 
+// Given a node, return the indexes of the characters that should be highlighted
+// The indexes are matched to the `relative` and `baseName` keys of FoundSpec, and
+// depending on whether the node is a leaf or not, the indexes are normalized to the position
+// of the node's location in the tree.
+// If a search of "src/comp" is given with indexes [0,1,2,3,4,5,6,7], the indexes will be split
+// into [0,1,2] and [4,5,6,7] corresponding with a
+// - src
+//   - components
+//     - index.ts
+// tree (given that src/comp is not collapsed)
 function getHighlightIndexes <T extends FoundSpec> (node: SpecTreeNode<T>) {
   if (!(node.data as any)?.fuzzyIndexes) {
     return []
@@ -156,6 +166,14 @@ export function useCachedSpecs<S extends { absolute: string }> (
   return cachedSpecs
 }
 
+// Used to split indexes from a baseName match to a fileName + extension (with cy extension) match
+// For example, given a filename of Button.cy.tsx:
+// - search of 'Butcytsx' yields indexes [0,1,2,7,8,10,11,12]
+// - deriveIndexes yields
+//    {
+//      fileNameIndexes: [0,1,2], // indexes to highlight in "Button"
+//      extensionIndexes: [1,2,4,5,6] // indexes to highlight in ".cy.tsx"
+//    }
 export function deriveIndexes (fileName: string, indexes: number[]) {
   return indexes.reduce((acc, idx) => {
     if (idx < fileName.length) {
