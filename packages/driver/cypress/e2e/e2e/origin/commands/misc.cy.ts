@@ -195,9 +195,10 @@ context('cy.origin misc', () => {
 })
 
 it('verifies number of cy commands', () => {
+  // remove custom commands we added for our own testing
+  const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils']
   // @ts-ignore
-  // remove 'getAll' and 'shouldWithTimeout' commands since they are custom commands we added for our own testing and are not actual cy commands
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll' || command === 'shouldWithTimeout')
+  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => customCommands.includes(command))
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
