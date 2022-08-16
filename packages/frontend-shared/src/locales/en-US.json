@@ -158,7 +158,7 @@
       "severityHigh": "High",
       "flakyRate": "{0}% flaky rate",
       "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
-      "lastFlaky": "Last flaky {runsSinceLastFlake} runs ago | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
+      "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
     },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
@@ -465,6 +465,10 @@
       "experimentalModifyObstructiveThirdPartyCode": {
         "name": "Modify Obstructive Third Party Code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
+      },
+      "experimentalSingleTabRunMode": {
+        "name": "Single Tab Run Mode",
+        "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
       },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",

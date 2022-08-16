@@ -1,3 +1,23 @@
+# [@cypress/vite-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.0...@cypress/vite-dev-server-v3.1.1) (2022-08-15)
+
+
+### Bug Fixes
+
+* vite v3 not working with node >=17 ([#23048](https://github.com/cypress-io/cypress/issues/23048)) ([2226b28](https://github.com/cypress-io/cypress/commit/2226b2834aabc90eab532bd7cf86407e8c7248df))
+
+# [@cypress/vite-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.0.0...@cypress/vite-dev-server-v3.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+
+
+### Features
+
+* support vite.config.mts and vite.config.cts ([#22782](https://github.com/cypress-io/cypress/issues/22782)) ([8678053](https://github.com/cypress-io/cypress/commit/8678053f7d822cda90fe653fd1aa87efd09cf769))
+* update to Vite 3 ([#22915](https://github.com/cypress-io/cypress/issues/22915)) ([6adba46](https://github.com/cypress-io/cypress/commit/6adba462ea6b76dbb96f99aa3837492ca1f17ed3))
+
 # [@cypress/vite-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.3...@cypress/vite-dev-server-v3.0.0) (2022-06-13)
 
 

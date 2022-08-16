@@ -33,7 +33,14 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
-    render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+    render: (gqlVal) => (
+      <div class="border-current border-1 h-700px resize overflow-auto">
+        <LoginModal
+          gql={gqlVal}
+          modelValue={true}
+          utmMedium="testing"
+        />
+      </div>),
   })
 }
 
@@ -77,6 +84,48 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleSuccess).should('be.visible')
       cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+    })
+
+    it('shows "connect project" after login if required by prop, and emits expected events', () => {
+      const connectProjectLabel = defaultMessages.runs.connect.modal.selectProject.connectProject
+      const connectProjectSpy = cy.spy().as('connectProjectSpy')
+      const loggedInSpy = cy.spy().as('loggedInSpy')
+      const updateModelSpy = cy.spy().as('updateModelSpy')
+
+      const props = {
+        'onUpdate:modelValue': (value: boolean) => {
+          updateModelSpy(value)
+        },
+        'onConnect-project': () => connectProjectSpy(),
+      }
+
+      // mount with extra event spies
+      cy.mountFragment(LoginModalFragmentDoc, {
+        onResult: (result) => {
+          result.__typename = 'Query'
+          result.authState.browserOpened = true
+          result.cloudViewer = cloudViewer
+          result.cloudViewer.__typename = 'CloudUser'
+        },
+        render: (gqlVal) => (
+          <div class="border-current border-1 h-700px resize overflow-auto">
+            <LoginModal
+              gql={gqlVal}
+              modelValue={true}
+              utmMedium="testing"
+              showConnectButtonAfterLogin={true}
+              onLoggedin={loggedInSpy}
+              {...props}
+            />
+          </div>),
+      })
+
+      cy.contains('button', connectProjectLabel)
+      .click()
+
+      cy.get('@connectProjectSpy').should('have.been.calledOnce')
+      cy.get('@loggedInSpy').should('have.been.calledOnce')
+      cy.get('@updateModelSpy').should('have.been.calledOnceWith', false)
     })
   })
 

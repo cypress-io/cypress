@@ -27,7 +27,6 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - reapply-state-refactor
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -36,6 +35,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -44,6 +44,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ "lmiller/experimental-single-tab-component-testing", << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -63,7 +64,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'lmiller/windows-vite-fix', << pipeline.git.branch >> ]
+    - equal: [ 'marktnoonan/windows-path-fix', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -127,7 +128,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/22272-globbing-working-dir" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -458,11 +459,17 @@ commands:
                 channel: <<parameters.install-chrome-channel>>
                 version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
       - run:
+          name: Run driver tests in Cypress
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ "<<parameters.browser>>" = "webkit" ]]; then
+              npx playwright install webkit
+              npx playwright install-deps webkit
+            fi
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
@@ -1562,6 +1569,13 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
+  driver-integration-tests-webkit:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+
   driver-integration-tests-chrome-experimentalSessionAndOrigin:
     <<: *defaults
     resource_class: medium
@@ -1598,6 +1612,15 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: electron
+          experimentalSessionAndOrigin: true
+
+  driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
           experimentalSessionAndOrigin: true
 
   run-reporter-component-tests-chrome:
@@ -1642,7 +1665,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    # parallelism: 3 TODO: Add parallelism once we have more specs
+    parallelism: 2
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
@@ -1850,17 +1873,12 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build:all
+            yarn workspace @cypress/schematic build
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
           command: |
             yarn test
-          working_directory: npm/cypress-schematic
-      - run:
-          name: Launch Sandbox and Install Schematic
-          command: |
-            yarn launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 
@@ -2361,6 +2379,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    # TODO: Fix keyboard tests to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:
@@ -2377,6 +2400,11 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    # TODO: Implement WebKit network automation to fix the majority of these tests before re-enabling
+    # - driver-integration-tests-webkit-experimentalSessionAndOrigin:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - run-frontend-shared-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2505,6 +2533,8 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

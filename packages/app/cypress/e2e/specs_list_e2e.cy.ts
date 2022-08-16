@@ -237,7 +237,8 @@ describe('App: Spec List (E2E)', () => {
         cy.get('button').contains('23 Matches')
       })
 
-      it('saves the filter when navigating to a spec and back', function () {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23305
+      it.skip('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)

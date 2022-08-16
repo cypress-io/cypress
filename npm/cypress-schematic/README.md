@@ -61,7 +61,7 @@ To generate new e2e spec files:
 
 ```shell script
 ng generate @cypress/schematic:e2e
-```
+``` 
 
 ## Builder Options 🛠
 
