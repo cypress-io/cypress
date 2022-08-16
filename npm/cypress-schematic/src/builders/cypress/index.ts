@@ -99,10 +99,6 @@ export function startDevServer ({
   devServerTarget,
   watch,
   context }: CypressStartDevServerProps): Observable<string> {
-  // @NOTE: Do not forward watch option if not supported by the target dev server,
-  // this is relevant for running Cypress against dev server target that does not support this option,
-  // for instance @nguniversal/builders:ssr-dev-server.
-  // see https://github.com/nrwl/nx/blob/f930117ed6ab13dccc40725c7e9551be081cc83d/packages/cypress/src/executors/cypress/cypress.impl.ts
   const buildTarget = targetFromTargetString(devServerTarget)
 
   return from(context.getBuilderNameForTarget(buildTarget)).pipe(
