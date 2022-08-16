@@ -16,9 +16,9 @@ import { CypressBuilderOptions } from './cypressBuilderOptions'
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
 Partial<CypressCommandLine.CypressOpenOptions>;
 
-type StartDevServerProps = {
+type CypressStartDevServerProps = {
   devServerTarget: string
-  watch?: boolean
+  watch: boolean
   context: any
 }
 
@@ -98,7 +98,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
 export function startDevServer ({
   devServerTarget,
   watch,
-  context }: StartDevServerProps): Observable<string> {
+  context }: CypressStartDevServerProps): Observable<string> {
   // @NOTE: Do not forward watch option if not supported by the target dev server,
   // this is relevant for running Cypress against dev server target that does not support this option,
   // for instance @nguniversal/builders:ssr-dev-server.
