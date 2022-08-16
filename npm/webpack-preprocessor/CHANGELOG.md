@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.12.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.12.0...@cypress/webpack-preprocessor-v5.12.1) (2022-08-11)
+
+
+### Bug Fixes
+
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+
 # [@cypress/webpack-preprocessor-v5.12.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.11.1...@cypress/webpack-preprocessor-v5.12.0) (2022-06-01)
 
 

@@ -60,7 +60,7 @@ const getCA = () => {
   })
 }
 
-const prepend = (arch, urlPath) => {
+const prepend = (arch, urlPath, version) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
@@ -71,6 +71,7 @@ const prepend = (arch, urlPath) => {
       .replace(/\\?\$\{endpoint\}/, endpoint)
       .replace(/\\?\$\{platform\}/, platform)
       .replace(/\\?\$\{arch\}/, arch)
+      .replace(/\\?\$\{version\}/, version)
     )
     : `${endpoint}?platform=${platform}&arch=${arch}`
 }
@@ -82,7 +83,9 @@ const getUrl = (arch, version) => {
     return version
   }
 
-  return version ? prepend(arch, `desktop/${version}`) : prepend(arch, 'desktop')
+  const urlPath = version ? `desktop/${version}` : 'desktop'
+
+  return prepend(arch, urlPath, version)
 }
 
 const statusMessage = (err) => {

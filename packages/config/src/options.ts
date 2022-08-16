@@ -3,31 +3,37 @@ import path from 'path'
 
 // @ts-ignore
 import pkg from '@packages/root'
+import type { AllCypressErrorNames } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 
 import * as validate from './validation'
 
-export type BreakingOptionErrorKey =
-  | 'COMPONENT_FOLDER_REMOVED'
-  | 'INTEGRATION_FOLDER_REMOVED'
-  | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
-  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
-  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT'
-  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
-  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E'
-  | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
-  | 'EXPERIMENTAL_SAMESITE_REMOVED'
-  | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
-  | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
-  | 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED'
-  | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
-  | 'EXPERIMENTAL_STUDIO_REMOVED'
-  | 'FIREFOX_GC_INTERVAL_REMOVED'
-  | 'NODE_VERSION_DEPRECATION_SYSTEM'
-  | 'NODE_VERSION_DEPRECATION_BUNDLED'
-  | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
-  | 'RENAMED_CONFIG_OPTION'
-  | 'TEST_FILES_RENAMED'
+const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
+  'COMPONENT_FOLDER_REMOVED',
+  'INTEGRATION_FOLDER_REMOVED',
+  'CONFIG_FILE_INVALID_ROOT_CONFIG',
+  'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
+  'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
+  'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+  'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
+  'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+  'EXPERIMENTAL_SAMESITE_REMOVED',
+  'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
+  'EXPERIMENTAL_RUN_EVENTS_REMOVED',
+  'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+  'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
+  'EXPERIMENTAL_SHADOW_DOM_REMOVED',
+  'EXPERIMENTAL_STUDIO_REMOVED',
+  'EXPERIMENTAL_STUDIO_REMOVED',
+  'FIREFOX_GC_INTERVAL_REMOVED',
+  'NODE_VERSION_DEPRECATION_SYSTEM',
+  'NODE_VERSION_DEPRECATION_BUNDLED',
+  'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+  'RENAMED_CONFIG_OPTION',
+  'TEST_FILES_RENAMED',
+] as const
+
+export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
 export type OverrideLevel = 'any' | 'suite' | 'never'
 
@@ -207,6 +213,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSourceRewriting',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -520,7 +532,7 @@ export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
-export const breakingOptions: Array<BreakingOption> = [
+export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
@@ -592,7 +604,7 @@ export const breakingOptions: Array<BreakingOption> = [
     newName: 'specPattern',
     isWarning: false,
   },
-]
+] as const
 
 export const breakingRootOptions: Array<BreakingOption> = [
   {
@@ -645,6 +657,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
   e2e: [
+    {
+      name: 'experimentalSingleTabRunMode',
+      errorKey: 'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
+      isWarning: false,
+      testingTypes: ['e2e'],
+    },
     {
       name: 'indexHtmlFile',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',

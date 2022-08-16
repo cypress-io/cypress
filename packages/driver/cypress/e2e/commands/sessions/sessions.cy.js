@@ -24,6 +24,7 @@ describe('cy.session', { retries: 0 }, () => {
 
     it('accepts array as id', () => {
       cy.session('session-id', () => {})
+      cy.session('session-id')
     })
 
     it('accepts object as id', () => {
@@ -35,7 +36,7 @@ describe('cy.session', { retries: 0 }, () => {
       const setup = cy.stub().as('setupSession')
       const validate = cy.stub().as('validateSession')
 
-      cy.session('session-id', setup, { validate })
+      cy.session('session-id-3rd-arg', setup, { validate })
       cy.then(() => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledOnce
@@ -236,7 +237,7 @@ describe('cy.session', { retries: 0 }, () => {
         setupTestContext()
         cy.log('Creating new session with validation to test against')
 
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -366,7 +367,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         validate.callsFake(() => false)
 
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
       })
     })
 
@@ -374,14 +375,14 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup)
+        cy.session(`session-${Cypress.state('test').id}`, setup)
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup)
+        cy.session(`session-${Cypress.state('test').id}`, setup)
         cy.url().should('eq', 'about:blank')
       })
 
@@ -433,14 +434,14 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -504,7 +505,7 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
@@ -516,7 +517,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -627,7 +628,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('fails to recreate session and logs correctly', function (done) {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
@@ -733,7 +734,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
       })
     })
   })

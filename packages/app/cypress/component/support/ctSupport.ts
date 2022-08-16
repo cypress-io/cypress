@@ -10,6 +10,17 @@ export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
   },
 })
 
+beforeEach(() => {
+  if (!window.top?.getEventManager) {
+    throw Error('Could not find `window.top.getEventManager`. Expected `getEventManager` to be defined.')
+  }
+
+  // this is always undefined, since we only define it when
+  // running CT with a project that sets `experimentalSingleTabRunMode: true`
+  // @ts-ignore - dynamically defined during tests using
+  expect(window.top.getEventManager().autDestroyedCount).to.be.undefined
+})
+
 // Event manager with Cypress driver dependencies stubbed out
 // Useful for component testing
 export const createEventManager = () => {

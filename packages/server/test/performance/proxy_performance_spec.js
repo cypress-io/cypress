@@ -375,7 +375,8 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    describe(urlUnderTest, function () {
+    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
+    describe.skip(urlUnderTest, function () {
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 
