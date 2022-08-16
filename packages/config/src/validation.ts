@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import * as is from 'check-more-types'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
+import { BROWSER_FAMILY } from '@packages/types'
 
 const debug = Debug('cypress:server:validation')
 
@@ -49,11 +50,8 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  // TODO: this is duplicated with browsers/index
-  const knownBrowserFamilies = ['chromium', 'firefox']
-
-  if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
-    return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
+  if (!is.oneOf(BROWSER_FAMILY)(browser.family)) {
+    return errMsg('family', browser, commaListsOr`either ${BROWSER_FAMILY}`)
   }
 
   if (!is.unemptyString(browser.displayName)) {

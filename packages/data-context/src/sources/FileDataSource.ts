@@ -36,7 +36,11 @@ export class FileDataSource {
       // The working directory path may include characters that conflict with glob
       // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
       // We scope our search to the working directory using the `cwd` globby option.
-      return globPattern.replace(cwd, '.')
+      if (globPattern.startsWith(cwd)) {
+        return globPattern.replace(cwd, '.')
+      }
+
+      return globPattern
     })
 
     const ignoreGlob = (globOptions?.ignore ?? []).concat('**/node_modules/**')
