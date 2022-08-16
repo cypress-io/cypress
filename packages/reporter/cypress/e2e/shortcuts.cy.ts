@@ -161,5 +161,25 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('focus:tests')
       })
     })
+
+    context('focus search', () => {
+      ['{ctrl+k}', '{meta+k}'].forEach((shortcut) => {
+        it(`emits "focus:search" and toggles spec list with ${shortcut}`, () => {
+          cy.get('body').type(shortcut).then(() => {
+            expect(runner.emit).to.have.been.calledWith('save:state')
+            expect(runner.emit).to.have.been.calledWith('focus:search')
+            cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
+
+            // Reset call history to verify we don't toggle spec list if it's already open
+            runner.emit.resetHistory()
+          })
+
+          cy.get('body').type(shortcut).then(() => {
+            expect(runner.emit).to.not.have.been.calledWith('save:state')
+            expect(runner.emit).to.have.been.calledWith('focus:search')
+          })
+        })
+      })
+    })
   })
 })

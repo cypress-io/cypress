@@ -10,7 +10,7 @@
         class="flex h-full inset-y-0 w-32px absolute items-center pointer-events-none"
       >
         <i-cy-magnifying-glass_x16
-          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
+          :class="runnerUiStore.isSpecsListInputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
           class="icon-light-gray-1000"
         />
       </div>
@@ -26,22 +26,22 @@
           placeholder-gray-700
           text-gray-500
         "
-        :class="inputFocused || props.specFilterModel.length ? 'w-full' : 'w-16px'"
+        :class="runnerUiStore.isSpecsListInputFocused || props.specFilterModel.length ? 'w-full' : 'w-16px'"
         :value="props.specFilterModel"
         type="search"
         minlength="1"
         autocapitalize="off"
         autocomplete="off"
         spellcheck="false"
-        @focus="inputFocused = true"
-        @blur="inputFocused = false"
+        @focus="handleFocus"
+        @blur="handleBlur"
         @input="onInput"
       >
       <label
         for="inline-spec-list-header-search"
         class="cursor-text font-light bottom-4px left-24px text-gray-500 pointer-events-none absolute"
         :class="{
-          'sr-only': inputFocused || props.specFilterModel
+          'sr-only': runnerUiStore.isSpecsListInputFocused || props.specFilterModel
         }"
       >
         {{ t('specPage.searchPlaceholder') }}
@@ -56,7 +56,7 @@
       >
         <i-cy-delete_x16
           class="icon-light-gray-1000 group-hocus:icon-dark-indigo-300"
-          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
+          :class="runnerUiStore.isSpecsListInputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
         />
       </button>
     </div>
@@ -90,8 +90,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { useI18n } from '@cy/i18n'
+import { useRunnerUiStore } from '../store'
 
 const { t } = useI18n()
 const props = defineProps<{
@@ -104,8 +105,19 @@ const emit = defineEmits<{
   (e: 'newSpec'): void
 }>()
 
-const inputFocused = ref(false)
+const runnerUiStore = useRunnerUiStore()
+
 const input = ref<HTMLInputElement>()
+
+watchEffect(() => {
+  if (runnerUiStore.isSpecsListInputFocused) {
+    // Wrapping in timeout since the inline spec tree auto-focuses
+    // the active spec after mount.
+    setTimeout(() => {
+      input.value?.focus()
+    }, 100)
+  }
+})
 
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
@@ -115,6 +127,14 @@ const onInput = (e: Event) => {
 
 const clearInput = (e: Event) => {
   emit('update:specFilterModel', '')
+}
+
+const handleFocus = () => {
+  runnerUiStore.setPreference('isSpecsListInputFocused', true)
+}
+
+const handleBlur = () => {
+  runnerUiStore.setPreference('isSpecsListInputFocused', false)
 }
 </script>
 

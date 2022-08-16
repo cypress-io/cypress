@@ -19,7 +19,26 @@ class Shortcuts {
     const isTextLike = $dom.isTextLike(event.target)
     const isAnyModifierKeyPressed = event.altKey || event.ctrlKey || event.shiftKey || event.metaKey
 
-    if (isAnyModifierKeyPressed || isTextLike) return
+    if (isTextLike) return
+
+    if (isAnyModifierKeyPressed) {
+      switch (event.key) {
+        case 'k': {
+          if (event.ctrlKey || event.metaKey) {
+            action('toggle:spec:list', () => {
+              if (!appState.isSpecsListOpen) {
+                appState.toggleSpecList()
+                events.emit('save:state')
+              }
+
+              events.emit('focus:search')
+            })()
+          }
+
+          break
+        } default: return
+      }
+    }
 
     switch (event.key) {
       case 'r': !appState.studioActive && events.emit('restart')
@@ -42,6 +61,7 @@ class Shortcuts {
       })()
 
         break
+
       default: return
     }
   }

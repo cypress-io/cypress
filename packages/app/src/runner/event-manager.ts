@@ -255,6 +255,10 @@ export class EventManager {
       this.saveState(state)
     })
 
+    this.reporterBus.on('focus:search', () => {
+      this.localBus.emit('focus:app:search')
+    })
+
     this.reporterBus.on('clear:session', () => {
       if (!Cypress) return
 

@@ -207,6 +207,10 @@ const events: Events = {
       })
     })
 
+    localBus.on('focus:search', () => {
+      runner.emit('focus:search')
+    })
+
     localBus.on('external:open', (url) => {
       runner.emit('external:open', url)
     })

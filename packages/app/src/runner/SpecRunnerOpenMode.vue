@@ -294,6 +294,10 @@ onMounted(() => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
+
+  eventManager.on('focus:app:search', () => {
+    runnerUiStore.setPreference('isSpecsListInputFocused', true)
+  })
 })
 
 onBeforeUnmount(() => {
