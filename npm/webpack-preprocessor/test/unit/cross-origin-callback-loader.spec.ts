@@ -211,5 +211,3 @@ describe('./lib/cross-origin-callback-loader', () => {
     })
   })
 })
-
-// TODO: fix other specs
