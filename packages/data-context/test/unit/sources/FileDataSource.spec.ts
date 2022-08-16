@@ -70,7 +70,7 @@ describe('FileDataSource', () => {
       // to the working directory
       let files = await fileDataSource.getFilesByGlob(
         projectPath,
-        `./cypress/${projectPath}/nested-script.js`,
+        `./cypress${projectPath}/nested-script.js`,
       )
 
       expect(files).to.have.length(1)
