@@ -32,12 +32,14 @@ export class FileDataSource {
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
+      const workingDirectoryPrefix = path.join(cwd, '/')
+
       // If the pattern includes the working directory, we strip it from the pattern.
       // The working directory path may include characters that conflict with glob
       // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
       // We scope our search to the working directory using the `cwd` globby option.
-      if (globPattern.startsWith(cwd)) {
-        return globPattern.replace(cwd, '.')
+      if (globPattern.startsWith(workingDirectoryPrefix)) {
+        return globPattern.replace(workingDirectoryPrefix, '')
       }
 
       return globPattern
