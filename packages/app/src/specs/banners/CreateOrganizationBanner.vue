@@ -14,28 +14,28 @@
       {{ t('specPage.banners.createOrganization.content') }}
     </p>
 
-    <ExternalLink
-      class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-6px px-16px inline-block hocus-default hocus:no-underline"
+    <Button
       :href="createOrganizationUrl"
       :include-graphql-port="true"
       data-cy="create-organization-button"
+      :prefix-icon="OrganizationIcon"
+      prefix-icon-class="icon-dark-white icon-light-indigo-500"
     >
-      <i-cy-office-building_x16 class="inline-block icon-dark-white" />
       {{ t('specPage.banners.createOrganization.buttonLabel') }}
-    </ExternalLink>
+    </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 gql`
 query CreateOrganizationBanner {
