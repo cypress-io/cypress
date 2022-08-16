@@ -8,13 +8,13 @@
     },
     "spec": {
       "description": "Create a single spec file",
-      "factory": "./ng-generate/spec/index",
-      "schema": "./ng-generate/spec/schema.json"
+      "factory": "./ng-generate/cypress-test/index",
+      "schema": "./ng-generate/cypress-test/schema.json"
     },
     "specs-ct": {
-      "description": "Create spec files for all Angular components",
-      "factory": "./ng-generate/specs-ct/index",
-      "schema": "./ng-generate/specs-ct/schema.json"
+      "description": "Create spec files for all Angular components in a project",
+      "factory": "./ng-generate/cypress-ct-tests/index",
+      "schema": "./ng-generate/cypress-ct-tests/schema.json"
     }
   }
 }

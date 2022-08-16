@@ -16,7 +16,7 @@
       "type": "boolean",
       "alias": "g",
       "x-prompt": "Would you like to generate Cypress component tests alongside all components in your project?",
-      "default": true
+      "default": false
     }
   },
   "required": [

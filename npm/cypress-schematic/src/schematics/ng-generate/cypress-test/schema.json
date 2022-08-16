@@ -1,30 +1,32 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "cypress-schematics-e2e-spec",
-  "title": "Cypress E2E Spec Options Schema",
+  "title": "Cypress Generate Spec Options Schema",
   "type": "object",
   "properties": {
     "path": {
       "type": "string",
       "format": "path",
-      "description": "The path where the component test will be created.",
+      "description": "The path where the spec will be created.",
       "visible": false
     },
     "project": {
       "type": "string",
-      "description": "The name of the project.",
+      "description": "The name of the project to create the spec in.",
+      "alias": "p",
       "$default": {
         "$source": "projectName"
       }
     },
     "name": {
       "type": "string",
-      "description": "The name of the component test.",
+      "description": "The name of the spec.",
+      "alias": "n",
       "$default": {
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What is the name of the component test?"
+      "x-prompt": "What should the spec be named?"
     },
     "testingType": {
       "enum": [
@@ -32,9 +34,9 @@
         "component"
       ],
       "alias": "t",
-      "description": "The type of test to generate - e2e or component. e2e is default.",
+      "description": "The type of spec to generate - e2e or component. e2e is default.",
       "default": "e2e",
-      "x-prompt": "What type of test do you want to generate?"
+      "x-prompt": "What type of spec do you want to generate?"
     }
   },
   "required": [
