@@ -23,7 +23,6 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
-import { makeTestingTypeData } from './coreDataShape'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -233,7 +232,7 @@ export class ProjectLifecycleManager {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           if (!devServerOptions?.port) {
-            this.ctx.onError(getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions))
+            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
@@ -408,7 +407,7 @@ export class ProjectLifecycleManager {
         })
       }
 
-      s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
+      s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
 
@@ -495,8 +494,11 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      if (testingType) {
+        d.diagnostics = {
+          error: null,
+          warnings: [],
+        }
       }
     })
 
@@ -516,9 +518,6 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
-      }
     })
 
     if (this._currentTestingType === testingType) {

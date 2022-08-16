@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -50,21 +50,9 @@
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
               </li>
               <li class="inline-block">
-                <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
-                <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
-                <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
-                <a
-                  :key="canClearTestingType.toString()"
-                  class="font-medium"
-                  :role="canClearTestingType ? undefined : 'link'"
-                  :href="canClearTestingType ? 'choose-testing-type' : undefined"
-                  :class="canClearTestingType ? 'text-indigo-500 hocus-link-default' :
-                    'text-gray-700'"
-                  :ariaDisabled="!canClearTestingType"
-                  @click.prevent="clearTestingType"
-                >
+                <span class="font-medium">
                   {{ currentProject.title }}
-                </a>
+                </span>
                 <!-- currentProject might not have a branch -->
                 <template v-if="currentProject.branch">
                   <!-- Using a margin here causes different overflow problems.
@@ -169,6 +157,8 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
+        :show-connect-button-after-login="isApp && !cloudProjectId"
+        @connect-project="handleConnectProject"
       />
     </div>
   </div>
@@ -179,7 +169,7 @@ import { gql, useMutation, useSubscription } from '@urql/vue'
 import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
-  GlobalPageHeader_ClearCurrentProjectDocument, GlobalPageHeader_ClearCurrentTestingTypeDocument,
+  GlobalPageHeader_ClearCurrentProjectDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
@@ -236,24 +226,6 @@ mutation GlobalPageHeader_clearCurrentProject {
 `
 
 gql`
-mutation GlobalPageHeader_ClearCurrentTestingType {
-  clearCurrentTestingType {
-    baseError {
-      id
-      ...BaseError
-    }
-    warnings {
-      id
-    }
-    currentProject {
-      id
-      currentTestingType
-    }
-  }
-}
-`
-
-gql`
 fragment HeaderBar_HeaderBarContent on Query {
   currentProject {
     id
@@ -262,7 +234,6 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
-    isLoadingNodeEvents
   }
   isGlobalMode
   ...TopNav
@@ -278,19 +249,15 @@ const userData = computed(() => {
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState
 })
+
+const currentProject = computed(() => props.gql.currentProject)
+
 const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const currentProject = computed(() => props.gql.currentProject)
-
-const canClearTestingType = computed(() => {
-  return Boolean(props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents)
-})
-
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
-const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
 
 const openLogin = () => {
   isLoginOpen.value = true
@@ -302,18 +269,22 @@ const clearCurrentProject = () => {
   }
 }
 
-const clearTestingType = () => {
-  if (canClearTestingType.value) {
-    clearCurrentTestingTypeMutation.executeMutation({})
-  }
-}
-
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment
   showBrowsers?: boolean
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
+
+const emit = defineEmits<{
+  (event: 'connect-project'): void
+}>()
+
+const isApp = window.__Cypress__
+
+const handleConnectProject = () => {
+  emit('connect-project')
+}
 
 const { t } = useI18n()
 const prompts = sortBy([

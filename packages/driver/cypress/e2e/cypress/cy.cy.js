@@ -136,10 +136,10 @@ describe('driver/src/cypress/cy', () => {
 
     it('supports cy.state(\'subject\') for backwards compatability', () => {
       cy.stub(Cypress.utils, 'warning')
-      const a = {}
+      const subject = {}
 
-      cy.wrap(a).then(() => {
-        expect(cy.state('subject')).to.equal(a)
+      cy.wrap(subject).then(() => {
+        expect(cy.state('subject')).to.equal(subject)
         expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.currentSubject()` instead.')
       })
     })

@@ -11,6 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { getAutIframeModel } from '.'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -54,6 +55,8 @@ export class EventManager {
   studioRecorder: any
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
+  // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
+  ws: Socket
 
   constructor (
     // import '@packages/driver'
@@ -64,10 +67,11 @@ export class EventManager {
     selectorPlaygroundModel: any,
     // StudioRecorder constructor
     StudioRecorderCtor: any,
-    private ws: Socket,
+    ws: Socket,
   ) {
     this.studioRecorder = new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
+    this.ws = ws
   }
 
   getCypress () {
@@ -90,7 +94,7 @@ export class EventManager {
         return
       }
 
-      return this.runSpec(state)
+      return this.rerunSpec()
     }
 
     const connectionInfo: AddGlobalListenerOptions = {
@@ -335,6 +339,13 @@ export class EventManager {
     this.localBus.on('studio:cancel', () => {
       this.studioRecorder.cancel()
       rerun()
+    })
+
+    this.ws.on('aut:destroy:init', () => {
+      const autIframe = getAutIframeModel()
+
+      autIframe.destroy()
+      this.ws.emit('aut:destroy:complete')
     })
 
     // @ts-ignore
@@ -719,15 +730,19 @@ export class EventManager {
     this.ws.off()
   }
 
-  async teardown (state: MobxRunnerStore) {
+  async teardown (state: MobxRunnerStore, isRerun = false) {
     if (!Cypress) {
       return
     }
 
     state.setIsLoading(true)
 
-    // when we are re-running we first
-    // need to stop cypress always
+    if (!isRerun) {
+      // only clear session state when a new spec is selected
+      Cypress.backend('reset:session:state')
+    }
+
+    // when we are re-running we first need to stop cypress always
     Cypress.stop()
     // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
     Cypress.primaryOriginCommunicator.removeAllListeners()
@@ -744,26 +759,19 @@ export class EventManager {
     })
   }
 
-  async _rerun () {
-    await this.resetReporter()
-
-    // this probably isn't 100% necessary
-    // since Cypress will fall out of scope
-    // but we want to be aggressive here
-    // and force GC early and often
-    Cypress.removeAllListeners()
-
-    this.localBus.emit('restart')
-  }
-
-  async runSpec (state: MobxRunnerStore) {
-    if (!Cypress) {
+  async rerunSpec () {
+    if (!this || !Cypress) {
+      // if the tests have been reloaded then there is nothing to rerun
       return
     }
 
-    await this.teardown(state)
+    await this.resetReporter()
 
-    return this._rerun()
+    // this probably isn't 100% necessary since Cypress will fall out of scope
+    // but we want to be aggressive here and force GC early and often
+    Cypress.removeAllListeners()
+
+    this.localBus.emit('restart')
   }
 
   _interceptStudio (displayProps) {

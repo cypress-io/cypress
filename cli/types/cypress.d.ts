@@ -2791,6 +2791,13 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
+     * The test isolation level applied to ensure a clean slate between tests.
+     *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
+     *   - strict - applies all resets/clears from legacy, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
+     * @default "legacy", however, when experimentalSessionAndOrigin=true, the default is "strict"
+     */
+    testIsolation: 'legacy' | 'strict'
+    /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */
@@ -3061,6 +3068,11 @@ declare namespace Cypress {
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
+    /**
+     * Runs all component specs in a single tab, trading spec isolation for faster run mode execution.
+     * @default false
+     */
+    experimentalSingleTabRunMode?: boolean
   }
 
   /**
@@ -3072,7 +3084,12 @@ declare namespace Cypress {
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
    * so we have proper completion for `devServerConfig`
    */
-  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>>
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>> & {
+    /**
+     * Hosts mappings to IP addresses.
+     */
+     hosts?: null | {[key: string]: string}
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**

@@ -6,18 +6,6 @@ export interface UnmountArgs {
   boundComponentMessage?: string
 }
 
-export interface InternalUnmountOptionsReact {
-  unmount: (el: HTMLElement) => boolean
-}
-
-export interface InternalUnmountOptionsReact18 {
-  unmount: () => boolean
-}
-
-export type InternalUnmountOptions =
-  InternalUnmountOptionsReact
-  | InternalUnmountOptionsReact18
-
 export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
 
 export interface MountReactComponentOptions {
@@ -43,6 +31,7 @@ export interface InternalMountOptions {
     reactDomToUse: typeof import('react-dom')
   ) => void
   unmount: (options: UnmountArgs) => void
+  cleanup: () => boolean
 
   // globalThis.Cypress.Chainable<MountReturn>
 }

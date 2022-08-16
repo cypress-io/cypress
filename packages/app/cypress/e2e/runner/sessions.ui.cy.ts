@@ -11,16 +11,17 @@ const validateSessionsInstrumentPanel = (sessionIds: Array<string> = []) => {
   })
 }
 
-const validateCreateNewSessionGroup = () => {
-  cy.contains('Create New Session').closest('.command').as('createNewSession')
+const validateSetupSessionGroup = (isNewSession = true) => {
+  const groupText = isNewSession ? 'Create new session' : 'Recreate session'
 
-  cy.get('@createNewSession').find('.command-expander-is-open')
-  cy.get('@createNewSession').find('.command-alias').contains('runSetup')
+  cy.contains(groupText).closest('.command').as('setupSession')
+  cy.get('@setupSession').find('.command-expander').click()
+  cy.get('@setupSession').find('.command-alias').contains('runSetup')
 
-  return cy.contains('Create New Session')
+  return cy.contains(groupText)
   .closest('.command')
-  .find('.command-name-Clear-Page')
-  .should('have.length', 2)
+  .find('.command-name-Clear-page')
+  .should('have.length', 1)
 }
 
 describe('runner/cypress sessions.ui.spec', {
@@ -41,23 +42,23 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session.cy.js',
+      passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    validateSessionsInstrumentPanel(['user1'])
 
     cy.get('.command-name-session')
     .within(() => {
-      cy.get('i.command-message-indicator-successful')
-      .siblings()
-      .should('contain', '(new) blank_session')
+      cy.get('.command-expander').first().click()
+      cy.contains('user1')
+      cy.contains('created')
 
-      validateCreateNewSessionGroup()
+      validateSetupSessionGroup()
     })
 
     cy.percySnapshot()
 
-    cy.get('.command-name-session').find('.command-expander-column').first().click()
-
+    cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
     cy.get('.command').should('have.length', 2)
   })
 
@@ -65,23 +66,25 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session_with_validation.cy.js',
+      passCount: 1,
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
     .within(() => {
-      cy.get('i.command-message-indicator-successful')
-      .siblings()
-      .should('contain', '(new) blank_session')
+      cy.get('.command-expander').first().click()
+      cy.contains('blank_session')
+      cy.contains('created')
 
-      validateCreateNewSessionGroup()
+      validateSetupSessionGroup()
 
-      cy.contains('Validate Session: valid')
+      cy.contains('Validate session')
       .closest('.command').as('validateSession')
 
       cy.get('@validateSession')
-      .find('.command-expander-is-open')
+      .find('.command-expander')
+      .click()
 
       cy.get('@validateSession')
       .find('.command-alias')
@@ -90,7 +93,7 @@ describe('runner/cypress sessions.ui.spec', {
 
     cy.percySnapshot()
 
-    cy.get('.command-name-session').get('.command-expander').first().click()
+    cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
 
     cy.get('.command').should('have.length', 2)
   })
@@ -99,19 +102,19 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session_and_fails_validation.cy.js',
+      failCount: 1,
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
     .within(() => {
-      cy.get('i.command-message-indicator-successful')
-      .siblings()
-      .should('contain', '(new) blank_session')
+      cy.contains('blank_session')
+      cy.contains('failed')
 
-      validateCreateNewSessionGroup()
+      validateSetupSessionGroup()
 
-      cy.contains('Validate Session: invalid')
+      cy.contains('Validate session')
       .closest('.command').as('validateSession')
 
       cy.get('@validateSession')
@@ -132,6 +135,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/restores_saved_session.cy.js',
+      passCount: 2,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -139,7 +143,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.log('validate new session was created in first test')
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
-      validateCreateNewSessionGroup()
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -148,28 +152,21 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session')
       .within(() => {
-        cy.get('i.command-message-indicator-pending')
-        .siblings().should('contain', '(saved) user1')
+        cy.get('.command-expander').first().click()
+        cy.contains('user1')
+        cy.contains('restored')
 
-        cy.contains('Restore Saved Session')
-        .closest('.command')
-        .contains('Clear Page')
-        .should('have.length', 1)
+        cy.get('.command-name-Clear-page').should('have.length', 2)
 
-        cy.contains('Restore Saved Session')
-        .closest('.command')
-        .contains('runSetup')
-        .should('not.exist')
+        cy.contains('Restore saved session')
 
-        cy.contains('Validate Session: valid')
+        cy.contains('Validate session')
         .closest('.command').as('validateSession')
 
         cy.get('@validateSession')
         .find('.command-expander')
-        // FIXME: this validation group does not align with the
-        // with Create New Session's validation group behavior
-        // should be 'not.have.class' to align
-        .should('have.class', 'command-expander-is-open')
+        .should('not.have.class', 'command-expander-is-open')
+        .click()
 
         cy.get('@validateSession')
         .find('.command-alias')
@@ -186,6 +183,7 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/recreates_session.cy.js',
+      passCount: 2,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -194,7 +192,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.contains('Create New Session')
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -203,34 +201,31 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session')
       .within(() => {
-        cy.get('i.command-message-indicator-bad')
-        .siblings().should('contain', '(recreated) user1')
+        cy.get('.command-expander').first().click()
+        cy.contains('user1')
+        cy.contains('recreated')
 
-        cy.contains('Restore Saved Session')
+        cy.contains('Restore saved session')
+        .parent()
         .closest('.command')
-        .contains('Clear Page')
-        .should('have.length', 1)
-
-        cy.contains('Restore Saved Session')
-        .closest('.command')
-        .contains('runSetup')
-        .should('not.exist')
-
-        cy.contains('Validate Session: invalid')
-
-        validateCreateNewSessionGroup()
-
-        cy.contains('Validate Session: valid')
-        .closest('.command').as('validateSession')
-
-        cy.get('@validateSession')
+        .next()
+        .contains('Validate session')
+        .closest('.command').as('firstValidateSession')
         .find('.command-expander')
-        // FIXME: this validation group does not align with the
-        // with Create New Session's validation group behavior
-        // should be 'not.have.class' to align
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('@validateSession')
+        cy.get('.command-name-Clear-page').should('have.length', 3)
+
+        validateSetupSessionGroup(false)
+
+        cy.contains('Validate session')
+        .closest('.command').as('secondValidateSession')
+
+        cy.get('@secondValidateSession')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+
+        cy.get('@secondValidateSession')
         .find('.command-alias')
         .contains('runValidation')
       })
@@ -248,6 +243,8 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/recreates_session_and_fails_validation.cy.js',
+      passCount: 1,
+      failCount: 1,
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -256,7 +253,7 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
-      cy.contains('Create New Session')
+      cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
@@ -265,31 +262,30 @@ describe('runner/cypress sessions.ui.spec', {
 
       cy.get('.command-name-session')
       .within(() => {
-        cy.get('i.command-message-indicator-bad')
-        .siblings().should('contain', '(recreated) user1')
+        cy.contains('failed')
 
-        cy.contains('Restore Saved Session')
-        .closest('.command')
-        .contains('Clear Page')
-        .should('have.length', 1)
-
-        cy.contains('Restore Saved Session')
-        .closest('.command')
-        .contains('runSetup')
-        .should('not.exist')
-
-        cy.contains('Validate Session: invalid')
-
-        validateCreateNewSessionGroup()
+        cy.contains('Restore saved session')
         .parent()
         .closest('.command')
         .next()
-        .contains('Validate Session: invalid')
+        .contains('Validate session')
+        .closest('.command').as('firstValidateSession')
+
+        cy.get('@firstValidateSession')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+
+        cy.get('.command-name-Clear-page').should('have.length', 2)
+
+        validateSetupSessionGroup(false)
+        .parent()
+        .closest('.command')
+        .next()
+        .contains('Validate session')
         .closest('.command').as('secondValidateSession')
 
         cy.get('@secondValidateSession')
         .find('.command-expander')
-        // should be 'not.have.class' to align
         .should('have.class', 'command-expander-is-open')
 
         cy.get('@secondValidateSession')
@@ -306,9 +302,70 @@ describe('runner/cypress sessions.ui.spec', {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/multiple_sessions.cy.js',
+      passCount: 1,
     })
 
     validateSessionsInstrumentPanel(['user1', 'user2'])
     cy.percySnapshot()
+  })
+})
+
+describe('runner/cypress sessions.open_mode.spec', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+
+    cy.get('[data-cy-row="multiple_sessions.cy.js"]').click()
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'created')
+  })
+
+  it('persists spec sessions when clicking "rerun all tests" button', () => {
+    cy.get('.restart').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'restored')
+  })
+
+  it('persists spec sessions on refresh', () => {
+    cy.get('body').type('r')
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'user2')
+    .find('.reporter-tag').should('contain', 'restored')
+  })
+
+  it('does not persists spec sessions when selecting a different spec', () => {
+    cy.get('body').type('f')
+    cy.get('div[title="new_session.cy.js"]').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
   })
 })

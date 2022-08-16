@@ -105,7 +105,7 @@
     "component": {
       "importFromComponent": {
         "header": "Create from component",
-        "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
+        "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
       "importEmptySpec": {
@@ -151,9 +151,19 @@
         "linkText": "average spec durations"
       }
     },
+    "flaky": {
+      "badgeLabel": "Flaky",
+      "severityLow": "Low",
+      "severityMedium": "Medium",
+      "severityHigh": "High",
+      "flakyRate": "{0}% flaky rate",
+      "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
+      "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
+    },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
     "reconnectProjectButton": "Reconnect your project",
+    "unauthorizedBannerTitle": "Request access to project",
     "requestAccessButton": "Request access",
     "requestSentButton": "Request sent",
     "rows": {
@@ -452,6 +462,10 @@
         "name": "Cross-origin and Session",
         "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
       },
+      "experimentalModifyObstructiveThirdPartyCode": {
+        "name": "Modify Obstructive Third Party Code",
+        "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
+      },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
@@ -553,7 +567,7 @@
       },
       "unauthorized": {
         "title": "Request access to view the recorded runs",
-        "description": "This is a private project that you do not current have access to. Please request access from the project owner in order to view the list of runs.",
+        "description": "This is a private project that you do not currently have access to. Please request access from the project owner in order to view the list of runs.",
         "button": "Request Access"
       },
       "unauthorizedRequested": {
@@ -766,6 +780,7 @@
   },
   "versions": {
     "alpha": "Alpha",
-    "beta": "Beta"
+    "beta": "Beta",
+    "new": "New"
   }
 }

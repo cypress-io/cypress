@@ -6,6 +6,11 @@ import sinon from 'sinon'
 describe('http/util/prerequests', () => {
   let preRequests: PreRequests
 
+  function expectPendingCounts (pendingRequests: number, pendingPreRequests: number) {
+    expect(preRequests.pendingRequests.length).to.eq(pendingRequests, 'wrong number of pending requests')
+    expect(preRequests.pendingPreRequests.length).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
+  }
+
   beforeEach(() => {
     preRequests = new PreRequests(10)
   })
@@ -18,6 +23,10 @@ describe('http/util/prerequests', () => {
     // should match in reverse order
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'WRONGMETHOD' } as BrowserPreRequest)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    const thirdPreRequest = { requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest
+
+    preRequests.addPending(thirdPreRequest)
+    expectPendingCounts(0, 3)
 
     const cb = sinon.stub()
 
@@ -25,12 +34,15 @@ describe('http/util/prerequests', () => {
 
     const { args } = cb.getCall(0)
 
-    expect(args[0]).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
+    expect(args[0]).to.eq(thirdPreRequest)
+
+    expectPendingCounts(0, 2)
   })
 
   it('synchronously matches a pre-request added after the request', (done) => {
     const cb = (preRequest) => {
       expect(preRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
+      expectPendingCounts(0, 0)
       done()
     }
 
@@ -41,6 +53,7 @@ describe('http/util/prerequests', () => {
   it('invokes a request callback after a timeout if no pre-request occurs', (done) => {
     const cb = (preRequest) => {
       expect(preRequest).to.be.undefined
+      expectPendingCounts(0, 0)
       done()
     }
 
@@ -57,6 +70,7 @@ describe('http/util/prerequests', () => {
     setTimeout(() => {
       const cb = (preRequest) => {
         expect(preRequest).to.be.undefined
+        expectPendingCounts(0, 0)
         done()
       }
 
