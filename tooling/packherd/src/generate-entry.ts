@@ -51,7 +51,7 @@ export class EntryGenerator {
     relToCwdPaths.sort()
 
     const fullPaths = relToCwdPaths.map((x) => path.join(process.cwd(), x))
-    const paths = fullPaths.map((x) => path.relative(this.entryDirectory, x)).map((x) => path.posix.join(x))
+    const paths = fullPaths.map((x) => path.relative(this.entryDirectory, x)).map((x) => x.split(path.sep).join(path.posix.sep))
 
     const entry = ['// vim: set ft=text:']
     .concat(paths.map((x) => `exports['./${x}'] = require('./${x}')`))
