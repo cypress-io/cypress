@@ -1938,12 +1938,12 @@ describe('network stubbing', function () {
             cy.wait('@getUrl')
           })
 
-          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23100
-          it.skip('setPrototypeOf', (done) => {
+          it('setPrototypeOf', () => {
+            let didShowError = false
+
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
-
-              done()
+              didShowError = true
             })
 
             cy.intercept({ url: '/users*' }, (req) => {
@@ -1960,6 +1960,9 @@ describe('network stubbing', function () {
             })
 
             cy.wait('@getUrl')
+            .then(() => {
+              expect(didShowError, 'didShowError').to.be.true
+            })
           })
         })
       })
