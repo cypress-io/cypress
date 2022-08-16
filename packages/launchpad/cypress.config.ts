@@ -20,6 +20,7 @@ export default defineConfig({
     videoCompression: false, // turn off video compression for CI
   },
   component: {
+    experimentalSingleTabRunMode: true,
     supportFile: 'cypress/component/support/index.ts',
     devServer: {
       bundler: 'vite',

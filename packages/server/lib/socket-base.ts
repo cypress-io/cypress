@@ -609,4 +609,8 @@ export class SocketBase {
   close () {
     return this._io?.close()
   }
+
+  changeToUrl (url: string) {
+    return this.toRunner('change:to:url', url)
+  }
 }
