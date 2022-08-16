@@ -128,8 +128,4 @@ describe('cy.origin dependencies', () => {
       Cypress.require('./does-not-exist')
     })
   })
-
-  // Test cases
-  // - this failure: https://dashboard.cypress.io/projects/ypt4pf/runs/37853/specs
-  // - a different file type (use types, jsx, tsx, etc): system tests
 })
