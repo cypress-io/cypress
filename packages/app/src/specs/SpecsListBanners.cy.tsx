@@ -72,6 +72,25 @@ describe('<SpecsListBanners />', () => {
   }
 
   const validateSmartNotificationBehaviors = (bannerId: BannerId, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
+    it('should not render when using cypress < 4 days', () => {
+      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
+
+      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+    })
+
+    it('should not render when previously-dismissed', () => {
+      mountWithState(gql, {
+        ...stateWithFirstOpenedDaysAgo(4),
+        banners: {
+          [bannerId]: {
+            dismissed: Date.now(),
+          },
+        },
+      })
+
+      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+    })
+
     context('banner conditions are met and when cypress use >= 4 days', () => {
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
@@ -102,25 +121,6 @@ describe('<SpecsListBanners />', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isProjectUnauthorized: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
-
-      it('should not render when previously-dismissed', () => {
-        mountWithState(gql, {
-          ...stateWithFirstOpenedDaysAgo(4),
-          banners: {
-            [bannerId]: {
-              dismissed: Date.now(),
-            },
-          },
-        })
-
-        cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
-      })
-    })
-
-    it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
-
-      cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })
   }
 
