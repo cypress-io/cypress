@@ -56,6 +56,7 @@ const _summaries: StringValues = {
   experimentalSessionAndOrigin: 'Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
+  experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
 }
 
@@ -74,6 +75,7 @@ const _names: StringValues = {
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
   experimentalSessionAndOrigin: 'Cross-origin and Session',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
+  experimentalSingleTabRunMode: 'Single Tab Run Mode',
   experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalStudio: 'Studio',
 }
