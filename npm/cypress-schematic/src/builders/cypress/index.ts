@@ -9,7 +9,7 @@ import { asWindowsPath, normalize } from '@angular-devkit/core'
 import * as os from 'os'
 import { dirname, join } from 'path'
 import { open, run } from 'cypress'
-import { forkJoin, from, noop, Observable, of } from 'rxjs'
+import { from, noop, Observable, of } from 'rxjs'
 import { catchError, concatMap, first, map, switchMap, tap } from 'rxjs/operators'
 import { CypressBuilderOptions } from './cypressBuilderOptions'
 
@@ -19,7 +19,7 @@ Partial<CypressCommandLine.CypressOpenOptions>;
 type CypressStartDevServerProps = {
   devServerTarget: string
   watch: boolean
-  context: any
+  context: BuilderContext
 }
 
 function runCypress (
