@@ -303,6 +303,23 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/17896
+    it('escapes the downloadsFolders path correctly when running on Windows OS', function () {
+      this.options.proxyServer = 'http://proxy-server:1234'
+      this.options.downloadsFolder = 'C:/Users/test/Downloads/My_Test_Downloads_Folder'
+      sinon.stub(os, 'platform').returns('win32')
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            // NOTE: sinon.match treats the string itself as a regular expression. The backslashes need to be escaped.
+            'browser.download.dir': 'C:\\\\Users\\\\test\\\\Downloads\\\\My_Test_Downloads_Folder',
+          },
+        }), this.options)
+      })
+    })
+
     it('updates the preferences', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
