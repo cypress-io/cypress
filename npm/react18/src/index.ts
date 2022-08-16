@@ -16,7 +16,9 @@ let root: ReactDOM.Root | null = null
 const cleanup = () => {
   if (root) {
     root.unmount()
+
     root = null
+
     return true
   }
 
