@@ -3,6 +3,7 @@
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
 import { expect } from 'chai'
+import { take } from 'rxjs/operators'
 
 describe('@cypress/schematic: ng-add', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -32,7 +33,9 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files for e2e testing by default', async () => {
-    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
+    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).pipe(
+      take(1),
+    ).subscribe((tree: UnitTestTree) => {
       const files = tree.files
 
       expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
@@ -45,7 +48,9 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files for component testing', async () => {
-    return schematicRunner.runSchematicAsync('ng-add', { 'ct': true }, appTree).toPromise().then((tree) => {
+    return schematicRunner.runSchematicAsync('ng-add', { 'ct': true }, appTree).pipe(
+      take(1),
+    ).subscribe((tree: UnitTestTree) => {
       const files = tree.files
 
       expect(files).to.contain('/projects/sandbox/cypress/support/component.ts')
