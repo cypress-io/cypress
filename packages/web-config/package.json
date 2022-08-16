@@ -29,7 +29,7 @@
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "4.3.0",
     "html-webpack-plugin": "4.5.2",
-    "jsdom": "13.2.0",
+    "jsdom": "16.5.0",
     "mini-css-extract-plugin": "1.5.0",
     "mock-require": "3.0.3",
     "node-sass-glob-importer": "5.3.2",
