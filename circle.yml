@@ -2533,7 +2533,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests,
+          - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
 
     # various testing scenarios, like building full binary
