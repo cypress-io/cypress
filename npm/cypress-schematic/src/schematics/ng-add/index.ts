@@ -263,8 +263,8 @@ function modifyAngularJson (options: any): Rule {
             testingType: 'component',
           },
           configurations: {
-            production: {
-              devServerTarget: `${project}:serve:production`,
+            development: {
+              devServerTarget: `${project}:serve:development`,
             },
           },
         }

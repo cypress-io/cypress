@@ -73,7 +73,10 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
     headless: true,
     record: false,
     spec: '',
-    testingType: 'e2e',
+  }
+
+  if (userOptions.component || userOptions.testingType === 'component') {
+    userOptions.e2e = false
   }
 
   const options: CypressOptions = {

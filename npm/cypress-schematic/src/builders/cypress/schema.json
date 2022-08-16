@@ -39,6 +39,11 @@
       "description": "Run end to end tests",
       "default": true
     },
+    "component": {
+      "type": "boolean",
+      "description": "Run component tests",
+      "default": false
+    },
     "env": {
       "type": "object",
       "description": "A key-value pair of environment variables to pass to Cypress runner"

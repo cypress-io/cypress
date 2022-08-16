@@ -26,16 +26,16 @@ const cypressSchematicPackagePath = path.join(__dirname, '..')
 
 const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-13', 'angular-14']
 
-describe('ng add @cypress/schematic / only e2e', function () {
+describe('ng add @cypress/schematic / e2e and ct', function () {
   this.timeout(1000 * 60 * 4)
 
   for (const project of ANGULAR_PROJECTS) {
-    it('should install e2e files by default', async () => {
+    it('should install ct files with option and no component specs', async () => {
       const projectPath = await scaffoldAngularProject(project)
 
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
-      await runCommandInProject('yarn ng add @cypress/schematic --e2e --ct false --add-ct-specs false', projectPath)
-      await runCommandInProject('yarn ng e2e --watch false', projectPath)
+      await runCommandInProject('yarn ng add @cypress/schematic --e2e --ct --add-ct-specs false', projectPath)
+      await runCommandInProject(`yarn ng run ${project}:ct --watch false`, projectPath)
     })
   }
 })
