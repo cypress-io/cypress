@@ -351,12 +351,15 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           originalFilePath: filePath,
           webpackOptions,
         })
-        // TODO: how to handle errors? reject original deferred?
-        .finally(() => {
-          crossOriginCallbackStore.reset(filePath)
-
+        .then(() => {
           debug('resolve all after handling cross-origin callback files')
           resolveAllBundles()
+        })
+        .catch((err) => {
+          rejectWithErr(err)
+        })
+        .finally(() => {
+          crossOriginCallbackStore.reset(filePath)
         })
       })
     }

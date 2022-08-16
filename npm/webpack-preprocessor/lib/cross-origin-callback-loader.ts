@@ -4,8 +4,12 @@ import { default as traverse } from '@babel/traverse'
 import { default as generate } from '@babel/generator'
 import { NodePath, types as t } from '@babel/core'
 import * as pathUtil from 'path'
+import Debug from 'debug'
+
 import { crossOriginCallbackStore } from './cross-origin-callback-store'
 import utils from './utils'
+
+const debug = Debug('cypress:webpack')
 
 // this loader makes supporting dependencies within the cy.origin() callbacks
 // possible. it does this by doing the following:
@@ -31,12 +35,23 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
   let ast
 
   try {
+    // purposefully lenient in allowing syntax since the user can't configure
+    // this, but probably has their own webpack or target configured to
+    // handle it
     ast = parse(source, {
       allowImportExportEverywhere: true,
+      allowAwaitOutsideFunction: true,
+      allowSuperOutsideMethod: true,
+      allowUndeclaredExports: true,
+      attachComment: false,
       sourceType: 'unambiguous',
     })
   } catch (err) {
-    // TODO: actually error somehow?
+    // it's unlikely there will be a parsing error, since that should have
+    // already been caught by a previous loader, but if there is and it isn't
+    // possible to get the AST, there's nothing we can do, so just return the
+    // original source
+    debug('parsing error for file (%s): %s', resourcePath, err.stack)
 
     return source
   }
