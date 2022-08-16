@@ -79,7 +79,8 @@ export const runner = {
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
     config.spec = spec ? { ...spec, name: spec.baseName } : null
-    config.browser = getCurrentBrowser()
+    // coerce type to allow string to be cast to BrowserFamily
+    config.browser = getCurrentBrowser() as Cypress.Browser
     config.exit = exit ?? true
 
     debug('serving runner index.html with config %o',

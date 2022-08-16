@@ -250,6 +250,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
+    this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
 
     // init traits
 
@@ -360,7 +361,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
 
     setTopOnError(Cypress, this)
 

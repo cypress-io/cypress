@@ -58,6 +58,24 @@ describe('FileDataSource', () => {
       expect(files).to.have.length(2)
     })
 
+    it('does not replace working directory in glob pattern if it is not leading', async () => {
+      // Create a redundant structure within the project dir matching its absolute path
+      // and write a new script in that location
+      const nestedScriptPath = path.join(projectPath, 'cypress', projectPath)
+
+      await fs.mkdirs(nestedScriptPath)
+      await fs.writeFile(path.join(nestedScriptPath, 'nested-script.js'), '')
+
+      // Verify that the glob pattern is not impacted if if contains directories equivalent
+      // to the working directory
+      let files = await fileDataSource.getFilesByGlob(
+        projectPath,
+        `./cypress${projectPath}/nested-script.js`,
+      )
+
+      expect(files).to.have.length(1)
+    })
+
     it('finds files matching multiple patterns', async () => {
       const files = await fileDataSource.getFilesByGlob(
         projectPath,

@@ -64,8 +64,18 @@ export class CommandQueue extends Queue<$Command> {
   fail: $Cy['fail']
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
+  setSubjectForChainer: $Cy['setSubjectForChainer']
 
-  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
+  constructor (
+    state: StateFunc,
+    timeout: $Cy['timeout'],
+    stability: IStability,
+    cleanup: $Cy['cleanup'],
+    fail: $Cy['fail'],
+    isCy: $Cy['isCy'],
+    clearTimeout: ITimeouts['clearTimeout'],
+    setSubjectForChainer: $Cy['setSubjectForChainer'],
+  ) {
     super()
     this.state = state
     this.timeout = timeout
@@ -74,6 +84,7 @@ export class CommandQueue extends Queue<$Command> {
     this.fail = fail
     this.isCy = isCy
     this.clearTimeout = clearTimeout
+    this.setSubjectForChainer = setSubjectForChainer
   }
 
   logs (filter) {
@@ -249,7 +260,7 @@ export class CommandQueue extends Queue<$Command> {
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
-      cy.setSubjectForChainer(command.get('chainerId'), subject)
+      this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
     })
@@ -281,7 +292,7 @@ export class CommandQueue extends Queue<$Command> {
 
         this.state('index', index + 1)
 
-        cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 
