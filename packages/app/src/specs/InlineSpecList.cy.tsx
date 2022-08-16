@@ -49,11 +49,16 @@ describe('InlineSpecList', () => {
 
     it('should support fuzzy sort', () => {
       mountInlineSpecList()
-      cy.get('input').type('scome', { force: true })
+      cy.get('input').type('compspec')
 
       cy.get('li').should('have.length', 4)
       .should('contain', 'src/components')
       .and('contain', 'Spec-A.spec.tsx')
+
+      // Don't want the search to be too fuzzy
+      // sr => src, co => components, se => spec
+      cy.get('input').clear().type('srcose')
+      cy.get('li').should('have.length', 0)
     })
 
     it('should open CreateSpec modal', () => {
