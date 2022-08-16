@@ -7,9 +7,9 @@ import { track } from 'temp'
 import { processArgsFromFile } from './process-args-from-file'
 
 import debug from 'debug'
-const logInfo = debug('mksnap:info')
-const logDebug = debug('mksnap:debug')
-const logError = debug('mksnap:error')
+const logInfo = debug('mksnapshot:info')
+const logDebug = debug('mksnapshot:debug')
+const logError = debug('mksnapshot:error')
 
 const temp = track()
 const workingDir = temp.mkdirSync('mksnapshot-workdir')

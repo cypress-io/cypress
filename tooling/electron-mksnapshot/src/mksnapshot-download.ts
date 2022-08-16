@@ -5,9 +5,9 @@ import extractZip from 'extract-zip'
 import debug from 'debug'
 import path from 'path'
 
-const logInfo = debug('mksnap:info')
-const logDebug = debug('mksnap:debug')
-const logError = debug('mksnap:error')
+const logInfo = debug('mksnapshot:info')
+const logDebug = debug('mksnapshot:debug')
+const logError = debug('mksnapshot:error')
 
 // -----------------
 // Config
@@ -61,7 +61,7 @@ export async function attemptDownload (
 ) {
   if (!checkArmArchitectures(version)) {
     throw new Error(
-      'Architecture not supported. Run with `DEBUG=\'mksnap:error\'` for more information',
+      'Architecture not supported. Run with `DEBUG=\'mksnapshot:error\'` for more information',
     )
   }
 
