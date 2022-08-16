@@ -1163,12 +1163,7 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.15.6.tgz#043b9aa3c303c0722e5377fef9197f4cf1796549"
   integrity sha512-S/TSCcsRuCkmpUuoWijua0Snt+f3ewU/8spLo+4AXJCZfT0bVCzLD5MuOKdrx0mlAptbKzn5AdgEIIKXxXkz9Q==
 
-"@babel/parser@7.8.3":
-  version "7.8.3"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.8.3.tgz#790874091d2001c9be6ec426c2eed47bc7679081"
-  integrity sha512-/V72F4Yp/qmHaTALizEm9Gf2eQHV3QyTL3K0cNfijwnMnb1L+LDlAubb/ZnSdGAVzVSWakujHYs1I26x66sMeQ==
-
-"@babel/parser@^7", "@babel/parser@^7.0.0", "@babel/parser@^7.1.0", "@babel/parser@^7.1.6", "@babel/parser@^7.15.4", "@babel/parser@^7.15.8", "@babel/parser@^7.16.4", "@babel/parser@^7.16.7", "@babel/parser@^7.17.9", "@babel/parser@^7.4.3", "@babel/parser@^7.6.0", "@babel/parser@^7.7.0", "@babel/parser@^7.8.3", "@babel/parser@^7.9.0", "@babel/parser@^7.9.6":
+"@babel/parser@7.18.11", "@babel/parser@^7", "@babel/parser@^7.0.0", "@babel/parser@^7.1.0", "@babel/parser@^7.1.6", "@babel/parser@^7.15.4", "@babel/parser@^7.15.8", "@babel/parser@^7.16.4", "@babel/parser@^7.16.7", "@babel/parser@^7.17.9", "@babel/parser@^7.4.3", "@babel/parser@^7.6.0", "@babel/parser@^7.7.0", "@babel/parser@^7.8.3", "@babel/parser@^7.9.0", "@babel/parser@^7.9.6":
   version "7.18.11"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.18.11.tgz#68bb07ab3d380affa9a3f96728df07969645d2d9"
   integrity sha512-9JKn5vN+hDt0Hdqn1PiJ2guflwP+B6Ga8qbDuoF0PzzVhrzsKIJo8yGqVk6CmMHiMei9w1C1Bp9IMJSIK+HPIQ==
