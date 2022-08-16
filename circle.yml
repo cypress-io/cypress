@@ -1294,6 +1294,12 @@ jobs:
 
   v8-integration-tests:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
       - restore_cached_workspace
