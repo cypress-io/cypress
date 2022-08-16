@@ -543,6 +543,9 @@ Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'elemen
 
 installCustomPercyCommand({
   elementOverrides: {
+    '[data-cy=top-nav-cypress-version-current-link] > span': ($el) => {
+      $el.text('vX.X.X')
+    },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
     },
