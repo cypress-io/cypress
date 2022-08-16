@@ -154,7 +154,8 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
 
   // if we found Cypress.require()s, re-generate the code from the AST
   if (hasDependencies) {
-    // TODO: handle sourcemaps for this correctly.
+    // TODO: handle sourcemaps for this correctly
+    // https://github.com/cypress-io/cypress/issues/23365
     // the following causes error "Cannot read property 'replace' of undefined"
     // return generate(ast, { sourceMaps: true }, source).code
     return generate(ast, {}).code
