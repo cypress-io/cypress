@@ -5,6 +5,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { getDefaultSpecFileName } from '../sources/migration/utils'
 import { toPosix } from '../util'
+import type { FoundSpec } from '@packages/types'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -12,8 +13,8 @@ interface CodeGenOptions {
   isDefaultSpecPattern: boolean
   specPattern: string[]
   currentProject: string | null
-  specFileExtension?: string
   framework?: WizardFrontendFramework
+  specs?: FoundSpec[]
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -93,7 +94,8 @@ export class SpecOptions {
         testingType: this.options.codeGenType === 'componentEmpty' || this.options.codeGenType === 'component' ? 'component' : 'e2e',
         fileExtensionToUse: (extension === '.cy.ts' || extension === '.cy.tsx') ? 'ts' : 'js',
         specPattern: this.options.specPattern,
-        name: componentName }))
+        name: componentName,
+        specs: this.options.specs }))
     }
 
     // The path to import the component from
@@ -136,11 +138,12 @@ export class SpecOptions {
   }
 
   private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
-    const { dir, base, ext } = filePath || this.parsedPath
+    const { dir, base } = filePath || this.parsedPath
     const cyWithExt = this.getSpecExtension() + specExt
-    const name = base.slice(0, -ext.length)
 
-    const finalExtension = filePath ? ext : cyWithExt
+    const name = base.slice(0, base.indexOf('.'))
+
+    const finalExtension = filePath ? specExt : cyWithExt
 
     return this.getFinalFileName(dir, name, finalExtension, path.join(dir, `${name}${finalExtension}`))
   }

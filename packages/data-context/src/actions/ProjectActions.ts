@@ -339,9 +339,7 @@ export class ProjectActions {
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
-    if (!project) {
-      throw Error(`Cannot create spec without currentProject.`)
-    }
+    assert(project, 'Cannot create spec without currentProject.')
 
     const getCodeGenPath = () => {
       return codeGenType === 'e2e'
@@ -363,6 +361,7 @@ export class ProjectActions {
       isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
       specPattern,
       currentProject: this.ctx.currentProject,
+      specs: this.ctx.project.specs,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
