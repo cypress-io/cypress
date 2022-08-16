@@ -1292,6 +1292,19 @@ jobs:
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
+  v8-integration-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run: yarn test-integration --scope @tooling/packherd
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   unit-tests:
     <<: *defaults
     parameters:
@@ -2461,6 +2474,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-cypress-schematic:
         requires:
           - build
+    - v8-integration-tests:
+        requires:
+          - system-tests-node-modules-install
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
@@ -2510,6 +2526,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - v8-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
@@ -2620,6 +2637,13 @@ linux-arm64-workflow: &linux-arm64-workflow
         requires:
           - linux-arm64-build
 
+    - v8-integration-tests:
+        name: linux-arm64-v8-integration-tests
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2659,6 +2683,13 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-build
 
+    - v8-integration-tests:
+        name: darwin-x64-v8-integration-tests
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
     - node_modules_install:
@@ -2680,6 +2711,13 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
+
+    - v8-integration-tests:
+        name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
@@ -2745,6 +2783,13 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-create-build-artifacts
+
+    - v8-integration-tests:
+        name: windows-v8-integration-tests
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-build
 
 workflows:
   linux-x64:

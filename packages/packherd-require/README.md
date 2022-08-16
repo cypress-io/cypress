@@ -1,11 +1,10 @@
-## @packages/packherd
+## @packages/packherd-require
 
-Herds all dependencies reachable from an entry and packs them.
+Loads modules that have been bundled by `@tooling/packherd`.
 
 **Table of Contents**
 
 - [Summary](#summary)
-- [Creating a Bundle with Packherd](#creating-a-bundle-with-packherd)
 - [Loading Bundled/Snapshotted Modules with Packherd](#loading-bundledsnapshotted-modules-with-packherd)
 - [Transpiling TypeScript Modules on Demand](#transpiling-typescript-modules-on-demand)
   - [Transpile Cache](#transpile-cache)
@@ -13,11 +12,10 @@ Herds all dependencies reachable from an entry and packs them.
   - [Implementation](#implementation)
   - [Import Caveats](#import-caveats)
 - [Env Vars](#env-vars)
-- [LICENSE](#license)
 
 ## Summary
 
-packherd has three main tasks:
+packherd has three main tasks. 1 is provided by `@tooling/packherd`. 2 and 3 are provided by this package
 
 1. bundling application files and providing related metadata
 2. loading modules that have been bundled previously and are provided via fully instantiated
@@ -26,16 +24,6 @@ packherd has three main tasks:
 
 While `1.` and `2.` are very related and work hand in hand, `3.` is unrelated to them and was
 just added here since it is another feature that requires to intercept module loads.
-
-## Creating a Bundle with Packherd
-
-Calling the [packherd function][packherd fn] and providing the desired [packherd opts][packherd
-opts] will return the `Buffer` of the bundle,  a `meta` [esbuild metafile][esbuild metafile], a
-`Buffer` containing the sourceMap if it was generated as well as any warnings that esbuild
-emitted.
-
-The caller can then store this data or use it for further operations, i.e. to generate a
-snapshot as is the case for the [v8-snapshot][v8-snapshot] module.
 
 ## Loading Bundled/Snapshotted Modules with Packherd
 
@@ -117,10 +105,6 @@ In general I recommend doing this _properly_ via a tool like
 
 - `PACKHERD_CODE_FRAMES` if set will include code snippets for error messages that have been
   sourcemapped
-
-[packherd fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L44
-[packherd opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L14-L27
-[esbuild metafile]:https://esbuild.github.io/api/#metafile
 
 [require fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L71
 [require opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L23-L32

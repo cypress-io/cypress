@@ -8,30 +8,45 @@ import {
 import { expect } from 'chai'
 import spok from 'spok'
 import type{ Metafile } from 'esbuild'
+import Fixtures from '@tooling/system-tests'
+import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
+import path from 'path'
+
+const MINIMAL_PROJECT = 'v8-snapshot/minimal'
 
 const t = spok.adapters.chaiExpect(expect)
 
 describe('Packherd', () => {
+  let projectBaseDir
+
+  before(async () => {
+    Fixtures.remove()
+    await FixturesScaffold.scaffoldCommonNodeModules()
+    projectBaseDir = await Fixtures.scaffoldProject(MINIMAL_PROJECT)
+
+    await FixturesScaffold.scaffoldProjectNodeModules(MINIMAL_PROJECT, false, true)
+  })
+
   it('resolves paths relative to entry and creates entry content', async () => {
-    const entryFile = require.resolve('../test/fixtures/minimal/entry.js')
+    const entryFile = require.resolve(path.join(projectBaseDir, 'entry.js'))
     const { meta, bundle } = await packherd({ entryFile })
 
     spok(t, meta, {
       inputs: {
-        'test/fixtures/minimal/node_modules/isobject/index.cjs.js': {
+        [path.relative(process.cwd(), `${projectBaseDir}/node_modules/isobject/index.cjs.js`)]: {
           bytes: spok.ge(200),
         },
-        'test/fixtures/minimal/node_modules/tmpfile/index.js': {
+        [path.relative(process.cwd(), `${projectBaseDir}/node_modules/tmpfile/index.js`)]: {
           bytes: spok.ge(800),
         },
-        'test/fixtures/minimal/entry.js': {
+        [path.relative(process.cwd(), `${projectBaseDir}/entry.js`)]: {
           bytes: spok.ge(100),
           imports: [
             {
-              path: 'test/fixtures/minimal/node_modules/isobject/index.cjs.js',
+              path: path.relative(process.cwd(), `${projectBaseDir}/node_modules/isobject/index.cjs.js`),
             },
             {
-              path: 'test/fixtures/minimal/node_modules/tmpfile/index.js',
+              path: path.relative(process.cwd(), `${projectBaseDir}/node_modules/tmpfile/index.js`),
             },
           ],
         },
@@ -63,7 +78,7 @@ describe('Packherd', () => {
       return Promise.resolve(result)
     }
 
-    const entryFile = require.resolve('../test/fixtures/minimal/entry.js')
+    const entryFile = path.relative(projectBaseDir, require.resolve(path.join(projectBaseDir, 'entry.js')))
     const { meta, bundle } = await packherd({ entryFile, createBundle })
 
     spok(t, meta, metafile)

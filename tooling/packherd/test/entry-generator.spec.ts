@@ -7,12 +7,26 @@ import type {
   CreateBundleResult,
 } from '../src/packherd'
 import { expect } from 'chai'
-
 import { EntryGenerator } from '../src/generate-entry'
+import Fixtures from '@tooling/system-tests'
+import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
+import path from 'path'
+
+const MINIMAL_PROJECT = 'v8-snapshot/minimal'
 
 describe('Entry Generator', () => {
+  let projectBaseDir
+
+  before(async () => {
+    Fixtures.remove()
+    await FixturesScaffold.scaffoldCommonNodeModules()
+    projectBaseDir = await Fixtures.scaffoldProject(MINIMAL_PROJECT)
+
+    await FixturesScaffold.scaffoldProjectNodeModules(MINIMAL_PROJECT, false, true)
+  })
+
   it('resolves paths relative to entry and creates entry content', async () => {
-    const entryFile = require.resolve('../test/fixtures/minimal/entry.js')
+    const entryFile = require.resolve(path.join(projectBaseDir, 'entry.js'))
     const generator = new EntryGenerator(createBundle, entryFile)
     const { paths, entry } = await generator.createEntryScript()
 
@@ -34,9 +48,9 @@ exports['./node_modules/tmpfile/index.js'] = require('./node_modules/tmpfile/ind
     }
     const metafile: Metafile = ({
       inputs: {
-        'test/fixtures/minimal/node_modules/foo/foo.js': {},
-        'test/fixtures/minimal/lib/bar.js': {},
-        'test/fixtures/minimal/node_modules/baz/baz.js': {},
+        'node_modules/foo/foo.js': {},
+        'lib/bar.js': {},
+        'node_modules/baz/baz.js': {},
       },
     } as unknown) as Metafile
 
@@ -50,9 +64,15 @@ exports['./node_modules/tmpfile/index.js'] = require('./node_modules/tmpfile/ind
       return Promise.resolve(result)
     }
 
-    const entryFile = require.resolve('../test/fixtures/minimal/entry.js')
+    const entryFile = require.resolve(path.join(projectBaseDir, 'entry.js'))
     const generator = new EntryGenerator(createBundle, entryFile)
+
+    const oldWd = process.cwd()
+
+    process.chdir(projectBaseDir)
     const { paths, entry } = await generator.createEntryScript()
+
+    process.chdir(oldWd)
 
     expect(paths).to.deep.equal(
       ['node_modules/foo/foo.js', 'node_modules/baz/baz.js'].sort(),
