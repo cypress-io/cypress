@@ -9,7 +9,7 @@ import { asWindowsPath, normalize } from '@angular-devkit/core'
 import * as os from 'os'
 import { dirname, join } from 'path'
 import { open, run } from 'cypress'
-import { from, noop, Observable, of } from 'rxjs'
+import { forkJoin, from, noop, Observable, of } from 'rxjs'
 import { catchError, concatMap, first, map, switchMap, tap } from 'rxjs/operators'
 import { CypressBuilderOptions } from './cypressBuilderOptions'
 
@@ -46,8 +46,8 @@ function runCypress (
     }),
     switchMap((options: CypressBuilderOptions) => {
       return (options.devServerTarget
-        ? startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context }).pipe(
-          map((devServerBaseUrl: string) => options.baseUrl || devServerBaseUrl),
+        ? forkJoin(startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context })).pipe(
+          map((devServerBaseUrlArray: [string]) => options.baseUrl || devServerBaseUrlArray[0]),
         )
         : of(options.baseUrl)
       ).pipe(
@@ -103,29 +103,27 @@ export function startDevServer ({
   // this is relevant for running Cypress against dev server target that does not support this option,
   // for instance @nguniversal/builders:ssr-dev-server.
   // see https://github.com/nrwl/nx/blob/f930117ed6ab13dccc40725c7e9551be081cc83d/packages/cypress/src/executors/cypress/cypress.impl.ts
-  const angularJson = require(`${context.workspaceRoot }/angular.json`)
-  const { project, target } = targetFromTargetString(devServerTarget)
-  const devServerConfig = angularJson.projects[project].architect[target]
-  let overrides = {}
+  return context.getBuilderNameForTarget(targetFromTargetString(devServerTarget)).then((devServerBuilder: string) => {
+    let overrides = {}
 
-  if (devServerConfig.builder !== '@nguniversal/builders:ssr-dev-server') {
-    console.info(`Passing watch mode to DevServer - watch mode is ${watch}`)
-    overrides = {
-      watch,
-    }
-  }
-
-  //@ts-ignore
-  return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
-    //@ts-ignore
-    map((output: any) => {
-      if (!output.success && !watch) {
-        throw new Error('Could not compile application files')
+    // here we set dev server in watch mode only if it is allowed
+    if (devServerBuilder !== '@nguniversal/builders:ssr-dev-server') {
+      console.info(`Passing watch mode to DevServer - watch mode is ${watch}`)
+      overrides = {
+        watch,
       }
+    }
 
-      return output.baseUrl as string
-    }),
-  )
+    return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
+      map((output: any) => {
+        if (!output.success && !watch) {
+          throw new Error('Could not compile application files')
+        }
+
+        return output.baseUrl as string
+      }),
+    )
+  })
 }
 
 export default createBuilder<CypressBuilderOptions>(runCypress)
