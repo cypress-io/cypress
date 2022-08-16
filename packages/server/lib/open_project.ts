@@ -223,6 +223,21 @@ export class OpenProject {
     this.closeOpenProjectAndBrowsers()
   }
 
+  changeUrlToSpec (spec: Cypress.Spec) {
+    if (!this.projectBase) {
+      return
+    }
+
+    const newSpecUrl = getSpecUrl({
+      projectRoot: this.projectBase.projectRoot,
+      spec,
+    })
+
+    debug(`New url is ${newSpecUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newSpecUrl)
+  }
+
   // close existing open project if it exists, for example
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad

@@ -15,27 +15,33 @@
     >
       <HighlightedText
         :text="fileName"
-        :indexes="indexes.filter((idx) => idx < fileName.length)"
+        :indexes="split.fileNameIndexes"
         class="font-medium pl-8px whitespace-nowrap"
         :class="selected ? 'text-white' : 'group-focus:text-indigo-300 text-gray-400 group-hover:text-indigo-300'"
       />
       <HighlightedText
         :text="extension"
-        :indexes="indexes.filter((idx) => idx >= fileName.length).map(idx => idx - fileName.length)"
+        :indexes="split.extensionIndexes"
         class="text-gray-700"
       />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { computed } from 'vue'
 import DocumentIconBlank from '~icons/cy/document-blank_x16'
 import HighlightedText from './HighlightedText.vue'
+import { deriveIndexes } from './spec-utils'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   fileName: string
   extension: string
   selected?: boolean
   indexes: number[]
 }>(), { indexes: () => [], selected: false })
+
+const split = computed(() => {
+  return deriveIndexes(props.fileName, props.indexes)
+})
 
 </script>

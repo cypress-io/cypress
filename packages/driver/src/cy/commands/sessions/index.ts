@@ -40,8 +40,6 @@ export default function (Commands, Cypress, cy) {
   Cypress.on('run:start', () => {
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        sessionsManager.currentTestRegisteredSessions.clear()
-
         const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
         return clearPage
@@ -93,18 +91,18 @@ export default function (Commands, Cypress, cy) {
       }
 
       let session: SessionData = sessionsManager.getActiveSession(id)
-      const isRegisteredSessionForTest = sessionsManager.currentTestRegisteredSessions.has(id)
+      const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
       if (!setup) {
-        if (!session || !isRegisteredSessionForTest) {
+        if (!session || !isRegisteredSessionForSpec) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
         }
       } else {
         const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
 
         if (isUniqSessionDefinition) {
-          if (isRegisteredSessionForTest) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: session.id } })
+          if (isRegisteredSessionForSpec) {
+            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
           }
 
           session = sessions.defineSession({
@@ -114,7 +112,7 @@ export default function (Commands, Cypress, cy) {
             cacheAcrossSpecs: options.cacheAcrossSpecs,
           })
 
-          sessionsManager.currentTestRegisteredSessions.set(id, true)
+          sessionsManager.registeredSessions.set(id, true)
         }
       }
 

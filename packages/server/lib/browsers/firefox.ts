@@ -6,6 +6,7 @@ import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
 import { debug as launcherDebug, launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
@@ -427,7 +428,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
       'network.proxy.http_port': +port,
       'network.proxy.ssl_port': +port,
       'network.proxy.no_proxies_on': '',
-      'browser.download.dir': options.downloadsFolder,
+      'browser.download.dir': os.platform() === 'win32' ? doubleEscape(options.downloadsFolder) : options.downloadsFolder,
     })
   }
 
