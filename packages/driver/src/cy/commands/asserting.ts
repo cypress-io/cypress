@@ -97,18 +97,18 @@ export default function (Commands, Cypress, cy, state) {
 
     const applyChainer = function (memo, value) {
       logIndex++
-      if (value === lastChainer && !isCheckingExistence) {
+      cy.state('onBeforeLog', (log) => {
+        log.set('command', command)
+        log.set('commandLogId', `${assertionIndex}-${logIndex}`)
+      })
+
+      try {
+        if (value === lastChainer && !isCheckingExistence) {
         // https://github.com/cypress-io/cypress/issues/16006
         // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
         // It creates duplicated messages and confuses users.
-        const cmd = memo[value]
+          const cmd = memo[value]
 
-        cy.state('onBeforeLog', (log) => {
-          log.set('command', command)
-          log.set('commandLogId', `${assertionIndex}-${logIndex}`)
-        })
-
-        try {
           if (_.isFunction(cmd)) {
             try {
               return cmd.apply(memo, args)
@@ -126,11 +126,11 @@ export default function (Commands, Cypress, cy, state) {
           } else {
             return cmd
           }
-        } finally {
-          cy.state('onBeforeLog', undefined)
+        } else {
+          return memo[value]
         }
-      } else {
-        return memo[value]
+      } finally {
+        cy.state('onBeforeLog', undefined)
       }
     }
 

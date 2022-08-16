@@ -329,11 +329,15 @@ describe('src/cy/commands/assertions', () => {
       it('resolves eventually not exist', () => {
         const button = cy.$$('button:first')
 
-        cy.on('command:retry', _.after(2, _.once(() => {
+        cy.on('command:retry', _.after(3, _.once(() => {
           button.remove()
         })))
 
         cy.get('button:first').click().should('not.exist')
+
+        cy.then(function () {
+          assertLogLength(this.logs, 3)
+        })
       })
 
       it('resolves all 3 assertions', (done) => {
