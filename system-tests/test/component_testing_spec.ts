@@ -124,3 +124,16 @@ describe(`Angular CLI major versions`, () => {
     })
   }
 })
+
+describe('experimentalSingleTabRunMode', function () {
+  systemTests.setup()
+
+  systemTests.it('executes all specs in a single tab', {
+    project: 'experimentalSingleTabRunMode',
+    testingType: 'component',
+    spec: '**/*.cy.js',
+    browser: 'chrome',
+    snapshot: true,
+    expectedExitCode: 2,
+  })
+})
