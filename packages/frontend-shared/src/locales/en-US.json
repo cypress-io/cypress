@@ -466,6 +466,10 @@
         "name": "Modify Obstructive Third Party Code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
       },
+      "experimentalSingleTabRunMode": {
+        "name": "Single Tab Run Mode",
+        "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
+      },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
