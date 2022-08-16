@@ -48,4 +48,8 @@ export class ServerCt extends ServerBase<SocketCt> {
       })
     })
   }
+
+  destroyAut () {
+    return this.socket.destroyAut()
+  }
 }

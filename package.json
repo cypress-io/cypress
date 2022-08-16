@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "10.4.0",
+  "version": "10.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -192,6 +192,7 @@
     "mock-fs": "5.1.1",
     "p-defer": "^3.0.0",
     "patch-package": "6.4.7",
+    "playwright-webkit": "1.24.2",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
     "print-arch": "1.0.0",
