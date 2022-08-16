@@ -568,7 +568,8 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'yarn add -D ')
     })
 
-    it('makes the right command for pnpm', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+    it.skip('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
