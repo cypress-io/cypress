@@ -3929,7 +3929,8 @@ describe('src/cy/commands/actions/click', { browser: '!webkit' }, () => {
   })
 })
 
-describe('shadow dom', () => {
+// TODO(webkit): fix+unskip for experimental webkit
+describe('shadow dom', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
   })
@@ -3992,7 +3993,8 @@ describe('shadow dom', () => {
   })
 })
 
-describe('mouse state', () => {
+// TODO(webkit): fix+unskip for experimental webkit
+describe('mouse state', { browser: '!webkit' }, () => {
   describe('mouse/pointer events', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3500/fixtures/dom.html')
