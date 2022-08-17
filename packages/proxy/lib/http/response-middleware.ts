@@ -55,7 +55,7 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
 
 function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesDomainTLDAndPortProps(req.proxiedUrl, remoteState.props)
   }
 
   if (remoteState.strategy === 'file') {

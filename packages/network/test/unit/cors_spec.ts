@@ -92,14 +92,14 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesOriginPolicyProps', () => {
+  context('.urlMatchesDomainTLDAndPortProps', () => {
     beforeEach(function () {
       this.isFalse = (url, props) => {
-        expect(cors.urlMatchesOriginPolicyProps(url, props)).to.be.false
+        expect(cors.urlMatchesDomainTLDAndPortProps(url, props)).to.be.false
       }
 
       this.isTrue = (url, props) => {
-        expect(cors.urlMatchesOriginPolicyProps(url, props)).to.be.true
+        expect(cors.urlMatchesDomainTLDAndPortProps(url, props)).to.be.true
       }
     })
 

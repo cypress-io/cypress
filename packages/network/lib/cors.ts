@@ -71,14 +71,14 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
-export function urlMatchesOriginPolicyProps (urlStr, props) {
+export function urlMatchesDomainTLDAndPortProps (url: string, props?: ParsedHost) {
   // take a shortcut here in the case
   // where remoteHostAndPort is null
   if (!props) {
     return false
   }
 
-  const parsedUrl = parseUrlIntoDomainTldPort(urlStr)
+  const parsedUrl = parseUrlIntoDomainTldPort(url)
 
   // does the parsedUrl match the parsedHost?
   return _.isEqual(parsedUrl, props)
