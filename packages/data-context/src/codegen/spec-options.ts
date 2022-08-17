@@ -129,21 +129,22 @@ export class SpecOptions {
     }
   }
 
-  private getSpecExtension = () => {
+  private getSpecExtension = (filePath?: ParsedPath) => {
     const foundSpecExtension = expectedSpecExtensions.find((specExtension) => {
-      return this.parsedPath.base.endsWith(specExtension + this.parsedPath.ext)
+      return filePath ? filePath.base.endsWith(specExtension + filePath.ext) :
+        this.parsedPath.base.endsWith(specExtension + this.parsedPath.ext)
     })
 
     return foundSpecExtension || ''
   }
 
   private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
-    const { dir, base } = filePath || this.parsedPath
-    const cyWithExt = this.getSpecExtension() + specExt
+    const { dir, base, ext } = filePath || this.parsedPath
+    const cyWithExt = this.getSpecExtension(filePath) + ext
 
     const name = base.slice(0, base.indexOf('.'))
 
-    const finalExtension = filePath ? specExt : cyWithExt
+    const finalExtension = filePath ? cyWithExt : specExt
 
     return this.getFinalFileName(dir, name, finalExtension, path.join(dir, `${name}${finalExtension}`))
   }
