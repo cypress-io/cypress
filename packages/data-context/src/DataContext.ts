@@ -41,7 +41,6 @@ import type { CypressError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
 import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
-import { resetIssuedWarnings } from '@packages/config'
 import { RemotePollingDataSource } from './sources/RemotePollingDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -444,7 +443,9 @@ export class DataContext {
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
 
-    resetIssuedWarnings()
+    this.update((coreData) => {
+      coreData.diagnostics.warnings = []
+    })
 
     return Promise.all([
       this.lifecycleManager.destroy(),

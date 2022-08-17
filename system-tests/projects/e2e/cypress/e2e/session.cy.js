@@ -405,7 +405,7 @@ describe('options.validate reruns steps when rejecting', () => {
 })
 
 describe('options.validate reruns steps when throwing', () => {
-  SuiteWithValidateFn('validate_reject', (callCount) => {
+  SuiteWithValidateFn('validate_throw', (callCount) => {
     if (callCount === 2) {
       throw new Error('validate error')
     }
@@ -460,22 +460,6 @@ describe('can wait for login redirect automatically', () => {
     cy.session('redirect-login', () => {
       cy.visit('https://localhost:4466/form')
       cy.get('[name="delay"]').type('100{enter}')
-      // not needed since cypress will pause command queue during the redirect
-      // cy.url().should('include', '/home')
-    })
-
-    expectCurrentSessionData({
-      cookies: ['/form', '/home'],
-    })
-  })
-})
-
-describe('can wait for a js redirect with an assertion', () => {
-  it('t1', () => {
-    cy.session('redirect-login', () => {
-      cy.visit('https://localhost:4466/form')
-      cy.get('[name="delay"]').type('100{enter}')
-      // cy.url().should('include', '/home')
     })
 
     expectCurrentSessionData({
@@ -486,7 +470,7 @@ describe('can wait for a js redirect with an assertion', () => {
 
 describe('same session name, different options, multiple tests', () => {
   it('t1', () => {
-    cy.session('bob', () => {
+    cy.session('bob_1', () => {
       localStorage.bob = '1'
     })
     .then(() => {
@@ -495,7 +479,7 @@ describe('same session name, different options, multiple tests', () => {
   })
 
   it('t2', () => {
-    cy.session('bob', () => {
+    cy.session('bob_2', () => {
       localStorage.bob = '2'
     })
     .then(() => {

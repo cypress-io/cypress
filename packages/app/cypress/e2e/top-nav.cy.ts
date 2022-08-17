@@ -655,6 +655,7 @@ describe('Growth Prompts Can Open Automatically', () => {
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: {},
+          banners: { _disabled: true },
         })
       },
     )
@@ -672,6 +673,7 @@ describe('Growth Prompts Can Open Automatically', () => {
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: { ci1: 1609459200000 },
+          banners: { _disabled: true },
         })
       },
     )

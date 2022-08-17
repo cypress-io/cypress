@@ -1708,7 +1708,10 @@ export default {
         return
       },
 
-      resumeAtTest (id, emissions: Emissions = {}) {
+      resumeAtTest (id, emissions: Emissions = {
+        started: {},
+        ended: {},
+      }) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions

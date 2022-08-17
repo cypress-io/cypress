@@ -1,3 +1,33 @@
+# [@cypress/webpack-dev-server-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.1.0...@cypress/webpack-dev-server-v2.2.0) (2022-08-15)
+
+
+### Bug Fixes
+
+* remove webpack entrypoints from for ct webpack projects ([#23299](https://github.com/cypress-io/cypress/issues/23299)) ([c93b652](https://github.com/cypress-io/cypress/commit/c93b652ff7a68ee368234ee928fbd6835d708769))
+
+
+### Features
+
+* add template support, teardown & standalone ([#23117](https://github.com/cypress-io/cypress/issues/23117)) ([d201b37](https://github.com/cypress-io/cypress/commit/d201b37b3d6b1e37a15a8d21d853acca47bfc666))
+* enable Angular CT support ([#23089](https://github.com/cypress-io/cypress/issues/23089)) ([94e78eb](https://github.com/cypress-io/cypress/commit/94e78eba0430eae97529058c40611e5f24dbf140))
+
+# [@cypress/webpack-dev-server-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.0.0...@cypress/webpack-dev-server-v2.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* allow next.js apps to import global styles ([#22769](https://github.com/cypress-io/cypress/issues/22769)) ([2027f1d](https://github.com/cypress-io/cypress/commit/2027f1daee5855b4466dad0d551c388b001664f9))
+* Increase timeout for npm-webpack-dev-server tests ([#22489](https://github.com/cypress-io/cypress/issues/22489)) ([0fccc45](https://github.com/cypress-io/cypress/commit/0fccc45aaf1edabf1a3539df02fbef2982352307))
+* map framework name to dependency that contains webpack ([#22774](https://github.com/cypress-io/cypress/issues/22774)) ([7e0de0b](https://github.com/cypress-io/cypress/commit/7e0de0b0d085cc3e07b8f904ee9f0fa4cef6c1cf))
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+* wrong version of webpack-dev-server displayed ([#22919](https://github.com/cypress-io/cypress/issues/22919)) ([b4ae71c](https://github.com/cypress-io/cypress/commit/b4ae71c1c1ee73dbee6785292eb0ddaef50a19dc))
+
+
+### Features
+
+* **angular:** angular mount ([#22858](https://github.com/cypress-io/cypress/issues/22858)) ([4131b1f](https://github.com/cypress-io/cypress/commit/4131b1fa8482ae08113bef337965baa1ac12f66c))
+* **webpack-dev-server:** add angular handler ([#22314](https://github.com/cypress-io/cypress/issues/22314)) ([dc5d9de](https://github.com/cypress-io/cypress/commit/dc5d9de290e23efb093ac8e36fc9294242a0d0f7))
+
 # [@cypress/webpack-dev-server-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.8.4...@cypress/webpack-dev-server-v2.0.0) (2022-06-13)
 
 

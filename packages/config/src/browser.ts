@@ -51,8 +51,6 @@ export const testOverrideLevels = createIndex(options, 'name', 'overrideLevel', 
 
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
-const issuedWarnings = new Set()
-
 export type InvalidTestOverrideResult = {
   invalidConfigKey: string
   supportedOverrideLevel: string
@@ -71,11 +69,7 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
-export function resetIssuedWarnings () {
-  issuedWarnings.clear()
-}
-
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -84,13 +78,6 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
       }
 
       if (isWarning) {
-        if (issuedWarnings.has(errorKey)) {
-          return
-        }
-
-        // avoid re-issuing the same warning more than once
-        issuedWarnings.add(errorKey)
-
         return onWarning(errorKey, {
           name,
           newName,

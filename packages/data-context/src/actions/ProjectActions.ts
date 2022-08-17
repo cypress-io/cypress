@@ -12,7 +12,6 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
-import { resetIssuedWarnings } from '@packages/config'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export interface ProjectApiShape {
@@ -35,7 +34,7 @@ export interface ProjectApiShape {
   getConfig(): ReceivedCypressOptions | undefined
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
-  getCurrentProjectSavedState(): {} | undefined
+  getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
@@ -99,7 +98,10 @@ export class ProjectActions {
     })
 
     await this.ctx.lifecycleManager.clearCurrentProject()
-    resetIssuedWarnings()
+    this.ctx.update((coreData) => {
+      coreData.diagnostics.warnings = []
+    })
+
     await this.api.closeActiveProject()
   }
 
