@@ -122,7 +122,7 @@ export class WebkitAutomation {
 
   private attachListeners (page: playwright.Page) {
     // emit preRequest to proxy
-    page.on('request', async (request) => {
+    page.on('request', (request) => {
       // ignore socket.io events
       // TODO: use config.socketIoRoute here instead
       if (request.url().includes('/__socket') || request.url().includes('/__cypress')) return
