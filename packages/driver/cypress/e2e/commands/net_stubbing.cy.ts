@@ -1704,7 +1704,8 @@ describe('network stubbing', function () {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/14446
-    it('should delay the same amount on every response', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23406
+    it.skip('should delay the same amount on every response', () => {
       const delay = 250
 
       const testDelay = () => {
