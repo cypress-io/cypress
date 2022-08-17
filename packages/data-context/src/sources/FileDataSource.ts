@@ -64,7 +64,7 @@ export class FileDataSource {
       debug('globbing pattern(s): %o', globs)
       debug('within directory: %s', cwd)
 
-      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
+      const files = await this.matchGlobs(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
 
       return files
     } catch (e) {
@@ -72,5 +72,9 @@ export class FileDataSource {
 
       return []
     }
+  }
+
+  async matchGlobs (globs: string | string[], globbyOptions?: GlobbyOptions) {
+    return await globby(globs, globbyOptions)
   }
 }
