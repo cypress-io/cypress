@@ -15,7 +15,6 @@
 import { gql, useQuery } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
-import { useStudioRecorderStore } from '@packages/app/src/store/studio-store'
 
 gql`
 query HeaderBar_HeaderBarQuery {

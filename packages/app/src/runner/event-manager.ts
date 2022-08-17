@@ -283,24 +283,22 @@ export class EventManager {
 
     const studioInit = () => {
       this.ws.emit('studio:init', (showedStudioModal) => {
+        rerun()
         // if (!showedStudioModal) {
         //   this.studioRecorder.showInitModal()
         // } else {
-          console.log('re run!')
-          rerun()
+        //   rerun()
         // }
       })
     }
 
     this.reporterBus.on('studio:init:test', (testId) => {
-      console.log('init studio test', testId)
       this.studioRecorder.setTestId(testId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      console.log('init studio suite')
       this.studioRecorder.setSuiteId(suiteId)
 
       studioInit()
@@ -482,7 +480,7 @@ export class EventManager {
               testId: this.studioRecorder.testId,
               suiteId: this.studioRecorder.suiteId,
               url: this.studioRecorder.url,
-            }
+            },
           })
         })
       })
@@ -720,7 +718,6 @@ export class EventManager {
       performance.mark('run-e')
       performance.measure('run', 'run-s', 'run-e')
     })
-
 
     const hasRunnableId = !!this.studioRecorder.testId || !!this.studioRecorder.suiteId
 

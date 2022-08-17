@@ -8,6 +8,7 @@ import { getEventManager } from '../runner'
 
 function getCypress () {
   const eventManager = getEventManager()
+
   return eventManager.getCypress()
 }
 
@@ -92,16 +93,18 @@ interface StudioRecorderState {
 }
 
 export const useStudioRecorderStore = defineStore('studioRecorder', {
-  state: (): StudioRecorderState => ({
-    initModalIsOpen: false,
-    saveModalIsOpen: false,
-    logs: [],
-    isLoading: false,
-    isActive: false,
-    isFailed: false,
-    _hasStarted: false,
-    _currentId: 1
-  }),
+  state: (): StudioRecorderState => {
+    return {
+      initModalIsOpen: false,
+      saveModalIsOpen: false,
+      logs: [],
+      isLoading: false,
+      isActive: false,
+      isFailed: false,
+      _hasStarted: false,
+      _currentId: 1,
+    }
+  },
 
   actions: {
     setTestId (testId: string) {
@@ -167,7 +170,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         }
       }
 
-      if (Boolean(this.testId || this.suiteId)) {
+      if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
 
@@ -184,7 +187,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         this.setTestId(test.id)
       }
 
-      if (Boolean(this.testId || this.suiteId)) {
+      if (this.testId || this.suiteId) {
         if (test.invocationDetails) {
           this.setFileDetails(test.invocationDetails)
         }
@@ -207,11 +210,9 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       this._hasStarted = true
 
       if (this.url) {
-        console.log(`Visiting url ${this.url}`)
         this.visitUrl()
       }
 
-      console.log('body', body)
       this.attachListeners(body)
     },
 
@@ -346,7 +347,6 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
     },
 
     _addLog (log: StudioLog) {
-      console.log('Adding log', log)
       log.id = this._getId()
 
       this.logs.push(log)
@@ -415,11 +415,8 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       return this._previousMouseEvent && window.UnifiedRunner.CypressJQuery(el).is(this._previousMouseEvent.element)
     },
 
-
     attachListeners (body: HTMLBodyElement) {
-      console.log(`attaching listeners to`, body)
       if (this.isFailed) {
-        console.log('failed...')
         return
       }
 
@@ -516,7 +513,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       }
     },
 
-    _getId() {
+    _getId () {
       return this._currentId++
     },
 
@@ -647,7 +644,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       })
     },
 
-    _updateLog (log: StudioLog) { 
+    _updateLog (log: StudioLog) {
       const { id, name, message } = log
 
       getEventManager().emit('reporter:log:state:changed', this._generateLog({
@@ -844,7 +841,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
   },
 
   getters: {
-    hasRunnableId(state) {
+    hasRunnableId (state) {
       return !!state.testId || !!state.suiteId
     },
 
@@ -853,11 +850,10 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
     },
 
     isEmpty: (state): boolean => {
-      console.log(`Is Empty? ${state.logs.length}`)
       return state.logs.length === 0
     },
 
-    isReady(state): boolean {
+    isReady (state): boolean {
       return this.isOpen && this.isEmpty && !state.isLoading && !state.isFailed
     },
 
@@ -875,5 +871,5 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         state: 'failed',
       }
     },
-  }
+  },
 })

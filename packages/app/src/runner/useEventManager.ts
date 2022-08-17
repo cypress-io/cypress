@@ -39,11 +39,9 @@ export function useEventManager () {
 
     eventManager.on('page:loading', (isLoading) => {
       if (isLoading) {
-        console.log('return early')
         return
       }
 
-      console.log('reattaching')
       getAutIframeModel().reattachStudio()
     })
 
@@ -52,8 +50,7 @@ export function useEventManager () {
     })
 
     eventManager.on('run:end', () => {
-      console.log('here??')
-      getAutIframeModel().startStudio();
+      getAutIframeModel().startStudio()
     })
 
     eventManager.on('expect:origin', addCrossOriginIframe)

@@ -483,6 +483,7 @@ export class AutIframe {
 
   startStudio () {
     const studioRecorder = useStudioRecorderStore()
+
     if (studioRecorder.isLoading) {
       studioRecorder.start(this._body()?.[0])
     }
@@ -490,7 +491,7 @@ export class AutIframe {
 
   reattachStudio () {
     const studioRecorder = useStudioRecorderStore()
-    console.log('reattach')
+
     if (studioRecorder.isActive) {
       studioRecorder.attachListeners(this._body()?.[0])
     }
