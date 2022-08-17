@@ -9,7 +9,6 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
-import { InjectedConfigApi } from '../../src/data'
 import sinon from 'sinon'
 import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
@@ -50,7 +49,6 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       logIn: sinon.stub().throws('not stubbed'),
       resetAuthState: sinon.stub(),
     } as unknown as AuthApiShape,
-    configApi: {} as InjectedConfigApi,
     projectApi: {
       closeActiveProject: sinon.stub(),
       insertProjectToCache: sinon.stub().resolves(),
