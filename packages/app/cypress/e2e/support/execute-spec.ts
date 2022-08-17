@@ -29,7 +29,7 @@ export const waitForSpecToFinish = (expectedResults) => {
   cy.get('.failed > .num').should('contain', '--')
 
   // Then ensure the tests are running
-  cy.contains('Your tests are loading...').should('not.exist')
+  cy.contains('Your tests are loading...', { timeout: 10000 }).should('not.exist')
 
   // Then ensure the tests have finished
   cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
