@@ -1686,7 +1686,8 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can delay with deprecated delayMs param', function () {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23404
+    it.skip('can delay with deprecated delayMs param', function () {
       const delayMs = 250
 
       cy.intercept('/timeout*', (req) => {
