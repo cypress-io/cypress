@@ -96,7 +96,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
-        cy.contains('%)').should('not.exist')
+        return cy.contains('%)').should('not.exist')
       }
 
       cy.scaffoldProject('cypress-in-cypress')
