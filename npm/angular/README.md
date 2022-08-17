@@ -61,6 +61,7 @@ describe('HelloWorldComponent', () => {
     cy.contains('Hello World!').should('be.visible')
   })
 })
+```
 
 Look at the examples in [cypress-component-testing-apps](https://github.com/cypress-io/cypress-component-testing-apps) repo. Here in the `angular` and `angular-standalone` folders are the two example applications showing various testing scenarios.
 
