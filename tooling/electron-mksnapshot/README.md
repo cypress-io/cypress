@@ -6,7 +6,7 @@ versions.
 The main difference is that the _mksnapshot_ binary is not downloaded when installing this
 module. 
 
-Instead whenever it is run an electron version it should make a snapshot for can be
+Instead, whenever `electron-mksnapshot` is run an electron version to use can be
 provided or is resolved from the electron installed relative to the root of your project.
 
 If that version was downloaded previously it is used, otherwise the matching version is

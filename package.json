@@ -50,7 +50,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,electron-mksnapshot,errors,data-context,electron,extension,https-proxy,launcher,net-stubbing,network,packherd,proxy,rewriter,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,data-context,electron,errors,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,socket}'\" --scope \"'@tooling/electron-mksnapshot'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{driver,root,static,web-config}'\"",
@@ -250,6 +250,7 @@
       "cli",
       "packages/*",
       "npm/*",
+      "tooling/*",
       "system-tests"
     ],
     "nohoist": [
