@@ -1,4 +1,3 @@
-import type { CrossOriginCallbackStoreFile } from '@cypress/webpack-preprocessor/lib/cross-origin-callback-store'
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
@@ -7,11 +6,16 @@ import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 import $networkUtils from '../cypress/network_utils'
 
+interface CrossOriginCallbackObject {
+  callbackName: string
+  outputFilePath: string
+}
+
 interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
-  fn: string | CrossOriginCallbackStoreFile
+  fn: string | CrossOriginCallbackObject
   skipConfigValidation: boolean
   state: {}
   logCounter: number
