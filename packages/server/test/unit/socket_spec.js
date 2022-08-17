@@ -22,7 +22,7 @@ const { sinon } = require('../spec_helper')
 
 let ctx
 
-describe('lib/socket', () => {
+describe.only('lib/socket', () => {
   beforeEach(async function () {
     ctx = getCtx()
     ctx.coreData.activeBrowser = {
@@ -453,7 +453,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(get:fixture)', () => {
+    context('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {
           expect(resp.response).to.deep.eq([
@@ -488,7 +488,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(http:request)', () => {
+    context('on(backend:request, http:request)', () => {
       it('calls socket#onRequest', function (done) {
         sinon.stub(this.options, 'onRequest').resolves({ foo: 'bar' })
 
@@ -512,7 +512,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(exec)', () => {
+    context('on(backend:request, exec)', () => {
       it('calls exec#run with project root and options', function (done) {
         const run = sinon.stub(exec, 'run').returns(Promise.resolve('Desktop Music Pictures'))
 
@@ -539,7 +539,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(firefox:force:gc)', () => {
+    context('on(backend:request, firefox:force:gc)', () => {
       it('calls firefoxUtil#collectGarbage', function (done) {
         sinon.stub(firefoxUtil, 'collectGarbage').resolves()
 
@@ -599,7 +599,39 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(cross:origin:bridge:ready)', () => {
+    context('on(backend:request, save:session)', () => {
+      it('calls socket#watchTestFileByPath with config, spec argument', function (done) {
+        sinon.stub(this.socket, 'watchTestFileByPath')
+
+        const specArgument = {}
+
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+
+        return this.client.emit('watch:test:file', specArgument, () => {
+          expect(this.socket.watchTestFileByPath).to.be.calledWith(this.cfg, specArgument)
+
+          return done()
+        })
+      })
+    })
+
+    context('on(backend:request, clear:spec:sessions)', () => {})
+    context('on(backend:request, clear:all:sessions)', () => {})
+    context('on(backend:request, get:session)', () => {})
+    context('on(backend:request, reset:session:state)', () => {})
+    context('on(backend:request, get:cached:state)', function (done) {
+      it('returns cached state', function (done) {
+        this.client.emit('backend:request', 'get:cached:state', (cachedState) => {
+          expect(cachedState).deep.eq({
+            globalSessions: {},
+          })
+
+          done()
+        })
+      })
+    })
+
+    context('on(backend:request, cross:origin:bridge:ready)', () => {
       it('emits cross:origin:bridge:ready on local bus', function (done) {
         this.server.socket.localBus.once('cross:origin:bridge:ready', ({ originPolicy }) => {
           expect(originPolicy).to.equal('http://foobar.com')
@@ -611,7 +643,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(cross:origin:release:html)', () => {
+    context('on(backend:request, cross:origin:release:html)', () => {
       it('emits cross:origin:release:html on local bus', function (done) {
         this.server.socket.localBus.once('cross:origin:release:html', () => {
           done()
@@ -621,7 +653,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(cross:origin:finished)', () => {
+    context('on(backend:request, cross:origin:finished)', () => {
       it('emits cross:origin:finished on local bus', function (done) {
         this.server.socket.localBus.once('cross:origin:finished', (originPolicy) => {
           expect(originPolicy).to.equal('http://foobar.com')

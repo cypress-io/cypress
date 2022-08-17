@@ -408,17 +408,17 @@ export class SocketBase {
 
               return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
             }
-            case 'http:request':
+            case 'http:request': //tested
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
               return options.onResetServerState()
             case 'log:memory:pressure':
               return firefoxUtil.log()
-            case 'firefox:force:gc':
+            case 'firefox:force:gc': // tested
               return firefoxUtil.collectGarbage()
             case 'firefox:window:focus':
               return firefoxUtil.windowFocus()
-            case 'get:fixture':
+            case 'get:fixture': //tested
               return getFixture(args[0], args[1])
             case 'read:file':
               return files.readFile(config.projectRoot, args[0], args[1])
@@ -433,7 +433,7 @@ export class SocketBase {
                 getFixture,
                 args,
               })
-            case 'exec':
+            case 'exec': //tested
               return exec.run(config.projectRoot, args[0])
             case 'task':
               return task.run(cfgFile ?? null, args[0])
@@ -462,11 +462,11 @@ export class SocketBase {
             case 'reset:rendered:html:origins': {
               return resetRenderedHTMLOrigins()
             }
-            case 'cross:origin:bridge:ready':
+            case 'cross:origin:bridge:ready': //tested
               return this.localBus.emit('cross:origin:bridge:ready', args[0])
-            case 'cross:origin:release:html':
+            case 'cross:origin:release:html': //tested
               return this.localBus.emit('cross:origin:release:html')
-            case 'cross:origin:finished':
+            case 'cross:origin:finished': //tested
               return this.localBus.emit('cross:origin:finished', args[0])
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
@@ -533,7 +533,7 @@ export class SocketBase {
         // todo(lachlan): post 10.0 we should not pass the
         // editor (in the `fileDetails.where` key) from the
         // front-end, but rather rely on the server context
-        // to grab the prefered editor, like I'm doing here,
+        // to grab the preferred editor, like I'm doing here,
         // so we do not need to
         // maintain two sources of truth for the preferred editor
         // adding this conditional to maintain backwards compat with
@@ -555,7 +555,6 @@ export class SocketBase {
 
       runnerEvents.forEach((event) => {
         socket.on(event, (data): any => {
-          console.log('event', event)
           this.toReporter(event, data)
         })
       })
