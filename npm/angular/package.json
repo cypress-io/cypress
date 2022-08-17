@@ -2,7 +2,6 @@
   "name": "@cypress/angular",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
-  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
