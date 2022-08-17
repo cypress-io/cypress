@@ -47,7 +47,7 @@ const getMidPoint = (el) => {
 const isFirefox = Cypress.isBrowser('firefox')
 
 // TODO(webkit): fix+unskip for experimental webkit
-describe('src/cy/commands/actions/click', { browser: '!webkit' }, () => {
+describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
@@ -812,7 +812,7 @@ describe('src/cy/commands/actions/click', { browser: '!webkit' }, () => {
       })
     })
 
-    it('places cursor at the end of [contenteditable]', () => {
+    it('places cursor at the end of [contenteditable]', { browser: '!webkit' }, () => {
       cy.get('[contenteditable]:first')
       .invoke('html', '<div><br></div>').click()
       .then(expectCaret(0))
@@ -3584,7 +3584,7 @@ describe('src/cy/commands/actions/click', { browser: '!webkit' }, () => {
       })
     })
 
-    it('can rightclick disabled with force', () => {
+    it('can rightclick disabled with force', { browser: '!webkit' }, () => {
       const el = cy.$$('input:first')
       .prop('disabled', true)
 
@@ -3930,7 +3930,7 @@ describe('src/cy/commands/actions/click', { browser: '!webkit' }, () => {
 })
 
 // TODO(webkit): fix+unskip for experimental webkit
-describe('shadow dom', { browser: '!webkit' }, () => {
+describe('shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
   })
@@ -3994,7 +3994,7 @@ describe('shadow dom', { browser: '!webkit' }, () => {
 })
 
 // TODO(webkit): fix+unskip for experimental webkit
-describe('mouse state', { browser: '!webkit' }, () => {
+describe('mouse state', () => {
   describe('mouse/pointer events', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3500/fixtures/dom.html')
@@ -4036,7 +4036,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
     })
 
     describe('mouseout', () => {
-      it('can move mouse from a div to another div', () => {
+      it('can move mouse from a div to another div', { browser: '!webkit' }, () => {
         const coordsChrome = {
           clientX: 492,
           clientY: 9,
@@ -4475,7 +4475,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       })
     })
 
-    it('handles disabled attr', () => {
+    it('handles disabled attr', { browser: '!webkit' }, () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4504,7 +4504,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
-    it('handles disabled attr added on mousedown', () => {
+    it('handles disabled attr added on mousedown', { browser: '!webkit' }, () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4561,7 +4561,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each(shouldBeCalledOnce)
     })
 
-    it('can click new element after mousemove sequence [disabled]', () => {
+    it('can click new element after mousemove sequence [disabled]', { browser: '!webkit' }, () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4724,7 +4724,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/4347
-    it('can render element highlight inside iframe', () => {
+    it('can render element highlight inside iframe', { browser: '!webkit' }, () => {
       cy.get('iframe:first')
       .should(($iframe) => {
         // wait for iframe to load
@@ -4756,7 +4756,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       })
     })
 
-    it('can print table of keys on click', () => {
+    it('can print table of keys on click', { browser: '!webkit' }, () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
@@ -4769,7 +4769,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       })
     })
 
-    it('can print table of keys on dblclick', () => {
+    it('can print table of keys on dblclick', { browser: '!webkit' }, () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
@@ -4785,7 +4785,7 @@ describe('mouse state', { browser: '!webkit' }, () => {
       })
     })
 
-    it('can print table of keys on rightclick', () => {
+    it('can print table of keys on rightclick', { browser: '!webkit' }, () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
