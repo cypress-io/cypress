@@ -1,0 +1,11 @@
+{
+  "name": "minimal",
+  "version": "0.0.0",
+  "description": "Minimal example of project using deps.",
+  "main": "entry.js",
+  "dependencies": {
+    "isobject": "^4.0.0",
+    "tmpfile": "^0.2.0"
+  },
+  "license": "MIT"
+}

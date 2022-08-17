@@ -13,7 +13,7 @@
     "test": "yarn test-unit",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000"
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000"
   },
   "dependencies": {
     "@babel/core": "^7",
