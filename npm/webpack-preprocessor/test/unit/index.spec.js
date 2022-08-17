@@ -19,6 +19,8 @@ mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../../index')
 const typescriptOverrides = require('../../lib/typescript-overrides')
+const crossOriginCallbackStore = require('../../lib/cross-origin-callback-store').crossOriginCallbackStore
+const crossOriginCallbackCompile = require('../../lib/cross-origin-callback-compile')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
@@ -151,6 +153,81 @@ describe('webpack preprocessor', function () {
           expect(webpack.lastCall.args[0].output).to.eql({
             path: 'output',
             filename: 'output.ts.js',
+          })
+        })
+      })
+
+      describe('cross-origin callback compilation', function () {
+        beforeEach(function () {
+          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: true }
+
+          this.files = []
+
+          sinon.stub(crossOriginCallbackStore, 'hasFilesFor').returns(true)
+          sinon.stub(crossOriginCallbackStore, 'getFilesFor').returns(this.files)
+          sinon.stub(crossOriginCallbackCompile, 'compileCrossOriginCallbackFiles').resolves()
+          sinon.stub(crossOriginCallbackStore, 'reset')
+
+          this.statsApi = {
+            hasErrors: () => false,
+            toJson () {
+              return { warnings: [], errors: [], modules: [] }
+            },
+          }
+
+          this.compilerApi.run.yields(null, this.statsApi)
+        })
+
+        afterEach(function () {
+          global.__CYPRESS_CONFIG__ = {}
+        })
+
+        it('adds cross-origin callback loader when flag is on', function () {
+          const options = { webpackOptions: { devtool: false, module: { rules: [] } } }
+
+          return this.run(options).then(() => {
+            expect(options.webpackOptions.module.rules[0].use[0].loader).to.include('cross-origin-callback-loader')
+          })
+        })
+
+        it('runs additional compilation for cross-origin callback files', function () {
+          return this.run().then(() => {
+            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).to.be.calledWith(this.files)
+            expect(crossOriginCallbackStore.reset).to.be.called
+          })
+        })
+
+        it('rejects the main bundle promise if callback file compilation errors', function () {
+          const err = new Error('compilation failed')
+
+          crossOriginCallbackCompile.compileCrossOriginCallbackFiles.rejects(err)
+
+          return this.run()
+          .then(() => {
+            throw new Error('should not resolve')
+          })
+          .catch((_err) => {
+            expect(_err).to.equal(err)
+            expect(crossOriginCallbackStore.reset).to.be.called
+          })
+        })
+
+        it('does not compile files when experimental flag is off', function () {
+          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: false }
+
+          return this.run().then(() => {
+            expect(crossOriginCallbackStore.hasFilesFor).not.to.be.called
+            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).not.to.be.called
+          })
+        })
+
+        it('does not compile files there are no files', function () {
+          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: false }
+
+          crossOriginCallbackStore.hasFilesFor.returns(false)
+
+          return this.run().then(() => {
+            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).not.to.be.called
           })
         })
       })

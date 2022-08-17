@@ -12,6 +12,18 @@ import { compileCrossOriginCallbackFiles } from './lib/cross-origin-callback-com
 const debug = Debug('cypress:webpack')
 const debugStats = Debug('cypress:webpack:stats')
 
+interface CypressConfigPartial {
+  experimentalSessionAndOrigin: boolean
+}
+
+declare global {
+  // this could be undefined if used with an older version of Cypress or if
+  // it's removed in a future version. this global should have the entire
+  // config, but only declaring the properties used for brevity's sake
+  // eslint-disable-next-line no-var
+  var __CYPRESS_CONFIG__: CypressConfigPartial | undefined
+}
+
 type FilePath = string
 interface BundleObject {
   promise: Bluebird<FilePath>
@@ -182,6 +194,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       return bundles[filePath].promise
     }
 
+    const cypressConfig = global.__CYPRESS_CONFIG__ || {
+      experimentalSessionAndOrigin: false,
+    }
+
     const defaultWebpackOptions = getDefaultWebpackOptions()
 
     // we're provided a default output path that lives alongside Cypress's
@@ -227,7 +243,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
-    if (!crossOriginCallbackLoaderAdded) {
+    crossOriginCallbackLoaderAdded = false
+
+    if (!crossOriginCallbackLoaderAdded && cypressConfig.experimentalSessionAndOrigin) {
       // webpack runs loaders last-to-first and we want ours to run last
       // so that it's working with plain javascript
       webpackOptions.module.rules.unshift({
@@ -327,6 +345,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       Bluebird.delay(0).then(() => {
         if (!bundles[filePath]) {
           return
+        }
+
+        if (!cypressConfig.experimentalSessionAndOrigin) {
+          return resolveAllBundles()
         }
 
         // get the source file and any of its dependencies

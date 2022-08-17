@@ -267,6 +267,18 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         return done()
       })
     })
+
+    it('declares global __CYPRESS_CONFIG__', function () {
+      const setupNodeEventsFn = sinon.spy()
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      const config = {}
+
+      this.ipc.on.withArgs('load:plugins').yield(config)
+
+      expect(global.__CYPRESS_CONFIG__).to.equal(config)
+    })
   })
 
   describe('on \'execute\' message', () => {
