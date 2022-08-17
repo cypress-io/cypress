@@ -22,8 +22,9 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
-// TODO(webkit): fix+unskip for experimental webkit
-describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
+const browserIsWebkit = Cypress.browser.family === 'webkit'
+
+describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
@@ -861,16 +862,23 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
       .attr('maxlength', 0)
       .on('keydown', push('keydown'))
       .on('keypress', push('keypress'))
-      .on('textInput', push('textInput'))
+      .on('textInput', !browserIsWebkit && push('textInput'))
       .on('input', push('input'))
       .on('keyup', push('keyup'))
+
+      const expectedEvents = [
+        'keydown', 'keypress', 'textInput', 'keyup',
+      ]
+
+      if (browserIsWebkit) {
+        // delete textInput expectation
+        expectedEvents.splice(2, 1)
+      }
 
       cy.get(':text:first')
       .type('1')
       .then(() => {
-        expect(events).to.deep.eq([
-          'keydown', 'keypress', 'textInput', 'keyup',
-        ])
+        expect(events).to.deep.eq(expectedEvents)
       })
     })
 
@@ -888,17 +896,25 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
       .attr('maxlength', 1)
       .on('keydown', push('keydown'))
       .on('keypress', push('keypress'))
-      .on('textInput', push('textInput'))
+      .on('textInput', !browserIsWebkit && push('textInput'))
       .on('input', push('input'))
       .on('keyup', push('keyup'))
+
+      const expectedEvents = [
+        'keydown', 'keypress', 'textInput', 'input', 'keyup',
+        'keydown', 'keypress', 'textInput', 'keyup',
+      ]
+
+      if (browserIsWebkit) {
+        // delete textInput expectations
+        expectedEvents.splice(2, 1)
+        expectedEvents.splice(6, 1)
+      }
 
       cy.get(':text:first')
       .type('12')
       .then(() => {
-        expect(events).to.deep.eq([
-          'keydown', 'keypress', 'textInput', 'input', 'keyup',
-          'keydown', 'keypress', 'textInput', 'keyup',
-        ])
+        expect(events).to.deep.eq(expectedEvents)
       })
     })
   })
@@ -910,14 +926,14 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
       })
     })
 
-    it('changes the elements value for multiple keys', () => {
-      cy.get('#input-without-value').type('foo').then(($text) => {
+    it('changes the elements value for multiple keys', { browser: '!webkit' }, () => {
+      cy.get('#input-without-value').type(' foo').then(($text) => {
         expect($text).to.have.value('foo')
       })
     })
 
-    it('inserts text after existing text', () => {
-      cy.get('#input-with-value').type(' bar').then(($text) => {
+    it('inserts text after existing text', { browser: '!webkit' }, () => {
+      cy.get('#input-with-value').type('bar').then(($text) => {
         expect($text).to.have.value('foo bar')
       })
     })
@@ -1136,7 +1152,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
       })
     })
 
-    it('does not insert key when textInput is preventedDefault', () => {
+    it('does not insert key when textInput is preventedDefault', { browser: '!webkit' }, () => {
       cy.$$('#input-without-value').get(0).addEventListener('textInput', (e) => {
         e.preventDefault()
       })
@@ -1146,7 +1162,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
       })
     })
 
-    it('does not fire input when textInput is preventedDefault', (done) => {
+    it('does not fire input when textInput is preventedDefault', { browser: '!webkit' }, (done) => {
       cy.$$('#input-without-value').get(0).addEventListener('input', (e) => {
         done('should not have received input event')
       })
@@ -1197,7 +1213,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('inserts text after existing text ', () => {
+      it('inserts text after existing text', { browser: '!webkit' }, () => {
         cy.get('#number-with-value').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
@@ -1317,7 +1333,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('inserts text after existing text', () => {
+      it('inserts text after existing text', { browser: '!webkit' }, () => {
         cy.get('#email-with-value').type('om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
@@ -1357,7 +1373,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('inserts text after existing text', () => {
+      it('inserts text after existing text', { browser: '!webkit' }, () => {
         cy.get('#password-with-value').type('word').then(($text) => {
           expect($text).to.have.value('password')
         })
@@ -1628,7 +1644,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('inserts text with only one input event', () => {
+      it('inserts text with only one input event', { browser: '!webkit' }, () => {
         const ce = cy.$$('#input-types [contenteditable]')
 
         attachKeyListeners({ ce })
@@ -1643,7 +1659,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         cy.getAll('ce', 'keydown keypress textInput input keyup').each(shouldBeCalledOnce)
       })
 
-      it('{enter} inserts text with only one input event', () => {
+      it('{enter} inserts text with only one input event', { browser: '!webkit' }, () => {
         const ce = cy.$$('#input-types [contenteditable]')
 
         attachKeyListeners({ ce })
@@ -1740,7 +1756,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       }
 
-      it('can type in designmode="on"', () => {
+      it('can type in designmode="on"', { browser: '!webkit' }, () => {
         cy.timeout(100)
         cy.state('document').designMode = 'on'
         cy.state('document').documentElement.focus()
@@ -1749,7 +1765,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         .then(expectTextEndsWith('111'))
       })
 
-      it('can type in body[contenteditable]', () => {
+      it('can type in body[contenteditable]', { browser: '!webkit' }, () => {
         cy.state('document').body.setAttribute('contenteditable', true)
         cy.state('document').documentElement.focus()
         cy.get('div.item:first')
@@ -1795,7 +1811,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
 
     // https://github.com/cypress-io/cypress/issues/7088
     describe('beforeInput event', () => {
-      it('sends beforeinput in text input', () => {
+      it('sends beforeinput in text input', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
@@ -1839,7 +1855,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('sends beforeinput in textarea', () => {
+      it('sends beforeinput in textarea', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
@@ -1883,7 +1899,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('sends beforeinput in [contenteditable]', () => {
+      it('sends beforeinput in [contenteditable]', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
@@ -1927,7 +1943,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         })
       })
 
-      it('beforeinput special inputTypes', () => {
+      it('beforeinput special inputTypes', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
@@ -2343,7 +2359,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/5694
-  describe('shortcuts', () => {
+  describe('shortcuts', { browser: '!webkit' }, () => {
     beforeEach(function () {
       cy.visit('fixtures/dom.html')
       cy.on('log:added', (attrs, log) => {
@@ -2448,7 +2464,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
     })
   })
 
-  describe('single value change inputs', () => {
+  describe('single value change inputs', { browser: '!webkit' }, () => {
     // https://github.com/cypress-io/cypress/issues/5476
     it('fires all keyboard events', () => {
       const els = {
@@ -2929,7 +2945,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
 
       // Updated not to input text when non-shift modifier is pressed
       // https://github.com/cypress-io/cypress/issues/5424
-      it('has a table of keys', () => {
+      it('has a table of keys', { browser: '!webkit' }, () => {
         cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
         .then(function ($input) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
@@ -2964,13 +2980,20 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
+          const expectedEvents = ['keydown', 'keypress', 'beforeinput', 'textInput', 'input', 'keyup']
+
+          if (browserIsWebkit) {
+            // delete textInput expectation\
+            expectedEvents.splice(3, 1)
+          }
+
           expect(table.data).to.deep.eq({
-            1: { Typed: 'f', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
+            1: { Typed: 'f', 'Events Fired': expectedEvents.join(', '), 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
           })
         })
       })
 
-      it('has a table of keys with preventedDefault', () => {
+      it('has a table of keys with preventedDefault', { browser: '!webkit' }, () => {
         cy.$$(':text:first').keydown(() => {
           return false
         })
@@ -2989,7 +3012,7 @@ describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
     })
   })
 
-  describe('user experience', () => {
+  describe('user experience', { browser: '!webkit' }, () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
 

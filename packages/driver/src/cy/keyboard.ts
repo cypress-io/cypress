@@ -1140,6 +1140,10 @@ export class Keyboard {
       }
     }
 
+    if (Cypress.browser.family === 'webkit') {
+      key.events.textInput = false
+    }
+
     let elToType
 
     options.id = _.uniqueId('char')
