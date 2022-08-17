@@ -1,5 +1,42 @@
 import _ from 'lodash'
-import toBoolean from 'underscore.string/toBoolean'
+import { toBoolean } from 'underscore.string'
+import * as uri from '@packages/network/lib/uri'
+
+export const hideKeys = (token?: string | number | boolean) => {
+  if (!token) {
+    return
+  }
+
+  if (typeof token !== 'string') {
+    // maybe somehow we passes key=true?
+    // https://github.com/cypress-io/cypress/issues/14571
+    return
+  }
+
+  return [
+    token.slice(0, 5),
+    token.slice(-5),
+  ].join('...')
+}
+
+export function setUrls (obj: any) {
+  obj = _.clone(obj)
+
+  // TODO: rename this to be proxyServer
+  const proxyUrl = `http://localhost:${obj.port}`
+
+  const rootUrl = obj.baseUrl
+    ? uri.origin(obj.baseUrl)
+    : proxyUrl
+
+  return {
+    ...obj,
+    proxyUrl,
+    browserUrl: rootUrl + obj.clientRoute,
+    reporterUrl: rootUrl + obj.reporterRoute,
+    xhrUrl: `${obj.namespace}${obj.xhrRoute}`,
+  }
+}
 
 // https://github.com/cypress-io/cypress/issues/6810
 const toArray = (value: any) => {
@@ -36,7 +73,7 @@ const fromJson = (value: string) => {
   }
 }
 
-export const coerce = (value: string) => {
+export const coerce = (value: any) => {
   const num = _.toNumber(value)
 
   if (_.invoke(num, 'toString') === value) {
@@ -62,4 +99,8 @@ export const coerce = (value: string) => {
   }
 
   return value
+}
+
+export const isResolvedConfigPropDefault = (config: Record<string, any>, prop: string) => {
+  return config.resolved[prop].from === 'default'
 }

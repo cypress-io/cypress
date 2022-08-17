@@ -1,4 +1,4 @@
-import type { Editor } from '.'
+import type { BannersState, Editor } from '.'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
@@ -12,6 +12,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'appX',
   'appY',
   'autoScrollingEnabled',
+  'banners',
   'browserWidth',
   'browserHeight',
   'browserX',
@@ -47,6 +48,7 @@ export type AllowedState = Partial<{
   appY: Maybe<number>
   isSpecsListOpen: Maybe<boolean>
   autoScrollingEnabled: Maybe<boolean>
+  banners: Maybe<BannersState>
   browserWidth: Maybe<number>
   browserHeight: Maybe<number>
   browserX: Maybe<number>

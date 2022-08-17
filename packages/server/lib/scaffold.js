@@ -7,7 +7,7 @@ const { fs } = require('./util/fs')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
 const errors = require('./errors')
-const { isDefault } = require('./util/config')
+const { isResolvedConfigPropDefault } = require('@packages/config')
 
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
@@ -74,7 +74,7 @@ module.exports = {
 
     // skip if user has explicitly set e2eFolder
     // or if user has set up component testing
-    if (!isDefault(config, 'e2eFolder') || componentTestingEnabled(config)) {
+    if (!isResolvedConfigPropDefault(config, 'e2eFolder') || componentTestingEnabled(config)) {
       return Promise.resolve()
     }
 
@@ -94,7 +94,7 @@ module.exports = {
     debug(`fixture folder ${folder}`)
 
     // skip if user has explicitly set fixturesFolder
-    if (!config.fixturesFolder || !isDefault(config, 'fixturesFolder')) {
+    if (!config.fixturesFolder || !isResolvedConfigPropDefault(config, 'fixturesFolder')) {
       return Promise.resolve()
     }
 
@@ -108,7 +108,7 @@ module.exports = {
   plugins (folder, config) {
     debug(`plugins folder ${folder}`)
     // skip if user has explicitly set pluginsFile
-    if (!config.pluginsFile || !isDefault(config, 'pluginsFile')) {
+    if (!config.pluginsFile || !isResolvedConfigPropDefault(config, 'pluginsFile')) {
       return Promise.resolve()
     }
 
