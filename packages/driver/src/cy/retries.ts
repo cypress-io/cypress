@@ -77,17 +77,17 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       }).message
 
       const retryErrProps = modifyErrMsg(error, prependMsg, (msg1, msg2) => {
-        const autOrigin = Cypress.state('autOrigin')
-        const commandOrigin = window.location.origin
+        // const autOrigin = Cypress.state('autOrigin')
+        // const commandOrigin = window.location.origin
 
-        if (!options.isCrossOriginSpecBridge && autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
-          const appendMsg = errByPath('miscellaneous.cross_origin_command', {
-            commandOrigin,
-            autOrigin,
-          }).message
+        // if (!options.isCrossOriginSpecBridge && autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+        //   const appendMsg = errByPath('miscellaneous.cross_origin_command', {
+        //     commandOrigin,
+        //     autOrigin,
+        //   }).message
 
-          return `${msg2}${msg1}\n\n${appendMsg}`
-        }
+        //   return `${msg2}${msg1}\n\n${appendMsg}`
+        // }
 
         return `${msg2}${msg1}`
       })
@@ -145,6 +145,39 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       // once we reach stability
       return whenStable(fn)
     })
+  },
+  ensureCommandAUTSameOrigin (fn, timeout) {
+    const options = {
+      log: true,
+      timeout,
+      interval: 100,
+    }
+
+    const getValue = () => {
+      const commandOrigin = window.location.origin
+      const autOrigin = Cypress.state('autOrigin')
+
+      if (autOrigin && autOrigin !== 'about://blank' && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+        $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
+          commandOrigin,
+          autOrigin,
+        } })
+      }
+
+      return fn()
+    }
+
+    const retryValue = () => {
+      return Promise
+      .try(getValue)
+      .catch((err) => {
+        options.error = err
+
+        return cy.retry(retryValue, options)
+      })
+    }
+
+    return retryValue()
   },
 })
 

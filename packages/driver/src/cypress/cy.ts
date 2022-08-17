@@ -275,6 +275,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
 
     this.retry = retries.retry
+    this.ensureCommandAUTSameOrigin = retries.ensureCommandAUTSameOrigin
 
     const jquery = createJQuery(state)
 

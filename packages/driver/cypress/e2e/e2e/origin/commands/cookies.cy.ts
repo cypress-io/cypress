@@ -1,4 +1,4 @@
-import { findCrossOriginLogs } from '../../../../support/utils'
+import { findCrossOriginLogs, assertLogLength } from '../../../../support/utils'
 
 describe('cy.origin cookies', () => {
   context('client side', () => {
@@ -38,6 +38,95 @@ describe('cy.origin cookies', () => {
       })
     })
 
+    context('#cross-origin errors', () => {
+      let logs: any = []
+
+      beforeEach(() => {
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+      })
+
+      afterEach(() => {
+        logs = []
+      })
+
+      it('.getCookie()', { defaultCommandTimeout: 100 }, (done) => {
+        cy.on('fail', (err) => {
+          assertLogLength(logs, 1)
+          expect(logs[0].get('error')).to.eq(err)
+          expect(logs[0].get('state')).to.eq('failed')
+          expect(logs[0].get('name')).to.eq('getCookie')
+          expect(logs[0].get('message')).to.eq('foo')
+          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+
+          done()
+        })
+
+        cy.getCookie('foo')
+      })
+
+      it('.getCookies()', { defaultCommandTimeout: 100 }, (done) => {
+        cy.on('fail', (err) => {
+          assertLogLength(logs, 1)
+          expect(logs[0].get('error')).to.eq(err)
+          expect(logs[0].get('state')).to.eq('failed')
+          expect(logs[0].get('name')).to.eq('getCookies')
+          expect(logs[0].get('message')).to.eq('')
+          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+
+          done()
+        })
+
+        cy.getCookies()
+      })
+
+      it('.setCookie()', { defaultCommandTimeout: 100 }, (done) => {
+        cy.on('fail', (err) => {
+          assertLogLength(logs, 1)
+          expect(logs[0].get('error')).to.eq(err)
+          expect(logs[0].get('state')).to.eq('failed')
+          expect(logs[0].get('name')).to.eq('setCookie')
+          expect(logs[0].get('message')).to.eq('foo, bar')
+          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+
+          done()
+        })
+
+        cy.setCookie('foo', 'bar')
+      })
+
+      it('.clearCookie()', { defaultCommandTimeout: 100 }, (done) => {
+        cy.on('fail', (err) => {
+          assertLogLength(logs, 1)
+          expect(logs[0].get('error')).to.eq(err)
+          expect(logs[0].get('state')).to.eq('failed')
+          expect(logs[0].get('name')).to.eq('clearCookie')
+          expect(logs[0].get('message')).to.eq('foo')
+          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+
+          done()
+        })
+
+        cy.clearCookie('foo')
+      })
+
+      it('.clearCookies()', { defaultCommandTimeout: 100 }, (done) => {
+        cy.on('fail', (err) => {
+          assertLogLength(logs, 1)
+          expect(logs[0].get('error')).to.eq(err)
+          expect(logs[0].get('state')).to.eq('failed')
+          expect(logs[0].get('name')).to.eq('clearCookies')
+          expect(logs[0].get('message')).to.eq('')
+          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+
+          done()
+        })
+
+        cy.clearCookies()
+      })
+    })
+
     context('#consoleProps', () => {
       const { _ } = Cypress
       let logs: Map<string, any>
@@ -54,7 +143,7 @@ describe('cy.origin cookies', () => {
         cy.origin('http://foobar.com:3500', () => {
           cy.getCookies().should('be.empty')
           cy.setCookie('foo', 'bar')
-          cy.getCookie('foo')
+          cy.getCookie('foo').its('value').should('equal', 'bar')
         })
 
         cy.shouldWithTimeout(() => {

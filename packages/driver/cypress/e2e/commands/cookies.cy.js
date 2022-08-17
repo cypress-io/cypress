@@ -156,7 +156,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookies')
           expect(lastLog.get('message')).to.eq('')
-          expect(err.message).to.eq('`cy.getCookies()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getCookies()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getcookies')
 
           done()
@@ -328,7 +328,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookie')
           expect(lastLog.get('message')).to.eq('foo')
-          expect(err.message).to.eq('`cy.getCookie()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getCookie()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getcookie')
 
           done()
@@ -593,7 +593,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('setCookie')
           expect(lastLog.get('message')).to.eq('foo, bar')
-          expect(err.message).to.include('`cy.setCookie()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.include('Timed out retrying after 50ms: `cy.setCookie()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/setcookie')
 
           done()
@@ -842,7 +842,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('clearCookie')
           expect(lastLog.get('message')).to.eq('foo')
-          expect(err.message).to.eq('`cy.clearCookie()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.clearCookie()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/clearcookie')
 
           done()
@@ -1112,7 +1112,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('clearCookies')
           expect(lastLog.get('message')).to.eq('')
-          expect(err.message).to.eq('`cy.clearCookies()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.clearCookies()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/clearcookies')
 
           done()

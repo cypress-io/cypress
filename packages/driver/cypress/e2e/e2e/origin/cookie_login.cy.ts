@@ -86,8 +86,7 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(500)
-        cy.getCookie('user').its('value').should('equal', username) // TODO run only on the originating domain.
+        cy.getCookie('user').its('value').should('equal', username)
       }, {
         validate () {
           cy.getCookie('user').its('value').should('equal', username)
@@ -132,8 +131,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(500)
-      cy.clearCookie('user') // TODO Run only on the originating domain
+      cy.clearCookie('user')
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
@@ -146,8 +144,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(500)
-      cy.clearCookies() // TODO run only on the originating domain.
+      cy.clearCookies()
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
