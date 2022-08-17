@@ -371,11 +371,10 @@ export class Server {
     // cancel any outstanding xhr's
     // which aren't already complete
     // or already canceled
-
     return _
     .chain(this.xhrs)
-    .reject({ canceled: true })
     .reject({ readyState: 4 })
+    .reject({ canceled: true })
     .map(this.cancelXhr)
     .value()
   }
@@ -641,12 +640,9 @@ export class Server {
   }
 }
 
+// Left behind for backwards compatibility
+// When cy.server() is moved to a plugin, this might be safely removed.
 export default {
-  /**
-   * Left behind for backwards compatibility
-   * When cy.server() is moved to a plugin, this might be safely removed.
-   * @deprecated
-   */
   create (options = {}) {
     return new Server(options)
   },

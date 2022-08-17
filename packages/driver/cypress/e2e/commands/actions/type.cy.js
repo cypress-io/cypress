@@ -22,7 +22,8 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
-describe('src/cy/commands/actions/type - #type', () => {
+// TODO(webkit): fix+unskip for experimental webkit
+describe('src/cy/commands/actions/type - #type', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
