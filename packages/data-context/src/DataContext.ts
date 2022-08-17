@@ -36,7 +36,7 @@ import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
-import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
@@ -67,7 +67,6 @@ export interface DataContextConfig {
   appApi: AppApiShape
   localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
-  configApi: InjectedConfigApi
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
   browserApi: BrowserApiShape
@@ -322,7 +321,6 @@ export class DataContext {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
       browserApi: this._config.browserApi,
-      configApi: this._config.configApi,
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
