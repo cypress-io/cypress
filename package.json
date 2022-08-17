@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "version": "10.6.0",
-  "description": "Cypress.io end to end testing tool",
+  "description": "Cypress.io End-to-End and Component testing tool",
   "private": true,
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
@@ -235,6 +235,7 @@
   "keywords": [
     "automation",
     "browser",
+    "component",
     "cypress",
     "cypress.io",
     "e2e",
