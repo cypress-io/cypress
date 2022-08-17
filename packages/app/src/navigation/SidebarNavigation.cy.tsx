@@ -27,7 +27,7 @@ describe('SidebarNavigation', () => {
     })
 
     cy.findByText('test-project').should('be.visible')
-
+    cy.findByTestId('sidebar-link-specs-page').should('have.class', 'router-link-active') // assert active link to prevent percy flake
     cy.percySnapshot()
   })
 
