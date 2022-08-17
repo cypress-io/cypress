@@ -18,7 +18,7 @@ export class CrossOriginCallbackStore {
   getFilesFor (sourceFiles: string[]) {
     return Object.keys(this.files).reduce((files, sourceFilePath) => {
       return sourceFiles.includes(sourceFilePath) ? files.concat(this.files[sourceFilePath]) : files
-    }, [])
+    }, [] as CrossOriginCallbackStoreFile[])
   }
 
   reset (sourceFilePath: string) {

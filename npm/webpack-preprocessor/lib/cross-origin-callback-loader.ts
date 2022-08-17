@@ -29,10 +29,10 @@ const debug = Debug('cypress:webpack')
 //   - this object references the file the callback will be output to by
 //     its own compilation. this allows the runtime to get the file and
 //     run it in its origin's context.
-export default function (source, map, meta, store = crossOriginCallbackStore) {
+export default function (source: string, map, meta, store = crossOriginCallbackStore) {
   const { resourcePath } = this
 
-  let ast
+  let ast: t.File
 
   try {
     // purposefully lenient in allowing syntax since the user can't configure
@@ -43,7 +43,6 @@ export default function (source, map, meta, store = crossOriginCallbackStore) {
       allowAwaitOutsideFunction: true,
       allowSuperOutsideMethod: true,
       allowUndeclaredExports: true,
-      attachComment: false,
       sourceType: 'unambiguous',
     })
   } catch (err) {
