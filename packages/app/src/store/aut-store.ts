@@ -28,7 +28,7 @@ export const useAutStore = defineStore({
     return {
       isLoadingUrl: false,
       highlightUrl: false,
-      url: `https://lmiller1990.github.io`,
+      url: undefined,
       viewportHeight: defaultViewportHeight,
       viewportWidth: defaultViewportWidth,
       defaultViewportHeight,

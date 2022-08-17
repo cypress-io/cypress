@@ -37,11 +37,22 @@ export function useEventManager () {
       getAutIframeModel().showVisitFailure(payload)
     })
 
+    eventManager.on('page:loading', (isLoading) => {
+      if (isLoading) {
+        console.log('return early')
+        return
+      }
+
+      console.log('reattaching')
+      getAutIframeModel().reattachStudio()
+    })
+
     eventManager.on('visit:blank', ({ type }) => {
       getAutIframeModel().visitBlank({ type })
     })
 
     eventManager.on('run:end', () => {
+      console.log('here??')
       getAutIframeModel().startStudio();
     })
 

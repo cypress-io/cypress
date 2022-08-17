@@ -490,6 +490,7 @@ export class AutIframe {
 
   reattachStudio () {
     const studioRecorder = useStudioRecorderStore()
+    console.log('reattach')
     if (studioRecorder.isActive) {
       studioRecorder.attachListeners(this._body()?.[0])
     }

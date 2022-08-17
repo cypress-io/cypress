@@ -715,7 +715,6 @@ export class EventManager {
   }
 
   _runDriver (state) {
-    console.log('Run driver')
     performance.mark('run-s')
     Cypress.run(() => {
       performance.mark('run-e')
@@ -724,7 +723,6 @@ export class EventManager {
 
 
     const hasRunnableId = !!this.studioRecorder.testId || !!this.studioRecorder.suiteId
-    console.log({ hasRunnableId })
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),

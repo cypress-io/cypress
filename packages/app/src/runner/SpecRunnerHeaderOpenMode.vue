@@ -4,6 +4,9 @@
     ref="autHeaderEl"
     class="min-h-64px text-14px"
   >
+    <button @click="visitUrl">Go Studio</button>
+    <div v-if="!studioRecorder.url && studioRecorder.isActive">You need to enter a URL!</div>
+
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
@@ -13,8 +16,6 @@
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-
-        <button @click="visitUrl">Go Studio</button>
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
@@ -25,14 +26,14 @@
         >
           <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
-        <a
+        <input
           target="_blank"
-          :href="autStore.url"
+          :value="autStore.url"
+          @input="setStudioUrl"
           class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
-        >
-          {{ autStore.url }}
-        </a>
+        />
       </div>
+
       <div
         v-else
         class="flex-grow"
@@ -172,8 +173,18 @@ import { useStudioRecorderStore } from '../store/studio-store'
 
 const studioRecorder = useStudioRecorderStore()
 
+function setStudioUrl (event: Event) {
+  const url = (event.currentTarget as HTMLInputElement).value
+  console.log(`setting ${url}`)
+  studioRecorder.setUrl(url)
+}
+
 function visitUrl () {
-  studioRecorder.visitUrl(`https://lmiller1990.github.io`)
+  if (!studioRecorder.url) {
+    throw Error('Cannot visit blank url')
+  }
+
+  studioRecorder.visitUrl(studioRecorder.url)
 }
 
 gql`

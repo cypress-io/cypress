@@ -207,9 +207,11 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       this._hasStarted = true
 
       if (this.url) {
+        console.log(`Visiting url ${this.url}`)
         this.visitUrl()
       }
 
+      console.log('body', body)
       this.attachListeners(body)
     },
 
@@ -415,7 +417,11 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
 
 
     attachListeners (body: HTMLBodyElement) {
-      if (this.isFailed) return
+      console.log(`attaching listeners to`, body)
+      if (this.isFailed) {
+        console.log('failed...')
+        return
+      }
 
       this._body = body
 
