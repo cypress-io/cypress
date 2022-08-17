@@ -1,7 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
-import pkg from '@packages/root'
-import * as configUtils from '@packages/config'
 
 import { isListening } from './util/ensure-url'
 import { isMainWindowFocused, focusMainWindow } from './gui/windows'
@@ -19,7 +17,6 @@ import type {
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
-import * as config from './config'
 import { openProject } from './open_project'
 import cache from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
@@ -59,13 +56,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       relaunchBrowser () {
         return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
       },
-    },
-    configApi: {
-      allowedConfig: configUtils.allowed,
-      cypressVersion: pkg.version,
-      validateConfig: configUtils.validate,
-      updateWithPluginValues: config.updateWithPluginValues,
-      setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
     },
     appApi: {
       appData,
