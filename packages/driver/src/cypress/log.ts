@@ -280,7 +280,7 @@ export class Log {
   toJSON () {
     return _
     .chain(this.attributes)
-    .omit(['error', 'command'])
+    .omit('error')
     .omitBy(_.isFunction)
     .extend({
       err: $errUtils.wrapErr(this.get('error')),
@@ -598,44 +598,15 @@ class LogManager {
         }
       }
 
-      let command = log.get('command')
-
-      if (!command) {
-        command = state('current')
-        log.set('command', command)
-      }
+      let command = state('current')
 
       if (command) {
-        // See commands/asserting.ts for a detailed explanation of commandLogId.
-        // Short version: If onBeforeLog sets the same commandLogId as an existing log on the current command,
-        // then we want to merge the current instance into the existing one, rather than display a new log to
-        // the user.
-        let commandLogId = log.get('commandLogId')
-
-        if (commandLogId != null) {
-          const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
-
-          if (previousLogInstance) {
-            // log.merge unsets any keys that aren't set on the new log instance. We
-            // copy over 'snapshots' beforehand so that existing snapshots aren't lost
-            // in the merge operation.
-            log.set('snapshots', previousLogInstance.get('snapshots'))
-            previousLogInstance.merge(log)
-
-            if (previousLogInstance.get('end')) {
-              previousLogInstance.end()
-            }
-
-            return
-          }
-        }
-
         command.log(log)
       }
 
       // if snapshot was passed
       // in, go ahead and snapshot
-      if (log.get('snapshot') && !log.get('snapshots')) {
+      if (log.get('snapshot')) {
         log.snapshot()
       }
 

@@ -7,6 +7,28 @@ import $errUtils from '../../cypress/error_utils'
 const reExistence = /exist/
 const reHaveLength = /length/
 
+const onBeforeLog = (log, command, commandLogId) => {
+  log.set('commandLogId', commandLogId)
+
+  if (command) {
+    const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
+
+    if (previousLogInstance) {
+      // log.merge unsets any keys that aren't set on the new log instance. We
+      // copy over 'snapshots' beforehand so that existing snapshots aren't lost
+      // in the merge operation.
+      log.set('snapshots', previousLogInstance.get('snapshots'))
+      previousLogInstance.merge(log)
+
+      if (previousLogInstance.get('end')) {
+        previousLogInstance.end()
+      }
+
+      return false
+    }
+  }
+}
+
 export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
@@ -31,8 +53,8 @@ export default function (Commands, Cypress, cy, state) {
     // `verifyUpcomingAssertions`. This callback can also be invoked any number of times, but we only want
     // to display a few log messages (one for each assertion).
 
-    // Therefore, we each time Cypress.log() is called, we need a way to identify: is this log call
-    // a duplicate of a previous one that's just being retried? This is the purpose of `commandLogId` - it should
+    // Therefore, we each time Cypress.log() is called, we need a way to identify if this log call
+    // a duplicate of a previous one that's just being retried. This is the purpose of `commandLogId` - it should
     // remain the same across multiple invocations of verifyUpcomingAssertions().
 
     // It is composed of two parts: assertionIndex and logIndex. Assertion index is "which .should() command are we
@@ -52,10 +74,9 @@ export default function (Commands, Cypress, cy, state) {
 
     if (_.isFunction(chainers)) {
       cy.state('onBeforeLog', (log) => {
-        log.set('command', command)
-        log.set('commandLogId', `${assertionIndex}-${logIndex}`)
-
         logIndex++
+
+        return onBeforeLog(log, command, `${assertionIndex}-${logIndex}`)
       })
 
       try {
@@ -98,8 +119,7 @@ export default function (Commands, Cypress, cy, state) {
     const applyChainer = function (memo, value) {
       logIndex++
       cy.state('onBeforeLog', (log) => {
-        log.set('command', command)
-        log.set('commandLogId', `${assertionIndex}-${logIndex}`)
+        return onBeforeLog(log, command, `${assertionIndex}-${logIndex}`)
       })
 
       try {
