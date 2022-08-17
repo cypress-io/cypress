@@ -14,14 +14,7 @@ describe('App: Spec List - Flaky Indicator', () => {
 
     cy.remoteGraphQLIntercept(async (obj) => {
       await new Promise((r) => setTimeout(r, 20))
-      if (obj.result.data && 'cloudProjectBySlug' in obj.result.data) {
-        obj.result.data.cloudProjectBySlug = {
-          __typename: 'CloudProject',
-          retrievedAt: new Date().toISOString(),
-          id: `id${obj.variables.slug}`,
-          projectId: 'abc123',
-        }
-      } else if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
+      if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
         if (obj.variables.specPath.includes('123.spec.js')) {
           obj.result.data.cloudSpecByPath = {
             __typename: 'CloudProjectSpec',
@@ -94,7 +87,7 @@ describe('App: Spec List - Flaky Indicator', () => {
     cy.contains('[data-cy="spec-item"]', '123.spec.js').find('.v-popper').trigger('mouseenter')
 
     cy.findByTestId('flaky-spec-summary').within(() => {
-      cy.contains('123.js')
+      cy.contains('123.spec.js')
       cy.contains('Low')
       cy.contains('4% flaky rate')
       cy.contains('2 flaky runs / 50 total')
