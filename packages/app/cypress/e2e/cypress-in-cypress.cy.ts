@@ -141,7 +141,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       }
 
       // resize the reporter using each of the dragPositions and take Percy snapshots
-      dragPositions.forEach((position, index) => {
+      cy.wrap(dragPositions).each((position, index) => {
+        // @ts-ignore - TS assumes `position` is a jquery value, but it's just a number
         dragHandleToClientX('panel2', position).then(() => {
           const expectedScale = testingTypeExpectedScales[testingType][index]
 
