@@ -251,6 +251,8 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
    *   precedence over the global override defined when the command was installed.
    */
   const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
+    cy.get('[data-cy=header-bar-content]').should('be.visible') // ensure header has loaded to prevent flake
+
     if (name && typeof name === 'object') {
       options = name
       name = undefined
