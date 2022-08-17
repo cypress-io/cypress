@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.0...@cypress/vite-dev-server-v3.1.1) (2022-08-15)
+
+
+### Bug Fixes
+
+* vite v3 not working with node >=17 ([#23048](https://github.com/cypress-io/cypress/issues/23048)) ([2226b28](https://github.com/cypress-io/cypress/commit/2226b2834aabc90eab532bd7cf86407e8c7248df))
+
 # [@cypress/vite-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.0.0...@cypress/vite-dev-server-v3.1.0) (2022-08-11)
 
 

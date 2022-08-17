@@ -41,7 +41,7 @@
             :file-name="row.data.data?.fileName || row.data.name"
             :extension="row.data.data?.specFileExtension || ''"
             :selected="isCurrentSpec(row.data)"
-            :indexes="row.data?.data?.fileIndexes"
+            :indexes="row.data.highlightIndexes"
             class="pl-22px"
             data-cy="spec-file-item"
           />
@@ -50,7 +50,7 @@
             class="children:truncate"
             :name="row.data.name"
             :expanded="treeSpecList[row.index].expanded.value"
-            :indexes="getDirIndexes(row.data)"
+            :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
           />
         </RouterLink>
@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree, getDirIndexes } from './spec-utils'
+import { buildSpecTree } from './spec-utils'
 import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'

@@ -1,5 +1,4 @@
-import { cors } from '@packages/network'
-import origin from './util/origin'
+import { cors, uri } from '@packages/network'
 import Debug from 'debug'
 import _ from 'lodash'
 import type EventEmitter from 'events'
@@ -99,7 +98,7 @@ export class RemoteStates {
     let state
 
     if (_.isString(urlOrState)) {
-      const remoteOrigin = origin(urlOrState)
+      const remoteOrigin = uri.origin(urlOrState)
       const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
 
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {

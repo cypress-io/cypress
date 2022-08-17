@@ -11,6 +11,7 @@ const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const Fixtures = require('@tooling/system-tests')
 const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require('../../lib/makeDataContext')
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
 
@@ -46,7 +47,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return config.setupFullConfigWithDefaults(obj)
+        return config.setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically

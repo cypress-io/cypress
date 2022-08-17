@@ -45,7 +45,7 @@ describe.skip('lib/project-base', () => {
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
-      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' })
+      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' }, getCtx().file.getFilesByGlob)
       .then((config1) => {
         this.config = config1
         this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
