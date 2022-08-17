@@ -3062,6 +3062,11 @@ declare namespace Cypress {
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
+    /**
+     * Runs all component specs in a single tab, trading spec isolation for faster run mode execution.
+     * @default false
+     */
+    experimentalSingleTabRunMode?: boolean
   }
 
   /**

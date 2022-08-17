@@ -92,7 +92,7 @@
               v-if="row.data.isLeaf"
               :file-name="row.data.data?.fileName || row.data.name"
               :extension="row.data.data?.specFileExtension || ''"
-              :indexes="row.data.data?.fileIndexes"
+              :indexes="row.data.highlightIndexes"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
             >
               <span class="ml-2 inline-block">
@@ -110,7 +110,7 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
-              :indexes="getDirIndexes(row.data)"
+              :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
             />
@@ -130,7 +130,7 @@
               <RunStatusDots
                 v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
                 :gql="row.data.data.cloudSpec ?? null"
-                :spec-file-extension="row.data.data.fileExtension"
+                :spec-file-extension="row.data.data.specFileExtension"
                 :spec-file-name="row.data.data.fileName"
               />
               <div
@@ -188,7 +188,7 @@ import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { buildSpecTree, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'

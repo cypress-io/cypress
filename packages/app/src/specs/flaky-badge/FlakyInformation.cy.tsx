@@ -13,7 +13,7 @@ describe('<FlakyInformation />', () => {
       __typename: 'Spec',
       id: '2',
       fileName: 'abc',
-      fileExtension: 'cy.tsx',
+      specFileExtension: 'cy.tsx',
       relative: 'test/abc.cy.tsx',
     }
     const cloudSpec: FlakyInformationCloudSpecFragment = {
