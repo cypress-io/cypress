@@ -29,7 +29,6 @@ Promise.all([
     // shouldn't be any different to the user
     return launchpadClient
     .query(HeaderBar_HeaderBarQueryDocument)
-    .toPromise()
   }),
   // Make sure highlighter is initialized immediately at app
   // start, so it's available when we render code blocks
