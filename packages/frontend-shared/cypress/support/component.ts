@@ -20,7 +20,6 @@ declare global {
     }
   }
 }
-
 cy.i18n = defaultMessages
 cy.gqlStub = GQLStubRegistry
 
