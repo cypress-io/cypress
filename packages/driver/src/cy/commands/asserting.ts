@@ -27,6 +27,8 @@ const onBeforeLog = (log, command, commandLogId) => {
       return false
     }
   }
+
+  return true
 }
 
 export default function (Commands, Cypress, cy, state) {
