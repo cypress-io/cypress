@@ -1185,7 +1185,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // if this is a number, then we know we're about to insert this
     // into our commands and need to reset next + increment the index
-    if (_.isNumber(nestedIndex)) {
+    if (_.isNumber(nestedIndex) && nestedIndex < this.queue.length) {
       this.state('nestedIndex', (nestedIndex += 1))
     }
 
