@@ -53,7 +53,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .trigger('mouseenter')
     })
 
-    cy.contains('Unsupported browser').should('be.visible')
+    cy.contains('.v-popper__inner', 'Unsupported browser').should('be.visible')
 
     cy.percySnapshot('unsupported browser tooltip')
   })

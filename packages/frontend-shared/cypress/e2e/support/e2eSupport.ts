@@ -342,6 +342,8 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
+      cy.findByTestId('top-nav-cypress-version-current-link') // assert Cypress version to prevent Percy flake
+
       return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
         return val
       })
