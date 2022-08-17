@@ -1,5 +1,5 @@
 import '@testing-library/cypress/add-commands'
-import { browsers } from '@packages/types/src/browser'
+import { browsers } from '@packages/launcher/lib/browsers'
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
@@ -15,7 +15,6 @@ import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
-import 'cypress-axe'
 import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
@@ -305,6 +304,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
             firstOpened: 1609459200000,
             lastOpened: 1609459200000,
             promptsShown: { ci1: 1609459200000 },
+            banners: { _disabled: true },
           })
         }
 

@@ -16,7 +16,7 @@ function updateViewportHeightInCypressConfig (value: number) {
   }, { value })
 }
 
-describe('specChange subscription', () => {
+describe('configChange subscription', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
@@ -31,6 +31,19 @@ describe('specChange subscription', () => {
       cy.contains(`projectId: 'abc123'`)
       updateProjectIdInCypressConfig('foo456')
       cy.contains(`projectId: 'foo456'`)
+    })
+  })
+
+  describe('on specs list page', () => {
+    it('responds to configChange event when viewport is changed', () => {
+      cy.contains('a', 'Specs').click()
+      updateViewportHeightInCypressConfig(888)
+
+      // validate the spinner appears and then goes away
+
+      cy.contains('[role="alert"]', 'Loading')
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
     })
   })
 

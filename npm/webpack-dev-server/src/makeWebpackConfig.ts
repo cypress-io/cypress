@@ -2,7 +2,7 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
-import type { Configuration } from 'webpack'
+import type { Configuration, EntryObject } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -41,7 +41,7 @@ if (process.platform === 'linux') {
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
-const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
+export const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
 
 /**
  * Removes and/or modifies certain plugins known to conflict
@@ -90,6 +90,7 @@ export async function makeWebpackConfig (
     },
     specs: files,
     devServerEvents,
+    framework,
   } = config.devServerConfig
 
   let configFile: string | undefined = undefined
@@ -161,7 +162,15 @@ export async function makeWebpackConfig (
     dynamicWebpackConfig,
   )
 
-  mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  // Angular loads global styles and polyfills via script injection in the index.html
+  if (framework === 'angular') {
+    mergedConfig.entry = {
+      ...(mergedConfig.entry as EntryObject) || {},
+      'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
+    }
+  } else {
+    mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  }
 
   debug('Merged webpack config %o', mergedConfig)
 

@@ -35,12 +35,16 @@ export class AutIframe {
     return $iframe
   }
 
-  showInitialBlankContentsE2E () {
-    this._showContents(blankContents.initial())
+  destroy () {
+    if (!this.$iframe) {
+      throw Error(`Cannot call #remove without first calling #create`)
+    }
+
+    this.$iframe.remove()
   }
 
-  showInitialBlankContentsCT () {
-    this._showContents(blankContents.initialCT())
+  showInitialBlankContents () {
+    this._showContents(blankContents.initial())
   }
 
   showSessionBlankContents () {
@@ -134,7 +138,7 @@ export class AutIframe {
             this.showSessionLifecycleBlankContents()
             break
           default:
-            this.showInitialBlankContentsE2E()
+            this.showInitialBlankContents()
         }
 
         resolve()

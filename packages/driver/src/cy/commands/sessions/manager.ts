@@ -10,10 +10,22 @@ import {
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
 
+const getLogProperties = (displayName) => {
+  return {
+    name: 'sessions_manager',
+    displayName,
+    message: '',
+    event: 'true',
+    state: 'passed',
+    type: 'system',
+    snapshot: false,
+  }
+}
+
 export default class SessionsManager {
   Cypress
   cy
-  currentTestRegisteredSessions = new Map()
+  registeredSessions = new Map()
 
   constructor (Cypress, cy) {
     this.Cypress = Cypress
@@ -125,6 +137,11 @@ export default class SessionsManager {
     },
 
     clearCurrentSessionData: async () => {
+      // this prevents a log occurring when we clear session in-between tests
+      if (this.cy.state('duringUserTestExecution')) {
+        this.Cypress.log(getLogProperties('Clear cookies, localStorage and sessionStorage'))
+      }
+
       window.localStorage.clear()
       window.sessionStorage.clear()
 
@@ -134,8 +151,15 @@ export default class SessionsManager {
       ])
     },
 
+    saveSessionData: async (data) => {
+      this.setActiveSession({ [data.id]: data })
+
+      // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
+      // eslint-disable-next-line no-console
+      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString() }).catch(console.error)
+    },
+
     setSessionData: async (data) => {
-      await this.sessions.clearCurrentSessionData()
       const allHtmlOrigins = await this.getAllHtmlOrigins()
 
       let _localStorage = data.localStorage || []
@@ -153,10 +177,8 @@ export default class SessionsManager {
 
       await Promise.all([
         this.sessions.setStorage({ localStorage: _localStorage, sessionStorage: _sessionStorage }),
-        this.Cypress.automation('clear:cookies', null),
+        this.sessions.setCookies(data.cookies),
       ])
-
-      await this.sessions.setCookies(data.cookies)
     },
 
     getCookies: async () => {

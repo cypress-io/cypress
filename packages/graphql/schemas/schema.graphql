@@ -42,6 +42,7 @@ type Browser implements Node {
 enum BrowserFamily {
   chromium
   firefox
+  webkit
 }
 
 enum BrowserStatus {
@@ -63,6 +64,12 @@ type CachedUser implements Node {
 
   """Relay style Node ID field for the CachedUser field"""
   id: ID!
+}
+
+"""Feature not available for subscription"""
+type CloudFeatureNotEnabled {
+  """an error message"""
+  message: String!
 }
 
 """
@@ -208,6 +215,15 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+  flakyStatus(
+    """The number of runs to consider when counting flaky runs."""
+    flakyRunsWindow: Int!
+
+    """
+    The branch to measure average duration against. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+  ): CloudProjectSpecFlakyResult
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -243,6 +259,23 @@ type CloudProjectSpec implements Node {
     """Returns the last n elements from the list."""
     last: Int
   ): CloudSpecRunConnection
+}
+
+union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
+
+type CloudProjectSpecFlakyStatus {
+  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  dashboardUrl: String
+
+  """Number of flaky runs from the considered runs"""
+  flakyRuns: Int
+  flakyRunsWindow: Int
+
+  """
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  """
+  lastFlaky: Int
+  severity: String
 }
 
 """Unable to find cloud spec in project"""
@@ -502,8 +535,17 @@ type CodeFrame {
   line: Int
 }
 
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+}
+
 enum CodeGenType {
   component
+  componentEmpty
   e2e
   scaffoldIntegration
 }
@@ -543,6 +585,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -672,6 +715,7 @@ enum ErrorTypeEnum {
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
   COMPONENT_FOLDER_REMOVED
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_INVALID_RETURN
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
@@ -720,6 +764,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SAMESITE_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
@@ -870,6 +915,7 @@ type FileParts implements Node {
 }
 
 enum FrontendFrameworkEnum {
+  angular
   nextjs
   nuxtjs
   react
@@ -1236,6 +1282,9 @@ type Mutation {
   """Ping configured Base URL"""
   pingBaseUrl: Query
 
+  """Removes the cache entries for specified cloudSpecByPath query records"""
+  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
+
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
@@ -1271,15 +1320,17 @@ type Mutation {
   setCurrentProject(path: String!): Query
 
   """
-  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`
   """
-  setPreferences(value: String!): Query
+  setPreferences(type: PreferencesTypeEnum!, value: String!): Query
 
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query
 
-  """Save the projects preferences to cache"""
-  setProjectPreferences(testingType: TestingTypeEnum!): Query!
+  """
+  Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache
+  """
+  setProjectPreferencesInGlobalCache(testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
@@ -1333,6 +1384,11 @@ enum PluginsState {
   initialized
   initializing
   uninitialized
+}
+
+enum PreferencesTypeEnum {
+  global
+  project
 }
 
 """Common base fields inherited by GlobalProject / CurrentProject"""

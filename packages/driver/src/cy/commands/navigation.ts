@@ -397,14 +397,14 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
     const promise = new Promise((resolve) => {
       const onWindowLoad = (win) => {
-        // this prevents a log occurring when we navigate to about:blank inbetween tests
+        // this prevents a log occurring when we navigate to about:blank in-between tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
 
         if (win.location.href === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
-          options._log.set({ message: '', name: 'Clear Page', type: 'system' }).snapshot().end()
+          options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }
@@ -1138,6 +1138,8 @@ export default (Commands, Cypress, cy, state, config) => {
           // throw an error, else we'd be in a endless loop,
           // we also need to disable retries to prevent the endless loop
           if (previouslyVisitedLocation) {
+            // _retries is `private`. We're not using `retries()` method here because it breaks some tests.
+            // @ts-ignore
             $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
             const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }

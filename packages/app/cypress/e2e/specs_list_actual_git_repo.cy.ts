@@ -24,7 +24,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('Created')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'Created')
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
 
@@ -36,7 +36,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="blank-contents.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('Modified')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'Modified')
     cy.get('[data-cy-row="blank-contents.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
 
@@ -48,7 +48,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('add all specs')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'add all specs')
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
 
@@ -68,7 +68,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('Modified')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'Modified')
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
 
@@ -89,7 +89,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('Created')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'Created')
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
 
@@ -103,7 +103,7 @@ describe('Spec List - Last updated with git info', () => {
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseenter')
 
-    cy.get('.v-popper__popper--shown').contains('add all specs')
+    cy.get('.v-popper__popper--shown').should('be.visible').and('contain.text', 'add all specs')
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .trigger('mouseleave')
   })

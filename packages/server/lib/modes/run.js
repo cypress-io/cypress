@@ -776,6 +776,12 @@ module.exports = {
 
   displayRunStarting,
 
+  navigateToNextSpec (spec) {
+    debug('navigating to next spec %s', spec)
+
+    return openProject.changeUrlToSpec(spec)
+  },
+
   exitEarly (err) {
     debug('set early exit error: %s', err.stack)
 
@@ -1105,6 +1111,16 @@ module.exports = {
       return this.currentSetScreenshotMetadata(data)
     }
 
+    if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
+      // reset browser state to match default behavior when opening/closing a new tab
+      return openProject.resetBrowserState().then(() => {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return this.navigateToNextSpec(options.spec)
+      })
+    }
+
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
@@ -1168,7 +1184,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1244,17 +1260,22 @@ module.exports = {
         }
       }
 
-      // Close the browser if the environment variable is set to do so
-      // if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
-      //   debug('attempting to close the browser')
-      //   await openProject.closeBrowser()
-      // } else {
-      debug('attempting to close the browser tab')
-      await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
-      // }
+      const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-      debug('resetting server state')
-      openProject.projectBase.server.reset()
+      if (usingExperimentalSingleTabMode) {
+        await openProject.projectBase.server.destroyAut()
+      }
+
+      // we do not support experimentalSingleTabRunMode for e2e
+      if (!usingExperimentalSingleTabMode) {
+        debug('attempting to close the browser tab')
+
+        await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+
+        debug('resetting server state')
+
+        openProject.projectBase.server.reset()
+      }
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1479,6 +1500,7 @@ module.exports = {
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
           exit: options.exit,
+          testingType: options.testingType,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
@@ -1496,8 +1518,10 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          testingType: options.testingType,
+          isFirstSpec,
+          experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
           shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
-          // TODO(tim): investigate the socket disconnect
         }),
       })
     })
@@ -1560,7 +1584,13 @@ module.exports = {
 
         return Promise.all([
           system.info(),
-          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
+          (async () => {
+            const browsers = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
+
+            await removeOldProfiles(browsers)
+
+            return browsers
+          })(),
           trashAssets(config),
         ])
         .spread(async (sys = {}, browser = {}) => {
