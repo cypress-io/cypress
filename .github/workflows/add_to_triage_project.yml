@@ -1,4 +1,4 @@
-name: Add issue/PR to triage project
+name: Add issue/PR to project
 
 on:
   issues:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   add-to-triage-project:
-    name: Add issue/PR to triage project
+    name: Add to triage project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/add-to-project@v0.3.0
