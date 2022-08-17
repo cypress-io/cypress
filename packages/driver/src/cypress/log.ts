@@ -358,7 +358,7 @@ export class Log {
       const originalLogSnapshotFn = this.snapshot
 
       this.snapshot = function () {
-      // restore the original snapshot function
+        // restore the original snapshot function
         this.snapshot = originalLogSnapshotFn
 
         // call orig fn with next as name
