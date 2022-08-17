@@ -348,7 +348,7 @@ export class Log {
     // if the snapshotting process errors
     // https://github.com/cypress-io/cypress/issues/15816
     if (snapshot) {
-    // insert at index 'at' or whatever is the next position
+      // insert at index 'at' or whatever is the next position 
       snapshots[options.at || snapshots.length] = snapshot
     }
 
