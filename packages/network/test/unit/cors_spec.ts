@@ -211,6 +211,131 @@ describe('lib/cors', () => {
     })
   })
 
+  context('.urlOriginsMatch', () => {
+    beforeEach(function () {
+      this.isFalse = (url1, url2) => {
+        expect(cors.urlOriginsMatch(url1, url2)).to.be.false
+      }
+
+      this.isTrue = (url1, url2) => {
+        expect(cors.urlOriginsMatch(url1, url2)).to.be.true
+      }
+    })
+
+    describe('domain + subdomain', () => {
+      beforeEach(function () {
+        this.url = 'https://staging.google.com'
+      })
+
+      it('does not match', function () {
+        this.isFalse('https://foo.bar:443', this.url)
+        this.isFalse('http://foo.bar:80', this.url)
+        this.isFalse('http://foo.bar', this.url)
+        this.isFalse('http://staging.google.com', this.url)
+        this.isFalse('http://staging.google.com:80', this.url)
+        this.isFalse('https://staging.google2.com:443', this.url)
+        this.isFalse('https://staging.google.net:443', this.url)
+        this.isFalse('https://google.net:443', this.url)
+        this.isFalse('http://google.com', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('https://staging.google.com:443', this.url)
+        this.isTrue('https://google.com:443', this.url)
+        this.isTrue('https://foo.google.com:443', this.url)
+        this.isTrue('https://foo.bar.google.com:443', this.url)
+      })
+    })
+
+    describe('public suffix', () => {
+      beforeEach(function () {
+        this.url = 'https://example.gitlab.io'
+      })
+
+      it('does not match', function () {
+        this.isFalse('http://example.gitlab.io', this.url)
+        this.isFalse('https://foo.gitlab.io:443', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('https://example.gitlab.io:443', this.url)
+        this.isTrue('https://foo.example.gitlab.io:443', this.url)
+      })
+    })
+
+    describe('localhost', () => {
+      beforeEach(function () {
+        this.url = 'http://localhost:4200'
+      })
+
+      it('does not match', function () {
+        this.isFalse('http://localhoss:4200', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('http://localhost:4200', this.url)
+        // different ports qualify under same origin policy
+        this.isTrue('http://localhost:4201', this.url)
+      })
+    })
+
+    describe('app.localhost', () => {
+      beforeEach(function () {
+        this.url = 'http://app.localhost:4200'
+      })
+
+      it('does not match', function () {
+        this.isFalse('http://app.localhoss:4200', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('http://app.localhost:4200', this.url)
+        this.isTrue('http://name.app.localhost:4200', this.url)
+        // different ports qualify under same origin policy
+        this.isTrue('http://app.localhost:4201', this.url)
+      })
+    })
+
+    describe('local', () => {
+      beforeEach(function () {
+        this.url = 'http://brian.dev.local'
+      })
+
+      it('does not match', function () {
+        this.isFalse('https://brian.dev.local:443', this.url)
+        this.isFalse('https://brian.dev.local', this.url)
+        this.isFalse('http://brian.dev2.local:81', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('http://jennifer.dev.local:80', this.url)
+        this.isTrue('http://jennifer.dev.local', this.url)
+        // different ports/subdomains qualify under same origin policy
+        this.isTrue('http://jennifer.dev.local:4201', this.url)
+      })
+    })
+
+    describe('ip address', () => {
+      beforeEach(function () {
+        this.url = 'http://192.168.5.10'
+      })
+
+      it('does not match', function () {
+        this.isFalse('http://192.168.5.10:443', this.url)
+        this.isFalse('https://192.168.5.10', this.url)
+        this.isFalse('http://193.168.5.10', this.url)
+        this.isFalse('http://193.168.5.10:80', this.url)
+      })
+
+      it('matches', function () {
+        this.isTrue('http://192.168.5.10', this.url)
+        this.isTrue('http://192.168.5.10:80', this.url)
+        // different ports/subdomains qualify under same origin policy
+        this.isTrue('http://192.168.5.10:12345', this.url)
+      })
+    })
+  })
+
   context('.urlMatchesOriginProtectionSpace', () => {
     const isMatch = (urlStr, origin) => {
       expect(urlStr, `the url: '${urlStr}' did not match origin protection space: '${origin}'`).to.satisfy(() => {

@@ -84,13 +84,16 @@ export function urlMatchesDomainTLDAndPortProps (url: string, props?: ParsedHost
   return _.isEqual(parsedUrl, props)
 }
 
-export function urlOriginsMatch (url1, url2) {
+export function urlOriginsMatch (url1: string, url2: string) {
   if (!url1 || !url2) return false
 
-  const parsedUrl1 = parseUrlIntoDomainTldPort(url1)
-  const parsedUrl2 = parseUrlIntoDomainTldPort(url2)
+  const { port: port1, ...parsedUrl1 } = parseUrlIntoDomainTldPort(url1)
+  const { port: port2, ...parsedUrl2 } = parseUrlIntoDomainTldPort(url2)
 
-  return _.isEqual(parsedUrl1, parsedUrl2)
+  // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
+  const doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
+
+  return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
 }
 
 declare module 'url' {
