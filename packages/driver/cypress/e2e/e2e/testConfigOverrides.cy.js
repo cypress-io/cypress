@@ -377,15 +377,15 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
-describe('cannot set read-only properties', () => {
+describe('cannot set override configuration options that', () => {
   afterEach(() => {
     window.top.__cySkipValidateConfig = true
   })
 
   it('throws if mutating read-only config with Cypress.config()', (done) => {
     window.top.__cySkipValidateConfig = false
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option')
       done()
     })
 

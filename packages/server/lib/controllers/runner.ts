@@ -79,7 +79,8 @@ export const runner = {
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
     config.spec = spec ? { ...spec, name: spec.baseName } : null
-    config.browser = getCurrentBrowser()
+    // coerce type to allow string to be cast to BrowserFamily
+    config.browser = getCurrentBrowser() as Cypress.Browser
     config.exit = exit ?? true
 
     debug('serving runner index.html with config %o',
@@ -92,8 +93,7 @@ export const runner = {
   },
 
   handle (testingType, req: Request, res: Response) {
-    // FIXME: Why is runner-ct being used for all injections? Can anyone comment here as to why this changed?
-    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
+    const pathToFile = getPathToDist('runner', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)

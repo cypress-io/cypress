@@ -12,7 +12,7 @@
       @reconnect-project="showConnectToProject"
     />
     <SpecsListHeader
-      v-model="search"
+      v-model="specFilterModel"
       :specs-list-input-ref-fn="specsListInputRefFn"
       class="pb-32px"
       :result-count="specs.length"
@@ -92,9 +92,17 @@
               v-if="row.data.isLeaf"
               :file-name="row.data.data?.fileName || row.data.name"
               :extension="row.data.data?.specFileExtension || ''"
-              :indexes="row.data.data?.fileIndexes"
+              :indexes="row.data.highlightIndexes"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
-            />
+            >
+              <span class="ml-2 inline-block">
+                <FlakyInformation
+                  :project-gql="props.gql.currentProject"
+                  :spec-gql="row.data.data"
+                  :cloud-spec-gql="row.data.data?.cloudSpec"
+                />
+              </span>
+            </SpecItem>
 
             <RowDirectory
               v-else
@@ -102,7 +110,7 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
-              :indexes="getDirIndexes(row.data)"
+              :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
             />
@@ -122,7 +130,7 @@
               <RunStatusDots
                 v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
                 :gql="row.data.data.cloudSpec ?? null"
-                :spec-file-extension="row.data.data.fileExtension"
+                :spec-file-extension="row.data.data.specFileExtension"
                 :spec-file-name="row.data.data.fileName"
               />
               <div
@@ -143,7 +151,7 @@
     </div>
     <NoResults
       v-show="!specs.length"
-      :search="search"
+      :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
       @clear="handleClear"
@@ -153,7 +161,9 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     :utm-medium="loginUtmMedium"
-    @loggedin="refreshPage"
+    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
+    @loggedin="handleLoggedin"
+    @connect-project="isProjectConnectOpen = true"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
@@ -174,11 +184,11 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useMutation, useSubscription } from '@urql/vue'
-import { computed, ref, watch } from 'vue'
-import { CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { computed, ref, toRef, watch } from 'vue'
+import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { buildSpecTree, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
@@ -186,9 +196,11 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
-import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
+import { useOnline, useResizeObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
-import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import FlakyInformation from './flaky-badge/FlakyInformation.vue'
+import { useCloudSpecData } from '../composables/useCloudSpecData'
+import { useSpecFilter } from '../composables/useSpecFilter'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -263,8 +275,10 @@ fragment SpecsList on Spec {
     id
     fetchingStatus
     ...AverageDuration
+    ...FlakyInformationCloudSpec
     ...RunStatusDots
   }
+  ...FlakyInformationSpec
 }
 `
 
@@ -285,7 +299,9 @@ fragment Specs_SpecsList on Query {
       ...SpecsList
     }
     config
+    savedState
     ...SpecPatternModal
+    ...FlakyInformationProject
   }
   ...SpecHeaderCloudDataTooltip
   ...SpecsListBanners
@@ -313,25 +329,25 @@ const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
 )
 
-const search = ref('')
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(props.gql.currentProject?.savedState?.specFilter)
+
 const specsListInputRef = ref<HTMLInputElement>()
-const debouncedSearchString = useDebounce(search, 200)
 
 const specsListInputRefFn = () => specsListInputRef
 
 function handleClear () {
-  search.value = ''
+  specFilterModel.value = ''
   specsListInputRef.value?.focus()
 }
 
 const specs = computed(() => {
   const fuzzyFoundSpecs = cachedSpecs.value.map(makeFuzzyFoundSpec)
 
-  if (!debouncedSearchString.value) {
+  if (!debouncedSpecFilterModel?.value) {
     return fuzzyFoundSpecs
   }
 
-  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSearchString.value)
+  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSpecFilterModel.value)
 })
 
 // Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved
@@ -339,7 +355,7 @@ const specs = computed(() => {
 const treeExpansionCache = ref(new Map<string, boolean>())
 
 // When search value changes or when specs are added/removed, reset the tree expansion cache so that any collapsed directories re-expand
-watch([() => search.value, () => specs.value.length], () => treeExpansionCache.value.clear())
+watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
@@ -368,9 +384,11 @@ useResizeObserver(containerProps.ref, (entries) => {
   }
 })
 
-// If you are scrolled down the virtual list and the search filter changes,
-// reset scroll position to top of list
-watch(() => debouncedSearchString.value, () => scrollTo(0))
+watch(() => debouncedSpecFilterModel?.value, () => {
+  // If you are scrolled down the virtual list and the search filter changes,
+  // reset scroll position to top of list
+  scrollTo(0)
+})
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
@@ -380,107 +398,32 @@ function getIdIfDirectory (row) {
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
 
-gql`
-mutation CloudData_Refetch ($ids: [ID!]!) {
-  loadRemoteFetchables(ids: $ids){
-    id
-    fetchingStatus
-  }
-}
-`
-
-const refetchMutation = useMutation(CloudData_RefetchDocument)
-
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
-const refetch = async (ids: string[]) => {
-  if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
-    await refetchMutation.executeMutation({ ids })
-  }
-}
+const displayedSpecs = computed(() => list.value.map((v) => v.data.data))
 
-type CloudSpecItem = {
-  fetchingStatus?: RemoteFetchableStatus
-  data?: {
-    __typename?: 'CloudProjectSpec'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectSpecNotFound'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectUnauthorized'
-  } | null
-}
+const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
-function shouldRefetch (item: CloudSpecItem) {
-  if (isOffline.value) {
-    // Offline, no need to refetch
-
-    return false
-  }
-
-  if (item.fetchingStatus === 'NOT_FETCHED' || item.fetchingStatus === undefined) {
-    // NOT_FETCHED, refetch
-
-    return true
-  }
-
-  if (props.mostRecentUpdate) {
-    if (
-      (
-        item.data?.__typename === 'CloudProjectSpecNotFound' ||
-        item.data?.__typename === 'CloudProjectSpec'
-      )
-      && (
-        item.data.retrievedAt &&
-        props.mostRecentUpdate > item.data.retrievedAt
-      )
-    ) {
-      // outdated, refetch
-
-      return true
-    }
-  }
-
-  // nothing new, no need to refetch
-
-  return false
-}
-
-type NonNullCloudSpec = Exclude<SpecsListFragment['cloudSpec'], undefined | null>
-
-function getIdsToRefetch () {
-  return list.value
-  .map((spec) => spec.data.data?.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec && shouldRefetch(cloudSpec)))
-  .map((cloudSpec) => cloudSpec.id)
-  ?? []
-}
-async function fetchMissingOrErroneousItems () {
-  const cloudSpecIds = getIdsToRefetch()
-
-  if (cloudSpecIds.length > 0) {
-    await refetch(cloudSpecIds)
-  }
-}
-
-const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloudSpec?.id).join('|'))
-
-const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
-
-watch([debouncedDisplayedSpecIds, isOnline, isProjectDisconnected, () => props.mostRecentUpdate], fetchMissingOrErroneousItems)
-
-async function refetchFailedCloudData () {
-  const latestRunsIds = props.gql.currentProject?.specs
-  .map((s) => s.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec?.fetchingStatus === 'ERRORED'))
-  .map((cloudSpec) => cloudSpec.id) ?? []
-
-  await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
-}
+const { refetchFailedCloudData } = useCloudSpecData(
+  isProjectDisconnected,
+  isOffline,
+  props.gql.currentProject?.projectId,
+  mostRecentUpdateRef,
+  displayedSpecs,
+  props.gql.currentProject?.specs as SpecsListFragment[] || [],
+)
 
 function refreshPage () {
   location.reload()
+}
+
+const handleLoggedin = () => {
+  // if there is no project id, there can be no cloud data to refresh -
+  // we want to stay on the page and let the `connect-project` event take the user
+  // to the next step to connect their project
+  if (props.gql.currentProject?.projectId) {
+    refreshPage()
+  }
 }
 
 </script>

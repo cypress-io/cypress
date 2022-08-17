@@ -111,7 +111,6 @@ exports.runTest = async (options = {}) => {
       })
     }
 
-    // console.log(stdout)
     console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
   })
 }

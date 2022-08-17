@@ -1658,7 +1658,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('passes filtered options to Project#open and sets cli config', async function () {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
+    it.skip('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       sinon.stub(interactiveMode, 'ready')
@@ -1679,9 +1680,9 @@ describe('lib/cypress', () => {
         // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 

@@ -16,7 +16,7 @@
     <p>{{ t('specPage.noSpecError.explainer') }}</p>
   </Alert>
   <Alert
-    v-if="showOffline"
+    v-else-if="showOffline"
     v-model="showOffline"
     data-cy="offline-alert"
     status="warning"
@@ -30,7 +30,7 @@
     </p>
   </Alert>
   <Alert
-    v-if="showFetchError"
+    v-else-if="showFetchError"
     v-model="showFetchError"
     status="warning"
     :title="t('specPage.fetchFailedWarning.title')"
@@ -64,7 +64,7 @@
     </Button>
   </Alert>
   <Alert
-    v-if="showProjectNotFound"
+    v-else-if="showProjectNotFound"
     v-model="showProjectNotFound"
     data-cy="project-not-found-alert"
     status="warning"
@@ -96,7 +96,7 @@
     </Button>
   </Alert>
   <Alert
-    v-if="showProjectRequestAccess"
+    v-else-if="showProjectRequestAccess"
     v-model="showProjectRequestAccess"
     data-cy="project-request-access-alert"
     status="warning"
@@ -110,6 +110,22 @@
     </p>
     <RequestAccessButton :gql="props.gql" />
   </Alert>
+  <RecordBanner
+    v-else-if="showRecordBanner"
+    v-model="showRecordBanner"
+  />
+  <ConnectProjectBanner
+    v-else-if="showConnectBanner"
+    v-model="showConnectBanner"
+  />
+  <CreateOrganizationBanner
+    v-else-if="showCreateOrganizationBanner"
+    v-model="showCreateOrganizationBanner"
+  />
+  <LoginBanner
+    v-else-if="showLoginBanner"
+    v-model="showLoginBanner"
+  />
 </template>
 
 <script setup lang="ts">
@@ -123,10 +139,13 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
-import { gql } from '@urql/vue'
-import type { SpecsListBannersFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
+import interval from 'human-interval'
+import { AllowedState, BannerIds } from '@packages/types'
+import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -134,6 +153,41 @@ const { t } = useI18n()
 gql`
 fragment SpecsListBanners on Query {
   ...RequestAccessButton
+  cloudViewer {
+    id
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
+  }
+  cachedUser {
+    id
+  }
+  currentProject {
+    id
+    projectId
+    savedState
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runs(first: 1) {
+          nodes {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+gql`
+subscription SpecsListBanners_CheckCloudOrgMembership {
+  cloudViewerChange {
+    ...SpecsListBanners
+  }
 }
 `
 
@@ -158,11 +212,17 @@ const emit = defineEmits<{
   (e: 'reconnectProject'): void
 }>()
 
+useSubscription({ query: SpecsListBanners_CheckCloudOrgMembershipDocument })
+
 const showSpecNotFound = ref(props.isSpecNotFound)
 const showOffline = ref(props.isOffline)
 const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
+const showRecordBanner = ref(false)
+const showConnectBanner = ref(false)
+const showCreateOrganizationBanner = ref(false)
+const showLoginBanner = ref(false)
 
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
@@ -174,5 +234,34 @@ watch(
     showProjectRequestAccess.value = props.isProjectUnauthorized
   },
 )
+
+const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
+
+watch(
+  cloudData,
+  ([cloudViewer, cachedUser, currentProject]) => {
+    // Cached user covers state where we're authenticated but data isn't loaded yet
+    const isLoggedIn = !!cachedUser?.id || !!cloudViewer?.id
+    // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
+    // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
+    const isOrganizationLoaded = !!cloudViewer?.firstOrganization
+    const isMemberOfOrganization = (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
+    const isProjectConnected = !!currentProject?.projectId && currentProject.cloudProject?.__typename === 'CloudProject'
+    const hasNoRecordedRuns = currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0
+    const hasFourDaysOfCypressUse = (Date.now() - currentProject?.savedState?.firstOpened) > interval('4 days')
+
+    showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse
+    showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
+    showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
+    showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
+  },
+  { immediate: true },
+)
+
+function hasBannerBeenDismissed (bannerId: string) {
+  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.dismissed
+}
 
 </script>

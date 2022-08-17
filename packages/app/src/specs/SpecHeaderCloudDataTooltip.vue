@@ -3,6 +3,7 @@
     placement="top"
     :is-interactive="true"
     :show-group="VALUES[mode].header"
+    :show-delay="250"
   >
     <button
       type="button"

@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
 import type { WizardFrontendFramework, WizardBundler } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
@@ -35,7 +35,9 @@ export interface SavedStateShape {
   firstOpened?: number | null
   lastOpened?: number | null
   promptsShown?: object | null
+  banners?: BannerState | null
   lastProjectId?: string | null
+  specFilter?: string | null
 }
 
 export interface ConfigChildProcessShape {

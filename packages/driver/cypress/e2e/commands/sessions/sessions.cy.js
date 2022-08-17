@@ -24,6 +24,7 @@ describe('cy.session', { retries: 0 }, () => {
 
     it('accepts array as id', () => {
       cy.session('session-id', () => {})
+      cy.session('session-id')
     })
 
     it('accepts object as id', () => {
@@ -35,10 +36,58 @@ describe('cy.session', { retries: 0 }, () => {
       const setup = cy.stub().as('setupSession')
       const validate = cy.stub().as('validateSession')
 
-      cy.session('session-id', setup, { validate })
+      cy.session('session-id-3rd-arg', setup, { validate })
       cy.then(() => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledOnce
+      })
+    })
+  })
+
+  describe('test:before:run:async', () => {
+    it('clears session data before each run', async () => {
+      const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
+
+      await Cypress.action('runner:test:before:run:async', {})
+
+      expect(clearCurrentSessionData).to.be.called
+    })
+
+    it('resets rendered html origins before each run', async () => {
+      const backendSpy = cy.spy(Cypress, 'backend')
+
+      await Cypress.action('runner:test:before:run:async', {})
+
+      expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
+    })
+
+    describe('testIsolation=strict', { testIsolation: 'strict' }, () => {
+      it('clears page before each run when testIsolation=strict', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:run:async', {})
+
+          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+        })
+        .url('about:blank')
+      })
+    })
+
+    describe('testIsolation=legacy', { testIsolation: 'legacy' }, () => {
+      it('does not clear page', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:run:async', {})
+
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
+        })
+        .url('/fixtures/form.html')
       })
     })
   })
@@ -188,7 +237,7 @@ describe('cy.session', { retries: 0 }, () => {
         setupTestContext()
         cy.log('Creating new session with validation to test against')
 
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -318,7 +367,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         validate.callsFake(() => false)
 
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
       })
     })
 
@@ -326,14 +375,14 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup)
+        cy.session(`session-${Cypress.state('test').id}`, setup)
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup)
+        cy.session(`session-${Cypress.state('test').id}`, setup)
         cy.url().should('eq', 'about:blank')
       })
 
@@ -385,14 +434,14 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -456,7 +505,7 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
@@ -468,7 +517,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -579,7 +628,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('fails to recreate session and logs correctly', function (done) {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
@@ -685,7 +734,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.log('restore session to test against')
-        cy.session('session-1', setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
       })
     })
   })
