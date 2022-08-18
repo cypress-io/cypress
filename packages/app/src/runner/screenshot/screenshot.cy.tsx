@@ -59,7 +59,7 @@ describe('screenshot', () => {
         styles,
       })
 
-      // removeGlobalStyles()
+      removeGlobalStyles()
       cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
     })
   })
