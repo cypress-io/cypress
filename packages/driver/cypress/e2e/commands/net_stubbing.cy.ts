@@ -1836,6 +1836,7 @@ describe('network stubbing', function () {
           cy.wait('@getUrl')
         })
 
+        // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23414
         it('by deleting query member', () => {
           cy.intercept({ url: '/users*' }, (req) => {
             req.query = {
@@ -1859,7 +1860,8 @@ describe('network stubbing', function () {
         })
 
         context('by setting new url', () => {
-          it('absolute path', () => {
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23415
+          it.skip('absolute path', () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = 'http://localhost:3500/users?a=b'
 

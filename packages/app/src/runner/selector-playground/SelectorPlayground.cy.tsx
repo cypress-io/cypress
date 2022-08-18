@@ -44,8 +44,10 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-toggle"]').click().then(() => {
       expect(selectorPlaygroundStore.isEnabled).to.be.true
       expect(autIframe.toggleSelectorPlayground).to.have.been.called
-      cy.percySnapshot('toggle-enabled')
     })
+
+    cy.contains('.v-popper__inner', 'Click an element to see a suggested selector').should('be.visible')
+    cy.percySnapshot('toggle-enabled')
   })
 
   it('changes method from cy.get to cy.contains', () => {
