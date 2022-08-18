@@ -115,10 +115,15 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
-    cy.percySnapshot('Copy to clipboard hover tooltip')
+
+    // TODO: fix flaky snapshot https://github.com/cypress-io/cypress/issues/23436
+    // cy.percySnapshot('Copy to clipboard hover tooltip')
+
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied!')
-    cy.percySnapshot('Copy to clipboard click tooltip')
+
+    // TODO: fix flaky snapshot https://github.com/cypress-io/cypress/issues/23436
+    // cy.percySnapshot('Copy to clipboard click tooltip')
 
     cy.wrap(copyStub).should('have.been.calledWith', 'cy.get(\'.foo-bar\')')
   })
