@@ -4037,7 +4037,7 @@ describe('mouse state', () => {
     })
 
     describe('mouseout', () => {
-      it('can move mouse from a div to another div', { browser: '!webkit' }, () => {
+      it('can move mouse from a div to another div', () => {
         const coordsChrome = {
           clientX: 492,
           clientY: 9,
@@ -4065,11 +4065,27 @@ describe('mouse state', () => {
           y: 10,
         }
 
+        const coordsWebkit = {
+          clientX: 500,
+          clientY: 10,
+          layerX: 500,
+          layerY: 215,
+          pageX: 500,
+          pageY: 215,
+          screenX: 500,
+          screenY: 10,
+          x: 500,
+          y: 10,
+        }
+
         let coords
 
         switch (Cypress.browser.family) {
           case 'firefox':
             coords = coordsFirefox
+            break
+          case 'webkit':
+            coords = coordsWebkit
             break
           default:
             coords = coordsChrome
