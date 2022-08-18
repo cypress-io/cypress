@@ -1837,7 +1837,7 @@ describe('network stubbing', function () {
         })
 
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23414
-        it('by deleting query member', () => {
+        it.skip('by deleting query member', () => {
           cy.intercept({ url: '/users*' }, (req) => {
             req.query = {
               a: 'b',
