@@ -4,6 +4,9 @@ export const snapshotReporter = () => {
     width: 450,
     elementOverrides: {
       '.cy-tooltip': true,
+      '.runnable-header .duration': ($el) => {
+        $el.text('XX:XX')
+      },
       '[data-cy=sidebar]': ($el) => {
         $el.attr('style', 'display: none !important')
       },
