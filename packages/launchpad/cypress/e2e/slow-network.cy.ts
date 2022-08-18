@@ -35,7 +35,7 @@ describe('slow network: launchpad', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing').click()
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 
   it('shows the versions after they resolve', () => {

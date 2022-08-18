@@ -34,7 +34,7 @@ describe('baseUrl', () => {
       `)
     })
 
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 
@@ -44,7 +44,7 @@ describe('baseUrl', () => {
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').should('not.exist')
 
     cy.withCtx(async (ctx) => {
@@ -62,7 +62,7 @@ describe('baseUrl', () => {
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
   })
 })

@@ -25,7 +25,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
     // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 
   describe('request for Cypress manifest', () => {
@@ -40,7 +40,7 @@ describe('Launchpad: Open Mode', () => {
 
     it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
       cy.visitLaunchpad()
-      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+      cy.get('h1').should('contain', 'Choose a Browser')
       cy.withCtx((ctx, o) => {
         expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
           headers: {
@@ -54,7 +54,7 @@ describe('Launchpad: Open Mode', () => {
     describe('logged-in state', () => {
       it(`sends 'false' when not logged in`, () => {
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+        cy.get('h1').should('contain', 'Choose a Browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
@@ -67,7 +67,7 @@ describe('Launchpad: Open Mode', () => {
       it(`sends 'true' when logged in`, () => {
         cy.loginUser()
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+        cy.get('h1').should('contain', 'Choose a Browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
@@ -103,7 +103,7 @@ describe('Launchpad: Open Mode', () => {
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
       cy.contains('E2E Testing').click()
-      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+      cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
     })
@@ -117,7 +117,7 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
-      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+      cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
@@ -233,13 +233,13 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
 
     cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 
   it('opens project with spaces in path', () => {
     cy.scaffoldProject('simple with spaces')
     cy.openProject('simple with spaces', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 })
