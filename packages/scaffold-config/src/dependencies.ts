@@ -7,15 +7,6 @@ export const WIZARD_DEPENDENCY_WEBPACK = {
   minVersion: '>=4.0.0 || >=5.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_SVELTE = {
-  type: 'svelte',
-  name: 'Svelte.js',
-  package: 'svelte',
-  installer: 'svelte',
-  description: 'Cybernetically enhanced web apps',
-  minVersion: '^3.0.0',
-} as const
-
 export const WIZARD_DEPENDENCY_VUE_2 = {
   type: 'vue',
   name: 'Vue.js 2',
@@ -149,6 +140,15 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   installer: '@angular/platform-browser-dynamic',
   description: 'Library for using Angular in a web browser with JIT compilation',
   minVersion: '>=13.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_SVELTE = {
+  type: 'svelte',
+  name: 'Svelte.js',
+  package: 'svelte',
+  installer: 'svelte',
+  description: 'Cybernetically enhanced web apps',
+  minVersion: '^3.0.0',
 } as const
 
 export const WIZARD_DEPENDENCIES = [

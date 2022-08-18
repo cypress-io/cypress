@@ -22,18 +22,23 @@ declare global {
   }
 }
 
-const svelteComponentOptions = [
-  'accessors',
-  'anchor',
-  'props',
-  'hydrate',
-  'intro',
-  'context',
-] as const
+declare type Props = Record<string, any>;
+export interface SvelteConstructorOptions<Props extends Record<string, any> = Record<string, any>> {
+  anchor?: Element
+  props?: Props
+  context?: Map<any, any>
+  hydrate?: boolean
+  intro?: boolean
+}
 
-export type CyMountOptions = Partial<Record<(typeof svelteComponentOptions)[number], any>> &
-{ log?: boolean } &
-Partial<StyleOptions>
+export interface SvelteComponent {
+  $set(props?: Props): void
+  $on(event: string, callback: (event: any) => void): () => void
+  $destroy(): void
+  [accessor: string]: any
+}
+
+export type MountOptions = SvelteConstructorOptions & { log?: boolean } & Partial<StyleOptions>
 
 Cypress.on('run:start', () => {
   // `mount` is designed to work with component testing only.
@@ -57,8 +62,8 @@ Cypress.on('run:start', () => {
 // implementation
 export function mount (
   Component: any,
-  options: CyMountOptions = {},
-) {
+  options: MountOptions = {},
+): Cypress.Chainable<SvelteComponent> {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(Component)
 
@@ -90,7 +95,7 @@ export function mount (
     // mount the component using VTU and return the component on Cypress.svelteComponent
     const ComponentConstructor = Component.default || Component
 
-    const component = Cypress.svelteComponent = new ComponentConstructor({
+    const component: SvelteComponent = Cypress.svelteComponent = new ComponentConstructor({
       target: componentNode,
       ...options,
     })
@@ -135,21 +140,6 @@ function getComponentDisplayName (componentOptions: any): string {
   }
 
   return DEFAULT_COMP_NAME
-}
-
-/**
- * Helper function for mounting a component quickly in test hooks.
- * @example
- *  import {mountCallback} from '@cypress/svelte'
- *  beforeEach(mountSvelte(component, options))
- */
-export function mountCallback (
-  component: any,
-  options: any = {},
-): () => Cypress.Chainable {
-  return () => {
-    return mount(component, options)
-  }
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this

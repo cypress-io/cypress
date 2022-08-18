@@ -26,7 +26,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular'] as const
+export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular', 'svelte'] as const
 
 /**
  * @internal
@@ -121,6 +121,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
 
     case 'react':
     case 'vue':
+    case 'svelte':
     case undefined:
       return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 
