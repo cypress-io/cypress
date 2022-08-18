@@ -10,10 +10,10 @@ import type {
 } from './types'
 import { strict as assert } from 'assert'
 
-const logDebug = debug('packherd:debug')
-const logTrace = debug('packherd:trace')
-const logSilly = debug('packherd:silly')
-const logWarn = debug('packherd:warn')
+const logDebug = debug('cypress:packherd:debug')
+const logTrace = debug('cypress:packherd:trace')
+const logSilly = debug('cypress:packherd:silly')
+const logWarn = debug('cypress:packherd:warn')
 
 /**
  * Provides information that is used to resolve a module's key from its URI.
