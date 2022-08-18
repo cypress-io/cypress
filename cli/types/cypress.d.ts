@@ -1,5 +1,6 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
+/// <reference path="./cypress-type-helpers.d.ts" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -2876,7 +2877,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
+    retries: CyTypeHelpers.Nullable<number | { runMode?: CyTypeHelpers.Nullable<number>, openMode?: CyTypeHelpers.Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},

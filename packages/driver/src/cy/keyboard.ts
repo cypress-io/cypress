@@ -876,7 +876,7 @@ export class Keyboard {
     let charCode: number | undefined
     let keyCode: number | undefined
     let which: number | undefined
-    let data: Nullable<string> | undefined
+    let data: CyTypeHelpers.Nullable<string> | undefined
     let location: number | undefined = keyDetails.location || 0
     let key: string | undefined
     let code: string | undefined = keyDetails.code

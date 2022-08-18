@@ -1,2 +1,4 @@
 // type helpers
-type Nullable<T> = T | null
+declare namespace CyTypeHelpers {
+   type Nullable<T> = T | null
+}
