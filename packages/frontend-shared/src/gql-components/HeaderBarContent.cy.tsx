@@ -53,9 +53,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       .trigger('mouseenter')
     })
 
-    cy.contains('.v-popper__inner', 'Unsupported browser').should('be.visible')
+    cy.contains('Unsupported browser').should('be.visible')
 
-    cy.percySnapshot('unsupported browser tooltip')
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('unsupported browser tooltip')
+    */
   })
 
   describe('breadcrumbs', () => {

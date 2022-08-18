@@ -5,6 +5,5 @@ describe('Blank Contents', () => {
 
   it('renders the visit failure page', () => {
     cy.visit('http://localhost:999')
-    cy.get('button.restart') // assert test finished to prevent percy flake
   })
 })

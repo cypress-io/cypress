@@ -34,7 +34,10 @@ describe('SpecListGitInfo', () => {
       cy.findByTestId('git-info-tooltip').should('be.visible')
       .and('have.text', 'Created')
 
-      cy.percySnapshot()
+      /*
+        TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+        cy.percySnapshot()
+      */
     })
   })
 
@@ -51,8 +54,12 @@ describe('SpecListGitInfo', () => {
     it('provides expected tooltip content', () => {
       cy.findByTestId('git-info-tooltip').should('not.exist')
       cy.get('.v-popper').trigger('mouseenter')
-      cy.contains('[data-cy=git-info-tooltip]', 'Modified').should('be.visible')
-      cy.percySnapshot()
+      cy.findByTestId('git-info-tooltip').should('be.visible')
+      .and('have.text', 'Modified')
+      /*
+        TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+        cy.percySnapshot()
+      */
     })
   })
 
@@ -73,7 +80,10 @@ describe('SpecListGitInfo', () => {
       .and('contain', 'chore: did stuff')
       .and('contain', 'abc123 by Bob')
 
-      cy.percySnapshot()
+      /*
+        TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+        cy.percySnapshot()
+      */
     })
   })
 })
