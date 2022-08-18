@@ -22,7 +22,8 @@
   "dependencies": {
     "bluebird": "3.7.1",
     "debug": "^4.3.2",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",
@@ -60,8 +61,7 @@
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
     "ts-node": "^10.2.1",
-    "webpack": "^4.44.2",
-    "webpack-virtual-modules": "^0.4.4"
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
