@@ -59,6 +59,54 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    context('setSystemTime', () => {
+      it('takes number now arg', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+        })
+      })
+
+      it('takes Date now arg', () => {
+        // April 15, 2017
+        const now = new Date(2017, 3, 15)
+        const nowTimestamp = now.getTime()
+
+        cy.clock(0).then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(nowTimestamp)
+        })
+      })
+
+      it('defaults to 0 ms with no argument', () => {
+        const now = 1111111111111
+
+        cy.clock(now).then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.setSystemTime()
+          expect(new this.window.Date().getTime()).to.equal()
+        })
+      })
+
+      it('combines correctly with tick', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(4321)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(now + 4321)
+        })
+      })
+    })
+
     it('restores window time methods when calling restore', (done) => {
       cy.clock().then(function (clock) {
         this.window.setTimeout(() => {

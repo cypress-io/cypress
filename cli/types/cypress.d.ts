@@ -5773,6 +5773,26 @@ declare namespace Cypress {
      *   cy.clock().invoke('restore')
      */
     restore(): void
+    /**
+     * Change the time without invoking any timers.
+     *
+     * Default value with no argument or undefined is 0.
+     *
+     * This can for example be useful if you need to change the time by an hour
+     * while there is a setInterval registered that may otherwise run thousands
+     * of times.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.setSystemTime(60 * 60 * 1000)
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('setSystemTime', 60 * 60 * 1000)
+     */
+    setSystemTime(now?: number | Date | undefined): void
   }
 
   interface Cookie {

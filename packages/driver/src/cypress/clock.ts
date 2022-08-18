@@ -47,7 +47,7 @@ export const create = (win, now, methods) => {
   }
 
   const setSystemTime = (now) => {
-    return clock.setSystemTime(now);
+    clock.setSystemTime(now)
   }
 
   return {
@@ -55,11 +55,11 @@ export const create = (win, now, methods) => {
 
     restore,
 
+    setSystemTime,
+
     bind,
 
     details,
-
-    setSystemTime,
 
   }
 }
