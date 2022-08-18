@@ -547,9 +547,6 @@ installCustomPercyCommand({
     '[data-cy=top-nav-cypress-version-current-link] > span': ($el) => {
       $el.text('vX.X.X')
     },
-    '[data-cy=spec-duration]': ($el) => {
-      $el.text('XXms')
-    },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
     },
