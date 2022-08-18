@@ -46,7 +46,8 @@ describe('Proxy Logging', () => {
   }
 
   context('request logging', () => {
-    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
+    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
