@@ -176,15 +176,18 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23157
-    it.skip('can forcibly click even when element is invisible', (done) => {
+    it('can forcibly click even when element is invisible', () => {
+      let clicked = false
+
       const select = cy.$$('#select-maps').hide()
 
       select.click(() => {
-        done()
+        clicked = true
       })
 
-      cy.get('#select-maps').select('de_dust2', { force: true })
+      cy.get('#select-maps').select('de_dust2', { force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('can forcibly click when select is disabled', () => {
