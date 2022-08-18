@@ -133,7 +133,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
   const sendClick = (el, evtOptions, opts: { force?: boolean } = {}) => {
     // send the click event if firefox and force (needed for force check checkbox)
-    if (!opts.force && isFirefox && el.disabled) {
+    if (!opts.force && (isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 

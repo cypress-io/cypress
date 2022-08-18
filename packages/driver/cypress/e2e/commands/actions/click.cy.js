@@ -4492,7 +4492,7 @@ describe('mouse state', () => {
       })
     })
 
-    it('handles disabled attr', { browser: '!webkit' }, () => {
+    it('handles disabled attr', () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4515,13 +4515,13 @@ describe('mouse state', () => {
       // cy.wrap(onAction).should('calledOnce')
 
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebkit ? shouldNotBeCalled : shouldBeCalledOnce)
 
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox ? shouldBeCalled : shouldNotBeCalled)
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebkit ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
-    it('handles disabled attr added on mousedown', { browser: '!webkit' }, () => {
+    it('handles disabled attr added on mousedown', () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4541,7 +4541,7 @@ describe('mouse state', () => {
       cy.get('#btn').click()
 
       cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
+      cy.getAll('btn', 'pointerup').each(isFirefox || isWebkit ? shouldNotBeCalled : shouldBeCalledOnce)
 
       cy.getAll('btn', 'mouseup click').each(shouldNotBeCalled)
     })
@@ -4578,7 +4578,7 @@ describe('mouse state', () => {
       cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each(shouldBeCalledOnce)
     })
 
-    it('can click new element after mousemove sequence [disabled]', { browser: '!webkit' }, () => {
+    it('can click new element after mousemove sequence [disabled]', () => {
       const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
@@ -4616,8 +4616,8 @@ describe('mouse state', () => {
 
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
 
-      // on disabled inputs, pointer events are still fired in chrome, not in firefox
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      // on disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebkit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('can target new element after mousedown sequence', () => {
