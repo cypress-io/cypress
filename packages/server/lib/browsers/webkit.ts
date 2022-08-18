@@ -36,7 +36,14 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     headless: browser.isHeadless,
   })
 
-  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url, options.videoApi)
+  wkAutomation = await WebKitAutomation.create({
+    automation,
+    browser: pwBrowser,
+    initialUrl: url,
+    shouldMarkAutIframeRequests: !!options.experimentalSessionAndOrigin,
+    videoApi: options.videoApi,
+  })
+
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {
