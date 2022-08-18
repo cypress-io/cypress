@@ -37,4 +37,23 @@ describe('lib/uri', () => {
       expect(uri.isLocalhost(new URL('https:foobar.com'))).to.be.false
     })
   })
+
+  context('.origin', () => {
+    it('strips everything but the remote origin', () => {
+      expect(
+        uri.origin('http://localhost:9999/foo/bar?baz=quux#/index.html'),
+        'http://localhost:9999',
+      )
+
+      expect(
+        uri.origin('https://www.google.com/'),
+        'https://www.google.com',
+      )
+
+      expect(
+        uri.origin('https://app.foobar.co.uk:1234/a=b'),
+        'https://app.foobar.co.uk:1234',
+      )
+    })
+  })
 })
