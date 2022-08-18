@@ -4,8 +4,12 @@
     ref="autHeaderEl"
     class="min-h-64px text-14px"
   >
-    <button @click="visitUrl">Go Studio</button>
-    <div v-if="!studioRecorder.url && studioRecorder.isActive">You need to enter a URL!</div>
+    <button @click="visitUrl">
+      Go Studio
+    </button>
+    <div v-if="!studioRecorder.url && studioRecorder.isActive">
+      You need to enter a URL!
+    </div>
 
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
@@ -29,9 +33,9 @@
         <input
           target="_blank"
           :value="autStore.url"
-          @input="setStudioUrl"
           class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
-        />
+          @input="setStudioUrl"
+        >
       </div>
 
       <div
@@ -170,12 +174,11 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import BookIcon from '~icons/cy/book_x16'
 import { useStudioRecorderStore } from '../store/studio-store'
 
-
 const studioRecorder = useStudioRecorderStore()
 
 function setStudioUrl (event: Event) {
   const url = (event.currentTarget as HTMLInputElement).value
-  console.log(`setting ${url}`)
+
   studioRecorder.setUrl(url)
 }
 
