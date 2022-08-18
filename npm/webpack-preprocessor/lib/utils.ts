@@ -1,4 +1,5 @@
 import * as os from 'os'
+import path from 'path'
 import md5 from 'md5'
 import Bluebird from 'bluebird'
 
@@ -23,7 +24,7 @@ function hash (contents: string) {
 }
 
 function tmpdir () {
-  return os.tmpdir()
+  return path.join(os.tmpdir(), 'cypress', 'webpack-preprocessor')
 }
 
 export default {
