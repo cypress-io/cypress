@@ -1898,7 +1898,8 @@ describe('network stubbing', function () {
             cy.wait('@getUrl')
           })
 
-          it('empty string', () => {
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
+          it.skip('empty string', () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = ''
 

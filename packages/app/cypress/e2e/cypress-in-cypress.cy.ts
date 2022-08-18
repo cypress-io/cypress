@@ -41,7 +41,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it(`handles automation missing in ${testingType}`, () => {
@@ -74,11 +74,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.contains('h3', 'The Cypress extension is missing')
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.get('[data-cy="select-browser"]').click()
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.withCtx((ctx, { sinon }) => {
         sinon.stub(ctx.actions.project, 'launchProject').resolves()
@@ -96,7 +96,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
-        return cy.contains('%)').should('not.exist')
+        cy.contains('%)').should('not.exist')
       }
 
       cy.scaffoldProject('cypress-in-cypress')
@@ -117,7 +117,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       // validate that the width we set in `withCtx` above is the starting point
       cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
-      cy.percySnapshot('initial state')
+      // cy.percySnapshot('initial state') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       .click({ force: true })
@@ -141,8 +141,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       }
 
       // resize the reporter using each of the dragPositions and take Percy snapshots
-      cy.wrap(dragPositions).each((position, index) => { // use cy.wrap and .each instead of .forEach to preserve order of execution
-        // @ts-ignore - TS assumes `position` is a jquery HTML element, but it's just a number
+      dragPositions.forEach((position, index) => {
         dragHandleToClientX('panel2', position).then(() => {
           const expectedScale = testingTypeExpectedScales[testingType][index]
 
@@ -172,11 +171,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.contains('Expand Specs List')
 
         assertNoScaleShown()
-        cy.percySnapshot('tall viewport')
+        // cy.percySnapshot('tall viewport') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
         cy.viewport(1500, 400)
         cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('be.visible')
-        cy.percySnapshot('short viewport')
+        // cy.percySnapshot('short viewport') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       })
 
       cy.get('[data-cy="select-browser"]').as('selectBrowser')
