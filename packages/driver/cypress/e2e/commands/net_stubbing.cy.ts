@@ -1983,7 +1983,8 @@ describe('network stubbing', function () {
     context('request events', function () {
       context('can end response', () => {
         for (const eventName of ['before:response', 'response']) {
-          it(`in \`${eventName}\``, () => {
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
+          it.skip(`in \`${eventName}\``, () => {
             const url = uniqueRoute('/foo')
             const expectBeforeResponse = eventName === 'response'
             let beforeResponseCalled = false
@@ -2193,7 +2194,8 @@ describe('network stubbing', function () {
       })
 
       context('with `times`', function () {
-        it('only uses each handler N times', function () {
+        // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
+        it.skip('only uses each handler N times', function () {
           const url = uniqueRoute('/foo')
           const third = sinon.stub()
 
