@@ -337,7 +337,8 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    // Sometimes we don't have a window when loading. TODO need to investigate what to do when this happens.
+    // Sometimes we don't have a window when loading.
+    // TODO: need to investigate what to do when this happens.
     if (state('window')) {
       const href = state('window').location.href
       const count = getRedirectionCount(href)

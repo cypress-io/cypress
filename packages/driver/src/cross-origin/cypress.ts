@@ -182,7 +182,7 @@ const attachToWindow = (autWindow: Window) => {
     async onBeforeUnload (e) {
       // The before unload event is propagated to primary through code injected into the AUT.
       // We need to sync this state value prior to changing stability otherwise we will erroneously log a loading event.
-      const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:duringUserTestExecution')
+      const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:sync:during:user:test:execution')
 
       cy.state('duringUserTestExecution', duringUserTestExecution)
 

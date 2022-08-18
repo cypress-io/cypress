@@ -1,8 +1,8 @@
-import { $Location } from '../cypress/location'
+import { $Location, LocationObject } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
 
-const getRemoteLocationFromCrossOriginWindow = (autWindow: Window) => {
+const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<LocationObject> => {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel()
 
@@ -40,7 +40,7 @@ export const create = (state: StateFunc) => ({
       return ''
     }
 
-    let autLocation
+    let autLocation: LocationObject
 
     try {
       const remoteUrl = $utils.locToString(win ?? state('window'))

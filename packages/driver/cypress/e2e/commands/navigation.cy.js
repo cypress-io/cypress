@@ -2702,7 +2702,7 @@ describe('src/cy/commands/navigation', () => {
             done()
           }
 
-          times = times + 1
+          times++
         }
 
         Cypress.on('url:changed', listener)
@@ -2754,7 +2754,7 @@ describe('src/cy/commands/navigation', () => {
             done()
           }
 
-          times = times + 1
+          times++
         }
 
         Cypress.on('url:changed', listener)

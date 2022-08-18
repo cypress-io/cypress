@@ -146,7 +146,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       return whenStable(fn)
     })
   },
-  ensureCommandAUTSameOrigin (fn, timeout) {
+  ensureCommandAUTSameOrigin (fn: () => any, timeout: number) {
     const options = {
       log: true,
       timeout,

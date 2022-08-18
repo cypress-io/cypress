@@ -214,9 +214,12 @@ export class SpecBridgeCommunicator extends EventEmitter {
    * @param options - contains boolean to sync globals
    * @returns the response from primary of the event with the same name.
    */
-  toPrimaryPromise (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
-    return new Promise((resolve, reject) => {
-      //TODO reject based on timeout?
+  toPrimaryPromise<T> (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+    return new Promise<T>((resolve, reject) => {
+      setTimeout(() => {
+        reject()
+      }, 1000)
+
       this.once(event, (result) => {
         resolve(result)
       })

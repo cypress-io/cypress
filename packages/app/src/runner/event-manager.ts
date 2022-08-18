@@ -599,8 +599,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:duringUserTestExecution', (__unused, originPolicy) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:duringUserTestExecution', cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:sync:during:user:test:execution', (__unused, originPolicy) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:sync:during:user:test:execution', cy.state('duringUserTestExecution'))
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {

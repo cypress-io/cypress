@@ -547,7 +547,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       try {
         const autWindow = getContentWindow($autIframe)
 
-        let isSameOrigin
+        let isSameOrigin: boolean
 
         try {
           autWindow.location.origin

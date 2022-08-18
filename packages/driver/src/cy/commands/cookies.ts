@@ -234,7 +234,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
           return resp
         })
-        .catch(handleBackendError('getCookie', 'reading the requested cookie from', () => {}))
+        .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
       }, options.timeout)
     },
 
