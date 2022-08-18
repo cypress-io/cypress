@@ -95,8 +95,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
       })
@@ -133,8 +132,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -181,8 +179,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
