@@ -1879,7 +1879,8 @@ describe('network stubbing', function () {
             cy.wait('@getUrl')
           })
 
-          it('relative path', () => {
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23433
+          it.skip('relative path', () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = '/users?a=b'
 
