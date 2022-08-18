@@ -196,6 +196,46 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('button').get('[aria-label="Close"').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
+
+    it('shows "Connect project" button if a project is not connected after login', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.visitApp()
+      moveToRunsPage()
+
+      cy.withCtx(async (ctx, options) => {
+        options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
+        options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+          setTimeout(() => {
+            onMessage({ browserOpened: true })
+          }, 500)
+
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(options.user)
+            }, 1000)
+          })
+        })
+      }, { user: {
+        authToken: 'test1',
+        email: 'test_user_a@example.com',
+        name: 'Test User A',
+      } })
+
+      cy.contains('button', 'Log in to the Cypress Dashboard').click()
+
+      cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+        cy.findByRole('button', { name: 'Log In' }).click()
+      })
+
+      cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
+        cy.findByRole('button', { name: 'Connect project' }).click()
+      })
+
+      cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+    })
   })
 
   context('Runs - Create Project', () => {
@@ -349,8 +389,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').click()
-      cy.findByText('Mock Project').click()
+      cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })

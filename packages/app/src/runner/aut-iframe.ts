@@ -35,6 +35,14 @@ export class AutIframe {
     return $iframe
   }
 
+  destroy () {
+    if (!this.$iframe) {
+      throw Error(`Cannot call #remove without first calling #create`)
+    }
+
+    this.$iframe.remove()
+  }
+
   showInitialBlankContents () {
     this._showContents(blankContents.initial())
   }

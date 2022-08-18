@@ -2396,7 +2396,8 @@ describe('src/cy/commands/xhr', () => {
         expect(this.lastLog.invoke('consoleProps').Status).to.be.undefined
       })
 
-      it('logs request + response headers', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
+      it.skip('logs request + response headers', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Request Headers']).to.be.an('object')
@@ -2405,7 +2406,8 @@ describe('src/cy/commands/xhr', () => {
         })
       })
 
-      it('logs Method, Status, URL, and XHR', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23247
+      it.skip('logs Method, Status, URL, and XHR', () => {
         cy.then(function () {
           const { xhr } = cy.state('responses')[0]
 
@@ -2422,7 +2424,8 @@ describe('src/cy/commands/xhr', () => {
         })
       })
 
-      it('logs response', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23246
+      it.skip('logs response', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Response Body'].trim()).to.deep.eq(JSON.stringify({

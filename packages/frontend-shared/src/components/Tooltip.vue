@@ -13,10 +13,12 @@
   >
     <slot />
     <template
-      #popper
+      #popper="{ shown, hide }"
     >
       <slot
         name="popper"
+        :shown="shown"
+        :hide="hide"
       />
     </template>
   </component>

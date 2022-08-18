@@ -1,3 +1,10 @@
+# [@cypress/vue2-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.1...@cypress/vue2-v1.0.2) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+
 # [@cypress/vue2-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.0...@cypress/vue2-v1.0.1) (2022-06-13)
 
 
