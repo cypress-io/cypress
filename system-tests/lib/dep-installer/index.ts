@@ -148,7 +148,15 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  * Will use `yarn` or `npm` based on the lockfile present.
  */
-export async function scaffoldProjectNodeModules (project: string, updateLockFile: boolean = !!process.env.UPDATE_LOCK_FILE, forceCopyDependencies: boolean = false): Promise<void> {
+export async function scaffoldProjectNodeModules ({
+  project,
+  updateLockFile = !!process.env.UPDATE_LOCK_FILE,
+  forceCopyDependencies = false,
+}: {
+  project: string
+  updateLockFile?: boolean
+  forceCopyDependencies?: boolean
+}): Promise<void> {
   const projectDir = projectPath(project)
   const relativePathToMonorepoRoot = path.relative(
     path.join(projects, project),
