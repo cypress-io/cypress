@@ -20,15 +20,14 @@ app.use(Toast, {
 
 app.use(createI18n())
 
-makeUrqlClient({ target: 'launchpad' }).then((launchpadClient) => {
+makeUrqlClient({ target: 'launchpad' })
+.then((launchpadClient) => {
   app.use(urql, launchpadClient)
 
   // Loading the Header Bar Query document prior to mounting leads to a better experience
   // when doing things like taking snapshots of the DOM during testing, and it
   // shouldn't be any different to the user
   return launchpadClient.query(HeaderBar_HeaderBarQueryDocument).toPromise()
-}).then(() => {
-  initHighlighter().then(() => {
-    app.mount('#app')
-  })
 })
+.then(initHighlighter)
+.then(() => app.mount('#app'))
