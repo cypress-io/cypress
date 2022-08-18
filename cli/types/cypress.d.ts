@@ -5788,7 +5788,7 @@ declare namespace Cypress {
      *
      * Default value with no argument or undefined is 0.
      *
-     * This can for example be useful if you need to change the time by an hour
+     * This can be useful if you need to change the time by an hour
      * while there is a setInterval registered that may otherwise run thousands
      * of times.
      * @see https://on.cypress.io/clock
