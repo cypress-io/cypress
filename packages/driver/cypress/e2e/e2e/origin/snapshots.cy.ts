@@ -48,7 +48,8 @@ describe('cy.origin - snapshots', () => {
     })
   })
 
-  it('verifies fetch requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23437
+  it.skip('verifies fetch requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
       // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
       // @ts-ignore
