@@ -86,10 +86,10 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
-      d.diagnostics = {
-        error: null,
-        warnings: [],
-      }
+
+      d.diagnostics.error = null
+      d.diagnostics.warnings = []
+      d.diagnostics.globallyIssuedWarnings = new Set()
 
       d.currentTestingType = null
       d.forceReconfigureProject = null

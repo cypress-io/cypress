@@ -5,7 +5,7 @@ import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import type { ErrorWrapperSource } from '@packages/errors'
+import type { AllCypressErrorNames, ErrorWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
@@ -112,6 +112,7 @@ export interface ForceReconfigureProjectDataShape {
 interface Diagnostics {
   error: ErrorWrapperSource | null
   warnings: ErrorWrapperSource[]
+  globallyIssuedWarnings: Set<AllCypressErrorNames>
 }
 
 export interface CoreDataShape {
@@ -182,7 +183,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
-    diagnostics: { error: null, warnings: [] },
+    diagnostics: { error: null, warnings: [], globallyIssuedWarnings: new Set() },
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {

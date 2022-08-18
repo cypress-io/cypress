@@ -112,7 +112,7 @@ describe('experimentalStudio', () => {
     cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
   })
 
-  it('should show experimentalStudio warning in the same project', () => {
+  it('should not continually show experimentalStudio warning in the same project', () => {
     cy.scaffoldProject('experimental-studio')
     cy.openProject('experimental-studio')
     cy.visitLaunchpad()
@@ -126,7 +126,7 @@ describe('experimentalStudio', () => {
 
     cy.get('[data-cy="loading-spinner"]')
     cy.get('h1').should('contain', 'Welcome to Cypress!')
-    cy.get('[data-cy="warning-alert"]').should('exist')
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 
   it('should show experimentalStudio warning when opening project and going back', () => {

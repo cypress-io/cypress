@@ -390,6 +390,11 @@ export class DataContext {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
+      // do not re-issue global warnings
+      if (this.coreData.diagnostics.globallyIssuedWarnings.has(err.type)) {
+        return
+      }
+
       const warning = {
         id: _.uniqueId('Warning'),
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
@@ -404,6 +409,14 @@ export class DataContext {
           d.diagnostics.warnings.splice(warningsIndex, 1)
         } else {
           d.diagnostics.warnings.push(warning)
+        }
+
+        // we only want to show "global" warnings once
+        // a "global" warning is one that is *not* nested under `e2e` or `component`,
+        // for example the deprecated `experimentalStudio` flag.
+        // to avoid re-issuing, we add it to a cache.
+        if (!this.coreData.currentTestingType) {
+          this.coreData.diagnostics.globallyIssuedWarnings.add(err.type)
         }
       })
 
