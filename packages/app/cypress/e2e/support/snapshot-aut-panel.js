@@ -10,6 +10,9 @@ export const snapshotAUTPanel = (name) => {
       '[data-cy=sidebar]': hideEl,
       '[data-cy="reporter-panel"]': hideEl,
       '[data-cy="specs-list-panel"]': hideEl,
+      '.runnable-header .duration': ($el) => {
+        $el.text('XX:XX')
+      },
     },
   })
 }
