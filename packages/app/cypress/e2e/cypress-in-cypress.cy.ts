@@ -152,7 +152,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
             assertNoScaleShown()
           }
 
-          cy.percySnapshot(`panel 2 at ${ position } px`)
+          /*
+            TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+            cy.percySnapshot(`panel 2 at ${ position } px`)
+          */
         })
       })
 
