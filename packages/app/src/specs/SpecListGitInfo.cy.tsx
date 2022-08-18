@@ -51,9 +51,7 @@ describe('SpecListGitInfo', () => {
     it('provides expected tooltip content', () => {
       cy.findByTestId('git-info-tooltip').should('not.exist')
       cy.get('.v-popper').trigger('mouseenter')
-      cy.findByTestId('git-info-tooltip').should('be.visible')
-      .and('have.text', 'Modified')
-
+      cy.contains('[data-cy=git-info-tooltip]', 'Modified').should('be.visible')
       cy.percySnapshot()
     })
   })
