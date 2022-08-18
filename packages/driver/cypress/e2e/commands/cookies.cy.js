@@ -509,7 +509,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
