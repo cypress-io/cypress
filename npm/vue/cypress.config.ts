@@ -1,5 +1,4 @@
 import { defineConfig } from 'cypress'
-import { devServer } from '@cypress/webpack-dev-server'
 
 export default defineConfig({
   'viewportWidth': 500,
@@ -16,11 +15,6 @@ export default defineConfig({
     devServer: {
       bundler: 'vite',
       framework: 'vue',
-    },
-    setupNodeEvents (on, config) {
-      require('@cypress/code-coverage/task')(on, config)
-
-      return config
     },
   },
 })

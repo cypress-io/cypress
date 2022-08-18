@@ -3,13 +3,12 @@ import 'mocha'
 import path from 'path'
 import fs from 'fs-extra'
 import { Response } from 'cross-fetch'
-import Fixtures, { fixtureDirs, scaffoldProject } from '@tooling/system-tests'
+import Fixtures, { fixtureDirs, scaffoldProject, removeProject } from '@tooling/system-tests'
 import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
-import { InjectedConfigApi } from '../../src/data'
 import sinon from 'sinon'
 import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
@@ -20,7 +19,7 @@ import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
 
-export { scaffoldProject }
+export { scaffoldProject, removeProject }
 
 export function getSystemTestProject<T extends typeof fixtureDirs[number]> (project: T): SystemTestProjectPath<T> {
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
@@ -50,7 +49,6 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       logIn: sinon.stub().throws('not stubbed'),
       resetAuthState: sinon.stub(),
     } as unknown as AuthApiShape,
-    configApi: {} as InjectedConfigApi,
     projectApi: {
       closeActiveProject: sinon.stub(),
       insertProjectToCache: sinon.stub().resolves(),

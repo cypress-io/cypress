@@ -67,6 +67,26 @@ describe('baseUrl', () => {
   })
 })
 
+describe('experimentalSingleTabRunMode', () => {
+  it('is a valid config for component testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode')
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.get('h1').contains('Choose a Browser')
+  })
+
+  it('is not a valid config for e2e testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode')
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('error-header').contains('Cypress configuration error')
+    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
+  })
+})
+
 describe('experimentalStudio', () => {
   it('should show experimentalStudio warning if Cypress detects experimentalStudio config has been set', () => {
     cy.scaffoldProject('experimental-studio')
@@ -131,7 +151,8 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  it('warns against outdated @vue/cli dependency', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
+  it.skip('warns against outdated @vue/cli dependency', () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()

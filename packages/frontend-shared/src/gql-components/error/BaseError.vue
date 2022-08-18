@@ -8,7 +8,7 @@
         <h1
           v-if="baseError.title"
           class="font-medium leading-snug text-32px text-gray-900"
-          data-testid="error-header"
+          data-cy="error-header"
         >
           <slot name="header">
             {{ baseError.title }}

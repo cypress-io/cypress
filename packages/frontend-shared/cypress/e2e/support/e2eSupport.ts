@@ -304,6 +304,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
             firstOpened: 1609459200000,
             lastOpened: 1609459200000,
             promptsShown: { ci1: 1609459200000 },
+            banners: { _disabled: true },
           })
         }
 
