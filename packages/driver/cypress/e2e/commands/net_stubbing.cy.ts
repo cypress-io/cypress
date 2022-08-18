@@ -20,7 +20,8 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
-describe('network stubbing', function () {
+// TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
+describe.skip('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
