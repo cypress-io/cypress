@@ -19,7 +19,8 @@ describe('e2e cookies spec', () => {
 
   context('__Host- prefix', () => {
     // https://github.com/cypress-io/cypress/issues/8261
-    it('can set __Host- cookie', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it.skip('can set __Host- cookie', () => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         domain: 'example.com',
@@ -35,7 +36,8 @@ describe('e2e cookies spec', () => {
       }))
     })
 
-    it('errors when __Host- cookie and secure:false', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it.skip('errors when __Host- cookie and secure:false', (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval')
 
@@ -79,6 +81,7 @@ describe('e2e cookies spec', () => {
       }))
     })
 
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('errors when __Secure- cookie secure:false', (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
