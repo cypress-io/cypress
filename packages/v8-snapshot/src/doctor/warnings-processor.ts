@@ -1,4 +1,4 @@
-import type { CreateBundleResult } from '@packages/packherd'
+import type { CreateBundleResult } from '@tooling/packherd'
 import path from 'path'
 
 /**
@@ -142,7 +142,7 @@ export class WarningsProcessor {
   }
 
   private _processWarning (
-    warning: Omit<Warning, 'detail' | 'notes' | 'pluginName'>,
+    warning: Omit<Warning, 'detail' | 'notes' | 'pluginName' | 'id'>,
     hist: WarningsProcessHistory,
   ): ProcessedWarning | null {
     // We cannot do anything useful if we don't know what file the warning pertains to
@@ -225,7 +225,7 @@ export class WarningsProcessor {
     }
     let text = err.toString()
 
-    let warning: Omit<Warning, 'detail' | 'notes' | 'pluginName'> = {
+    let warning: Omit<Warning, 'detail' | 'notes' | 'pluginName' | 'id'> = {
       location,
       text,
     }

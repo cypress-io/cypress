@@ -26,5 +26,6 @@
   },
   "files": [
     "dist/*"
-  ]
+  ],
+  "types": "src/packherd.ts"
 }

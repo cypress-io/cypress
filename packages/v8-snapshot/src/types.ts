@@ -1,4 +1,4 @@
-import type { CreateBundleResult } from '@packages/packherd'
+import type { CreateBundleResult } from '@tooling/packherd'
 import type { RawSourceMap } from 'source-map-js'
 
 type NodeRequireFunction = typeof require

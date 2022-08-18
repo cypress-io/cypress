@@ -16,9 +16,10 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@packages/electron-mksnapshot": "0.0.0-development",
-    "@packages/packherd": "0.0.0-development",
+    "@packages/packherd-require": "0.0.0-development",
     "@packages/snapbuild": "0.0.0-development",
+    "@tooling/electron-mksnapshot": "0.0.0-development",
+    "@tooling/packherd": "0.0.0-development",
     "ansi-colors": "^4.1.1",
     "convert-source-map": "^1.8.0",
     "debug": "^4.1.1",

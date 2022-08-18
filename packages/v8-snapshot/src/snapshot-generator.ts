@@ -17,7 +17,7 @@ import {
 } from './utils'
 import { createExportScript, ExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
-import { syncAndRun } from '@packages/electron-mksnapshot'
+import { syncAndRun } from '@tooling/electron-mksnapshot'
 
 const logInfo = debug('snapgen:info')
 const logDebug = debug('snapgen:debug')

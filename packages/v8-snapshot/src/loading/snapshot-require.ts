@@ -4,8 +4,8 @@ import type {
   GetModuleKey,
   ModuleNeedsReload,
   PackherdTranspileOpts,
-} from '@packages/packherd'
-import { packherdRequire } from '@packages/packherd/dist/require.js'
+} from '@packages/packherd-require'
+import { packherdRequire } from '@packages/packherd-require'
 import type { Snapshot, SnapshotAuxiliaryData } from '../types'
 import { EMBEDDED } from '../constants'
 import { forwardSlash } from '../utils'

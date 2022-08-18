@@ -11,7 +11,7 @@ import {
   CreateBundleOpts as PackherdCreateBundleOpts,
   CreateBundleResult,
   CreateBundleSourcemap,
-} from '@packages/packherd'
+} from '@tooling/packherd'
 import { dependencyMapArrayFromInputs } from './meta/dependency-map'
 import { writeConfigJSON } from './write-config-json'
 import { tryRemoveFileSync } from './utils'
