@@ -146,17 +146,19 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-maps').select('de_train')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23156
-    it.skip('can forcibly click even when being covered by another element', (done) => {
+    it('can forcibly click even when being covered by another element', () => {
+      let clicked = false
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
       $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
       select.on('click', () => {
-        done()
+        clicked = true
       })
 
-      cy.get('#select-covered-in-span').select('foo', { force: true })
+      cy.get('#select-covered-in-span').select('foo', { force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('passes timeout and interval down to click', (done) => {
