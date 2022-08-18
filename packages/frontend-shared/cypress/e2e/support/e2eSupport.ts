@@ -545,7 +545,7 @@ Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'elemen
 installCustomPercyCommand({
   elementOverrides: {
     '[data-cy=top-nav-cypress-version-current-link] > span': ($el) => {
-      $el.text('vX.X.X')
+      $el.text('') // TODO: set dummy text to vX.X.X once flake is fixed. See issue https://github.com/cypress-io/cypress/issues/21897
     },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
