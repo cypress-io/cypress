@@ -812,7 +812,7 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    it('places cursor at the end of [contenteditable]', { browser: '!webkit' }, () => {
+    it('places cursor at the end of [contenteditable]', () => {
       cy.get('[contenteditable]:first')
       .invoke('html', '<div><br></div>').click()
       .then(expectCaret(0))

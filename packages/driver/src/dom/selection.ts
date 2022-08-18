@@ -575,19 +575,26 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
         $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
       }
     } else {
-      let range
-
-      // Sometimes, selection.rangeCount is 0 when there is no selection.
-      // In that case, it fails in Chrome.
-      // We're creating a new range and add it to the selection to avoid the case.
-      if (selection.rangeCount === 0) {
-        range = doc.createRange()
-        selection.addRange(range)
+      // TODO(webkit): comments here regarding selection of markup within contenteditable
+      // Maybe see if we can simplify this further? selectAllChildren might cover a lot of these
+      // edge cases across browsers
+      if (Cypress.browser.family === 'webkit') {
+        selection.selectAllChildren(el)
       } else {
-        range = selection.getRangeAt(0)
-      }
+        let range
 
-      range.selectNodeContents(el)
+        // Sometimes, selection.rangeCount is 0 when there is no selection.
+        // In that case, it fails in Chrome.
+        // We're creating a new range and add it to the selection to avoid the case.
+        if (selection.rangeCount === 0) {
+          range = doc.createRange()
+          selection.addRange(range)
+        } else {
+          range = selection.getRangeAt(0)
+        }
+
+        range.selectNodeContents(el)
+      }
     }
 
     toStart ? selection.collapseToStart() : selection.collapseToEnd()
