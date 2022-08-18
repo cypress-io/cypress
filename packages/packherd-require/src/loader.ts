@@ -2,7 +2,7 @@ import debug from 'debug'
 import Module from 'module'
 import path from 'path'
 import type {
-  ModuleBuiltin as ModuleBuiltin,
+  ModuleBuiltin,
   ModuleDefinition,
   ModuleLoadResult,
   ModuleResolveResult,
