@@ -7,9 +7,6 @@ export const snapshotReporter = () => {
       '[data-cy=sidebar]': ($el) => {
         $el.attr('style', 'display: none !important')
       },
-      '[data-cy=spec-duration]': ($el) => {
-        $el.attr('style', 'display: none !important')
-      },
       '[data-cy=aut-panel]': ($el) => {
         $el.attr('style', 'display: none !important')
       },
