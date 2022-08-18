@@ -24,7 +24,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.findByRole('radio', { name: 'Edge v8', checked: true })
 
@@ -39,7 +39,7 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'Browser: doesNotExist was not found on your system or is not supported by Cypress.')
@@ -62,7 +62,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]').as('AlertBody')
@@ -86,7 +86,7 @@ describe('Choose a Browser Page', () => {
       cy.get('[data-cy="alert-header"]').should('not.exist')
 
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
 
@@ -95,7 +95,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.findByRole('radio', { name: 'Chrome v1' })
 
@@ -111,7 +111,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.contains('button', 'Start E2E Testing in Chrome').as('launchButton')
 
@@ -163,7 +163,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
       cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
@@ -187,7 +187,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'launchProject')
@@ -225,7 +225,7 @@ describe('Choose a Browser Page', () => {
         ctx.browser.setBrowserStatus('open')
       })
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.contains('button', 'Running Chrome').as('launchButton')
 
@@ -261,7 +261,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.launchProject).to.have.been.called
@@ -274,7 +274,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
 
@@ -305,7 +305,7 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
@@ -342,7 +342,7 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.contains('h1', 'Choose a Browser', { timeout: 10000 })
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
