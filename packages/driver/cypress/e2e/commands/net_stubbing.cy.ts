@@ -1916,7 +1916,8 @@ describe('network stubbing', function () {
         })
 
         context('throwing errors correctly', () => {
-          it('defineproperty', (done) => {
+          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23423
+          it.skip('defineproperty', (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`defineProperty()` is not allowed.')
 
