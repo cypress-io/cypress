@@ -5,9 +5,9 @@ import debug from 'debug'
 import { runMksnapshot } from './mksnapshot-run'
 import type { VersionMeta } from './config'
 
-const logInfo = debug('mksnapshot:info')
-const logDebug = debug('mksnapshot:debug')
-const logError = debug('mksnapshot:error')
+const logInfo = debug('cypress:mksnapshot:info')
+const logDebug = debug('cypress:mksnapshot:debug')
+const logError = debug('cypress:mksnapshot:error')
 
 export async function syncAndRun (version: string, args: string[]) {
   const metadata = new Metadata(version)
