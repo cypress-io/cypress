@@ -152,7 +152,6 @@ function setupRunner () {
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
-    useStudioRecorderStore()
   )
 
   createIframeModel()

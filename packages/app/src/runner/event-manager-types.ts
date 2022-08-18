@@ -1,5 +1,6 @@
 import type { FileDetails } from '@packages/types'
 import type { ScriptError } from '../store'
+import type { CommandLog, StudioLog } from '../store/studio-store'
 import type { CypressInCypressMochaEvent } from './event-manager'
 
 interface BeforeScreenshot {
@@ -20,9 +21,23 @@ export type LocalBusEventMap = {
   'open:file': FileDetails
 }
 
+export interface StudioSavePayload {
+  fileDetails: string
+  absoluteFile: string
+  runnableTitle: string
+  commands: StudioLog[]
+  isSuite: boolean
+  isRoot: boolean
+  testName?: string
+}
+
 export type LocalBusEmitsMap = {
   'open:file': FileDetails
   'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
+  'studio:save': StudioSavePayload
+  'reporter:log:add': CommandLog
+  'reporter:log:remove': CommandLog
+  'reporter:log:state:changed': CommandLog
 }
 
 export type SocketToDriverMap = {

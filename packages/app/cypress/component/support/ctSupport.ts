@@ -53,6 +53,5 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
     // dom - imports driver which causes problems
     // so just stubbing it out for now
     mockDom,
-    eventManager.studioRecorder,
   )
 }

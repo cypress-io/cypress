@@ -1,10 +1,8 @@
+import type { Instrument, TestState } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
-// import $ from 'jquery'
-// import $driverUtils from '@packages/driver/src/cypress/utils'
-// import { dom } from '../dom'
-// import { eventManager } from '../event-manager'
+import type { StudioSavePayload } from '../runner/event-manager-types'
 
 function getCypress () {
   const eventManager = getEventManager()
@@ -21,6 +19,29 @@ You can use the copy button below to copy the commands to your clipboard. \
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
+}
+
+function assertNonNullish<TValue> (
+  value: TValue,
+  message: string,
+): asserts value is NonNullable<TValue> {
+  if (value === null || value === undefined) {
+    throw Error(message)
+  }
+}
+
+export interface CommandLog {
+  id: `s${string}`
+  testId?: string
+  hookId?: string
+  state: TestState
+  name: string
+  message: string
+  type: 'parent' | 'child'
+  number?: number
+  instrument: Instrument
+  numElements: number
+  isStudio: boolean
 }
 
 const eventTypes = [
@@ -60,7 +81,7 @@ const tagNamesWithValue = [
   'TEXTAREA',
 ]
 
-interface StudioLog {
+export interface StudioLog {
   id?: number
   name: string
   selector?: string
@@ -88,7 +109,7 @@ interface StudioRecorderState {
     element: Element
     selector: string
   }
-  _body?: HTMLBodyElement
+  _body?: Element
   _currentId: number
 }
 
@@ -250,7 +271,11 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       this.closeSaveModal()
       this.stop()
 
-      getEventManager().emit('studio:save', {
+      assertNonNullish(this.fileDetails, `fileDetails should exist!`)
+      assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
+      assertNonNullish(this.runnableTitle, `runnableTitle should exist`)
+
+      const payload: StudioSavePayload = {
         fileDetails: this.fileDetails,
         absoluteFile: this.absoluteFile,
         runnableTitle: this.runnableTitle,
@@ -258,7 +283,9 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         isSuite: !!this.suiteId,
         isRoot: this.suiteId === 'r1',
         testName,
-      })
+      }
+
+      getEventManager().emit('studio:save', payload)
     },
 
     visitUrl (url?: string) {
@@ -596,7 +623,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       return true
     },
 
-    _generateLog ({ id, name, message, type, number }: { id: string, name: string, message: unknown, type: 'parent' | 'child', number?: number }) {
+    _generateLog ({ id, name, message, type, number }: { id: `s${string}`, name: string, message: unknown, type: 'parent' | 'child', number?: number }): CommandLog {
       return {
         id,
         testId: this.testId,
@@ -612,7 +639,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       }
     },
 
-    _generateBothLogs (log) {
+    _generateBothLogs (log): [CommandLog, CommandLog] {
       return [
         this._generateLog({
           id: `s${log.id}-get`,
@@ -747,7 +774,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       window.UnifiedRunner.dom.closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(this._body))
     },
 
-    _generatePossibleAssertions ($el) {
+    _generatePossibleAssertions ($el: JQuery<Element>) {
       const tagName = $el.prop('tagName')
 
       const possibleAssertions: Array<{ type: string, options?: unknown[] }> = []
@@ -778,8 +805,10 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
         }
       }
 
-      const attributes = $.map($el[0].attributes, ({ name, value }: { name: string, value: string }) => {
-        if (name === 'value' || name === 'disabled') return
+      const attributes = Array.from($el[0].attributes).reduce<Array<{ name: string, value: string }>>((acc, { name, value }) => {
+        if (name === 'value' || name === 'disabled') {
+          return acc
+        }
 
         if (name === 'class') {
           possibleAssertions.push({
@@ -787,7 +816,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
             options: value.split(' ').map((value) => ({ value })),
           })
 
-          return
+          return acc
         }
 
         if (name === 'id') {
@@ -798,16 +827,18 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
             }],
           })
 
-          return
+          return acc
         }
 
-        if (value !== undefined && value !== '') {
-          return {
+        if (name !== undefined && name !== '' && value !== undefined && value !== '') {
+          return acc.concat({
             name,
             value,
-          }
+          })
         }
-      })
+
+        return acc
+      }, [])
 
       if (attributes.length > 0) {
         possibleAssertions.push({

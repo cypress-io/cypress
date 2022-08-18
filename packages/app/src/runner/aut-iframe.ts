@@ -76,7 +76,7 @@ export class AutIframe {
   }
 
   _body () {
-    return this._contents()?.find('body')
+    return this._contents()?.find('body') as unknown as JQuery<HTMLBodyElement>
   }
 
   detachDom = () => {
@@ -493,7 +493,13 @@ export class AutIframe {
     const studioRecorder = useStudioRecorderStore()
 
     if (studioRecorder.isActive) {
-      studioRecorder.attachListeners(this._body()?.[0])
+      const body = this._body()?.[0]
+
+      if (!body) {
+        throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
+      }
+
+      studioRecorder.attachListeners(body)
     }
   }
 }
