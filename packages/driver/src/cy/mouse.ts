@@ -57,6 +57,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
 
 export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
+  const isWebkit = Cypress.browser.family === 'webkit'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     const constructor = el.ownerDocument.defaultView.PointerEvent
@@ -72,14 +73,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
 
   const sendPointerup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 
     return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
   }
   const sendPointerdown = (el, evtOptions): {} | SentEvent => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 
@@ -102,14 +103,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
 
   const sendMouseup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
   const sendMousedown = (el, evtOptions): {} | SentEvent => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 
@@ -139,14 +140,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     return sendMouseEvent(el, evtOptions, 'click', true, true)
   }
   const sendDblclick = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
   }
   const sendContextmenu = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebkit) && el.disabled) {
       return {}
     }
 

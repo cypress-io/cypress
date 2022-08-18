@@ -45,6 +45,7 @@ const getMidPoint = (el) => {
 }
 
 const isFirefox = Cypress.isBrowser('firefox')
+const isWebkit = Cypress.isBrowser('webkit')
 
 // TODO(webkit): fix+unskip for experimental webkit
 describe('src/cy/commands/actions/click', () => {
@@ -3584,7 +3585,7 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    it('can rightclick disabled with force', { browser: '!webkit' }, () => {
+    it('can rightclick disabled with force', () => {
       const el = cy.$$('input:first')
       .prop('disabled', true)
 
@@ -3596,7 +3597,7 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
 
-      cy.getAll('el', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      cy.getAll('el', 'pointerdown pointerup').each(isFirefox || isWebkit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('rightclick cancel contextmenu', () => {
