@@ -9,6 +9,7 @@ import type {
   AllowedState,
   OpenProjectLaunchOpts,
   FoundBrowser,
+  FullConfig,
   InitializeProjectOptions,
   OpenProjectLaunchOptions,
   Preferences,
@@ -46,9 +47,20 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       close: browsers.close,
       getBrowsers,
       async ensureAndGetByNameOrPath (nameOrPath: string) {
+        const projectConfig: FullConfig = await (ctx as DataContext).project.getConfig()
+        const declaredBrowsers = projectConfig.browsers?.map<FoundBrowser | undefined>((b) => {
+          if (!b.path) return
+
+          return {
+            path: b.path,
+            version: b.version,
+            majorVersion: b.majorVersion,
+            custom: true,
+          }
+        }).filter<FoundBrowser>((b): b is FoundBrowser => b != null) || []
         const browsers = await ctx.browser.machineBrowsers()
 
-        return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+        return await ensureAndGetByNameOrPath(nameOrPath, false, [...declaredBrowsers, ...browsers])
       },
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
