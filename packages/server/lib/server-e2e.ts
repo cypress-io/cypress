@@ -139,7 +139,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return super.startWebsockets(automation, config, options)
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl (urlStr: string, headers: { [key: string]: any }, automationRequest, options: Record<string, any> = { headers: {} }) {
     let p
 
     debug('resolving visit %o', {
@@ -169,9 +169,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     // nuke any hashes from our url since
     // those those are client only and do
     // not apply to http requests
-    urlStr = url.parse(urlStr)
-    urlStr.hash = null
-    urlStr = urlStr.format()
+    {
+      const urlWithStringQuery = url.parse(urlStr)
+
+      urlWithStringQuery.hash = null
+      urlStr = urlWithStringQuery.format()
+    }
 
     const originalUrl = urlStr
 
@@ -305,7 +308,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml &&
-                  !((options.hasAlreadyVisitedUrl || options.isCrossOrigin) && !cors.urlOriginsMatch(previousRemoteState.origin, newUrl))) {
+                  !((options.hasAlreadyVisitedUrl || options.isCrossOrigin) && !cors.urlOriginsMatch(previousRemoteState.origin, newUrl as string))) {
                   // if we're not handling a local file set the remote state
                   if (!handlingLocalFile) {
                     this._remoteStates.set(newUrl as string, options)
