@@ -26,7 +26,7 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -60,7 +60,7 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    useStudioRecorderStore(),
+    useStudioStore(),
     // UnifiedRunner.StudioRecorder,
     // created once when opening runner at the very top level in main.ts
     window.ws,

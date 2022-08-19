@@ -170,7 +170,7 @@ import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineC
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import BookIcon from '~icons/cy/book_x16'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -195,7 +195,7 @@ const specStore = useSpecStore()
 
 const route = useRoute()
 
-const studioStore = useStudioRecorderStore()
+const studioStore = useStudioStore()
 
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment

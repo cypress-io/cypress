@@ -11,7 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
@@ -53,7 +53,7 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  studioRecorder: ReturnType<typeof useStudioRecorderStore>
+  studioRecorder: ReturnType<typeof useStudioStore>
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
@@ -70,7 +70,7 @@ export class EventManager {
     StudioRecorderCtor: any,
     ws: Socket,
   ) {
-    this.studioRecorder = useStudioRecorderStore() // new StudioRecorderCtor(this)
+    this.studioRecorder = useStudioStore() // new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
   }
