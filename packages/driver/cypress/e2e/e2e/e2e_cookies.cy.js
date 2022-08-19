@@ -50,7 +50,8 @@ describe('e2e cookies spec', () => {
       })
     })
 
-    it('errors when __Host- cookie and path', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it.skip('errors when __Host- cookie and path', (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         secure: true,
@@ -82,7 +83,7 @@ describe('e2e cookies spec', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('errors when __Secure- cookie secure:false', (done) => {
+    it.skip('errors when __Secure- cookie secure:false', (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',
