@@ -32,6 +32,11 @@ interface BaseReporterProps {
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
+  studioStore: {
+    showInitModal: () => void 
+    closeInitModal: () => void
+    initModalIsOpen: boolean
+  }
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   experimentalStudioEnabled: boolean
   runnerStore: MobxRunnerStore
@@ -59,6 +64,7 @@ class Reporter extends Component<SingleReporterProps> {
       runnablesStore,
       scroller,
       error,
+      studioStore,
       statsStore,
       experimentalStudioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
@@ -82,6 +88,8 @@ class Reporter extends Component<SingleReporterProps> {
             statsStore={this.props.statsStore}
           />
         )}
+        <button onClick={() => studioStore.showInitModal()}>Show</button>
+        <div>{studioStore.initModalIsOpen ? 'Showing' : 'Hiding'}</div>
       </div>
     )
   }

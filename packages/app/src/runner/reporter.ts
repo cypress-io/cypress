@@ -3,6 +3,7 @@ import { getReporterElement } from './utils'
 import { getEventManager, getRunnerConfigFromWindow } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
+import { useStudioStore } from '../store/studio-store'
 
 let hasInitializeReporter = false
 
@@ -51,6 +52,7 @@ function renderReporter (
     // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
     experimentalStudioEnabled: config.experimentalStudio,
     runnerStore: store,
+    studioStore: useStudioStore()
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)
