@@ -51,7 +51,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return { }
   },
-  setProjectPreferences (source, args, ctx) {
+  setProjectPreferencesInGlobalCache (source, args, ctx) {
     return {}
   },
   generateSpecFromSource (source, args, ctx) {

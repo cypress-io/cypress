@@ -86,8 +86,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     // simulate it by registering the same unpin:snapshot event it does.
     eventManager.on('unpin:snapshot', () => snapshotStore.$reset())
 
-    // debugger
-    // console.log('snapshotWithSnapshots', snapshotWithSnapshots)
     snapshotStore.pinSnapshot({ ...snapshotWithSnapshots, $el: document.body })
 
     mountSnapshotControls(eventManager, autIframe)

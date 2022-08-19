@@ -47,7 +47,7 @@ function scaffoldAndOpenE2EProject (opts: {
   // Going through the loading of config
   cy.get('[data-cy="loading-spinner"]')
   cy.get('[data-cy="loading-spinner"]').should('not.exist')
-  // No errrors were encountered
+  // No errors were encountered
   cy.get('[data-testid="error-header"]').should('not.exist')
   // Asserts that we've made it through the flow
   cy.contains('Choose a Browser')

@@ -16,8 +16,8 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
     expect(sessionsManager).to.haveOwnProperty('cy')
     expect(sessionsManager).to.haveOwnProperty('Cypress')
-    expect(sessionsManager).to.haveOwnProperty('currentTestRegisteredSessions')
-    expect(sessionsManager.currentTestRegisteredSessions).to.be.instanceOf(Map)
+    expect(sessionsManager).to.haveOwnProperty('registeredSessions')
+    expect(sessionsManager.registeredSessions).to.be.instanceOf(Map)
   })
 
   describe('.setActiveSession()', () => {

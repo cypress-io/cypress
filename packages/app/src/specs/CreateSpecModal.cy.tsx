@@ -1,6 +1,6 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
-import { CreateSpecModalFragmentDoc } from '../generated/graphql-test'
+import { CreateSpecModalFragmentDoc, EmptyGenerator_MatchSpecFileDocument } from '../generated/graphql-test'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
@@ -15,6 +15,11 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -62,6 +67,38 @@ describe('<CreateSpecModal />', () => {
       .should('not.exist')
     })
   })
+
+  describe('form behavior', () => {
+    it('enter should call create spec function', () => {
+      //submit default path
+      cy.get('input')
+      .type('{enter}')
+
+      //should switch to success state
+      cy.contains('h2', 'Great! The spec was successfully added')
+      .should('be.visible')
+    })
+
+    it('enter should not call create spec function if spec file path is invalid', () => {
+      cy.stubMutationResolver(EmptyGenerator_MatchSpecFileDocument, (defineResult, variables) => {
+        //mocking one pattern use case
+        return defineResult({ matchesSpecPattern: variables.specFile !== '' })
+      })
+
+      cy.get('button[type="submit"').as('submit').should('not.be.disabled')
+
+      //try to submit an empty path which is invalid
+      cy.get('input')
+      .clear()
+      .type('{enter}')
+
+      //should stay on current state
+      cy.contains('h2', 'Enter the path for your new spec')
+      .should('be.visible')
+
+      cy.get('@submit').should('be.disabled')
+    })
+  })
 })
 
 describe('Modal Text Input', () => {
@@ -73,6 +110,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -116,6 +158,11 @@ describe('Modal Text Input', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -163,6 +210,11 @@ describe('playground', () => {
         gql={{
           currentProject: {
             id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',

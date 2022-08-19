@@ -131,7 +131,7 @@ fragment SidebarNavigation on Query {
 
 gql`
 mutation SideBarNavigation_SetPreferences ($value: String!) {
-  setPreferences (value: $value) {
+  setPreferences (value: $value, type: global) {
     ...SidebarNavigation
   }
 }`
