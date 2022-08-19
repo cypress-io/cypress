@@ -7,7 +7,6 @@
         type="component"
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
-        :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
         @restart="cancelSpecNameCreation"
         @updateTitle="(value) => emits('update:title', value)"
       />
@@ -143,7 +142,6 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
     generatedSpecResult {
       ... on GeneratedSpecError {
         fileName
-        erroredCodegenCandidate
       }
     }
   }
