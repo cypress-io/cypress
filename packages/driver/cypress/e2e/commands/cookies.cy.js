@@ -587,7 +587,8 @@ describe('src/cy/commands/cookies', () => {
         cy.setCookie('foo', 'bar')
       })
 
-      it('throws after timing out', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('throws after timing out', function (done) {
         Cypress.automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
