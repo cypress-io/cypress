@@ -243,8 +243,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
-    crossOriginCallbackLoaderAdded = false
-
     if (!crossOriginCallbackLoaderAdded && cypressConfig.experimentalSessionAndOrigin) {
       // webpack runs loaders last-to-first and we want ours to run last
       // so that it's working with plain javascript
