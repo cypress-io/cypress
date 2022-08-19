@@ -484,6 +484,8 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
+      let neededFocus = false
+
       debug('elToFocus:', $elToFocus[0])
       if (focused.needsFocus($elToFocus, $previouslyFocused)) {
         debug('el needs focus')
@@ -499,14 +501,25 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         } else {
           // the user clicked inside a focusable element
           focused.fireFocus($elToFocus.get(0), { preventScroll: true })
+          neededFocus = true
         }
       }
 
       if (shouldMoveCursorToEndAfterMousedown(el)) {
+        let onlyIfEmptySelection = true
+
+        if (Cypress.browser.family === 'webkit' && neededFocus) {
+          // TODO(webkit): selection is defaulted to all content on focus
+          // We override in this case, as we know we we just focused
+          onlyIfEmptySelection = false
+        }
+
         debug('moveSelectionToEnd due to click', el)
         // It's a curried function, so the 2 arguments are valid.
         // @ts-ignore
-        $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
+        $selection.moveSelectionToEnd(el, {
+          onlyIfEmptySelection,
+        })
       }
 
       return mouseDownPhase

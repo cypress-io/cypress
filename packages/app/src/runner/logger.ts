@@ -32,7 +32,7 @@ export const logger = {
     this._logValues(consoleProps)
     this._logArgs(consoleProps)
     this._logGroups(consoleProps)
-    this._logTable(consoleProps)
+    this._logTables(consoleProps)
   },
 
   _logValues (consoleProps: any) {
@@ -118,43 +118,46 @@ export const logger = {
     })
   },
 
-  _logTable (consoleProps: any) {
-    if (isMultiEntryTable(consoleProps.table)) {
-      _.each(
-        _.sortBy(consoleProps.table, (val, key) => key),
-        (table) => {
-          return this._logTable({ table })
-        },
-      )
+  _logTables (consoleProps: any) {
+    const logTable = ({ name, data, columns }) => {
+      let tableData = data
 
-      return
-    }
+      if (Cypress.browser.family === 'webkit') {
+        // Webkit will hang when we attempt to log element references
+        // within a table. We replace the element with a simplified display
+        // string in this case.
+        // https://bugs.webkit.org/show_bug.cgi?id=244100
 
-    const table = this._getTable(consoleProps)
+        const getSimplifiedElementDisplay = (element: Element) => {
+          let display = element.tagName.toLowerCase()
 
-    if (!table) return
+          if (element.id) {
+            display += `#${element.id}`
+          }
 
-    if (_.isArray(table)) {
-      console.table(table)
-    } else {
-      console.group(table.name)
-      console.table(table.data, table.columns)
+          element.classList.forEach((className) => {
+            display += `.${className}`
+          })
+
+          return display
+        }
+
+        tableData = data.map((rowObj) => {
+          return Object.entries(rowObj).reduce((acc: any, value) => {
+            acc[value[0]] = _.isElement(value[1]) ? getSimplifiedElementDisplay(value[1] as Element) : value[1]
+
+            return acc
+          }, {})
+        })
+      }
+
+      console.group(name)
+      console.table(tableData, columns)
       console.groupEnd()
     }
+
+    _.each(_.sortBy(consoleProps.table, (val, key) => key), (getTableData: () => Table) => {
+      return logTable(getTableData())
+    })
   },
-
-  _getTable (consoleProps: any): Table | Table[] | undefined {
-    const table = _.result<Table | Table[]>(consoleProps, 'table')
-
-    if (!table) return
-
-    return table
-  },
-}
-
-const isMultiEntryTable = (table: Table) => {
-  return !_.isFunction(table) &&
-  !_.some(_.keys(table)
-  .map((x) => isNaN(parseInt(x, 10)))
-  .filter(Boolean), true)
 }

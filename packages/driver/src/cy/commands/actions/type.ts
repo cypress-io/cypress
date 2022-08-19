@@ -89,12 +89,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       // transform table object into object with zero based index as keys
       const getTableData = () => {
-        return _.reduce(_.values(table), (memo, value, index) => {
-          memo[index + 1] = value
-
-          return memo
-        }
-        , {})
+        return _.values(table)
       }
 
       options._log = Cypress.log({

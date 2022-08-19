@@ -4741,7 +4741,7 @@ describe('mouse state', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/4347
-    it('can render element highlight inside iframe', { browser: '!webkit' }, () => {
+    it('can render element highlight inside iframe', () => {
       cy.get('iframe:first')
       .should(($iframe) => {
         // wait for iframe to load
@@ -4773,7 +4773,7 @@ describe('mouse state', () => {
       })
     })
 
-    it('can print table of keys on click', { browser: '!webkit' }, () => {
+    it('can print table of keys on click', () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
@@ -4786,7 +4786,7 @@ describe('mouse state', () => {
       })
     })
 
-    it('can print table of keys on dblclick', { browser: '!webkit' }, () => {
+    it('can print table of keys on dblclick', () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
@@ -4802,7 +4802,7 @@ describe('mouse state', () => {
       })
     })
 
-    it('can print table of keys on rightclick', { browser: '!webkit' }, () => {
+    it('can print table of keys on rightclick', () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 

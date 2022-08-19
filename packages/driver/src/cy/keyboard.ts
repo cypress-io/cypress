@@ -912,7 +912,16 @@ export class Keyboard {
         keyCode = 0
         which = 0
         location = undefined
-        data = text === '\r' ? '↵' : text
+
+        // TODO(webkit): validate impact
+        // Webkit will update inputs on a textInput event, resulting
+        // in double entry when the default is executed
+        if (Cypress.browser.family === 'webkit') {
+          data = ''
+        } else {
+          data = text === '\r' ? '↵' : text
+        }
+
         break
 
       case 'beforeinput':
@@ -1138,10 +1147,6 @@ export class Keyboard {
         key.events.input = false
         key.events.beforeinput = false
       }
-    }
-
-    if (Cypress.browser.family === 'webkit') {
-      key.events.textInput = false
     }
 
     let elToType
