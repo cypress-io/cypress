@@ -209,5 +209,25 @@ describe('./lib/cross-origin-callback-loader', () => {
           expect(result).to.equal('mutated someVar');
         }`)
     })
+
+    it('works when dependencies passed into called', () => {
+      const { store } = callLoader(
+        `it('test', () => {
+          cy.origin('http://foobar.com:3500', { args: { foo: 'foo'}}, ({ foo }) => {
+            const result = Cypress.require('./fn')(foo)
+            expect(result).to.equal('mutated someVar')
+          })
+        })`,
+      )
+
+      expectAddFileSource(store).to.equal(stripIndent`
+        __cypressCrossOriginCallback = ({
+          foo
+        }) => {
+          const result = require('./fn')(foo);
+
+          expect(result).to.equal('mutated someVar');
+        }`)
+    })
   })
 })
