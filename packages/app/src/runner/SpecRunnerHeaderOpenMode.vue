@@ -4,17 +4,6 @@
     ref="autHeaderEl"
     class="min-h-64px text-14px"
   >
-    <button
-      v-if="studioRecorder.url && studioRecorder.isActive"
-      @click="visitUrl"
-    >
-      Go Studio
-    </button>
-
-    <div v-if="!studioRecorder.url && studioRecorder.isActive">
-      You need to enter a URL!
-    </div>
-
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
@@ -142,6 +131,8 @@
       :event-manager="eventManager"
     />
 
+    <StudioControls v-if="studioStore.isActive" />
+
     <Alert
       v-model="showAlert"
       status="success"
@@ -173,6 +164,7 @@ import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import StudioControls from './StudioControls.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
@@ -203,6 +195,8 @@ const specStore = useSpecStore()
 
 const route = useRoute()
 
+const studioStore = useStudioRecorderStore()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
@@ -224,8 +218,8 @@ const displayScale = computed(() => {
 })
 
 const autUrl = computed(() => {
-  if (studioRecorder.isActive && studioRecorder.url) {
-    return studioRecorder.url
+  if (studioStore.isActive && studioStore.url) {
+    return studioStore.url
   }
 
   return autStore.url
@@ -242,27 +236,17 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
-const studioRecorder = useStudioRecorderStore()
-
 function setStudioUrl (event: Event) {
   const url = (event.currentTarget as HTMLInputElement).value
 
-  studioRecorder.setUrl(url)
+  studioStore.setUrl(url)
 }
 
 function openInNewTab () {
-  if (!autStore.url || studioRecorder.isActive) {
+  if (!autStore.url || studioStore.isActive) {
     return
   }
 
   window.open(autStore.url, '_blank')?.focus()
-}
-
-function visitUrl () {
-  if (!studioRecorder.url) {
-    throw Error('Cannot visit blank url')
-  }
-
-  studioRecorder.visitUrl(studioRecorder.url)
 }
 </script>

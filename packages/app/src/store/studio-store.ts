@@ -119,6 +119,7 @@ export const useStudioRecorderStore = defineStore('studioRecorder', {
       initModalIsOpen: false,
       saveModalIsOpen: false,
       logs: [],
+      url: '',
       isLoading: false,
       isActive: false,
       isFailed: false,

@@ -32,9 +32,17 @@ export interface StudioSavePayload {
 }
 
 export type LocalBusEmitsMap = {
+  // Local Bus
+  'restart': undefined
   'open:file': FileDetails
   'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
+
+  // Studio Events
   'studio:save': StudioSavePayload
+  'studio:cancel': undefined
+  'studio:copy:to:clipboard': () => void
+
+  // Reporter Events
   'reporter:log:add': CommandLog
   'reporter:log:remove': CommandLog
   'reporter:log:state:changed': CommandLog
