@@ -1,0 +1,14 @@
+{
+  "norewrite": [
+    "./graceful-fs-polyfill.js",
+    "./lib/colors/lib/system/supports-colors.js"
+  ],
+  "deferred": [],
+  "healthy": [
+    "./entry.js",
+    "./graceful-fs-polyfill.js",
+    "./lib/colors/lib/system/has-flag.js"
+  ],
+  "deferredHashFile": "yarn.lock",
+  "deferredHash": "38df2378ed26e20124d8c38a945af1b4a058656aab3b3b1f71a9d8a629cc0d81"
+}

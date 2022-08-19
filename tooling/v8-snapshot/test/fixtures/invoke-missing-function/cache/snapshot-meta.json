@@ -1,0 +1,14 @@
+{
+  "norewrite": [
+    "./invoke-not-function.js",
+    "./invoke-undefined.js"
+  ],
+  "deferred": [
+    "./invoke-push-on-undefined.js"
+  ],
+  "healthy": [
+    "./entry.js",
+    "./valid-module.js"
+  ],
+  "deferredHashFile": "<not used>"
+}
