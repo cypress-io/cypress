@@ -4,13 +4,21 @@
       :is="Component"
     />
   </router-view>
+  <template v-if="route.name !== 'SpecRunner'" />
 </template>
+
+<script setup lang="ts">
+
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
+</script>
 
 <style lang="scss">
 html,
 body,
 #app {
-  @apply h-full bg-white;
+  @apply bg-white h-full;
 }
 
 @font-face {
