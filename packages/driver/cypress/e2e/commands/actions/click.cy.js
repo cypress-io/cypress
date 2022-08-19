@@ -47,7 +47,6 @@ const getMidPoint = (el) => {
 const isFirefox = Cypress.isBrowser('firefox')
 const isWebkit = Cypress.isBrowser('webkit')
 
-// TODO(webkit): fix+unskip for experimental webkit
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -3930,7 +3929,6 @@ describe('src/cy/commands/actions/click', () => {
   })
 })
 
-// TODO(webkit): fix+unskip for experimental webkit
 describe('shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
@@ -3994,7 +3992,6 @@ describe('shadow dom', () => {
   })
 })
 
-// TODO(webkit): fix+unskip for experimental webkit
 describe('mouse state', () => {
   describe('mouse/pointer events', () => {
     beforeEach(() => {
