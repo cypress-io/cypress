@@ -271,7 +271,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#go', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
+  context.skip('#go', () => {
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
