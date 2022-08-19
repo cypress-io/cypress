@@ -27,6 +27,8 @@
     "spok": "^1.3.0"
   },
   "files": [
-    "dist/*"
-  ]
+    "dist/*",
+    "src/require.ts"
+  ],
+  "types": "src/require.ts"
 }

@@ -20,6 +20,8 @@ const logError = debug('packherd:error')
 
 export * from './loader'
 
+export * from './types'
+
 /**
  * Configures how packherd require works.
  *

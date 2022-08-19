@@ -1,5 +1,5 @@
 'use strict'
-require('@packages/v8-snapshot').snapshotRequire(__dirname, {
+require('@packages/v8-snapshot-require').snapshotRequire(__dirname, {
   diagnostics: true,
   useCache: true,
 })

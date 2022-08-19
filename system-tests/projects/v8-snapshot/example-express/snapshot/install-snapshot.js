@@ -6,7 +6,7 @@ const {
   SnapshotGenerator,
   prettyPrintError,
   generateBundlerMetadata,
-} = require('@packages/v8-snapshot')
+} = require('@tooling/v8-snapshot')
 
 const projectBaseDir = path.join(__dirname, '../')
 const snapshotEntryFile = require.resolve('./snapshot.js')
