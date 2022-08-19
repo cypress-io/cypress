@@ -22,7 +22,7 @@ describe('Entry Generator', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     projectBaseDir = await Fixtures.scaffoldProject(MINIMAL_PROJECT)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(MINIMAL_PROJECT, false, true)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: MINIMAL_PROJECT, updateLockFile: false, forceCopyDependencies: true })
   })
 
   it('resolves paths relative to entry and creates entry content', async () => {

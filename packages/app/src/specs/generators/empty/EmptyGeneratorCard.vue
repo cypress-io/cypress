@@ -15,7 +15,7 @@ import DocumentCodeIcon from '~icons/cy/document-code_x48'
 const { t } = useI18n()
 
 defineProps<{
-  disabled: boolean
+  disabled?: boolean
 }>()
 
 </script>

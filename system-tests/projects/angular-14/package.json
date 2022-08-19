@@ -25,7 +25,6 @@
     "@angular-devkit/build-angular": "^14.0.0",
     "@angular/cli": "~14.0.0",
     "@angular/compiler-cli": "^14.0.0",
-    "cypress": "file:../../../cli",
     "typescript": "~4.7.2"
   },
   "projectFixtureDirectory": "angular"

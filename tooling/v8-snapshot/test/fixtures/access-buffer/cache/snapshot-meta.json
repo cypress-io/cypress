@@ -1,0 +1,11 @@
+{
+  "norewrite": [],
+  "deferred": [
+    "./accessing-buffer.js"
+  ],
+  "healthy": [
+    "./entry.js",
+    "./valid-module.js"
+  ],
+  "deferredHashFile": "<not used>"
+}

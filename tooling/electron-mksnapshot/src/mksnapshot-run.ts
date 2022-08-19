@@ -7,9 +7,9 @@ import { track } from 'temp'
 import { processArgsFromFile } from './process-args-from-file'
 
 import debug from 'debug'
-const logInfo = debug('mksnapshot:info')
-const logDebug = debug('mksnapshot:debug')
-const logError = debug('mksnapshot:error')
+const logInfo = debug('cypress:mksnapshot:info')
+const logDebug = debug('cypress:mksnapshot:debug')
+const logError = debug('cypress:mksnapshot:error')
 
 const temp = track()
 const workingDir = temp.mkdirSync('mksnapshot-workdir')

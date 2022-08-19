@@ -42,8 +42,11 @@ describe('src/cy/commands/local_storage', () => {
         const clear = cy.spy(Cypress.LocalStorage, 'clear')
 
         Cypress.emit('test:before:run', {})
-
-        expect(clear).to.be.calledWith([])
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          expect(clear).not.to.be.called
+        } else {
+          expect(clear).to.be.calledWith([])
+        }
       })
     })
 

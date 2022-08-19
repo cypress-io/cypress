@@ -15,7 +15,6 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
-    "@cypress/code-coverage": "3.8.1",
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",

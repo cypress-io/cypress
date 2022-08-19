@@ -1,5 +1,5 @@
 import { syncAndRun } from '../src/mksnapshot'
-import { expect } from 'chai'
+import { expect, assert } from 'chai'
 import { track } from 'temp'
 import path from 'path'
 const { mkdirSync } = track()
@@ -22,7 +22,7 @@ describe('mksnapshot', () => {
     expect(version).to.equal(providedVersion)
     expect(snapshotBlobFile).to.equal('snapshot_blob.bin')
     expect(v8ContextFile.startsWith('v8_context_snapshot')).to.be.true
-  }).timeout(10000)
+  }).timeout(20000)
 
   it('builds invalid snapshot providing version 12.0.10', async () => {
     const providedVersion = '12.0.10'
@@ -47,5 +47,5 @@ describe('mksnapshot', () => {
     expect(version).to.equal(providedVersion)
     expect(snapshotBlobFile).to.equal('snapshot_blob.bin')
     expect(v8ContextFile.startsWith('v8_context_snapshot')).to.be.true
-  }).timeout(10000)
+  }).timeout(20000)
 })

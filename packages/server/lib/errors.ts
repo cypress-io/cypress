@@ -15,6 +15,8 @@ export const logException = Bluebird.method(function (this: any, err) {
     .create(err)
     .catch(() => {})
   }
+
+  return
 })
 
 export const get = errors.get

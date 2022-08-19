@@ -13,10 +13,10 @@ import type {
 } from './types'
 import path from 'path'
 
-const logInfo = debug('packherd:info')
-const logDebug = debug('packherd:debug')
-const logTrace = debug('packherd:trace')
-const logError = debug('packherd:error')
+const logInfo = debug('cypress:packherd:info')
+const logDebug = debug('cypress:packherd:debug')
+const logTrace = debug('cypress:packherd:trace')
+const logError = debug('cypress:packherd:error')
 
 export * from './loader'
 
