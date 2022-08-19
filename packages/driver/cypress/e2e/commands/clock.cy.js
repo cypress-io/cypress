@@ -75,7 +75,7 @@ describe('src/cy/commands/clock', () => {
         const now = new Date(2017, 3, 15)
         const nowTimestamp = now.getTime()
 
-        cy.clock(0).then(function (clock) {
+        cy.clock().then(function (clock) {
           expect(new this.window.Date().getTime()).to.equal(0)
           clock.setSystemTime(now)
           expect(new this.window.Date().getTime()).to.equal(nowTimestamp)
@@ -88,7 +88,7 @@ describe('src/cy/commands/clock', () => {
         cy.clock(now).then(function (clock) {
           expect(new this.window.Date().getTime()).to.equal(now)
           clock.setSystemTime()
-          expect(new this.window.Date().getTime()).to.equal()
+          expect(new this.window.Date().getTime()).to.equal(0)
         })
       })
 
@@ -103,6 +103,37 @@ describe('src/cy/commands/clock', () => {
           expect(new this.window.Date().getTime()).to.equal(now)
           clock.tick(4321)
           expect(new this.window.Date().getTime()).to.equal(now + 4321)
+        })
+      })
+
+      it('doesn\'t call timers on setSystemTime, but does on tick', function () {
+        cy.clock().then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          })
+
+          clock.setSystemTime(1111111)
+          expect(callCount).to.equal(0)
+          clock.tick()
+          expect(callCount).to.equal(1)
+        })
+      })
+
+      it('doesn\'t shift the time left for timers to trigger', function () {
+        cy.clock(0).then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          }, 100)
+
+          clock.setSystemTime(1111111)
+          clock.tick(99)
+          expect(callCount).to.equal(0)
+          clock.tick(1)
+          expect(callCount).to.equal(1)
         })
       })
     })
