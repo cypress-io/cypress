@@ -435,8 +435,7 @@ describe('src/cy/commands/cookies', () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-  context.skip('#setCookie', () => {
+  context('#setCookie', () => {
     beforeEach(() => {
       cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
