@@ -522,7 +522,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can override timeout', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('can override timeout', () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
