@@ -324,7 +324,7 @@ export class AutIframe {
 
     if (coords) {
       requestAnimationFrame(() => {
-        this._addHitBoxLayer(coords, $body).setAttribute('data-highlight-hitbox', 'true')
+        this._addHitBoxLayer(coords, $body.get(0)).setAttribute('data-highlight-hitbox', 'true')
       })
     }
   }
