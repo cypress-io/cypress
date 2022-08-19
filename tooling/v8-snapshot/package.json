@@ -2,7 +2,7 @@
   "name": "@tooling/v8-snapshot",
   "version": "0.0.0-development",
   "description": "Various utils related to create v8 snapshots for electron apps.",
-  "private": false,
+  "private": true,
   "main": "dist/v8-snapshot.js",
   "scripts": {
     "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
@@ -11,7 +11,8 @@
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js",
+    "test-integration": "mocha test/integration/**/*.spec.ts -r @packages/ts/register --config ./test/.mocharc.js",
+    "test-unit": "mocha test/unit/**/*.spec.ts -r @packages/ts/register --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },

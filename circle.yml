@@ -1320,7 +1320,7 @@ jobs:
           name: Run v8 integration tests
           command: |
             source ./scripts/ensure-node.sh
-            yarn test-integration --scope @tooling/packherd
+            yarn test-integration --scope "'@tooling/{packherd,v8-snapshot}'"
       - unless:
           condition:
             or:
@@ -1329,7 +1329,7 @@ jobs:
               - equal: [ *linux-arm64-executor, << parameters.executor >> ]
           steps:
             - verify-mocha-results:
-                expectedResultCount: 1
+                expectedResultCount: 2
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -1364,7 +1364,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 16
+                expectedResultCount: 18
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output

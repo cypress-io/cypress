@@ -21,7 +21,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false, true)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -59,7 +59,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.mjs')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -97,7 +97,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -136,7 +136,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -174,7 +174,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await rmrf(cacheDir)
@@ -216,7 +216,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await rmrf(cacheDir)
@@ -259,7 +259,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -297,7 +297,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(projectName, false)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await rmrf(cacheDir)

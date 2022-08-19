@@ -20,7 +20,7 @@ describe('integration: express', () => {
     await FixturesScaffold.scaffoldCommonNodeModules()
     const projectBaseDir = await Fixtures.scaffoldProject(EXPRESS_MINIMAL_PROJECT)
 
-    await FixturesScaffold.scaffoldProjectNodeModules(EXPRESS_MINIMAL_PROJECT, false, true)
+    await FixturesScaffold.scaffoldProjectNodeModules({ project: EXPRESS_MINIMAL_PROJECT, updateLockFile: false, forceCopyDependencies: true })
 
     const cacheDir = path.join(projectBaseDir, 'cache')
     const metadataFile = path.join(cacheDir, 'snapshot-meta.json')

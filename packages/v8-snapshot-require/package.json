@@ -2,7 +2,7 @@
   "name": "@packages/v8-snapshot-require",
   "version": "0.0.0-development",
   "description": "Various utils related to create v8 snapshots for electron apps.",
-  "private": false,
+  "private": true,
   "main": "dist/snapshot-require.js",
   "scripts": {
     "build": "tsc",
