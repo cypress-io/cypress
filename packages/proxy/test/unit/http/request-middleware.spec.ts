@@ -69,7 +69,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
     it('is a noop if no current AUT URL', async () => {
@@ -79,7 +79,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
     it('prepends cookie jar cookies to request', async () => {
@@ -87,7 +87,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie; request=cookie')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/22751
@@ -96,7 +96,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie; request=cookie')
     })
 
     describe('tough-cookie integration', () => {
@@ -208,7 +208,7 @@ describe('http/request-middleware', () => {
 
       await Promise.all(cookieJarStrings.map(async (cookieString) => {
         try {
-          await cookieJar._cookieJar.setCookie(cookieString, autUrl)
+          await cookieJar._cookieJar.setCookie(cookieString, autAndRequestUrl)
         } catch (e) {
           // likely doesn't match the url policy, path, or is another type of cookie mismatch
           return
@@ -223,7 +223,8 @@ describe('http/request-middleware', () => {
           proxiedUrl: autAndRequestUrl,
           isAUTFrame: true,
           headers: {
-            cookie: requestCookieStrings,
+
+            cookie: requestCookieStrings.join('; '),
           },
         },
       }

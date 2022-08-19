@@ -32,6 +32,25 @@ export const areUrlsSameSite = (url1: string, url2: string) => {
   return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
 }
 
+export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieString: string[] = []): string => {
+  const cookieMap = new Map<string, Cookie>()
+  const requestCookies: Cookie[] = requestCookieString.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
+
+  // Always have cookies in the jar overwrite cookies in the request if they are the same
+  requestCookies.forEach((cookie) => cookieMap.set(cookie.key, cookie))
+  // Two or more cookies on the same request can happen per https://www.rfc-editor.org/rfc/rfc6265
+  // But if a value for that cookie already exists in the cookie jar, do NOT add the cookie jar cookie
+  applicableCookieJarCookies.forEach((cookie) => {
+    if (cookieMap.get(cookie.key)) {
+      cookieMap.delete(cookie.key)
+    }
+  })
+
+  const requestCookiesThatNeedToBeAdded = Array.from(cookieMap).map(([key, cookie]) => cookie)
+
+  return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
+}
+
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it
 // simulate what a browser would do when determining whether or not it should
 // be set from a response or a attached to a response. it shouldn't be confused

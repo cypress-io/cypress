@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
-import { getSameSiteContext } from './util/cookies'
+import { getSameSiteContext, addCookieJarCookiesToRequest } from './util/cookies'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -44,17 +44,15 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     this.req.isAUTFrame,
   )
 
-  const cookies = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
-  const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
+  const cookiesOnRequestString = (this.req.headers['cookie'] ? this.req.headers['cookie'] : '').split('; ')
 
-  this.debug('existing cookies on request: %s', existingCookies.join('; '))
-  this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
+  this.debug('existing cookies on request: %s', applicableCookiesInCookieJar.join('; '))
+  this.debug('add cookies to request: %s', cookiesOnRequestString.join('; '))
 
-  // if two or more cookies have the same key, the first one found is preferred,
-  // so we prepend the added cookies so they take preference
-  this.req.headers['cookie'] = cookiesToAdd.concat(existingCookies).join('; ')
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequestString)
 
+  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
   this.next()
 }
 
