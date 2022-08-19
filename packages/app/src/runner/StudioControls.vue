@@ -60,9 +60,9 @@
 
 <script setup lang="ts">
 import { getEventManager } from '.'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 
-const studioStore = useStudioRecorderStore()
+const studioStore = useStudioStore()
 
 function handleShowCommands () {
   // TODO: Show modal with available commands'

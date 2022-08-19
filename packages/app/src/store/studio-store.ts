@@ -113,7 +113,7 @@ interface StudioRecorderState {
   _currentId: number
 }
 
-export const useStudioRecorderStore = defineStore('studioRecorder', {
+export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
     return {
       initModalIsOpen: false,
