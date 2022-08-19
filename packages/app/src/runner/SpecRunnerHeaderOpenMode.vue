@@ -4,13 +4,6 @@
     ref="autHeaderEl"
     class="min-h-64px text-14px"
   >
-    <button @click="visitUrl">
-      Go Studio
-    </button>
-    <div v-if="!studioRecorder.url && studioRecorder.isActive">
-      You need to enter a URL!
-    </div>
-
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
@@ -32,9 +25,11 @@
         </Button>
         <input
           target="_blank"
-          :value="autStore.url"
-          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
+          :value="autUrl"
+          data-cy="aut-url-input"
+          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate flex flex-grow"
           @input="setStudioUrl"
+          @click="openInNewTab"
         >
       </div>
 
@@ -136,6 +131,8 @@
       :event-manager="eventManager"
     />
 
+    <StudioControls v-if="studioStore.isActive" />
+
     <Alert
       v-model="showAlert"
       status="success"
@@ -167,28 +164,13 @@ import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import StudioControls from './StudioControls.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import BookIcon from '~icons/cy/book_x16'
-import { useStudioRecorderStore } from '../store/studio-store'
-
-const studioRecorder = useStudioRecorderStore()
-
-function setStudioUrl (event: Event) {
-  const url = (event.currentTarget as HTMLInputElement).value
-
-  studioRecorder.setUrl(url)
-}
-
-function visitUrl () {
-  if (!studioRecorder.url) {
-    throw Error('Cannot visit blank url')
-  }
-
-  studioRecorder.visitUrl(studioRecorder.url)
-}
+import { useStudioStore } from '../store/studio-store'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -213,6 +195,8 @@ const specStore = useSpecStore()
 
 const route = useRoute()
 
+const studioStore = useStudioStore()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
@@ -233,6 +217,14 @@ const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
 })
 
+const autUrl = computed(() => {
+  if (studioStore.isActive && studioStore.url) {
+    return studioStore.url
+  }
+
+  return autStore.url
+})
+
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const togglePlayground = () => _togglePlayground(autIframe)
@@ -244,4 +236,17 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
+function setStudioUrl (event: Event) {
+  const url = (event.currentTarget as HTMLInputElement).value
+
+  studioStore.setUrl(url)
+}
+
+function openInNewTab () {
+  if (!autStore.url || studioStore.isActive) {
+    return
+  }
+
+  window.open(autStore.url, '_blank')?.focus()
+}
 </script>

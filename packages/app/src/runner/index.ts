@@ -26,7 +26,7 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -60,9 +60,6 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    useStudioRecorderStore(),
-    // UnifiedRunner.StudioRecorder,
-    // created once when opening runner at the very top level in main.ts
     window.ws,
   )
 }
@@ -111,7 +108,7 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: getEventManager().studioRecorder,
+      recorder: useStudioStore(),
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
@@ -346,7 +343,7 @@ function runSpecE2E (spec: SpecFile) {
 }
 
 export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**

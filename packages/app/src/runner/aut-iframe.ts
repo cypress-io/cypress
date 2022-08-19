@@ -4,7 +4,7 @@ import { logger } from './logger'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
-import { useStudioRecorderStore } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -482,7 +482,7 @@ export class AutIframe {
   }
 
   startStudio () {
-    const studioRecorder = useStudioRecorderStore()
+    const studioRecorder = useStudioStore()
 
     if (studioRecorder.isLoading) {
       studioRecorder.start(this._body()?.[0])
@@ -490,7 +490,7 @@ export class AutIframe {
   }
 
   reattachStudio () {
-    const studioRecorder = useStudioRecorderStore()
+    const studioRecorder = useStudioStore()
 
     if (studioRecorder.isActive) {
       const body = this._body()?.[0]
