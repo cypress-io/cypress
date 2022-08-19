@@ -138,12 +138,18 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-print"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
-    cy.percySnapshot('Print to console hover tooltip')
+
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('Print to console hover tooltip')
+    */
 
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed!')
-    cy.percySnapshot('Print to console click tooltip')
-
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('Print to console click tooltip')
+    */
     cy.then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
         Command: `cy.get('.foo-bar')`,
