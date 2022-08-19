@@ -1,5 +1,5 @@
 import { syncAndRun } from '../src/mksnapshot'
-import { expect } from 'chai'
+import { expect, assert } from 'chai'
 import { track } from 'temp'
 import path from 'path'
 const { mkdirSync } = track()
