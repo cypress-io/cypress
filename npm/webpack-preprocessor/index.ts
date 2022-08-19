@@ -330,25 +330,21 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       const resolveAllBundles = () => {
         bundles[filePath].deferreds.forEach((deferred) => {
+          // resolve with the outputPath so Cypress knows where to serve
+          // the file from
           deferred.resolve(outputPath)
         })
 
         bundles[filePath].deferreds.length = 0
       }
 
-      // resolve with the outputPath so Cypress knows where to serve
-      // the file from
-      // Seems to be a race condition where changing file before next tick
-      // does not cause build to rerun
-      Bluebird.delay(0).then(() => {
-        if (!bundles[filePath]) {
-          return
-        }
-
-        if (!cypressConfig.experimentalSessionAndOrigin) {
-          return resolveAllBundles()
-        }
-
+      // the cross-origin-callback-loader extracts any cy.origin() callback
+      // functions // that contains Cypress.require() and stores their sources
+      // in the CrossOriginCallbackStore. it saves the callbacks per source
+      // files, since that's the context it has. here we need to unfurl
+      // what dependencies the input source file has so we can know which
+      // files stored in the CrossOriginCallbackStore to compile
+      const handleCrossOriginCallbackFiles = () => {
         // get the source file and any of its dependencies
         const sourceFiles = jsonStats.modules
         .filter((module) => {
@@ -381,6 +377,20 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         .finally(() => {
           crossOriginCallbackStore.reset(filePath)
         })
+      }
+
+      // seems to be a race condition where changing file before next tick
+      // does not cause build to rerun
+      Bluebird.delay(0).then(() => {
+        if (!bundles[filePath]) {
+          return
+        }
+
+        if (!cypressConfig.experimentalSessionAndOrigin) {
+          return resolveAllBundles()
+        }
+
+        handleCrossOriginCallbackFiles()
       })
     }
 

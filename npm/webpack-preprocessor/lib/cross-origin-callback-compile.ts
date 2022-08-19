@@ -8,7 +8,24 @@ const VirtualModulesPlugin = require('webpack-virtual-modules')
 
 const debug = Debug('cypress:webpack')
 
-const getConfig = ({ files, originalFilePath }) => {
+interface Entry {
+  [key: string]: string
+}
+
+interface VirtualConfig {
+  [key: string]: string
+}
+
+interface EntryConfig {
+  entry: Entry
+  virtualConfig: VirtualConfig
+}
+
+// takes the files stored by the cross-origin-callback-loader and turns
+// them into config we can pass to webpack to compile all the files. the
+// virtual config allows us to just use the source we have in memory without
+// needing to write it to file
+const getConfig = ({ files, originalFilePath }): EntryConfig => {
   const dir = path.dirname(originalFilePath)
 
   return files.reduce((memo, file) => {
@@ -22,7 +39,14 @@ const getConfig = ({ files, originalFilePath }) => {
   }, { entry: {}, virtualConfig: {} })
 }
 
-const getWebpackOptions = ({ webpackOptions, entry, virtualConfig, outputDir }) => {
+interface ConfigProperties {
+  webpackOptions: webpack.Configuration
+  entry: Entry
+  virtualConfig: VirtualConfig
+  outputDir: string
+}
+
+const getWebpackOptions = ({ webpackOptions, entry, virtualConfig, outputDir }: ConfigProperties): webpack.Configuration => {
   const modifiedWebpackOptions = _.extend({}, webpackOptions, {
     entry,
     output: {
@@ -43,7 +67,11 @@ interface CompileOptions {
   webpackOptions: webpack.Configuration
 }
 
-export const compileCrossOriginCallbackFiles = (files: CrossOriginCallbackStoreFile[], options: CompileOptions) => {
+// the cross-origin-callback-loader extracts any cy.origin() callback functions
+// that contains Cypress.require() and stores their sources in the
+// CrossOriginCallbackStore. this sends those sources through webpack again
+// to process any dependencies and create bundles for each callback function
+export const compileCrossOriginCallbackFiles = (files: CrossOriginCallbackStoreFile[], options: CompileOptions): Promise<void> => {
   debug('compile cross-origin callback files: %o', files)
 
   const { originalFilePath, webpackOptions } = options
@@ -56,7 +84,7 @@ export const compileCrossOriginCallbackFiles = (files: CrossOriginCallbackStoreF
     outputDir,
   })
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const compiler = webpack(modifiedWebpackOptions)
 
     const handle = (err: Error) => {
@@ -68,7 +96,7 @@ export const compileCrossOriginCallbackFiles = (files: CrossOriginCallbackStoreF
 
       debug('successfully compiled cross-origin callback files')
 
-      resolve(outputDir)
+      resolve()
     }
 
     compiler.run(handle)
