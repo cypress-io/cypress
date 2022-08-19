@@ -60,9 +60,6 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    useStudioStore(),
-    // UnifiedRunner.StudioRecorder,
-    // created once when opening runner at the very top level in main.ts
     window.ws,
   )
 }
@@ -111,7 +108,7 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: getEventManager().studioRecorder,
+      recorder: useStudioStore(),
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )

@@ -2,8 +2,6 @@ import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
 import type { Socket } from '@packages/socket/lib/browser'
 
-class StudioRecorderMock {}
-
 export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
   get: (obj, prop) => {
     throw Error(`Cannot access ${String(prop)} on StubWebsocket!`)
@@ -29,7 +27,6 @@ export const createEventManager = () => {
     // @ts-ignore
     null, // MobX, also not needed in Vue CT tests,
     null, // selectorPlaygroundModel,
-    StudioRecorderMock, // needs to be a valid class
     StubWebsocket,
   )
 }

@@ -53,7 +53,6 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  studioRecorder: ReturnType<typeof useStudioStore>
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
@@ -66,11 +65,8 @@ export class EventManager {
     private Mobx: typeof MobX,
     // selectorPlaygroundModel singleton
     selectorPlaygroundModel: any,
-    // StudioRecorder constructor
-    StudioRecorderCtor: any,
     ws: Socket,
   ) {
-    this.studioRecorder = useStudioStore()
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
   }
@@ -151,7 +147,7 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      this.studioRecorder.cancel()
+      useStudioStore().cancel()
       rerun()
     })
 
@@ -284,37 +280,37 @@ export class EventManager {
     const studioInit = () => {
       this.ws.emit('studio:init', (showedStudioModal) => {
         rerun()
-        // if (!showedStudioModal) {
-        //   this.studioRecorder.showInitModal()
-        // } else {
-        //   rerun()
-        // }
+        if (!showedStudioModal) {
+          useStudioStore().showInitModal()
+        } else {
+          rerun()
+        }
       })
     }
 
     this.reporterBus.on('studio:init:test', (testId) => {
-      this.studioRecorder.setTestId(testId)
+      useStudioStore().setTestId(testId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioRecorder.setSuiteId(suiteId)
+      useStudioStore().setSuiteId(suiteId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.studioRecorder.cancel()
+      useStudioStore().cancel()
       rerun()
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
-      this.studioRecorder.removeLog(commandId)
+      useStudioStore().removeLog(commandId)
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.studioRecorder.startSave()
+      useStudioStore().startSave()
     })
 
     this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
@@ -322,7 +318,7 @@ export class EventManager {
     })
 
     this.localBus.on('studio:start', () => {
-      this.studioRecorder.closeInitModal()
+      useStudioStore().closeInitModal()
       rerun()
     })
 
@@ -333,13 +329,13 @@ export class EventManager {
     this.localBus.on('studio:save', (saveInfo) => {
       this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
-          this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
+          this.reporterBus.emit('test:set:state', useStudioStore().saveError(err), noop)
         }
       })
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.studioRecorder.cancel()
+      useStudioStore().cancel()
       rerun()
     })
 
@@ -416,7 +412,7 @@ export class EventManager {
             return
           }
 
-          this.studioRecorder.initialize(config, state)
+          useStudioStore().initialize(config, state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -477,9 +473,9 @@ export class EventManager {
           resolve({
             ...reporterState,
             studio: {
-              testId: this.studioRecorder.testId,
-              suiteId: this.studioRecorder.suiteId,
-              url: this.studioRecorder.url,
+              testId: useStudioStore().testId,
+              suiteId: useStudioStore().suiteId,
+              url: useStudioStore().url,
             },
           })
         })
@@ -598,12 +594,12 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', (_attr, test) => {
-      this.studioRecorder.interceptTest(test)
+      useStudioStore().interceptTest(test)
     })
 
     Cypress.on('test:after:run', (test) => {
-      if (this.studioRecorder.isOpen && test.state !== 'passed') {
-        this.studioRecorder.testFailed()
+      if (useStudioStore().isOpen && test.state !== 'passed') {
+        useStudioStore().testFailed()
       }
     })
 
@@ -740,7 +736,7 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    const hasRunnableId = !!this.studioRecorder.testId || !!this.studioRecorder.suiteId
+    const hasRunnableId = !!useStudioStore().testId || !!useStudioStore().suiteId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -778,7 +774,7 @@ export class EventManager {
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
 
-    this.studioRecorder.setInactive()
+    useStudioStore().setInactive()
   }
 
   resetReporter () {
@@ -804,12 +800,12 @@ export class EventManager {
   }
 
   _interceptStudio (displayProps) {
-    if (this.studioRecorder.isActive) {
-      displayProps.hookId = this.studioRecorder.hookId
+    if (useStudioStore().isActive) {
+      displayProps.hookId = useStudioStore().hookId
 
       if (displayProps.name === 'visit' && displayProps.state === 'failed') {
-        this.studioRecorder.testFailed()
-        this.reporterBus.emit('test:set:state', this.studioRecorder.testError, noop)
+        useStudioStore().testFailed()
+        this.reporterBus.emit('test:set:state', useStudioStore().testError, noop)
       }
     }
 
@@ -817,8 +813,8 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    this.ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
-      this.studioRecorder.copyToClipboard(commandsText)
+    this.ws.emit('studio:get:commands:text', useStudioStore().logs, (commandsText) => {
+      useStudioStore().copyToClipboard(commandsText)
       .then(cb)
     })
   }
