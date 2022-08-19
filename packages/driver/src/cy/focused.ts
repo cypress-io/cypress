@@ -142,7 +142,7 @@ export const create = (state: StateFunc) => ({
     }
 
     if (Cypress.browser.family === 'webkit') {
-      // By default, Webkit will select the contents of an input element when the input is focused.
+      // By default, WebKit will select the contents of an input element when the input is focused.
       // This is problematic, as we use the existence of any selection to determine whether
       // we adjust the input's cursor and prepare the input for receiving additional content.
       // Without intervention, we will always interpret this default selection as a user-performed selection
@@ -150,7 +150,7 @@ export const create = (state: StateFunc) => ({
       // on subsequent actions.
       //
       // In order to avoid this behavior, we use a focus event during the capture phase to set
-      // our own initial blank selection. This short-circuits Webkit's default behavior and ensures
+      // our own initial blank selection. This short-circuits WebKit's default behavior and ensures
       // that any user-performed selections performed during the focus event's bubble phase are still applied.
 
       onFocusCapture = (event: FocusEvent) => {

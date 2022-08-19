@@ -3,11 +3,11 @@ import { EventEmitter } from 'events'
 import type playwright from 'playwright-webkit'
 import type { Browser, BrowserInstance } from './types'
 import type { Automation } from '../automation'
-import { WebkitAutomation } from './webkit-automation'
+import { WebKitAutomation } from './webkit-automation'
 
 const debug = Debug('cypress:server:browsers:webkit')
 
-let wkAutomation: WebkitAutomation | undefined
+let wkAutomation: WebKitAutomation | undefined
 
 export async function connectToNewSpec (browser: Browser, options, automation: Automation) {
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
@@ -31,7 +31,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     headless: browser.isHeadless,
   })
 
-  wkAutomation = await WebkitAutomation.create(automation, pwBrowser, url)
+  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url)
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {

@@ -22,7 +22,7 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
-const isWebkit = Cypress.browser.family === 'webkit'
+const isWebKit = Cypress.browser.family === 'webkit'
 
 describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
@@ -951,7 +951,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/5456
-    // Webkit will select all input content on focus, which leaves
+    // WebKit will select all input content on focus, which leaves
     // our cursor logic to assume that any selections after focus should
     // be ignored, lest the cursor not get moved to the end of the input.
     // But this means that this user-updated selection value is also ignored,
@@ -1799,7 +1799,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/7088
-    // In Webkit, setting the inputType is not supported
+    // In WebKit, setting the inputType is not supported
     // by the InputEvent constructor:
     // https://bugs.webkit.org/show_bug.cgi?id=170416
     describe('beforeInput event', () => {
@@ -1807,28 +1807,28 @@ describe('src/cy/commands/actions/type - #type', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('insertLineBreak')
+          !isWebKit && expect(e.inputType).eq('insertLineBreak')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentBackward')
+          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentForward')
+          !isWebKit && expect(e.inputType).eq('deleteContentForward')
         }
 
         const stub = cy.stub()
@@ -1851,28 +1851,28 @@ describe('src/cy/commands/actions/type - #type', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('insertLineBreak')
+          !isWebKit && expect(e.inputType).eq('insertLineBreak')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentBackward')
+          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentForward')
+          !isWebKit && expect(e.inputType).eq('deleteContentForward')
         }
 
         const stub = cy.stub()
@@ -1895,28 +1895,28 @@ describe('src/cy/commands/actions/type - #type', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          !isWebkit && expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('insertParagraph')
+          !isWebKit && expect(e.inputType).eq('insertParagraph')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentBackward')
+          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteContentForward')
+          !isWebKit && expect(e.inputType).eq('deleteContentForward')
         }
 
         const stub = cy.stub()
@@ -1939,23 +1939,23 @@ describe('src/cy/commands/actions/type - #type', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteWordForward')
+          !isWebKit && expect(e.inputType).eq('deleteWordForward')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteHardLineForward')
+          !isWebKit && expect(e.inputType).eq('deleteHardLineForward')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteWordBackward')
+          !isWebKit && expect(e.inputType).eq('deleteWordBackward')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebkit && expect(e.inputType).eq('deleteHardLineBackward')
+          !isWebKit && expect(e.inputType).eq('deleteHardLineBackward')
         }
 
         const stub = cy.stub()

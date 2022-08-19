@@ -914,7 +914,7 @@ export class Keyboard {
         location = undefined
 
         // TODO(webkit): validate impact
-        // Webkit will update inputs on a textInput event, resulting
+        // WebKit will update inputs on a textInput event, resulting
         // in double entry when the default is executed
         if (Cypress.browser.family === 'webkit') {
           data = ''
