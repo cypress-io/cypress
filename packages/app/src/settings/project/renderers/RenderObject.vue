@@ -26,10 +26,22 @@
           />
           <span>,</span>
         </template>
+        <Tooltip
+          v-else
+          class="inline"
+          placement="right"
+        >
+          <span
+            :class="props.colorClasses"
+            :data-cy-config="props.from"
+          >
+            {{ renderPrimitive(v) }},
+          </span>
 
-        <span v-else>
-          {{ renderPrimitive(v) }},
-        </span>
+          <template #popper>
+            {{ from }}
+          </template>
+        </Tooltip>
         <br>
       </span>
       <span
@@ -58,11 +70,21 @@
         :color-classes="props.colorClasses"
         :depth="props.depth + 1"
         :from="props.from"
-      /><span
+      />
+      <Tooltip
         v-else
-        :class="props.colorClasses"
-        :data-cy-config="props.from"
-      >{{ renderPrimitive(val) }},</span><br>
+        class="inline"
+      >
+        <span
+          :class="props.colorClasses"
+          :data-cy-config="props.from"
+        >{{ renderPrimitive(val) }},</span>
+
+        <template #popper>
+          {{ from }}
+        </template>
+      </Tooltip>
+      <br>
     </template>
     <span
       :class="props.colorClasses"
@@ -74,6 +96,7 @@
 
 <script lang="ts" setup>
 import { renderPrimitive } from './renderPrimitive'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
 const props = withDefaults(defineProps<{
   value: Record<string, any> | any[]

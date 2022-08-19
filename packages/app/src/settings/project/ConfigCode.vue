@@ -30,12 +30,20 @@
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
             :from="from"
           />
-          <span
+          <Tooltip
             v-else
-            class="rounded-sm px-2px"
-            :class="colorMap[from]"
-            :data-cy-config="from"
-          >{{ renderPrimitive(value) }}</span>,
+            placement="right"
+            class="inline"
+          >
+            <span
+              :data-cy-config="from"
+              class="rounded-sm px-2px"
+              :class="colorMap[from]"
+            >{{ renderPrimitive(value) }}</span>,
+            <template #popper>
+              {{ from }}
+            </template>
+          </Tooltip>
           <br>
         </span>
       </div>
@@ -53,6 +61,7 @@ import RenderObject from './renderers/RenderObject.vue'
 import { renderPrimitive } from './renderers/renderPrimitive'
 import { gql } from '@urql/core'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import type { ConfigCodeFragment } from '../../generated/graphql'
 
 gql`
