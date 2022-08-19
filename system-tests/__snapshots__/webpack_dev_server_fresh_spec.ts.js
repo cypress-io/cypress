@@ -207,15 +207,19 @@ When Cypress detects uncaught errors originating from your test code it will aut
   Comp with componentWillUnmount
     ✓ calls the prop
 
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
 
-  1 passing
+
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -247,9 +251,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        7        4        3        -        -  
 
 
 `
@@ -472,15 +476,19 @@ When Cypress detects uncaught errors originating from your test code it will aut
   Comp with componentWillUnmount
     ✓ calls the prop
 
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
 
-  1 passing
+
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -512,9 +520,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        7        4        3        -        -  
 
 
 `
@@ -728,15 +736,19 @@ When Cypress detects uncaught errors originating from your test code it will aut
   Comp with componentWillUnmount
     ✓ calls the prop
 
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
 
-  1 passing
+
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -768,9 +780,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        7        4        3        -        -  
 
 
 `
@@ -996,15 +1008,19 @@ When Cypress detects uncaught errors originating from your test code it will aut
   Comp with componentWillUnmount
     ✓ calls the prop
 
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
 
-  1 passing
+
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -1036,9 +1052,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  3 of 5 failed (60%)                      XX:XX        7        4        3        -        -  
 
 
 `

@@ -8,7 +8,7 @@
  * - reporter
  * which are built with React and bundle with webpack.
  *
- * The entry point for the webpack bundle is `runner-ct/main.tsx`.
+ * The entry point for the webpack bundle is `runner/main.tsx`.
  * Any time you need to consume some existing code, add it to the `window.UnifiedRunner`
  * namespace there, and access it with `window.UnifiedRunner`.
  *
@@ -36,6 +36,12 @@ export function createWebsocket (socketIoRoute: string) {
   }
 
   const ws = client(socketConfig)
+
+  ws.on('connect_error', () => {
+    // fall back to polling if websocket fails to connect (webkit)
+    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
+    ws.io.opts.transports = ['polling', 'websocket']
+  })
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -165,10 +171,10 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec () {
+function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
 
-  return getEventManager().teardown(getMobxRunnerStore())
+  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
 let isTorndown = false
@@ -245,7 +251,7 @@ function runSpecCT (spec: SpecFile) {
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.showInitialBlankContentsCT()
+  autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -314,7 +320,7 @@ function runSpecE2E (spec: SpecFile) {
     el.remove()
   })
 
-  autIframe.showInitialBlankContentsE2E()
+  autIframe.showInitialBlankContents()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
@@ -399,8 +405,8 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
-  await teardownSpec()
+async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
+  await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
 

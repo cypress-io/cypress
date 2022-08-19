@@ -2,22 +2,24 @@
   <div class="flex flex-col flex-grow justify-between">
     <template v-if="!result">
       <div class="p-24px w-720px">
-        <Input
-          v-model="specFile"
-          :input-ref="inputRefFn"
-          :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-          :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-          :has-error="hasError"
-        >
-          <template #prefix>
-            <i-cy-document-blank_x16
-              class="icon-light-gray-50 icon-dark-gray-300"
-              :class="{
-                'icon-light-error-50 icon-dark-error-400': hasError,
-              }"
-            />
-          </template>
-        </Input>
+        <form @submit.prevent="createSpec">
+          <Input
+            v-model="specFile"
+            :input-ref="inputRefFn"
+            :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :has-error="hasError"
+          >
+            <template #prefix>
+              <i-cy-document-blank_x16
+                class="icon-light-gray-50 icon-dark-gray-300"
+                :class="{
+                  'icon-light-error-50 icon-dark-error-400': hasError,
+                }"
+              />
+            </template>
+          </Input>
+        </form>
 
         <div
           v-if="props.gql"
@@ -54,6 +56,7 @@
       >
         <Button
           size="lg"
+          type="submit"
           :disabled="!isValidSpecFile"
           @click="createSpec"
         >
@@ -93,7 +96,7 @@
             query: {
               file: result.file.relative?.replace(/\\/g, '/')
             },
-            params: props.type === 'component'
+            params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
                 shouldShowTroubleRenderingAlert: true
               }
@@ -141,9 +144,8 @@ import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 const props = defineProps<{
   title: string
   gql: EmptyGeneratorFragment
-  type: 'e2e' | 'component'
+  type: 'e2e' | 'component' | 'componentEmpty'
   specFileName: string
-  erroredCodegenCandidate?: string
   /** is there any other generator available when clicking "Back" */
   otherGenerators: boolean
 }>()
@@ -165,8 +167,8 @@ mutation EmptyGenerator_MatchSpecFile($specFile: String!) {
 `
 
 gql`
-mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $erroredCodegenCandidate: String) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, erroredCodegenCandidate: $erroredCodegenCandidate) {
+mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
   }
 }`
@@ -223,7 +225,11 @@ whenever(result, () => {
 })
 
 const createSpec = async () => {
-  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
+  if (!isValidSpecFile.value) {
+    return
+  }
+
+  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }

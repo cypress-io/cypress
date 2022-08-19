@@ -341,7 +341,7 @@ describe('App: Settings', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Well known editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/bin/well-known')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/bin/well-known')
       })
 
       // navigate away and come back
@@ -363,7 +363,7 @@ describe('App: Settings', () => {
       // assert contains `/usr/local/bin/vim'
       cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/local/bin/vim')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/local/bin/vim')
       })
 
       // navigate away and come back
@@ -380,7 +380,7 @@ describe('App: Settings', () => {
       cy.get('[data-cy="computer"]').click()
 
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('computer')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('computer')
       })
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
@@ -390,7 +390,7 @@ describe('App: Settings', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Null binary editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('{"preferredEditorBinary":null')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('{"preferredEditorBinary":null')
       })
 
       // navigate away and come back

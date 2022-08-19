@@ -84,13 +84,6 @@
       "command": "yarn watch"
     },
     {
-      "name": "packages/runner-ct watch",
-      "focus": true,
-      "onlySingle": true,
-      "cwd": "[cwd]/packages/runner-ct",
-      "command": "yarn watch"
-    },
-    {
       "name": "packages/driver cypress open",
       "focus": true,
       "onlySingle": true,

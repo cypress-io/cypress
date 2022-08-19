@@ -285,7 +285,6 @@ export async function scaffoldCommonNodeModules () {
     'babel-loader',
     // Used for import { defineConfig } from 'cypress'
     'cypress',
-    '@cypress/code-coverage',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
