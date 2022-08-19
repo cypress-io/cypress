@@ -455,14 +455,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
         })
 
-        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
-        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('f')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Typed').that.equals('f')
+
+        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
+        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('o')
 
         expect(KeyboardEventsTable.data[2]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
         expect(KeyboardEventsTable.data[2]).to.have.property('Typed').that.equals('o')
-
-        expect(KeyboardEventsTable.data[3]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
-        expect(KeyboardEventsTable.data[3]).to.have.property('Typed').that.equals('o')
       })
     })
 
