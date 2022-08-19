@@ -484,8 +484,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
-      let neededFocus = false
-
       debug('elToFocus:', $elToFocus[0])
       if (focused.needsFocus($elToFocus, $previouslyFocused)) {
         debug('el needs focus')
@@ -499,26 +497,37 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
             focused.fireBlur($focused.get(0))
           }
         } else {
+          // let captureFocusHandler
+
+          // if (Cypress.browser.family === 'webkit') {
+          //   captureFocusHandler = (event: FocusEvent) => {
+          //     if ((event?.currentTarget as HTMLInputElement).setSelectionRange) {
+          //       try {
+          //         (event.currentTarget as HTMLInputElement).setSelectionRange(0, 0)
+          //       } catch (e) {
+          //         // some input types do not support selection
+          //       }
+          //     }
+          //   }
+
+          //   el.addEventListener('focus', captureFocusHandler, { capture: true })
+          // }
+
           // the user clicked inside a focusable element
           focused.fireFocus($elToFocus.get(0), { preventScroll: true })
-          neededFocus = true
+
+          // if (captureFocusHandler) {
+          //   el.removeEventListener('focus', captureFocusHandler, { capture: true })
+          // }
         }
       }
 
       if (shouldMoveCursorToEndAfterMousedown(el)) {
-        let onlyIfEmptySelection = true
-
-        if (Cypress.browser.family === 'webkit' && neededFocus) {
-          // TODO(webkit): selection is defaulted to all content on focus
-          // We override in this case, as we know we we just focused
-          onlyIfEmptySelection = false
-        }
-
         debug('moveSelectionToEnd due to click', el)
         // It's a curried function, so the 2 arguments are valid.
         // @ts-ignore
         $selection.moveSelectionToEnd(el, {
-          onlyIfEmptySelection,
+          onlyIfEmptySelection: true,
         })
       }
 

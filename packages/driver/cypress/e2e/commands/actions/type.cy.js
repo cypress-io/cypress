@@ -956,7 +956,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     // be ignored, lest the cursor not get moved to the end of the input.
     // But this means that this user-updated selection value is also ignored,
     // as we cannot tell where the selection came from.
-    it('respects changed selection in focus handler', { browser: '!webkit' }, () => {
+    it('respects changed selection in focus handler', () => {
       cy.get('#input-without-value')
       .then(($el) => {
         $el.val('foo')
@@ -968,7 +968,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', 'baroo')
     })
 
-    // TODO(webkit): Fix test without assertion
     it('overwrites text when selectAll in mouseup handler', () => {
       cy.$$('#input-without-value').val('0').mouseup(function () {
         $(this).select()
@@ -976,7 +975,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/5703
-    it('overwrites text when selectAll in focus handler', { browser: '!webkit' }, () => {
+    it('overwrites text when selectAll in focus handler', () => {
       const input = cy.$$('#input-without-value')
 
       input
@@ -990,7 +989,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', 'foo')
     })
 
-    it('overwrites text when selectAll in focus handler in number', { browser: '!webkit' }, () => {
+    it('overwrites text when selectAll in focus handler in number', () => {
       const input = cy.$$('#number-without-value')
 
       input
@@ -1004,7 +1003,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', '10')
     })
 
-    it('overwrites text when selectAll in focus handler in email', { browser: '!webkit' }, () => {
+    it('overwrites text when selectAll in focus handler in email', () => {
       const input = cy.$$('#email-without-value')
 
       input

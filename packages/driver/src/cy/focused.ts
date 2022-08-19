@@ -123,17 +123,54 @@ export const create = (state: StateFunc) => ({
     const $focused = this.getFocused(el.ownerDocument)
 
     let hasFocused = false
+    let onFocusCapture
 
     // we need to bind to the focus event here
     // because some browsers will not ever fire
     // the focus event if the window itself is not
     // currently focused
     const cleanup = () => {
+      if (onFocusCapture) {
+        $elements.callNativeMethod(el, 'removeEventListener', 'focus', onFocusCapture, { capture: true })
+      }
+
       return $elements.callNativeMethod(el, 'removeEventListener', 'focus', onFocus)
     }
 
     const onFocus = () => {
       return hasFocused = true
+    }
+
+    if (Cypress.browser.family === 'webkit') {
+      // By default, Webkit will select the contents of an input element when the input is focused.
+      // This is problematic, as we use the existence of any selection to determine whether
+      // we adjust the input's cursor and prepare the input for receiving additional content.
+      // Without intervention, we will always interpret this default selection as a user-performed selection
+      // and persist it, leaving the selection contents to be overwritten rather than appended to
+      // on subsequent actions.
+      //
+      // In order to avoid this behavior, we use a focus event during the capture phase to set
+      // our own initial blank selection. This short-circuits Webkit's default behavior and ensures
+      // that any user-performed selections performed during the focus event's bubble phase are still applied.
+
+      onFocusCapture = (event: FocusEvent) => {
+        const eventTarget = event.currentTarget as HTMLInputElement
+
+        if (!eventTarget.setSelectionRange) {
+          return
+        }
+
+        try {
+          eventTarget.setSelectionRange(0, 0)
+        } catch (e) {
+          // Some input types do not support setSelectionRange
+          // and will throw when it is called. We can ignore this
+          // for our purposes, as we're trying to prevent a selection
+          // in the first place.
+        }
+      }
+
+      $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocusCapture, { capture: true })
     }
 
     $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocus)
