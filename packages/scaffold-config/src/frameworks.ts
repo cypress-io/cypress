@@ -278,6 +278,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'svelte',
+    glob: '*.svelte',
     mountModule: mountModule('cypress/svelte'),
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
