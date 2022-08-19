@@ -69,7 +69,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
     it('is a noop if no current AUT URL', async () => {
@@ -79,7 +79,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
     it('prepends cookie jar cookies to request', async () => {
@@ -87,21 +87,31 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie; request=cookie')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/22751
-    it('does not prepend cookie jar cookies to request if the cookie already exists on the request', async () => {
-      const ctx = getContext('new=one; exist=ing')
+    it('does not double up cookies on request if the cookie exists on the request and in the cookie jar', async () => {
+      const ctx = getContext(['jar=cookie', 'request=cookie'])
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie; request=cookie')
     })
 
-    function getContext (cookieString = 'exist=ing') {
+    // The idea here being if the same key/value were to be set in the cookie jar, but the path/samesite/secure etc is different.
+    // TODO: I wonder if we need to do additional logic here when attaching cookies to requests based on which path is most specific?
+    it('does not add request cookie to request if the cookie already exists in the jar, and preserves duplicate cookies if duplicate cookies exist in the cookie jar', async () => {
+      const ctx = getContext(['jar=cookie', 'request=cookie'], ['jar=cookie', 'jar=cookie'])
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie; jar=cookie; request=cookie')
+    })
+
+    function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie']) {
       const cookieJar = {
-        getCookies: () => [CookieJar.parse('new=one')],
+        getCookies: () => cookieJarStrings.map((cookie) => CookieJar.parse(cookie)),
       }
 
       return {
@@ -112,7 +122,7 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'http://foobar.com',
           isAUTFrame: true,
           headers: {
-            cookie: cookieString,
+            cookie: requestCookieStrings.join('; '),
           },
         },
       }
