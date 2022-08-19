@@ -533,7 +533,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('clears the current timeout and restores after success', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('clears the current timeout and restores after success', () => {
         Cypress.automation.resolves(null)
 
         cy.timeout(100)
