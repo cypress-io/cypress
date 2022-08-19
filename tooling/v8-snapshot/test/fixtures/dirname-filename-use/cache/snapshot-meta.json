@@ -1,0 +1,12 @@
+{
+  "norewrite": [],
+  "deferred": [
+    "./using-filename-init.js"
+  ],
+  "healthy": [
+    "./entry.js",
+    "./using-dirname-delayed.js",
+    "./valid-module.js"
+  ],
+  "deferredHashFile": "<not used>"
+}
