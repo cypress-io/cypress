@@ -507,11 +507,11 @@ describe('lib/agent', function () {
     ;[
       {
         name: 'should present a client certificate',
-        peresentClientCertificate: true,
+        presentClientCertificate: true,
       },
       {
-        name: 'should present not a client certificate',
-        peresentClientCertificate: false,
+        name: 'should not present a client certificate',
+        presentClientCertificate: false,
       },
     ].slice().map((testCase) => {
       context(testCase.name, function () {
@@ -537,7 +537,7 @@ describe('lib/agent', function () {
             auth: false,
           }
 
-          if (testCase.peresentClientCertificate) {
+          if (testCase.presentClientCertificate) {
             clientCertificateStore.clear()
             const certAndKey = createCertAndKey()
             const pemCert = pki.certificateToPem(certAndKey[0])
@@ -560,7 +560,7 @@ describe('lib/agent', function () {
           this.debugProxy.stop()
         })
 
-        it('Client certificate presneted if appropriate', function () {
+        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https request`, function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
@@ -583,6 +583,28 @@ describe('lib/agent', function () {
             } else {
               expect(socketKey[0]).not.to.contain(this.clientCert, 'A client cert should not be used for the TLS Socket')
             }
+          })
+        })
+
+        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https websocket`, function () {
+          const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
+          return new Bluebird((resolve) => {
+            socket.on('message', resolve)
+          })
+          .then((msg) => {
+            expect(msg).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            socket.close()
           })
         })
       })
