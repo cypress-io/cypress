@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export type ScriptError = { type: string, error: string } | null
 
 interface AutStoreState {
-  url?: string
+  url: string | undefined
   highlightUrl: boolean
   viewportWidth: number
   viewportHeight: number

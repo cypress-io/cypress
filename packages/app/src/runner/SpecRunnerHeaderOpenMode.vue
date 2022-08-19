@@ -4,9 +4,13 @@
     ref="autHeaderEl"
     class="min-h-64px text-14px"
   >
-    <button @click="visitUrl">
+    <button
+      v-if="studioRecorder.url && studioRecorder.isActive"
+      @click="visitUrl"
+    >
       Go Studio
     </button>
+
     <div v-if="!studioRecorder.url && studioRecorder.isActive">
       You need to enter a URL!
     </div>
@@ -32,9 +36,11 @@
         </Button>
         <input
           target="_blank"
-          :value="autStore.url"
-          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
+          :value="autUrl"
+          data-cy="aut-url-input"
+          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate flex flex-grow"
           @input="setStudioUrl"
+          @click="openInNewTab"
         >
       </div>
 
@@ -174,22 +180,6 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import BookIcon from '~icons/cy/book_x16'
 import { useStudioRecorderStore } from '../store/studio-store'
 
-const studioRecorder = useStudioRecorderStore()
-
-function setStudioUrl (event: Event) {
-  const url = (event.currentTarget as HTMLInputElement).value
-
-  studioRecorder.setUrl(url)
-}
-
-function visitUrl () {
-  if (!studioRecorder.url) {
-    throw Error('Cannot visit blank url')
-  }
-
-  studioRecorder.visitUrl(studioRecorder.url)
-}
-
 gql`
 fragment SpecRunnerHeader on CurrentProject {
   id
@@ -233,6 +223,14 @@ const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
 })
 
+const autUrl = computed(() => {
+  if (studioRecorder.isActive && studioRecorder.url) {
+    return studioRecorder.url
+  }
+
+  return autStore.url
+})
+
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const togglePlayground = () => _togglePlayground(autIframe)
@@ -244,4 +242,27 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
+const studioRecorder = useStudioRecorderStore()
+
+function setStudioUrl (event: Event) {
+  const url = (event.currentTarget as HTMLInputElement).value
+
+  studioRecorder.setUrl(url)
+}
+
+function openInNewTab () {
+  if (!autStore.url || studioRecorder.isActive) {
+    return
+  }
+
+  window.open(autStore.url, '_blank')?.focus()
+}
+
+function visitUrl () {
+  if (!studioRecorder.url) {
+    throw Error('Cannot visit blank url')
+  }
+
+  studioRecorder.visitUrl(studioRecorder.url)
+}
 </script>
