@@ -5,6 +5,7 @@ import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
+import { CookieJar } from '@packages/server/lib/util/cookies'
 
 describe('http/request-middleware', () => {
   it('exports the members in the correct order', () => {
@@ -81,7 +82,7 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('exist=ing')
     })
 
-    it('is prepends cookie jar cookies to request', async () => {
+    it('prepends cookie jar cookies to request', async () => {
       const ctx = getContext()
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
@@ -89,9 +90,18 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
     })
 
-    function getContext () {
+    // @see https://github.com/cypress-io/cypress/issues/22751
+    it('does not prepend cookie jar cookies to request if the cookie already exists on the request', async () => {
+      const ctx = getContext('new=one; exist=ing')
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
+    })
+
+    function getContext (cookieString = 'exist=ing') {
       const cookieJar = {
-        getCookies: () => [{ key: 'new', value: 'one' }],
+        getCookies: () => [CookieJar.parse('new=one')],
       }
 
       return {
@@ -102,7 +112,7 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'http://foobar.com',
           isAUTFrame: true,
           headers: {
-            cookie: 'exist=ing',
+            cookie: cookieString,
           },
         },
       }
