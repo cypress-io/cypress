@@ -70,7 +70,7 @@ export class EventManager {
     StudioRecorderCtor: any,
     ws: Socket,
   ) {
-    this.studioRecorder = useStudioStore() // new StudioRecorderCtor(this)
+    this.studioRecorder = useStudioStore()
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
   }
