@@ -66,7 +66,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
           {appState.studioActive && (
             <>
               <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
-              <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
+              <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
             </>
           )}
         </>
@@ -79,12 +79,13 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
 
 interface RunnablesListProps {
   runnables: RunnableArray
+  experimentalStudioEnabled: boolean
 }
 
-const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables, experimentalStudioEnabled }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} experimentalStudioEnabled={experimentalStudioEnabled} />)}
     </ul>
   </div>
 ))
@@ -93,9 +94,10 @@ export interface RunnablesContentProps {
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   error?: RunnablesErrorModel
+  experimentalStudioEnabled: boolean
 }
 
-const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesContentProps) => {
+const RunnablesContent = observer(({ runnablesStore, spec, error, experimentalStudioEnabled }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -116,7 +118,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesCon
 
   const isRunning = specPath === runnablesStore.runningSpec
 
-  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} experimentalStudioEnabled={experimentalStudioEnabled} />
 })
 
 export interface RunnablesProps {
@@ -126,12 +128,13 @@ export interface RunnablesProps {
   spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
+  experimentalStudioEnabled: boolean
 }
 
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, spec } = this.props
+    const { error, runnablesStore, spec, experimentalStudioEnabled } = this.props
 
     return (
       <div ref='container' className='container'>
@@ -140,6 +143,7 @@ class Runnables extends Component<RunnablesProps> {
           runnablesStore={runnablesStore}
           spec={spec}
           error={error}
+          experimentalStudioEnabled={experimentalStudioEnabled}
         />
       </div>
     )

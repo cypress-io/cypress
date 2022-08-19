@@ -35,6 +35,7 @@ interface BaseReporterProps {
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   experimentalStudioEnabled: boolean
   runnerStore: MobxRunnerStore
+  studioRecorder: any
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
@@ -80,6 +81,7 @@ class Reporter extends Component<SingleReporterProps> {
             scroller={scroller}
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
+            experimentalStudioEnabled={true}
           />
         )}
       </div>

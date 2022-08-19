@@ -1,6 +1,6 @@
 import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
-import { getEventManager, getRunnerConfigFromWindow } from '.'
+import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 
@@ -39,7 +39,7 @@ function renderReporter (
 ) {
   const runnerUiStore = useRunnerUiStore()
 
-  const config = getRunnerConfigFromWindow()
+  // const config = getRunnerConfigFromWindow()
 
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
@@ -49,7 +49,7 @@ function renderReporter (
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
-    experimentalStudioEnabled: config.experimentalStudio,
+    experimentalStudioEnabled: true,
     runnerStore: store,
   })
 

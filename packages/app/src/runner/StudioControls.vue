@@ -16,7 +16,7 @@
 
   <button
     :disabled="studioStore.isLoading"
-    @click="handleShowCommands"
+    @click="studioStore.openInstructionModal"
   >
     Available Commands
   </button>
@@ -63,10 +63,6 @@ import { getEventManager } from '.'
 import { useStudioStore } from '../store/studio-store'
 
 const studioStore = useStudioStore()
-
-function handleShowCommands () {
-  // TODO: Show modal with available commands'
-}
 
 const eventManager = getEventManager()
 

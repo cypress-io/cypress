@@ -8,6 +8,8 @@ interface DefaultAppState {
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
+  experimentalStudioEnabled: boolean
+  studioRecorder: any
 }
 
 // these are used for the `reset` method
@@ -19,6 +21,8 @@ const defaults: DefaultAppState = {
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
+  experimentalStudioEnabled: false,
+  studioRecorder: {},
 }
 
 class AppState {
@@ -30,6 +34,8 @@ class AppState {
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable studioActive = defaults.studioActive
+  @observable experimentalStudioEnabled = defaults.experimentalStudioEnabled
+  @observable studioRecorder = defaults.studioRecorder
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
@@ -90,6 +96,10 @@ class AppState {
 
   setStudioActive (studioActive: boolean) {
     this.studioActive = studioActive
+  }
+
+  setExperimentalStudioEnabled (experimentalStudioEnabled: boolean) {
+    this.experimentalStudioEnabled = experimentalStudioEnabled
   }
 
   reset () {

@@ -106,6 +106,7 @@ interface TestProps {
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
+  experimentalStudioEnabled: boolean
 }
 
 @observer
@@ -182,7 +183,7 @@ class Test extends Component<TestProps> {
   _controls () {
     let controls: Array<JSX.Element> = []
 
-    if (this.props.model.state) {
+    if (this.props.model.state === 'failed') {
       controls.push(
         <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
@@ -192,13 +193,15 @@ class Test extends Component<TestProps> {
       )
     }
 
-    controls.push(
-      <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
-        <a onClick={this._launchStudio} className='runnable-controls-studio'>
-          <WandIcon />
-        </a>
-      </Tooltip>,
-    )
+    if (this.props.experimentalStudioEnabled) {
+      controls.push(
+        <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
+          <a onClick={this._launchStudio} className='runnable-controls-studio'>
+            <WandIcon />
+          </a>
+        </Tooltip>,
+      )
+    }
 
     if (controls.length === 0) {
       return null
