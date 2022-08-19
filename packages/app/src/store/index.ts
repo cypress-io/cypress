@@ -12,6 +12,8 @@ export * from './selector-playground-store'
 
 export * from './screenshot-store'
 
+export * from './login-connect-store'
+
 // Reusable installation function, used as an entry point for tests that
 // require an identical setup to main.ts
 export const createPinia = () => {
