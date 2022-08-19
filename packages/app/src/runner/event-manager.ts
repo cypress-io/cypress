@@ -279,7 +279,6 @@ export class EventManager {
 
     const studioInit = () => {
       this.ws.emit('studio:init', (showedStudioModal) => {
-        rerun()
         if (!showedStudioModal) {
           useStudioStore().showInitModal()
         } else {
@@ -736,7 +735,8 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    const hasRunnableId = !!useStudioStore().testId || !!useStudioStore().suiteId
+    const studioStore = useStudioStore()
+    const hasRunnableId = !!studioStore.testId || !!studioStore.suiteId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),

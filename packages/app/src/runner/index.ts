@@ -343,7 +343,7 @@ function runSpecE2E (spec: SpecFile) {
 }
 
 export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**

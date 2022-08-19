@@ -1,6 +1,6 @@
 import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
-import { getEventManager } from '.'
+import { getEventManager, getRunnerConfigFromWindow } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 
@@ -39,6 +39,8 @@ function renderReporter (
 ) {
   const runnerUiStore = useRunnerUiStore()
 
+  const config = getRunnerConfigFromWindow()
+
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
@@ -46,7 +48,8 @@ function renderReporter (
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
-    experimentalStudioEnabled: false,
+    // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
+    experimentalStudioEnabled: config.experimentalStudio,
     runnerStore: store,
   })
 
