@@ -566,7 +566,8 @@ describe('src/cy/commands/cookies', () => {
         return null
       })
 
-      it('logs once on error', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('logs once on error', function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'

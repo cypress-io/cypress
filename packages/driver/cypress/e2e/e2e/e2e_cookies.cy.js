@@ -66,7 +66,8 @@ describe('e2e cookies spec', () => {
   })
 
   context('__Secure- prefix', () => {
-    it('can set __Secure- cookie', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it.skip('can set __Secure- cookie', () => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',
