@@ -161,12 +161,22 @@ export const create = (state: StateFunc) => ({
         }
 
         try {
-          eventTarget.setSelectionRange(0, 0)
+          // Prior to being focused, the element's selectionStart/End will be at 0.
+          // Even so, we need to explicitly call setSelectionRange here to prevent WebKit
+          // from selecting the contents after being focused.
+          //
+          // By re-setting the selection at the current start/end values,
+          // we ensure that any selection values set by previous event handlers
+          // are persisted.
+          eventTarget.setSelectionRange(
+            eventTarget.selectionStart,
+            eventTarget.selectionEnd,
+          )
         } catch (e) {
-          // Some input types do not support setSelectionRange
-          // and will throw when it is called. We can ignore this
-          // for our purposes, as we're trying to prevent a selection
-          // in the first place.
+          // Some input types do not support selections and will throw when
+          // setSelectionRange is called. We can ignore these errors,
+          // as these elements wouldn't have a selection to we need to
+          // prevent anyway.
         }
       }
 
