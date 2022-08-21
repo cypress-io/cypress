@@ -272,7 +272,17 @@ describe('src/cy/commands/navigation', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
-  context.skip('#go', () => {
+  context('#go', () => {
+    afterEach(() => {
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We enqueue another cy command after each test to ensure stability
+      // is reached for the next test. This additional command can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      cy.then(() => { /* ensuring stability */ })
+    })
+
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
