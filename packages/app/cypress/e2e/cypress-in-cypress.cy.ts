@@ -92,7 +92,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
     })
 
-    it(`scales the AUT correctly in ${testingType}`, () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23307
+    it.skip(`scales the AUT correctly in ${testingType}`, () => {
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
