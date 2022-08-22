@@ -5430,30 +5430,12 @@
     "@percy/env" "1.10.0"
     "@percy/logger" "1.10.0"
 
-"@percy/client@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.8.1.tgz#bbc81c2a41ab44e5f79c93aac6afa68c17a90af8"
-  integrity sha512-2T0SdIUFwMCsnaUTM0hNQx5lrkg2qPHPKBL/MRrbbTPJVJe3J9PzeR84RJtKviyy+ciEkkm6UaQsWBngbyXXsQ==
-  dependencies:
-    "@percy/env" "1.8.1"
-    "@percy/logger" "1.8.1"
-
 "@percy/config@1.10.0":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.10.0.tgz#cba859fe85f865216adb468c121b97d88ed72ab9"
   integrity sha512-/UEulUsyObSQYQlWw3rjE3NBOjLF66HsPgXr7n6DBCpyVf6vD0OZD+1FGb8Dyi7uuzUTpmsOw0ij7mrjsXv83A==
   dependencies:
     "@percy/logger" "1.10.0"
-    ajv "^8.6.2"
-    cosmiconfig "^7.0.0"
-    yaml "^2.0.0"
-
-"@percy/config@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.8.1.tgz#46d73b8cdb0e1d7400e8d91fe12e9f6ea08d2b31"
-  integrity sha512-yKdKx0kh5xyVxBdNVExXsoNuSmKcmpma31DkqqacDUu2nYSjuCGxr3j3y8BRAKURfj59fdhwpFNmjVVB1xiVWA==
-  dependencies:
-    "@percy/logger" "1.8.1"
     ajv "^8.6.2"
     cosmiconfig "^7.0.0"
     yaml "^2.0.0"
@@ -5477,49 +5459,32 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/cypress@^3.1.0", "@percy/cypress@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.1.tgz#4e7c5bdeccf1240b2150fc9d608df72c2f213d4b"
-  integrity sha512-khvWmCOJW7pxwDZPB5ovvbSe11FfNtH8Iyq8PHRYLD9ibAkiAWHZVs07bLK5wju1Q9X8s7zg5uj2yWxIlB1yjA==
+"@percy/cypress@3.1.2", "@percy/cypress@^3.1.0":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.2.tgz#a087d3c59a6b155eab5fdb4c237526b9cfacbc22"
+  integrity sha512-JXrGDZbqwkzQd2h5T5D7PvqoucNaiMh4ChPp8cLQiEtRuLHta9nf1lEuXH+jnatGL2j+3jJFIHJ0L7XrgVnvQA==
   dependencies:
-    "@percy/sdk-utils" "^1.0.0-beta.44"
+    "@percy/sdk-utils" "^1.3.1"
 
 "@percy/dom@1.10.0":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.10.0.tgz#879d94fde1d5ae63f5dbb96b1a75e48ba8ca5525"
   integrity sha512-aHCy+Vk8xc3azFDPSV4Z3+wiO/bp9OlGfi8aNwa6fpuEIx0SMN8TyLVGaKTwIlrhDVEqSbmTYsrh67HS+Uweqg==
 
-"@percy/dom@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.8.1.tgz#b3daa0f6f8d95a5b72df4edfdca615ed04f14f93"
-  integrity sha512-h9XJV+VcVHrMkfIgJ6sJLujtYLzkvRy3aBvUY/iS7yh88qM16pSuTgEHG9fzbOp8ZNZpu6zZdxy4QmeACqzGzw==
-
 "@percy/env@1.10.0":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.10.0.tgz#79af82e30ed98c94162f1531705f8a134773cb54"
   integrity sha512-//yfh7N++ncP/K7+zacLm8PoPVFJ1tL3hc/COzP2YWLjMcLBGDtjIWZvTLk09PnEzkZ+hGLZ06AJeEzQiixhyA==
-
-"@percy/env@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.8.1.tgz#338d87479dc48fc2ca3e0a66c98f0b5235f322c2"
-  integrity sha512-noxlV3fesivvXxnWEODUzdoToIurOolvwlEk+ETmpB933zKTpo55UFD5leV5LWP5Oxwrv4uen2i7ZdHRXPD47Q==
 
 "@percy/logger@1.10.0", "@percy/logger@^1.0.0-beta.48":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.10.0.tgz#34ccccfb2949bd37bba3b23a462f3d7b4dcc8654"
   integrity sha512-4t3V/Qlyup9mDAkf1KfENjaFVYcXVgXWeVasNRGYX5HBDbFfRB7G00uAfgK2Ja+QQGBmcY3ZA4o6+OXY88AjkQ==
 
-"@percy/logger@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.8.1.tgz#91e1fb3ec2952dfd170201ab101aa1a7f505c778"
-  integrity sha512-O1GpuuN6pzBk/dso57LS90APbRNfc4y0qsGEIph+8f1zK6dBZmalwKLzhgrvb267rLe3pduYM5fCiYel0pqh7Q==
-
-"@percy/sdk-utils@^1.0.0-beta.44":
-  version "1.0.0-beta.48"
-  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.0.0-beta.48.tgz#47e59d92c7df19fe13faf5458702fd2b9a0e0b76"
-  integrity sha512-I+hWBUIpDvfC2UsPj0c1p10VBM6hsrNmEyNwfY452c1zXvvxGFIzAni20LOTKVG3wk2rVhqtX4yT1OH7kpZ63w==
-  dependencies:
-    "@percy/logger" "^1.0.0-beta.48"
+"@percy/sdk-utils@^1.0.0-beta.44", "@percy/sdk-utils@^1.3.1":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.10.0.tgz#4affe8e37114c420eae3aa5722804eb0edab6a90"
+  integrity sha512-Oohn7d4otYKPsCGtchKwAcXXiF7JMrzVlEphQk9+O7KYGhodFup8LzyfgpYXT4pIjfVygTBZP8ad0UQCJdTobQ==
 
 "@polka/url@^1.0.0-next.20":
   version "1.0.0-next.20"
