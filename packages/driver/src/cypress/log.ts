@@ -622,7 +622,7 @@ class LogManager {
         }
       }
 
-      let command = state('current')
+      const command = state('current')
 
       if (command) {
         command.log(log)
@@ -653,7 +653,7 @@ class LogManager {
       this.triggerLog(log)
 
       // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
-      if (!state('current') || log.get('end')) {
+      if (!command || log.get('end')) {
         log.end()
       }
 

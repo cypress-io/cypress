@@ -10,22 +10,21 @@ const reHaveLength = /length/
 const onBeforeLog = (log, command, commandLogId) => {
   log.set('commandLogId', commandLogId)
 
-  if (command) {
-    const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
+  const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
 
-    if (previousLogInstance) {
-      // log.merge unsets any keys that aren't set on the new log instance. We
-      // copy over 'snapshots' beforehand so that existing snapshots aren't lost
-      // in the merge operation.
-      log.set('snapshots', previousLogInstance.get('snapshots'))
-      previousLogInstance.merge(log)
+  if (previousLogInstance) {
+    // log.merge unsets any keys that aren't set on the new log instance. We
+    // copy over 'snapshots' beforehand so that existing snapshots aren't lost
+    // in the merge operation.
+    log.set('snapshots', previousLogInstance.get('snapshots'))
+    previousLogInstance.merge(log)
 
-      if (previousLogInstance.get('end')) {
-        previousLogInstance.end()
-      }
-
-      return false
+    if (previousLogInstance.get('end')) {
+      previousLogInstance.end()
     }
+
+    // Returning false prevents this new log from being added to the command log
+    return false
   }
 
   return true
