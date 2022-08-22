@@ -331,7 +331,7 @@ export class SocketBase {
 
       socket.on('get:cached:state', (cb) => {
         return cb({
-          globalSessions: session.getGlobalSessions(),
+          globalSessions: session.getState().globalSessions,
         })
       })
 
@@ -439,29 +439,20 @@ export class SocketBase {
               return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
-            case 'clear:spec:sessions':
-              return session.clearSpecSessions() // pass in arg for boolean for clear all?
-              // return session.clearSessions(args[0])
-            case 'clear:all:sessions':
-              return session.clearAllSessions()
+            case 'clear:sessions':
+              return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])
-
             case 'reset:session:state':
               cookieJar.removeAllCookies()
-              session.clearSpecSessions()
-              resetRenderedHTMLOrigins()
+              session.clearSessions()
 
-              return
-            case 'get:cached:state':
-              return {
-                sessions: session.getGlobalSessions(),
-              }
+              return resetRenderedHTMLOrigins()
+
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
-            case 'reset:rendered:html:origins': {
+            case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            }
             case 'cross:origin:bridge:ready': //tested
               return this.localBus.emit('cross:origin:bridge:ready', args[0])
             case 'cross:origin:release:html': //tested

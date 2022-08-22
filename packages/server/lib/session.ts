@@ -1,28 +1,28 @@
 import type { CyCookie } from './browsers/cdp_automation'
 
 interface SessionData {
-  cacheAcrossSpecs: boolean
   cookies: CyCookie[]
   id: string
-  localStorage: object
-  sessionStorage: object
+  cacheAcrossSpecs: boolean
+  localStorage: Array<Record<string, string>>
+  sessionStorage: Array<Record<string, string>>
 }
 
-const state: {
+type State = {
   globalSessions: Record<string, SessionData>
   specSessions: Record<string, SessionData>
-} = {
+}
+
+const state: State = {
   globalSessions: {},
   specSessions: {},
 }
 
-export function saveSession (data: SessionData) {
+export function saveSession (data: SessionData): void {
   if (!data.id) throw new Error('session data had no id')
 
-  console.log('data,', data)
   if (data.cacheAcrossSpecs) {
     state.globalSessions[data.id] = data
-    console.log('add as globalSessions,')
 
     return
   }
@@ -35,9 +35,6 @@ export function getGlobalSessions (): Record<string, SessionData> {
 }
 
 export function getSession (id: string): SessionData {
-  console.log('get session....', id)
-  console.log('  globalSessions....', state.globalSessions)
-  console.log('  specSessions....', state.specSessions)
   const session = state.globalSessions[id] || state.specSessions[id]
 
   if (!session) throw new Error(`session with id "${id}" not found`)
@@ -45,15 +42,14 @@ export function getSession (id: string): SessionData {
   return session
 }
 
-export function getState () {
+export function getState (): State {
   return state
 }
 
-export function clearSpecSessions () {
+export function clearSessions (clearAllSessions: boolean = false): void {
   state.specSessions = {}
-}
 
-export function clearAllSessions () {
-  state.globalSessions = {}
-  state.specSessions = {}
+  if (clearAllSessions) {
+    state.globalSessions = {}
+  }
 }

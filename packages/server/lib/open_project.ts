@@ -169,7 +169,7 @@ export class OpenProject {
 
         // clear cookies and all session data before each spec
         cookieJar.removeAllCookies()
-        session.clearSpecSessions()
+        session.clearSessions()
       })
       .then(() => {
         // TODO: Stub this so we can detect it being called

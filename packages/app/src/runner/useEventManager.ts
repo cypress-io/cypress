@@ -46,7 +46,6 @@ export function useEventManager () {
 
   const startSpecWatcher = () => {
     return watch(() => specStore.activeSpec, () => {
-      console.log('startSpecWatcher')
       if (specStore.activeSpec) {
         runSpec()
       }
