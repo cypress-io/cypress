@@ -293,7 +293,6 @@ class $Cypress {
   // Method to manually re-execute Runner (usually within $autIframe)
   // used mainly by Component Testing
   restartRunner () {
-    console.log('[cypres] restartrunner')
     if (!window.top!.Cypress) {
       throw Error('Cannot re-run spec without Cypress')
     }
@@ -360,7 +359,6 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-      // console.log(this.state())
       this.onSpecReady()
     })
   }

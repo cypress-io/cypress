@@ -6,7 +6,7 @@ declare namespace Cypress {
       type SessionSetup = (log: Cypress.Log) => Chainable<S>
       type SessionValidation = (log: Cypress.Log) => Chainable<S>
       
-      interface BrowserStorage {
+      interface WebStorage {
         origin: string
         value: Record<string, any>
       }
@@ -15,8 +15,8 @@ declare namespace Cypress {
         id: string
         cacheAcrossSpecs: boolean
         cookies?: Array<Cypress.Cookie> | null
-        localStorage?: Array<BrowserStorage> | null
-        sessionStorage?: Array<BrowserStorage> | null
+        localStorage?: Array<WebStorage> | null
+        sessionStorage?: Array<WebStorage> | null
         setup: () => void
         hydrated: boolean
         validate?: Cypress.SessionOptions['validate']

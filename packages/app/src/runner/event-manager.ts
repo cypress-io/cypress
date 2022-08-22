@@ -34,21 +34,14 @@ interface AddGlobalListenerOptions {
   randomString: string
 }
 
-const driverToReporterEvents = ['paused', 'session:add'] as const
-
-const driverToLocalAndReporterEvents = ['run:start', 'run:end'] as const
-
-const driverToSocketEvents = ['backend:request', 'automation:request', 'mocha', 'recorder:frame'] as const
-
-const driverTestEvents = ['test:before:run:async', 'test:after:run'] as const
-
-const driverToLocalEvents = ['viewport:changed', 'config', 'stop', 'url:changed', 'page:loading', 'visit:failed', 'visit:blank', 'cypress:in:cypress:runner:event'] as const
-
-const socketRerunEvents = ['runner:restart', 'watched:file:changed'] as const
-
-const socketToDriverEvents = ['net:stubbing:event', 'request:event', 'script:error', 'cross:origin:automation:cookies'] as const
-
-const localToReporterEvents = ['reporter:log:add', 'reporter:log:state:changed', 'reporter:log:remove'] as const
+const driverToReporterEvents = 'paused session:add'.split(' ')
+const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
+const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
+const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:automation:cookies'.split(' ')
+const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 /**
  * @type {Cypress.Cypress}
@@ -771,8 +764,6 @@ export class EventManager {
     state.setIsLoading(true)
 
     if (!isRerun) {
-      // Cypress.backend('clear:spec:sessions')
-
       // only clear session state when a new spec is selected
       Cypress.backend('reset:session:state')
     }

@@ -227,18 +227,22 @@ function runSpecCT (spec: SpecFile) {
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
+
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
   // watches spec file for changes.
   getEventManager().setup(config)
+
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
   empty($runnerRoot)
+
   // create root for new AUT
   const $container = document.createElement('div')
 
   $container.classList.add('screenshot-height-container')
+
   $runnerRoot.append($container)
 
   // create new AUT
@@ -248,7 +252,6 @@ function runSpecCT (spec: SpecFile) {
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
   autIframe.showInitialBlankContents()
-
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -402,7 +405,6 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-
 async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   await teardownSpec(isRerun)
 
