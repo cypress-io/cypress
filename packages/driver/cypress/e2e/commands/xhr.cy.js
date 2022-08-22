@@ -1029,7 +1029,9 @@ describe('src/cy/commands/xhr', () => {
 
           try {
             assertLogLength(this.logs, 1)
-            expect(lastLog.get('error').message).contain('foo is not defined')
+            const undefinedError = Cypress.browser.family === 'webkit' ? 'Can\'t find variable: foo' : 'foo is not defined'
+
+            expect(lastLog.get('error').message).contain(undefinedError)
 
             done()
           } catch (err) {
@@ -2383,7 +2385,8 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('{force404: false}', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
+    describe.skip('{force404: false}', () => {
       beforeEach(() => {
         cy
         .server()
@@ -2396,7 +2399,8 @@ describe('src/cy/commands/xhr', () => {
         expect(this.lastLog.invoke('consoleProps').Status).to.be.undefined
       })
 
-      it('logs request + response headers', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
+      it.skip('logs request + response headers', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Request Headers']).to.be.an('object')
@@ -2405,7 +2409,8 @@ describe('src/cy/commands/xhr', () => {
         })
       })
 
-      it('logs Method, Status, URL, and XHR', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23247
+      it.skip('logs Method, Status, URL, and XHR', () => {
         cy.then(function () {
           const { xhr } = cy.state('responses')[0]
 
@@ -2422,7 +2427,8 @@ describe('src/cy/commands/xhr', () => {
         })
       })
 
-      it('logs response', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23246
+      it.skip('logs response', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Response Body'].trim()).to.deep.eq(JSON.stringify({
@@ -2692,7 +2698,10 @@ describe('src/cy/commands/xhr', () => {
   })
 
   context('Cypress.on(window:unload)', () => {
-    it('cancels all open XHR\'s', () => {
+    // TODO(webkit): fix+unskip. XHRs are at { readyState: 4 } when they are canceled
+    // leading to a failure when we check `xhr.canceled`. `xhr.canceled` is non-standard so a better
+    // test may be needed here?
+    it('cancels all open XHR\'s', { browser: '!webkit' }, () => {
       const xhrs = []
 
       cy
@@ -2747,7 +2756,8 @@ describe('src/cy/commands/xhr', () => {
       .wait('@getFoo').its('url').should('include', '/foo')
     })
 
-    it('reapplies server + route automatically during page transitions', () => {
+    // TODO(webkit): fix+unskip. seems to be related to `cy.click` event not firing on the <a>, not an actual issue in cy.route
+    it('reapplies server + route automatically during page transitions', { browser: '!webkit' }, () => {
       // this tests that the server + routes are automatically reapplied
       // after the 2nd visit - which is an example of the remote iframe
       // causing an onBeforeLoad event

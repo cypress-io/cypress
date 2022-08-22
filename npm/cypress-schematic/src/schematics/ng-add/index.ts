@@ -15,14 +15,14 @@ import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
 import { concatMap, map } from 'rxjs/operators'
 
-import { addPackageJsonDependency, NodeDependencyType } from '../utility/dependencies'
+import { addPackageJsonDependency, NodeDependencyType } from '../utils/dependencies'
 import {
   getAngularVersion,
   getLatestNodeVersion,
   NodePackage,
-} from '../utility'
+} from '../utils'
 import { relative, resolve } from 'path'
-import { JSONFile, JSONPath } from '../utility/jsonFile'
+import { JSONFile, JSONPath } from '../utils/jsonFile'
 
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
@@ -46,7 +46,7 @@ function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue)
 function updateDependencies (): Rule {
   return (tree: Tree, context: SchematicContext): any => {
     context.logger.debug('Updating dependencies...')
-    context.addTask(new NodePackageInstallTask())
+    context.addTask(new NodePackageInstallTask({ allowScripts: true }))
 
     const addDependencies = of('cypress').pipe(
       concatMap((packageName: string) => getLatestNodeVersion(packageName)),

@@ -1,3 +1,17 @@
+# [@cypress/vue-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.0.0...@cypress/vue-v4.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+* remove dependency causing semantic-release to fail ([#23142](https://github.com/cypress-io/cypress/issues/23142)) ([20f89bf](https://github.com/cypress-io/cypress/commit/20f89bfa32636baa8922896e719962c703129abd))
+
+
+### Features
+
+* **npm/vue:** expose Test Utils API ([#22757](https://github.com/cypress-io/cypress/issues/22757)) ([8e07318](https://github.com/cypress-io/cypress/commit/8e07318a9f72c3df012be47d500007571165a87e))
+* update to Vite 3 ([#22915](https://github.com/cypress-io/cypress/issues/22915)) ([6adba46](https://github.com/cypress-io/cypress/commit/6adba462ea6b76dbb96f99aa3837492ca1f17ed3))
+
 # [@cypress/vue-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.2...@cypress/vue-v4.0.0) (2022-06-13)
 
 

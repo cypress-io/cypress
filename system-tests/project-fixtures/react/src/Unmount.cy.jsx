@@ -26,3 +26,16 @@ describe('Comp with componentWillUnmount', () => {
     cy.get('@onUnmount').should('have.been.calledOnce')
   })
 })
+
+describe('mount cleanup', () => {
+  beforeEach(() => {
+    cy.contains('My Component').should('not.exist')
+  })
+
+  for (const num of [1,2]) {
+    it(`mount ${num}`, () => {
+      cy.mount(<Comp onUnmount={() => {}} />)
+      cy.contains('My component')
+    })
+  }
+})

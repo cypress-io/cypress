@@ -9,6 +9,8 @@ const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
 
+const { hideKeys } = require('@packages/config')
+
 const api = require('../api')
 const exception = require('../exception')
 const errors = require('../errors')
@@ -16,7 +18,6 @@ const capture = require('../capture')
 const upload = require('../upload')
 const Config = require('../config')
 const env = require('../util/env')
-const keys = require('../util/keys')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
@@ -387,7 +388,7 @@ const createRun = Promise.method((options = {}) => {
 
     switch (err.statusCode) {
       case 401:
-        recordKey = keys.hide(recordKey)
+        recordKey = hideKeys(recordKey)
         if (!recordKey) {
           // make sure the key is defined, otherwise the error
           // printing logic substitutes the default value {}

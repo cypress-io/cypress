@@ -182,20 +182,22 @@ describe('clears session data beforeEach test even with no session', () => {
 })
 
 describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
-  cy.state('foo', true)
   it('t1', () => {
     // only warns after initial blank page
     // unfortunately this fails when run alongside other tests
     // cy.contains('experimentalSessionAndOrigin').should('not.exist')
-    cy.contains('default blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
+    cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
   })
 
   it('t2', () => {
-    cy.contains('Because experimentalSessionAndOrigin')
-    cy.contains('default blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
+    cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
   })
 })
 
@@ -210,16 +212,16 @@ describe('navigates to special about:blank after session', () => {
   })
 
   it('t1', () => {
-    cy.contains('session')
-    cy.contains('blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
   })
 
   it('t2', () => {
-    cy.contains('cy.session')
-    cy.contains('blank page')
+    cy.contains('Default blank page')
+    cy.contains('This page was cleared by navigating to about:blank.')
   })
 })
 
@@ -403,7 +405,7 @@ describe('options.validate reruns steps when rejecting', () => {
 })
 
 describe('options.validate reruns steps when throwing', () => {
-  SuiteWithValidateFn('validate_reject', (callCount) => {
+  SuiteWithValidateFn('validate_throw', (callCount) => {
     if (callCount === 2) {
       throw new Error('validate error')
     }
@@ -458,22 +460,6 @@ describe('can wait for login redirect automatically', () => {
     cy.session('redirect-login', () => {
       cy.visit('https://localhost:4466/form')
       cy.get('[name="delay"]').type('100{enter}')
-      // not needed since cypress will pause command queue during the redirect
-      // cy.url().should('include', '/home')
-    })
-
-    expectCurrentSessionData({
-      cookies: ['/form', '/home'],
-    })
-  })
-})
-
-describe('can wait for a js redirect with an assertion', () => {
-  it('t1', () => {
-    cy.session('redirect-login', () => {
-      cy.visit('https://localhost:4466/form')
-      cy.get('[name="delay"]').type('100{enter}')
-      // cy.url().should('include', '/home')
     })
 
     expectCurrentSessionData({
@@ -484,7 +470,7 @@ describe('can wait for a js redirect with an assertion', () => {
 
 describe('same session name, different options, multiple tests', () => {
   it('t1', () => {
-    cy.session('bob', () => {
+    cy.session('bob_1', () => {
       localStorage.bob = '1'
     })
     .then(() => {
@@ -493,7 +479,7 @@ describe('same session name, different options, multiple tests', () => {
   })
 
   it('t2', () => {
-    cy.session('bob', () => {
+    cy.session('bob_2', () => {
       localStorage.bob = '2'
     })
     .then(() => {

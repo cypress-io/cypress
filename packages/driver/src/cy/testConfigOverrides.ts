@@ -3,22 +3,33 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
+const mochaOverrideLevel = ['suite', 'test'] as const
+
+export type MochaOverrideLevel = typeof mochaOverrideLevel[number]
+
 type ResolvedTestConfigOverride = {
   /**
    * The list of test config overrides and the invocation details used to add helpful
    * error messaging to consumers if a test override fails validation.
    */
-  testConfigList: Array<TestConfig>
+  testConfigList: Array<TestConfig|ResolvedTestConfigOverride>
   /**
    * The test config overrides that will apply to the test if it passes validation.
-   * */
+   */
   unverifiedTestConfig: Object
+  /**
+   * The current runnable level of test config overrides that are being applied.
+   * Used for accurate error reporting.
+   */
+  applied?: MochaOverrideLevel | 'complete'
 }
 
 type TestConfig = {
-  overrides: {
-    browser?: Object
-  }
+  // The level in which the configuration override was set.
+  overrideLevel: MochaOverrideLevel
+  // The configuration overrides. Browser is a valid configuration
+  // to indicate the suite or test should run for that browser(s).
+  overrides: Record<string, any>
   invocationDetails: {
     stack: Object
   }
@@ -28,18 +39,25 @@ type ConfigOverrides = {
   env: Object | undefined
 };
 
-function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
-  testConfigList.forEach(({ overrides: testConfigOverride, invocationDetails }) => {
+function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
+  const { testConfigList = [] } = testConfig
+
+  testConfigList.forEach((resolvedConfig) => {
+    const { overrides: testConfigOverride, overrideLevel, invocationDetails } = resolvedConfig as TestConfig
+
     if (_.isArray(testConfigOverride)) {
-      setConfig(testConfigOverride, config, localConfigOverrides)
-    } else {
+      setConfig(resolvedConfig as ResolvedTestConfigOverride, config, localConfigOverrides)
+    } else if (Object.keys(testConfigOverride).length) {
       delete testConfigOverride.browser
 
       try {
+        testConfig.applied = overrideLevel
+
         config(testConfigOverride)
       } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
+          overrideLevel,
         })
 
         err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
@@ -53,11 +71,9 @@ function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverri
 }
 
 function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
-  const { testConfigList } = testConfig || []
-
   let globalConfig = _.clone(config())
 
-  const localConfigOverrides = setConfig(testConfigList, config)
+  const localConfigOverrides = setConfig(testConfig, config)
 
   // only store the global config values that updated
   globalConfig = _.pick(globalConfig, Object.keys(localConfigOverrides))
@@ -119,6 +135,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
         testConfigList = testConfigList.concat(curr._testConfig.testConfigList)
       } else {
         testConfigList.unshift({
+          overrideLevel: curr.type,
           overrides: curr._testConfig,
           invocationDetails: curr.invocationDetails,
         })
@@ -150,5 +167,7 @@ export class TestConfigOverride {
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
     }
+
+    resolvedTestConfig.applied = 'complete'
   }
 }

@@ -34,8 +34,9 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject(name)
     cy.openProject(name, args)
 
-    // Delete the fixtures folder so it scaffold correctly the example
-    cy.withCtx(async (ctx) => {
+    cy.withCtx(async (ctx, o) => {
+      o.sinon.stub(ctx.project, 'projectId').resolves(null)
+      // Delete the fixtures folder so it scaffold correctly the example
       await ctx.actions.file.removeFileInProject('cypress/fixtures')
     })
   }
@@ -567,7 +568,8 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'yarn add -D ')
     })
 
-    it('makes the right command for pnpm', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+    it.skip('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -579,7 +581,8 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'pnpm install -D ')
     })
 
-    it('makes the right command for npm', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+    it.skip('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -653,7 +656,8 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    it('takes the user to first step of ct setup when switching from app', () => {
+    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
+    it.skip('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })

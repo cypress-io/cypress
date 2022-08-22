@@ -89,6 +89,7 @@ function retrySelector (command: $Command, ret: any, isCy) {
   const onRetry = () => {
     try {
       const subject = cy.currentSubject(command.get('chainerId'))
+
       cy.ensureSubjectByType(subject, command.get('prevSubject'))
       ret(subject)
     } catch (err) {
@@ -112,8 +113,18 @@ export class CommandQueue extends Queue<$Command> {
   fail: $Cy['fail']
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
+  setSubjectForChainer: $Cy['setSubjectForChainer']
 
-  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
+  constructor (
+    state: StateFunc,
+    timeout: $Cy['timeout'],
+    stability: IStability,
+    cleanup: $Cy['cleanup'],
+    fail: $Cy['fail'],
+    isCy: $Cy['isCy'],
+    clearTimeout: ITimeouts['clearTimeout'],
+    setSubjectForChainer: $Cy['setSubjectForChainer'],
+  ) {
     super()
     this.state = state
     this.timeout = timeout
@@ -122,6 +133,7 @@ export class CommandQueue extends Queue<$Command> {
     this.fail = fail
     this.isCy = isCy
     this.clearTimeout = clearTimeout
+    this.setSubjectForChainer = setSubjectForChainer
   }
 
   logs (filter) {
@@ -363,7 +375,7 @@ export class CommandQueue extends Queue<$Command> {
 
         this.state('index', index + 1)
 
-        cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 

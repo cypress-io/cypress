@@ -266,19 +266,25 @@ export default {
   },
 
   config: {
-    invalid_argument: {
-      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
-      docsUrl: 'https://on.cypress.io/config',
+    cypress_config_api: {
+      read_only: {
+        message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+    },
+    invalid_mocha_config_override: {
+      read_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can never be overridden because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      suite_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be overridden from a suite-level override.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_test_override: {
-      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
-    },
-    invalid_cypress_config_override: {
-      message: `\`Cypress.config()\` cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
-    },
-    invalid_test_config_override: {
-      message: `Cypress test configuration cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
     },
   },
 
