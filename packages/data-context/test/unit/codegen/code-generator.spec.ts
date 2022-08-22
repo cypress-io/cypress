@@ -11,6 +11,7 @@ import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
 import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { defaultSpecPattern } from '@packages/config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -205,7 +206,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`import ${codeGenArgs.componentName} from "${codeGenArgs.componentPath}"
+          content: dedent`import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
@@ -257,11 +258,12 @@ describe('code-generator', () => {
     }
 
     const newSpecCodeGenOptions = new SpecOptions({
+      currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      specFileExtension: '.cy',
       framework: WIZARD_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
+      specPattern: [defaultSpecPattern.component],
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
