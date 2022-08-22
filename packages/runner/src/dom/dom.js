@@ -2,7 +2,7 @@ import _ from 'lodash'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import $Cypress from '@packages/driver'
-import { getElementDimensions } from './dimensions'
+import { getElementDimensions, setOffset } from './dimensions'
 import { selectorPlaygroundHighlight } from '../selector-playground/highlight'
 import { studioAssertionsMenu } from '../studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
@@ -17,15 +17,17 @@ function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
 
   const el = $el.get(0)
+  const body = $body.get(0)
 
   const dimensions = getElementDimensions(el)
 
-  const $container = $('<div class="__cypress-highlight">')
-  .css({
-    opacity: 0.7,
-    position: 'absolute',
-    zIndex: 2147483647,
-  })
+  const container = document.createElement('div')
+
+  container.classList.add('__cypress-highlight')
+
+  container.style.opacity = `0.7`
+  container.style.position = 'absolute'
+  container.style.zIndex = `${INT32_MAX}`
 
   const layers = {
     Content: '#9FC4E7',
@@ -74,26 +76,22 @@ function addElementBoxModelLayers ($el, $body) {
 
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
-    if (dimensionsMatchPreviousLayer(obj, $container.get(0))) return
+    if (dimensionsMatchPreviousLayer(obj, container)) return
 
-    createLayer($el.get(0), attr, color, $container.get(0), obj)
+    createLayer($el.get(0), attr, color, container, obj)
   })
 
-  $container.appendTo($body)
+  body.appendChild(container)
 
-  $container.children().each((index, el) => {
-    const $el = $(el)
-    const top = $el.data('top')
-    const left = $el.data('left')
+  for (let i = 0; i < container.children.length; i++) {
+    const el = container.children[i] // as HTMLElement
+    const top = el.getAttribute('data-top')
+    const left = el.getAttribute('data-left')
 
-    // dont ask... for some reason we
-    // have to run offset twice!
-    _.times(2, () => {
-      return $el.offset({ top, left })
-    })
-  })
+    setOffset(el, { top, left })
+  }
 
-  return $container
+  return container
 }
 
 function getOrCreateHelperDom ({ $body, className, css }) {

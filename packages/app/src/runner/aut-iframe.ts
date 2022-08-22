@@ -319,7 +319,7 @@ export class AutIframe {
         return
       }
 
-      this.dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
+      this.dom.addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
     })
 
     if (coords) {

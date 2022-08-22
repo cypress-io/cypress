@@ -64,6 +64,17 @@ export const getElementDimensions = (el: HTMLElement) => {
   }
 }
 
+// Cherry picked from https://github.com/jquery/jquery/blob/016872ffe03ab9107b1bc62fae674a4809c3b23f/src/offset.js#L11-L59
+export const setOffset = (el: HTMLElement, offset: { top: number, left: number }) => {
+  const curOffset = getOffset(el)
+
+  const curTop = parseFloat(getComputedStyle(el, null).top)
+  const curLeft = parseFloat(getComputedStyle(el, null).left)
+
+  el.style.top = `${offset.top - curOffset.top + curTop}px`
+  el.style.left = `${offset.left - curOffset.left + curLeft}px`
+}
+
 // Cherry picked from https://github.com/jquery/jquery/blob/016872ffe03ab9107b1bc62fae674a4809c3b23f/src/offset.js#L91-L97
 const getOffset = (el: HTMLElement) => {
   // Get document-relative position by adding viewport scroll to viewport-relative gBCR
@@ -71,8 +82,8 @@ const getOffset = (el: HTMLElement) => {
   const win = el.ownerDocument.defaultView
 
   return {
-    top: rect.top + win!.pageYOffset,
-    left: rect.left + win!.pageXOffset,
+    top: rect.top + win!.scrollY,
+    left: rect.left + win!.scrollX,
   }
 }
 
