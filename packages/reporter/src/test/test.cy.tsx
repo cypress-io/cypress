@@ -19,7 +19,7 @@ describe('test/test.tsx', () => {
       <Test
         model={model}
         appState={appState}
-        experimentalStudioEnabled={false}
+        studioEnabled={false}
       />
     </div>)
 

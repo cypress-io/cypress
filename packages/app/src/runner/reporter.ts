@@ -49,7 +49,7 @@ function renderReporter (
     error: null,
     resetStatsOnSpecChange: true,
     // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
-    experimentalStudioEnabled: config.experimentalStudio,
+    studioEnabled: config.experimentalStudio,
     runnerStore: store,
   })
 

@@ -20,10 +20,10 @@ import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/ic
 interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
-  experimentalStudioActive: boolean
+  studioEnabled: boolean
 }
 
-const Suite = observer(({ experimentalStudioActive, eventManager = events, model }: SuiteProps) => {
+const Suite = observer(({ studioEnabled, eventManager = events, model }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -34,7 +34,7 @@ const Suite = observer(({ experimentalStudioActive, eventManager = events, model
   const _header = () => (
     <>
       <span className='runnable-title'>{model.title}</span>
-      {experimentalStudioActive && (
+      {studioEnabled && (
         <span className='runnable-controls'>
           <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
             <a onClick={_launchStudio} className='runnable-controls-studio'>
@@ -59,7 +59,7 @@ const Suite = observer(({ experimentalStudioActive, eventManager = events, model
           (<Runnable
             key={runnable.id}
             model={runnable}
-            experimentalStudioActive={experimentalStudioActive}
+            studioEnabled={studioEnabled}
           />))}
       </ul>
     </Collapsible>
@@ -69,7 +69,7 @@ const Suite = observer(({ experimentalStudioActive, eventManager = events, model
 export interface RunnableProps {
   model: TestModel | SuiteModel
   appState: AppState
-  experimentalStudioActive: boolean
+  studioEnabled: boolean
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -83,7 +83,7 @@ class Runnable extends Component<RunnableProps> {
   }
 
   render () {
-    const { appState, model, experimentalStudioActive } = this.props
+    const { appState, model, studioEnabled } = this.props
 
     return (
       <li
@@ -94,8 +94,8 @@ class Runnable extends Component<RunnableProps> {
         data-model-state={model.state}
       >
         {model.type === 'test'
-          ? <Test model={model as TestModel} experimentalStudioEnabled={experimentalStudioActive} />
-          : <Suite model={model as SuiteModel} experimentalStudioActive={experimentalStudioActive} />}
+          ? <Test model={model as TestModel} studioEnabled={studioEnabled} />
+          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} />}
       </li>
     )
   }

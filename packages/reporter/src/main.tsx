@@ -33,7 +33,7 @@ interface BaseReporterProps {
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
-  experimentalStudioEnabled: boolean
+  studioEnabled: boolean
   runnerStore: MobxRunnerStore
 }
 
@@ -60,7 +60,7 @@ class Reporter extends Component<SingleReporterProps> {
       scroller,
       error,
       statsStore,
-      experimentalStudioEnabled,
+      studioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
@@ -79,7 +79,7 @@ class Reporter extends Component<SingleReporterProps> {
             scroller={scroller}
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
-            experimentalStudioEnabled={experimentalStudioEnabled}
+            studioEnabled={studioEnabled}
           />
         )}
       </div>
