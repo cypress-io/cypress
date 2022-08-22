@@ -16,7 +16,11 @@ describe('test/test.tsx', () => {
     }
 
     cy.mount(<div className="runnable suite">
-      <Test model={model} appState={appState} />
+      <Test
+        model={model}
+        appState={appState}
+        experimentalStudioEnabled={false}
+      />
     </div>)
 
     cy.percySnapshot()

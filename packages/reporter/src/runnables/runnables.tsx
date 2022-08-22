@@ -80,12 +80,18 @@ const RunnablesEmptyState = ({ spec, experimentalStudioEnabled, eventManager = e
 
 interface RunnablesListProps {
   runnables: RunnableArray
+  experimentalStudioActive: boolean
 }
 
-const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables, experimentalStudioActive }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {_.map(runnables, (runnable) =>
+        (<Runnable
+          key={runnable.id}
+          model={runnable}
+          experimentalStudioActive={experimentalStudioActive}
+        />))}
     </ul>
   </div>
 ))
@@ -118,7 +124,12 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, experimentalSt
 
   const isRunning = specPath === runnablesStore.runningSpec
 
-  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
+  return (
+    <RunnablesList
+      runnables={isRunning ? runnables : runnablesHistory[specPath]}
+      experimentalStudioActive={experimentalStudioEnabled}
+    />
+  )
 })
 
 export interface RunnablesProps {
