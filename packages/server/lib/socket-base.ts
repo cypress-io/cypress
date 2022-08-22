@@ -408,17 +408,17 @@ export class SocketBase {
 
               return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
             }
-            case 'http:request': //tested
+            case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
               return options.onResetServerState()
             case 'log:memory:pressure':
               return firefoxUtil.log()
-            case 'firefox:force:gc': // tested
+            case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
             case 'firefox:window:focus':
               return firefoxUtil.windowFocus()
-            case 'get:fixture': //tested
+            case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':
               return files.readFile(config.projectRoot, args[0], args[1])
@@ -433,7 +433,7 @@ export class SocketBase {
                 getFixture,
                 args,
               })
-            case 'exec': //tested
+            case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':
               return task.run(cfgFile ?? null, args[0])
@@ -453,11 +453,11 @@ export class SocketBase {
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            case 'cross:origin:bridge:ready': //tested
+            case 'cross:origin:bridge:ready':
               return this.localBus.emit('cross:origin:bridge:ready', args[0])
-            case 'cross:origin:release:html': //tested
+            case 'cross:origin:release:html':
               return this.localBus.emit('cross:origin:release:html')
-            case 'cross:origin:finished': //tested
+            case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')

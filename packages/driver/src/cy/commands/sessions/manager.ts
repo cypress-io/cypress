@@ -203,7 +203,7 @@ export default class SessionsManager {
       return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
     },
 
-    getCurrentSessionData: async () => {
+    getCurrentSessionData: async (): Pick<SessionData, 'localStorage', 'sess' => {
       const [storage, cookies] = await Promise.all([
         this.sessions.getStorage({ origin: '*' }),
         this.sessions.getCookies(),
