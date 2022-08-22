@@ -6,7 +6,7 @@ name: Snyk Software Composition Analysis Scan
 on:
   pull_request:
     branches: 
-      - main
+      - master
       - develop
 jobs:
   Snyk_SCA_Scan:
