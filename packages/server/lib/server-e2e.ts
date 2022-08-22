@@ -190,6 +190,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       // @ts-ignore
+      console.log(getRoutesForRequest)
       const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done

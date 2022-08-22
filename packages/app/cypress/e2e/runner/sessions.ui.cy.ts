@@ -38,7 +38,7 @@ describe('runner/cypress sessions.ui.spec', {
     }
   })
 
-  it('creates new session', () => {
+  it.only('creates new session', () => {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session.cy.js',
@@ -160,7 +160,7 @@ describe('runner/cypress sessions.ui.spec', {
           cy.contains('user1')
           cy.contains('restored')
 
-          cy.get('.command-name-Clear-page').should('have.length', 2)
+          cy.get('.command-name-Clear-page').should('have.length', 1)
 
           cy.contains('Restore saved session')
 
@@ -231,7 +231,7 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-expander')
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('.command-name-Clear-page').should('have.length', 3)
+        cy.get('.command-name-Clear-page').should('have.length', 2)
 
         validateSetupSessionGroup(false)
 

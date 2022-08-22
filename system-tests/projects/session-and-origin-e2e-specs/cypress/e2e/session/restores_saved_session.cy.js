@@ -2,8 +2,19 @@ let setupFn
 let validateFn
 
 before(() => {
-  setupFn = cy.stub().as('runSetup')
-  validateFn = cy.stub().as('runValidation')
+  setupFn = () => {
+    const setup = cy.stub().as('runSetup')
+
+    cy.visit('/cypress/fixtures/login.html')
+    cy.then(setup)
+  }
+
+  validateFn = () => {
+    const validate = cy.stub().as('runValidation')
+
+    cy.visit('/cypress/fixtures/home.html')
+    cy.then(validate)
+  }
 })
 
 it('t1', () => {
@@ -11,7 +22,7 @@ it('t1', () => {
     validate: validateFn,
   })
 
-  cy.log('after')
+  cy.url().should('eq', '/cypress/fixtures/home.html')
 })
 
 it('t2', () => {
