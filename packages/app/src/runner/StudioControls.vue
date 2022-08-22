@@ -10,61 +10,117 @@
     Go ➜
   </button>
 
-  <div>
-    <b>Studio Beta</b>
-  </div>
+  <div class="border-y flex border-gray-50 mt-5 w-full justify-between">
+    <div class="flex">
+      <div class="border-r flex border-gray-50 py-2 pr-3 pl-1 items-center">
+        <svg
+          height="30"
+          width="30"
+          class="animate-pulse"
+        >
+          <circle
+            cx="15"
+            cy="15"
+            r="7"
+            fill="#e94f5f"
+          />
+        </svg>
+        <span class="font-semibold">{{ t('runner.studio.studio').toUpperCase() }}</span>
+        <span class="ml-1 text-gray-600"> {{ t('versions.beta').toUpperCase() }}</span>
+      </div>
 
-  <button
-    :disabled="studioStore.isLoading"
-    @click="studioStore.openInstructionModal"
-  >
-    Available Commands
-  </button>
+      <button
+        class="border-r font-semibold border-gray-50 px-3 text-indigo-500 hocus-link"
+        :disabled="studioStore.isLoading"
+        @click="studioStore.openInstructionModal"
+      >
+        {{ t('runner.studio.availableCommands').toUpperCase() }}
+      </button>
 
-  <a
-    href="https://on.cypress.io/studio-beta"
-    target="_blank"
-  >Give feedback</a>
+      <div class="flex items-center">
+        <a
+          class="font-semibold py-4 px-3 text-indigo-500 hocus-link"
+          href="https://on.cypress.io/studio-beta"
+          target="_blank"
+        >{{ t('runner.studio.giveFeedback').toUpperCase() }}</a>
+      </div>
+    </div>
 
-  <div>
-    <!-- these are the buttons that do the things -->
-    <button
-      :disabled="studioStore.isLoading"
-      @click="handleClose"
-    >
-      Close Studio
-    </button>
+    <div class="flex">
+      <Tooltip
+        placement="top"
+      >
+        <button
+          :class="`border-l ${controlsClassName}`"
+          :disabled="studioStore.isLoading"
+          @click="handleClose"
+        >
+          <i-cy-delete_x16 />
+        </button>
+        <template #popper>
+          {{ t('runner.studio.closeStudio') }}
+        </template>
+      </Tooltip>
 
-    <button
-      :disabled="studioStore.isLoading"
-      @click="handleRestart"
-    >
-      Restart
-    </button>
+      <Tooltip
+        placement="top"
+      >
+        <button
+          :class="controlsClassName"
+          :disabled="studioStore.isLoading"
+          @click="handleRestart"
+        >
+          <i-cy-action-restart_x16 />
+        </button>
+        <template #popper>
+          {{ t('runner.studio.restartStudio') }}
+        </template>
+      </Tooltip>
 
-    <button
-      :disabled="studioStore.isLoading || studioStore.isEmpty"
-      @click="handleCopyCommands"
-    >
-      Copy Commands
-    </button>
+      <Tooltip
+        placement="top"
+      >
+        <button
+          :class="controlsClassName"
+          :disabled="studioStore.isLoading || studioStore.isEmpty"
+          @click="handleCopyCommands"
+          @mouseleave="() => commandsCopied = false"
+        >
+          <span v-if="commandsCopied"><i-cy-checkmark_x16 /></span>
+          <span v-else> <i-cy-general-clipboard_x16 /></span>
+        </button>
+        <template #popper>
+          {{ t(commandsCopied ? 'runner.studio.commandsCopied' : 'runner.studio.copyCommands') }}
+        </template>
+      </Tooltip>
 
-    <button
-      :disabled="studioStore.isLoading || studioStore.isEmpty"
-      @click="handleSaveCommands"
-    >
-      Save Commands
-    </button>
+      <button
+        :class="controlsClassName"
+        :disabled="studioStore.isLoading || studioStore.isEmpty"
+        @click="handleSaveCommands"
+      >
+        Save Commands
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useI18n } from '@cy/i18n'
 import { getEventManager } from '.'
 import { useStudioStore } from '../store/studio-store'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+
+const controlsClassName = 'border-r border-gray-50 py-4 px-3'
+
+const { t } = useI18n()
 
 const studioStore = useStudioStore()
 
 const eventManager = getEventManager()
+
+const commandsCopied = ref(false)
 
 function handleClose () {
   eventManager.emit('studio:cancel', undefined)
@@ -77,7 +133,7 @@ function handleRestart () {
 
 function handleCopyCommands () {
   eventManager.emit('studio:copy:to:clipboard', () => {
-    // optional callback - do we need this?
+    commandsCopied.value = true
   })
 }
 

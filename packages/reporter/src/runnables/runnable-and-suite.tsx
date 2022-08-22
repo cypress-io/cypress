@@ -34,7 +34,7 @@ const Suite = observer(({ eventManager = events, model, experimentalStudioEnable
   const _header = () => (
     <>
       <span className='runnable-title'>{model.title}</span>
-      {experimentalStudioEnabled && (
+      {(experimentalStudioEnabled && !appState.studioActive) && (
         <span className='runnable-controls'>
           <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
             <a onClick={_launchStudio} className='runnable-controls-studio'>

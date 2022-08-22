@@ -809,7 +809,13 @@
       "feedbackLink": "feedback",
       "saveNewTest": "Save New Test",
       "testName": "Test Name",
-      "saveTestButton": "Save Test"
+      "saveTestButton": "Save Test",
+      "closeStudio": "Close Studio",
+      "restartStudio": "Restart Studio",
+      "copyCommands": "Copy Commands to Clipboard",
+      "commandsCopied": "Commands Copied!",
+      "availableCommands": "Available Commands",
+      "giveFeedback": "Give Feedback"
     }
   },
   "warnings": {
