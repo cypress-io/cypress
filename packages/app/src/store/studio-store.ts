@@ -1,4 +1,4 @@
-import type { Instrument, TestState } from '@packages/types/src'
+import type { FileDetails, Instrument, TestState } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
@@ -102,7 +102,7 @@ interface StudioRecorderState {
   suiteId?: string
   url?: string
 
-  fileDetails?: string
+  fileDetails?: FileDetails
   absoluteFile?: string
   runnableTitle?: string
   _previousMouseEvent?: {
@@ -272,9 +272,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.closeSaveModal()
       this.stop()
 
-      assertNonNullish(this.fileDetails, `fileDetails should exist!`)
       assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
-      assertNonNullish(this.runnableTitle, `runnableTitle should exist`)
 
       const payload: StudioSavePayload = {
         fileDetails: this.fileDetails,
@@ -427,7 +425,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.fileDetails = fileDetails
     },
 
-    setAbsoluteFile (absoluteFile) {
+    setAbsoluteFile (absoluteFile: string) {
       this.absoluteFile = absoluteFile
     },
 
