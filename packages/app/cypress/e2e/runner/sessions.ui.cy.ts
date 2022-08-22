@@ -328,7 +328,7 @@ describe('runner/cypress sessions.ui.spec', {
   })
 })
 
-describe('runner/cypress sessions.open_mode.spec', () => {
+describe.only('runner/cypress sessions.open_mode.spec', () => {
   beforeEach(() => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
     cy.openProject('session-and-origin-e2e-specs')
@@ -340,38 +340,47 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
+    cy.get('.command-name-session').should('contain', 'spec_session_1')
     .find('.reporter-tag').should('contain', 'created')
 
-    cy.get('.command-name-session').should('contain', 'user2')
+    cy.get('.command-name-session').should('contain', 'spec_session_2')
+    .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').should('contain', 'global_session_1')
     .find('.reporter-tag').should('contain', 'created')
   })
 
-  it('persists spec sessions when clicking "rerun all tests" button', () => {
+  it('persists global and spec sessions when clicking "rerun all tests" button', () => {
     cy.get('.restart').click()
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
+    cy.get('.command-name-session').should('contain', 'spec_session_1')
     .find('.reporter-tag').should('contain', 'restored')
 
-    cy.get('.command-name-session').should('contain', 'user2')
+    cy.get('.command-name-session').should('contain', 'spec_session_2')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'global_session_1')
     .find('.reporter-tag').should('contain', 'restored')
   })
 
-  it('persists spec sessions on refresh', () => {
+  it('persists global and spec sessions on refresh', () => {
     cy.get('body').type('r')
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
+    cy.get('.command-name-session').should('contain', 'spec_session_1')
     .find('.reporter-tag').should('contain', 'restored')
 
-    cy.get('.command-name-session').should('contain', 'user2')
+    cy.get('.command-name-session').should('contain', 'spec_session_2')
+    .find('.reporter-tag').should('contain', 'restored')
+
+    cy.get('.command-name-session').should('contain', 'global_session_1')
     .find('.reporter-tag').should('contain', 'restored')
   })
 
@@ -385,5 +394,35 @@ describe('runner/cypress sessions.open_mode.spec', () => {
 
     cy.get('.command-name-session').should('contain', 'user1')
     .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
+  })
+
+  it('clears all sessions when selecting "clear all sessions"', () => {
+    cy.get('body').type('f')
+    cy.get('div[title="new_session.cy.js"]').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'user1')
+    .find('.reporter-tag').should('contain', 'created')
+  })
+
+  it('persists global sessions when selecting a different spec', () => {
+    cy.get('body').type('f')
+    cy.get('div[title="blank_session.cy.js"]').click()
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.command-name-session').should('contain', 'spec_session')
+    .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').should('contain', 'global_session_1')
+    .find('.reporter-tag').should('contain', 'restored')
   })
 })

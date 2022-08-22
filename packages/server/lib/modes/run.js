@@ -322,8 +322,6 @@ const renderSummaryTable = (runUrl) => {
   return function (results) {
     const { runs } = results
 
-    console.log('runs', runs)
-
     console.log('')
 
     terminal.divider('=')

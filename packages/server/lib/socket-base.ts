@@ -99,7 +99,7 @@ export class SocketBase {
     // instead of throwing immediately here perhaps we need
     // to make this more resilient by automatically retrying
     // up to 1 second in the case where our automation room
-    // is empty. that would give padding for reconnection s
+    // is empty. that would give padding for reconnections
     // to automatically happen.
     // for instance when socket.io detects a disconnect
     // does it immediately remove the member from the room?

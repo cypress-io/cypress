@@ -312,8 +312,6 @@ export class Http {
   }
 
   getRenderedHTMLOrigins = () => {
-    console.log('renderedHTMLOrigins', this.renderedHTMLOrigins)
-
     return this.renderedHTMLOrigins
   }
 
