@@ -35,7 +35,6 @@ interface BaseReporterProps {
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   experimentalStudioEnabled: boolean
   runnerStore: MobxRunnerStore
-  studioRecorder: any
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
