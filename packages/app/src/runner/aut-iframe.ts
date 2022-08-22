@@ -1,6 +1,8 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
+import { getElementDimensions, setOffset } from './dimensions'
+
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
@@ -10,6 +12,7 @@ import { useStudioStore } from '../store/studio-store'
 type $CypressJQuery = any
 
 const sizzleRe = /sizzle/i
+const INT32_MAX = 2147483647
 
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
@@ -319,7 +322,7 @@ export class AutIframe {
         return
       }
 
-      this.dom.addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
+      this._addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
     })
 
     if (coords) {
@@ -628,5 +631,133 @@ export class AutIframe {
       width: el.offsetWidth,
       height: el.offsetHeight,
     }
+  }
+
+  private _addElementBoxModelLayers ($el, $body) {
+    $body = $body || $('body')
+
+    const el = $el.get(0)
+    const body = $body.get(0)
+
+    const dimensions = getElementDimensions(el)
+
+    const container = document.createElement('div')
+
+    container.classList.add('__cypress-highlight')
+
+    container.style.opacity = `0.7`
+    container.style.position = 'absolute'
+    container.style.zIndex = `${INT32_MAX}`
+
+    const layers = {
+      Content: '#9FC4E7',
+      Padding: '#C1CD89',
+      Border: '#FCDB9A',
+      Margin: '#F9CC9D',
+    }
+
+    // create the margin / bottom / padding layers
+    _.each(layers, (color, attr) => {
+      let obj
+
+      switch (attr) {
+        case 'Content':
+          // rearrange the contents offset so
+          // its inside of our border + padding
+          obj = {
+            width: dimensions.width,
+            height: dimensions.height,
+            top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
+            left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
+          }
+
+          break
+        default:
+          obj = {
+            width: this._getDimensionsFor(dimensions, attr, 'width'),
+            height: this._getDimensionsFor(dimensions, attr, 'height'),
+            top: dimensions.offset.top,
+            left: dimensions.offset.left,
+          }
+      }
+
+      // if attr is margin then we need to additional
+      // subtract what the actual marginTop + marginLeft
+      // values are, since offset disregards margin completely
+      if (attr === 'Margin') {
+        obj.top -= dimensions.marginTop
+        obj.left -= dimensions.marginLeft
+      }
+
+      if (attr === 'Padding') {
+        obj.top += dimensions.borderTop
+        obj.left += dimensions.borderLeft
+      }
+
+      // bail if the dimensions of this layer match the previous one
+      // so we dont create unnecessary layers
+      if (this._dimensionsMatchPreviousLayer(obj, container)) return
+
+      this._createLayer($el.get(0), attr, color, container, obj)
+    })
+
+    body.appendChild(container)
+
+    for (let i = 0; i < container.children.length; i++) {
+      const el = container.children[i] as HTMLElement
+      const top = parseFloat(el.getAttribute('data-top')!)
+      const left = parseFloat(el.getAttribute('data-left')!)
+
+      setOffset(el, { top, left })
+    }
+
+    return container
+  }
+
+  private _createLayer (el, attr, color, container, dimensions) {
+    const div = document.createElement('div')
+
+    div.style.transform = getComputedStyle(el, null).transform
+    div.style.width = `${dimensions.width}px`
+    div.style.height = `${dimensions.height}px`
+    div.style.position = 'absolute'
+    div.style.zIndex = `${this._getZIndex(el)}`
+    div.style.backgroundColor = color
+
+    div.setAttribute('data-top', dimensions.top)
+    div.setAttribute('data-left', dimensions.left)
+    div.setAttribute('data-layer', attr)
+
+    container.prepend(div)
+
+    return div
+  }
+
+  private _dimensionsMatchPreviousLayer (obj, container) {
+    // since we're prepending to the container that
+    // means the previous layer is actually the first child element
+    const previousLayer = container.childNodes[0]
+
+    // bail if there is no previous layer
+    if (!previousLayer) {
+      return
+    }
+
+    return obj.width === previousLayer.offsetWidth &&
+      obj.height === previousLayer.offsetHeight
+  }
+
+  private _getDimensionsFor (dimensions, attr, dimension) {
+    return dimensions[`${dimension}With${attr}`]
+  }
+
+  private _getZIndex (el) {
+    const value = getComputedStyle(el, null).getPropertyValue('z-index')
+
+    if (/^(auto|0)$/.test(value)) {
+      return INT32_MAX
+    }
+
+    return parseFloat(value)
   }
 }
