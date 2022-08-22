@@ -497,28 +497,8 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
             focused.fireBlur($focused.get(0))
           }
         } else {
-          // let captureFocusHandler
-
-          // if (Cypress.browser.family === 'webkit') {
-          //   captureFocusHandler = (event: FocusEvent) => {
-          //     if ((event?.currentTarget as HTMLInputElement).setSelectionRange) {
-          //       try {
-          //         (event.currentTarget as HTMLInputElement).setSelectionRange(0, 0)
-          //       } catch (e) {
-          //         // some input types do not support selection
-          //       }
-          //     }
-          //   }
-
-          //   el.addEventListener('focus', captureFocusHandler, { capture: true })
-          // }
-
           // the user clicked inside a focusable element
           focused.fireFocus($elToFocus.get(0), { preventScroll: true })
-
-          // if (captureFocusHandler) {
-          //   el.removeEventListener('focus', captureFocusHandler, { capture: true })
-          // }
         }
       }
 
