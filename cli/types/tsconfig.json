@@ -11,7 +11,7 @@
     "strictFunctionTypes": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "types": ["@percy/cypress"],
+    "types": [],
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true
