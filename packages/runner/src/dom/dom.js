@@ -11,6 +11,7 @@ import selectorPlaygroundCSS from '!../selector-playground/selector-playground.s
 import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 
 const $ = $Cypress.$
+const INT32_MAX = 2147483647
 
 function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
@@ -73,9 +74,9 @@ function addElementBoxModelLayers ($el, $body) {
 
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
-    if (dimensionsMatchPreviousLayer(obj, $container)) return
+    if (dimensionsMatchPreviousLayer(obj, $container.get(0))) return
 
-    return createLayer($el, attr, color, $container, obj)
+    createLayer($el.get(0), attr, color, $container.get(0), obj)
   })
 
   $container.appendTo($body)
@@ -205,30 +206,29 @@ function closeStudioAssertionsMenu ($body) {
   $container.remove()
 }
 
-function createLayer ($el, attr, color, container, dimensions) {
-  const transform = $el.css('transform')
+function createLayer (el, attr, color, container, dimensions) {
+  const div = document.createElement('div')
 
-  const css = {
-    transform,
-    width: dimensions.width,
-    height: dimensions.height,
-    position: 'absolute',
-    zIndex: getZIndex($el),
-    backgroundColor: color,
-  }
+  div.style.transform = getComputedStyle(el, null).transform
+  div.style.width = `${dimensions.width}px`
+  div.style.height = `${dimensions.height}px`
+  div.style.position = 'absolute'
+  div.style.zIndex = `${getZIndex2(el)}`
+  div.style.backgroundColor = color
 
-  return $('<div>')
-  .css(css)
-  .attr('data-top', dimensions.top)
-  .attr('data-left', dimensions.left)
-  .attr('data-layer', attr)
-  .prependTo(container)
+  div.setAttribute('data-top', dimensions.top)
+  div.setAttribute('data-left', dimensions.left)
+  div.setAttribute('data-layer', attr)
+
+  container.prepend(div)
+
+  return div
 }
 
 function dimensionsMatchPreviousLayer (obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
-  const previousLayer = container.children().first().get(0)
+  const previousLayer = container.childNodes[0]
 
   // bail if there is no previous layer
   if (!previousLayer) {
@@ -249,6 +249,16 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
+}
+
+function getZIndex2 (el) {
+  const value = getComputedStyle(el, null).getPropertyValue('z-index')
+
+  if (/^(auto|0)$/.test(value)) {
+    return INT32_MAX
+  }
+
+  return parseFloat(value)
 }
 
 export const dom = {
