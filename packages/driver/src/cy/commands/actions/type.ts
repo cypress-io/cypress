@@ -250,7 +250,10 @@ export default function (Commands, Cypress, cy, state, config) {
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        if (!isFirefoxBefore98) {
+        //
+        // WebKit browser will send the submit with an Enter keypress event,
+        // so we do need to click the default button in this case.
+        if (!isFirefoxBefore98 && Cypress.browser.family !== 'webkit') {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
