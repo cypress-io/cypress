@@ -24,6 +24,9 @@ export type WebpackDevServerConfig = {
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack
+  options?: {
+    projectConfig?: Cypress.ProjectConfig
+  }
 }
 
 export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue', 'angular'] as const

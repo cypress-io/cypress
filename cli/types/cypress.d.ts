@@ -3047,16 +3047,29 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
+  type ProjectConfig = {
+    root: string,
+    sourceRoot: string,
+    buildOptions: Record<string, any>
+  }
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'angular'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue'
     viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+  } | {
+    bundler: 'webpack',
+    framework: 'angular',
+    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    options?: {
+      projectConfig: ProjectConfig
+    }
   }
 
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
