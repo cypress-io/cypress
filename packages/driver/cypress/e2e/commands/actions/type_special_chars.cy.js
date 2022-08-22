@@ -6,7 +6,8 @@ const {
   trimInnerText,
 } = require('../../../support/utils')
 
-describe('src/cy/commands/actions/type - #type special chars', () => {
+// TODO(webkit): fix+unskip for experimental webkit release
+describe('src/cy/commands/actions/type - #type special chars', { browser: '!webkit' }, () => {
   before(function () {
     cy
     .visit('/fixtures/dom.html')

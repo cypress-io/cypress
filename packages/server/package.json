@@ -102,7 +102,6 @@
     "randomstring": "1.1.5",
     "recast": "0.20.4",
     "resolve": "1.17.0",
-    "return-deep-diff": "0.4.0",
     "sanitize-filename": "1.6.3",
     "semver": "7.3.2",
     "send": "0.17.1",
