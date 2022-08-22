@@ -80,6 +80,7 @@ class Reporter extends Component<SingleReporterProps> {
             scroller={scroller}
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
+            experimentalStudioEnabled={experimentalStudioEnabled}
           />
         )}
       </div>

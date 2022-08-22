@@ -46,7 +46,7 @@ function renderReporter (
     runner: eventManager.reporterBus,
     autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
-    error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
+    error: null,
     resetStatsOnSpecChange: true,
     // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
     experimentalStudioEnabled: config.experimentalStudio,
