@@ -64,11 +64,6 @@
       background-color: $gray-900;
     }
 
-    .open-studio,
-    .open-studio-desc {
-      display: none;
-    }
-
     svg {
       margin-right: 5px;
       vertical-align: text-top;
@@ -83,8 +78,8 @@
     }
   }
 
-  &.experimental-studio-enabled .no-tests .open-studio,
-  &.experimental-studio-enabled .no-tests .open-studio-desc {
+  .open-studio,
+  .open-studio-desc {
     display: inline;
   }
 
@@ -307,20 +302,11 @@
     .runnable-controls-studio {
       color: $indigo-300;
       opacity: 0;
-      display: none;
     }
   }
 
   .test.runnable-failed .runnable-controls .runnable-controls-status {
     visibility: visible;
-  }
-
-  &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
-    display: inline;
-  }
-
-  &.studio-active .runnable-controls .runnable-controls-studio {
-    display: none;
   }
 
   .test .collapsible {

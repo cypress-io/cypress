@@ -78,6 +78,7 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: linux
+      CI_DOCKER: "true"
 
   # Docker image with non-root "node" user
   non-root-docker-user:
@@ -1200,8 +1201,10 @@ jobs:
       - run:
           name: Check env canaries on Linux
           command: |
-            # Windows/Mac M1 CircleCI does not have a way to pull per-job env
-            [[ $PLATFORM == 'linux' ]] && node ./scripts/circle-env.js --check-canaries || true
+            # only Docker has the required env data for this
+            if [[ $CI_DOCKER == 'true' ]]; then
+              node ./scripts/circle-env.js --check-canaries
+            fi
       - build-and-persist
       - store-npm-logs
 

@@ -10,7 +10,7 @@ import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
-import appState, { AppState } from '../lib/app-state'
+import type { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
 import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
@@ -29,9 +29,10 @@ const Loading = () => (
 interface RunnablesEmptyStateProps {
   spec: Cypress.Cypress['spec']
   eventManager?: Events
+  experimentalStudioEnabled: boolean
 }
 
-const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStateProps) => {
+const RunnablesEmptyState = ({ spec, experimentalStudioEnabled, eventManager = events }: RunnablesEmptyStateProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
 
@@ -63,7 +64,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
             </a>
           </OpenFileInIDE>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
-          {appState.studioActive && (
+          {experimentalStudioEnabled && (
             <>
               <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
               <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
@@ -85,7 +86,12 @@ interface RunnablesListProps {
 const RunnablesList = observer(({ runnables, experimentalStudioEnabled }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} experimentalStudioEnabled={experimentalStudioEnabled} />)}
+      {_.map(runnables, (runnable) =>
+        (<Runnable
+          key={runnable.id}
+          model={runnable}
+          experimentalStudioEnabled={experimentalStudioEnabled}
+        />))}
     </ul>
   </div>
 ))
@@ -107,7 +113,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, experimentalSt
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
   if (!error && !runnablesStore.runnables.length) {
-    return <RunnablesEmptyState spec={spec} />
+    return <RunnablesEmptyState spec={spec} experimentalStudioEnabled={experimentalStudioEnabled} />
   }
 
   if (error) {
@@ -118,7 +124,12 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, experimentalSt
 
   const isRunning = specPath === runnablesStore.runningSpec
 
-  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} experimentalStudioEnabled={experimentalStudioEnabled} />
+  return (
+    <RunnablesList
+      runnables={isRunning ? runnables : runnablesHistory[specPath]}
+      experimentalStudioEnabled={experimentalStudioEnabled}
+    />
+  )
 })
 
 export interface RunnablesProps {
@@ -141,9 +152,9 @@ class Runnables extends Component<RunnablesProps> {
         <RunnableHeader spec={spec} statsStore={statsStore} />
         <RunnablesContent
           runnablesStore={runnablesStore}
+          experimentalStudioEnabled={experimentalStudioEnabled}
           spec={spec}
           error={error}
-          experimentalStudioEnabled={experimentalStudioEnabled}
         />
       </div>
     )

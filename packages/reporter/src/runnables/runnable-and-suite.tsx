@@ -55,7 +55,12 @@ const Suite = observer(({ eventManager = events, model, experimentalStudioEnable
       isOpen
     >
       <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} experimentalStudioEnabled={experimentalStudioEnabled} />)}
+        {_.map(model.children, (runnable) =>
+          (<Runnable
+            key={runnable.id}
+            model={runnable}
+            experimentalStudioEnabled={experimentalStudioEnabled}
+          />))}
       </ul>
     </Collapsible>
   )
@@ -88,7 +93,9 @@ class Runnable extends Component<RunnableProps> {
         })}
         data-model-state={model.state}
       >
-        {model.type === 'test' ? <Test model={model as TestModel} experimentalStudioEnabled={experimentalStudioEnabled} /> : <Suite model={model as SuiteModel} experimentalStudioEnabled={experimentalStudioEnabled} />}
+        {model.type === 'test'
+          ? <Test model={model as TestModel} experimentalStudioEnabled={experimentalStudioEnabled} />
+          : <Suite model={model as SuiteModel} experimentalStudioEnabled={experimentalStudioEnabled} />}
       </li>
     )
   }

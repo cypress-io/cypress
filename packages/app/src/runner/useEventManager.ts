@@ -1,6 +1,7 @@
 import { watch } from 'vue'
 import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
 import { useAutStore, useSpecStore } from '../store'
+import { useStudioStore } from '../store/studio-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
 
 export function useEventManager () {
@@ -8,6 +9,7 @@ export function useEventManager () {
 
   const autStore = useAutStore()
   const specStore = useSpecStore()
+  const studioStore = useStudioStore()
 
   function runSpec (isRerun: boolean = false) {
     if (!specStore.activeSpec) {
@@ -50,7 +52,9 @@ export function useEventManager () {
     })
 
     eventManager.on('run:end', () => {
-      getAutIframeModel().startStudio()
+      if (studioStore.isLoading) {
+        getAutIframeModel().startStudio()
+      }
     })
 
     eventManager.on('expect:origin', addCrossOriginIframe)

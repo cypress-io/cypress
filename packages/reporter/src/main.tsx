@@ -67,7 +67,6 @@ class Reporter extends Component<SingleReporterProps> {
 
     return (
       <div className={cs(className, 'reporter', {
-        'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
@@ -81,7 +80,7 @@ class Reporter extends Component<SingleReporterProps> {
             scroller={scroller}
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
-            experimentalStudioEnabled={true}
+            experimentalStudioEnabled={experimentalStudioEnabled}
           />
         )}
       </div>
