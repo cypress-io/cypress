@@ -38,7 +38,7 @@ describe('runner/cypress sessions.ui.spec', {
     }
   })
 
-  it.only('creates new session', () => {
+  it('creates new session', () => {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
       filePath: 'session/new_session.cy.js',

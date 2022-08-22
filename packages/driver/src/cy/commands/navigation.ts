@@ -1273,7 +1273,6 @@ export default (Commands, Cypress, cy, state, config) => {
         // session support which already visits
         // about:blank between tests
         if (!hasVisitedAboutBlank && !Cypress.isCrossOriginSpecBridge) {
-          console.log('visit about blank')
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 

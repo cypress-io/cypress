@@ -104,7 +104,6 @@ describe('cy.session', { retries: 0 }, () => {
       cy.contains('Default blank page')
       cy.contains('This page was cleared by navigating to about:blank.')
 
-      // setup
       cy.visit('/fixtures/auth/index.html')
       cy.contains('You are not logged in')
       cy.window().then((win) => {
@@ -117,7 +116,6 @@ describe('cy.session', { retries: 0 }, () => {
       cy.contains('Default blank page')
       cy.contains('This page was cleared by navigating to about:blank.')
 
-      // validation
       cy.visit('/fixtures/auth/index.html')
       cy.contains('Welcome tester')
     }
