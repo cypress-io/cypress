@@ -100,18 +100,31 @@ describe('cy.session', { retries: 0 }, () => {
     let validate
 
     const handleSetup = () => {
-      cy.then(() => {
-        expect(clearPageCount, 'cleared page before executing session setup').to.eq(1)
-      })
+      // create session clears page before running
+      cy.contains('Default blank page')
+      cy.contains('This page was cleared by navigating to about:blank.')
 
-      cy.contains('This is a blank page')
-      cy.contains('We always navigate you here after')
-      cy.contains('cy.session(...)')
+      // setup
+      cy.visit('/fixtures/auth/index.html')
+      cy.contains('You are not logged in')
+      cy.window().then((win) => {
+        win.sessionStorage.setItem('cypressAuthToken', JSON.stringify({ body: { username: 'tester' } }))
+      })
+    }
+
+    const handleValidate = () => {
+      // both create & restore session clears page after running
+      cy.contains('Default blank page')
+      cy.contains('This page was cleared by navigating to about:blank.')
+
+      // validation
+      cy.visit('/fixtures/auth/index.html')
+      cy.contains('Welcome tester')
     }
 
     before(() => {
       setup = cy.stub().callsFake(handleSetup).as('setupSession')
-      validate = cy.stub().as('validateSession')
+      validate = cy.stub().callsFake(handleValidate).as('validateSession')
     })
 
     const resetMocks = () => {
@@ -119,7 +132,9 @@ describe('cy.session', { retries: 0 }, () => {
       clearPageCount = 0
       sessionGroupId = undefined
       setup.reset()
+      setup.callsFake(handleSetup)
       validate.reset()
+      validate.callsFake(handleValidate)
     }
 
     const setupTestContext = () => {
@@ -159,7 +174,12 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session to test against')
+        expect(clearPageCount, 'total times session cleared the page').to.eq(0)
         cy.session('session-1', setup)
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('clears page after setup runs', () => {
         cy.url().should('eq', 'about:blank')
       })
 
@@ -232,7 +252,11 @@ describe('cy.session', { retries: 0 }, () => {
         cy.log('Creating new session with validation to test against')
 
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully creates new session and validates it', () => {
@@ -371,6 +395,10 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session(`session-${Cypress.state('test').id}`, setup)
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('clears page after setup runs', () => {
         cy.url().should('eq', 'about:blank')
       })
 
@@ -425,7 +453,11 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully restores saved session', () => {
@@ -483,6 +515,7 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
+
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         .then(() => {
           // reset and only test restored session
@@ -491,12 +524,18 @@ describe('cy.session', { retries: 0 }, () => {
             if (validate.callCount === 1) {
               return false
             }
+
+            handleValidate()
           })
         })
 
         cy.log('restore session to test against')
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully recreates session', () => {

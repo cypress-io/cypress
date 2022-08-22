@@ -41,10 +41,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  // const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
-  const iterator = getRoutesForRequest(this.netStubbingState?.routes, this.req)
+  const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
-  if (iterator.next().done) {
+  if (!matchingRoutes.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -60,7 +59,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    iterator,
+    matchingRoutes,
   })
 
   debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
