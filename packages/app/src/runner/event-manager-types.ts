@@ -22,9 +22,9 @@ export type LocalBusEventMap = {
 }
 
 export interface StudioSavePayload {
-  fileDetails: string
+  fileDetails?: FileDetails
   absoluteFile: string
-  runnableTitle: string
+  runnableTitle?: string
   commands: StudioLog[]
   isSuite: boolean
   isRoot: boolean

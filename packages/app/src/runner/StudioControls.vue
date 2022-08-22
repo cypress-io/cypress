@@ -55,10 +55,23 @@
     >
       Save Commands
     </button>
+
+    <input
+      v-if="studioStore.saveModalIsOpen"
+      v-model="testName"
+      style="border: 1px solid black"
+    >
+    <button
+      :disabled="!testName"
+      @click="handleSave"
+    >
+      Save Test
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { getEventManager } from '.'
 import { useStudioStore } from '../store/studio-store'
 
@@ -68,7 +81,13 @@ function handleShowCommands () {
   // TODO: Show modal with available commands'
 }
 
+function handleSave () {
+  studioStore.save(testName.value)
+}
+
 const eventManager = getEventManager()
+
+const testName = ref('')
 
 function handleClose () {
   eventManager.emit('studio:cancel', undefined)
