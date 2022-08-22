@@ -63,7 +63,7 @@ describe('http/request-middleware', () => {
     const { MaybeAttachCrossOriginCookies } = RequestMiddleware
 
     it('is a noop if experimental flag is off', async () => {
-      const ctx = getContext()
+      const ctx = await getContext()
 
       ctx.config.experimentalSessionAndOrigin = false
 
@@ -73,7 +73,7 @@ describe('http/request-middleware', () => {
     })
 
     it('is a noop if no current AUT URL', async () => {
-      const ctx = getContext()
+      const ctx = await getContext()
 
       ctx.getAUTUrl = () => ''
 
@@ -83,7 +83,7 @@ describe('http/request-middleware', () => {
     })
 
     it('prepends cookie jar cookies to request', async () => {
-      const ctx = getContext()
+      const ctx = await getContext()
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
@@ -91,28 +91,139 @@ describe('http/request-middleware', () => {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/22751
-    it('does not prepend cookie jar cookies to request if the cookie already exists on the request', async () => {
-      const ctx = getContext('new=one; exist=ing')
+    it('does not double up cookies on request if the cookie exists on the request and in the cookie jar', async () => {
+      const ctx = await getContext(['jar=cookie', 'request=cookie'])
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
       expect(ctx.req.headers['cookie']).to.equal('new=one; exist=ing')
     })
 
-    function getContext (cookieString = 'exist=ing') {
-      const cookieJar = {
-        getCookies: () => [CookieJar.parse('new=one')],
-      }
+    describe('tough-cookie integration', () => {
+      /**
+     * Depending on how cookies are defined, they need to be specified in order of most specific PATH matching to least specific PATH matching
+     * @see https://www.rfc-editor.org/rfc/rfc6265#section-5.4.
+     *
+     * If PATH is equal, cookies with earlier creation-times are listed before cookies with later creation-times
+     *
+     * If cookies of the same key are defined on different domains, both of which match the domain policy,
+     * and the path is the same, both cookies are included but are not ordered by specific domain
+     *
+     * Take the following example:
+     *
+     * KEY | VALUE | DOMAIN                | PATH
+     * foo | bar1  | subdomain.example.com | /
+     * foo | bar2  | .example.com          | /
+     * foo | bar3  | myapp.example.com     | /
+     * foo | bar4  | subdomain.example.com | /generic-path
+     * foo | bar5  | .example.com          | /generic-path
+     * foo | bar6  | myapp.example.com     | /generic-path
+     * foo | bar7  | subdomain.example.com | /generic-path/specific-path
+     * foo | bar8  | .example.com          | /generic-path/specific-path
+     * foo | bar9  | myapp.example.com     | /generic-path/specific-path
+     *
+     * A request to subdomain.example.com/generic-path/specific-path should have the cookies listed in the following order.
+     * foo=bar7|bar8 foo=bar5|bar4 foo=bar2|bar1
+     *
+     * A request to subdomain.example.com/generic-path should have the cookies listed in the following order.
+     * foo=bar5|bar4 foo=bar2|bar1
+     *
+     * A request to subdomain.example.com/, assuming foo=bar1 was created before foo=bar2, should have the cookies listed in the following order.
+     * foo=bar1 foo=bar2
+     *
+     * Thankfully, tough-cookie handles most of this for us.
+     * These tests are to leverage small integration tests between us and tough-cookie to make sure we are adding cookies correctly to the Cookie header given the above circumstances
+     */
+      describe('duplicate cookies', () => {
+        describe('does not add request cookie to request if cookie exists in jar, and preserves duplicate cookies when same key/value if', () => {
+          describe('subdomain and TLD', () => {
+            it('matches hierarchy', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic')
+
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
+            })
+
+            it('matches hierarchy and gives order to the cookie that was created first', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+
+              const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
+
+              const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
+
+              // make the TLD cookie created an hour earlier
+              TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie2; jar=cookie1; request=cookie')
+            })
+
+            it('matches hierarchy and gives order to the cookie with the most specific path, regardless of creation time', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+
+              const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
+
+              const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
+
+              // make the TLD cookie created an hour earlier
+              TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
+            })
+          })
+        })
+
+        it('omits cookies not fitting the cookie policy of the request', async () => {
+          const cookieJarCookies = [
+            'jar=cookie1; Domain=app.foobar.com; Path=/',
+            'jar=cookie2; Domain=.foobar.com; Path=/',
+            'jar=cookie3; Domain=exclude.foobar.com; Path=/',
+            'jar=cookie4; Domain=app.foobar.com; Path=/generic',
+            'jar=cookie5; Domain=.foobar.com; Path=/generic',
+            'jar=cookie6; Domain=exclude.foobar.com; Path=/generic',
+            'jar=cookie7; Domain=app.foobar.com; Path=/generic/specific',
+            'jar=cookie8; Domain=.foobar.com; Path=/generic/specific',
+            'jar=cookie9; Domain=exclude.foobar.com; Path=/generic/specific',
+          ]
+
+          const ctx = await getContext(['request=cookie'], cookieJarCookies, 'http://app.foobar.com/generic/specific')
+
+          const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
+
+          const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
+
+          // make the TLD cookie created an hour earlier
+          TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
+          await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+          expect(ctx.req.headers['cookie']).to.equal('jar=cookie7; jar=cookie8; jar=cookie5; jar=cookie4; jar=cookie1; jar=cookie2; request=cookie')
+        })
+      })
+    })
+
+    async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autAndRequestUrl = 'http://foobar.com') {
+      const cookieJar = new CookieJar()
+
+      await Promise.all(cookieJarStrings.map(async (cookieString) => {
+        try {
+          await cookieJar._cookieJar.setCookie(cookieString, autUrl)
+        } catch (e) {
+          // likely doesn't match the url policy, path, or is another type of cookie mismatch
+          return
+        }
+      }))
 
       return {
-        getAUTUrl: () => 'http://foobar.com',
+        getAUTUrl: () => autAndRequestUrl,
         getCookieJar: () => cookieJar,
         config: { experimentalSessionAndOrigin: true },
         req: {
-          proxiedUrl: 'http://foobar.com',
+          proxiedUrl: autAndRequestUrl,
           isAUTFrame: true,
           headers: {
-            cookie: cookieString,
+            cookie: requestCookieStrings,
           },
         },
       }
