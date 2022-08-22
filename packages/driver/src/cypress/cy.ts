@@ -211,6 +211,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // Private methods
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
+  ensureChildCommand: ReturnType<typeof createEnsures>['ensureChildCommand']
 
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
@@ -350,6 +351,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
+    this.ensureChildCommand = ensures.ensureChildCommand
 
     const snapshots = createSnapshots(this.$$, state)
 

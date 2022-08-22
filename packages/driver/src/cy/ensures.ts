@@ -134,6 +134,21 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
+  const ensureChildCommand = (command, args) => {
+    const subjects = cy.state('subjects')
+
+    if (subjects[command.get('chainerId')] === undefined) {
+      const stringifiedArg = $utils.stringifyActual(args[0])
+
+      $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        args: {
+          cmd: command.get('name'),
+          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+        },
+      })
+    }
+  }
+
   const ensureElementIsNotAnimating = ($el, coords = [], threshold) => {
     const lastTwo = coords.slice(-2)
 
@@ -293,18 +308,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       return
     }
 
-    returnFalse = () => {
-      cleanup()
-
-      return false
-    }
-
-    const cleanup = () => {
-      return state('onBeforeLog', null)
-    }
-
     // prevent any additional logs since this is an implicit assertion
-    state('onBeforeLog', returnFalse)
+    state('onBeforeLog', () => false)
 
     // verify the $el exists and use our default error messages
     try {
@@ -460,6 +465,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
+    ensureChildCommand,
   }
 }
 

@@ -58,7 +58,7 @@ const commandRunningFailed = async (Cypress, state, err) => {
 
 /*
  * Selectors are simple beasts: They take arguments, and return an idempotent function. They contain no retry
- *logic, have no awareness of cy.stop(), and are entirely synchronous.
+ * logic, have no awareness of cy.stop(), and are entirely synchronous.
  *
  * retrySelector is where we intergrate this simplicity with Cypress' retryability. It verifies the return value is
  * a sync function, and retries selectors until they pass or time out. It is conceptually similar to

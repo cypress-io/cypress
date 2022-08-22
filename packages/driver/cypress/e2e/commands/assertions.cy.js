@@ -265,15 +265,13 @@ describe('src/cy/commands/assertions', () => {
         }
         , Math.random() * 300)
 
-        cy
-        .get('body').should(($body) => {
+        cy.get('body').should(($body) => {
           expect($body.attr('class')).to.match(/foo/)
-
           expect($body.attr('id')).to.include('bar')
         }).then(function () {
           cy.$$('body').removeClass('foo').removeAttr('id')
 
-          const types = _.map(this.logs, (l) => l.get('type'))
+          const types = _.map(this.logs, 'attributes.type')
 
           expect(types).to.deep.eq(['parent', 'child', 'child'])
 
@@ -298,9 +296,9 @@ describe('src/cy/commands/assertions', () => {
         .then(function () {
           assertLogLength(this.logs, 8)
 
-          this.logs.slice(1).forEach((log) => {
-            expect(log.get('name')).to.eq('assert')
-          })
+          const names = _.map(this.logs, 'attributes.name')
+
+          expect(names).to.eql(['wrap', 'assert', 'assert', 'assert', 'assert', 'assert', 'assert', 'assert', 'assert'])
         })
       })
 
@@ -418,8 +416,7 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 2)
 
           expect(this.logs[0].get('name')).to.eq('contains')
-          expect(this.logs[0].get('state')).to.eq('failed')
-          expect(this.logs[0].get('error')).to.eq(err)
+          expect(this.logs[0].get('state')).to.eq('passed')
 
           expect(this.logs[1].get('name')).to.eq('assert')
           expect(this.logs[1].get('state')).to.eq('failed')
@@ -428,6 +425,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
+        cy.timeout(100)
         cy.contains('Nested Find').should('have.length', 2)
       })
 
@@ -530,7 +528,7 @@ describe('src/cy/commands/assertions', () => {
     }, () => {
       it('should not be true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('expected false to be true')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected false to be true')
 
           done()
         })
@@ -626,7 +624,7 @@ describe('src/cy/commands/assertions', () => {
           // the 'should' is not here because based on
           // when we check for the element to be detached
           // it never actually runs the assertion
-          expect(names).to.deep.eq(['get', 'click'])
+          expect(names).to.deep.eq(['get', 'click', 'should'])
           expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
@@ -650,7 +648,7 @@ describe('src/cy/commands/assertions', () => {
           const names = _.invokeMap(this.logs, 'get', 'name')
 
           // should is present here due to the retry
-          expect(names).to.deep.eq(['get', 'click', 'assert'])
+          expect(names).to.deep.eq(['get', 'click', 'should'])
           expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
@@ -736,7 +734,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.should(() => {})
+        cy.should('have.class', 'foo')
       })
     })
 
@@ -793,6 +791,7 @@ describe('src/cy/commands/assertions', () => {
         done()
       })
 
+      cy.timeout(50)
       cy.noop({}).should('have.property', 'foo')
     })
 
@@ -810,23 +809,8 @@ describe('src/cy/commands/assertions', () => {
         done()
       })
 
-      cy.get('body').then(() => {
-        expect(cy.currentSubject()).to.match('body')
-      })
-    })
-
-    it('sets type to child when subject matches', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          expect(log.get('type')).to.eq('child')
-
-          done()
-        }
-      })
-
-      cy.wrap('foo').then(() => {
-        expect('foo').to.eq('foo')
+      cy.get('body').then((subject) => {
+        expect(subject).to.match('body')
       })
     })
 
@@ -1516,12 +1500,16 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.length', 1)
       })
 
-      it('formats error _obj with cypress', (done) => {
+      it('formats error with cypress', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
 
-            expect(log.get('_error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
+            // querying.ts has registered a handler that will prevent this assertion from showing
+            // as completed. Remove it, so that this one properly shows a green check in the command log.
+            cy.state('onBeforeLog', null)
+
+            expect(log.get('error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
 
             done()
           }
@@ -2615,7 +2603,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('button:first').should('have.focus')
         .then(() => {
-          expect(stub).to.be.calledTwice
+          expect(stub).to.be.calledThrice
         })
       })
     })

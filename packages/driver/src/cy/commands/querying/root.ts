@@ -1,40 +1,25 @@
-import _ from 'lodash'
-import type { Log } from '../../../cypress/log'
-
-interface InternalRootOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: Log
-}
-
 export default (Commands, Cypress, cy, state) => {
-  Commands.addAll({
-    root (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalRootOptions = _.defaults({}, userOptions, { log: true })
+  Commands.addSelector('root', null, function root (options = {}) {
+    const log = options.log !== false && Cypress.log({
+      timeout: options.timeout,
+    })
 
-      if (options.log !== false) {
-        options._log = Cypress.log({
-          message: '',
-          timeout: options.timeout,
-        })
-      }
+    cy.state('current').set('timeout', options.timeout)
 
-      const log = ($el) => {
-        if (options._log) {
-          options._log!.set({ $el })
-        }
+    return () => {
+      const $el = state('withinSubject') || cy.$$('html')
 
-        return $el
-      }
+      log && log.set({
+        $el,
+        consoleProps: () => {
+          return {
+            Command: 'root',
+            Yielded: $el.get(0),
+          }
+        },
+      })
 
-      const withinSubject = state('withinSubject')
-
-      if (withinSubject) {
-        return log(withinSubject)
-      }
-
-      return cy.now('get', 'html', {
-        log: false,
-        timeout: options.timeout,
-      }).then(log)
-    },
+      return $el
+    }
   })
 }
