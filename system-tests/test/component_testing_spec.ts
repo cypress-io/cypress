@@ -125,6 +125,20 @@ describe(`Angular CLI major versions`, () => {
   }
 })
 
+describe('svelte component testing', () => {
+  systemTests.setup()
+
+  for (const bundler of ['webpack', 'vite']) {
+    systemTests.it(`svelte + ${bundler}`, {
+      project: `svelte-${bundler}`,
+      testingType: 'component',
+      spec: 'src/mount.cy.js',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+})
+
 describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 

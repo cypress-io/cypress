@@ -4,23 +4,19 @@
   "description": "Browser-based Component Testing for Svelte.js with Cypress.io 🧡",
   "main": "dist/cypress-svelte.cjs.js",
   "scripts": {
-    "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
+    "build": "rollup -c rollup.config.js",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "typecheck": "yarn tsd",
-    "test": "yarn cy:run",
-    "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.tsd.json",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit"
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
-    "debug": "^4.3.2",
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
+    "svelte": "^3.49.0",
     "typescript": "^4.2.3"
   },
   "peerDependencies": {
@@ -28,12 +24,8 @@
     "svelte": ">=3.0.0"
   },
   "files": [
-    "dist/**/*",
-    "src/**/*.js"
+    "dist/**/*"
   ],
-  "engines": {
-    "node": ">=8"
-  },
   "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
