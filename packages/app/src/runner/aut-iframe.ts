@@ -482,24 +482,22 @@ export class AutIframe {
   }
 
   startStudio () {
-    const studioRecorder = useStudioStore()
+    const studioStore = useStudioStore()
 
-    if (studioRecorder.isLoading) {
-      studioRecorder.start(this._body()?.[0])
-    }
+    studioStore.start(this._body()?.[0])
   }
 
   reattachStudio () {
-    const studioRecorder = useStudioStore()
+    const studioStore = useStudioStore()
 
-    if (studioRecorder.isActive) {
+    if (studioStore.isActive) {
       const body = this._body()?.[0]
 
       if (!body) {
         throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
       }
 
-      studioRecorder.attachListeners(body)
+      studioStore.attachListeners(body)
     }
   }
 }
