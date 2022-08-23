@@ -1,4 +1,4 @@
-const ONE_MINUTE = 1000 * 60
+const THIRTY_SECONDS = 1000 * 30
 
 describe('baseUrl', () => {
   it('should show baseUrl warning if Cypress cannot connect to provided baseUrl', () => {
@@ -113,7 +113,7 @@ describe('experimentalStudio', () => {
     cy.findByTestId('alert-body').contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
   })
 
-  it('is a valid config for e2e testing', { defaultCommandTimeout: ONE_MINUTE }, () => {
+  it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
     cy.scaffoldProject('e2e')
     cy.openProject('e2e')
     cy.withCtx(async (ctx) => {
