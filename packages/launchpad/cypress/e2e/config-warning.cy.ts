@@ -1,3 +1,5 @@
+const ONE_MINUTE = 1000 * 60
+
 describe('baseUrl', () => {
   it('should show baseUrl warning if Cypress cannot connect to provided baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
@@ -111,14 +113,12 @@ describe('experimentalStudio', () => {
     cy.findByTestId('alert-body').contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
   })
 
-  it('is a valid config for e2e testing', () => {
+  it('is a valid config for e2e testing', { defaultCommandTimeout: ONE_MINUTE }, () => {
     cy.scaffoldProject('e2e')
     cy.openProject('e2e')
-    cy.visitLaunchpad()
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `
         const { defineConfig } = require('cypress')
-        const plugin = require('./cypress/plugins')
 
         module.exports = defineConfig({
           experimentalStudio: true,
@@ -129,7 +129,9 @@ describe('experimentalStudio', () => {
       `)
     })
 
+    cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.get('h1').contains('Initializing Config').should('not.exist')
     cy.get('h1').contains('Choose a Browser')
   })
 })
