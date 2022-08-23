@@ -24,6 +24,7 @@ describe('runnables', () => {
       cy.visit('/').then((win) => {
         win.render(Object.assign({
           runner,
+          studioEnabled: true,
           runnerStore: {
             spec: {
               name: 'foo',
@@ -140,7 +141,7 @@ describe('runnables', () => {
     })
 
     it('displays error', () => {
-      start()
+      start({ studioEnabled: false })
 
       cy.contains('No tests found.').should('be.visible')
       cy.contains('Cypress could not detect tests in this file.').should('be.visible')
@@ -170,8 +171,7 @@ describe('runnables', () => {
       cy.get('.help-link').should('have.attr', 'target', '_blank')
     })
 
-    // FIXME: When studio support is re-introduced we can enable these tests.
-    it.skip('can launch studio', () => {
+    it('can launch studio', () => {
       start().then(() => {
         cy.stub(runner, 'emit')
 
