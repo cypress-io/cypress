@@ -1174,6 +1174,12 @@ export class Keyboard {
 
       if ($elements.isContentEditable(elToType)) {
         key.events.input = false
+
+        if (Cypress.browser.family === 'webkit') {
+          // WebKit will emit beforeinput itself when the text is
+          // inserted into a contenteditable input.
+          key.events.beforeinput = false
+        }
       } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }

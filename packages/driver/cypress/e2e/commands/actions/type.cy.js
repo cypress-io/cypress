@@ -1903,32 +1903,39 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('sends beforeinput in [contenteditable]', { browser: '!webkit' }, () => {
+      it('sends beforeinput in [contenteditable]', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          !isWebKit && expect(e.inputType).eq('insertText')
+          expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          !isWebKit && expect(e.inputType).eq('insertText')
+          expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('insertParagraph')
+          expect(e.inputType).eq('insertParagraph')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
+          expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteContentForward')
+
+          if (isWebKit) {
+            // WebKit does not distinguish between forward/backward
+            // deletion within a contenteditable field
+            expect(e.inputType).eq('deleteContentBackward')
+          } else {
+            expect(e.inputType).eq('deleteContentForward')
+          }
         }
 
         const stub = cy.stub()
@@ -1947,27 +1954,31 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('beforeinput special inputTypes', { browser: '!webkit' }, () => {
+      it('beforeinput special inputTypes (not WebKit)', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteWordForward')
+          expect(e.inputType).eq('deleteWordForward')
+
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteHardLineForward')
+          expect(e.inputType).eq('deleteHardLineForward')
+
           stub.callsFake(call3)
         }
+
         const call3 = (e) => {
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteWordBackward')
+          expect(e.inputType).eq('deleteWordBackward')
           stub.callsFake(call4)
         }
+
         const call4 = (e) => {
           expect(e.data).eq(null)
-          !isWebKit && expect(e.inputType).eq('deleteHardLineBackward')
+          expect(e.inputType).eq('deleteHardLineBackward')
         }
 
         const stub = cy.stub()
@@ -1984,6 +1995,50 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('{ctrl}{shift}{backspace}')
         .then(($el) => {
           expect(stub).callCount(4)
+        })
+      })
+
+      // We do not emit simulated `beforeinput` events for the WebKit browser's
+      // contenteditable fields, as `execCommand('insertText')` will emit `beforeinput`
+      // when called. As a result, we do not emit as many events as other browsers in
+      // this test case, which includes no-op deletions due to cursor positions.
+      it('beforeinput special inputTypes (WebKit)', { browser: 'webkit' }, () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+
+          // WebKit does not distinguish between forward/backward
+          // deletion within a contenteditable field using `execCommand('delete')`
+          expect(e.inputType).eq('deleteContentBackward')
+
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+
+          // WebKit does not distinguish between forward/backward
+          // deletion within a contenteditable field using `execCommand('delete')`
+          expect(e.inputType).eq('deleteContentBackward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('#input-types [contenteditable]')
+        .then(($el) => {
+          $el.text('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        // This command does not result in a change, as the cursor is in the right-most position
+        // and there is nothing to delete. This causes WebKit to not emit a beforeinput event.
+        .type('{ctrl}{del}')
+        // This command also does not result in a change, for the same reason.
+        .type('{ctrl}{shift}{del}')
+        .type('{ctrl}{backspace}')
+        .type('{ctrl}{shift}{backspace}')
+        .then(($el) => {
+          expect(stub).callCount(2)
         })
       })
 
