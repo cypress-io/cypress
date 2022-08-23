@@ -9,6 +9,17 @@ import { studioAssertionsMenu } from '../studio/assertions-menu'
 import selectorPlaygroundCSS from '!../selector-playground/selector-playground.scss'
 import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 
+const getOffset = (el) => {
+  // Get document-relative position by adding viewport scroll to viewport-relative gBCR
+  const rect = el.getBoundingClientRect()
+  const win = el.ownerDocument.defaultView
+
+  return {
+    top: rect.top + win.scrollY,
+    left: rect.left + win.scrollX,
+  }
+}
+
 const $ = $Cypress.$
 
 function getOrCreateHelperDom ({ $body, className, css }) {
@@ -88,25 +99,24 @@ function getOrCreateHelperDom2 ({ body, className, css }) {
   }
 }
 
-function getSelectorHighlightStyles ($el) {
+function getSelectorHighlightStyles (elements) {
   const borderSize = 2
 
-  return $el.map((__, el) => {
-    const $el = $(el)
-    const offset = $el.offset()
+  return elements.map((el) => {
+    const offset = getOffset(el)
 
     return {
       position: 'absolute',
-      margin: 0,
-      padding: 0,
-      width: $el.outerWidth(),
-      height: $el.outerHeight(),
+      margin: `0px`,
+      padding: `0px`,
+      width: `${el.offsetWidth}px`,
+      height: `${el.offsetHeight}px`,
       top: offset.top - borderSize,
       left: offset.left - borderSize,
-      transform: $el.css('transform'),
-      zIndex: getZIndex($el),
+      transform: getComputedStyle(el, null).transform,
+      zIndex: getZIndex($(el)),
     }
-  }).get()
+  })
 }
 
 let listeners = []
@@ -134,9 +144,10 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
     return
   }
 
-  const styles = getSelectorHighlightStyles($el)
+  const elements = $el.get()
+  const styles = getSelectorHighlightStyles(elements)
 
-  if ($el.length === 1) {
+  if (elements.length === 1) {
     removeContainerClickListeners()
 
     if (onClick) {
