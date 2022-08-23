@@ -107,9 +107,9 @@
     "vue",
     "react",
     "vue2",
-    "svelte",
     "react18",
-    "angular"
+    "angular",
+    "svelte"
   ],
   "bin": {
     "cypress": "bin/cypress"

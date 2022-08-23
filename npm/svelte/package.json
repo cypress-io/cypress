@@ -20,7 +20,7 @@
     "typescript": "^4.2.3"
   },
   "peerDependencies": {
-    "cypress": ">=10.3.0",
+    "cypress": ">=10.6.0",
     "svelte": ">=3.0.0"
   },
   "files": [
