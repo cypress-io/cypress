@@ -14,6 +14,7 @@
       :href="dashboardUrl"
     >
       <div
+        v-if="isRunsLoaded"
         class="flex justify-end items-center"
         data-cy="run-status-dots"
       >
@@ -57,6 +58,13 @@
         />
       </ExternalLink>
     </template>
+    <div
+      v-if="!isRunsLoaded"
+      data-cy="run-status-empty"
+      class="text-gray-400"
+    >
+      --
+    </div>
   </component>
 </template>
 
@@ -133,6 +141,10 @@ const props = defineProps<{
 
 const runs = computed(() => {
   return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+})
+
+const isRunsLoaded = computed(() => {
+  return !!props.gql?.data
 })
 
 const dotClasses = computed(() => {

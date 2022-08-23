@@ -111,14 +111,13 @@ function simulateRunData () {
 }
 
 function allVisibleSpecsShouldBePlaceholders () {
-  cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-latest')
-  .should('not.have.class', 'animate-spin')
-  .and('have.attr', 'data-cy-run-status', 'PLACEHOLDER')
+  // cy.findByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
+  cy.findAllByTestId('run-status-empty').should('exist').should('have.class', 'text-gray-400')
+  cy.findAllByTestId('run-status-dot-0').should('not.exist')
+  cy.findAllByTestId('run-status-dot-1').should('not.exist')
+  cy.findAllByTestId('run-status-dot-2').should('not.exist')
+  cy.findAllByTestId('run-status-dot-latest').should('not.exist')
 
-  cy.get('.spec-list-container').scrollTo('bottom')
   cy.get('.spec-list-container').scrollTo('bottom')
 }
 

@@ -104,8 +104,10 @@ describe('<RunStatusDots />', () => {
 
     it('renders placeholder without tooltip or link', () => {
       cy.findByTestId('external').should('not.exist')
-      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.findByTestId('run-status-empty').contains('--')
+      cy.findByTestId('run-status-empty').trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('not.exist')
+      cy.findByTestId('run-status-dots').should('not.exist')
     })
   })
 
