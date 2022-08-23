@@ -55,7 +55,8 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
-    it('should detect new spec', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
+    it.skip('should detect new spec', () => {
       cy.visitApp()
 
       cy.withCtx(async (ctx) => {
@@ -73,7 +74,8 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
-    it('should allow import of global styles in support file', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
+    it.skip('should allow import of global styles in support file', () => {
       cy.visitApp()
       cy.contains('styles.cy.js').click()
       cy.waitForSpecToFinish()
