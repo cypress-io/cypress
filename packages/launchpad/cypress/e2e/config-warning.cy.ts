@@ -115,6 +115,20 @@ describe('experimentalStudio', () => {
     cy.scaffoldProject('e2e')
     cy.openProject('e2e')
     cy.visitLaunchpad()
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
+        const { defineConfig } = require('cypress')
+        const plugin = require('./cypress/plugins')
+
+        module.exports = defineConfig({
+          experimentalStudio: true,
+          e2e: {
+            experimentalStudio: true
+          },
+        })
+      `)
+    })
+
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('h1').contains('Choose a Browser')
   })
