@@ -913,8 +913,8 @@ export class Keyboard {
         which = 0
         location = undefined
 
-        // WebKit will update inputs on a textInput event, resulting
-        // in double entry when the default is executed. But values
+        // WebKit will insert characters on a textInput event, resulting
+        // in double char entry when the default handler is executed. But values
         // inserted by textInput aren't always correct/aren't filtered
         // through our shouldUpdateValue logic, so we prevent textInput's
         // default logic by removing the key data from the event.
