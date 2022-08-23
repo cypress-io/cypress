@@ -114,6 +114,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     it('fires textInput event with e.data', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
         if (Cypress.isBrowser('webkit')) {
+          // For WebKit, the simulated textInput event is not
+          // emitted with the char data to prevent double entry.
           expect(e.originalEvent.data).to.eq('')
         } else {
           expect(e.originalEvent.data).to.eq('{')
@@ -1743,7 +1745,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
       })
 
-      // WebKit will still emit the submit event on the form in this case
+      // WebKit still emits the submit event on the form in this configuration.
       it('will not submit the form', { browser: '!webkit' }, function (done) {
         this.$forms.find('#multiple-inputs-and-multiple-submits').submit(() => {
           done(new Error('should not receive submit event'))

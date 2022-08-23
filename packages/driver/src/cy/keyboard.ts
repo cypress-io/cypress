@@ -913,7 +913,6 @@ export class Keyboard {
         which = 0
         location = undefined
 
-        // TODO(webkit): validate impact
         // WebKit will update inputs on a textInput event, resulting
         // in double entry when the default is executed. But values
         // inserted by textInput aren't always correct/aren't filtered
@@ -1177,7 +1176,8 @@ export class Keyboard {
 
         if (Cypress.isBrowser('webkit')) {
           // WebKit will emit beforeinput itself when the text is
-          // inserted into a contenteditable input.
+          // inserted into a contenteditable input using `execCommand('insertText')`.
+          // We prevent the simulated event from firing to avoid duplicative events.
           key.events.beforeinput = false
         }
       } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {

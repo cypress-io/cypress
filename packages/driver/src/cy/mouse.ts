@@ -506,9 +506,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         debug('moveSelectionToEnd due to click', el)
         // It's a curried function, so the 2 arguments are valid.
         // @ts-ignore
-        $selection.moveSelectionToEnd(el, {
-          onlyIfEmptySelection: true,
-        })
+        $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
       }
 
       return mouseDownPhase

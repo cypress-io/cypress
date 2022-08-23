@@ -575,9 +575,8 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
         $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
       }
     } else {
-      // TODO(webkit): comments here regarding selection of markup within contenteditable
-      // Maybe see if we can simplify this further? selectAllChildren might cover a lot of these
-      // edge cases across browsers
+      // WebKit must use selectAllChildren to ensure selections are made in all use cases.
+      // Some content, like HTML markup, cannot be selected using a range when inside a contenteditable field.
       if (Cypress.isBrowser('webkit')) {
         selection.selectAllChildren(el)
       } else {

@@ -866,14 +866,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       .on('input', push('input'))
       .on('keyup', push('keyup'))
 
-      const expectedEvents = [
-        'keydown', 'keypress', 'textInput', 'keyup',
-      ]
-
       cy.get(':text:first')
       .type('1')
       .then(() => {
-        expect(events).to.deep.eq(expectedEvents)
+        expect(events).to.deep.eq([
+          'keydown', 'keypress', 'textInput', 'keyup',
+        ])
       })
     })
 
@@ -895,15 +893,13 @@ describe('src/cy/commands/actions/type - #type', () => {
       .on('input', push('input'))
       .on('keyup', push('keyup'))
 
-      const expectedEvents = [
-        'keydown', 'keypress', 'textInput', 'input', 'keyup',
-        'keydown', 'keypress', 'textInput', 'keyup',
-      ]
-
       cy.get(':text:first')
       .type('12')
       .then(() => {
-        expect(events).to.deep.eq(expectedEvents)
+        expect(events).to.deep.eq([
+          'keydown', 'keypress', 'textInput', 'input', 'keyup',
+          'keydown', 'keypress', 'textInput', 'keyup',
+        ])
       })
     })
   })
@@ -950,11 +946,6 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/5456
-    // WebKit will select all input content on focus, which leaves
-    // our cursor logic to assume that any selections after focus should
-    // be ignored, lest the cursor not get moved to the end of the input.
-    // But this means that this user-updated selection value is also ignored,
-    // as we cannot tell where the selection came from.
     it('respects changed selection in focus handler', () => {
       cy.get('#input-without-value')
       .then(($el) => {
@@ -967,6 +958,13 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', 'baroo')
     })
 
+    // WebKit will select all input content on focus. This causes our
+    // cursor placement logic to be ignored, as we interpret the default
+    // selection as a user-provided selection that we do not want to override.
+    // We work around this by preventing the default selection on focus using
+    // our own capture-phase 'focus' event handler; this test ensures that user-set
+    // capture-phase events continue to function as expected for the purpose
+    // of selection updates.
     it('respects changed selection in focus handler during capture phase', () => {
       cy.get('#input-without-value')
       .then(($el) => {
@@ -1026,6 +1024,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get('#email-without-value')
       .type('b@foo.com')
       .should('have.value', 'b@foo.com')
+    })
+
+    it('overwrites text when selectAll in mouseup handler', () => {
+      cy.$$('#input-without-value').val('0').mouseup(function () {
+        $(this).select()
+      })
     })
 
     it('responsive to keydown handler', () => {
@@ -1810,8 +1814,8 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/7088
-    // In WebKit, setting the inputType is not supported
-    // by the InputEvent constructor:
+    // In WebKit, setting the inputType is not supported by the InputEvent constructor.
+    // This results in the inputType being unset in any of the simulated beforeinput events.
     // https://bugs.webkit.org/show_bug.cgi?id=170416
     describe('beforeInput event', () => {
       it('sends beforeinput in text input', () => {
@@ -1902,6 +1906,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      // In WebKit, simulated `beforeinput` events are not emitted for
+      // contenteditable inputs. The stubs are receiving the
+      // browser-emitted events, which is why the inputType values
+      // of these events are populated.
       it('sends beforeinput in [contenteditable]', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
@@ -1953,28 +1961,24 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('beforeinput special inputTypes (not WebKit)', { browser: '!webkit' }, () => {
+      it('beforeinput special inputTypes in [contenteditable] (not WebKit)', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
           expect(e.inputType).eq('deleteWordForward')
-
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
           expect(e.inputType).eq('deleteHardLineForward')
-
           stub.callsFake(call3)
         }
-
         const call3 = (e) => {
           expect(e.data).eq(null)
           expect(e.inputType).eq('deleteWordBackward')
           stub.callsFake(call4)
         }
-
         const call4 = (e) => {
           expect(e.data).eq(null)
           expect(e.inputType).eq('deleteHardLineBackward')
@@ -2000,8 +2004,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       // We do not emit simulated `beforeinput` events for the WebKit browser's
       // contenteditable fields, as `execCommand('insertText')` will emit `beforeinput`
       // when called. As a result, we do not emit as many events as other browsers in
-      // this test case, which includes no-op deletions due to cursor positions.
-      it('beforeinput special inputTypes (WebKit)', { browser: 'webkit' }, () => {
+      // this test case, which includes no-op deletions due to a terminal cursor position.
+      it('beforeinput special inputTypes in [contenteditable] (WebKit)', { browser: 'webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
@@ -3031,10 +3035,8 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
-          const expectedEvents = ['keydown', 'keypress', 'beforeinput', 'textInput', 'input', 'keyup']
-
           expect(table.data).to.deep.eq([
-            { Typed: 'f', 'Events Fired': expectedEvents.join(', '), 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
+            { Typed: 'f', 'Events Fired': 'keydown, keypress, beforeinput, textInput, input, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
           ])
         })
       })
