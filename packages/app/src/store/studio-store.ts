@@ -81,6 +81,15 @@ const tagNamesWithValue = [
   'TEXTAREA',
 ]
 
+// Single argument assertion: ['be.visible']
+type AssertionArgs_1 = [string]
+// Two argument assertion: ['have.text', '<some text>']
+type AssertionArgs_2 = [string, string]
+// Three argument assertion: ['have.attr', 'href', '<some value>']
+type AssertionArgs_3 = [string, string, string]
+
+type AssertionArgs = AssertionArgs_1 | AssertionArgs_2 | AssertionArgs_3
+
 export interface StudioLog {
   id?: number
   name: string
@@ -382,7 +391,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
     },
 
-    _addAssertion ($el: HTMLElement, ...args: unknown[]) {
+    _addAssertion ($el: HTMLElement, args: AssertionArgs) {
       const id = this._getId()
       const selector = getCypress().SelectorPlayground.getSelector($el)
 
@@ -717,7 +726,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       return false
     },
 
-    _generateAssertionMessage ($el: HTMLElement, ...args: any[]) {
+    _generateAssertionMessage ($el: HTMLElement, args: AssertionArgs) {
       const elementString = $el.tagName // $driverUtils.stringifyActual($el)
       const assertionString = args[0].replace(/\./g, ' ')
 
