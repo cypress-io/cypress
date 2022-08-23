@@ -62,12 +62,6 @@ export class IframeModel {
     const autStore = useAutStore()
 
     this.eventManager.on('url:changed', (url: string) => {
-      const studioStore = useStudioStore()
-
-      if (studioStore.isLoading) {
-        studioStore.setUrl(url)
-      }
-
       autStore.updateUrl(url)
     })
 
