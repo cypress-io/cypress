@@ -76,7 +76,7 @@ export const setOffset = (el: HTMLElement, offset: { top: number, left: number }
 }
 
 // Cherry picked from https://github.com/jquery/jquery/blob/016872ffe03ab9107b1bc62fae674a4809c3b23f/src/offset.js#L91-L97
-const getOffset = (el: HTMLElement) => {
+export const getOffset = (el: HTMLElement) => {
   // Get document-relative position by adding viewport scroll to viewport-relative gBCR
   const rect = el.getBoundingClientRect()
   const win = el.ownerDocument.defaultView

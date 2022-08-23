@@ -1,7 +1,7 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
-import { getElementDimensions, setOffset } from './dimensions'
+import { getElementDimensions, setOffset, getOffset } from './dimensions'
 
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
@@ -23,7 +23,8 @@ export class AutIframe {
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
-    private dom: any,
+    private selectorPlayground: any,
+    private studioRecorder: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -393,18 +394,18 @@ export class AutIframe {
     const selector = Cypress.SelectorPlayground.getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({
+    this._addOrUpdateSelectorPlaygroundHighlight(
       $el,
-      selector,
       $body,
-      showTooltip: true,
-      onClick: () => {
+      selector,
+      true,
+      () => {
         selectorPlaygroundStore.setNumElements(1)
         selectorPlaygroundStore.resetMethod()
         selectorPlaygroundStore.setSelector(selector)
         selectorPlaygroundStore.setValidity(!!el)
       },
-    })
+    )
   }
 
   _clearHighlight = () => {
@@ -412,7 +413,7 @@ export class AutIframe {
 
     if (!$body) return
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
+    this._addOrUpdateSelectorPlaygroundHighlight(null, $body)
     if (this._highlightedEl) {
       this._highlightedEl = undefined
     }
@@ -441,12 +442,12 @@ export class AutIframe {
       }
     }
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({
-      $el: $el && $el.length ? $el : null,
-      selector: selectorPlaygroundStore.selector,
-      $body: this._body(),
-      showTooltip: false,
-    })
+    this._addOrUpdateSelectorPlaygroundHighlight(
+      $el && $el.length ? $el : null,
+      this._body(),
+      selectorPlaygroundStore.selector,
+      false,
+    )
   }
 
   getElements (cypressDom) {
@@ -759,5 +760,118 @@ export class AutIframe {
     }
 
     return parseFloat(value)
+  }
+
+  private _getOrCreateHelperDom ({ body, className, css }) {
+    let containers = body.querySelectorAll(`.${className}`)
+
+    if (containers.length > 0) {
+      const shadowRoot = containers[0].shadowRoot
+
+      return {
+        container: containers[0],
+        shadowRoot,
+        reactContainer: shadowRoot.querySelector('.react-container'),
+      }
+    }
+
+    // Create container element
+
+    const container = document.createElement('div')
+
+    container.classList.add(className)
+
+    container.style.position = 'static'
+
+    body.appendChild(container)
+
+    // Create react-container element
+
+    const shadowRoot = container.attachShadow({ mode: 'open' })
+
+    const reactContainer = document.createElement('div')
+
+    reactContainer.classList.add('react-container')
+
+    shadowRoot.appendChild(reactContainer)
+
+    // Prepend style element
+
+    const style = document.createElement('style')
+
+    style.innerHTML = css.toString()
+
+    shadowRoot.prepend(style)
+
+    return {
+      container,
+      shadowRoot,
+      reactContainer,
+    }
+  }
+
+  private _getSelectorHighlightStyles (elements) {
+    const borderSize = 2
+
+    return elements.map((el) => {
+      const offset = getOffset(el)
+
+      return {
+        position: 'absolute',
+        margin: `0px`,
+        padding: `0px`,
+        width: `${el.offsetWidth}px`,
+        height: `${el.offsetHeight}px`,
+        top: offset.top - borderSize,
+        left: offset.left - borderSize,
+        transform: getComputedStyle(el, null).transform,
+        zIndex: this._getZIndex(el),
+      }
+    })
+  }
+
+  private listeners: any[] = []
+
+  private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
+    const { container, shadowRoot, reactContainer } = this._getOrCreateHelperDom({
+      body: $body.get(0),
+      className: '__cypress-selector-playground',
+      css: this.selectorPlayground.css,
+    })
+
+    const removeContainerClickListeners = () => {
+      this.listeners.forEach((listener) => {
+        reactContainer.removeEventListener('click', listener)
+      })
+
+      this.listeners = []
+    }
+
+    if (!$el) {
+      this.selectorPlayground.highlight.unmount(reactContainer)
+      removeContainerClickListeners()
+      container.remove()
+
+      return
+    }
+
+    const elements = $el.get()
+    const styles = this._getSelectorHighlightStyles(elements)
+
+    if (elements.length === 1) {
+      removeContainerClickListeners()
+
+      if (onClick) {
+        reactContainer.addEventListener('click', onClick)
+        this.listeners.push(onClick)
+      }
+    }
+
+    this.selectorPlayground.highlight.render(reactContainer, {
+      selector,
+      appendTo: shadowRoot,
+      showTooltip,
+      styles,
+    })
   }
 }
