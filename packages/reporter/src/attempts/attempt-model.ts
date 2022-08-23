@@ -114,10 +114,11 @@ export default class Attempt {
   updateLog (props: LogProps) {
     const log = this._logs[props.id]
 
-    if (log) {
-      log.update(props)
+    if (!log) {
+      return
     }
 
+    log.update(props)
     if (log.name === 'session' && !log.displayName) {
       this._updateSession(props)
     }

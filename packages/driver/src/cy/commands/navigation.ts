@@ -36,7 +36,11 @@ const reset = (test: any = {}) => {
   // visited about blank again
   hasVisitedAboutBlank = false
 
-  currentlyVisitingAboutBlank = false
+  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
+
+  // make sure we reset that we haven't visited about blank again
+  // strict test isolation resets the navigation history for us.
+  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
 
   id = test.id
 }
@@ -1191,9 +1195,6 @@ export default (Commands, Cypress, cy, state, config) => {
             .set('query', existing.search)
             .set('hash', existing.hash)
 
-            // replace is broken in electron so switching
-            // to href for now
-            // $utils.locReplace(window, newUri.toString())
             $utils.locHref(newUri.toString(), window)
 
             // we are returning a Promise which never resolves

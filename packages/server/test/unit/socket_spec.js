@@ -748,8 +748,8 @@ describe.only('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, reset:session:state)', () => {})
-    context('on(get:cached:state)', function (done) {
+    context('on(backend:request, reset:test:state)', () => {})
+    context('on(get:cached:state)', function () {
       it('returns cached state', function (done) {
         this.client.emit('get:cached:state', (cachedState) => {
           expect(cachedState).deep.eq({
