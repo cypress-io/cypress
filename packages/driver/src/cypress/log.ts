@@ -355,15 +355,7 @@ export class Log {
     this.set('snapshots', snapshots)
 
     if (options.next && shouldRebindSnapshotFn) {
-      const originalLogSnapshotFn = this.snapshot
-
-      this.snapshot = function () {
-        // restore the original snapshot function
-        this.snapshot = originalLogSnapshotFn
-
-        // call orig fn with next as name
-        return originalLogSnapshotFn.call(this, options.next)
-      }
+      this.set('next', options.next)
     }
 
     return this
@@ -376,10 +368,10 @@ export class Log {
       return this
     }
 
-    _.defaults(options, {
-      at: null,
-      next: null,
-    })
+    if (this.get('next')) {
+      name = this.get('next')
+      this.set('next', null)
+    }
 
     if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
       const activeSpecBridgeOriginPolicyIfApplicable = this.state('currentActiveOriginPolicy') || undefined
@@ -620,24 +612,6 @@ class LogManager {
 
       log.set(options)
 
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
-      // if end was passed in
-      // go ahead and end
-      if (log.get('end')) {
-        log.end()
-      }
-
-      if (log.get('error')) {
-        log.error(log.get('error'))
-      }
-
-      log.wrapConsoleProps()
-
       const onBeforeLog = state('onBeforeLog')
 
       // dont trigger log if this function
@@ -648,12 +622,23 @@ class LogManager {
         }
       }
 
-      // set the log on the command
-      const current = state('current')
+      const command = state('current')
 
-      if (current) {
-        current.log(log)
+      if (command) {
+        command.log(log)
       }
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'))
+      }
+
+      log.wrapConsoleProps()
 
       this.addToLogs(log)
 
@@ -667,9 +652,8 @@ class LogManager {
 
       this.triggerLog(log)
 
-      // if not current state then the log is being run
-      // with no command reference, so just end the log
-      if (!current) {
+      // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
+      if (!command || log.get('end')) {
         log.end()
       }
 

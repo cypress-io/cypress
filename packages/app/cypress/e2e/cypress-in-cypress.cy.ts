@@ -41,7 +41,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it(`handles automation missing in ${testingType}`, () => {
@@ -74,11 +74,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.contains('h3', 'The Cypress extension is missing')
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.get('[data-cy="select-browser"]').click()
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.withCtx((ctx, { sinon }) => {
         sinon.stub(ctx.actions.project, 'launchProject').resolves()
@@ -92,7 +92,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
     })
 
-    it(`scales the AUT correctly in ${testingType}`, () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23307
+    it.skip(`scales the AUT correctly in ${testingType}`, () => {
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
@@ -117,7 +118,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       // validate that the width we set in `withCtx` above is the starting point
       cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
-      cy.percySnapshot('initial state')
+      // cy.percySnapshot('initial state') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       .click({ force: true })
@@ -152,7 +153,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
             assertNoScaleShown()
           }
 
-          cy.percySnapshot(`panel 2 at ${ position } px`)
+          /*
+            TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+            cy.percySnapshot(`panel 2 at ${ position } px`)
+          */
         })
       })
 
@@ -171,11 +175,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.contains('Expand Specs List')
 
         assertNoScaleShown()
-        cy.percySnapshot('tall viewport')
+        // cy.percySnapshot('tall viewport') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
         cy.viewport(1500, 400)
         cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('be.visible')
-        cy.percySnapshot('short viewport')
+        // cy.percySnapshot('short viewport') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       })
 
       cy.get('[data-cy="select-browser"]').as('selectBrowser')

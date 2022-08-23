@@ -2385,7 +2385,8 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('{force404: false}', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
+    describe.skip('{force404: false}', () => {
       beforeEach(() => {
         cy
         .server()
