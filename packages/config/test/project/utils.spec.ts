@@ -1042,6 +1042,7 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
@@ -1134,6 +1135,7 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
               foo: {
