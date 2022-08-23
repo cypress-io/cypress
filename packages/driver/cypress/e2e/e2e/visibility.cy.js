@@ -1,9 +1,12 @@
 describe('visibility', () => {
+  it.only('some random regression', () => {
+    cy.visit('/fixtures/regression.html')
+    cy.get('#hello').should('be.visible')
+  })
+
   // https://github.com/cypress-io/cypress/issues/631
   describe('with overflow and transform - slider', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/issue-631.html')
-
       // first slide is visible by default, nothing wrong here
       cy.get('[name="test1"]').should('be.visible')
       cy.get('[name="test2"]').should('not.be.visible')
