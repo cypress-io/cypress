@@ -77,7 +77,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
     it('expands the left nav bar by default', () => {
       cy.findByTestId('sidebar').should('have.css', 'width', '248px') // assert width to ensure transition has finished
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it('highlights indicator on hover showing you can click to expand', () => {
@@ -87,14 +87,15 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.findByTestId('toggle-sidebar').realHover()
       cy.get(navIndicatorSelector).should('be.visible')
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findByTestId('sidebar').contains('todos').should('be.visible')
       cy.findByTestId('toggle-sidebar').click()
       cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
-      cy.percySnapshot()
+
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
@@ -107,7 +108,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
     it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
@@ -123,7 +124,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('li span').contains('s')
       cy.get('li span').contains('f')
 
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       cy.get('[aria-label="Close"]').click()
       cy.findAllByTestId('keyboard-modal').should('not.exist')
     })
@@ -134,7 +135,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.findByTestId('sidebar-header').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
       cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
@@ -243,7 +244,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.findAllByTestId('spec-item').first().click()
       cy.location('hash').should('contain', '#/specs/runner')
       cy.contains('.router-link-exact-active', 'Specs').should('not.exist')
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.findByTestId('sidebar-link-specs-page').click()
       cy.location('hash').should('equal', '#/specs')

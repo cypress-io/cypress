@@ -110,7 +110,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
     // should clear after reload
     cy.reload()
@@ -172,7 +172,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // We could consider removing this after percy is
     // up and running for e2e tests.
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('should show visit failure blank page', () => {
@@ -181,7 +181,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .click()
 
     cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('set the correct viewport values from CLI', () => {

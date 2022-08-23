@@ -15,6 +15,7 @@ describe('suites', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
+        studioEnabled: true,
         runnerStore: {
           spec: {
             name: 'foo.js',
@@ -129,8 +130,7 @@ describe('suites', () => {
     })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
-  describe.skip('studio button', () => {
+  describe('studio button', () => {
     it('displays studio icon with half transparency when hovering over test title', () => {
       cy.contains('nested suite 1')
       .closest('.runnable-wrapper')

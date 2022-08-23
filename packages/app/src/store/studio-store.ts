@@ -77,7 +77,6 @@ const tagNamesWithValue = [
   'LI',
   'OPTION',
   'PROGRESS',
-  'PARAM',
   'TEXTAREA',
 ]
 
@@ -113,127 +112,6 @@ interface StudioRecorderState {
   _body?: Element
   _currentId: number
 }
-
-// interface StudioRecorderGetters {
-//   hasRunnableId: (state: StudioRecorderState) => boolean
-//   isOpen: (state: StudioRecorderState) => boolean
-//   isEmpty: (state: StudioRecorderState) => boolean
-//   isReady: (state: StudioRecorderState) => boolean
-//   hookId: (state: StudioRecorderState) => string
-//   needsUrl: (state: StudioRecorderState) => boolean
-//   testError: (state: StudioRecorderState) => {id: string, state: 'failed'}
-// }
-
-// interface StudioRecorderActions {
-//   setTestId: (testId: string) => void
-
-//   setSuiteId: (suiteId: string) => void
-
-//   clearRunnableIds: () => void
-
-//   showInitModal: () => void
-
-//   closeInitModal: () => void
-
-//   openInstructionModal: () => void
-
-//   closeInstructionModal: () => void
-
-//   showSaveModal: () => void
-
-//   closeSaveModal: () => void
-
-//   startLoading: () => void
-//   setInactive: () => void
-
-//   setUrl: (url?: string) => void
-
-//   testFailed: () => void
-
-//   initialize: (config: any, state: any) => void
-
-//   interceptTest: (test: any) => void
-
-//   start: (body: any) => void
-
-//   stop: () => void
-
-//   reset: () => void
-
-//   cancel: () => void
-
-//   startSave: () => void
-
-//   save: (testName?: string) => void
-
-//   visitUrl: (url?: string) => void
-
-//   _recordEvent: (event: any) => void
-
-//   _removeLastLogIfType: (selector?: string) => void
-
-//   removeLog: (commandId?: number) => void
-
-//   _addLog: (log: StudioLog) => void
-
-//   _addAssertion: ($el: HTMLElement, ...args: unknown[]) => void
-
-//   saveError: (err: Error) => {id: string, err: any}
-
-//   setFileDetails: (fileDetails: any) => void
-
-//   setAbsoluteFile: (absoluteFile: any) => void
-
-//   setRunnableTitle: (runnableTitle: any) => void
-
-//   _clearPreviousMouseEvent: () => void
-
-//   _matchPreviousMouseEvent: (el: any) => boolean
-
-//   attachListeners: (body: HTMLBodyElement) => void
-
-//   removeListeners: () => void
-
-//   copyToClipboard: (commandsText: any) => Promise<void>
-
-//   _trustEvent: (event: any) => boolean
-
-//   _recordMouseEvent: (event: any) => void
-
-//   _getId: () => void
-
-//   _getName: (event: any, $el: any) => any
-
-//   _getMessage: (event: any, $el: any) => any
-
-//   _shouldRecordEvent: (event: any, $el: any) => boolean
-
-//   _generateLog: (args: { id: `s${string}`, name: string, message: unknown, type: 'parent' | 'child', number?: number }) => CommandLog
-
-//   _generateBothLogs: (log: any) => [CommandLog, CommandLog]
-
-//   _addClearLog: (selector: any) => void
-
-//   _updateLog: (log: StudioLog) => void
-
-//   _updateLastLog: (selector: string | undefined, name: string, message: unknown) => boolean
-
-//   _generateAssertionMessage: ($el: HTMLElement, ...args: any[]) => string
-
-//   _isAssertionsMenu: ($el: any) => any
-
-//   _openAssertionsMenu: (event: any) => void
-
-//   _closeAssertionsMenu: () => void
-
-//   _generatePossibleAssertions: ($el: JQuery<Element>) => Array<{
-//     type: string
-//     options?: unknown[] | undefined
-//   }>
-// }
-
-// TODO: Add types for getters and actions here
-// export type StudioStore = Store<'studioRecorder', StudioRecorderState, StudioRecorderGetters, StudioRecorderActions>
 
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
