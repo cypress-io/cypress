@@ -23,7 +23,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-  'EXPERIMENTAL_STUDIO_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
   'NODE_VERSION_DEPRECATION_SYSTEM',
   'NODE_VERSION_DEPRECATION_BUNDLED',
@@ -218,6 +217,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSingleTabRunMode',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalStudio',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -668,6 +673,12 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
+    },
+    {
+      name: 'experimentalStudio',
+      errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
+      isWarning: false,
+      testingTypes: ['component'],
     },
     {
       name: 'testIsolation',

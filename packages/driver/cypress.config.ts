@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   'projectId': 'ypt4pf',
-  // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
   'experimentalStudio': true,
   'hosts': {
     '*.foobar.com': '127.0.0.1',
