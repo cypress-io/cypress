@@ -612,6 +612,19 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.class', 'does-not-have-class')
       })
 
+      it('has a pending state while retrying', (done) => {
+        cy.on('command:retry', (command) => {
+          const [getLog, shouldLog] = cy.state('current').get('logs')
+
+          expect(getLog.get('state')).to.eq('pending')
+          expect(shouldLog.get('state')).to.eq('pending')
+
+          done()
+        })
+
+        cy.get('button:first', { timeout: 100 }).should('have.class', 'does-not-have-class')
+      })
+
       it('throws when the subject isnt in the DOM', function (done) {
         cy.$$('button:first').click(function () {
           $(this).addClass('foo').remove()
