@@ -21,7 +21,18 @@ function createEntry (options) {
   const config = {
     input,
     plugins: [
-      resolve({ preferBuiltins: true }), commonjs(),
+      resolve({ preferBuiltins: true }),
+      commonjs(),
+      ts({
+        check: false,
+        tsconfigOverride: {
+          compilerOptions: {
+            declaration: format === 'es',
+            noEmit: false,
+            module: format === 'cjs' ? 'es2015' : 'esnext',
+          },
+        },
+      }),
     ],
     output: {
       banner,
@@ -32,32 +43,15 @@ function createEntry (options) {
     },
   }
 
-  if (input === 'src/index.ts') {
-    if (format === 'es') {
-      config.output.file = pkg.module
-    }
+  if (format === 'es') {
+    config.output.file = pkg.module
+  }
 
-    if (format === 'cjs') {
-      config.output.file = pkg.main
-    }
-  } else {
-    config.output.file = input.replace(/^src\//, 'dist/')
+  if (format === 'cjs') {
+    config.output.file = pkg.main
   }
 
   console.log(`Building ${format}: ${config.output.file}`)
-
-  config.plugins.push(
-    ts({
-      check: false,
-      tsconfigOverride: {
-        compilerOptions: {
-          declaration: format === 'es',
-          noEmit: false,
-          module: format === 'cjs' ? 'es2015' : 'esnext',
-        },
-      },
-    }),
-  )
 
   return config
 }
