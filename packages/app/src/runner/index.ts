@@ -26,7 +26,6 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
-import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -108,7 +107,6 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: useStudioStore(),
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
