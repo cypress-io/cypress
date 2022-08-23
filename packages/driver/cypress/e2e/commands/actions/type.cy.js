@@ -22,7 +22,7 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
-const isWebKit = Cypress.browser.family === 'webkit'
+const isWebKit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
@@ -916,7 +916,6 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('changes the elements value for multiple keys', () => {
-      // TODO(webkit): verify why there used to be a space here
       cy.get('#input-without-value').type('foo').then(($text) => {
         expect($text).to.have.value('foo')
       })

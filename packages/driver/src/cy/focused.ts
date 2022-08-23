@@ -141,7 +141,7 @@ export const create = (state: StateFunc) => ({
       return hasFocused = true
     }
 
-    if (Cypress.browser.family === 'webkit') {
+    if (Cypress.isBrowser('webkit')) {
       // By default, WebKit will select the contents of an input element when the input is focused.
       // This is problematic, as we use the existence of any selection to determine whether
       // we adjust the input's cursor and prepare the input for receiving additional content.

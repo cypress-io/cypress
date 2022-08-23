@@ -919,7 +919,7 @@ export class Keyboard {
         // inserted by textInput aren't always correct/aren't filtered
         // through our shouldUpdateValue logic, so we prevent textInput's
         // default logic by removing the key data from the event.
-        if (Cypress.browser.family === 'webkit') {
+        if (Cypress.isBrowser('webkit')) {
           data = ''
         } else {
           data = text === '\r' ? '↵' : text
@@ -1175,7 +1175,7 @@ export class Keyboard {
       if ($elements.isContentEditable(elToType)) {
         key.events.input = false
 
-        if (Cypress.browser.family === 'webkit') {
+        if (Cypress.isBrowser('webkit')) {
           // WebKit will emit beforeinput itself when the text is
           // inserted into a contenteditable input.
           key.events.beforeinput = false

@@ -122,7 +122,7 @@ export const logger = {
     const logTable = ({ name, data, columns }) => {
       let tableData = data
 
-      if (Cypress.browser.family === 'webkit') {
+      if (Cypress.isBrowser('webkit')) {
         // WebKit will hang when we attempt to log element references
         // within a table. We replace the element with a simplified display
         // string in this case.

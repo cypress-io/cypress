@@ -578,7 +578,7 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
       // TODO(webkit): comments here regarding selection of markup within contenteditable
       // Maybe see if we can simplify this further? selectAllChildren might cover a lot of these
       // edge cases across browsers
-      if (Cypress.browser.family === 'webkit') {
+      if (Cypress.isBrowser('webkit')) {
         selection.selectAllChildren(el)
       } else {
         let range

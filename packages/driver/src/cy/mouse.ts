@@ -57,7 +57,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
 
 export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
-  const isWebKit = Cypress.browser.family === 'webkit'
+  const isWebKit = Cypress.isBrowser('webkit')
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     const constructor = el.ownerDocument.defaultView.PointerEvent

@@ -113,7 +113,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     it('fires textInput event with e.data', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        if (Cypress.browser.family === 'webkit') {
+        if (Cypress.isBrowser('webkit')) {
           expect(e.originalEvent.data).to.eq('')
         } else {
           expect(e.originalEvent.data).to.eq('{')
@@ -1004,7 +1004,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // WebKit does not round to the step value when calling stepUp/stepDown,
       // as we do here for the ArrowUp handler.
       // https://bugs.webkit.org/show_bug.cgi?id=244206
-      .should('have.value', Cypress.browser.family === 'webkit' ? '14.34' : '14')
+      .should('have.value', Cypress.isBrowser('webkit') ? '14.34' : '14')
     })
   })
 
@@ -1065,7 +1065,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // WebKit does not round to the step value when calling stepUp/stepDown,
       // as we do here for the ArrowDown handler
       // https://bugs.webkit.org/show_bug.cgi?id=244206
-      .should('have.value', Cypress.browser.family === 'webkit' ? '10.34' : '11')
+      .should('have.value', Cypress.isBrowser('webkit') ? '10.34' : '11')
     })
 
     it('downarrow ignores current selection', () => {

@@ -90,7 +90,7 @@ export default (Commands, Cypress, cy) => {
 
       cy.fireFocus(el)
 
-      if (Cypress.browser.family === 'webkit' && (
+      if (Cypress.isBrowser('webkit') && (
         $elements.isInput(el) || $elements.isTextarea(el)
       )) {
         // Force selection to end in WebKit, unless selection
