@@ -614,6 +614,27 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
+    Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
+      log: Cypress.Log
+      name?: string
+      options?: any
+      specBridge: string
+      addSnapshot: (snapshot: any, options: any, shouldRebindSnapshotFn: boolean) => Cypress.Log
+    }) => {
+      const eventID = log.get('id')
+
+      Cypress.primaryOriginCommunicator.once(`snapshot:for:log:generated:${eventID}`, (generatedCrossOriginSnapshot) => {
+        const snapshot = generatedCrossOriginSnapshot.body ? generatedCrossOriginSnapshot : null
+
+        addSnapshot.apply(log, [snapshot, options, false])
+      })
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(specBridge, 'generate:snapshot:for:log', {
+        name,
+        id: eventID,
+      })
+    })
+
     Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
       // Sync stable if the expected origin has loaded.
       // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already

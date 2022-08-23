@@ -55,18 +55,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     // if our total exceeds the timeout OR the total + the interval
     // exceed the runnables timeout, then bail
     if ((total + interval) >= options._runnableTimeout) {
-      // snapshot the DOM since we are bailing
-      // so the user can see the state we're in
-      // when we fail
-      if (log) {
-        log.snapshot()
-      }
-
-      const assertions = options.assertions
-
-      if (assertions) {
-        finishAssertions(assertions)
-      }
+      finishAssertions()
 
       let onFail
 

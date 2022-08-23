@@ -588,7 +588,8 @@ is being covered by another element:
         cy.get('#hidden-basic-label').selectFile({ contents: '@foo' }, { force: true })
       })
 
-      it('can scroll to input', () => {
+      // TODO(webkit): fix+unskip for experimental webkit
+      it('can scroll to input', { browser: '!webkit' }, () => {
         const scrolled = []
 
         cy.on('scrolled', ($el, type) => {
@@ -646,7 +647,8 @@ is being covered by another element:
         })
       })
 
-      it('can specify scrollBehavior in options', () => {
+      // TODO(webkit): fix+unskip for experimental webkit
+      it('can specify scrollBehavior in options', { browser: '!webkit' }, () => {
         cy.get('#scroll').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
