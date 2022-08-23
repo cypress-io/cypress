@@ -10,6 +10,11 @@ function getCypress () {
   return eventManager.getCypress()
 }
 
+function stringifyActual (val: any) {
+  // @ts-expect-error - this exists, but not in TypeScript.
+  return Cypress.utils.stringifyActual(val)
+}
+
 const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
@@ -79,6 +84,15 @@ const tagNamesWithValue = [
   'PROGRESS',
   'TEXTAREA',
 ]
+
+// Single argument assertion: ['be.visible']
+type AssertionArgs_1 = [string]
+// Two argument assertion: ['have.text', '<some text>']
+type AssertionArgs_2 = [string, string]
+// Three argument assertion: ['have.attr', 'href', '<some value>']
+type AssertionArgs_3 = [string, string, string]
+
+type AssertionArgs = AssertionArgs_1 | AssertionArgs_2 | AssertionArgs_3
 
 export interface StudioLog {
   id?: number
@@ -391,7 +405,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
     },
 
-    _addAssertion ($el: HTMLElement, ...args: unknown[]) {
+    _addAssertion ($el: HTMLElement, ...args: AssertionArgs) {
       const id = this._getId()
       const selector = getCypress().SelectorPlayground.getSelector($el)
 
@@ -409,7 +423,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         id,
         selector,
         name: 'assert',
-        message: this._generateAssertionMessage($el, args),
+        message: this._generateAssertionMessage($el, ...args),
       }
 
       this._generateBothLogs(reporterLog).forEach((commandLog) => {
@@ -637,7 +651,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         testId: this.testId,
         hookId: this.hookId,
         name,
-        message: 'message!', // message ? $driverUtils.stringifyActual(message) : undefined,
+        message: message ? stringifyActual(message) : undefined,
         type,
         state: 'passed',
         instrument: 'command',
@@ -726,8 +740,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       return false
     },
 
-    _generateAssertionMessage ($el: HTMLElement, ...args: any[]) {
-      const elementString = $el.tagName // $driverUtils.stringifyActual($el)
+    _generateAssertionMessage ($el: HTMLElement, ...args: AssertionArgs) {
+      const elementString = stringifyActual($el)
       const assertionString = args[0].replace(/\./g, ' ')
 
       let message = `expect **${elementString}** to ${assertionString}`
