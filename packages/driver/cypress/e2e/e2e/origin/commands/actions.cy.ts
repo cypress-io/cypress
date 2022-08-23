@@ -466,7 +466,8 @@ context('cy.origin actions', () => {
       })
     })
 
-    it('.submit()', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23480
+    it.skip('.submit()', () => {
       cy.get('a[data-cy="dom-link"]').click()
       cy.origin('http://foobar.com:3500', () => {
         cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')
