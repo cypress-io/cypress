@@ -10,6 +10,11 @@ function getCypress () {
   return eventManager.getCypress()
 }
 
+function stringifyActual (val: any) {
+  // @ts-expect-error - this exists, but not in TypeScript.
+  return Cypress.utils.stringifyActual(val)
+}
+
 const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
@@ -391,7 +396,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
     },
 
-    _addAssertion ($el: HTMLElement, args: AssertionArgs) {
+    _addAssertion ($el: HTMLElement, ...args: AssertionArgs) {
       const id = this._getId()
       const selector = getCypress().SelectorPlayground.getSelector($el)
 
@@ -409,7 +414,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         id,
         selector,
         name: 'assert',
-        message: this._generateAssertionMessage($el, args),
+        message: this._generateAssertionMessage($el, ...args),
       }
 
       this._generateBothLogs(reporterLog).forEach((commandLog) => {
@@ -637,7 +642,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         testId: this.testId,
         hookId: this.hookId,
         name,
-        message: 'message!', // message ? $driverUtils.stringifyActual(message) : undefined,
+        message: message ? stringifyActual(message) : undefined,
         type,
         state: 'passed',
         instrument: 'command',
@@ -726,8 +731,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       return false
     },
 
-    _generateAssertionMessage ($el: HTMLElement, args: AssertionArgs) {
-      const elementString = $el.tagName // $driverUtils.stringifyActual($el)
+    _generateAssertionMessage ($el: HTMLElement, ...args: AssertionArgs) {
+      const elementString = stringifyActual($el)
       const assertionString = args[0].replace(/\./g, ' ')
 
       let message = `expect **${elementString}** to ${assertionString}`
