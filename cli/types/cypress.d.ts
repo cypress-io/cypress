@@ -81,7 +81,7 @@ declare namespace Cypress {
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-  type BrowserFamily = 'chromium' | 'firefox' | 'webkit'
+  type BrowserFamily = 'chromium' | 'firefox'
 
   /**
    * Describes a browser Cypress can control
