@@ -1,19 +1,9 @@
 <template>
-  <div v-if="!studioStore.url && studioStore.isActive">
-    <b>Please enter a valid URL to visit.</b>
-  </div>
-
-  <button
-    v-if="studioStore.url && studioStore.isActive"
-    @click="visitUrl"
-  >
-    Go ➜
-  </button>
-
   <div class="border-y flex border-gray-50 mt-5 w-full justify-between">
     <div class="flex">
       <div class="border-r flex border-gray-50 py-2 pr-3 pl-1 items-center">
         <svg
+          v-if="studioStore.url && studioStore.isActive && !studioStore.isFailed"
           height="30"
           width="30"
           class="animate-pulse"
@@ -25,6 +15,10 @@
             fill="#e94f5f"
           />
         </svg>
+        <span
+          v-else
+          class="px-2"
+        ><i-cy-object-magic-wand-dark-mode_x16 /></span>
         <span class="font-semibold">{{ t('runner.studio.studio').toUpperCase() }}</span>
         <span class="ml-1 text-gray-600"> {{ t('versions.beta').toUpperCase() }}</span>
       </div>
@@ -108,8 +102,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
-import { getEventManager } from '.'
-import { useStudioStore } from '../store/studio-store'
+import { getEventManager } from '../'
+import { useStudioStore } from '../../store/studio-store'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
 const controlsClassName = 'border-r border-gray-50 py-4 px-3'
@@ -139,13 +133,5 @@ function handleCopyCommands () {
 
 function handleSaveCommands () {
   studioStore.startSave()
-}
-
-function visitUrl () {
-  if (!studioStore.url) {
-    throw Error('Cannot visit blank url')
-  }
-
-  studioStore.visitUrl(studioStore.url)
 }
 </script>

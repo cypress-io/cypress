@@ -3,11 +3,18 @@ import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
 import type { StudioSavePayload } from '../runner/event-manager-types'
+import { useAutStore } from './aut-store'
 
 function getCypress () {
   const eventManager = getEventManager()
 
   return eventManager.getCypress()
+}
+
+function getAutUrl () {
+  const autStore = useAutStore()
+
+  return autStore.url
 }
 
 function stringifyActual (val: any) {
@@ -214,6 +221,8 @@ export const useStudioStore = defineStore('studioRecorder', {
           this.setUrl(studio.url)
         }
       }
+
+      this.setUrl(getAutUrl())
 
       if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)

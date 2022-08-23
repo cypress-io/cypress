@@ -819,7 +819,10 @@
       "copyCommands": "Copy Commands to Clipboard",
       "commandsCopied": "Commands Copied!",
       "availableCommands": "Available Commands",
-      "giveFeedback": "Give Feedback"
+      "giveFeedback": "Give Feedback",
+      "enterValidUrl": "Enter a valid URL to visit",
+      "continue": "Continue",
+      "actionCancel": "Cancel"
     }
   },
   "warnings": {

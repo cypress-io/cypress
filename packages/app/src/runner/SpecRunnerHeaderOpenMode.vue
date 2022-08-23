@@ -24,13 +24,21 @@
           <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
         <input
+          ref="autUrlInputRef"
           target="_blank"
-          :value="autUrl"
+          :value="studioStore.needsUrl ? urlInProgress : autUrl"
           data-cy="aut-url-input"
-          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate flex flex-grow"
+          class="flex flex-grow mr-12px leading-normal max-w-100% text-indigo-500 z-51 self-center hocus-link-default truncate"
           @input="setStudioUrl"
           @click="openInNewTab"
+          @keyup.enter="visitUrl"
         >
+        <StudioUrlPrompt
+          v-if="studioStore.needsUrl"
+          :aut-url-input-ref="autUrlInputRef"
+          @submit="visitUrl"
+          @cancel="() => eventManager.emit('studio:cancel', undefined)"
+        />
       </div>
 
       <div
@@ -164,7 +172,8 @@ import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import StudioControls from './StudioControls.vue'
+import StudioControls from './studio/StudioControls.vue'
+import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
@@ -196,6 +205,10 @@ const specStore = useSpecStore()
 const route = useRoute()
 
 const studioStore = useStudioStore()
+
+const urlInProgress = ref('')
+
+const autUrlInputRef = ref<HTMLInputElement>()
 
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
@@ -239,7 +252,17 @@ const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 function setStudioUrl (event: Event) {
   const url = (event.currentTarget as HTMLInputElement).value
 
-  studioStore.setUrl(url)
+  urlInProgress.value = url
+}
+
+function visitUrl () {
+  studioStore.setUrl(urlInProgress.value)
+
+  if (!studioStore.url) {
+    throw Error('Cannot visit blank url')
+  }
+
+  studioStore.visitUrl(studioStore.url)
 }
 
 function openInNewTab () {
