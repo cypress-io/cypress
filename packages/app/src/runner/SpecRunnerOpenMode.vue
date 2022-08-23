@@ -10,7 +10,6 @@
   />
   <StudioSaveModal
     :open="studioStore.saveModalIsOpen"
-    :studio-store="studioStore"
     @close="studioStore.closeSaveModal"
   />
   <AdjustRunnerStyleDuringScreenshot

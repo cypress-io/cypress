@@ -1,4 +1,5 @@
 import StudioSaveModal from './StudioSaveModal.vue'
+import { useStudioStore } from '../../store/studio-store'
 
 describe('StudioSaveModal', () => {
   it('renders hidden by default', () => {
@@ -13,13 +14,15 @@ describe('StudioSaveModal', () => {
   })
 
   it('submits the form', () => {
-    const save = cy.stub()
+    const studioStore = useStudioStore()
 
-    cy.mount(<StudioSaveModal studioStore={{ save }} open />)
+    const saveStub = cy.stub(studioStore, 'save')
+
+    cy.mount(<StudioSaveModal open />)
     cy.get('#testName').focus().type('my test')
 
     cy.findByText('Save Test').click().then(() => {
-      expect(save).to.be.calledOnceWith('my test')
+      expect(saveStub).to.be.calledOnceWith('my test')
     })
   })
 })

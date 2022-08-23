@@ -44,14 +44,15 @@ import { useI18n } from '@cy/i18n'
 import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
 import { ref } from 'vue'
 import Input from '../../../../frontend-shared/src/components/Input.vue'
+import { useStudioStore } from '../../store/studio-store'
 
 const { t } = useI18n()
+const studioStore = useStudioStore()
 
 const testName = ref('')
 
 const props = defineProps<{
   open: boolean
-  studioStore: any
 }>()
 
 const emit = defineEmits<{
@@ -61,7 +62,7 @@ const emit = defineEmits<{
 function submit (e) {
   e.preventDefault()
 
-  props.studioStore.save(testName.value)
+  studioStore.save(testName.value)
 }
 
 </script>
