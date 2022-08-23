@@ -199,6 +199,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "experimentalModifyObstructiveThirdPartyCode",
   "experimentalSourceRewriting",
   "experimentalSingleTabRunMode",
+  "experimentalStudio",
   "fileServerFolder",
   "fixturesFolder",
   "excludeSpecPattern",
