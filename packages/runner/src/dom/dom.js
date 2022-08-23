@@ -40,6 +40,54 @@ function getOrCreateHelperDom ({ $body, className, css }) {
   return { $container, shadowRoot, $reactContainer }
 }
 
+function getOrCreateHelperDom2 ({ body, className, css }) {
+  let containers = body.querySelectorAll(`.${className}`)
+
+  if (containers.length > 0) {
+    const shadowRoot = containers[0].shadowRoot
+
+    return {
+      container: containers[0],
+      shadowRoot,
+      reactContainer: shadowRoot.querySelector('.react-container'),
+    }
+  }
+
+  // Create container element
+
+  const container = document.createElement('div')
+
+  container.classList.add(className)
+
+  container.style.position = 'static'
+
+  body.appendChild(container)
+
+  // Create react-container element
+
+  const shadowRoot = container.attachShadow({ mode: 'open' })
+
+  const reactContainer = document.createElement('div')
+
+  reactContainer.classList.add('react-container')
+
+  shadowRoot.appendChild(reactContainer)
+
+  // Prepend style element
+
+  const style = document.createElement('style')
+
+  style.innerHTML = css.toString()
+
+  shadowRoot.prepend(style)
+
+  return {
+    container,
+    shadowRoot,
+    reactContainer,
+  }
+}
+
 function getSelectorHighlightStyles ($el) {
   const borderSize = 2
 
@@ -61,17 +109,27 @@ function getSelectorHighlightStyles ($el) {
   }).get()
 }
 
+let listeners = []
+
 function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
-  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
-    $body,
+  const { container, shadowRoot, reactContainer } = getOrCreateHelperDom2({
+    body: $body.get(0),
     className: '__cypress-selector-playground',
     css: selectorPlaygroundCSS,
   })
 
+  const removeContainerClickListeners = () => {
+    listeners.forEach((listener) => {
+      reactContainer.removeEventListener('click', listener)
+    })
+
+    listeners = []
+  }
+
   if (!$el) {
-    selectorPlaygroundHighlight.unmount($reactContainer[0])
-    $reactContainer.off('click')
-    $container.remove()
+    selectorPlaygroundHighlight.unmount(reactContainer)
+    removeContainerClickListeners()
+    container.remove()
 
     return
   }
@@ -79,12 +137,15 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
   const styles = getSelectorHighlightStyles($el)
 
   if ($el.length === 1) {
-    $reactContainer
-    .off('click')
-    .on('click', onClick)
+    removeContainerClickListeners()
+
+    if (onClick) {
+      reactContainer.addEventListener('click', onClick)
+      listeners.push(onClick)
+    }
   }
 
-  selectorPlaygroundHighlight.render($reactContainer[0], {
+  selectorPlaygroundHighlight.render(reactContainer, {
     selector,
     appendTo: shadowRoot,
     showTooltip,
