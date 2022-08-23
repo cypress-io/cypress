@@ -271,7 +271,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#go', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
+  context.skip('#go', () => {
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
@@ -735,7 +736,8 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14445
-    it('should eventually fail on assertion despite redirects', (done) => {
+    // TODO: skip flaky test https://github.com/cypress-io/cypress/issues/23472
+    it.skip('should eventually fail on assertion despite redirects', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
 
