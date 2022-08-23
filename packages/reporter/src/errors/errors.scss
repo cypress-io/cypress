@@ -59,6 +59,14 @@ $code-border-radius: 4px;
     text-align: center;
   }
 
+  .studio-err-wrapper {
+    display: none;
+  }
+
+  &.studio-active .attempt-failed .studio-err-wrapper {
+    display: block;
+  }
+
   .runnable-err {
     border-left: 2px solid $fail;
     background-color: $err-background;

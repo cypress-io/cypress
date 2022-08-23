@@ -243,7 +243,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.visitApp()
       cy.contains('dom-content.spec').click()
 
-      cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
+      cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
       cy.findByLabelText('Stats').should('not.exist')
       cy.findByTestId('specs-list-panel').should('not.be.visible')
       cy.findByTestId('reporter-panel').should('not.be.visible')

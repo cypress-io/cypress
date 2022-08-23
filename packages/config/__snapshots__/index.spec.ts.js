@@ -7,7 +7,6 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   "experimentalRunEvents",
   "experimentalSessionSupport",
   "experimentalShadowDomSupport",
-  "experimentalStudio",
   "firefoxGcInterval",
   "ignoreTestFiles",
   "integrationFolder",

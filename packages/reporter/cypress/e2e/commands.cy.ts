@@ -958,7 +958,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
   })
 
   // FIXME: When studio support is re-introduced we can enable these tests.
-  context.skip('studio commands', () => {
+  context('studio commands', () => {
     beforeEach(() => {
       addCommand(runner, {
         id: 10,
@@ -990,10 +990,10 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
     it('only parent studio commands display remove button', () => {
       cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').should('be.visible')
+      .find('.studio-command-remove').should('exist')
 
       cy.contains('#studio-command-child').closest('.command')
-      .find('.studio-command-remove').should('not.be.visible')
+      .find('.studio-command-remove').should('not.exist')
     })
 
     it('emits studio:remove:command with number when delete button is clicked', () => {

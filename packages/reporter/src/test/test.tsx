@@ -106,6 +106,7 @@ interface TestProps {
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
+  studioEnabled: boolean
 }
 
 @observer
@@ -192,7 +193,7 @@ class Test extends Component<TestProps> {
       )
     }
 
-    if (appState.studioActive) {
+    if (this.props.studioEnabled) {
       controls.push(
         <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>

@@ -59,8 +59,6 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    UnifiedRunner.StudioRecorder,
-    // created once when opening runner at the very top level in main.ts
     window.ws,
   )
 }
@@ -109,7 +107,6 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: getEventManager().studioRecorder,
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
@@ -150,7 +147,6 @@ function setupRunner () {
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
-    getEventManager().studioRecorder,
   )
 
   createIframeModel()
@@ -345,7 +341,7 @@ function runSpecE2E (spec: SpecFile) {
 }
 
 export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**
