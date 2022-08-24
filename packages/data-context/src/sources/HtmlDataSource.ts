@@ -81,6 +81,7 @@ export class HtmlDataSource {
       const remoteStates = this.ctx._apis.projectApi.getRemoteStates()
 
       if (remoteStates) {
+        console.log('DATE CONTEXT: remote state', remoteStates)
         cfg.remote = remoteStates.getPrimary()
       }
     }

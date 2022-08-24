@@ -28,6 +28,7 @@ export default defineConfig({
   },
 
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'react',
       bundler: 'webpack',

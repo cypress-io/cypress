@@ -78,7 +78,20 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
+  _handleUnload () {
+    this._clearAllCookies()
+  }
+
+  _handleBeforeUnload () {
+    console.log('beforeunload')
+    this.reporterBus.emit('reporter:restart:test:run')
+
+    this._clearAllCookies()
+    this._setUnload()
+  }
+
+  addGlobalListeners (state: MobxRunnerStore, config, options: AddGlobalListenerOptions) {
+    console.log('addGlobalListeners')
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
     if (!this.ws.hasListeners('connect')) {
@@ -93,6 +106,8 @@ export class EventManager {
         // then there is nothing to rerun
         return
       }
+
+      console.log('rerun spec')
 
       return this.rerunSpec()
     }
@@ -128,6 +143,7 @@ export class EventManager {
     })
 
     this.ws.on('change:to:url', (url) => {
+      console.log('change:to:url')
       window.location.href = url
     })
 
@@ -154,11 +170,22 @@ export class EventManager {
       rerun()
     })
 
+    // if (config.testingType === 'component') {}
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
+      console.log('dev-server:compile:success')
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
       }
     })
+
+    // this.reporterBus.on('runner:start', () => {
+    //   console.log('RUN')
+    //   performance.mark('run-s')
+    //   Cypress.run(() => {
+    //     performance.mark('run-e')
+    //     performance.measure('run', 'run-s', 'run-e')
+    //   })
+    // })
 
     socketRerunEvents.forEach((event) => {
       this.ws.on(event, rerun)
@@ -199,6 +226,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('runner:console:log', (logId) => {
+      console.log('on(runner:console:log)', logId)
       if (!Cypress) return
 
       logger.clearLog()
@@ -352,15 +380,13 @@ export class EventManager {
     const $window = this.$CypressDriver.$(window)
 
     // This is a test-only even. It's used to
-    // trigger a re-reun for the drive rerun.cy.js spec.
+    // trigger a re-rerun for the drive rerun.cy.js spec.
     $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('unload', () => {
-      this._clearAllCookies()
-    })
+    $window.on('unload', this._handleUnload)
 
     // when our window triggers beforeunload
     // we know we've change the URL and we need
@@ -368,12 +394,9 @@ export class EventManager {
     // additionally we set unload to true so
     // that Cypress knows not to set any more
     // cookies
-    $window.on('beforeunload', () => {
-      this.reporterBus.emit('reporter:restart:test:run')
+    $window.on('beforeunload', this._handleBeforeUnload)
 
-      this._clearAllCookies()
-      this._setUnload()
-    })
+    console.log('here')
   }
 
   start (config) {
@@ -383,6 +406,7 @@ export class EventManager {
   }
 
   setup (config) {
+    console.log('setup!')
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
@@ -406,15 +430,14 @@ export class EventManager {
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
-        // get the current runnable in case we reran mid-test due to a visit
-        // to a new domain
+        // get the current runnable in case we reran mid-test due to a visit to a new domain
         this.ws.emit('get:existing:run:state', (state: RunState = {}) => {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
           }
 
-          this.studioRecorder.initialize(config, state)
+          console.log('get:existing:run:state', state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -441,6 +464,8 @@ export class EventManager {
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
+          this.studioRecorder.initialize(config, state)
+
           if (state.currentId) {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
@@ -455,6 +480,7 @@ export class EventManager {
   }
 
   _addListeners () {
+    console.log('_addListeners')
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
@@ -580,6 +606,8 @@ export class EventManager {
           return
         }
 
+        // console.log('driverToLocalEvents: event', event, args)
+
         // @ts-ignore
         // TODO: UNIFY-1318 - strongly typed event emitter.
         return this.emit(event, ...args)
@@ -681,6 +709,7 @@ export class EventManager {
     })
 
     Cypress.primaryOriginCommunicator.on('url:changed', ({ url }) => {
+      console.log('primaryOriginCommunicator: on URL Change', url)
       this.localBus.emit('url:changed', url)
     })
 
@@ -747,6 +776,7 @@ export class EventManager {
   }
 
   stop () {
+    this.reporterBus.removeAllListeners()
     this.localBus.removeAllListeners()
     this.ws.off()
   }
@@ -756,17 +786,44 @@ export class EventManager {
       return
     }
 
+    console.log('teardown')
+
     state.setIsLoading(true)
 
     if (!isRerun) {
-      // only clear session state when a new spec is selected
+      console.log('clear session state')
+      // only clear test state when a new spec is selected
       Cypress.backend('reset:session:state')
     }
 
-    // when we are re-running we first need to stop cypress always
+    // when we are re-running we first need to stop cypress always to stop runner
     Cypress.stop()
     // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
     Cypress.primaryOriginCommunicator.removeAllListeners()
+
+    // @ts-ignore
+    const $window = this.$CypressDriver.$(window)
+
+    // This is a test-only even. It's used to
+    // trigger a re-rerun for the drive rerun.cy.js spec.
+    $window.off('test:trigger:rerun', rerun)
+
+    // when we actually unload then
+    // nuke all of the cookies again
+    // so we clear out unload
+    $window.off('unload', this._handleUnload)
+
+    // when our window triggers beforeunload
+    // we know we've change the URL and we need
+    // to clear our cookies
+    // additionally we set unload to true so
+    // that Cypress knows not to set any more
+    // cookies
+    $window.off('beforeunload', this._handleBeforeUnload)
+
+    Cypress.teardown()
+    window.Cypress = undefined
+
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
 
@@ -791,7 +848,7 @@ export class EventManager {
     // this probably isn't 100% necessary since Cypress will fall out of scope
     // but we want to be aggressive here and force GC early and often
     Cypress.removeAllListeners()
-
+    console.log('restarting....')
     this.localBus.emit('restart')
   }
 
@@ -880,7 +937,7 @@ export class EventManager {
     this.localBus.emit('save:app:state', state)
   }
 
-  // usefulf for testing
+  // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
   }

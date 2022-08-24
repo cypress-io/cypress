@@ -1361,6 +1361,7 @@ export default {
       },
 
       run (fn) {
+        console.log(_runner)
         if (_startTime == null) {
           _startTime = dayjs().toJSON()
         }

@@ -21,6 +21,7 @@ export function useEventManager () {
   function initializeRunnerLifecycleEvents () {
     // these events do not use GraphQL
     eventManager.on('restart', () => {
+      console.log('on restart')
       // If we get the event to restart but have already navigated away from the runner, don't execute the spec
       if (specStore.activeSpec) {
         const isRerun = true

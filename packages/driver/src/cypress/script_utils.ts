@@ -49,4 +49,8 @@ export default {
 
     return runScriptsFromUrls(specWindow, scripts)
   },
+
+  destroySourceMaps: () => {
+    $sourceMapUtils.destroySourceMapConsumers()
+  },
 }

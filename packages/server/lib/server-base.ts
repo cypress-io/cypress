@@ -348,6 +348,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
+      console.log('reset server state')
       this.networkProxy.reset()
       this.netStubbingState.reset()
       this._remoteStates.reset()

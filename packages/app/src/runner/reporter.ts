@@ -18,7 +18,7 @@ async function unmountReporter () {
 
 async function resetReporter () {
   if (hasInitializeReporter) {
-    await getEventManager().resetReporter()
+    await getEventManager().resetReporter() //
   }
 }
 

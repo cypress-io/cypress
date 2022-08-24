@@ -61,15 +61,20 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
-          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
-            {appState.studioActive ? (
-              <RestartIcon transform="scale(-1 1)" />
-            ) : (
-              <RestartIcon />
-            )}
-          </button>
-        </Tooltip>
+        <>
+          {/* <button aria-label='Start tests' className='start' onClick={emit('start')}>
+            <PlayIcon />
+          </button> */}
+          <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
+            <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
+              {appState.studioActive ? (
+                <RestartIcon transform="scale(-1 1)" />
+              ) : (
+                <RestartIcon />
+              )}
+            </button>
+          </Tooltip>
+        </>
       ))}
       {ifThen(!!appState.nextCommandName, (
         <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>

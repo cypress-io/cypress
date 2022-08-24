@@ -3,6 +3,10 @@ import Command from './command'
 import CommandModel from './command-model'
 
 describe('commands', () => {
+  before(() => {
+    cy.wait(200)
+  })
+
   describe('sessionPill', () => {
     const statusList = [
       'creating',

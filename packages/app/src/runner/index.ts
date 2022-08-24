@@ -132,7 +132,7 @@ function setupRunner () {
   const runnerUiStore = useRunnerUiStore()
   const config = getRunnerConfigFromWindow()
 
-  getEventManager().addGlobalListeners(mobxRunnerStore, {
+  getEventManager().addGlobalListeners(mobxRunnerStore, config, {
     randomString: runnerUiStore.randomString,
     element: getAutomationElementId(),
   })
@@ -174,6 +174,8 @@ function getSpecUrl (namespace: string, specSrc: string) {
 function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
 
+  _eventManager?.stop()
+
   return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
@@ -185,6 +187,7 @@ let isTorndown = false
  * any associated events.
  */
 export async function teardown () {
+  useSnapshotStore().$reset()
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   _eventManager?.teardown(getMobxRunnerStore())
@@ -222,6 +225,7 @@ export function addCrossOriginIframe (location) {
  *
  */
 function runSpecCT (spec: SpecFile) {
+  console.log('run spec ct')
   // TODO: UNIFY-1318 - figure out how to manage window.config.
   const config = getRunnerConfigFromWindow()
 
@@ -287,6 +291,7 @@ function setSpecForDriver (spec: SpecFile) {
  * initialize Cypress on the AUT.
  */
 function runSpecE2E (spec: SpecFile) {
+  console.log('run spec e2e')
   // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
   const config = getRunnerConfigFromWindow()
 
@@ -341,6 +346,8 @@ function runSpecE2E (spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
+
+  console.log('initialize Cypress (driver) with the AUT!')
   getEventManager().initialize($autIframe, config)
 }
 
@@ -356,16 +363,19 @@ export function getRunnerConfigFromWindow () {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  console.log('Inject the global `UnifiedRunner`')
   await dfd.promise
 
   isTorndown = false
 
+  console.log('getRunnerConfigFromWindow')
   const config = getRunnerConfigFromWindow()
 
   if (isTorndown) {
     return
   }
 
+  console.log('getRunnerConfigFromWindow')
   const autStore = useAutStore()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
@@ -375,6 +385,7 @@ async function initialize () {
 
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
+  console.log('initializeEventManager')
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
@@ -406,13 +417,9 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
-  await teardownSpec(isRerun)
+  await Promise.all([teardownSpec(isRerun), UnifiedReporterAPI.resetReporter()])
 
-  const mobxRunnerStore = getMobxRunnerStore()
-
-  mobxRunnerStore.setSpec(spec)
-
-  await UnifiedReporterAPI.resetReporter()
+  getMobxRunnerStore().setSpec(spec)
 
   UnifiedReporterAPI.setupReporter()
 

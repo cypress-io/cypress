@@ -61,6 +61,7 @@ type ReporterEvent =
 
 const reporterEvents: ReporterEvent[] = [
   // "go:to:file"
+  'runner:start',
   'runner:restart',
   'runner:abort',
   'runner:console:log',

@@ -59,9 +59,10 @@ export class IframeModel {
       return this._updateViewport({ viewportHeight, viewportWidth })
     })
 
-    const autStore = useAutStore()
-
     this.eventManager.on('url:changed', (url: string) => {
+      // console.log('update URL', url)
+      const autStore = useAutStore()
+
       autStore.updateUrl(url)
     })
 
@@ -107,6 +108,7 @@ export class IframeModel {
   }
 
   setSnapshots = (snapshotProps: AutSnapshot) => {
+    console.log('set snapshots')
     const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
 
