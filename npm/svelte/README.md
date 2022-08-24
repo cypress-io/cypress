@@ -6,6 +6,7 @@ Mount Svelte components in the open source [Cypress.io](https://www.cypress.io/)
 
 ## Install
 
+- Requires Svelte >= 3
 - Requires Cypress v10.6.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
 
