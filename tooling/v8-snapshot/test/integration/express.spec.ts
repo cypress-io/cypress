@@ -43,5 +43,5 @@ describe('integration: express', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 })

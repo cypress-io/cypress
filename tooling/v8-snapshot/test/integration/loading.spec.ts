@@ -50,7 +50,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   it('loads an entry esm module importing a lodash function', async () => {
     const projectName = 'v8-snapshot/esm'
@@ -88,7 +88,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   it('loads a healthy module that requires an external one', async () => {
     const projectName = 'v8-snapshot/external-from-healthy'
@@ -127,7 +127,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   if (process.platform === 'darwin') {
     it('loads an app loading and using fsevents which has native module component', async () => {
@@ -166,7 +166,7 @@ describe('loading', () => {
       } catch (err: any) {
         assert.fail(err.toString())
       }
-    }).timeout(20000)
+    })
   }
 
   it('loads a cached module that modifies require cache', async () => {
@@ -209,7 +209,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   it('loads an uncached module that modifies require cache', async () => {
     const projectName = 'v8-snapshot/require-cache'
@@ -252,7 +252,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   it('loads from full path provided via variable', async () => {
     const projectName = 'v8-snapshot/require-full-path-var'
@@ -290,7 +290,7 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 
   it('loads all cached ', async () => {
     const projectName = 'v8-snapshot/stealthy-require'
@@ -333,5 +333,5 @@ describe('loading', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(20000)
+  })
 })
