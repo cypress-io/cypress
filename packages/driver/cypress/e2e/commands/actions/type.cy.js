@@ -958,6 +958,25 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', 'baroo')
     })
 
+    // WebKit will select all input content on focus. This causes our
+    // cursor placement logic to be ignored, as we interpret the default
+    // selection as a user-provided selection that we do not want to override.
+    // We work around this by preventing the default selection on focus using
+    // our own capture-phase 'focus' event handler; this test ensures that user-set
+    // capture-phase events continue to function as expected for the purpose
+    // of selection updates.
+    it('respects changed selection in focus handler during capture phase', () => {
+      cy.get('#input-without-value')
+      .then(($el) => {
+        $el.val('foo')
+        $el.get(0).addEventListener('focus', (e) => {
+          e.currentTarget.setSelectionRange(0, 1)
+        }, { capture: true })
+      })
+      .type('bar')
+      .should('have.value', 'baroo')
+    })
+
     it('overwrites text when selectAll in mouseup handler', () => {
       cy.$$('#input-without-value').val('0').mouseup(function () {
         $(this).select()
