@@ -31,7 +31,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         return ctx
       },
       render: (gqlVal) => {
-        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} />
+        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} mostRecentUpdate={null} />
       },
     })
   }
@@ -78,7 +78,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.get('@specsListInput').type(longestSpec.fileName)
         cy.get('[data-cy="spec-list-directory"]').first()
-        .should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
+        .should('contain', longestSpec.relative.replace(`/${longestSpec.baseName}`, ''))
 
         cy.get('[data-cy="spec-list-file"]').last().within(() => {
           cy.contains('a', longestSpec.baseName)
@@ -91,6 +91,11 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@specsListInput').clear().type(directory)
         cy.get('[data-cy="spec-list-directory"]').first().should('contain', directory)
         cy.percySnapshot('matching directory search')
+
+        // Support full relative path search
+        cy.get('@specsListInput').clear().type(longestSpec.relative)
+        cy.get('[data-cy="spec-list-directory"]').first().should('contain', directory)
+        cy.get('[data-cy="spec-list-file"]').should('contain', longestSpec.baseName)
 
         // test interactions
 

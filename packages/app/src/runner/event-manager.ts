@@ -11,6 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { getAutIframeModel } from '.'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -54,6 +55,8 @@ export class EventManager {
   studioRecorder: any
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
+  // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
+  ws: Socket
 
   constructor (
     // import '@packages/driver'
@@ -64,10 +67,11 @@ export class EventManager {
     selectorPlaygroundModel: any,
     // StudioRecorder constructor
     StudioRecorderCtor: any,
-    private ws: Socket,
+    ws: Socket,
   ) {
     this.studioRecorder = new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
+    this.ws = ws
   }
 
   getCypress () {
@@ -337,6 +341,13 @@ export class EventManager {
       rerun()
     })
 
+    this.ws.on('aut:destroy:init', () => {
+      const autIframe = getAutIframeModel()
+
+      autIframe.destroy()
+      this.ws.emit('aut:destroy:complete')
+    })
+
     // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
@@ -601,6 +612,27 @@ export class EventManager {
     // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+    })
+
+    Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
+      log: Cypress.Log
+      name?: string
+      options?: any
+      specBridge: string
+      addSnapshot: (snapshot: any, options: any, shouldRebindSnapshotFn: boolean) => Cypress.Log
+    }) => {
+      const eventID = log.get('id')
+
+      Cypress.primaryOriginCommunicator.once(`snapshot:for:log:generated:${eventID}`, (generatedCrossOriginSnapshot) => {
+        const snapshot = generatedCrossOriginSnapshot.body ? generatedCrossOriginSnapshot : null
+
+        addSnapshot.apply(log, [snapshot, options, false])
+      })
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(specBridge, 'generate:snapshot:for:log', {
+        name,
+        id: eventID,
+      })
     })
 
     Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {

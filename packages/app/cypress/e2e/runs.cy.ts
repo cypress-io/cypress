@@ -389,8 +389,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').click()
-      cy.findByText('Mock Project').click()
+      cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
@@ -659,7 +658,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
 
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
-      cy.percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {

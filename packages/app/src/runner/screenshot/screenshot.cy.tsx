@@ -53,6 +53,11 @@ function removeGlobalStyles () {
 
 describe('screenshot', () => {
   captureTypes.forEach((capture) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23424
+    if (capture === 'runner') {
+      return
+    }
+
     it(`takes a standard screenshot with viewport: ${capture}`, () => {
       cy.viewport(500, 500)
       mount(() => <Layout />, {

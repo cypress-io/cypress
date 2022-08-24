@@ -11,7 +11,7 @@
     v-model="isLoginOpen"
     :gql="props.gql"
     utm-medium="Runs Tab"
-    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
+    :show-connect-button-after-login="!cloudProjectId"
     @connect-project="isProjectConnectOpen = true"
   />
   <CloudConnectModals
@@ -40,7 +40,7 @@ gql`
 fragment CloudConnectButton on Query {
   currentProject {
     id
-    projectId
+    config
   }
   ...CloudConnectModals
   ...LoginModal
@@ -69,5 +69,9 @@ function openConnection () {
     isProjectConnectOpen.value = true
   }
 }
+
+const cloudProjectId = computed(() => {
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+})
 
 </script>
