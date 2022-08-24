@@ -3,12 +3,12 @@ import { useStudioStore } from '../../store/studio-store'
 
 describe('StudioSaveModal', () => {
   it('renders hidden by default', () => {
-    cy.mount(<StudioSaveModal studioStore={{}} open={false} />)
+    cy.mount(<StudioSaveModal open={false} />)
     cy.findByTestId('studio-save-modal').should('not.exist')
   })
 
   it('renders open with props', () => {
-    cy.mount(<StudioSaveModal studioStore={{}} open />)
+    cy.mount(<StudioSaveModal open />)
     cy.findByTestId('studio-save-modal').should('be.visible')
     cy.percySnapshot()
   })
