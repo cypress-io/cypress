@@ -5,9 +5,11 @@ import path from 'path'
 import os from 'os'
 
 import { scaffoldProject, removeProject, createTestDataContext } from '../helper'
-import { FileDataSource } from '../../../src/sources/FileDataSource'
+import * as FileDataSourceModule from '../../../src/sources/FileDataSource'
 import { DataContext } from '../../../src'
 import * as fileUtil from '../../../src/util/file'
+
+const FileDataSource = FileDataSourceModule.FileDataSource
 
 describe('FileDataSource', () => {
   describe('#getFilesByGlob', () => {
@@ -15,7 +17,7 @@ describe('FileDataSource', () => {
       let projectPath: string
       let scriptsFolder: string
       let ctx: DataContext
-      let fileDataSource: FileDataSource
+      let fileDataSource
 
       beforeEach(async () => {
         projectPath = await scaffoldProject('globby-test-bed')
@@ -162,7 +164,7 @@ describe('FileDataSource', () => {
       let matchGlobsStub: sinon.SinonStub
 
       beforeEach(() => {
-        matchGlobsStub = sinon.stub(fileDataSource, 'matchGlobs').resolves(mockMatches)
+        matchGlobsStub = sinon.stub(FileDataSourceModule, 'matchGlobs').resolves(mockMatches)
       })
 
       afterEach(() => {

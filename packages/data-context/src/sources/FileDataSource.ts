@@ -9,6 +9,10 @@ import { toPosix } from '../util/file'
 
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
+export const matchGlobs = async (globs: string | string[], globbyOptions?: GlobbyOptions) => {
+  return await globby(globs, globbyOptions)
+}
+
 export class FileDataSource {
   constructor (private ctx: DataContext) {}
 
@@ -64,7 +68,7 @@ export class FileDataSource {
       debug('globbing pattern(s): %o', globs)
       debug('within directory: %s', cwd)
 
-      const files = await this.matchGlobs(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
+      const files = await matchGlobs(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
 
       return files
     } catch (e) {
@@ -72,9 +76,5 @@ export class FileDataSource {
 
       return []
     }
-  }
-
-  async matchGlobs (globs: string | string[], globbyOptions?: GlobbyOptions) {
-    return await globby(globs, globbyOptions)
   }
 }
