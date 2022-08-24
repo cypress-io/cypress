@@ -1,6 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
-import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
+import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType, SpecWithRelativeRoot } from '@packages/types'
 import minimatch from 'minimatch'
 import _ from 'lodash'
 import path from 'path'
@@ -22,8 +22,6 @@ import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTyp
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 import { getDefaultSpecFileName } from './migration/utils'
-
-export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
 interface MatchedSpecs {
   projectRoot: string

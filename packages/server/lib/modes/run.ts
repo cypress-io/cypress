@@ -1,34 +1,52 @@
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
-const _ = require('lodash')
-const la = require('lazy-ass')
-const pkg = require('@packages/root')
-const path = require('path')
-const chalk = require('chalk')
-const human = require('human-interval')
-const debug = require('debug')('cypress:server:run')
-const Promise = require('bluebird')
-const logSymbols = require('log-symbols')
-const assert = require('assert')
+import _ from 'lodash'
+import la from 'lazy-ass'
+import pkg from '@packages/root'
+import path from 'path'
+import chalk from 'chalk'
+import human from 'human-interval'
+import Debug from 'debug'
+import Promise from 'bluebird'
+import logSymbols from 'log-symbols'
+import assert from 'assert'
 
-const recordMode = require('./record')
-const errors = require('../errors')
-const Reporter = require('../reporter')
-const browserUtils = require('../browsers')
-const { openProject } = require('../open_project')
-const videoCapture = require('../video_capture')
-const { fs } = require('../util/fs')
-const runEvents = require('../plugins/run_events')
-const env = require('../util/env')
-const trash = require('../util/trash')
-const random = require('../util/random')
-const system = require('../util/system')
-const duration = require('../util/duration')
-const newlines = require('../util/newlines')
-const terminal = require('../util/terminal')
-const humanTime = require('../util/human_time')
-const chromePolicyCheck = require('../util/chrome_policy_check')
-const experiments = require('../experiments')
-const objUtils = require('../util/obj_utils')
+import recordMode from './record'
+import * as errors from '../errors'
+import Reporter from '../reporter'
+import browserUtils from '../browsers'
+import { openProject } from '../open_project'
+import * as videoCapture from '../video_capture'
+import { fs } from '../util/fs'
+import runEvents from '../plugins/run_events'
+import env from '../util/env'
+import trash from '../util/trash'
+import random from '../util/random'
+import system from '../util/system'
+import duration from '../util/duration'
+import newlines from '../util/newlines'
+import terminal from '../util/terminal'
+import humanTime from '../util/human_time'
+import chromePolicyCheck from '../util/chrome_policy_check'
+import * as experiments from '../experiments'
+import * as objUtils from '../util/obj_utils'
+import type { LaunchOpts, SpecFile, SpecWithRelativeRoot, TestingType } from '@packages/types'
+import type { Cfg } from '../project-base'
+import type { Browser } from '../browsers/types'
+import 'cypress'
+
+type Screenshot = {
+  width: number
+  height: number
+  path: string
+  specName: string
+}
+type SetScreenshotMetadata = (data: Screenshot) => void // ?
+type RunEachSpec = any
+type BeforeSpecRun = any
+type AfterSpecRun = any
+type Project = NonNullable<ReturnType<typeof openProject['getProject']>>
+
+const debug = Debug('cypress:server:run')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -65,6 +83,8 @@ const getWidth = (table, index) => {
   if (columnWidth) {
     return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
   }
+
+  throw new Error('Unable to get width for column')
 }
 
 const relativeSpecPattern = (projectRoot, pattern) => {
@@ -135,7 +155,7 @@ const macOSRemovePrivate = (str) => {
   return str
 }
 
-const formatPath = (name, n, colour = 'reset', caller) => {
+const formatPath = (name, n, colour = 'reset', caller?) => {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -163,12 +183,12 @@ const formatPath = (name, n, colour = 'reset', caller) => {
   return `${color(name, colour)}`
 }
 
-const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => {
+const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg, 'resolvedNodeVersion' | 'resolvedNodePath'>, width) => {
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
-  if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
-  }
+  if (resolvedNodePath) return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
+
+  return
 }
 
 const formatRecordParams = function (runUrl, parallel, group, tag) {
@@ -183,9 +203,11 @@ const formatRecordParams = function (runUrl, parallel, group, tag) {
 
     return `Tag: ${tag}, Group: ${group}, Parallel: ${Boolean(parallel)}`
   }
+
+  return
 }
 
-const displayRunStarting = function (options = {}) {
+const displayRunStarting = function (options: { browser: Browser, config: Cfg, group: string | undefined, parallel: boolean, runUrl?: string, specPattern: string | RegExp, specs: SpecFile[], tag: string | undefined }) {
   const { browser, config, group, parallel, runUrl, specPattern, specs, tag } = options
 
   console.log('')
@@ -228,6 +250,8 @@ const displayRunStarting = function (options = {}) {
     if (specPattern) {
       return formatPath(specPattern.join(', '), getWidth(table, 1))
     }
+
+    throw new Error('No specPattern in formatSpecPattern')
   }
 
   const formatSpecs = (specs) => {
@@ -302,7 +326,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   }
 }
 
-const collectTestResults = (obj = {}, estimated) => {
+const collectTestResults = (obj: { video?: boolean, screenshots?: Screenshot[] }, estimated) => {
   return {
     name: _.get(obj, 'spec.name'),
     baseName: _.get(obj, 'spec.baseName'),
@@ -418,28 +442,17 @@ const renderSummaryTable = (runUrl) => {
   }
 }
 
-const iterateThroughSpecs = function (options = {}) {
+const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg }) {
   const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
     return Promise.mapSeries(specs, runEachSpec)
   }
 
-  const ranSpecs = []
+  const ranSpecs: SpecFile[] = []
   const parallelAndSerialWithRecord = (runs) => {
     return beforeSpecRun()
-    .then(({ spec, claimedInstances, totalInstances, estimated, shouldFallbackToOfflineOrder }) => {
-      // if (!parallel) {
-      //   // NOTE: if we receive the old API which always sends {spec: null},
-      //   // that would instantly end the run with a 0 exit code if we act like parallel mode.
-      //   // so instead we check length of ran specs just to make sure we have run all the specs.
-      //   // However, this means the api can't end a run early for us without some other logic being added.
-
-      //   if (shouldFallbackToOfflineOrder) {
-      //     spec = _.without(specs, ...ranSpecs)[0]?.relative
-      //   }
-      // }
-
+    .then(({ spec, claimedInstances, totalInstances, estimated }) => {
       // no more specs to run?
       if (!spec) {
         // then we're done!
@@ -517,26 +530,21 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onErro
     return getFirefoxProps(project, writeVideoFrame)
   }
 
+  if (browser.family === 'webkit') {
+    return { recordVideo: !!writeVideoFrame }
+  }
+
   return {}
 }
 
 const getFirefoxProps = (project, writeVideoFrame) => {
-  debug('setting Firefox properties')
+  if (writeVideoFrame) {
+    project.on('capture:video:frames', writeVideoFrame)
 
-  return _
-  .chain({})
-  .tap((props) => {
-    if (writeVideoFrame) {
-      const onScreencastFrame = (data) => {
-        writeVideoFrame(data)
-      }
+    return { onScreencastFrame: true }
+  }
 
-      project.on('capture:video:frames', onScreencastFrame)
-
-      props.onScreencastFrame = true
-    }
-  })
-  .value()
+  return {}
 }
 
 const getCdpVideoPropSetter = (writeVideoFrame) => {
@@ -604,7 +612,7 @@ const writeOutput = (outputPath, results) => {
 
     debug('saving output results %o', { outputPath })
 
-    return fs.outputJsonAsync(outputPath, results)
+    return fs.outputJson(outputPath, results)
   })
 }
 
@@ -630,11 +638,11 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onError: args.onError,
   }
 
-  return openProject.create(projectRoot, args, options, args.browsers)
+  return openProject.create(projectRoot, args, options)
 }
 
 async function checkAccess (folderPath) {
-  return fs.access(folderPath, fs.W_OK).catch((err) => {
+  return fs.access(folderPath, fs.constants.W_OK).catch((err) => {
     if (['EACCES', 'EPERM'].includes(err.code)) {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
@@ -652,15 +660,16 @@ const createAndOpenProject = async (options) => {
   const open_project = await openProjectCreate(projectRoot, socketId, options)
   const project = open_project.getProject()
 
-  const [_project, _config, _projectId] = await Promise.all([
-    project,
+  if (!project) throw new Error('Missing project after openProjectCreate!')
+
+  const [config, _projectId] = await Promise.all([
     project.getConfig(),
     getProjectId(project, projectId),
   ])
 
   return {
-    project: _project,
-    config: _config,
+    project,
+    config,
     projectId: _projectId,
     // Lazy require'd here, so as to not execute until we're in the electron process
     configFile: require('@packages/data-context').getCtx().lifecycleManager.configFile,
@@ -675,7 +684,7 @@ const removeOldProfiles = (browser) => {
   })
 }
 
-const trashAssets = Promise.method((config = {}) => {
+const trashAssets = Promise.method((config: Cfg) => {
   if (config.trashAssetsBeforeRuns !== true) {
     return
   }
@@ -691,7 +700,7 @@ const trashAssets = Promise.method((config = {}) => {
   })
 })
 
-const createVideoRecording = function (videoName, options = {}) {
+async function createVideoRecording (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
   const onError = _.once((err) => {
@@ -700,13 +709,13 @@ const createVideoRecording = function (videoName, options = {}) {
     return errors.warning('VIDEO_RECORDING_FAILED', err)
   })
 
-  return fs
-  .ensureDirAsync(outputDir)
-  .catch(onError)
-  .then(() => {
-    return videoCapture
-    .start(videoName, _.extend({}, options, { onError }))
-  })
+  try {
+    await fs.ensureDir(outputDir)
+  } catch (err) {
+    onError(err)
+  }
+
+  return videoCapture.start(videoName, _.extend({}, options, { onError }))
 }
 
 const getVideoRecordingDelay = function (startedVideoCapture) {
@@ -717,7 +726,7 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
   return 0
 }
 
-const maybeStartVideoRecording = Promise.method(function (options = {}) {
+const maybeStartVideoRecording = Promise.method(function (this: typeof exports, options: { spec: SpecWithRelativeRoot, browser: Browser, video: boolean, videosFolder: string }) {
   const { spec, browser, video, videosFolder } = options
 
   debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
@@ -739,8 +748,10 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
+  if (browser.family === 'webkit') return require('../browsers/webkit').getVideoRecordingApi(videoName, compressedVideoName)
+
   return this.createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
-  .then((props = {}) => {
+  .then((props) => {
     return {
       videoName,
       compressedVideoName,
@@ -831,7 +842,7 @@ module.exports = {
     console.log('')
   },
 
-  displayScreenshots (screenshots = []) {
+  displayScreenshots (screenshots: Screenshot[] = []) {
     console.log('')
 
     terminal.header('Screenshots', { color: ['yellow'] })
@@ -877,7 +888,7 @@ module.exports = {
       return
     }
 
-    function continueProcessing (onProgress = undefined) {
+    function continueProcessing (onProgress?: (progress: number) => void) {
       return videoCapture.process(name, cname, videoCompression, ffmpegChaptersConfig, onProgress)
     }
 
@@ -961,56 +972,49 @@ module.exports = {
     return continueProcessing(onProgress)
   },
 
-  launchBrowser (options = {}) {
+  launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame: videoCapture.WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: Screenshot[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
     const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
-
-    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
-
-    browserOpts.automationMiddleware = {
-      onBeforeRequest (message, data) {
-        if (message === 'take:screenshot') {
-          return setScreenshotMetadata(data)
-        }
-      },
-      onAfterResponse: (message, data, resp) => {
-        if (message === 'take:screenshot' && resp) {
-          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
-
-          if (existingScreenshot !== -1) {
-            // NOTE: saving screenshots to the same path will overwrite the previous one
-            // so we shouldn't report more screenshots than exist on disk.
-            // this happens when cy.screenshot is used in a retried test
-            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
-          } else {
-            screenshots.push(this.screenshotMetadata(data, resp))
-          }
-        }
-
-        return resp
-      },
-    }
 
     const warnings = {}
 
-    browserOpts.projectRoot = projectRoot
-    browserOpts.shouldLaunchNewTab = shouldLaunchNewTab
+    const browserOpts: LaunchOpts = {
+      ...getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError),
+      projectRoot,
+      shouldLaunchNewTab,
+      automationMiddleware: {
+        onBeforeRequest (message, data) {
+          if (message === 'take:screenshot') {
+            return setScreenshotMetadata(data)
+          }
+        },
+        onAfterResponse: (message, data, resp) => {
+          if (message === 'take:screenshot' && resp) {
+            const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
 
-    browserOpts.onWarning = (err) => {
-      const { message } = err
+            if (existingScreenshot !== -1) {
+              // NOTE: saving screenshots to the same path will overwrite the previous one
+              // so we shouldn't report more screenshots than exist on disk.
+              // this happens when cy.screenshot is used in a retried test
+              screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
+            } else {
+              screenshots.push(this.screenshotMetadata(data, resp))
+            }
+          }
 
-      // if this warning has already been
-      // seen for this browser launch then
-      // suppress it
-      if (warnings[message]) {
-        return
-      }
+          return resp
+        },
+      },
+      onWarning: (err) => {
+        const { message } = err
 
-      warnings[message] = err
+        // if this warning has already been
+        // seen for this browser launch then
+        // suppress it
+        if (warnings[message]) return
 
-      return project.onWarning
+        warnings[message] = err
+      },
     }
-
-    debug('browser launched')
 
     return openProject.launch(browser, spec, browserOpts)
   },
@@ -1086,9 +1090,9 @@ module.exports = {
     return this.currentWriteVideoFrameCallback(...arguments)
   },
 
-  waitForBrowserToConnect (options = {}) {
+  waitForBrowserToConnect (options: { project: Project, socketId: string, timeout: number, onError: (err: Error) => void, writeVideoFrame: videoCapture.WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, setScreenshotMetadata?: SetScreenshotMetadata }) {
     const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
-    const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
+    const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000)
     let attempts = 0
 
     // short circuit current browser callback so that we
@@ -1106,6 +1110,9 @@ module.exports = {
 
       return data
     }
+
+    // TODO: remove the need to extend options and thus this check
+    if (options.setScreenshotMetadata) throw new Error('unexpected setScreenshotMetadata')
 
     options.setScreenshotMetadata = (data) => {
       return this.currentSetScreenshotMetadata(data)
@@ -1132,29 +1139,28 @@ module.exports = {
         this.launchBrowser(options),
       )
       .timeout(browserTimeout)
-      .catch(Promise.TimeoutError, (err) => {
+      .catch(Promise.TimeoutError, async (err) => {
         attempts += 1
 
         console.log('')
 
         // always first close the open browsers
         // before retrying or dieing
-        return openProject.closeBrowser()
-        .then(() => {
-          if (attempts === 1 || attempts === 2) {
-            // try again up to 3 attempts
-            const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
+        await openProject.closeBrowser()
 
-            errors.warning('TESTS_DID_NOT_START_RETRYING', word)
+        if (attempts === 1 || attempts === 2) {
+          // try again up to 3 attempts
+          const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
 
-            return wait()
-          }
+          errors.warning('TESTS_DID_NOT_START_RETRYING', word)
 
-          err = errors.get('TESTS_DID_NOT_START_FAILED')
-          errors.log(err)
+          return await wait()
+        }
 
-          onError(err)
-        })
+        err = errors.get('TESTS_DID_NOT_START_FAILED')
+        errors.log(err)
+
+        onError(err)
       })
     }
 
@@ -1183,7 +1189,7 @@ module.exports = {
     })
   },
 
-  waitForTestsToFinishRunning (options = {}) {
+  waitForTestsToFinishRunning (options: { project: Project, screenshots: Screenshot[], startedVideoCapture?: any, endVideoCapture?: () => Promise<void>, videoName?: string, compressedVideoName: string, videoCompression: number, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType}) {
     const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
@@ -1229,9 +1235,12 @@ module.exports = {
       let videoCaptureFailed = false
 
       if (endVideoCapture) {
-        await endVideoCapture()
-        .tapCatch(() => videoCaptureFailed = true)
-        .catch(warnVideoRecordingFailed)
+        try {
+          await endVideoCapture()
+        } catch (err) {
+          videoCaptureFailed = true
+          warnVideoRecordingFailed(err)
+        }
       }
 
       await runEvents.execute('after:spec', config, spec, results)
@@ -1260,10 +1269,15 @@ module.exports = {
         }
       }
 
+      const project = openProject.getProject()
+
+      if (!project) throw new Error('Missing project!')
+
+      // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
       const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
       if (usingExperimentalSingleTabMode) {
-        await openProject.projectBase.server.destroyAut()
+        await project.server.destroyAut()
       }
 
       // we do not support experimentalSingleTabRunMode for e2e
@@ -1274,7 +1288,7 @@ module.exports = {
 
         debug('resetting server state')
 
-        openProject.projectBase.server.reset()
+        project.server.reset()
       }
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
@@ -1308,34 +1322,13 @@ module.exports = {
     }
   },
 
-  runSpecs (options = {}) {
+  runSpecs (options: { config: Cfg, browser: Browser, sys: Awaited<ReturnType<typeof system['info']>>, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel: boolean, group?: string, tag?: string, testingType: TestingType, quiet: boolean }) {
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
     const isHeadless = !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
-
-    const results = {
-      startedTestsAt: null,
-      endedTestsAt: null,
-      totalDuration: null,
-      totalSuites: null,
-      totalTests: null,
-      totalFailed: null,
-      totalPassed: null,
-      totalPending: null,
-      totalSkipped: null,
-      runs: null,
-      browserPath: browser.path,
-      browserName: browser.name,
-      browserVersion: browser.version,
-      osName: sys.osName,
-      osVersion: sys.osVersion,
-      cypressVersion: pkg.version,
-      runUrl,
-      config,
-    }
 
     if (!options.quiet) {
       displayRunStarting({
@@ -1352,19 +1345,18 @@ module.exports = {
 
     let isFirstSpec = true
 
-    const runEachSpec = (spec, index, length, estimated) => {
+    async function runEachSpec (spec, index, length, estimated) {
       if (!options.quiet) {
         displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
-      return this.runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
-      .tap(() => {
-        isFirstSpec = false
-      })
-      .get('results')
-      .tap((results) => {
-        return debug('spec results %o', results)
-      })
+      const { results } = await module.exports.runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+
+      isFirstSpec = false
+
+      debug('spec results %o', results)
+
+      return results
     }
 
     const beforeRunDetails = {
@@ -1385,24 +1377,34 @@ module.exports = {
       return iterateThroughSpecs({
         specs,
         config,
-        parallel,
         runEachSpec,
         afterSpecRun,
         beforeSpecRun,
       })
     })
     .then((runs = []) => {
-      results.status = 'finished'
-      results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
-      results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
-      results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
-      results.totalSuites = sumByProp(runs, 'stats.suites')
-      results.totalTests = sumByProp(runs, 'stats.tests')
-      results.totalPassed = sumByProp(runs, 'stats.passes')
-      results.totalPending = sumByProp(runs, 'stats.pending')
-      results.totalFailed = sumByProp(runs, 'stats.failures')
-      results.totalSkipped = sumByProp(runs, 'stats.skipped')
-      results.runs = runs
+      const results: CypressCommandLine.CypressRunResult = {
+        status: 'finished',
+        startedTestsAt: getRun(_.first(runs), 'stats.wallClockStartedAt'),
+        endedTestsAt: getRun(_.last(runs), 'stats.wallClockEndedAt'),
+        totalDuration: sumByProp(runs, 'stats.wallClockDuration'),
+        totalSuites: sumByProp(runs, 'stats.suites'),
+        totalTests: sumByProp(runs, 'stats.tests'),
+        totalPassed: sumByProp(runs, 'stats.passes'),
+        totalPending: sumByProp(runs, 'stats.pending'),
+        totalFailed: sumByProp(runs, 'stats.failures'),
+        totalSkipped: sumByProp(runs, 'stats.skipped'),
+        runs,
+        browserPath: browser.path,
+        browserName: browser.name,
+        browserVersion: browser.version,
+        osName: sys.osName,
+        osVersion: sys.osVersion,
+        cypressVersion: pkg.version,
+        runUrl,
+        // @ts-expect-error slight type mismatch in public types vs internal types
+        config,
+      }
 
       debug('final results of all runs: %o', results)
 
@@ -1455,7 +1457,7 @@ module.exports = {
     })
   },
 
-  runSpec (config, spec = {}, options = {}, estimated, isFirstSpec, isLastSpec) {
+  async runSpec (config, spec = {}, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1473,61 +1475,58 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, spec)
-    .then(() => {
+    await runEvents.execute('before:spec', config, spec)
+
+    const { videoRecordProps } = await this.maybeStartVideoRecording({
+      spec,
+      browser,
+      video: options.video,
+      videosFolder: options.videosFolder,
+    })
+
     // we know we're done running headlessly
     // when the renderer has connected and
     // finishes running all of the tests.
-    // we're using an event emitter interface
-    // to gracefully handle this in promise land
-      return this.maybeStartVideoRecording({
-        spec,
-        browser,
-        video: options.video,
-        videosFolder: options.videosFolder,
-      })
-    })
-    .then((videoRecordProps = {}) => {
-      return Promise.props({
-        results: this.waitForTestsToFinishRunning({
-          spec,
-          config,
-          project,
-          estimated,
-          screenshots,
-          videoName: videoRecordProps.videoName,
-          compressedVideoName: videoRecordProps.compressedVideoName,
-          endVideoCapture: videoRecordProps.endVideoCapture,
-          startedVideoCapture: videoRecordProps.startedVideoCapture,
-          exit: options.exit,
-          testingType: options.testingType,
-          videoCompression: options.videoCompression,
-          videoUploadOnPasses: options.videoUploadOnPasses,
-          quiet: options.quiet,
-          browser,
-          shouldKeepTabOpen: !isLastSpec,
-        }),
 
-        connection: this.waitForBrowserToConnect({
-          spec,
-          project,
-          browser,
-          screenshots,
-          onError,
-          writeVideoFrame: videoRecordProps.writeVideoFrame,
-          socketId: options.socketId,
-          webSecurity: options.webSecurity,
-          projectRoot: options.projectRoot,
-          testingType: options.testingType,
-          isFirstSpec,
-          experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-          shouldLaunchNewTab: !isFirstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !isFirstSpec,
-        }),
-      })
+    return Promise.props({
+      results: module.exports.waitForTestsToFinishRunning({
+        spec,
+        config,
+        project,
+        estimated,
+        screenshots,
+        videoName: videoRecordProps?.videoName,
+        compressedVideoName: videoRecordProps?.compressedVideoName,
+        endVideoCapture: videoRecordProps?.endVideoCapture,
+        startedVideoCapture: videoRecordProps?.startedVideoCapture,
+        exit: options.exit,
+        testingType: options.testingType,
+        videoCompression: options.videoCompression,
+        videoUploadOnPasses: options.videoUploadOnPasses,
+        quiet: options.quiet,
+        browser,
+        shouldKeepTabOpen: !isLastSpec,
+      }),
+
+      connection: module.exports.waitForBrowserToConnect({
+        spec,
+        project,
+        browser,
+        screenshots,
+        onError,
+        writeVideoFrame: videoRecordProps?.writeVideoFrame,
+        socketId: options.socketId,
+        webSecurity: options.webSecurity,
+        projectRoot: options.projectRoot,
+        testingType: options.testingType,
+        isFirstSpec,
+        experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
+        shouldLaunchNewTab: !isFirstSpec,
+      }),
     })
   },
 
-  ready (options = {}) {
+  ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp, headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: Browser[] }) {
     debug('run mode ready with options %o', options)
 
     if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1546,6 +1545,7 @@ module.exports = {
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
+    // TODO: refactor this so we don't need to extend options
     const onError = options.onError = (err) => {
       this.exitEarly(err)
     }
@@ -1558,6 +1558,7 @@ module.exports = {
     return browserUtils.getAllBrowsersWith()
     .then((browsers) => {
       debug('found all system browsers %o', browsers)
+      // TODO: refactor this so we don't need to extend options
       options.browsers = browsers
 
       return createAndOpenProject(options)
@@ -1594,11 +1595,12 @@ module.exports = {
           trashAssets(config),
         ])
         .spread(async (sys = {}, browser = {}) => {
-          if (!project.ctx.project.specs.length) {
-            errors.throwErr('NO_SPECS_FOUND', projectRoot, specPattern)
-          }
-
+          // @ts-expect-error ctx is protected
           const specs = project.ctx.project.specs
+
+          if (!specs.length) {
+            errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+          }
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
@@ -1608,7 +1610,7 @@ module.exports = {
             chromePolicyCheck.run(onWarning)
           }
 
-          const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
+          const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean}) => {
             return this.runSpecs({
               beforeSpecRun,
               afterSpecRun,
