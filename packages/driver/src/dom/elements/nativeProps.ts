@@ -258,7 +258,7 @@ export const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, va
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${prop as string}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${String(prop)}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
