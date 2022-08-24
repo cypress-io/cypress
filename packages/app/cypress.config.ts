@@ -41,7 +41,6 @@ export default defineConfig({
     },
   },
   'e2e': {
-    experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
