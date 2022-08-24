@@ -79,7 +79,7 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -97,7 +97,7 @@ describe(`React major versions with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -123,4 +123,17 @@ describe(`Angular CLI major versions`, () => {
       expectedExitCode: 0,
     })
   }
+})
+
+describe('experimentalSingleTabRunMode', function () {
+  systemTests.setup()
+
+  systemTests.it('executes all specs in a single tab', {
+    project: 'experimentalSingleTabRunMode',
+    testingType: 'component',
+    spec: '**/*.cy.js',
+    browser: 'chrome',
+    snapshot: true,
+    expectedExitCode: 2,
+  })
 })

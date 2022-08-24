@@ -1,5 +1,5 @@
 import '@testing-library/cypress/add-commands'
-import { browsers } from '@packages/types/src/browser'
+import { browsers } from '@packages/launcher/lib/browsers'
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
@@ -304,6 +304,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
             firstOpened: 1609459200000,
             lastOpened: 1609459200000,
             promptsShown: { ci1: 1609459200000 },
+            banners: { _disabled: true },
           })
         }
 
@@ -543,6 +544,9 @@ Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'elemen
 
 installCustomPercyCommand({
   elementOverrides: {
+    '[data-cy=top-nav-cypress-version-current-link]': ($el) => {
+      $el.attr('style', 'display: none !important') // TODO: display and set dummy text to vX.X.X once flake is fixed. See issue https://github.com/cypress-io/cypress/issues/21897
+    },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
     },
