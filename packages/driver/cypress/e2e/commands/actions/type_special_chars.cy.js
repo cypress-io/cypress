@@ -314,8 +314,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -357,8 +357,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -452,8 +452,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -467,6 +467,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
+
       .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
       .type('{selectall}{del}')
@@ -496,8 +497,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ textarea })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
