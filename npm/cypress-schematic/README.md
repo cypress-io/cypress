@@ -78,25 +78,37 @@ ng run {project-name}:ct
 To generate a new e2e spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec -t e2e
+ng generate @cypress/schematic:spec 
+```
+
+or (without cli prompt)
+
+```shell script
+ng generate @cypress/schematic:spec {name}
 ```
 
 To generate a new component spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec -t component
+ng generate @cypress/schematic:spec --component
+```
+
+or (without cli prompt)
+
+```shell script
+ng generate @cypress/schematic:spec {component name} --component
 ```
 
 To generate a new component spec file in a specific folder:
 
 ```shell script
-ng generate @cypress/schematic:spec {component name} -t component --path {path relative to project root}
+ng generate @cypress/schematic:spec {component name} --component --path {path relative to project root}
 ```
 
 To generate new component spec files alongside all component files in a project:
 
 ```shell script
-ng generate @cypress/schematic:spec -t component -a
+ng generate @cypress/schematic:specs-ct
 ```
 
 ## Builder Options 🛠

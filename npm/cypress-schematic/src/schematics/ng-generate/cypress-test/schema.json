@@ -28,19 +28,14 @@
       },
       "x-prompt": "What should the spec be named?"
     },
-    "testingType": {
-      "enum": [
-        "e2e",
-        "component"
-      ],
-      "alias": "t",
-      "description": "The type of spec to generate - e2e or component. e2e is default.",
-      "default": "e2e",
-      "x-prompt": "What type of spec do you want to generate?"
+    "component": {
+      "type": "boolean",
+      "alias": "c",
+      "default": false,
+      "description": "When true, the spec created will be a component spec."
     }
   },
   "required": [
-    "name",
-    "testingType"
+    "name"
   ]
 }

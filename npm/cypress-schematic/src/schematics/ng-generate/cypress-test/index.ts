@@ -35,6 +35,7 @@ export default function (options: Schema): Rule {
   return async (tree: Tree) => {
     const host = createSpec(tree)
     const { workspace } = await workspaces.readWorkspace('/', host)
+    const testType = options.component ? 'component' : 'e2e'
 
     let project
 
@@ -53,12 +54,12 @@ export default function (options: Schema): Rule {
     }
 
     if (options.path === undefined) {
-      options.path = options.testingType === 'component' ? `${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
+      options.path = testType === 'component' ? `${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
     }
 
-    console.log(`Creating new ${options.testingType} spec named: ${options.name}`)
+    console.log(`Creating new ${testType} spec named: ${options.name}`)
 
-    const templatePath = options.testingType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
+    const templatePath = testType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
     const templateSource = createTemplate({ templatePath, options })
 
     return chain([
