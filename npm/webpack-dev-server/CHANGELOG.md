@@ -1,3 +1,16 @@
+# [@cypress/webpack-dev-server-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.1.0...@cypress/webpack-dev-server-v2.2.0) (2022-08-15)
+
+
+### Bug Fixes
+
+* remove webpack entrypoints from for ct webpack projects ([#23299](https://github.com/cypress-io/cypress/issues/23299)) ([c93b652](https://github.com/cypress-io/cypress/commit/c93b652ff7a68ee368234ee928fbd6835d708769))
+
+
+### Features
+
+* add template support, teardown & standalone ([#23117](https://github.com/cypress-io/cypress/issues/23117)) ([d201b37](https://github.com/cypress-io/cypress/commit/d201b37b3d6b1e37a15a8d21d853acca47bfc666))
+* enable Angular CT support ([#23089](https://github.com/cypress-io/cypress/issues/23089)) ([94e78eb](https://github.com/cypress-io/cypress/commit/94e78eba0430eae97529058c40611e5f24dbf140))
+
 # [@cypress/webpack-dev-server-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.0.0...@cypress/webpack-dev-server-v2.1.0) (2022-08-11)
 
 
