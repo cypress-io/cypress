@@ -5803,7 +5803,7 @@ declare namespace Cypress {
      *   // or use this shortcut
      *   cy.clock().invoke('setSystemTime', 60 * 60 * 1000)
      */
-    setSystemTime(now?: number | Date | undefined): void
+    setSystemTime(now?: number | Date): void
   }
 
   interface Cookie {
