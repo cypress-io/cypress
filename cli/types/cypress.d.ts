@@ -1,5 +1,6 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
+/// <reference path="./cypress-type-helpers.d.ts" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
