@@ -17,7 +17,6 @@ export interface MountOptions extends ConstructorOptions, Partial<StyleOptions> 
 
 export interface MountReturn {
   component: SvelteComponentTyped
-  unmount: (unmountOptions: { log?: boolean, message?: string }) => Cypress.Chainable<undefined>
 }
 
 let componentInstance: SvelteComponentTyped | undefined
@@ -53,18 +52,6 @@ export function mount (
       ...options,
     })
 
-    const unmount: MountReturn['unmount'] = (unmountOptions = {}) => {
-      return cy.then(() => {
-        cleanup()
-        if (unmountOptions.log) {
-          Cypress.log({
-            name: 'unmount',
-            message: [unmountOptions.message ?? 'Unmounted component'],
-          })
-        }
-      })
-    }
-
     // by waiting, we are delaying test execution for the next tick of event loop
     // and letting hooks and component lifecycle methods to execute mount
     return cy.wait(0, { log: false }).then(() => {
@@ -77,7 +64,7 @@ export function mount (
         }).snapshot('mounted').end()
       }
     })
-    .wrap({ component: componentInstance, unmount }, { log: false })
+    .wrap({ component: componentInstance }, { log: false })
   })
 }
 

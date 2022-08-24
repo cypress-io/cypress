@@ -4,12 +4,9 @@ import Store from "./Store.svelte";
 import { messageStore } from "./store";
 
 describe("Svelte mount", () => {
-  it("mounts and unmounts", () => {
-    cy.mount(Counter).then(({ unmount }) => {
-      cy.contains("h1", "Count is 0");
-      unmount();
-      cy.contains("h1", "Count is 0").should("not.exist");
-    });
+  it("mounts", () => {
+    cy.mount(Counter)
+    cy.contains("h1", "Count is 0");
   });
 
   it("reacts to state changes", () => {
