@@ -328,7 +328,7 @@ describe('loading', () => {
       const lines = stdout.split('\n')
 
       if (lines[lines.length - 2] !== '# PASS') {
-        assert.fail('stdout had #FAIL')
+        assert.fail(`stdout had #FAIL:\n${stdout}`)
       }
     } catch (err: any) {
       assert.fail(err.toString())

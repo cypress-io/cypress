@@ -112,6 +112,5 @@ exports['integration: express installs snapshot for example-express 1'] = {
     "./node_modules/vary/index.js",
     "./snapshot/snapshot.js"
   ],
-  "deferredHashFile": "yarn.lock",
-  "deferredHash": "216a61df3760151255ce41db2a279ab4d83b4cb053687766b65b19c4010753a2"
+  "deferredHashFile": "yarn.lock"
 }

@@ -37,7 +37,7 @@ describe('integration: express', () => {
     try {
       await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB })
 
-      const metadata = require(metadataFile)
+      const { deferredHash, ...metadata } = require(metadataFile)
 
       snapshot(metadata)
     } catch (err: any) {
