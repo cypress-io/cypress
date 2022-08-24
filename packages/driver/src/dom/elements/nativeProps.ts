@@ -238,7 +238,7 @@ export const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T
   if (!nativeProp) {
     const props = _.keys(nativeGetters).join(', ')
 
-    throw new Error(`attempted to use a native getter prop called: ${prop as string}. Available props are: ${props}`)
+    throw new Error(`attempted to use a native getter prop called: ${String(prop)}. Available props are: ${props}`)
   }
 
   let retProp = nativeProp.call(obj, prop)
