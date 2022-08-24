@@ -25,7 +25,7 @@ export type WebpackDevServerConfig = {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack
   options?: {
-    projectConfig?: Cypress.ProjectConfig
+    projectConfig?: Cypress.AngularDevServerProjectConfig
   }
 }
 

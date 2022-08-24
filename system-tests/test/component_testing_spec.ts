@@ -124,7 +124,7 @@ describe(`Angular CLI major versions`, () => {
     })
   }
 
-  systemTests.it('angular 14 custom config with mount tests', {
+  systemTests.it('angular 14 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',

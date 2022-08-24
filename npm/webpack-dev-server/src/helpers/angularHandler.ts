@@ -13,8 +13,6 @@ type Configurations = {
   }
 }
 
-export type MyType = Extract<Cypress.DevServerConfigOptions, { framework: 'angular'}>
-
 export type AngularJsonProjectConfig = {
   projectType: string
   root: string
@@ -33,7 +31,7 @@ type AngularJson = {
 
 const dynamicImport = new Function('specifier', 'return import(specifier)')
 
-async function getProjectConfig (projectRoot: string): Promise<Cypress.ProjectConfig> {
+async function getProjectConfig (projectRoot: string): Promise<Cypress.AngularDevServerProjectConfig> {
   const angularJson = await getAngularJson(projectRoot)
 
   let { defaultProject } = angularJson
@@ -199,7 +197,7 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
   return JSON.parse(angularJson)
 }
 
-function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.ProjectConfig) {
+function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
   const logger = {
     createChild: () => ({}),
   }

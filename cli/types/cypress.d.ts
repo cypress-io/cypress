@@ -3047,7 +3047,7 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
-  type ProjectConfig = {
+  type AngularDevServerProjectConfig = {
     root: string,
     sourceRoot: string,
     buildOptions: Record<string, any>
@@ -3068,7 +3068,7 @@ declare namespace Cypress {
     framework: 'angular',
     webpackConfig?: PickConfigOpt<'webpackConfig'>,
     options?: {
-      projectConfig: ProjectConfig
+      projectConfig: AngularDevServerProjectConfig
     }
   }
 
