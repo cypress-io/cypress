@@ -682,6 +682,24 @@ namespace CypressClockTests {
   })
   // restoring the clock shortcut
   cy.clock().invoke('restore')
+  // setting system time with no argument
+  cy.clock().then(clock => {
+    clock.setSystemTime()
+  })
+  // setting system time with timestamp
+  cy.clock().then(clock => {
+    clock.setSystemTime(1000)
+  })
+  // setting system time with date object
+  cy.clock().then(clock => {
+    clock.setSystemTime(new Date(2019, 3, 2))
+  })
+  // setting system time with no argument and shortcut
+  cy.clock().invoke('setSystemTime')
+  // setting system time with timestamp and shortcut
+  cy.clock().invoke('setSystemTime', 1000)
+  // setting system time with date object and shortcut
+  cy.clock().invoke('setSystemTime', new Date(2019, 3, 2))
 }
 
 namespace CypressContainsTests {
