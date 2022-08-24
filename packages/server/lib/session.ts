@@ -6,11 +6,14 @@ interface SessionData {
   cacheAcrossSpecs: boolean
   localStorage: Array<Record<string, string>>
   sessionStorage: Array<Record<string, string>>
+  setup: string
 }
 
+export type StoredSessions = Record<string, SessionData>
+
 type State = {
-  globalSessions: Record<string, SessionData>
-  specSessions: Record<string, SessionData>
+  globalSessions: StoredSessions
+  specSessions: StoredSessions
 }
 
 const state: State = {
@@ -30,7 +33,7 @@ export function saveSession (data: SessionData): void {
   state.specSessions[data.id] = data
 }
 
-export function getGlobalSessions (): Record<string, SessionData> {
+export function getActiveSessions (): StoredSessions {
   return state.globalSessions
 }
 

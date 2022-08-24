@@ -6,12 +6,15 @@ export default defineConfig({
     '*.foobar.com': '127.0.0.1',
     '*.idp.com': '127.0.0.1',
     'localalias': '127.0.0.1',
+    'hi': '127.0.0.1',
   },
   'reporter': 'cypress-multi-reporters',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
+    'numTestsKeptInMemory': 100,
+    'viewportHeight': 800,
     'setupNodeEvents': (on, config) => {
       return require('./cypress/plugins')(on, config)
     },

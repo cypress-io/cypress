@@ -3,22 +3,23 @@ require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 
-const errors = require(`../../lib/errors`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
-const { Automation } = require(`../../lib/automation`)
-const exec = require(`../../lib/exec`)
-const preprocessor = require(`../../lib/plugins/preprocessor`)
-const { fs } = require(`../../lib/util/fs`)
+const socketIo = require('@packages/socket/lib/browser')
+const Fixtures = require('@tooling/system-tests')
+
+const errors = require('../../lib/errors')
+const { SocketE2E } = require('../../lib/socket-e2e')
+const { ServerE2E } = require('../../lib/server-e2e')
+const { Automation } = require('../../lib/automation')
+const exec = require('../../lib/exec')
+const preprocessor = require('../../lib/plugins/preprocessor')
+const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
 
-const Fixtures = require('@tooling/system-tests')
-const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
-const { createRoutes } = require(`../../lib/routes`)
-const { getCtx } = require(`../../lib/makeDataContext`)
+const firefoxUtil = require('../../lib/browsers/firefox-util').default
+const { createRoutes } = require('../../lib/routes')
+const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
 
 let ctx
@@ -748,12 +749,26 @@ describe.only('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, reset:test:state)', () => {})
-    context('on(get:cached:state)', function () {
-      it('returns cached state', function (done) {
-        this.client.emit('get:cached:state', (cachedState) => {
-          expect(cachedState).deep.eq({
-            globalSessions: {},
+    context('on(backend:request, reset:cached:test:state)', () => {
+      it('clears spec sessions', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.localSessions = {
+          local: { id: 'local' },
+        }
+
+        this.client.emit('backend:request', 'reset:cached:test:state', ({ error }) => {
+          expect(error).to.be.undefined
+
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': { id: 'global' },
+            },
+            specSessions: {},
           })
 
           done()

@@ -104,6 +104,7 @@ describe('basic login', () => {
         }, {
           validate: () => {
             cy.window().then((win) => {
+              cy.url().should('contain', '/index.html')
               const cypressAuthToken = win.sessionStorage.getItem('cypressAuthToken')
 
               return !!cypressAuthToken

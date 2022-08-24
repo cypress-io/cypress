@@ -70,7 +70,6 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
-        console.log('here 1')
         const validOpts = {
           'validate': 'function',
           'cacheAcrossSpecs': 'boolean',
@@ -91,11 +90,8 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      console.log('here 2')
       let session: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
-
-      console.log('isRegisteredSessionForSpec & sess', isRegisteredSessionForSpec, session)
 
       if (!setup) {
         if (!session || !isRegisteredSessionForSpec) {
@@ -103,8 +99,6 @@ export default function (Commands, Cypress, cy) {
         }
       } else {
         const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
-
-        console.log('isUniqSessionDefinition', isUniqSessionDefinition)
 
         if (isUniqSessionDefinition) {
           if (isRegisteredSessionForSpec) {
@@ -147,7 +141,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function restoreSession (existingSession) {
+      function restoreSession (testSession) {
         return cy.then(async () => {
           Cypress.log({
             name: 'session',
@@ -156,14 +150,13 @@ export default function (Commands, Cypress, cy) {
             type: 'system',
           })
 
-          _log.set({ consoleProps: () => getConsoleProps(existingSession) })
+          _log.set({ consoleProps: () => getConsoleProps(testSession) })
 
-          await sessions.setSessionData(existingSession)
+          await sessions.setSessionData(testSession)
         })
       }
 
       function validateSession (existingSession, restoreSession = false) {
-        console.log('validateSessions', existingSession)
         // const isValidSession = true
 
         if (!existingSession.validate) {
@@ -377,9 +370,6 @@ export default function (Commands, Cypress, cy) {
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
-        console.log('HERE', session)
-        console.log('active', Cypress.state('activeSessions'))
-
         return cy.then(async () => {
           _log = log
 

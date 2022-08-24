@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { IconGeneralGlobe } from '@cypress-design/react-icon'
 import cs from 'classnames'
 import React from 'react'
 import { observer } from 'mobx-react'
@@ -62,7 +61,6 @@ class Sessions extends React.Component<SessionsProps> {
                       >
                         <div className="session-item" >
                           <span className={cs('session-info', { 'spec-session': !sess.isGlobalSession })}>
-                            {sess.isGlobalSession && <IconGeneralGlobe size="16" fillColor="gray-900" strokeColor="gray-500" className="global-session" />}
                             {sess.name}
                           </span>
                           <span className='session-tag'>

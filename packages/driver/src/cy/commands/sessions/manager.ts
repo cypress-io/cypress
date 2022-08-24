@@ -139,13 +139,6 @@ export default class SessionsManager {
       return this.Cypress.backend('clear:sessions', clearAllSessions)
     },
 
-    clearAllSpecSessions: async () => {
-      this.clearActiveSessions()
-      const clearAllSessions = false
-
-      return this.Cypress.backend('clear:sessions', clearAllSessions)
-    },
-
     clearCurrentSessionData: async () => {
       // this prevents a log occurring when we clear session in-between tests
       if (this.cy.state('duringUserTestExecution')) {

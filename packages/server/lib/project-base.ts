@@ -4,6 +4,9 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 import pkg from '@packages/root'
+import { DataContext, getCtx } from '@packages/data-context'
+import { createHmac } from 'crypto'
+
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
@@ -18,11 +21,11 @@ import { ServerE2E } from './server-e2e'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-
+import { getActiveSessions } from './session'
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
-import { createHmac } from 'crypto'
+
+import type { AllowedState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
+import type { StoredSessions } from './session'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -30,11 +33,9 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
   exit?: boolean
-  state?: {
-    firstOpened?: number | null
-    lastOpened?: number | null
-    promptsShown?: object | null
-    banners?: BannersState | null
+  state?: AllowedState
+  cachedTestState: {
+    activeSessions?: StoredSessions
   }
   e2e: Partial<Cfg>
   component: Partial<Cfg>
@@ -350,7 +351,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
-
+    console.log('start web scokets')
     const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
@@ -445,6 +446,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    console.log('server: initializeConfig')
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
@@ -472,14 +474,19 @@ export class ProjectBase<TServer extends Server> extends EE {
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
+    console.log('get config with server')
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
+    console.log('active sessions', getActiveSessions())
 
     return {
       ...this._cfg,
+      cachedTestState: {
+        activeSessions: getActiveSessions(),
+      },
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',

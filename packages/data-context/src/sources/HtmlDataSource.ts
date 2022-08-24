@@ -42,10 +42,11 @@ export class HtmlDataSource {
     throw err
   }
 
-  getPropertiesFromLegacyConfig (cfg: any) {
+  getPropertiesFromServerConfig (cfg: any) {
     const keys = [
       'baseUrl',
       'browserUrl',
+      'cachedTestState',
       'port',
       'proxyServer',
       'proxyUrl',
@@ -62,8 +63,12 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const propertiesFromLegacyConfig = this.getPropertiesFromLegacyConfig(this.ctx._apis.projectApi.getConfig() ?? {})
+    const serverConfig = this.ctx._apis.projectApi.getConfig() ?? {}
 
+    console.log('serverConfig', serverConfig)
+    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(serverConfig)
+
+    console.log(propertiesFromLegacyConfig)
     let cfg = { ...propertiesFromLegacyConfig }
 
     try {
@@ -99,6 +104,7 @@ export class HtmlDataSource {
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
   async appHtml (nonProxied: boolean) {
+    console.log('get app HTML')
     if (nonProxied) {
       return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
     }

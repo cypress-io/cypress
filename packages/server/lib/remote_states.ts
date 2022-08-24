@@ -145,26 +145,33 @@ export class RemoteStates {
     return this.get(remoteOriginPolicy) as Cypress.RemoteState
   }
 
-  addEventListeners (eventEmitter: EventEmitter) {
-    eventEmitter.on('cross:origin:bridge:ready', ({ originPolicy }) => {
-      debug(`received cross:origin:bridge:ready, add origin ${originPolicy} to remote states`)
+  onCrossOriginEvent = (eventName, { originPolicy }) => {
+    switch (eventName) {
+      case 'bridge:ready':
+        debug(`received cross:origin:bridge:ready, add origin ${originPolicy} to remote states`)
 
-      const existingOrigin = this.remoteStates.get(originPolicy)
+        const existingOrigin = this.remoteStates.get(originPolicy)
 
-      // since this is just the cy.origin starting, we don't want to override
-      // the existing origin if it already exists
-      if (!existingOrigin) {
-        this.set(originPolicy, { isCrossOrigin: true })
-      }
+        // since this is just the cy.origin starting, we don't want to override
+        // the existing origin if it already exists
+        if (!existingOrigin) {
+          this.set(originPolicy, { isCrossOrigin: true })
+        }
 
-      this.addOrigin(originPolicy)
-    })
+        return this.addOrigin(originPolicy)
+      case 'finished':
+        debug(`received cross:origin:finished, remove ${originPolicy} from origin stack`)
 
-    eventEmitter.on('cross:origin:finished', (originPolicy) => {
-      debug(`received cross:origin:finished, remove ${originPolicy} from origin stack`)
+        return this.removeCurrentOrigin(originPolicy)
+      default:
+        throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
+    }
+  }
 
-      this.removeCurrentOrigin(originPolicy)
-    })
+  addEventListeners (socketEventEmitter: EventEmitter) {
+    // socketEventEmitter.on('cross:origin:bridge:ready')
+
+    // socketEventEmitter.on('cross:origin:finished')
   }
 
   private get config () {
