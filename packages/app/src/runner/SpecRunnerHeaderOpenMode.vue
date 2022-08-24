@@ -36,6 +36,7 @@
         <StudioUrlPrompt
           v-if="studioStore.needsUrl"
           :aut-url-input-ref="autUrlInputRef"
+          :url-in-progress="urlInProgress"
           @submit="visitUrl"
           @cancel="() => eventManager.emit('studio:cancel', undefined)"
         />

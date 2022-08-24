@@ -280,12 +280,8 @@ export class EventManager {
     })
 
     const studioInit = () => {
-      this.ws.emit('studio:init', (showedStudioModal) => {
-        if (!showedStudioModal) {
-          this.studioStore.showInitModal()
-        } else {
-          rerun()
-        }
+      this.ws.emit('studio:init', () => {
+        rerun()
       })
     }
 
@@ -319,7 +315,6 @@ export class EventManager {
     })
 
     this.localBus.on('studio:start', () => {
-      this.studioStore.closeInitModal()
       rerun()
     })
 

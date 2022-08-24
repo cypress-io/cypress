@@ -71,7 +71,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
 
     return (
       <div className='studio-controls'>
-        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <a className='studio-cancel' onClick={this._cancel}>Cancel</a>
         <Tooltip
           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
           className='cy-tooltip'

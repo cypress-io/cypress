@@ -21,7 +21,7 @@ describe('StudioSaveModal', () => {
     cy.mount(<StudioSaveModal open />)
     cy.get('#testName').focus().type('my test')
 
-    cy.findByText('Save Test').click().then(() => {
+    cy.findByRole('button', { name: 'Save' }).click().then(() => {
       expect(saveStub).to.be.calledOnceWith('my test')
     })
   })

@@ -1,9 +1,4 @@
 <template>
-  <StudioInitModal
-    :open="studioStore.initModalIsOpen"
-    @close="studioStore.closeInitModal"
-    @start="eventManager.emit('studio:start', undefined)"
-  />
   <StudioInstructionsModal
     :open="studioStore.instructionModalIsOpen"
     @close="studioStore.closeInstructionModal"
@@ -133,7 +128,6 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
-import StudioInitModal from './studio/StudioInitModal.vue'
 import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'

@@ -77,7 +77,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   modelValue: false,
   helpText: `${defaultMessages.links.needHelp}`,
-  helpLink: 'https://on.cypress.io',
+  helpLink: '',
   class: undefined,
   variant: undefined,
   title: '',

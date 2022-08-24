@@ -1,100 +1,92 @@
 <template>
-  <div class="border-y flex border-gray-50 mt-5 w-full justify-between">
+  <div class="border-y flex border-gray-50 w-full justify-between">
     <div class="flex">
-      <div class="border-r flex border-gray-50 py-2 pr-3 pl-1 items-center">
-        <svg
+      <div class="flex pr-5 pl-5 items-center">
+        <span
           v-if="studioStore.url && studioStore.isActive && !studioStore.isFailed"
-          height="30"
-          width="30"
-          class="animate-pulse"
-        >
-          <circle
-            cx="15"
-            cy="15"
-            r="7"
-            fill="#e94f5f"
-          />
-        </svg>
+          class="mr-2"
+        ><i-cy-action-record_x16 class="animate-pulse icon-dark-red-500 icon-light-red-500" /></span>
         <span
           v-else
           class="px-2"
-        ><i-cy-object-magic-wand-dark-mode_x16 /></span>
-        <span class="font-semibold">{{ t('runner.studio.studio').toUpperCase() }}</span>
-        <span class="ml-1 text-gray-600"> {{ t('versions.beta').toUpperCase() }}</span>
+        ><i-cy-object-magic-wand-dark-mode_x16 class="fill-purple-300 stroke-purple-300" /></span>
+        <div class="font-semibold text-base text-gray-800">
+          <span>{{ t('runner.studio.studio').toUpperCase() }}</span>
+          <span class="ml-1"> {{ t('versions.beta').toUpperCase() }}</span>
+        </div>
       </div>
-
-      <button
-        class="border-r font-semibold border-gray-50 px-3 text-indigo-500 hocus-link"
-        :disabled="studioStore.isLoading"
-        @click="studioStore.openInstructionModal"
-      >
-        {{ t('runner.studio.availableCommands').toUpperCase() }}
-      </button>
 
       <div class="flex items-center">
         <a
-          class="font-semibold py-4 px-3 text-indigo-500 hocus-link"
-          href="https://on.cypress.io/studio-beta"
-          target="_blank"
-        >{{ t('runner.studio.giveFeedback').toUpperCase() }}</a>
+          class="cursor-pointer font-medium text-base text-indigo-500 hocus-link hover:underline"
+          @click="studioStore.openInstructionModal"
+        >
+          {{ t('runner.studio.availableCommands') }}
+        </a>
       </div>
     </div>
 
     <div class="flex">
-      <Tooltip
-        placement="top"
-      >
-        <button
-          :class="`border-l ${controlsClassName}`"
-          :disabled="studioStore.isLoading"
-          @click="handleClose"
+      <div class="border rounded-md flex border-gray-100 m-1">
+        <Tooltip
+          placement="top"
         >
-          <i-cy-delete_x16 />
-        </button>
-        <template #popper>
-          {{ t('runner.studio.closeStudio') }}
-        </template>
-      </Tooltip>
+          <button
+            :class="`border-r ${controlsClassName}`"
+            :disabled="studioStore.isLoading"
+            @click="handleClose"
+          >
+            <i-cy-delete_x16 />
+          </button>
+          <template #popper>
+            {{ t('runner.studio.closeStudio') }}
+          </template>
+        </Tooltip>
 
-      <Tooltip
-        placement="top"
-      >
-        <button
-          :class="controlsClassName"
-          :disabled="studioStore.isLoading"
-          @click="handleRestart"
+        <Tooltip
+          placement="top"
         >
-          <i-cy-action-restart_x16 />
-        </button>
-        <template #popper>
-          {{ t('runner.studio.restartStudio') }}
-        </template>
-      </Tooltip>
+          <button
+            :class="`border-r ${controlsClassName}`"
+            :disabled="studioStore.isLoading"
+            @click="handleRestart"
+          >
+            <i-cy-action-restart_x16 />
+          </button>
+          <template #popper>
+            {{ t('runner.studio.restartStudio') }}
+          </template>
+        </Tooltip>
 
-      <Tooltip
-        placement="top"
-      >
-        <button
-          :class="controlsClassName"
-          :disabled="studioStore.isLoading || studioStore.isEmpty"
-          @click="handleCopyCommands"
-          @mouseleave="() => commandsCopied = false"
+        <Tooltip
+          placement="top"
         >
-          <span v-if="commandsCopied"><i-cy-checkmark_x16 /></span>
-          <span v-else> <i-cy-general-clipboard_x16 /></span>
-        </button>
-        <template #popper>
-          {{ t(commandsCopied ? 'runner.studio.commandsCopied' : 'runner.studio.copyCommands') }}
-        </template>
-      </Tooltip>
+          <button
+            :class="controlsClassName"
+            :disabled="studioStore.isLoading || studioStore.isEmpty"
+            @click="handleCopyCommands"
+            @mouseleave="() => commandsCopied = false"
+          >
+            <span
+              v-if="commandsCopied"
+            ><i-cy-checkmark_x16 class="icon-dark-green-400 icon-light-green-400" /></span>
+            <span v-else> <i-cy-general-clipboard_x16 /></span>
+          </button>
+          <template #popper>
+            {{ t(commandsCopied ? 'runner.studio.commandsCopied' : 'runner.studio.copyCommands') }}
+          </template>
+        </Tooltip>
+      </div>
 
-      <button
-        :class="controlsClassName"
-        :disabled="studioStore.isLoading || studioStore.isEmpty"
-        @click="handleSaveCommands"
-      >
-        Save Commands
-      </button>
+      <div class="flex items-center">
+        <button
+          class="rounded-md bg-indigo-500 mx-3 text-white py-2 px-3 hover:bg-indigo-400 disabled:opacity-50 disabled:pointer-events-none"
+          :disabled="studioStore.isLoading || studioStore.isEmpty || studioStore.isFailed"
+          @click="handleSaveCommands"
+        >
+          {{ t('runner.studio.saveTestButton') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -106,7 +98,7 @@ import { getEventManager } from '../'
 import { useStudioStore } from '../../store/studio-store'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
-const controlsClassName = 'border-r border-gray-50 py-4 px-3'
+const controlsClassName = 'border-gray-100 py-2 px-3 disabled:stroke-gray-400 disabled:pointer-events-none disabled:opacity-50'
 
 const { t } = useI18n()
 

@@ -110,7 +110,6 @@ export interface StudioLog {
 }
 
 interface StudioRecorderState {
-  initModalIsOpen: boolean
   saveModalIsOpen: boolean
   instructionModalIsOpen: boolean
   logs: StudioLog[]
@@ -137,7 +136,6 @@ interface StudioRecorderState {
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
     return {
-      initModalIsOpen: false,
       saveModalIsOpen: false,
       instructionModalIsOpen: false,
       logs: [],
@@ -163,14 +161,6 @@ export const useStudioStore = defineStore('studioRecorder', {
     clearRunnableIds () {
       this.testId = undefined
       this.suiteId = undefined
-    },
-
-    showInitModal () {
-      this.initModalIsOpen = true
-    },
-
-    closeInitModal () {
-      this.initModalIsOpen = false
     },
 
     openInstructionModal () {

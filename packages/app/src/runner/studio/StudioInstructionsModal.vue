@@ -8,17 +8,19 @@
     @update:model-value="emit('close')"
   >
     <template #title>
-      <i className="fas fa-magic icon" />
-      {{ t('runner.studio.studio') }}
-      <span className="beta">{{ t('versions.beta') }}</span>
+      <div class="flex pt-1">
+        <i-cy-object-magic-wand-dark-mode_x16 />
+        <span class="ml-1">{{ t('runner.studio.studio') }}</span>
+        <span class="ml-1">{{ t('versions.beta') }}</span>
+      </div>
     </template>
 
-    <div className="content center">
-      <div className="text">
+    <div class="py-7 px-15 text-gray-900">
+      <div class="text-center">
         {{ t('runner.studio.studioDetailedDescription') }}
       </div>
 
-      <div className="text center-box">
+      <div class="flex mt-3 justify-center">
         <ul>
           <li>
             <pre>.check()</pre>
@@ -37,13 +39,14 @@
           </li>
         </ul>
       </div>
-      <div className="text">
-        {{ t('runner.studio.betaMessage') }}
+      <div class="my-3 text-center">
+        {{ t('runner.studio.experimentalMessage') }}
         <i18n-t
           scope="global"
           keypath="runner.studio.feedbackPrompt"
         >
           <a
+            class="text-indigo-500"
             href="https://on.cypress.io/studio-beta"
             target="_blank"
           >{{ t('runner.studio.feedbackLink') }}</a>

@@ -6,33 +6,42 @@
     @update:model-value="emit('close')"
   >
     <template #title>
-      <i className="fas fa-magic icon" />
-      {{ t('runner.studio.saveNewTest') }}
+      <div class="flex pt-2">
+        <span><i-cy-object-magic-wand-dark-mode_x16 /></span>
+        <span class="ml-1">{{ t('runner.studio.saveTest') }}</span>
+      </div>
     </template>
 
-    <div className="content">
+    <div class="max-w-sm w-sm py-5 px-5">
       <form
+        class="flex items-center justify-evenly"
         @submit="submit"
       >
-        <div className="text">
-          <label
-            className="text-strong"
-            htmlFor="testName"
-          >{{ t('runner.studio.testName') }}</label>
+        <div class="w-full">
           <Input
             id="testName"
             v-model="testName"
+            class="rounded-md"
+            :placeholder="t('runner.studio.testName')"
             type="text"
             :required="true"
           />
         </div>
-        <div className="center">
-          <input
+        <div class="ml-3">
+          <button
+            class="disabled:opacity-50 disabled:pointer-events-none"
             type="submit"
-            :value="t('runner.studio.saveTestButton')"
-            class="btn btn-block"
             :disabled="!testName"
           >
+            <div class="rounded-md flex bg-indigo-500 py-1.5 px-1 align-center hover:bg-indigo-400">
+              <div class="ml-2 pt-1">
+                <i-cy-circle-check_x16 class="fill-gray-200 stroke-gray-1000" />
+              </div>
+              <div class="font-medium mx-2 text-white">
+                {{ t('runner.studio.saveTestButton') }}
+              </div>
+            </div>
+          </button>
         </div>
       </form>
     </div>
