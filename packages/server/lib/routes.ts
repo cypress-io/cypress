@@ -4,7 +4,6 @@ import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
-import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -20,13 +19,11 @@ const debug = Debug('cypress:server:routes')
 export interface InitializeRoutes {
   config: Cfg
   getSpec: () => FoundSpec | null
-  getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
   remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
-  exit?: boolean
 }
 
 export const createCommonRoutes = ({
@@ -34,10 +31,8 @@ export const createCommonRoutes = ({
   networkProxy,
   testingType,
   getSpec,
-  getCurrentBrowser,
   remoteStates,
   nodeProxy,
-  exit,
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
@@ -61,7 +56,7 @@ export const createCommonRoutes = ({
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
-    runner.handle(testingType, req, res)
+    runner.handle(req, res)
   })
 
   router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
