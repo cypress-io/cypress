@@ -4,6 +4,11 @@
   "title": "Cypress Generate Spec Options Schema",
   "type": "object",
   "properties": {
+    "filename": {
+      "type": "string",
+      "description": "Allows users to specify a custom filename.",
+      "visible": false
+    },
     "path": {
       "type": "string",
       "format": "path",

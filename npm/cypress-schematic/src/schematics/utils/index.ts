@@ -104,8 +104,8 @@ export function createTemplate ({ templatePath, options }: {templatePath: string
     applyTemplates({
       classify: strings.classify,
       dasherize: strings.dasherize,
-      name: options.testingType === 'component' ? `${options.name}Component` : options.name,
-      fileName: options.fileName || options.name,
+      name: options.component ? `${options.name}Component` : options.name,
+      fileName: options.filename || options.name,
     }),
     move(normalize(options.path as string)),
   ])

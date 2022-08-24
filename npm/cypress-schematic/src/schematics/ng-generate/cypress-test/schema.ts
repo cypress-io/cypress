@@ -1,4 +1,7 @@
 export interface Schema {
+  // Custom filename.
+  filename?: string
+
   // The name of the spec.
   name: string
 
