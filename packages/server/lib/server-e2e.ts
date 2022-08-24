@@ -231,7 +231,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // if our promise is still pending
         if (p.isPending()) {
           restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
-          p.cancel()
         }
 
         return reject(err)
