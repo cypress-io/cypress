@@ -219,21 +219,23 @@ describe('detectFramework', () => {
     })
   })
 
-  it(`Svelte and Vite`, async () => {
-    const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
+  ;['2.0.0', '3.0.0'].forEach((v) => {
+    it(`Svelte and Vite v${v}`, async () => {
+      const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
 
-    fakeDepsInNodeModules(projectPath, [
-      { dependency: 'svelte', version: '3.0.0' },
-      { dependency: 'vite', version: '3.0.0' },
-    ])
+      fakeDepsInNodeModules(projectPath, [
+        { dependency: 'svelte', version: '3.0.0' },
+        { dependency: 'vite', version: v },
+      ])
 
-    const actual = await detectFramework(projectPath)
+      const actual = await detectFramework(projectPath)
 
-    expect(actual.framework?.type).to.eq('svelte')
-    expect(actual.bundler?.type).to.eq('vite')
+      expect(actual.framework?.type).to.eq('svelte')
+      expect(actual.bundler?.type).to.eq('vite')
+    })
   })
 
-  it(`Svelte and Vite`, async () => {
+  it(`Svelte and Webpack`, async () => {
     const projectPath = await scaffoldMigrationProject('svelte-webpack-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [

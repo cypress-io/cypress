@@ -61,9 +61,18 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
-export type WizardMountModule = Awaited<ReturnType<typeof WIZARD_FRAMEWORKS[number]['mountModule']>>
+export const WIZARD_MOUNT_MODULES = [
+  'cypress/react',
+  'cypress/react18',
+  'cypress/vue',
+  'cypress/vue2',
+  'cypress/angular',
+  'cypress/svelte',
+] as const
 
-const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
+export type WizardMountModule = 'cypress/react' | 'cypress/react18' | 'cypress/vue' | 'cypress/vue2' | 'cypress/angular' | 'cypress/svelte'
+
+const mountModule = (mountModule: WizardMountModule) => (projectPath: string) => Promise.resolve(mountModule)
 
 const reactMountModule = async (projectPath: string) => {
   const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)

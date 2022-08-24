@@ -222,11 +222,10 @@ describe('supportFileComponent', () => {
   })
 
   context('svelte', () => {
-    for (const mountModule of ['cypress/svelte'] as const) {
-      it(`handles ${mountModule} and JS`, () => {
-        const actual = supportFileComponent('js', mountModule)
+    it(`handles cypress/svelte and JS`, () => {
+      const actual = supportFileComponent('js', 'cypress/svelte')
 
-        expect(actual).to.eq(dedent`
+      expect(actual).to.eq(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -248,19 +247,19 @@ describe('supportFileComponent', () => {
           // Alternatively you can use CommonJS syntax:
           // require('./commands')
 
-          import { mount } from '${mountModule}'
+          import { mount } from 'cypress/svelte'
 
           Cypress.Commands.add('mount', mount)
 
           // Example use:
           // cy.mount(MyComponent)
           `)
-      })
+    })
 
-      it(`handles ${mountModule} and TS`, () => {
-        const actual = supportFileComponent('ts', mountModule)
+    it(`handles cypress/svelte and TS`, () => {
+      const actual = supportFileComponent('ts', 'cypress/svelte')
 
-        expect(actual).to.eq(dedent`
+      expect(actual).to.eq(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -282,7 +281,7 @@ describe('supportFileComponent', () => {
         // Alternatively you can use CommonJS syntax:
         // require('./commands')
 
-        import { mount } from '${mountModule}'
+        import { mount } from 'cypress/svelte'
 
         // Augment the Cypress namespace to include type definitions for
         // your custom command.
@@ -301,7 +300,6 @@ describe('supportFileComponent', () => {
         // Example use:
         // cy.mount(MyComponent)
       `)
-      })
-    }
+    })
   })
 })

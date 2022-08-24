@@ -121,4 +121,30 @@ describe('scaffolding component testing', {
       verifyConfigFile(`cypress.config.ts`)
     })
   })
+
+  context('svelte-vite-unconfigured', () => {
+    it('Scaffolds component testing for Svelte using vite', () => {
+      startSetupFor('svelte-vite-unconfigured')
+
+      // should detect correctly
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', 'Svelte.js(detected)').should('be.visible')
+      cy.contains('button', 'Next Step').click()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
+
+  context('svelte-webpack-unconfigured', () => {
+    it('Scaffolds component testing for Svelte using webpack', () => {
+      startSetupFor('svelte-webpack-unconfigured')
+
+      // should detect correctly
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', 'Svelte.js(detected)').should('be.visible')
+      cy.contains('button', 'Next Step').click()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
 })
