@@ -7,16 +7,15 @@
       <span>{{ t('runner.studio.enterValidUrl') }}</span>
     </div>
 
-    <form>
+    <form @submit.prevent="emit('submit')">
       <div class="flex mt-3 justify-between">
         <button
+          type="button"
           @click="emit('cancel')"
         >
           {{ t('runner.studio.actionCancel') }}
         </button>
-        <button
-          @click="() => emit('submit')"
-        >
+        <button type="submit">
           {{ t('runner.studio.continue') }} ➜
         </button>
       </div>
