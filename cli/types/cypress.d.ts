@@ -3047,7 +3047,7 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
-  type AngularDevServerProjectConfig = {
+  interface AngularDevServerProjectConfig {
     root: string,
     sourceRoot: string,
     buildOptions: Record<string, any>

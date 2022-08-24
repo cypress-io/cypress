@@ -5,7 +5,9 @@ import { pathToFileURL } from 'url'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
-type BuildOptions = Record<string, any>
+export type BuildOptions = Record<string, any>
+
+export type AngularWebpackDevServerConfig = Extract<WebpackDevServerConfig, {framework: 'angular'}>
 
 type Configurations = {
   configurations?: {
@@ -31,7 +33,7 @@ type AngularJson = {
 
 const dynamicImport = new Function('specifier', 'return import(specifier)')
 
-async function getProjectConfig (projectRoot: string): Promise<Cypress.AngularDevServerProjectConfig> {
+export async function getProjectConfig (projectRoot: string): Promise<Cypress.AngularDevServerProjectConfig> {
   const angularJson = await getAngularJson(projectRoot)
 
   let { defaultProject } = angularJson
@@ -106,7 +108,7 @@ export function getAngularBuildOptions (buildOptions: BuildOptions, tsConfig: st
   }
 }
 
-export async function generateTsConfig (devServerConfig: WebpackDevServerConfig, buildOptions: BuildOptions): Promise<string> {
+export async function generateTsConfig (devServerConfig: AngularWebpackDevServerConfig, buildOptions: BuildOptions): Promise<string> {
   const { cypressConfig } = devServerConfig
   const { projectRoot } = cypressConfig
 
@@ -222,7 +224,7 @@ function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.A
 
 export const toPosix = (filePath: string) => filePath.split(path.sep).join(path.posix.sep)
 
-async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConfig) {
+async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevServerConfig) {
   const { projectRoot } = devServerConfig.cypressConfig
 
   const {
@@ -251,7 +253,7 @@ async function getAngularCliWebpackConfig (devServerConfig: WebpackDevServerConf
   return config
 }
 
-export async function angularHandler (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+export async function angularHandler (devServerConfig: AngularWebpackDevServerConfig): Promise<PresetHandlerResult> {
   const webpackConfig = await getAngularCliWebpackConfig(devServerConfig)
 
   return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
