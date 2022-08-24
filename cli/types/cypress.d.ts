@@ -2877,7 +2877,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: CyTypeHelpers.Nullable<number | { runMode?: CyTypeHelpers.Nullable<number>, openMode?: CyTypeHelpers.Nullable<number> }>
+    retries: Cypress.Nullable<number | { runMode?: Cypress.Nullable<number>, openMode?: Cypress.Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},
