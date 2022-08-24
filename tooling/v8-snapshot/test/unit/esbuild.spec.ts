@@ -47,7 +47,7 @@ describe('esbuild', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(10000)
+  }).timeout(20000)
 
   it('tests windows-issues', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'windows-issues')
@@ -81,5 +81,5 @@ describe('esbuild', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(10000)
+  }).timeout(20000)
 })

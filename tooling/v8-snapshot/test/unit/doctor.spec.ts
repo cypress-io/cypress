@@ -37,7 +37,7 @@ describe('doctor', () => {
     }).to.deep.equal({
       keys: ['./valid-module.js', './accessing-buffer.js', './entry.js'],
     })
-  })
+  }).timeout(20000)
 
   it('snapshots entry points modules using and one reassigning console ', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'console-assign')
@@ -74,7 +74,7 @@ describe('doctor', () => {
     expect(!reassign.includes('get_console() = function') && reassign.includes('console = function'), 'reassign-console.js: does not rewrite console =').to.be.true,
 
     expect(exported['./using-console.js'].toString().includes('get_console'), 'using-console.js: does rewrite console').to.be.true
-  })
+  }).timeout(20000)
 
   it('snapshots with requiring a module that depends on a module needing to be deferred', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'deep-nested-deferred')
@@ -110,7 +110,7 @@ describe('doctor', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(10000)
+  }).timeout(20000)
 
   it('snapshots using dir/file name delayed and during init ', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'dirname-filename-use')
@@ -142,7 +142,7 @@ describe('doctor', () => {
         './entry.js',
       ],
     })
-  })
+  }).timeout(20000)
 
   it('snapshots entry points to modules, with missing functions', async () => {
     const projectBaseDir = path.join(
@@ -180,7 +180,7 @@ describe('doctor', () => {
         './entry.js',
       ],
     })
-  })
+  }).timeout(20000)
 
   it('snapshots entry points to dependents of a module that is statically deferred', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'load-static-deferred')
@@ -225,7 +225,7 @@ describe('doctor', () => {
         './entry.js',
       ],
     })
-  })
+  }).timeout(20000)
 
   it('snapshots an entry that requires a module that has is detected norewrite', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'no-rewrite')
@@ -261,5 +261,5 @@ describe('doctor', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
-  }).timeout(10000)
+  }).timeout(20000)
 })

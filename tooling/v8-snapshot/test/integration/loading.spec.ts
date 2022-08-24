@@ -129,43 +129,45 @@ describe('loading', () => {
     }
   }).timeout(20000)
 
-  it('loads an app loading and using fsevents which has native module component', async () => {
-    const projectName = 'v8-snapshot/native-modules'
+  if (process.platform === 'darwin') {
+    it('loads an app loading and using fsevents which has native module component', async () => {
+      const projectName = 'v8-snapshot/native-modules'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
+      Fixtures.remove()
+      await FixturesScaffold.scaffoldCommonNodeModules()
+      const projectBaseDir = await Fixtures.scaffoldProject(projectName)
 
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
-    const cacheDir = path.join(projectBaseDir, 'cache')
-    const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
-    const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
-      cacheDir,
-      nodeModulesOnly: false,
-    })
+      await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+      const cacheDir = path.join(projectBaseDir, 'cache')
+      const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
+      const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+        cacheDir,
+        nodeModulesOnly: false,
+      })
 
-    await generator.createScript()
-    await generator.makeAndInstallSnapshot()
+      await generator.createScript()
+      await generator.makeAndInstallSnapshot()
 
-    const env: Record<string, any> = {
-      ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
-      PROJECT_BASE_DIR: projectBaseDir,
-      DEBUG_COLORS: 1,
-    }
-    const cmd =
+      const env: Record<string, any> = {
+        ELECTRON_RUN_AS_NODE: 1,
+        DEBUG: '(packherd|snapgen):*',
+        PROJECT_BASE_DIR: projectBaseDir,
+        DEBUG_COLORS: 1,
+      }
+      const cmd =
       `${electronExecutable} -r ${projectBaseDir}/hook-require.js` +
       ` ${projectBaseDir}/app.js`
 
-    try {
-      const { stdout } = await exec(cmd, { env })
-      const res = JSON.parse(stdout.trim())
+      try {
+        const { stdout } = await exec(cmd, { env })
+        const res = JSON.parse(stdout.trim())
 
-      spok(t, res, { itemIsDir: 131072 })
-    } catch (err: any) {
-      assert.fail(err.toString())
-    }
-  }).timeout(20000)
+        spok(t, res, { itemIsDir: 131072 })
+      } catch (err: any) {
+        assert.fail(err.toString())
+      }
+    }).timeout(20000)
+  }
 
   it('loads a cached module that modifies require cache', async () => {
     const projectName = 'v8-snapshot/require-cache'
