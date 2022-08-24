@@ -144,9 +144,9 @@ export const create = (state: StateFunc) => ({
       // and persist it, leaving the selection contents to be overwritten rather than appended to
       // on subsequent actions.
       //
-      // In order to avoid this behavior, we explicitly set the selection range with the current
-      // selectionStart/selectionEnd values. This will bypass the default select-all behavior, even though
-      // logically it looks like a no-op.
+      // To avoid this behavior, we explicitly set the selection range with the current
+      // selectionStart/selectionEnd values prior to calling focus. This will bypass the
+      // default select-all behavior even though logically it looks like a no-op.
       try {
         el.setSelectionRange(el.selectionStart, el.selectionEnd)
       } catch (e) {
