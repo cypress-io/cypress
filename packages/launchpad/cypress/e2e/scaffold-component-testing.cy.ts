@@ -128,7 +128,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
-      cy.contains('button', 'Svelte.js(detected)').should('be.visible')
+      cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next Step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
@@ -141,7 +141,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
-      cy.contains('button', 'Svelte.js(detected)').should('be.visible')
+      cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next Step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
