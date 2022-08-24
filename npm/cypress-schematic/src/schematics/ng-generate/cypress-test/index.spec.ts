@@ -31,10 +31,10 @@ describe('ng-generate @cypress/schematic:spec', () => {
   })
 
   it('should create cypress e2e spec file by default', async () => {
-    await schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', testingType: 'e2e' }, appTree).toPromise().then((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/cypress/e2e/foo.cy.ts'))
+    await schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox' }, appTree).toPromise().then((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/cypress/e2e/foo.cy.ts'))
   })
 
   it('should create cypress ct spec file when testingType is component', async () => {
-    await schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', testingType: 'component' }, appTree).toPromise().then((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/src/app/foo.component.cy.ts'))
+    await schematicRunner.runSchematicAsync('spec', { name: 'foo', project: 'sandbox', component: true }, appTree).toPromise().then((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/src/app/foo.component.cy.ts'))
   })
 })
