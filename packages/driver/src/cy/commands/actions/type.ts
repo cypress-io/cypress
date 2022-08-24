@@ -87,7 +87,6 @@ export default function (Commands, Cypress, cy, state, config) {
         }
       }
 
-      // transform table object into object with zero based index as keys
       const getTableData = () => {
         return _.values(table)
       }
