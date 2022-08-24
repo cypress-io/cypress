@@ -36,6 +36,22 @@ const getComponentDisplayName = (Component: SvelteComponentClass): string => {
   return DEFAULT_COMP_NAME
 }
 
+/**
+ * Mounts a Svelte component inside the Cypress browser
+ *
+ * @param {SvelteComponentClass} Component Svelte component being mounted
+ * @param {MountOptions} options options to customize the component being mounted
+ * @returns Cypress.Chainable<MountReturn>
+ *
+ * @example
+ * import Counter from './Counter.svelte'
+ * import { mount } from 'cypress/svelte'
+ *
+ * it('should render', () => {
+ *   mount(Counter, { props: { count: 42 } })
+ *   cy.get('button').contains(42)
+ * })
+ */
 export function mount (
   Component: SvelteComponentClass,
   options: MountOptions = {},
