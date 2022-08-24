@@ -532,7 +532,7 @@ export class SnapshotGenerator {
    */
   async makeSnapshot () {
     function runInstructions () {
-      const bin = require.resolve('@thlorenz/mksnapshot/dist/mksnapshot-bin')
+      const bin = require.resolve('@tooling/electron-mksnapshot/dist/mksnapshot-bin')
       const cmd = `node ${bin} ${args.join(' ')}`
 
       logError(`Run:\n   ${cmd}\n to investigate.`)
