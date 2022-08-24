@@ -90,9 +90,16 @@ const base64toJs = (base64) => {
   }
 }
 
+const destroySourceMapConsumers = () => {
+  Object.values(sourceMapConsumers).forEach((consumer) => {
+    consumer.destroy()
+  })
+}
+
 export default {
   getSourcePosition,
   getSourceContents,
   extractSourceMap,
   initializeSourceMapConsumer,
+  destroySourceMapConsumers,
 }

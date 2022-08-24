@@ -70,6 +70,7 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
+        console.log('here 1')
         const validOpts = {
           'validate': 'function',
           'cacheAcrossSpecs': 'boolean',
@@ -90,8 +91,11 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
+      console.log('here 2')
       let session: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
+
+      console.log('isRegisteredSessionForSpec & sess', isRegisteredSessionForSpec, session)
 
       if (!setup) {
         if (!session || !isRegisteredSessionForSpec) {
@@ -99,6 +103,8 @@ export default function (Commands, Cypress, cy) {
         }
       } else {
         const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
+
+        console.log('isUniqSessionDefinition', isUniqSessionDefinition)
 
         if (isUniqSessionDefinition) {
           if (isRegisteredSessionForSpec) {
@@ -131,8 +137,8 @@ export default function (Commands, Cypress, cy) {
             const data = await sessions.getCurrentSessionData()
 
             _.extend(existingSession, data)
-            existingSession.hydrated = true
-            await sessions.saveSessionData(existingSession)
+            // existingSession.hydrated = true
+            // await sessions.saveSessionData(existingSession)
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
 
@@ -157,10 +163,11 @@ export default function (Commands, Cypress, cy) {
       }
 
       function validateSession (existingSession, restoreSession = false) {
-        const isValidSession = true
+        console.log('validateSessions', existingSession)
+        // const isValidSession = true
 
         if (!existingSession.validate) {
-          return isValidSession
+          return
         }
 
         return logGroup(Cypress, {
@@ -171,7 +178,7 @@ export default function (Commands, Cypress, cy) {
         }, (validateLog) => {
           return cy.then(async () => {
             const onSuccess = () => {
-              return isValidSession
+              return
             }
 
             const onFail = (err) => {
@@ -185,13 +192,13 @@ export default function (Commands, Cypress, cy) {
                   name: 'session',
                 })
                 .error(err)
-
-                return !isValidSession
               }
 
-              $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
+              return err
 
-              return cy.fail(err)
+              // $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
+
+              // return cy.fail(err)
             }
 
             return validate(existingSession, onSuccess, onFail)
@@ -307,12 +314,16 @@ export default function (Commands, Cypress, cy) {
           return createSession(existingSession, recreateSession)
         })
         .then(() => validateSession(existingSession))
-        .then((isValidSession: boolean) => {
-          if (!isValidSession) {
-            return
+        .then((err: Error) => {
+          if (err) {
+            $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
+
+            return cy.fail(err)
           }
 
-          _log.set({ renderProps: { status: recreateSession ? 'recreated' : 'created' } })
+          existingSession.hydrated = true
+          sessions.saveSessionData(existingSession)
+          _log.set({ state: 'passed', renderProps: { status: recreateSession ? 'recreated' : 'created' } })
         })
       }
 
@@ -336,12 +347,12 @@ export default function (Commands, Cypress, cy) {
           return restoreSession(existingSession)
         })
         .then(() => validateSession(existingSession, true))
-        .then((isValidSession: boolean) => {
-          if (!isValidSession) {
+        .then((err: Error) => {
+          if (err) {
             return createSessionWorkflow(existingSession, true)
           }
 
-          _log.set({ renderProps: { status: 'restored' } })
+          _log.set({ state: 'passed', renderProps: { status: 'restored' } })
         })
       }
 
@@ -357,6 +368,7 @@ export default function (Commands, Cypress, cy) {
        */
       let _log
       const groupDetails = {
+        state: 'pending',
         message: `${session.id.length > 50 ? `${session.id.substring(0, 47)}...` : session.id}`,
         sessionInfo: getSessionDetails(session),
         renderProps: {
@@ -365,6 +377,9 @@ export default function (Commands, Cypress, cy) {
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
+        console.log('HERE', session)
+        console.log('active', Cypress.state('activeSessions'))
+
         return cy.then(async () => {
           _log = log
 

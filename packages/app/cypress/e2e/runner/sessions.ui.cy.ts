@@ -328,7 +328,7 @@ describe('runner/cypress sessions.ui.spec', {
   })
 })
 
-describe.only('runner/cypress sessions.open_mode.spec', () => {
+describe('runner/cypress sessions.open_mode.spec', () => {
   beforeEach(() => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
     cy.openProject('session-and-origin-e2e-specs')
@@ -424,5 +424,42 @@ describe.only('runner/cypress sessions.open_mode.spec', () => {
 
     cy.get('.command-name-session').should('contain', 'global_session_1')
     .find('.reporter-tag').should('contain', 'restored')
+  })
+})
+
+describe.only('global sessions', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+  })
+
+  it('creates global session', () => {
+
+  })
+
+  it('restores global session', () => {
+
+  })
+
+  it.only('persists global session', () => {
+    cy.get('[data-cy-row="global_session_persist_1.cy.js"]').click()
+    cy.waitForSpecToFinish({
+      passCount: 4,
+    })
+
+    // cy.get('.command-name-session').should('contain', 'global_session')
+    // .find('.reporter-tag').should('contain', 'created')
+  })
+
+  it('clears all sessions when selecting "clear all sessions"', () => {
+    cy.get('[data-cy-row="global_session_persist_1.cy.js"]').click()
+    cy.waitForSpecToFinish({
+      passCount: 2,
+    })
+
+    cy.get('.command-name-session').should('contain', 'global_session')
+    .find('.reporter-tag').should('contain', 'created')
   })
 })

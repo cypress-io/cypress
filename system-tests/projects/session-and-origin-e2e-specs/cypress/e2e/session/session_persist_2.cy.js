@@ -3,17 +3,6 @@
  * This part makes sure session data is cleared in-between specs in run mode
  */
 
-const expectCurrentSessionData = (obj) => {
-  cy.then(() => {
-    return Cypress.session.getCurrentSessionData()
-    .then((result) => {
-      expect(result.cookies.map((v) => v.name)).members(obj.cookies || [])
-      expect(result.localStorage).deep.members(obj.localStorage || [])
-      expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
-    })
-  })
-}
-
 describe('after running spec with saved session', () => {
   it('has an initially blank session on new spec', () => {
     cy.session('persist_session', () => {
@@ -25,16 +14,6 @@ describe('after running spec with saved session', () => {
       cy.setCookie('cookieName', 'cookieValue')
     }, {
       cacheAcrossSpecs: true,
-    })
-
-    cy.visit('https://localhost:4466/form')
-    cy.contains('form')
-
-    expectCurrentSessionData({
-      cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies', '/form'],
-      localStorage: [
-        { origin: 'https://127.0.0.1:44665', value: { name: 'cookies' } },
-      ],
     })
 
     return cy.wrap(null).should(() => {

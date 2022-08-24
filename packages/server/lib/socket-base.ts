@@ -440,6 +440,7 @@ export class SocketBase {
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:sessions':
+              console.log('clear sessions', args)
               return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])

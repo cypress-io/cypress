@@ -1,18 +1,5 @@
 top.count = top.count || 0
 
-const expectCurrentSessionData = (obj) => {
-  cy.then(() => {
-    return Cypress.session.getCurrentSessionData()
-    .then((result) => {
-      console.log(obj)
-      console.log(result)
-      // expect(result.cookies.map((v) => ({ domain: v.domain, name: v.name }))).to.deep.members(obj.cookies || [])
-      expect(result.localStorage).deep.members(obj.localStorage || [])
-      expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
-    })
-  })
-}
-
 describe('persist saved sessions between spec reruns', () => {
   it('sets session', () => {
     cy.wait(25000)
@@ -21,36 +8,10 @@ describe('persist saved sessions between spec reruns', () => {
     })
 
     cy.session('persist_global_session', () => {
-      cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
       cy.setCookie('cookieName', 'cookieValue')
     }, {
       cacheAcrossSpecs: true,
     })
-
-    // cy.visit('https://localhost:4466/form')
-    // cy.contains('form')
-
-    // expectCurrentSessionData({
-    //   cookies: [{
-    //     domain: 'localhost',
-    //     name: 'cookieName',
-    //   },
-    //   {
-    //     domain: '127.0.0.1',
-    //     name: '/set-localStorage/cookies',
-    //   },
-    //   {
-    //     domain: 'localhost',
-    //     name: '/cross_origin_iframe/cookies',
-    //   },
-    //   {
-    //     domain: 'localhost',
-    //     name: '/form',
-    //   }],
-    //   localStorage: [
-    //     { origin: 'https://127.0.0.1:44665', value: { name: 'cookies' } },
-    //   ],
-    // })
 
     if (!top.count) {
       cy.wait(4000)

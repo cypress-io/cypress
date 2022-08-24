@@ -131,6 +131,7 @@ describe('e2e sessions', () => {
   })
 
   it('session tests', {
+    project: 'session-and-origin-e2e-specs',
     spec: 'session.cy.js',
     snapshot: true,
     config: {
@@ -140,6 +141,7 @@ describe('e2e sessions', () => {
   })
 
   it.only('sessions persist on reload, and clear between specs', {
+    project: 'session-and-origin-e2e-specs',
     spec: 'session_persist_1.cy.js,session_persist_2.cy.js',
     snapshot: true,
     config: {
@@ -149,6 +151,7 @@ describe('e2e sessions', () => {
   })
 
   it('sessions recreated on reload in open mode', {
+    project: 'session-and-origin-e2e-specs',
     spec: 'session_recreate_reload.cy.js',
     snapshot: true,
     config: {
