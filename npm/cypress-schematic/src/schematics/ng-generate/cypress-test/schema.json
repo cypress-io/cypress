@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "cypress-schematics-e2e-spec",
+  "$id": "cypress-schematics-generate-spec",
   "title": "Cypress Generate Spec Options Schema",
   "type": "object",
   "properties": {

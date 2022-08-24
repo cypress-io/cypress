@@ -94,7 +94,10 @@
       "default": false
     },
     "testingType": {
-      "type": "string",
+      "enum": [
+        "e2e",
+        "component"
+      ],
       "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e."
     }
   },

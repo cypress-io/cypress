@@ -35,10 +35,18 @@
 
 ## Usage ⏯
 
-Install the schematic:
+### Adding E2E and Component Testing
+
+To install the schematic via prompts:
 
 ```shell
 ng add @cypress/schematic
+```
+
+To install the schematic via cli arguments (installs both e2e and component testing):
+
+```shell
+ng add @cypress/schematic --e2e --component
 ```
 
 To run Cypress in `open` mode within your project: 
@@ -59,28 +67,37 @@ If you have chosen to add or update the `ng e2e` command, you can also run Cypre
 ng e2e
 ```
 
-If you have chosen to add the `ng ct` command, you can also run Cypress component testing in `open` mode using this:
+If you have chosen to add Cypress component testing, you can run component tests in `open` mode using this:
 
 ```shell script
 ng run {project-name}:ct
 ```
 
-To generate new e2e spec files:
+### Generating New Cypress Spec Files
+
+To generate a new e2e spec file:
 
 ```shell script
-<<<<<<< HEAD
-ng generate @cypress/schematic:e2e
-``` 
-=======
 ng generate @cypress/schematic:spec -t e2e
 ```
 
-To generate new component spec files:
+To generate a new component spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec -t ct
+ng generate @cypress/schematic:spec -t component
 ```
->>>>>>> 2ba147e9ee (update ng-generate to be test-type agnostic - ng generate @cypress/schematic:spec. update readme. add tests.)
+
+To generate a new component spec file in a specific folder:
+
+```shell script
+ng generate @cypress/schematic:spec {component name} -t component --path {path relative to project root}
+```
+
+To generate new component spec files alongside all component files in a project:
+
+```shell script
+ng generate @cypress/schematic:spec -t component -a
+```
 
 ## Builder Options 🛠
 

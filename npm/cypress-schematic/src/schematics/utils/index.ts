@@ -1,8 +1,9 @@
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
-import { getSystemPath, normalize } from '@angular-devkit/core'
-import { Tree } from '@angular-devkit/schematics'
+import { getSystemPath, normalize, strings } from '@angular-devkit/core'
+import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
 import { get } from 'http'
+import { Schema } from '../ng-generate/cypress-test/schema'
 
 import { getPackageJsonDependency } from './dependencies'
 import { JSONFile } from './jsonFile'
@@ -10,17 +11,6 @@ import { JSONFile } from './jsonFile'
 export interface NodePackage {
   name: string
   version: string
-}
-
-const ctSpecContent = ({ component, file }: {component: string, file: string}): string => {
-  return `import { ${component} } from './${file}.component'
-
-  describe('${component}', () => {
-    it('should mount', () => {
-      cy.mount(${component})
-    })
-  })
-  `
 }
 
 export function getAngularVersion (tree: Tree): number {
@@ -62,17 +52,26 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
   }
 }
 
-function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any}): void {
+const ctSpecContent = ({ componentName, componentFilename }: {componentName: string, componentFilename: string}): string => {
+  return `import { ${componentName} } from './${componentFilename}.component'\n
+  describe('${componentName}', () => {
+    it('should mount', () => {
+      cy.mount(${componentName})
+    })
+  })
+  `
+}
+
+function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any}): Rule | void {
   const buffer = tree.read(`${appPath}/${component['name']}`)
   const componentString = buffer?.toString()
-  const componentName = componentString?.match(/(?<=class )\S+/g)
+  const componentMatch = componentString?.match(/(?<=class )\S+/g)
   const componentFilename = component['name'].split('.')[0]
+  const componentName = componentMatch ? componentMatch[0] : componentFilename
 
-  if (!tree.exists(`${appPath}/${componentFilename}.component.cy.ts`)) {
-    console.log(`Creating component test for: ${componentName ? componentName[0] : componentFilename}`)
+  console.log(`Creating new component spec for: ${componentName}\n`)
 
-    return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ component: componentName ? componentName[0] : componentFilename, file: componentFilename }))
-  }
+  return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))
 }
 
 export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree}) {
@@ -98,6 +97,18 @@ export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: stri
       })
     }
   }
+}
+
+export function createTemplate ({ templatePath, options }: {templatePath: string, options: Schema}): any {
+  return apply(url(templatePath), [
+    applyTemplates({
+      classify: strings.classify,
+      dasherize: strings.dasherize,
+      name: options.testingType === 'component' ? `${options.name}Component` : options.name,
+      fileName: options.fileName || options.name,
+    }),
+    move(normalize(options.path as string)),
+  ])
 }
 
 export function getAngularJsonValue (tree: Tree) {

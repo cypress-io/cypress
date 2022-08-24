@@ -7,7 +7,7 @@ export default defineConfig({
     supportFile: false
   },
   <% } %>
-  <% if (ct) { %>
+  <% if (component) { %>
   component: {
     devServer: {
       framework: 'angular',

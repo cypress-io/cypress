@@ -10,17 +10,17 @@
       "description": "When true, `ng e2e` will be added or updated to use Cypress.",
       "x-prompt": "Would you like the default `ng e2e` command to use Cypress? [ Protractor to Cypress Migration Guide: https://on.cypress.io/protractor-to-cypress?cli=true ]"
     },
-    "ct": {
+    "component": {
       "type": "boolean",
       "default": true,
-      "description": "When true, `ng ct` will be added to run Cypress component tests.",
-      "x-prompt": "Would you like to add Cypress component testing?  This will add a new command `ng ct` and add files needed for Cypress component testing."
+      "description": "When true, your project will set up for Cypress component testing.",
+      "x-prompt": "Would you like to add Cypress component testing?  This will add all files needed for Cypress component testing."
     },
     "addCtSpecs": {
       "type": "boolean",
       "default": false,
-      "description": "When true, Cypress component tests will be added alongside `.component` files.",
-      "x-prompt": "Would you like to add Cypress component tests alongside your existing components?"
+      "alias": "a",
+      "description": "When true, Cypress component tests will be added alongside `.component` files."
     }
   },
   "required": []

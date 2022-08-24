@@ -7,7 +7,7 @@ import {
   Rule,
   SchematicContext,
   SchematicsException,
-  template,
+  applyTemplates,
   Tree,
   url,
 } from '@angular-devkit/schematics'
@@ -84,7 +84,6 @@ function updateDependencies (): Rule {
 function addCypressTestScriptsToPackageJson (): Rule {
   return (tree: Tree) => {
     addPropertyToPackageJson(tree, ['scripts'], {
-      'ct': 'ng ct',
       'e2e': 'ng e2e',
       'cypress:open': 'cypress open',
       'cypress:run': 'cypress run',
@@ -106,7 +105,7 @@ function handleFiles (tree: Tree, context: SchematicContext, { projects, options
       return mergeWith(
         apply(url(applyPath), [
           move(movePath ? `${project.root}${movePath}` : project.root),
-          template({
+          applyTemplates({
             ...options,
             ...strings,
             root: project.root ? `${project.root}/` : project.root,
@@ -136,7 +135,7 @@ function addCypressCoreFiles (options: any): Rule {
 
 function addCypressComponentTestingFiles (options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    if (options.ct) {
+    if (options.component) {
       context.logger.debug('Adding cypress component testing files')
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
@@ -162,7 +161,7 @@ function addCtSpecs (options: any): Rule {
         const project = projects[name]
         const appPath = `${project.root}/${project.sourceRoot}/${project.prefix}`
 
-        getDirectoriesAndCreateSpecs({ tree, appPath })
+        return getDirectoriesAndCreateSpecs({ tree, appPath })
       })
     }
   }
@@ -189,16 +188,16 @@ function addNewCypressCommands (
   openJson: JsonObject,
   e2eJson: JsonObject,
   e2e: boolean,
-  ctJson: JsonObject,
-  ct: boolean,
+  componentJson: JsonObject,
+  component: boolean,
 ) {
   const projectArchitectJson = angularJsonVal['projects'][project]['architect']
 
   projectArchitectJson['cypress-run'] = runJson
   projectArchitectJson['cypress-open'] = openJson
 
-  if (ct) {
-    projectArchitectJson['ct'] = ctJson
+  if (component) {
+    projectArchitectJson['ct'] = componentJson
   }
 
   if (e2e || !projectArchitectJson['e2e']) {
@@ -254,7 +253,7 @@ function modifyAngularJson (options: any): Rule {
           },
         }
 
-        const ctJson = {
+        const componentJson = {
           builder,
           options: {
             devServerTarget: `${project}:serve`,
@@ -295,8 +294,8 @@ function modifyAngularJson (options: any): Rule {
           openJson,
           e2eJson,
           options.e2e,
-          ctJson,
-          options.ct,
+          componentJson,
+          options.component,
         )
       })
     } else {

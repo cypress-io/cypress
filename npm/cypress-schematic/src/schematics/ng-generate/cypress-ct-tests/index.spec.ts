@@ -3,7 +3,6 @@
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
 import { expect } from 'chai'
-import { take } from 'rxjs/operators'
 
 describe('ng-generate @cypress/schematic:specs-ct', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -31,9 +30,7 @@ describe('ng-generate @cypress/schematic:specs-ct', () => {
     appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
   })
 
-  it('should create cypress component tests alongside components', () => {
-    schematicRunner.runSchematicAsync('specs-ct', { createSpecs: true, project: 'sandbox' }, appTree).pipe(
-      take(1),
-    ).subscribe((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/app/src/app.component.cy.ts'))
+  it('should create cypress component tests alongside components', async () => {
+    await schematicRunner.runSchematicAsync('specs-ct', { project: 'sandbox' }, appTree).toPromise().then((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/app/src/app.component.cy.ts'))
   })
 })

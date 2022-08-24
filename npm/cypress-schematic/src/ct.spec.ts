@@ -34,7 +34,7 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
       const projectPath = await scaffoldAngularProject(project)
 
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
-      await runCommandInProject('yarn ng add @cypress/schematic --e2e --ct --add-ct-specs false', projectPath)
+      await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
       await runCommandInProject('yarn ng run angular:ct --watch false', projectPath)
     })
   }

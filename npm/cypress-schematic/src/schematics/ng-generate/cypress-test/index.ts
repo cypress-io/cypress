@@ -1,12 +1,12 @@
 import {
-  Rule, Tree, SchematicsException,
-  apply, url, applyTemplates, move,
-  chain, mergeWith,
+  Rule, Tree, SchematicsException, chain, mergeWith,
 } from '@angular-devkit/schematics'
 
-import { strings, normalize, virtualFs, workspaces } from '@angular-devkit/core'
+import { virtualFs, workspaces } from '@angular-devkit/core'
 
 import { Schema } from './schema'
+
+import { createTemplate } from '../../utils'
 
 function createSpec (tree: Tree): workspaces.WorkspaceHost {
   return {
@@ -59,15 +59,7 @@ export default function (options: Schema): Rule {
     console.log(`Creating new ${options.testingType} spec named: ${options.name}`)
 
     const templatePath = options.testingType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
-    const templateSource = apply(url(templatePath), [
-      applyTemplates({
-        classify: strings.classify,
-        dasherize: strings.dasherize,
-        name: options.testingType === 'component' ? `${options.name.toUpperCase()}Component` : options.name,
-        fileName: options.name,
-      }),
-      move(normalize(options.path as string)),
-    ])
+    const templateSource = createTemplate({ templatePath, options })
 
     return chain([
       mergeWith(templateSource),
