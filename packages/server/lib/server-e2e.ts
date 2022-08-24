@@ -118,6 +118,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
             return ensureUrl.isListening(baseUrl)
             .return(null)
             .catch((err) => {
+              debug(err)
+
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
           }
@@ -229,6 +231,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // if our promise is still pending
         if (p.isPending()) {
           restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
+          p.destroyAsync()
         }
 
         return reject(err)
