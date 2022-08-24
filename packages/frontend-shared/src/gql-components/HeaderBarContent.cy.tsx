@@ -30,7 +30,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .click()
 
-    cy.percySnapshot('after browsers open')
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('after browsers open')
+    */
 
     cy.contains('Edge Canary')
     .should('be.visible')
@@ -55,7 +58,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Unsupported browser').should('be.visible')
 
-    cy.percySnapshot('unsupported browser tooltip')
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('unsupported browser tooltip')
+    */
   })
 
   describe('breadcrumbs', () => {
