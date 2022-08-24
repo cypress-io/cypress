@@ -47,7 +47,7 @@ export interface AutomationMiddleware {
   onBeforeRequest?: OnRequestEvent | null
   onRequest?: OnRequestEvent | null
   onResponse?: NullableMiddlewareHook
-  onAfterResponse?: (eventName: string, data: any, resp: any) => void
+  onAfterResponse?: ((eventName: string, data: any, resp: any) => void) | null
 }
 
 type WebSocketOptionsCallback = (...args: any[]) => any
