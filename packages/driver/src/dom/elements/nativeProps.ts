@@ -12,7 +12,7 @@ const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype
   const desc = Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
   if (desc === undefined) {
-    throw new Error(`Error, could not get property descriptor for ${klass}  ${prop as string}. This should never happen`)
+    throw new Error(`Error, could not get property descriptor for ${klass}  ${String(prop)}. This should never happen`)
   }
 
   return desc
