@@ -1317,7 +1317,7 @@ jobs:
           name: Run v8 integration tests
           command: |
             source ./scripts/ensure-node.sh
-            yarn test-integration --scope "'@tooling/{packherd,v8-snapshot}'"
+            DEBUG=cypress:snapgen:* yarn test-integration --scope "'@tooling/{packherd,v8-snapshot}'"
       - unless:
           condition:
             or:
