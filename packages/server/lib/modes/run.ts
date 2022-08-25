@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces */
 import _ from 'lodash'
 import la from 'lazy-ass'
 import pkg from '@packages/root'
@@ -833,42 +833,34 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   // Remap results for module API/after:run to remove private props and
   // rename props to make more user-friendly
   const moduleAPIResults = remapKeys(results, {
-    runs: each((run) => {
-      return {
-        tests: each((test) => {
-          return {
-            attempts: each((attempt, i) => {
-              return {
-                timings: remove,
-                failedFromHookId: remove,
-                wallClockDuration: renameKey('duration'),
-                wallClockStartedAt: renameKey('startedAt'),
-                wallClockEndedAt: renameKey('endedAt'),
-                screenshots: setValue(
-                  _(run.screenshots)
-                  .filter({ testId: test.testId, testAttemptIndex: i })
-                  .map((screenshot) => {
-                    return _.omit(screenshot,
-                      ['screenshotId', 'testId', 'testAttemptIndex'])
-                  })
-                  .value(),
-                ),
-              }
-            }),
-            testId: remove,
-          }
-        }),
-        hooks: each({
-          hookId: remove,
-        }),
-        stats: {
+    runs: each((run) => ({
+      tests: each((test) => ({
+        attempts: each((attempt, i) => ({
+          timings: remove,
+          failedFromHookId: remove,
           wallClockDuration: renameKey('duration'),
           wallClockStartedAt: renameKey('startedAt'),
           wallClockEndedAt: renameKey('endedAt'),
-        },
-        screenshots: remove,
-      }
-    }),
+          screenshots: setValue(
+            _(run.screenshots)
+            .filter({ testId: test.testId, testAttemptIndex: i })
+            .map((screenshot) => _.omit(screenshot,
+              ['screenshotId', 'testId', 'testAttemptIndex']))
+            .value(),
+          ),
+        })),
+        testId: remove,
+      })),
+      hooks: each({
+        hookId: remove,
+      }),
+      stats: {
+        wallClockDuration: renameKey('duration'),
+        wallClockStartedAt: renameKey('startedAt'),
+        wallClockEndedAt: renameKey('endedAt'),
+      },
+      screenshots: remove,
+    })),
   })
 
   if (testingType === 'component') {
