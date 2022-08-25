@@ -23,7 +23,7 @@ interface SuiteProps {
   studioEnabled: boolean
 }
 
-const Suite = observer(({ studioEnabled, eventManager = events, model }: SuiteProps) => {
+const Suite = observer(({ eventManager = events, model, studioEnabled }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -34,7 +34,7 @@ const Suite = observer(({ studioEnabled, eventManager = events, model }: SuitePr
   const _header = () => (
     <>
       <span className='runnable-title'>{model.title}</span>
-      {studioEnabled && (
+      {(studioEnabled && !appState.studioActive) && (
         <span className='runnable-controls'>
           <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
             <a onClick={_launchStudio} className='runnable-controls-studio'>

@@ -71,7 +71,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
 
     return (
       <div className='studio-controls'>
-        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <a className='studio-cancel' onClick={this._cancel}>Cancel</a>
         <Tooltip
           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
           className='cy-tooltip'
@@ -183,7 +183,7 @@ class Test extends Component<TestProps> {
   _controls () {
     let controls: Array<JSX.Element> = []
 
-    if (this.props.model.state) {
+    if (this.props.model.state === 'failed') {
       controls.push(
         <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
@@ -193,7 +193,7 @@ class Test extends Component<TestProps> {
       )
     }
 
-    if (this.props.studioEnabled) {
+    if (this.props.studioEnabled && !appState.studioActive) {
       controls.push(
         <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>

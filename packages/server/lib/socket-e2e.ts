@@ -102,8 +102,7 @@ export class SocketE2E extends SocketBase {
         })
 
         socket.on('studio:init', (cb) => {
-          studio.getStudioModalShown()
-          .then(cb)
+          cb()
         })
 
         socket.on('studio:save', (saveInfo, cb) => {

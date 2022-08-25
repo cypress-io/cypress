@@ -3,11 +3,18 @@ import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
 import type { StudioSavePayload } from '../runner/event-manager-types'
+import { useAutStore } from './aut-store'
 
 function getCypress () {
   const eventManager = getEventManager()
 
   return eventManager.getCypress()
+}
+
+function getAutUrl () {
+  const autStore = useAutStore()
+
+  return autStore.url
 }
 
 function stringifyActual (val: any) {
@@ -81,8 +88,7 @@ const tagNamesWithValue = [
   'METER',
   'LI',
   'OPTION',
-  'PROGESS',
-  'PARAM',
+  'PROGRESS',
   'TEXTAREA',
 ]
 
@@ -104,8 +110,8 @@ export interface StudioLog {
 }
 
 interface StudioRecorderState {
-  initModalIsOpen: boolean
   saveModalIsOpen: boolean
+  instructionModalIsOpen: boolean
   logs: StudioLog[]
   isLoading: boolean
   isActive: boolean
@@ -130,8 +136,8 @@ interface StudioRecorderState {
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
     return {
-      initModalIsOpen: false,
       saveModalIsOpen: false,
+      instructionModalIsOpen: false,
       logs: [],
       url: '',
       isLoading: false,
@@ -157,12 +163,12 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.suiteId = undefined
     },
 
-    showInitModal () {
-      this.initModalIsOpen = true
+    openInstructionModal () {
+      this.instructionModalIsOpen = true
     },
 
-    closeInitModal () {
-      this.initModalIsOpen = false
+    closeInstructionModal () {
+      this.instructionModalIsOpen = false
     },
 
     showSaveModal () {
@@ -205,6 +211,8 @@ export const useStudioStore = defineStore('studioRecorder', {
           this.setUrl(studio.url)
         }
       }
+
+      this.setUrl(getAutUrl())
 
       if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)

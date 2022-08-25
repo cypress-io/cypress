@@ -199,6 +199,10 @@ describe('studio controls', () => {
   })
 
   describe('button', () => {
+    beforeEach(() => {
+      runner.emit('reporter:start', { studioActive: false })
+    })
+
     it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
       cy.contains('test 1')
       .closest('.runnable-wrapper')

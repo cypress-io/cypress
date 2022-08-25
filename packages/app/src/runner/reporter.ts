@@ -48,8 +48,8 @@ function renderReporter (
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     error: null,
     resetStatsOnSpecChange: true,
-    // @ts-ignore - https://github.com/cypress-io/cypress/issues/23338
-    studioEnabled: config.experimentalStudio,
+    // Studio can only be enabled for e2e testing
+    studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e' && config.experimentalStudio,
     runnerStore: store,
   })
 
