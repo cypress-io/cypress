@@ -39,7 +39,7 @@ type Screenshot = {
   path: string
   specName: string
 }
-type SetScreenshotMetadata = (data: Screenshot) => void // ?
+type SetScreenshotMetadata = (data: Screenshot) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
 type RunEachSpec = any
 type BeforeSpecRun = any
@@ -76,7 +76,7 @@ const colorIf = function (val, c) {
   return color(val, c)
 }
 
-const getSymbol = function (num) {
+const getSymbol = function (num?: number) {
   if (num) {
     return logSymbols.error
   }
@@ -155,7 +155,7 @@ const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
 }
 
-const macOSRemovePrivate = (str) => {
+const macOSRemovePrivate = (str: string): string => {
   // consistent snapshots when running system tests on macOS
   if (process.platform === 'darwin' && str.startsWith('/private')) {
     return str.slice(8)
