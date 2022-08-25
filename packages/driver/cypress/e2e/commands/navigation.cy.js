@@ -2367,8 +2367,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO(webkit): fix+unskip for experimental webkit release
-  context('#url:changed', { browser: '!webkit' }, () => {
+  context('#url:changed', () => {
     beforeEach(function () {
       this.logs = []
 

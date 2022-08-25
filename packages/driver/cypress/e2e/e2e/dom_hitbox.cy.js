@@ -2,8 +2,7 @@ const { clickCommandLog } = require('../../support/utils')
 const { _ } = Cypress
 
 // https://github.com/cypress-io/cypress/pull/5299/files
-// TODO(webkit): fix+unskip for experimental webkit
-describe('rect highlight', { browser: '!webkit' }, () => {
+describe('rect highlight', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
