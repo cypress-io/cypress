@@ -30,7 +30,7 @@ import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import Button from '@cy/components/Button.vue'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
-import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
+import LoginModal from '@cy/gql-components/modals/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { CloudConnectButtonFragment } from '../generated/graphql'
 
