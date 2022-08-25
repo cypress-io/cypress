@@ -135,6 +135,8 @@ describe('studio controls', () => {
     cy.contains('test 1').click()
     .parents('.collapsible').first()
     .find('.studio-controls').as('studioControls')
+
+    runner.emit('reporter:start', { studioActive: true })
   })
 
   const addStudioCommand = () => {
