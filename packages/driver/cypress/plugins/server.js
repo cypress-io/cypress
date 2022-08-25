@@ -12,7 +12,7 @@ const upload = multer({ dest: 'cypress/_test-output/' })
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
 const httpPorts = [3500, 3501]
-const httpsPort = 3502
+const httpsPorts = [3502, 3503]
 
 const createApp = (port) => {
   const app = express()
@@ -283,10 +283,31 @@ const createApp = (port) => {
     res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
   })
 
+  app.get('/test-request', (req, res) => {
+    res.sendStatus(200)
+  })
+
   app.get('/set-cookie', (req, res) => {
     const { cookie } = req.query
 
     res
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
+  app.get('/test-request-credentials', (req, res) => {
+    res
+    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .setHeader('Access-Control-Allow-Credentials', 'true')
+    .sendStatus(200)
+  })
+
+  app.get('/set-cookie-credentials', (req, res) => {
+    const { cookie } = req.query
+
+    res
+    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .setHeader('Access-Control-Allow-Credentials', 'true')
     .append('Set-Cookie', cookie)
     .sendStatus(200)
   })
@@ -323,10 +344,12 @@ httpPorts.forEach((port) => {
   })
 })
 
-const httpsApp = createApp(httpsPort)
-const httpsServer = httpsProxy.httpsServer(httpsApp)
+httpsPorts.forEach((port) => {
+  const httpsApp = createApp(port)
+  const httpsServer = httpsProxy.httpsServer(httpsApp)
 
-httpsServer.listen(httpsPort, () => {
-  // eslint-disable-next-line no-console
-  return console.log('Express server listening on port', httpsPort, '(HTTPS)')
+  return httpsServer.listen(port, () => {
+    // eslint-disable-next-line no-console
+    return console.log('Express server listening on port', port, '(HTTPS)')
+  })
 })
