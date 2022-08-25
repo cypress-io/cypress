@@ -135,8 +135,6 @@ describe('studio controls', () => {
     cy.contains('test 1').click()
     .parents('.collapsible').first()
     .find('.studio-controls').as('studioControls')
-
-    runner.emit('reporter:start', { studioActive: true })
   })
 
   const addStudioCommand = () => {
@@ -201,6 +199,10 @@ describe('studio controls', () => {
   })
 
   describe('button', () => {
+    beforeEach(() => {
+      runner.emit('reporter:start', { studioActive: false })
+    })
+
     it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
       cy.contains('test 1')
       .closest('.runnable-wrapper')
