@@ -1,6 +1,7 @@
 <template>
   <StandardModal
     :model-value="props.open"
+    :no-help="true"
     variant="bare"
     data-cy="studio-save-modal"
     @update:model-value="emit('close')"
