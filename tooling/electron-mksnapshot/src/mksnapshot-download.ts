@@ -7,7 +7,7 @@ import path from 'path'
 
 const logInfo = debug('cypress:mksnapshot:info')
 const logDebug = debug('cypress:mksnapshot:debug')
-const logError = debug('cypress:mksnapshot:error')
+// const logError = debug('cypress:mksnapshot:error')
 
 // -----------------
 // Config
@@ -30,15 +30,15 @@ if (
 // Not supporting ARM architectures except Darwin
 // -----------------
 function checkArmArchitectures (version: string): boolean {
-  if (process.arch.startsWith('arm') && process.platform !== 'darwin') {
-    logError(
-      `WARNING: mksnapshot does not run on ${process.arch}. Download 
-     https://github.com/electron/electron/releases/download/v${version}/mksnapshot-v${version}-${process.platform}-${process.arch}-x64.zip
-     on a x64 ${process.platform} OS to generate ${archToDownload} snapshots.`,
-    )
+  // if (process.arch.startsWith('arm') && process.platform !== 'darwin') {
+  //   logError(
+  //     `WARNING: mksnapshot does not run on ${process.arch}. Download
+  //    https://github.com/electron/electron/releases/download/v${version}/mksnapshot-v${version}-${process.platform}-${process.arch}-x64.zip
+  //    on a x64 ${process.platform} OS to generate ${archToDownload} snapshots.`,
+  //   )
 
-    return false
-  }
+  //   return false
+  // }
 
   return true
 }
