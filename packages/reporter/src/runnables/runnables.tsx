@@ -66,7 +66,14 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
           <p className='text-muted'>Write a test using your preferred text editor.</p>
           {studioEnabled && (
             <>
-              <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
+              <a
+                data-cy="studio-create-test"
+                className='open-studio'
+                onClick={_launchStudio}>
+                <h3>
+                  <StudioIcon /> Create test with Cypress Studio
+                </h3>
+              </a>
               <p className='text-muted open-studio-desc'>Use an interactive tool to author a test right here.</p>
             </>
           )}

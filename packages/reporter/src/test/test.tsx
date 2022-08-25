@@ -14,10 +14,10 @@ import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
+import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 
 import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
 import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
-import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
@@ -195,11 +195,11 @@ class Test extends Component<TestProps> {
 
     if (this.props.studioEnabled && !appState.studioActive) {
       controls.push(
-        <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
-          <a onClick={this._launchStudio} className='runnable-controls-studio'>
-            <WandIcon />
-          </a>
-        </Tooltip>,
+        <LaunchStudioIcon
+          key={`studio-command-${this.props.model}`}
+          title='Add Commands to Test'
+          onClick={this._launchStudio}
+        />,
       )
     }
 

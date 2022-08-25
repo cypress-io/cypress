@@ -26,6 +26,7 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
+import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -362,7 +363,14 @@ async function initialize () {
     return
   }
 
+  // Reset stores
   const autStore = useAutStore()
+
+  autStore.$reset()
+
+  const studioStore = useStudioStore()
+
+  studioStore.$reset()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
