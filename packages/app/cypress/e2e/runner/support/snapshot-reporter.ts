@@ -1,4 +1,4 @@
-// Takes percy snapshot with navigation/AUT hidden and run duration mocked
+// Takes percy snapshot with navigation/AUT/reporter hidden
 export const snapshotReporter = () => {
   cy.percySnapshot({
     width: 450,

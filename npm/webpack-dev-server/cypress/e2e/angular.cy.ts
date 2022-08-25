@@ -55,7 +55,8 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
-    it('should detect new spec', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
+    it.skip('should detect new spec', () => {
       cy.visitApp()
 
       cy.withCtx(async (ctx) => {
