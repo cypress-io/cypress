@@ -6,7 +6,7 @@ import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 
@@ -71,7 +71,7 @@ async function setFocus () {
   }
 }
 
-function getBrowserLauncher (browser): BrowserLauncher {
+function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): BrowserLauncher {
   debug('getBrowserLauncher %o', { browser })
 
   if (browser.name === 'electron') {
@@ -90,7 +90,7 @@ function getBrowserLauncher (browser): BrowserLauncher {
     return require('./webkit') as typeof import('./webkit')
   }
 
-  throw new Error('Missing browserLauncher for family')
+  return utils.throwBrowserNotFound(browser.name, browsers)
 }
 
 process.once('exit', () => kill(true, true))
@@ -129,11 +129,7 @@ exports = {
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
-    const browserLauncher = getBrowserLauncher(browser)
-
-    if (!browserLauncher) {
-      utils.throwBrowserNotFound(browser.name, options.browsers)
-    }
+    const browserLauncher = getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation)
 
@@ -141,11 +137,7 @@ exports = {
   },
 
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-    const browserLauncher = getBrowserLauncher(browser)
-
-    if (!browserLauncher) {
-      utils.throwBrowserNotFound(browser.name, options.browsers)
-    }
+    const browserLauncher = getBrowserLauncher(browser, options.browsers)
 
     // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
     await browserLauncher.connectToNewSpec(browser, options, automation)
@@ -163,11 +155,7 @@ exports = {
 
       ctx.browser.setBrowserStatus('opening')
 
-      const browserLauncher = getBrowserLauncher(browser)
-
-      if (!browserLauncher) {
-        utils.throwBrowserNotFound(browser.name, options.browsers)
-      }
+      const browserLauncher = getBrowserLauncher(browser, options.browsers)
 
       if (!options.url) throw new Error('Missing url in browsers.open')
 
@@ -224,6 +212,6 @@ exports = {
     })
   },
   setFocus,
-}
+} as const
 
 export = exports

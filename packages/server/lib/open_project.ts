@@ -75,7 +75,6 @@ export class OpenProject {
     if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
 
     const options: BrowserLaunchOpts = {
-      ...prevOptions || {},
       browser,
       url,
       // TODO: fix majorVersion discrepancy that causes this to be necessary
@@ -89,6 +88,7 @@ export class OpenProject {
       downloadsFolder: cfg.downloadsFolder,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
+      ...prevOptions || {},
     }
 
     // if we don't have the isHeaded property

@@ -129,7 +129,7 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onErro
   }
 
   if (browser.family === 'chromium') {
-    return getChromeProps(writeVideoFrame)
+    return getCdpVideoProp(writeVideoFrame)
   }
 
   if (browser.family === 'firefox') {
@@ -149,33 +149,22 @@ const getFirefoxProps = (project, writeVideoFrame) => {
   return {}
 }
 
-const getCdpVideoPropSetter = (writeVideoFrame) => {
+const getCdpVideoProp = (writeVideoFrame) => {
   if (!writeVideoFrame) {
-    return _.noop
+    return {}
   }
 
-  return (props) => {
-    props.onScreencastFrame = (e) => {
+  return {
+    onScreencastFrame: (e) => {
       // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
       writeVideoFrame(Buffer.from(e.data, 'base64'))
-    }
+    },
   }
-}
-
-const getChromeProps = (writeVideoFrame) => {
-  const shouldWriteVideo = Boolean(writeVideoFrame)
-
-  debug('setting Chrome properties %o', { shouldWriteVideo })
-
-  return _
-  .chain({})
-  .tap(getCdpVideoPropSetter(writeVideoFrame))
-  .value()
 }
 
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
-  return _
-  .chain({
+  return {
+    ...getCdpVideoProp(writeVideoFrame),
     width: 1280,
     height: 720,
     show: isHeaded,
@@ -193,9 +182,7 @@ const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
       // https://github.com/cypress-io/cypress/issues/123
       options.show = false
     },
-  })
-  .tap(getCdpVideoPropSetter(writeVideoFrame))
-  .value()
+  }
 }
 
 const sumByProp = (runs, prop) => {

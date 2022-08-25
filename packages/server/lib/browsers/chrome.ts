@@ -560,7 +560,7 @@ export = {
 
     if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
 
-    await this.attachListeners(browser, pageCriClient, automation, options)
+    await this.attachListeners(browser, options.url, pageCriClient, automation, options)
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation) {
@@ -578,7 +578,7 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (browser: Browser, pageCriClient, automation: Automation, options: BrowserNewTabOpts) {
+  async attachListeners (browser: Browser, url: string, pageCriClient, automation: Automation, options: BrowserNewTabOpts) {
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
@@ -592,7 +592,7 @@ export = {
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
-    await this._navigateUsingCRI(pageCriClient, options.url)
+    await this._navigateUsingCRI(pageCriClient, url)
 
     if (options.experimentalSessionAndOrigin) {
       await this._handlePausedRequests(pageCriClient)
@@ -694,7 +694,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this.attachListeners(browser, pageCriClient, automation, options)
+    await this.attachListeners(browser, url, pageCriClient, automation, options)
 
     // return the launched browser process
     // with additional method to close the remote connection
