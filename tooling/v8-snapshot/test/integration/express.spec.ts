@@ -31,11 +31,17 @@ describe('integration: express', () => {
       assert.fail(err.toString())
     }
 
+    const env: Record<string, any> = {
+      ELECTRON_RUN_AS_NODE: 1,
+      DEBUG: '(packherd|snapgen):*',
+      PROJECT_BASE_DIR: projectBaseDir,
+      DEBUG_COLORS: 1,
+    }
     const _MB = 1024 * 1024
     const cmd = `node ./snapshot/install-snapshot.js`
 
     try {
-      await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB })
+      await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
 
       const { deferredHash, ...metadata } = require(metadataFile)
 

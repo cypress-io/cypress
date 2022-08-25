@@ -61,7 +61,7 @@ export async function attemptDownload (
 ) {
   if (!checkArmArchitectures(version)) {
     throw new Error(
-      'Architecture not supported. Run with `DEBUG=\'mksnapshot:error\'` for more information',
+      'Architecture not supported. Run with `DEBUG=\'cypress:mksnapshot:error\'` for more information',
     )
   }
 

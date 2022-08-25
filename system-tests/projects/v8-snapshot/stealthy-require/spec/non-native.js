@@ -83,7 +83,7 @@ try {
     // We aren't updating module children when snapshot is used thus len doesn't change.
     // t.equal(lenChildrenAfterReq2, lenChildrenBeforeReq2 + 1, 'len children')
     // This assertion thus also ensures that we are using modules from the snapshot
-    t.equal(lenChildrenAfterReq2, lenChildrenBeforeReq2, 'len children')
+    t.equal(lenChildrenAfterReq2, lenChildrenBeforeReq2)
   })
 
   test('should require a module while keeping a dependency that will be required afterwards', (t) => {
