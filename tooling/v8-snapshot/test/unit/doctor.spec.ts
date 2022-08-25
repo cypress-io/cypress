@@ -4,11 +4,10 @@ import { SnapshotGenerator } from '../../src/snapshot-generator'
 import { Flag } from '../../src/snapshot-generator-flags'
 import { electronExecutable } from '../utils/consts'
 import { expect, assert } from 'chai'
-import rimraf from 'rimraf'
 import { promisify } from 'util'
 import { exec as execOrig } from 'child_process'
+import fs from 'fs-extra'
 
-const rmrf = promisify(rimraf)
 const exec = promisify(execOrig)
 
 describe('doctor', () => {
@@ -81,7 +80,7 @@ describe('doctor', () => {
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
 
-    await rmrf(cacheDir)
+    await fs.remove(cacheDir)
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
@@ -232,7 +231,7 @@ describe('doctor', () => {
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
 
-    await rmrf(cacheDir)
+    await fs.remove(cacheDir)
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,

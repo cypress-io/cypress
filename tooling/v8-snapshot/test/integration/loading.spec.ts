@@ -7,10 +7,9 @@ import { electronExecutable } from '../utils/consts'
 import { expect, assert } from 'chai'
 import Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
-import rimraf from 'rimraf'
+import fs from 'fs-extra'
 
 const exec = promisify(execOrig)
-const rmrf = promisify(rimraf)
 const t = spok.adapters.chaiExpect(expect)
 
 describe('loading', () => {
@@ -179,7 +178,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
-    await rmrf(cacheDir)
+    await fs.remove(cacheDir)
 
     const snapshotEntryFile = path.join(projectBaseDir, 'cached-manipulator.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -221,7 +220,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
-    await rmrf(cacheDir)
+    await fs.remove(cacheDir)
 
     const snapshotEntryFile = path.join(projectBaseDir, 'uncached-entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -302,7 +301,7 @@ describe('loading', () => {
     await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
     const cacheDir = path.join(projectBaseDir, 'cache')
 
-    await rmrf(cacheDir)
+    await fs.remove(cacheDir)
     const snapshotEntryFile = path.join(projectBaseDir, 'entry-all-cached.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
@@ -314,7 +313,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }

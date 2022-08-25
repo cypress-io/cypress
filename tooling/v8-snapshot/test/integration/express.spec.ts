@@ -1,7 +1,7 @@
 // This test uses the ../../../example-express, installing a snapshot and
 // checking the metadata for deferreds and healthy modules.
 import path from 'path'
-import rimraf from 'rimraf'
+import fs from 'fs-extra'
 import { exec as execOrig } from 'child_process'
 import { promisify } from 'util'
 import { assert } from 'chai'
@@ -10,7 +10,6 @@ import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import snapshot from 'snap-shot-it'
 
 const exec = promisify(execOrig)
-const rmrf = promisify(rimraf)
 
 const EXPRESS_MINIMAL_PROJECT = 'v8-snapshot/example-express'
 
@@ -25,15 +24,11 @@ describe('integration: express', () => {
     const cacheDir = path.join(projectBaseDir, 'cache')
     const metadataFile = path.join(cacheDir, 'snapshot-meta.json')
 
-    try {
-      await rmrf(cacheDir)
-    } catch (err: any) {
-      assert.fail(err.toString())
-    }
+    await fs.remove(cacheDir)
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -41,11 +36,17 @@ describe('integration: express', () => {
     const cmd = `node ./snapshot/install-snapshot.js`
 
     try {
-      await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
+      const { stdout, stderr } = await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
 
       const { deferredHash, ...metadata } = require(metadataFile)
 
       snapshot(metadata)
+
+      // TODO: Remove these
+      // eslint-disable-next-line no-console
+      console.log(stdout)
+      // eslint-disable-next-line no-console
+      console.log(stderr)
     } catch (err: any) {
       assert.fail(err.toString())
     }
