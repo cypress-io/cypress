@@ -1,4 +1,7 @@
 export interface Schema {
+  // Custom filename.
+  filename?: string
+
   // The name of the spec.
   name: string
 
@@ -7,4 +10,7 @@ export interface Schema {
 
   // The name of the project.
   project?: string
+
+  // Create a component spec
+  component?: boolean
 }
