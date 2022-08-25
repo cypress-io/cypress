@@ -18,8 +18,13 @@ describe('<LoginConnectModals />', () => {
         },
       })
 
-      setIsLoginConnectOpen(true)
-      cy.contains('logged out')
+      cy.contains('Log in to Cypress')
+      .should('not.exist')
+      .then(() => {
+        setIsLoginConnectOpen(true)
+
+        cy.contains('Log in to Cypress').should('be.visible')
+      })
     })
   })
 

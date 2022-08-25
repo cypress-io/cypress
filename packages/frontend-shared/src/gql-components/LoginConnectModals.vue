@@ -1,25 +1,40 @@
 <template>
   <CloudViewerAndProject
-    v-if="props.gql"
+    v-if="props.gql && loginConnectStore.isLoginConnectOpen"
     v-slot="{status}"
     :gql="props.gql"
   >
-    <div v-if="!status?.isLoggedIn">
-      logged out
-    </div>
-    <div v-else>
+    <LoginModal
+      :gql="props.gql"
+      :model-value="!status?.isLoggedIn"
+      utm-medium="Runs Tab"
+      :show-connect-button-after-login="!status?.isProjectConnected"
+      @connect-project="handleConnectProject"
+    />
+    <div>
       logged in
     </div>
+    <!-- <CloudConnectModals
+      v-if="status?.isLoggedIn"
+      :show="status?.isLoggedIn"
+      :gql="props.gql"
+      @cancel="handleCancelConnect"
+      @success="handleConnectSuccess"
+    /> -->
   </CloudViewerAndProject>
 </template>
 <script setup lang="ts">
 import CloudViewerAndProject from './CloudViewerAndProject.vue'
 import { gql } from '@urql/vue'
 import type { LoginConnectModalsFragment } from '../generated/graphql'
+import LoginModal from './modals/LoginModal.vue'
+import { ref } from 'vue'
+import { useLoginConnectStore } from '../store/login-connect-store'
 
 gql`
 fragment LoginConnectModals on Query {
 ...CloudViewerAndProject
+...LoginModal
 }
 `
 
@@ -27,7 +42,20 @@ const props = defineProps<{
   gql: LoginConnectModalsFragment
 }>()
 
-import { useLoginConnectStore } from '../store/login-connect-store'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const isLoginOpen = ref(false)
+
+const handleConnectProject = () => {
+  // switch to Connect modal
+}
+
+// const handleCancelConnect = () => {
+
+// }
+
+// const handleConnectSuccess = () => {
+//   // isProjectConnectOpen = false; emit('success')
+// }
 
 const loginConnectStore = useLoginConnectStore()
 
