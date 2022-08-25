@@ -155,7 +155,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
 }
 
 export class TestConfigOverride {
-  private restoreTestConfigFn: Nullable<() => void> = null
+  private restoreTestConfigFn: Cypress.Nullable<() => void> = null
 
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
