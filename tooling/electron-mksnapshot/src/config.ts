@@ -80,5 +80,5 @@ export const config = new Config(
   snapshotBlobFile,
   v8ContextFile,
   versionMetaPath,
-  process.env.npm_config_arch,
+  process.env.npm_config_arch || process.arch,
 )
