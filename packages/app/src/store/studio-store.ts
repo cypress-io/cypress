@@ -203,6 +203,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
         if (studio.url) {
           this.setUrl(studio.url)
+          this.visitUrl()
         }
       }
 
