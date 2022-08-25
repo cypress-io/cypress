@@ -10,6 +10,11 @@ export type Browser = FoundBrowser & {
 
 export type BrowserInstance = EventEmitter & {
   kill: () => void
+  /**
+   * Used in Electron to keep a list of what pids are spawned by the browser, to keep them separate from the launchpad/server pids.
+   * In all other browsers, the process tree of `BrowserInstance.pid` can be used instead of `allPids`.
+   */
+  allPids?: number[]
   pid: number
   /**
    * After `.open`, this is set to the `Browser` used to launch this instance.

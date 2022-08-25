@@ -164,7 +164,7 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
-type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP

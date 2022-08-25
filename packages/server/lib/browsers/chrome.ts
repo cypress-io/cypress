@@ -15,7 +15,7 @@ import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
-import type { Browser, BrowserLauncher } from './types'
+import type { Browser } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import type { CRIWrapper } from './cri-client'
@@ -549,7 +549,7 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
@@ -559,6 +559,8 @@ export = {
     const pageCriClient = browserCriClient.currentlyAttachedTarget
 
     if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
+
+    if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
     await this.attachListeners(browser, options.url, pageCriClient, automation, options)
   },
@@ -578,7 +580,7 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (browser: Browser, url: string, pageCriClient, automation: Automation, options: BrowserNewTabOpts) {
+  async attachListeners (browser: Browser, url: string, pageCriClient, automation: Automation, options: BrowserLaunchOpts & { onInitializeNewBrowserTab?: () => void }) {
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
@@ -700,4 +702,4 @@ export = {
     // with additional method to close the remote connection
     return launchedBrowser
   },
-} as BrowserLauncher & Omit<any, keyof BrowserLauncher>
+}
