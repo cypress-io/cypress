@@ -7,7 +7,7 @@ const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.
 const CYPRESS_INTERNAL_DEV_PROJECT_ID = getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'sehy69')
 
 export default defineConfig({
-  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : CYPRESS_INTERNAL_DEV_PROJECT_ID,
+  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' || CYPRESS_INTERNAL_CLOUD_ENV === 'production' ? 'ypt4pf' : CYPRESS_INTERNAL_DEV_PROJECT_ID,
   viewportWidth: 800,
   viewportHeight: 850,
   retries: {
