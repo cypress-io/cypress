@@ -20,7 +20,7 @@ import { addEventCoords, dispatch } from './trigger'
  * override webkitGetAsEntry() throws an error.
  *
  */
-const tryMockWebkit = (item) => {
+const tryMockWebKit = (item) => {
   try {
     item.webkitGetAsEntry = () => {
       return {
@@ -58,7 +58,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: J
   // also cannot be constructed, so we have to use an array instead.
   Object.defineProperty(dataTransfer, 'items', {
     get () {
-      return _.map(oldItems, tryMockWebkit)
+      return _.map(oldItems, tryMockWebKit)
     },
   })
 
