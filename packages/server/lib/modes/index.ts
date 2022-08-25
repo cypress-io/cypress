@@ -32,11 +32,11 @@ export = (mode, options) => {
     // a testingType, we default to e2e
     options.testingType = options.testingType || 'e2e'
 
-    return require('./run').run(options, loadingPromise)
+    return (require('./run') as typeof import('./run')).run(options, loadingPromise)
   }
 
   if (mode === 'interactive') {
     // Either launchpad or straight to e2e tests
-    return require('./interactive').run(options, loadingPromise)
+    return (require('./interactive') as typeof import('./interactive')).run(options, loadingPromise)
   }
 }
