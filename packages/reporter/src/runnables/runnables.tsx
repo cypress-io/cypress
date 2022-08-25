@@ -9,7 +9,7 @@ import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
-import { Scroller } from '../lib/scroller'
+import { Scroller, UserScrollCallback } from '../lib/scroller'
 import appState, { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
@@ -148,11 +148,25 @@ class Runnables extends Component<RunnablesProps> {
   componentDidMount () {
     const { scroller, appState } = this.props
 
-    scroller.setContainer(this.refs.container as Element, action('user:scroll:detected', () => {
-      if (appState && appState.isRunning && Cypress.config().isInteractive) {
-        appState.temporarilySetAutoScrolling(false)
-      }
-    }))
+    // Cypress is interactive so let's add the scroll listener and an attribute for testing
+    // this.refs.container.setAttribute('data-cy-scroll')
+
+    let maybeHandleScroll: UserScrollCallback | undefined = undefined
+
+    const containerEl = this.refs.container as HTMLElement
+
+    if (window.__CYPRESS_MODE__ === 'open') {
+      containerEl.setAttribute('data-cy-scroll-listen', 'true')
+      maybeHandleScroll = action('user:scroll:detected', () => {
+        if (appState && appState.isRunning) {
+          appState.temporarilySetAutoScrolling(false)
+        }
+      })
+    } else {
+      containerEl.setAttribute('data-cy-scroll-listen', 'false')
+    }
+
+    scroller.setContainer(this.refs.container as Element, maybeHandleScroll)
   }
 }
 

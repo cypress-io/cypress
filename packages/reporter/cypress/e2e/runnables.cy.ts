@@ -20,8 +20,9 @@ describe('runnables', () => {
 
     runner = new EventEmitter()
 
-    render = (renderProps: RenderProps = {}) => {
+    render = (renderProps: RenderProps = {}, cypressMode = 'open') => {
       cy.visit('/').then((win) => {
+        win.__CYPRESS_MODE__ = cypressMode
         win.render(Object.assign({
           runner,
           runnerStore: {
@@ -230,6 +231,15 @@ describe('runnables', () => {
       cy.get(selector).click().then(() => {
         expect(runner.emit).to.be.calledWith('open:file:unified')
       })
+    })
+
+    it('adds a scroll listener in open mode', () => {
+      cy.get('[data-cy-scroll-listen]').should('have.attr', 'data-cy-scroll-listen', 'true')
+    })
+
+    it('does not add a scroll listener in run mode', () => {
+      render({}, 'run')
+      cy.get('[data-cy-scroll-listen]').should('have.attr', 'data-cy-scroll-listen', 'false')
     })
   })
 })
