@@ -23,7 +23,7 @@ type FrameworkConfig = {
 } | {
   framework: 'angular'
   options?: {
-    projectConfig?: Cypress.AngularDevServerProjectConfig
+    projectConfig: Cypress.AngularDevServerProjectConfig
   }
 }
 
