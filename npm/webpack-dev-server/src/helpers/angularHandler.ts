@@ -122,8 +122,8 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     includePaths.push(toPosix(cypressConfig.supportFile))
   }
 
-  if (buildOptions?.polyfills) {
-    const polyfills = getProjectFilePath(buildOptions?.polyfills)
+  if (buildOptions.polyfills) {
+    const polyfills = getProjectFilePath(buildOptions.polyfills)
 
     includePaths.push(polyfills)
   }
