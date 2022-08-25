@@ -62,7 +62,7 @@ describe('src/cy/commands/assertions', () => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
-          { name: 'should', snapshots: 1, retries: 1 },
+          { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -197,12 +197,6 @@ describe('src/cy/commands/assertions', () => {
         .then(() => {
           expect(testCommands()).to.eql([
             { name: 'visit', snapshots: 1, retries: 0 },
-            // cy.get() has 2 snapshots, 1 for itself, and 1
-            // for the .should(...) assertion.
-
-            // TODO: Investigate whether or not the 2 commands are
-            // snapshotted at the same time. If there's no tick between
-            // them, we could reuse the snapshots
             { name: 'get', snapshots: 1, retries: 0 },
             { name: 'should', snapshots: 1, retries: 2 },
             { name: 'then', snapshots: 0, retries: 0 },
@@ -411,7 +405,8 @@ describe('src/cy/commands/assertions', () => {
         .should('have.length', 'asdf')
       })
 
-      it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
+      // TODO: Reenable once `contains` is a selector
+      it.skip('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
 
@@ -425,13 +420,14 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.timeout(100)
+        cy.timeout(50)
         cy.contains('Nested Find').should('have.length', 2)
       })
 
       // https://github.com/cypress-io/cypress/issues/6384
-      it('can chain contains assertions off of cy.contains', () => {
-        cy.timeout(100)
+      // TODO: Reenable once `contains` is a selector
+      it.skip('can chain contains assertions off of cy.contains', () => {
+        cy.timeout(50)
         cy.contains('foo')
         .should('not.contain', 'asdfasdf')
 
@@ -451,7 +447,8 @@ describe('src/cy/commands/assertions', () => {
     })
 
     describe('have.class', () => {
-      it('snapshots and ends the assertion after retrying', () => {
+      // TODO: Reenable once `contains` is a selector
+      it.skip('snapshots and ends the assertion after retrying', () => {
         cy.on('command:retry', _.after(3, () => {
           cy.$$('#foo').addClass('active')
         }))
@@ -614,8 +611,9 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('has a pending state while retrying', (done) => {
-        cy.on('command:retry', (command) => {
-          const [getLog, shouldLog] = cy.state('current').get('logs')
+        cy.on('command:retry', () => {
+          const shouldLog = cy.state('current').get('logs')[0]
+          const getLog = cy.state('current').get('prev').get('logs')[0]
 
           expect(getLog.get('state')).to.eq('pending')
           expect(shouldLog.get('state')).to.eq('pending')
@@ -661,7 +659,7 @@ describe('src/cy/commands/assertions', () => {
           const names = _.invokeMap(this.logs, 'get', 'name')
 
           // should is present here due to the retry
-          expect(names).to.deep.eq(['get', 'click', 'should'])
+          expect(names).to.deep.eq(['get', 'click', 'assert'])
           expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
@@ -1308,7 +1306,6 @@ describe('src/cy/commands/assertions', () => {
 
       // https://github.com/cypress-io/cypress/issues/205
       it('fails existence check on not.contain for non-existent DOM', function (done) {
-        cy.timeout(100)
         cy.on('fail', ({ message }) => {
           expect(message)
           .include('.non-existent')
@@ -1317,6 +1314,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
+        cy.timeout(50)
         cy.get('.non-existent').should('not.contain', 'foo')
       })
 
@@ -1519,10 +1517,13 @@ describe('src/cy/commands/assertions', () => {
             cy.removeAllListeners('log:added')
 
             // querying.ts has registered a handler that will prevent this assertion from showing
-            // as completed. Remove it, so that this one properly shows a green check in the command log.
+            // as completed. In normal operation it would be cleaned up when the command completes
+            // or the test ends, but we call 'done' from inside an event listener, so the cleanup
+            // never triggers. Removing the onBeforeLog function lets this 'expect' properly show
+            // a green checkmark in the command log.
             cy.state('onBeforeLog', null)
 
-            expect(log.get('error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
+            expect(log.get('_error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
 
             done()
           }

@@ -3,7 +3,6 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
 
-import $dom from '../dom'
 import $utils from './utils'
 import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
@@ -246,7 +245,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.addCommandSync = this.addCommandSync.bind(this)
     this.addCommand = this.addCommand.bind(this)
     this.now = this.now.bind(this)
-    this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
@@ -272,11 +270,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.assert = assertions.assert
     this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
 
-    const onFinishAssertions = function () {
-      return assertions.finishAssertions.apply(window, arguments as any)
-    }
-
-    const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
+    const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable)
 
     this.retry = retries.retry
 
@@ -867,64 +861,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     )
   }
 
-  replayCommandsFrom (current) {
-    const cy = this
-
-    // - starting with the aliased command
-    // - walk up to each prev command
-    // - until you reach a parent command
-    // - or until the subject is in the DOM
-    // - from that command walk down inserting
-    //   every command which changed the subject
-    // - coming upon an assertion should only be
-    //   inserted if the previous command should
-    //   be replayed
-
-    const commands = cy.getCommandsUntilFirstParentOrValidSubject(current)
-
-    if (commands) {
-      let initialCommand = commands.shift()
-
-      const commandsToInsert = _.reduce(commands, (memo, command, index) => {
-        const push = () => {
-          return memo.push(command)
-        }
-
-        if (!(command.get('type') !== 'assertion')) {
-          // if we're an assertion and the prev command
-          // is in the memo, then push this one
-          if (memo.includes(command.get('prev'))) {
-            push()
-          }
-        } else if (!(command.get('subject') === initialCommand.get('subject'))) {
-          // when our subjects dont match then
-          // reset the initialCommand to this command
-          // so the next commands can compare against
-          // this one to figure out the changing subjects
-          initialCommand = command
-
-          push()
-        }
-
-        return memo
-      }, [initialCommand])
-
-      const chainerId = this.state('chainerId')
-
-      for (let c of commandsToInsert) {
-        // clone the command to prevent
-        // mutating its properties
-        const command = c.clone()
-
-        command.set('chainerId', chainerId)
-        cy.enqueue(command)
-      }
-    }
-
-    // prevent loop comprehension
-    return null
-  }
-
   onBeforeAppWindowLoad (contentWindow) {
     // we set window / document props before the window load event
     // so that we properly handle events coming from the application
@@ -1263,32 +1199,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.Cypress.action('cy:command:enqueued', command.attributes)
   }
 
-  // TODO: Replace any with Command type.
-  private getCommandsUntilFirstParentOrValidSubject (command, memo: any[] = []) {
-    if (!command) {
-      return null
-    }
-
-    // push these onto the beginning of the commands array
-    memo.unshift(command)
-
-    // break and return the memo
-    if ((command.get('type') === 'parent') || $dom.isAttached(command.get('subject'))) {
-      return memo
-    }
-
-    // A workaround to ensure that when looking back, aliases don't extend beyond the current
-    // chainer. This whole area (`replayCommandsFrom` for aliases) will be replaced with subject chains as
-    // part of the detached DOM work.
-    const prev = command.get('prev')
-
-    if (prev.get('chainerId') !== command.get('chainerId')) {
-      return memo
-    }
-
-    return this.getCommandsUntilFirstParentOrValidSubject(prev, memo)
-  }
-
   private validateFirstCall (name, args, prevSubject: string[]) {
     // if we have a prevSubject then error
     // since we're invoking this improperly
@@ -1338,26 +1248,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   currentSubject (chainerId = this.state('chainerId')) {
     const subjectChain = (this.state('subjects') || {})[chainerId]
 
-    if (!subjectChain) {
-      return undefined
+    if (subjectChain) {
+      return $utils.getSubjectFromChain(subjectChain, this)
     }
 
-    // If we're getting the subject of a previous command, then any assertions have already
-    // been added to the command log; We don't want to re-add them every time we query
-    // the current subject.
-    this.state('onBeforeLog', () => false)
-
-    let subject = subjectChain[0]
-
-    try {
-      for (let i = 1; i < subjectChain.length; i++) {
-        subject = subjectChain[i](subject)
-      }
-    } finally {
-      this.state('onBeforeLog', null)
-    }
-
-    return subject
+    return undefined
   }
 
   /*

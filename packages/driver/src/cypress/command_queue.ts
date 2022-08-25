@@ -20,6 +20,11 @@ const __stackReplacementMarker = (fn, args) => {
 }
 
 const commandRunningFailed = async (Cypress, state, err) => {
+  const current = state('current')
+
+  current.snapshotLogs()
+  current.finishLogs()
+
   // allow for our own custom onFail function
   if (err.onFail) {
     err.onFail(err)
@@ -29,8 +34,6 @@ const commandRunningFailed = async (Cypress, state, err) => {
 
     return
   }
-
-  const current = state('current')
 
   return Cypress.log({
     end: true,
@@ -102,7 +105,7 @@ function retrySelector (command: $Command, ret: any, isCy) {
     }
   }
 
-  return cy.retry(onRetry, options)
+  return onRetry()
 }
 
 export class CommandQueue extends Queue<$Command> {
@@ -322,14 +325,10 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
-      // end / snapshot our logs if they need it
-      command.finishLogs()
-
-      // reset the nestedIndex back to null
-      this.state('nestedIndex', null)
-
-      // we're finished with the current command so set it back to null
-      this.state('current', null)
+      // When a command - selector or action - first passes, we verify that we have any snapshots needed.
+      // The logs may still be pending, but we want to know the state of the DOM now, before any subsequent commands
+      // run to alter it.
+      command.snapshotLogs()
 
       if (isSelector) {
         subject = command.get('selectorFn')
@@ -338,12 +337,31 @@ export class CommandQueue extends Queue<$Command> {
 
         // We add the command name here only to make debugging easier; It should not be relied on functionally.
         subject.commandName = name
+
+        // Even though we've snapshotted, we only end the logs a selector's logs if we're at the end of a selector
+        // chain - either there is no next command (end of a test), the next command is an action, or the next
+        // command belongs to another chainer (end of a chain).
+
+        // This is done so that any selector's logs remain in the 'pending' state until the subject chain is finished.
         cy.addSelectorToChainer(command.get('chainerId'), subject)
+
+        const next = command.get('next')
+
+        if (!next || next.get('chainerId') !== command.get('chainerId') || !next.get('selector')) {
+          command.finishLogs()
+        }
       } else {
         // For action commands, the "subject" here is the command's return value, which replaces
         // the current subject chain. We cannot re-invoke action commands - the return value here is final.
         cy.setSubjectForChainer(command.get('chainerId'), subject)
+        command.finishLogs()
       }
+
+      // reset the nestedIndex back to null
+      this.state('nestedIndex', null)
+
+      // we're finished with the current command so set it back to null
+      this.state('current', null)
 
       return subject
     })

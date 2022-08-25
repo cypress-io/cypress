@@ -33,9 +33,38 @@ export class $Command {
     return this
   }
 
+  snapshotLogs () {
+    this.get('logs').forEach((log) => {
+      if (!log.get('snapshots')) {
+        log.snapshot()
+      }
+    })
+  }
+
   finishLogs () {
-    // finish each of the logs we have
-    return _.invokeMap(this.get('logs'), 'finish')
+    // TODO: Investigate whether or not we can reuse snapshots between logs
+    // that snapshot at the same time
+
+    // Finish each of the logs we have, turning any potential errors into actual ones.
+    this.get('logs').forEach((log) => {
+      if (log.get('next')) {
+        log.snapshot()
+      }
+
+      if (log.get('_error')) {
+        log.error(log.get('_error'))
+      } else {
+        log.end()
+      }
+    })
+
+    // If the previous command is a selector belonging to the same chainer,
+    // we also ask it to end its own logs (and so on, up the chain).
+    const prev = this.get('prev')
+
+    if (prev && prev.get('selector') && prev.get('chainerId') === this.get('chainerId')) {
+      prev.finishLogs()
+    }
   }
 
   log (log) {

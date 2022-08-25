@@ -222,22 +222,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = () => {
-    cy.state('current').get('logs').forEach((log) => {
-      if (log.get('next') || !log.get('snapshots')) {
-        log.snapshot()
-      }
-
-      const e = log.get('_error')
-
-      if (e) {
-        return log.error(e)
-      }
-
-      return log.end()
-    })
-  }
-
   type VerifyUpcomingAssertionsCallbacks = {
     ensureExistenceFor?: 'subject' | 'dom' | boolean
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
@@ -245,7 +229,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
   }
 
   return {
-    finishAssertions,
 
     // TODO: define the specific type of options
     verifyUpcomingAssertions (subject, options: Record<string, any> = {}, callbacks: VerifyUpcomingAssertionsCallbacks = {}) {
@@ -350,11 +333,11 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         try {
           if (_.isFunction(onFail)) {
             // pass in the err and the upcoming assertion commands
-            finishAssertions()
+            command.finishLogs()
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          finishAssertions()
+          command.finishLogs()
           throw e3
         }
 
@@ -448,7 +431,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         setSubjectAndSkip()
 
-        finishAssertions()
+        command.finishLogs()
 
         return onPassFn()
       })
@@ -458,7 +441,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // when we're told not to retry
         if (err.retry === false) {
           // finish the assertions
-          finishAssertions()
+          command.finishLogs()
 
           // and then push our command into this err
           try {

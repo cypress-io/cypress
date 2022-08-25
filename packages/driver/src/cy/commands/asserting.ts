@@ -13,7 +13,11 @@ const onBeforeLog = (log, command, logIndex) => {
   // the log displayed in the 'pending' state. It will be 'cleaned up' (ended, and a snapshot gathered) when the
   // selector finally fails entirely.
   if (log.get('error')) {
-    log.set('end', false)
+    log.set({
+      end: false,
+      _error: log.get('error'),
+      error: undefined,
+    })
   }
 
   const previousLogInstance = command.get('logs') && command.get('logs')[logIndex]
