@@ -173,7 +173,7 @@ import {
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
-import LoginModal from './topnav/LoginModal.vue'
+import LoginModal from './modals/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
