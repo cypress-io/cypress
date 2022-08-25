@@ -40,7 +40,7 @@ import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
-import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
+import LoginModal from '@cy/gql-components/modals/LoginModal.vue'
 
 gql`
 query LoginBanner {
