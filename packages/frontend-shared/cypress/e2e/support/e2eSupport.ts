@@ -157,7 +157,12 @@ declare global {
        * Tabs until the result of fn is true
        */
       tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<any>
+      /**
+       * Get the AUT <iframe>. Useful for Cypress in Cypress tests.
+       */
+      getAutIframe(): Chainable<JQuery<HTMLIFrameElement>>
     }
+
   }
 }
 
@@ -525,9 +530,15 @@ function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10)
   })
 }
 
+function getAutIframe () {
+  return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
+}
+
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
+
+Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)

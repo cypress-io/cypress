@@ -1,9 +1,5 @@
-function getAutIframe () {
-  return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap)
-}
-
 describe('Cypress Studio', () => {
-  it('creates a test from an empty spec file', () => {
+  it('updates an existing test with a click action', () => {
     cy.scaffoldProject('experimental-studio')
     cy.openProject('experimental-studio')
     cy.startAppServer('e2e')
@@ -22,11 +18,12 @@ describe('Cypress Studio', () => {
     .findByTestId('launch-studio')
     .click()
 
+    // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
     cy.waitForSpecToFinish()
 
     cy.get('[data-cy="hook-name-studio commands"]').should('exist')
 
-    getAutIframe().within(() => {
+    cy.getAutIframe().within(() => {
       cy.get('p').contains('Count is 0')
 
       // (1) First Studio action - get
@@ -52,15 +49,40 @@ describe('Cypress Studio', () => {
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
-      expect(spec.trim()).to.eq(
-`it('visits a basic html page', () => {
+      expect(spec.trim()).to.eq(`
+it('visits a basic html page', () => {
   cy.visit('cypress/e2e/index.html')
   /* ==== Generated with Cypress Studio ==== */
-  cy.visit('http://localhost:4455/cypress/e2e/index.html');
   cy.get('#increment').click();
   /* ==== End Cypress Studio ==== */
-})`.trim(),
-      )
+})`.trim())
     })
+  })
+
+  // TODO: Can we somehow do the "Create Test" workflow within Cypress in Cypress?
+  it.skip('creates a brand new test', () => {
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=cypress/e2e/empty.cy.js`)
+
+    cy.waitForSpecToFinish()
+
+    cy.contains('Create test with Cypress Studio').click()
+    cy.get('[data-cy="aut-url"]').as('urlPrompt')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').should('be.disabled')
+    })
+
+    cy.get('@urlPrompt').type('http://localhost:4455/cypress/e2e/index.html')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').should('not.be.disabled')
+      cy.contains('Cancel').click()
+    })
+
+    // TODO: Can we somehow do the "Create Test" workflow within Cypress in Cypress?
   })
 })
