@@ -1,10 +1,10 @@
-import { syncAndRun } from '../src/mksnapshot'
+import { syncAndRun } from '../../src/mksnapshot'
 import { expect, assert } from 'chai'
 import { track } from 'temp'
 import path from 'path'
 const { mkdirSync } = track()
 
-const projectRootDir = path.join(__dirname, '..')
+const projectRootDir = path.join(__dirname, '..', '..')
 const fixturesDir = path.join(projectRootDir, 'test', 'fixtures')
 const validSnapshot = path.join(fixturesDir, 'valid-snapshot.js')
 const invalidSnapshot = path.join(fixturesDir, 'invalid-snapshot.js')

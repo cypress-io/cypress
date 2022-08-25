@@ -1321,7 +1321,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/{packherd,v8-snapshot}'"
+                  DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
       - when:
           condition:
             equal: [ *linux-arm64-executor, << parameters.executor >> ]
@@ -1339,7 +1339,7 @@ jobs:
               - equal: [ *linux-arm64-executor, << parameters.executor >> ]
           steps:
             - verify-mocha-results:
-                expectedResultCount: 2
+                expectedResultCount: 3
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs

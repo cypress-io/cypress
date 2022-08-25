@@ -1,4 +1,4 @@
-import { config } from '../src/config'
+import { config } from '../../src/config'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import proxyquire from 'proxyquire'
@@ -19,7 +19,7 @@ describe('download', () => {
     it(`downloads providing version ${version}`, async () => {
       const downloadArtifact = sinon.stub()
 
-      const { attemptDownload } = proxyquire('../src/mksnapshot-download', {
+      const { attemptDownload } = proxyquire('../../src/mksnapshot-download', {
         '@electron/get': { downloadArtifact },
         'extract-zip': sinon.stub(),
         'fs': { chmod: sinon.stub() },
