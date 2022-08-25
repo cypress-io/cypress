@@ -700,6 +700,157 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
             }
           })
         })
+
+        describe('misc', () => {
+          describe('domains', () => {
+            it('attaches subdomain and TLD cookies when making subdomain requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz; baz=quux')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  crossOriginPort,
+                },
+              }, ({ scheme, crossOriginPort }) => {
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch', 'include'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include'))
+                })
+
+                // Cookie should not be sent with app.foobar.com:3500/test as it does NOT fit the domain
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=app.foobar.com`, 'fetch', 'include'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include'))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
+
+            it('attaches TLD cookies ONLY when making top level requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  sameOriginPort,
+                },
+              }, ({ scheme, sameOriginPort }) => {
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
+          })
+
+          describe('paths', () => {
+            it('gives specific path precedent over generic path, regardless of matching domain', () => {
+              cy.intercept(`/test-request`, (req) => {
+                // bar=baz should come BEFORE foo=bar
+                expect(req['headers']['cookie']).to.equal('bar=baz; foo=bar')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, () => {
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com; Path=/', 'fetch'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `/test-request`, 'fetch'))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
+          })
+
+          describe('creation time', () => {
+            it('places cookies created earlier BEFORE newly created cookies', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  sameOriginPort,
+                },
+              }, ({ scheme, sameOriginPort }) => {
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch'))
+                })
+
+                cy.wait(200)
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+                })
+
+                cy.window().then((win) => {
+                  return cy.wrap(makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include'))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
+          })
+        })
       })
 
       // without cy.origin means the AUT has the same origin as top
@@ -1157,6 +1308,124 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.wait('@cookieCheck')
               })
             }
+          })
+        })
+
+        describe('misc', () => {
+          describe('domains', () => {
+            it('attaches subdomain and TLD cookies when making subdomain requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${sameOriginPort}`)
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=app.foobar.com', 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include'))
+              })
+
+              // Cookie should not be sent with app.foobar.com:3500/test as it does NOT fit the domain
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=www.foobar.com`, 'fetch', 'include'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include'))
+              })
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('attaches TLD cookies ONLY when making top level requests', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=app.foobar.com', 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
+              })
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('paths', () => {
+            it('gives specific path precedent over generic path, regardless of matching domain', () => {
+              cy.intercept(`/test-request`, (req) => {
+                // bar=baz should come BEFORE foo=bar
+                expect(req['headers']['cookie']).to.equal('bar=baz; foo=bar')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=app.foobar.com; Path=/', 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `/test-request`, 'fetch'))
+              })
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('creation time', () => {
+            it('places cookies created earlier BEFORE newly created cookies', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, (req) => {
+                7
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com`, 'fetch'))
+              })
+
+              cy.wait(200)
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+              })
+
+              cy.window().then((win) => {
+                return cy.wrap(makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include'))
+              })
+
+              cy.wait('@cookieCheck')
+            })
           })
         })
       })
