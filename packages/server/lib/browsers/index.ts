@@ -1,16 +1,19 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
-const debug = require('debug')('cypress:server:browsers')
-const utils = require('./utils')
-const check = require('check-more-types')
-const { exec } = require('child_process')
-const util = require('util')
-const os = require('os')
-const { BROWSER_FAMILY } = require('@packages/types')
+import _ from 'lodash'
+import Promise from 'bluebird'
+import Debug from 'debug'
+import utils from './utils'
+import check from 'check-more-types'
+import { exec } from 'child_process'
+import util from 'util'
+import os from 'os'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import type { Browser, BrowserInstance, BrowserLauncher } from './types'
+import type { Automation } from '../automation'
 
+const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
 
-let instance = null
+let instance: BrowserInstance | null = null
 
 const kill = function (unbind = true, isProcessExit = false) {
   // Clean up the instance when the browser is closed
@@ -43,16 +46,22 @@ const kill = function (unbind = true, isProcessExit = false) {
   })
 }
 
-const setFocus = async function () {
+async function setFocus () {
   const platform = os.platform()
   const execAsync = util.promisify(exec)
 
   try {
+    if (!instance) throw new Error('No instance in setFocus!')
+
     switch (platform) {
       case 'darwin':
-        return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+        await execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+
+        return
       case 'win32': {
-        return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+        await execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+
+        return
       }
       default:
         debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
@@ -62,32 +71,31 @@ const setFocus = async function () {
   }
 }
 
-const getBrowserLauncher = function (browser) {
+function getBrowserLauncher (browser): BrowserLauncher {
   debug('getBrowserLauncher %o', { browser })
-  if (!isBrowserFamily(browser.family)) {
-    debug('unknown browser family', browser.family)
-  }
 
   if (browser.name === 'electron') {
-    return require('./electron')
+    return require('./electron') as typeof import('./electron')
   }
 
   if (browser.family === 'chromium') {
-    return require('./chrome')
+    return require('./chrome') as typeof import('./chrome')
   }
 
   if (browser.family === 'firefox') {
-    return require('./firefox')
+    return require('./firefox') as typeof import('./firefox')
   }
 
   if (browser.family === 'webkit') {
-    return require('./webkit')
+    return require('./webkit') as typeof import('./webkit')
   }
+
+  throw new Error('Missing browserLauncher for family')
 }
 
 process.once('exit', () => kill(true, true))
 
-module.exports = {
+exports = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
 
   isBrowserFamily,
@@ -100,7 +108,7 @@ module.exports = {
 
   formatBrowsersToOptions: utils.formatBrowsersToOptions,
 
-  _setInstance (_instance) {
+  _setInstance (_instance: BrowserInstance) {
     // for testing
     instance = _instance
   },
@@ -111,7 +119,7 @@ module.exports = {
     return instance
   },
 
-  getAllBrowsersWith (nameOrPath) {
+  getAllBrowsersWith (nameOrPath?: string) {
     debug('getAllBrowsersWith %o', { nameOrPath })
     if (nameOrPath) {
       return utils.ensureAndGetByNameOrPath(nameOrPath, true)
@@ -120,7 +128,7 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  async connectToExisting (browser, options = {}, automation) {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
@@ -132,7 +140,7 @@ module.exports = {
     return this.getBrowserInstance()
   },
 
-  async connectToNewSpec (browser, options = {}, automation) {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
@@ -145,7 +153,7 @@ module.exports = {
     return this.getBrowserInstance()
   },
 
-  open (browser, options = {}, automation, ctx) {
+  open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx) {
     return kill(true)
     .then(() => {
       _.defaults(options, {
@@ -161,15 +169,11 @@ module.exports = {
         utils.throwBrowserNotFound(browser.name, options.browsers)
       }
 
-      const { url } = options
-
-      if (!url) {
-        throw new Error('options.url must be provided when opening a browser. You passed:', options)
-      }
+      if (!options.url) throw new Error('Missing url in browsers.open')
 
       debug('opening browser %o', browser)
 
-      return browserLauncher.open(browser, url, options, automation)
+      return browserLauncher.open(browser, options.url, options, automation)
       .then((i) => {
         debug('browser opened')
         // TODO: bind to process.exit here
@@ -184,6 +188,9 @@ module.exports = {
         // enable the browser to configure the interface
         instance.once('exit', () => {
           ctx.browser.setBrowserStatus('closed')
+          // TODO: make this a required property
+          if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
+
           options.onBrowserClose()
           instance = null
         })
@@ -205,6 +212,9 @@ module.exports = {
             return null
           }
 
+          // TODO: make this a required property
+          if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
+
           options.onBrowserOpen()
           ctx.browser.setBrowserStatus('open')
 
@@ -215,3 +225,5 @@ module.exports = {
   },
   setFocus,
 }
+
+export = exports

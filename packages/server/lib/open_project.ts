@@ -12,7 +12,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
-import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
+import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 
@@ -48,15 +48,13 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
-    onError: () => undefined,
-  }) {
+  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
     this._ctx = getCtx()
 
     assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
-      browser.name, spec, options)
+      browser.name, spec, prevOptions)
 
     la(_.isPlainObject(browser), 'expected browser object:', browser)
 
@@ -64,7 +62,7 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.projectBase!.reset()
 
-    let url = getSpecUrl({
+    const url = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? undefined : getSpecUrl({
       spec,
       browserUrl: this.projectBase.cfg.browserUrl,
       projectRoot: this.projectBase.projectRoot,
@@ -74,8 +72,14 @@ export class OpenProject {
 
     const cfg = this.projectBase.getConfig()
 
-    _.defaults(options, {
-      browsers: cfg.browsers,
+    if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
+
+    const options: BrowserLaunchOpts = {
+      ...prevOptions || {},
+      browser,
+      url,
+      // TODO: fix majorVersion discrepancy that causes this to be necessary
+      browsers: cfg.browsers as FoundBrowser[],
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       proxyServer: cfg.proxyServer,
@@ -85,7 +89,7 @@ export class OpenProject {
       downloadsFolder: cfg.downloadsFolder,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
-    })
+    }
 
     // if we don't have the isHeaded property
     // then we're in interactive mode and we
@@ -96,21 +100,13 @@ export class OpenProject {
       browser.isHeadless = false
     }
 
-    // set the current browser object on options
-    // so we can pass it down
-    options.browser = browser
-
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      options.url = url
-    }
-
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
     const automation = this.projectBase.getAutomation()
 
     // use automation middleware if its
     // been defined here
-    let am = options.automationMiddleware
+    const am = options.automationMiddleware
 
     if (am) {
       automation.use(am)

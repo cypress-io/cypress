@@ -22,7 +22,7 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, LaunchOpts, SpecFile, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -331,13 +331,11 @@ async function maybeStartVideoRecording (options: { spec: SpecWithRelativeRoot, 
   const { spec, browser, video, videosFolder } = options
 
   debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
-  // bail if we've been told not to capture
-  // a video recording
+
   if (!video) {
     return
   }
 
-  // make sure we have a videosFolder
   if (!videosFolder) {
     throw new Error('Missing videoFolder for recording')
   }
@@ -400,7 +398,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
 
   const warnings = {}
 
-  const browserOpts: LaunchOpts = {
+  const browserOpts: OpenProjectLaunchOpts = {
     ...getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError),
     projectRoot,
     shouldLaunchNewTab,
@@ -943,7 +941,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: Browser[], webSecurity: boolean }) {
+async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1001,11 +999,11 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   const [sys, browser] = await Promise.all([
     system.info(),
     (async () => {
-      const browsers = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
+      const browser = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
 
-      await removeOldProfiles(browsers)
+      await removeOldProfiles(browser)
 
-      return browsers
+      return browser
     })(),
     trashAssets(config),
   ])
