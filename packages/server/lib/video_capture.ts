@@ -8,6 +8,8 @@ import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 
+export type WriteVideoFrame = (data: Buffer) => void
+
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
 // extra verbose logs for logging individual frames
@@ -150,7 +152,7 @@ export function start (name, options: StartOptions = {}) {
 
   const lengths = {}
 
-  const writeVideoFrame = function (data) {
+  const writeVideoFrame: WriteVideoFrame = function (data) {
     // make sure we haven't ended
     // our stream yet because paint
     // events can linger beyond

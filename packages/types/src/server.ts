@@ -10,6 +10,7 @@ export interface LaunchOpts {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
+  onWarning?: (err: Error) => void
 }
 
 export interface LaunchArgs {
@@ -46,7 +47,7 @@ export interface AutomationMiddleware {
   onBeforeRequest?: OnRequestEvent | null
   onRequest?: OnRequestEvent | null
   onResponse?: NullableMiddlewareHook
-  onAfterResponse?: NullableMiddlewareHook
+  onAfterResponse?: ((eventName: string, data: any, resp: any) => void) | null
 }
 
 type WebSocketOptionsCallback = (...args: any[]) => any
