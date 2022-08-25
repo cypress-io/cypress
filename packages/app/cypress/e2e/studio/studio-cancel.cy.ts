@@ -1,7 +1,7 @@
 import { launchStudio } from './helper'
 
 describe('Cypress Studio', () => {
-  it('updates an existing test with a click action', () => {
+  it('creates a test using Studio, but cancels and does not write to file', () => {
     launchStudio()
 
     cy.getAutIframe().within(() => {
@@ -25,17 +25,22 @@ describe('Cypress Studio', () => {
       cy.get('.command-name-click').should('contain.text', 'click')
     })
 
-    cy.get('button').contains('Save Commands').click()
+    cy.get('[data-cy="hook-name-studio commands"]').should('exist')
+
+    cy.get('a').contains('Cancel').click()
+
+    // Cyprss re-runs after you cancel Studio.
+    cy.waitForSpecToFinish()
+
+    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
 
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
+      // No change, since we cancelled.
       expect(spec.trim()).to.eq(`
 it('visits a basic html page', () => {
   cy.visit('cypress/e2e/index.html')
-  /* ==== Generated with Cypress Studio ==== */
-  cy.get('#increment').click();
-  /* ==== End Cypress Studio ==== */
 })`.trim())
     })
   })
