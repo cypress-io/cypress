@@ -390,7 +390,7 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
     return continueProcessing()
   }
 
-  const { onProgress } = printResults.displayVideoProcessingProgress({ videoCompression })
+  const { onProgress } = printResults.displayVideoProcessingProgress({ name, videoCompression })
 
   return continueProcessing(onProgress)
 }
