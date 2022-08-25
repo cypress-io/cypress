@@ -1,13 +1,49 @@
-// import { SpecPatternModalFragmentDoc } from '../generated/graphql-test'
+import { LoginConnectModalsFragmentDoc } from '../generated/graphql-test'
 import LoginConnectModals from './LoginConnectModals.vue'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 
 import { useLoginConnectStore } from '../store/login-connect-store'
 
 describe('<LoginConnectModals />', () => {
-  it('should reflect store state on mount and update after', () => {
-    const { setIsLoginConnectOpen } = useLoginConnectStore()
+  context('when user is logged out', () => {
+    it('shows login modal', () => {
+      const { setIsLoginConnectOpen } = useLoginConnectStore()
 
-    cy.mount(LoginConnectModals)
-    setIsLoginConnectOpen(true)
+      cy.mountFragment(LoginConnectModalsFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = null
+        },
+        render: (gqlVal) => {
+          return <LoginConnectModals gql={gqlVal} />
+        },
+      })
+
+      setIsLoginConnectOpen(true)
+      cy.contains('logged out')
+    })
+  })
+
+  context('when user is logged in', () => {
+    it('shows correct "connect" state if project is not set up', () => {
+      const { setIsLoginConnectOpen } = useLoginConnectStore()
+
+      cy.mountFragment(LoginConnectModalsFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = {
+            ...CloudUserStubs.me,
+            firstOrganization: {
+              __typename: 'CloudOrganizationConnection',
+              nodes: [],
+            },
+          }
+        },
+        render: (gqlVal) => {
+          return <LoginConnectModals gql={gqlVal} />
+        },
+      })
+
+      setIsLoginConnectOpen(true)
+      cy.contains('logged in')
+    })
   })
 })

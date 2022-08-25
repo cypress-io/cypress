@@ -54,6 +54,10 @@ const props = defineProps<{
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
 const status = computed(() => {
+  if (!props.gql) {
+    return
+  }
+
   const isLoggedIn = !!props.gql.cachedUser?.id || !!props.gql.cloudViewer?.id
   // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
   // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
