@@ -11,12 +11,6 @@ function getCypress () {
   return eventManager.getCypress()
 }
 
-function getAutUrl () {
-  const autStore = useAutStore()
-
-  return autStore.url
-}
-
 function stringifyActual (val: any) {
   // @ts-expect-error - this exists, but not in TypeScript.
   return Cypress.utils.stringifyActual(val)
@@ -212,7 +206,11 @@ export const useStudioStore = defineStore('studioRecorder', {
         }
       }
 
-      this.setUrl(getAutUrl())
+      const autStore = useAutStore()
+
+      if (!studio?.url && autStore.url) {
+        this.setUrl(autStore.url)
+      }
 
       if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)
@@ -252,10 +250,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.logs = []
       this._currentId = 1
       this._hasStarted = true
-
-      if (this.url) {
-        this.visitUrl()
-      }
 
       this.attachListeners(body)
     },
