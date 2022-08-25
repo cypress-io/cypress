@@ -28,8 +28,8 @@ try {
     })
     let req3 = require('../fixtures/no-deps.js')
 
-    t.equal(req1, req3, 'req1 === req3')
-    t.notEqual(req1, req2, 'req1 !== req2')
+    t.equal(req1, req3)
+    t.notEqual(req1, req2)
   })
 
   test('should require a module with sync deps', (t) => {
@@ -39,8 +39,8 @@ try {
     })
     let req3 = require('../fixtures/sync-deps.js')
 
-    t.equal(req1, req3, 'req1 === req3')
-    t.notEqual(req1, req2, 'req1 !== req2')
+    t.equal(req1, req3)
+    t.notEqual(req1, req2)
   })
 
   // Not dealing with things as crazy as async deps which are assigned during `setTimeout`
@@ -75,10 +75,10 @@ try {
     let lenChildrenAfterReq2 = module.children.length
     let req3 = require('../fixtures/sync-deps.js')
 
-    t.equal(req1, req3, 'req1 === req3')
+    t.equal(req1, req3)
 
-    t.equal(req1, req2.dep, 'req1 === req2.dep')
-    t.equal(req1.dep, req2.dep.dep, 'req1.dep === req2.dep.dep')
+    t.equal(req1, req2.dep)
+    t.equal(req1.dep, req2.dep.dep)
 
     // We aren't updating module children when snapshot is used thus len doesn't change.
     // t.equal(lenChildrenAfterReq2, lenChildrenBeforeReq2 + 1, 'len children')
@@ -95,8 +95,8 @@ try {
     let testReq3 = require('../fixtures/sync-deps.js')
     let testReq4 = require('../fixtures/no-deps.js')
 
-    t.notEqual(testReq1, testReq3, 'testReq1 !== testReq3')
-    t.notEqual(testReq2, testReq4, 'testReq2 !== testReq4')
+    t.notEqual(testReq1, testReq3)
+    t.notEqual(testReq2, testReq4)
 
     delete require.cache[require.resolve('../fixtures/sync-deps.js')]
     delete require.cache[require.resolve('../fixtures/no-deps.js')]
@@ -115,8 +115,8 @@ try {
     let lenChildrenAfterReq2 = module.children.length
     let req3 = require('../fixtures/sync-deps.js')
 
-    t.equal(req3, req2.dep, 'req3 === req2.dep')
-    t.equal(req3.dep, req2.dep.dep, 'req3.dep === req2.dep.dep')
+    t.equal(req3, req2.dep)
+    t.equal(req3.dep, req2.dep.dep)
 
     // We aren't updating module children when snapshot is used thus len doesn't change
     // t.equal(lenChildrenAfterReq2, lenChildrenBeforeReq2 + 1, 'len children')
@@ -134,8 +134,8 @@ try {
     let testReq3 = require('../fixtures/sync-deps.js')
     let testReq4 = require('../fixtures/no-deps.js')
 
-    t.notEqual(testReq1, testReq3, 'testReq1 !== testReq3')
-    t.notEqual(testReq2, testReq4, 'testReq2 !== testReq4')
+    t.notEqual(testReq1, testReq3)
+    t.notEqual(testReq2, testReq4)
 
     delete require.cache[require.resolve('../fixtures/sync-deps.js')]
     delete require.cache[require.resolve('../fixtures/no-deps.js')]
@@ -151,7 +151,6 @@ try {
         t.notEqual(
           require.cache[require.resolve('../fixtures/sync-deps.js')],
           undefined,
-          '../fixtures/sync-deps.js is in require.cache',
         )
 
         t.equal(
@@ -160,7 +159,6 @@ try {
             require.resolve('../fixtures/sync-deps.js'),
           ),
           true,
-          '../fixtures/sync-deps.js key is in require.cache',
         )
       },
       module,
@@ -169,7 +167,6 @@ try {
     t.equal(
       require.cache[require.resolve('../fixtures/sync-deps.js')],
       undefined,
-      '../fixtures/sync-deps.js is not in require.cache',
     )
 
     t.equal(
@@ -178,7 +175,6 @@ try {
         require.resolve('../fixtures/sync-deps.js'),
       ),
       false,
-      '../fixtures/sync-deps.js key is not in require.cache',
     )
   })
 

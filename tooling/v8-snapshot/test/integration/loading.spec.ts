@@ -323,12 +323,12 @@ describe('loading', () => {
       ` ${projectBaseDir}/spec/non-native.js`
 
     try {
-      const { stdout } = await exec(cmd, { env })
+      const { stdout, stderr } = await exec(cmd, { env })
 
       const lines = stdout.split('\n')
 
       if (lines[lines.length - 2] !== '# PASS') {
-        assert.fail(`stdout had #FAIL:\n${stdout}`)
+        assert.fail(`stdout had #FAIL:\n${stdout}\n${stderr}`)
       }
     } catch (err: any) {
       assert.fail(err.toString())
