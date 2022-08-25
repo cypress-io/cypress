@@ -8,11 +8,7 @@
     @update:model-value="emit('close')"
   >
     <template #title>
-      <div class="flex pt-1">
-        <i-cy-object-magic-wand-dark-mode_x16 />
-        <span class="ml-1">{{ t('runner.studio.studio') }}</span>
-        <span class="ml-1">{{ t('versions.beta') }}</span>
-      </div>
+      {{ t('runner.studio.studio') }} {{ t('versions.beta') }}
     </template>
 
     <div class="py-7 px-15 text-gray-900">
