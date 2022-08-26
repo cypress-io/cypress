@@ -205,7 +205,8 @@ describe('lib/open_project', () => {
         })
       })
 
-      it('sends after:spec errors through onError option', function () {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23448
+      it.skip('sends after:spec errors through onError option', function () {
         const err = new Error('thrown from after:spec handler')
 
         this.config.experimentalInteractiveRunEvents = true

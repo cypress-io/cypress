@@ -51,7 +51,10 @@ describe('<OpenBrowserList />', () => {
     cy.get('.v-popper__popper--shown')
     .contains('Cypress does not support running Firefox Developer Edition version 69.')
 
-    cy.percySnapshot()
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot()
+    */
   })
 
   it('emits navigates back', () => {

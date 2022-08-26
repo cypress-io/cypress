@@ -83,7 +83,7 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
 
-export class WebkitAutomation {
+export class WebKitAutomation {
   private context!: playwright.BrowserContext
   private page!: playwright.Page
 
@@ -91,7 +91,7 @@ export class WebkitAutomation {
 
   // static initializer to avoid "not definitively declared"
   static async create (automation: Automation, browser: playwright.Browser, initialUrl: string) {
-    const wkAutomation = new WebkitAutomation(automation, browser)
+    const wkAutomation = new WebKitAutomation(automation, browser)
 
     await wkAutomation.reset(initialUrl)
 
