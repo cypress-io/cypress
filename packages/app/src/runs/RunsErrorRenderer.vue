@@ -77,7 +77,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
 import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
-import CloudConnectModals from './modals/CloudConnectModals.vue'
+import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 const { t } = useI18n()

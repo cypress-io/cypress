@@ -29,7 +29,7 @@ describe('<LoginConnectModals />', () => {
   })
 
   context('when user is logged in', () => {
-    it('shows correct "connect" state if project is not set up', () => {
+    it('shows correct "Create Project" state if project is not set up', () => {
       const { setIsLoginConnectOpen } = useLoginConnectStore()
 
       cy.mountFragment(LoginConnectModalsFragmentDoc, {
@@ -47,8 +47,13 @@ describe('<LoginConnectModals />', () => {
         },
       })
 
-      setIsLoginConnectOpen(true)
-      cy.contains('logged in')
+      cy.contains('Create project')
+      .should('not.exist')
+      .then(() => {
+        setIsLoginConnectOpen(true)
+
+        cy.contains('Create project').should('be.visible')
+      })
     })
   })
 })

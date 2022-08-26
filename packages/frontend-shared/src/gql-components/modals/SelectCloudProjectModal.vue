@@ -252,7 +252,26 @@ mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
           runs(first: 10) {
             nodes {
               id
-              ...RunCard
+              	id
+                createdAt
+                status
+                totalDuration
+                url
+                tags {
+                  id
+                  name
+                }
+                totalPassed
+                totalFailed
+                totalPending
+                totalSkipped
+                totalFlakyTests
+                commitInfo {
+                  authorName
+                  authorEmail
+                  summary
+                  branch
+                }
             }
           }
         }

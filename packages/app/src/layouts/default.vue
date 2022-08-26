@@ -66,7 +66,7 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
-import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
+import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
 
 import { useRoute } from 'vue-router'
 import { computed, ref } from 'vue'

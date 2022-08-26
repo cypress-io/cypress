@@ -41,7 +41,7 @@ import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import { ref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
-import CloudConnectModals from '../../runs/modals/CloudConnectModals.vue'
+import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
 
 gql`
 query ConnectProjectBanner {
