@@ -11,7 +11,7 @@
       {{ t('runner.studio.studio') }} {{ t('versions.beta') }}
     </template>
 
-    <div class="py-7 px-15 text-gray-900">
+    <div class="max-w-2xl py-7 px-15 text-gray-900">
       <div class="text-center">
         {{ t('runner.studio.studioDetailedDescription') }}
       </div>

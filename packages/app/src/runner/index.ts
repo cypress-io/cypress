@@ -370,7 +370,7 @@ async function initialize () {
 
   const studioStore = useStudioStore()
 
-  studioStore.$reset()
+  studioStore.cancel()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
