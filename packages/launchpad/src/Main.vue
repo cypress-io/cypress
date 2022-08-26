@@ -74,6 +74,7 @@
         <OpenBrowser v-else />
       </template>
     </div>
+    <LoginConnectModals :gql="query.data.value" />
   </template>
   <div data-e2e />
 </template>
@@ -98,6 +99,7 @@ import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 import { useOnline } from '@vueuse/core'
+import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
@@ -129,6 +131,7 @@ fragment MainLaunchpadQueryData on Query {
   ...GlobalPage
   ...ScaffoldedFiles
   ...WarningList
+  ...LoginConnectModals
 }
 `
 

@@ -49,12 +49,9 @@
           <component :is="Component" />
         </transition>
       </router-view>
-      <CloudConnectModals
-        v-if="showConnectDialog && cloudModalQuery.data.value"
-        :show="showConnectDialog"
-        :gql="cloudModalQuery.data.value"
-        @cancel="showConnectDialog = false"
-        @success="showConnectDialog = false"
+      <LoginConnectModals
+        v-if="query.data.value"
+        :gql="query.data.value"
       />
     </main>
   </div>
@@ -66,7 +63,7 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
-import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
+import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
 import { computed, ref } from 'vue'
@@ -84,6 +81,7 @@ fragment MainAppQueryData on Query {
       isLoadingConfigFile
       isLoadingNodeEvents
     }
+    ...LoginConnectModals
 }
 `
 
