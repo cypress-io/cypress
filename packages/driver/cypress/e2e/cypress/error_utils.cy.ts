@@ -399,7 +399,7 @@ describe('driver/src/cypress/error_utils', () => {
       err = { stack: 'Error: original stack message\n at originalStack (foo.js:1:1)' }
     })
 
-    it('replaces stack with source mapped stack', () => {
+    it('replaces stack with source mapped user invocation stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
       expect(result.stack).to.equal(sourceStack.sourceMapped)
