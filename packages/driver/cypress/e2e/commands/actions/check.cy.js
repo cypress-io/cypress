@@ -272,8 +272,9 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    // TODO(webkit): fix+unskip
     // https://github.com/cypress-io/cypress/issues/4233
-    it('can check an element behind a sticky header', () => {
+    it('can check an element behind a sticky header', { browser: '!webkit' }, () => {
       cy.viewport(400, 400)
       cy.visit('./fixtures/sticky-header.html')
       cy.get(':checkbox:first').check()

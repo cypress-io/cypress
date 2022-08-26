@@ -117,7 +117,7 @@ describe('uncaught errors', () => {
 
   // if we mutate the error, the app's listeners for 'error' or
   // 'unhandledrejection' will have our wrapped error instead of the original
-  it('original error is not mutated for "error"', () => {
+  it('original error is not mutated for "error"', { browser: '!webkit' }, () => {
     cy.once('uncaught:exception', () => false)
 
     cy.visit('/fixtures/errors.html')
