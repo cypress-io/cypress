@@ -257,13 +257,7 @@ function setStudioUrl (event: Event) {
 }
 
 function visitUrl () {
-  studioStore.setUrl(urlInProgress.value)
-
-  if (!studioStore.url) {
-    throw Error('Cannot visit blank url')
-  }
-
-  studioStore.visitUrl(studioStore.url)
+  studioStore.visitUrl(urlInProgress.value)
 }
 
 function openInNewTab () {

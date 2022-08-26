@@ -203,14 +203,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
         if (studio.url) {
           this.setUrl(studio.url)
-          this.visitUrl()
         }
-      }
-
-      const autStore = useAutStore()
-
-      if (!studio?.url && autStore.url) {
-        this.setUrl(autStore.url)
       }
 
       if (this.testId || this.suiteId) {
@@ -245,12 +238,22 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
     },
 
-    start (body) {
+    start (body: HTMLBodyElement) {
       this.isActive = true
       this.isLoading = false
       this.logs = []
       this._currentId = 1
       this._hasStarted = true
+
+      const autStore = useAutStore()
+
+      if (this.url) {
+        this.visitUrl()
+      }
+
+      if (!this.url && autStore.url) {
+        this.setUrl(autStore.url)
+      }
 
       this.attachListeners(body)
     },

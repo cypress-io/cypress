@@ -77,12 +77,15 @@ export const useAutStore = defineStore({
       this.highlightUrl = false
       this.isLoadingUrl = false
     },
+
     setScriptError (err: ScriptError) {
       this.scriptError = err
     },
+
     setScale (scale: number) {
       this.scale = scale
     },
+
     setSpecRunnerHeaderHeight (height: number) {
       this.specRunnerHeaderHeight = height
     },
