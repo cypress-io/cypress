@@ -128,6 +128,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
 
     case 'react':
     case 'vue':
+    case 'svelte':
     case undefined:
       return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 
