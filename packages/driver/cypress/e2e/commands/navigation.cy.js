@@ -89,8 +89,8 @@ describe('src/cy/commands/navigation', () => {
       cy.on('window:unload', stub3)
 
       cy.reload().then(() => {
-        expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
-        expect(stub1.secondCall).to.be.calledWith(true, 'load')
+        expect(stub1.getCall(0)).to.be.calledWith(false, 'beforeunload')
+        expect(stub1.getCall(1)).to.be.calledWith(true, 'load')
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
       })
@@ -301,17 +301,17 @@ describe('src/cy/commands/navigation', () => {
         cy.go('back')
       })
       .then(function () {
-        expect(emit.firstCall).to.be.calledWith(
+        expect(emit.getCall(0)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html',
         )
 
-        expect(emit.secondCall).to.be.calledWith(
+        expect(emit.getCall(1)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html#hashchange',
         )
 
-        expect(emit.thirdCall).to.be.calledWith(
+        expect(emit.getCall(2)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html',
         )
@@ -377,8 +377,8 @@ describe('src/cy/commands/navigation', () => {
         cy.on('window:unload', stub3)
       })
       .go('back').then(() => {
-        expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
-        expect(stub1.secondCall).to.be.calledWith(true, 'load')
+        expect(stub1.getCall(0)).to.be.calledWith(false, 'beforeunload')
+        expect(stub1.getCall(1)).to.be.calledWith(true, 'load')
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
       })
@@ -817,8 +817,8 @@ describe('src/cy/commands/navigation', () => {
 
           cy
           .visit('/fixtures/generic.html?foo#bar') // yes (1)
-          .visit('/fixtures/generic.html?foo#foo') // no (2)
-          .visit('/fixtures/generic.html?bar#bar') // yes (3)
+          .visit('/fixtures/generic.html?foo#foo') // no (1)
+          .visit('/fixtures/generic.html?bar#bar') // yes (2)
           .visit('/fixtures/dimensions.html?bar#bar') // yes (3)
           .visit('/fixtures/dimensions.html?baz#bar') // yes (4)
           .visit('/fixtures/dimensions.html#bar') // yes (5)
@@ -2287,12 +2287,12 @@ describe('src/cy/commands/navigation', () => {
       .visit('/timeout?ms=10', {
         onBeforeLoad () {
           expect(emit).to.be.calledOnce
-          expect(emit.firstCall).to.be.calledWith('page:loading', true)
+          expect(emit.getCall(0)).to.be.calledWith('page:loading', true)
         },
       })
       .then(() => {
         expect(emit).to.be.calledTwice
-        expect(emit.secondCall).to.be.calledWith('page:loading', false)
+        expect(emit.getCall(1)).to.be.calledWith('page:loading', false)
       })
     })
 
@@ -2306,7 +2306,7 @@ describe('src/cy/commands/navigation', () => {
         cy.once('window:unload', () => {
           expected = true
           expect(emit.callCount).to.eq(3)
-          expect(emit.thirdCall).to.be.calledWith('page:loading', true)
+          expect(emit.getCall(2)).to.be.calledWith('page:loading', true)
         })
       }).get('#dimensions').click()
       .then(() => {
@@ -2572,17 +2572,17 @@ describe('src/cy/commands/navigation', () => {
           }).then(() => {
             expect(emit.callCount).to.eq(4)
 
-            expect(emit.firstCall).to.be.calledWith(
+            expect(emit.getCall(0)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html',
             )
 
-            expect(emit.secondCall).to.be.calledWith(
+            expect(emit.getCall(1)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html#hashchange',
             )
 
-            expect(emit.thirdCall).to.be.calledWith(
+            expect(emit.getCall(2)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html',
             )
@@ -2635,17 +2635,17 @@ describe('src/cy/commands/navigation', () => {
               })
             })
             .then(() => {
-              expect(emit.firstCall).to.be.calledWith(
+              expect(emit.getCall(0)).to.be.calledWith(
                 'navigation:changed',
                 'page navigation event (load)',
               )
 
-              expect(emit.secondCall).to.be.calledWith(
+              expect(emit.getCall(1)).to.be.calledWith(
                 'navigation:changed',
                 'page navigation event (before:load)',
               )
 
-              expect(emit.thirdCall).to.be.calledWith(
+              expect(emit.getCall(2)).to.be.calledWith(
                 'navigation:changed',
                 'page navigation event (load)',
               )
@@ -2737,17 +2737,17 @@ describe('src/cy/commands/navigation', () => {
                 })
               })
               .then(() => {
-                expect(emit.firstCall).to.be.calledWith(
+                expect(emit.getCall(0)).to.be.calledWith(
                   'navigation:changed',
                   'page navigation event (before:load)',
                 )
 
-                expect(emit.secondCall).to.be.calledWith(
+                expect(emit.getCall(1)).to.be.calledWith(
                   'navigation:changed',
                   'page navigation event (load)',
                 )
 
-                expect(emit.thirdCall).to.be.calledWith(
+                expect(emit.getCall(2)).to.be.calledWith(
                   'navigation:changed',
                   'hashchange',
                 )
