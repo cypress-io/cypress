@@ -1831,7 +1831,6 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
     steps:
       - restore_cached_workspace
       - run:
