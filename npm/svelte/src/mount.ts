@@ -4,29 +4,34 @@ import {
   getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
-import { SvelteComponentTyped, ComponentConstructorOptions, SvelteComponent } from 'svelte'
+import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-type SvelteComponentClass = typeof SvelteComponent
-type ConstructorOptions = Omit<ComponentConstructorOptions, 'hydrate' | 'target' | '$$inline'>
+type SvelteConstructor<T> = new (...args: any[]) => T;
+type SvelteComponentOptions<T extends SvelteComponent> = Omit<
+  ComponentConstructorOptions<ComponentProps<T>>,
+  'hydrate' | 'target' | '$$inline'
+>;
 
-export interface MountOptions extends ConstructorOptions, Partial<StyleOptions> {
+export interface MountOptions<T extends SvelteComponent>
+  extends SvelteComponentOptions<T>,
+  Partial<StyleOptions> {
   log?: boolean
 }
 
-export interface MountReturn {
-  component: SvelteComponentTyped
+export interface MountReturn<T extends SvelteComponent> {
+  component: T
 }
 
-let componentInstance: SvelteComponentTyped | undefined
+let componentInstance: SvelteComponent | undefined
 
 const cleanup = () => {
   componentInstance?.$destroy()
 }
 
 // Extract the component name from the object passed to mount
-const getComponentDisplayName = (Component: SvelteComponentClass): string => {
+const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteConstructor<T>): string => {
   if (Component.name) {
     const [_, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
 
@@ -39,8 +44,8 @@ const getComponentDisplayName = (Component: SvelteComponentClass): string => {
 /**
  * Mounts a Svelte component inside the Cypress browser
  *
- * @param {SvelteComponentClass} Component Svelte component being mounted
- * @param {MountOptions} options options to customize the component being mounted
+ * @param {SvelteConstructor<T>} Component Svelte component being mounted
+ * @param {MountReturn<T extends SvelteComponent>} options options to customize the component being mounted
  * @returns Cypress.Chainable<MountReturn>
  *
  * @example
@@ -52,16 +57,16 @@ const getComponentDisplayName = (Component: SvelteComponentClass): string => {
  *   cy.get('button').contains(42)
  * })
  */
-export function mount (
-  Component: SvelteComponentClass,
-  options: MountOptions = {},
-): Cypress.Chainable<MountReturn> {
+export function mount<T extends SvelteComponent> (
+  Component: SvelteConstructor<T>,
+  options: MountOptions<T> = {},
+): Cypress.Chainable<MountReturn<T>> {
   return cy.then(() => {
     const target = getContainerEl()
 
     injectStylesBeforeElement(options, document, target)
 
-    const ComponentConstructor = ((Component as any).default || Component) as SvelteComponentClass
+    const ComponentConstructor = ((Component as any).default || Component) as SvelteConstructor<T>
 
     componentInstance = new ComponentConstructor({
       target,
@@ -80,7 +85,7 @@ export function mount (
         }).snapshot('mounted').end()
       }
     })
-    .wrap({ component: componentInstance }, { log: false })
+    .wrap({ component: componentInstance as T }, { log: false })
   })
 }
 
