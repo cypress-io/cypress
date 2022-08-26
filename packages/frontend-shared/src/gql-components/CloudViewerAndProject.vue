@@ -1,5 +1,8 @@
 <template>
-  <slot :status="status" />
+  <slot
+    :status="status"
+    :userData="userData"
+  />
 </template>
 
 <script setup lang="ts">
@@ -11,6 +14,8 @@ gql`
 fragment CloudViewerAndProject on Query {
   cloudViewer {
     id
+    fullName
+    email
     firstOrganization: organizations(first: 1) {
       nodes {
         id
@@ -19,6 +24,8 @@ fragment CloudViewerAndProject on Query {
   }
   cachedUser {
     id
+    fullName
+    email
   }
   currentProject {
     id
@@ -67,6 +74,10 @@ const status = computed(() => {
   const hasNoRecordedRuns = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && (props.gql.currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0
 
   return { isLoggedIn, isOrganizationLoaded, isMemberOfOrganization, isProjectConnected, hasNoRecordedRuns }
+})
+
+const userData = computed(() => {
+  return props.gql.cloudViewer ?? props.gql.cachedUser
 })
 
 </script>
