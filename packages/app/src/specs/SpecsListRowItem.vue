@@ -2,7 +2,8 @@
   <div data-cy="specs-list-row">
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
-      class="h-full outline-none ring-inset grid pr-20px grid-cols-[1fr,160px,160px] group md:grid-cols-[1fr,160px,160px,180px] focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      class="h-full outline-none ring-inset grid pr-20px focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      :class="[gridColumns]"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
       @click="emit('toggleRow')"
@@ -24,6 +25,7 @@
         </div>
         <div
           ref="cloudColumnLatestRuns"
+          data-cy="specs-list-row-latest-runs"
           class="relative"
         >
           <slot
@@ -37,11 +39,13 @@
           >
             <slot
               name="connect-button"
+              :utmMedium="'Specs Latest Runs Empty State'"
             />
           </div>
         </div>
         <div
           ref="cloudColumnAverageDuration"
+          data-cy="specs-list-row-average-duration"
           class="relative hidden md:block"
         >
           <slot
@@ -55,6 +59,7 @@
           >
             <slot
               name="connect-button"
+              :utmMedium="'Specs Average Duration Empty State'"
             />
           </div>
         </div>
@@ -69,9 +74,11 @@ import type { Ref } from 'vue'
 import { useTimeout, useTimeoutFn, useElementHover } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router'
 
-defineProps<{
+const props = defineProps<{
   isLeaf: boolean
   route?: RouteLocationRaw
+  hasRuns?: boolean
+  gridColumns: string
 }>()
 
 const emit = defineEmits<{
@@ -106,6 +113,10 @@ function createWatchFunction (
   let controls
 
   return () => {
+    if (props.hasRuns) {
+      return
+    }
+
     if (controls) {
       controls.stop()
     }

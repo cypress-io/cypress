@@ -8,7 +8,8 @@
     prefix-icon-class="icon-light-indigo-100 icon-dark-indigo-500"
     @click.stop.prevent="handleClick"
   >
-    {{ buttonOptions.text }}
+    <span class="hidden lg:inline">{{ buttonOptions.text }}</span>
+    <span class="lg:hidden">{{ buttonOptions.textShort }}</span>
   </Button>
 </template>
 
@@ -72,6 +73,7 @@ const projectConnectionStatus = computed(() => {
 
 type ButtonOptions = {
   text: string
+  textShort: string
   icon: FunctionalComponent<SVGAttributes>
   emits: 'showLogin' | 'showConnectToProject' | 'requestAccess'
 }
@@ -79,26 +81,31 @@ type ButtonOptions = {
 const VALUES = {
   LOGGED_OUT: {
     text: t('specPage.hoverButton.connect'),
+    text_short: t('specPage.hoverButton.connect'),
     icon: UserIcon,
     emits: 'showLogin',
   },
   NOT_CONNECTED: {
     text: t('specPage.hoverButton.connectProject'),
+    text_short: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
     emits: 'showConnectToProject',
   },
   NOT_FOUND: {
     text: t('specPage.hoverButton.connectProject'),
+    text_short: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
     emits: 'showConnectToProject',
   },
   UNAUTHORIZED: {
     text: t('specPage.hoverButton.requestAccess'),
+    text_short: t('specPage.hoverButton.requestAccessShort'),
     icon: PlayIcon,
     emits: 'requestAccess',
   },
   ACCESS_REQUESTED: {
     text: t('specPage.hoverButton.requestSent'),
+    text_short: t('specPage.hoverButton.requestSentShort'),
     icon: PlayIcon,
   },
 }
@@ -106,6 +113,7 @@ const VALUES = {
 const buttonOptions = computed(() => {
   const options: ButtonOptions = {
     text: VALUES[projectConnectionStatus.value]?.text,
+    textShort: VALUES[projectConnectionStatus.value]?.text_short,
     icon: VALUES[projectConnectionStatus.value]?.icon,
     emits: VALUES[projectConnectionStatus.value]?.emits,
   }

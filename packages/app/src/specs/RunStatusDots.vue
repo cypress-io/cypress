@@ -142,8 +142,16 @@ const props = defineProps<{
   specFileExtension: string
 }>()
 
+const emits = defineEmits<{
+  (eventName: 'hasRuns', value: boolean): void
+}>()
+
 const runs = computed(() => {
-  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+  const runs = props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+
+  emits('hasRuns', !!runs)
+
+  return runs
 })
 
 const isRunsLoaded = computed(() => {

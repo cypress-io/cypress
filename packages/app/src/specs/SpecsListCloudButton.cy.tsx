@@ -60,6 +60,17 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
     })
   }
 
+  function takeSnapshots () {
+    cy.viewport(650, 100)
+    cy.percySnapshot('narrow')
+    cy.viewport(800, 100)
+    cy.percySnapshot('medium')
+    cy.viewport(1200, 100)
+    cy.percySnapshot('wide')
+    cy.viewport(2000, 100)
+    cy.percySnapshot('widest')
+  }
+
   context('not connected', () => {
     beforeEach(() => {
       mountWithStatus('NOT_CONNECTED')
@@ -71,6 +82,8 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       .click()
 
       cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
+
+      takeSnapshots()
     })
   })
 
@@ -85,6 +98,8 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       .click()
 
       cy.get('@showLoginSpy').should('have.been.calledOnce')
+
+      takeSnapshots()
     })
   })
 
@@ -95,6 +110,8 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
 
     it('should not render', () => {
       cy.findByTestId('cloud-button').should('not.exist')
+
+      takeSnapshots()
     })
   })
 
@@ -109,6 +126,8 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       .click()
 
       cy.get('@requestAccessSpy').should('have.been.calledOnce')
+
+      takeSnapshots()
     })
   })
 
@@ -121,6 +140,8 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       cy.findByTestId('cloud-button')
       .should('exist')
       .should('be.disabled')
+
+      takeSnapshots()
     })
   })
 })

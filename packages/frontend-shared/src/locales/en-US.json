@@ -163,8 +163,11 @@
     "hoverButton": {
       "connect": "Connect",
       "connectProject": "Connect project",
+      "connectProjectShort": "Connect",
       "requestAccess": "Request Access",
-      "requestSent": "Request Sent"
+      "requestAccessShort": "Request",
+      "requestSent": "Request Sent",
+      "requestSentShort": "Request"
     },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",

@@ -28,8 +28,9 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-[1fr,160px,160px] md:grid-cols-[1fr,160px,160px,180px] children:font-medium children:text-gray-800"
+      class="mb-4 children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
+      :class="[tableGridColumns]"
     >
       <div
         class="flex items-center justify-between"
@@ -84,6 +85,8 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
+          :has-runs="hasRuns"
+          :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
         >
@@ -123,11 +126,11 @@
             />
           </template>
 
-          <template #connect-button>
+          <template #connect-button="{ utmMedium }">
             <SpecsListCloudButton
               v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
               :gql="props.gql"
-              @showLogin="showLogin('Specs List Column Button')"
+              @showLogin="showLogin(utmMedium)"
               @showConnectToProject="showConnectToProject"
               @request-access="requestAccess(props.gql?.currentProject?.projectId)"
             />
@@ -142,6 +145,7 @@
                 :gql="row.data.data.cloudSpec ?? null"
                 :spec-file-extension="row.data.data.specFileExtension"
                 :spec-file-name="row.data.data.fileName"
+                @hasRuns="(v) => hasRuns = v"
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
@@ -221,6 +225,8 @@ const isOnline = useOnline()
 const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
+
+const tableGridColumns: string = 'grid grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
@@ -426,6 +432,10 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
+
+const hasRuns = ref(false)
+
+watch([list], () => hasRuns.value = false)
 
 function refreshPage () {
   location.reload()
