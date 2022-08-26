@@ -36,17 +36,11 @@ describe('integration: express', () => {
     const cmd = `node ./snapshot/install-snapshot.js`
 
     try {
-      const { stdout, stderr } = await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
+      await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
 
       const { deferredHash, ...metadata } = require(metadataFile)
 
       snapshot(metadata)
-
-      // TODO: Remove these
-      // eslint-disable-next-line no-console
-      console.log(stdout)
-      // eslint-disable-next-line no-console
-      console.log(stderr)
     } catch (err: any) {
       assert.fail(err.toString())
     }

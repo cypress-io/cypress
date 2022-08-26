@@ -31476,13 +31476,6 @@ split@^1.0.0:
   dependencies:
     through "2"
 
-spok@^1.3.0:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/spok/-/spok-1.4.3.tgz#8516234e6bd8caf0e10567bd675e15fd03b5ceb8"
-  integrity sha512-5wFGctwrk638aDs+44u99kohxFNByUq2wo0uShQ9yqxSmsxqx7zKbMo1Busy4s7stZQXU+PhJ/BlVf2XWFEGIw==
-  dependencies:
-    ansicolors "~0.3.2"
-
 sponge-case@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sponge-case/-/sponge-case-1.0.1.tgz#260833b86453883d974f84854cdb63aecc5aef4c"

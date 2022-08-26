@@ -1,6 +1,6 @@
 {
   "extends": "../../packages/ts/tsconfig.json",
-  "include": ["src", "scripts/snapshot-generate-entry-via-deps.ts"],
+  "include": ["src"],
   "compilerOptions": {
     "lib": ["esnext"],
     "outDir": "./dist",

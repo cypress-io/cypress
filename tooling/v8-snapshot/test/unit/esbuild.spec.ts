@@ -22,7 +22,7 @@ describe('esbuild', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -63,7 +63,7 @@ describe('esbuild', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }

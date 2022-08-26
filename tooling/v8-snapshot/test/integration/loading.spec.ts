@@ -1,5 +1,4 @@
 import path from 'path'
-import spok from 'spok'
 import { SnapshotGenerator } from '../../src/snapshot-generator'
 import { exec as execOrig } from 'child_process'
 import { promisify } from 'util'
@@ -10,7 +9,6 @@ import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import fs from 'fs-extra'
 
 const exec = promisify(execOrig)
-const t = spok.adapters.chaiExpect(expect)
 
 describe('loading', () => {
   it('loads a healthy module requires a deferred one', async () => {
@@ -33,7 +31,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -45,7 +43,7 @@ describe('loading', () => {
       const { stdout } = await exec(cmd, { env })
       const res = JSON.parse(stdout.trim())
 
-      spok(t, res, { healthyCodeLen: spok.ge(100) })
+      expect(res.healthyCodeLen).to.be.gte(100)
     } catch (err: any) {
       assert.fail(err.toString())
     }
@@ -71,7 +69,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -83,7 +81,7 @@ describe('loading', () => {
       const { stdout } = await exec(cmd, { env })
       const res = JSON.parse(stdout.trim())
 
-      spok(t, res, { isObjectLike: true })
+      expect(res.isObjectLike).to.be.true
     } catch (err: any) {
       assert.fail(err.toString())
     }
@@ -109,7 +107,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -122,7 +120,7 @@ describe('loading', () => {
 
       const res = JSON.parse(stdout.trim())
 
-      expect(res.healthyString).to.equal('FAKE BLUEBIRD')
+      expect(res.healthyString).to.be.equal('FAKE BLUEBIRD')
     } catch (err: any) {
       assert.fail(err.toString())
     }
@@ -149,7 +147,7 @@ describe('loading', () => {
 
       const env: Record<string, any> = {
         ELECTRON_RUN_AS_NODE: 1,
-        DEBUG: '(packherd|snapgen):*',
+        DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
         PROJECT_BASE_DIR: projectBaseDir,
         DEBUG_COLORS: 1,
       }
@@ -161,7 +159,7 @@ describe('loading', () => {
         const { stdout } = await exec(cmd, { env })
         const res = JSON.parse(stdout.trim())
 
-        spok(t, res, { itemIsDir: 131072 })
+        expect(res.itemIsDir).to.be.equal(131072)
       } catch (err: any) {
         assert.fail(err.toString())
       }
@@ -191,7 +189,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -233,7 +231,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }
@@ -273,7 +271,7 @@ describe('loading', () => {
 
     const env: Record<string, any> = {
       ELECTRON_RUN_AS_NODE: 1,
-      DEBUG: '(packherd|snapgen):*',
+      DEBUG: '(cypress:packherd|cypress:snapgen|cypress:snapshot):*',
       PROJECT_BASE_DIR: projectBaseDir,
       DEBUG_COLORS: 1,
     }

@@ -1,9 +1,8 @@
-const assert = require('assert').strict
-const os = require('os')
+import { strict as assert } from 'assert'
+import os from 'os'
 
 const platformKey = `${process.platform} ${os.arch()} ${os.endianness()}`
 
-// prettier-ignore
 const packages = new Map([
   ['win32 ia32 LE', 'snapbuild-windows-32'],
   ['win32 x64 LE', 'snapbuild-windows-64'],
@@ -20,11 +19,8 @@ const packages = new Map([
   ['linux x64 LE', 'snapbuild-linux-64'],
 ])
 
-assert(
-  packages.has(platformKey),
-  `no binary package found for platform '{platformKey}'`,
-)
-
 const uri = packages.get(platformKey)
 
-module.exports = { binary: require.resolve(uri) }
+assert(uri, `no binary package found for platform '{platformKey}'`)
+
+export const binary = require.resolve(uri)

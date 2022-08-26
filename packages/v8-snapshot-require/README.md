@@ -4,16 +4,11 @@ Tool to load a snapshot for Electron applications that was created by `@tooling/
 
 **Table of Contents**
 
-- [v8-snapshot-require](#v8-snapshot-require)
-  - [Features](#features)
-  - [Loading From Snapshot](#loading-from-snapshot)
-    - [Windows Caveats](#windows-caveats)
-    - [Resolver Map](#resolver-map)
-  - [Examples](#examples)
-  - [Debugging and Diagnosing](#debugging-and-diagnosing)
-  - [Env Vars](#env-vars)
-  - [External Documentation](#external-documentation)
-  - [TODO](#todo)
+- [Features](#features)
+- [Loading From Snapshot](#loading-from-snapshot)
+  - [Resolver Map](#resolver-map)
+- [Examples](#examples)
+- [Debugging and Diagnosing](#debugging-and-diagnosing)
 
 ## Features
 
@@ -61,7 +56,7 @@ examples provided with this app, for instance:
 
 ## Debugging and Diagnosing
 
-In order to gain insight into the doctor step as well as loading modules please set the
+In order to gain insight into how the modules are loaded please set the
 `DEBUG=(cypress:pack|cypress:snap)*` which will cause the tool to emit a wealth of 
 information part of which will provide insight into how many modules were initialized 
 from the snapshot and which weren't.

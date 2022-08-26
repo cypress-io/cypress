@@ -1,4 +1,3 @@
-// import spok from 'spok'
 import path from 'path'
 import { readSnapshotResult } from '../utils/bundle'
 import { SnapshotGenerator } from '../../src/snapshot-generator'

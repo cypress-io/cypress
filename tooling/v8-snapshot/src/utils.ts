@@ -2,7 +2,7 @@ import { blueBright, gray, green, yellow } from 'ansi-colors'
 import fs from 'fs'
 import crypto from 'crypto'
 import path from 'path'
-import { binary } from '@packages/snapbuild'
+import { binary } from './snapbuild/snapbuild'
 import resolveFrom from 'resolve-from'
 
 import debug from 'debug'
