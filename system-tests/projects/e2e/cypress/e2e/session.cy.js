@@ -370,7 +370,7 @@ function SuiteWithValidateFn (id, fn) {
     expect(validate).calledOnce
     // (1,2) about:blank before & after session creation
     // (3) after validate runs
-    expect(numPageLoads, 'number of page loads').eq(3)
+    expect(numPageLoads, 'number of page loads').eq(2)
   })
 
   it('t2', () => {
@@ -380,7 +380,7 @@ function SuiteWithValidateFn (id, fn) {
     // (4) about:blank before session rehydrating
     // (5,6) about:blank before & after setup function
     // (7) about:blank after 2nd validate runs
-    expect(numPageLoads, 'number of page loads').eq(7)
+    expect(numPageLoads, 'number of page loads').eq(5)
   })
 }
 
