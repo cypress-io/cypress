@@ -1,13 +1,13 @@
 # @cypress/svelte
 
-Mount Svelte components in the open source [Cypress.io](https://www.cypress.io/) test runner **v10.6.0+**
+Mount Svelte components in the open source [Cypress.io](https://www.cypress.io/) test runner **v10.7.0+**
 
 > **Note:** This package is bundled with the `cypress` package and should not need to be installed separately. See the [Svelte Component Testing Docs](https://docs.cypress.io/guides/component-testing/quickstart-svelte#Configuring-Component-Testing) for mounting Svelte components. Installing and importing `mount` from `@cypress/svelte` should only be used for advanced use-cases.
 
 ## Install
 
 - Requires Svelte >= 3
-- Requires Cypress v10.6.0 or later
+- Requires Cypress v10.7.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
 
 ```sh
@@ -32,7 +32,7 @@ For more information, please check the official docs for [running Cypress](https
 
 ```js
 import { mount } from '@cypress/svelte'
-import { HelloWorld } from './HelloWorld.svelte'
+import HelloWorld from './HelloWorld.svelte'
 
 describe('HelloWorld component', () => {
   it('works', () => {
