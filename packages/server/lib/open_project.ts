@@ -20,7 +20,7 @@ const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
+  relaunchBrowser: (() => Promise<any>) | null = null
 
   constructor () {
     return autoBindDebug(this)
@@ -151,41 +151,38 @@ export class OpenProject {
 
     options.onError = this.projectBase.options.onError
 
-    this.relaunchBrowser = () => {
+    this.relaunchBrowser = async () => {
       debug(
         'launching browser: %o, spec: %s',
         browser,
         spec.relative,
       )
 
-      return Bluebird.try(() => {
-        if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-          return runEvents.execute('before:spec', cfg, spec)
-        }
-
+      if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+        await runEvents.execute('before:spec', cfg, spec)
+      } else {
         // clear cookies and all session data before each spec
         cookieJar.removeAllCookies()
         session.clearSessions()
-      })
-      .then(() => {
-        // TODO: Stub this so we can detect it being called
-        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return browsers.connectToExisting(browser, options, automation)
+      }
+
+      // TODO: Stub this so we can detect it being called
+      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        return await browsers.connectToExisting(browser, options, automation)
+      }
+
+      if (options.shouldLaunchNewTab) {
+        const onInitializeNewBrowserTab = async () => {
+          await this.resetBrowserState()
         }
 
-        if (options.shouldLaunchNewTab) {
-          const onInitializeNewBrowserTab = async () => {
-            await this.resetBrowserState()
-          }
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+      }
 
-          // If we do not launch the browser,
-          // we tell it that we are ready
-          // to receive the next spec
-          return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
-        }
-
-        return browsers.open(browser, options, automation, this._ctx)
-      })
+      return await browsers.open(browser, options, automation, this._ctx)
     }
 
     return this.relaunchBrowser()
