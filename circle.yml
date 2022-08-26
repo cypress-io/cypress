@@ -1323,7 +1323,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
       - when:
           condition:
             or:
@@ -1334,7 +1334,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/packherd'"
+                  yarn test-integration --scope "'@tooling/packherd'"
       # Windows and arm executors don't support verify-mocha-results
       - unless:
           condition:
