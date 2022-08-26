@@ -280,9 +280,7 @@ export class EventManager {
     })
 
     const studioInit = () => {
-      this.ws.emit('studio:init', () => {
-        rerun()
-      })
+      rerun()
     }
 
     this.reporterBus.on('studio:init:test', (testId) => {
