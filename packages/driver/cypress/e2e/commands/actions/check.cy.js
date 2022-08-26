@@ -903,16 +903,19 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
-    it('can forcibly click even when being covered by another element', (done) => {
+    it('can forcibly click even when being covered by another element', () => {
+      let clicked = false
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
 
       $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
 
       checkbox.on('click', () => {
-        done()
+        clicked = true
       })
 
-      cy.get('#checkbox-covered-in-span').uncheck({ force: true })
+      cy.get('#checkbox-covered-in-span').uncheck({ force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('passes timeout and interval down to click', (done) => {

@@ -65,11 +65,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - matches:
-          pattern: "-release$"
-          value: << pipeline.git.branch >>
-
-executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
@@ -2347,7 +2342,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - percy-finalize:
-        context: test-runner:poll-circle-workflow
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build

@@ -19,7 +19,7 @@ import { autoBindDebug } from '@packages/data-context/src/util'
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  projectBase: ProjectBase<any> | null = null
+  private projectBase: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
 
   constructor () {

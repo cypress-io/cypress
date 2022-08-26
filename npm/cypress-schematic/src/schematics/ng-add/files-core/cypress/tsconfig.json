@@ -1,5 +1,5 @@
 {
-  "extends": "<%= relativeToWorkspace %>/tsconfig.json",
+  "extends": "../tsconfig.json",
   "include": ["**/*.ts"],
   "compilerOptions": {
     "sourceMap": false,
