@@ -1,7 +1,7 @@
 import { launchStudio } from './helper'
 
 describe('Cypress Studio', () => {
-  it('kitchensink - writes a test with all kinds of assertions', () => {
+  it('writes a test with all kinds of assertions', () => {
     function assertStudioHookCount (num: number) {
       cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
         cy.get('.command').should('have.length', num)
