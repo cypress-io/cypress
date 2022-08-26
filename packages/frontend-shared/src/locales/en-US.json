@@ -164,9 +164,9 @@
       "connect": "Connect",
       "connectProject": "Connect project",
       "connectProjectShort": "Connect",
-      "requestAccess": "Request Access",
+      "requestAccess": "Request access",
       "requestAccessShort": "Request",
-      "requestSent": "Request Sent",
+      "requestSent": "Request sent",
       "requestSentShort": "Request"
     },
     "connectProjectButton": "Connect your project",
