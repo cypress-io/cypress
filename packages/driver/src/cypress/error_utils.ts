@@ -434,8 +434,7 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
-  err.stack = stack
-  err.sourceMappedStack = sourceMapped
+  err.stack = sourceMapped
   err.parsedStack = parsed
   err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
