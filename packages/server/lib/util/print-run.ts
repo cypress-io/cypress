@@ -13,6 +13,7 @@ import * as experiments from '../experiments'
 import type { SpecFile } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
+import type { Table } from 'cli-table3'
 
 type Screenshot = {
   width: number
@@ -21,15 +22,15 @@ type Screenshot = {
   specName: string
 }
 
-function color (val, c) {
+function color (val: any, c: string) {
   return chalk[c](val)
 }
 
-function gray (val) {
+function gray (val: any) {
   return color(val, 'gray')
 }
 
-function colorIf (val, c) {
+function colorIf (val: any, c: string) {
   if (val === 0 || val == null) {
     val = '-'
     c = 'gray'
@@ -38,7 +39,7 @@ function colorIf (val, c) {
   return color(val, c)
 }
 
-function getWidth (table, index) {
+function getWidth (table: Table, index: number) {
   // get the true width of a table's column,
   // based off of calculated table options for that column
   const columnWidth = table.options.colWidths[index]
@@ -50,7 +51,7 @@ function getWidth (table, index) {
   throw new Error('Unable to get width for column')
 }
 
-function formatBrowser (browser) {
+function formatBrowser (browser: Browser) {
   return _.compact([
     browser.displayName,
     browser.majorVersion,
@@ -58,7 +59,7 @@ function formatBrowser (browser) {
   ]).join(' ')
 }
 
-function formatFooterSummary (results) {
+function formatFooterSummary (results: any) {
   const { totalFailed, runs } = results
 
   const isCanceled = _.some(results.runs, { skippedSpec: true })
@@ -96,11 +97,11 @@ function formatFooterSummary (results) {
   ]
 }
 
-function formatSymbolSummary (failures) {
+function formatSymbolSummary (failures: number) {
   return failures ? logSymbols.error : logSymbols.success
 }
 
-function macOSRemovePrivate (str) {
+function macOSRemovePrivate (str: string) {
   // consistent snapshots when running system tests on macOS
   if (process.platform === 'darwin' && str.startsWith('/private')) {
     return str.slice(8)
@@ -109,7 +110,7 @@ function macOSRemovePrivate (str) {
   return str
 }
 
-function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[] }, estimated) {
+function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
   return {
     name: _.get(obj, 'spec.name'),
     baseName: _.get(obj, 'spec.baseName'),
@@ -125,7 +126,7 @@ function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[] 
   }
 }
 
-function formatPath (name, n, colour = 'reset') {
+function formatPath (name: string, n: number | undefined, pathColor = 'reset') {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -147,29 +148,21 @@ function formatPath (name, n, colour = 'reset') {
   if (n) {
     let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
 
-    return `${color(nameWithNewLines, colour)}`
+    return `${color(nameWithNewLines, pathColor)}`
   }
 
-  return `${color(name, colour)}`
+  return `${color(name, pathColor)}`
 }
 
-function formatNodeVersion ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg, 'resolvedNodeVersion' | 'resolvedNodePath'>, width) {
+function formatNodeVersion ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg, 'resolvedNodeVersion' | 'resolvedNodePath'>, width: number) {
   if (resolvedNodePath) return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
 
   return
 }
 
-function formatRecordParams (runUrl, parallel, group, tag) {
+function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string) {
   if (runUrl) {
-    if (!group) {
-      group = false
-    }
-
-    if (!tag) {
-      tag = false
-    }
-
-    return `Tag: ${tag}, Group: ${group}, Parallel: ${Boolean(parallel)}`
+    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}`
   }
 
   return
@@ -204,7 +197,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   const table = terminal.table({
     colWidths,
     type: 'outsideBorder',
-  })
+  }) as Table
 
   if (!specPattern) throw new Error('No specPattern in displayRunStarting')
 
@@ -230,7 +223,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
-    [gray('Searched:'), formatPath(Array.isArray(specPattern) ? specPattern.join(', ') : specPattern, getWidth(table, 1))],
+    [gray('Searched:'), formatPath(Array.isArray(specPattern) ? specPattern.join(', ') : String(specPattern), getWidth(table, 1))],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
@@ -238,6 +231,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   .filter(_.property(1))
   .value()
 
+  // @ts-expect-error incorrect type in Table
   table.push(...data)
 
   const heading = table.toString()
@@ -249,7 +243,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   return heading
 }
 
-export function displaySpecHeader (name, curr, total, estimated) {
+export function displaySpecHeader (name: string, curr: number, total: number, estimated: number) {
   console.log('')
 
   const PADDING = 2
@@ -280,7 +274,7 @@ export function displaySpecHeader (name, curr, total, estimated) {
   }
 }
 
-export function renderSummaryTable (runUrl, results) {
+export function renderSummaryTable (runUrl: string | undefined, results: any) {
   const { runs } = results
 
   console.log('')
@@ -378,7 +372,7 @@ export function renderSummaryTable (runUrl, results) {
   }
 }
 
-export function displayResults (obj: { screenshots?: Screenshot[] }, estimated) {
+export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: number) {
   const results = collectTestResults(obj, estimated)
 
   const c = results.failures ? 'red' : 'green'
@@ -458,7 +452,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoProcessingProgress (opts: { name: string, videoCompression: number | false}) {
+export function displayVideoProcessingProgress (opts: { name: string, videoCompression: number | false }) {
   console.log('')
 
   terminal.header('Video', {
