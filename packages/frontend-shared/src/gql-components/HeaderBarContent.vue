@@ -148,7 +148,7 @@
           <div v-if="!status?.isLoggedIn">
             <button
               class="flex text-gray-600 items-center group focus:outline-transparent"
-              @click="setIsLoginConnectOpen(true)"
+              @click="openLoginConnectModal({ utmMedium: 'Nav' })"
             >
               <i-cy-profile_x16
                 class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
@@ -182,7 +182,7 @@ import type { AllowedState } from '@packages/types'
 import { useLoginConnectStore } from '../store/login-connect-store'
 import CloudViewerAndProject from '../gql-components/CloudViewerAndProject.vue'
 
-const { setIsLoginConnectOpen } = useLoginConnectStore()
+const { openLoginConnectModal } = useLoginConnectStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {

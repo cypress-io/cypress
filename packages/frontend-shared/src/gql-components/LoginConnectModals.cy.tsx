@@ -7,7 +7,7 @@ import { useLoginConnectStore } from '../store/login-connect-store'
 describe('<LoginConnectModals />', () => {
   context('when user is logged out', () => {
     it('shows login modal', () => {
-      const { setIsLoginConnectOpen } = useLoginConnectStore()
+      const { openLoginConnectModal: openLoginConnectModal } = useLoginConnectStore()
 
       cy.mountFragment(LoginConnectModalsFragmentDoc, {
         onResult: (result) => {
@@ -21,7 +21,7 @@ describe('<LoginConnectModals />', () => {
       cy.contains('Log in to Cypress')
       .should('not.exist')
       .then(() => {
-        setIsLoginConnectOpen(true)
+        openLoginConnectModal({ utmMedium: 'testing' })
 
         cy.contains('Log in to Cypress').should('be.visible')
       })
@@ -30,7 +30,7 @@ describe('<LoginConnectModals />', () => {
 
   context('when user is logged in', () => {
     it('shows correct "Create Project" state if project is not set up', () => {
-      const { setIsLoginConnectOpen } = useLoginConnectStore()
+      const { openLoginConnectModal: openLoginConnectModal } = useLoginConnectStore()
 
       cy.mountFragment(LoginConnectModalsFragmentDoc, {
         onResult: (result) => {
@@ -50,7 +50,7 @@ describe('<LoginConnectModals />', () => {
       cy.contains('Create project')
       .should('not.exist')
       .then(() => {
-        setIsLoginConnectOpen(true)
+        openLoginConnectModal({ utmMedium: 'testing' })
 
         cy.contains('Create project').should('be.visible')
       })

@@ -86,16 +86,12 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
     })
 
-    it('shows "connect project" after login if required by prop, and emits expected events', () => {
+    it('shows "connect project" after login if project is not connected', () => {
       const connectProjectLabel = defaultMessages.runs.connect.modal.selectProject.connectProject
       const connectProjectSpy = cy.spy().as('connectProjectSpy')
       const loggedInSpy = cy.spy().as('loggedInSpy')
-      const updateModelSpy = cy.spy().as('updateModelSpy')
 
       const props = {
-        'onUpdate:modelValue': (value: boolean) => {
-          updateModelSpy(value)
-        },
         'onConnect-project': () => connectProjectSpy(),
       }
 
@@ -125,7 +121,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
       cy.get('@connectProjectSpy').should('have.been.calledOnce')
       cy.get('@loggedInSpy').should('have.been.calledOnce')
-      cy.get('@updateModelSpy').should('have.been.calledOnceWith', false)
     })
   })
 

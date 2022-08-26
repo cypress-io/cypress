@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export interface LoginConnectState {
   isLoginConnectOpen: boolean
+  utmMedium?: string
 }
 
 export const useLoginConnectStore = defineStore({
@@ -10,12 +11,19 @@ export const useLoginConnectStore = defineStore({
   state (): LoginConnectState {
     return {
       isLoginConnectOpen: false,
+      utmMedium: undefined,
     }
   },
 
   actions: {
-    setIsLoginConnectOpen (isOpen: boolean) {
-      this.isLoginConnectOpen = isOpen
+    openLoginConnectModal ({ utmMedium }: { utmMedium: string }) {
+      this.isLoginConnectOpen = true
+      // TODO: type for all valid utm_medium values?
+      this.utmMedium = utmMedium
+    },
+    closeLoginConnectModal () {
+      this.isLoginConnectOpen = false
+      this.utmMedium = undefined
     },
   },
 })

@@ -8,7 +8,7 @@
       v-if="status"
       :gql="props.gql"
       :model-value="!status.isLoggedIn || keepLoginOpen"
-      utm-medium="Runs Tab"
+      :utm-medium="loginConnectStore.utmMedium"
       :show-connect-button-after-login="!status.isProjectConnected"
       @connect-project="handleConnectProject"
       @loggedin="handleLoginSuccess(status.isProjectConnected)"
@@ -45,14 +45,15 @@ const props = defineProps<{
 }>()
 
 const loginConnectStore = useLoginConnectStore()
-const { setIsLoginConnectOpen } = loginConnectStore
+const { closeLoginConnectModal } = loginConnectStore
 
+// keepLoginOpen is only set if you've just logged in
+// and we want to show the "connect" button instead of "continue"
 const keepLoginOpen = ref(true)
 const isCloudConnectOpen = ref(true)
 
 const handleLoginSuccess = (isProjectConnected?: boolean) => {
   if (!isProjectConnected) {
-    // avoid double modals
     keepLoginOpen.value = true
   }
 }
@@ -65,7 +66,7 @@ const handleUpdate = (isProjectConnected?: boolean) => {
     return
   }
 
-  setIsLoginConnectOpen(false)
+  closeLoginConnectModal()
 }
 const handleConnectProject = () => {
   // switch to Connect modal
@@ -73,7 +74,7 @@ const handleConnectProject = () => {
 }
 
 const handleCancelConnect = () => {
-  setIsLoginConnectOpen(false)
+  closeLoginConnectModal()
 }
 
 const handleConnectSuccess = () => {
