@@ -299,14 +299,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return runEvents.execute('after:run', config)
   }
 
-  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
-    debug('got plugins error', err.stack)
-
-    browsers.close()
-
-    options.onError(err)
-  }
-
   initializeReporter ({
     report,
     reporter,

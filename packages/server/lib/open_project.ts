@@ -213,7 +213,7 @@ export class OpenProject {
   close () {
     debug('closing opened project')
 
-    this.closeOpenProjectAndBrowsers()
+    return this.closeOpenProjectAndBrowsers()
   }
 
   changeUrlToSpec (spec: Cypress.Spec) {
