@@ -18,7 +18,7 @@ import utils from './utils'
 import type { Browser } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
-import type { CRIWrapper } from './cri-client'
+import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 
@@ -318,7 +318,7 @@ const _handleDownloads = async function (client, dir, automation) {
 let frameTree
 let gettingFrameTree
 
-const onReconnect = (client: CRIWrapper.Client) => {
+const onReconnect = (client: CriClient) => {
   // if the client disconnects (e.g. due to a computer sleeping), update
   // the frame tree on reconnect in cases there were changes while
   // the client was disconnected
@@ -326,7 +326,7 @@ const onReconnect = (client: CRIWrapper.Client) => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const _updateFrameTree = (client: CRIWrapper.Client, eventName) => async () => {
+const _updateFrameTree = (client: CriClient, eventName) => async () => {
   debug(`update frame tree for ${eventName}`)
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
@@ -431,7 +431,7 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, !!options.experimentalSessionAndOrigin)
 
   return automation.use(cdpAutomation)

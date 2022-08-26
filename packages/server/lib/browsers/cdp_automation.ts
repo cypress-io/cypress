@@ -3,12 +3,17 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+
+export type CdpCommand = keyof ProtocolMapping.Commands
+
+export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -163,9 +168,9 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+type SendDebuggerCommand = (message: CdpCommand, data?: any) => Promise<any>
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
-type OnFn = (eventName: string, cb: Function) => void
+type OnFn = (eventName: CdpEvent, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22

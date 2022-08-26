@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import check from 'check-more-types'
@@ -27,7 +27,7 @@ const kill = function (unbind = true, isProcessExit = false) {
 
   instance = null
 
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     _instance.once('exit', () => {
       if (unbind) {
         _instance.removeAllListeners()
@@ -71,31 +71,23 @@ async function setFocus () {
   }
 }
 
-function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): BrowserLauncher {
+async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): Promise<BrowserLauncher> {
   debug('getBrowserLauncher %o', { browser })
 
-  if (browser.name === 'electron') {
-    return require('./electron') as typeof import('./electron')
-  }
+  if (browser.name === 'electron') return await import('./electron')
 
-  if (browser.family === 'chromium') {
-    return require('./chrome') as typeof import('./chrome')
-  }
+  if (browser.family === 'chromium') return await import('./chrome')
 
-  if (browser.family === 'firefox') {
-    return require('./firefox') as typeof import('./firefox')
-  }
+  if (browser.family === 'firefox') return await import('./firefox')
 
-  if (browser.family === 'webkit') {
-    return require('./webkit') as typeof import('./webkit')
-  }
+  if (browser.family === 'webkit') return await import('./webkit')
 
   return utils.throwBrowserNotFound(browser.name, browsers)
 }
 
 process.once('exit', () => kill(true, true))
 
-exports = {
+export = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
 
   isBrowserFamily,
@@ -129,7 +121,7 @@ exports = {
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
-    const browserLauncher = getBrowserLauncher(browser, options.browsers)
+    const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation)
 
@@ -137,7 +129,7 @@ exports = {
   },
 
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-    const browserLauncher = getBrowserLauncher(browser, options.browsers)
+    const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
     await browserLauncher.connectToNewSpec(browser, options, automation)
@@ -145,73 +137,65 @@ exports = {
     return this.getBrowserInstance()
   },
 
-  open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx) {
-    return kill(true)
-    .then(() => {
-      _.defaults(options, {
-        onBrowserOpen () {},
-        onBrowserClose () {},
-      })
+  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx) {
+    await kill(true)
 
-      ctx.browser.setBrowserStatus('opening')
-
-      const browserLauncher = getBrowserLauncher(browser, options.browsers)
-
-      if (!options.url) throw new Error('Missing url in browsers.open')
-
-      debug('opening browser %o', browser)
-
-      return browserLauncher.open(browser, options.url, options, automation)
-      .then((i) => {
-        debug('browser opened')
-        // TODO: bind to process.exit here
-        // or move this functionality into cypress-core-launder
-
-        i.browser = browser
-
-        instance = i
-
-        // TODO: normalizing opening and closing / exiting
-        // so that there is a default for each browser but
-        // enable the browser to configure the interface
-        instance.once('exit', () => {
-          ctx.browser.setBrowserStatus('closed')
-          // TODO: make this a required property
-          if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
-
-          options.onBrowserClose()
-          instance = null
-        })
-
-        // TODO: instead of waiting an arbitrary
-        // amount of time here we could instead
-        // wait for the socket.io connect event
-        // which would mean that our browser is
-        // completely rendered and open. that would
-        // mean moving this code out of here and
-        // into the project itself
-        // (just like headless code)
-        // ----------------------------
-        // give a little padding around
-        // the browser opening
-        return Promise.delay(1000)
-        .then(() => {
-          if (instance === null) {
-            return null
-          }
-
-          // TODO: make this a required property
-          if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
-
-          options.onBrowserOpen()
-          ctx.browser.setBrowserStatus('open')
-
-          return instance
-        })
-      })
+    _.defaults(options, {
+      onBrowserOpen () {},
+      onBrowserClose () {},
     })
+
+    ctx.browser.setBrowserStatus('opening')
+
+    const browserLauncher = await getBrowserLauncher(browser, options.browsers)
+
+    if (!options.url) throw new Error('Missing url in browsers.open')
+
+    debug('opening browser %o', browser)
+
+    const _instance = await browserLauncher.open(browser, options.url, options, automation)
+
+    debug('browser opened')
+
+    instance = _instance
+    instance.browser = browser
+
+    // TODO: normalizing opening and closing / exiting
+    // so that there is a default for each browser but
+    // enable the browser to configure the interface
+    instance.once('exit', () => {
+      ctx.browser.setBrowserStatus('closed')
+      // TODO: make this a required property
+      if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
+
+      options.onBrowserClose()
+      instance = null
+    })
+
+    // TODO: instead of waiting an arbitrary
+    // amount of time here we could instead
+    // wait for the socket.io connect event
+    // which would mean that our browser is
+    // completely rendered and open. that would
+    // mean moving this code out of here and
+    // into the project itself
+    // (just like headless code)
+    // ----------------------------
+    // give a little padding around
+    // the browser opening
+    await Bluebird.delay(1000)
+
+    if (instance === null) {
+      return null
+    }
+
+    // TODO: make this a required property
+    if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
+
+    options.onBrowserOpen()
+    ctx.browser.setBrowserStatus('open')
+
+    return instance
   },
   setFocus,
 } as const
-
-export = exports

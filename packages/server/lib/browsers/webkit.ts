@@ -19,7 +19,7 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
   await wkAutomation.reset(options.url)
 }
 
-export async function connectToExisting () {
+export function connectToExisting () {
   throw new Error('Cypress-in-Cypress is not supported for WebKit.')
 }
 

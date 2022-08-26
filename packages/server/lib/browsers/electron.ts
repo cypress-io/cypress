@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -41,14 +41,14 @@ const tryToCall = function (win, method) {
 }
 
 const _getAutomation = async function (win, options, parent) {
-  async function sendCommand (method: string, data?: object) {
+  async function sendCommand (method: CdpCommand, data?: object) {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
       .call(win.webContents.debugger, method, data)
     })
   }
 
-  const on = (eventName, cb) => {
+  const on = (eventName: CdpEvent, cb) => {
     win.webContents.debugger.on('message', (event, method, params) => {
       if (method === eventName) {
         cb(params)
@@ -93,7 +93,7 @@ const _getAutomation = async function (win, options, parent) {
   return automation
 }
 
-async function _installExtensions (win: BrowserWindow, extensionPaths: string[], options) {
+function _installExtensions (win: BrowserWindow, extensionPaths: string[], options) {
   Windows.removeAllExtensions(win)
 
   return Promise.all(extensionPaths.map((extensionPath) => {
@@ -500,7 +500,7 @@ export = {
     // https://github.com/cypress-io/cypress/issues/1939
     tryToCall(win, 'focusOnWebView')
 
-    const events = new EE
+    const events = new EE()
 
     win.once('closed', () => {
       debug('closed event fired')
