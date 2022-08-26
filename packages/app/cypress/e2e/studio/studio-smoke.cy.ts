@@ -38,5 +38,24 @@ it('visits a basic html page', () => {
   /* ==== End Cypress Studio ==== */
 })`.trim())
     })
+
+    // Studio re-executes the test after writing it file.
+    // It should pass
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    // Assert the commands we input via Studio are executed.
+    cy.get('.command-name-visit').within(() => {
+      cy.contains('visit')
+      cy.contains('cypress/e2e/index.html')
+    })
+
+    cy.get('.command-name-get').within(() => {
+      cy.contains('get')
+      cy.contains('#increment')
+    })
+
+    cy.get('.command-name-click').within(() => {
+      cy.contains('click')
+    })
   })
 })

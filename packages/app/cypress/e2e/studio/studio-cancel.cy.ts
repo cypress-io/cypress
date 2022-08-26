@@ -30,7 +30,16 @@ describe('Cypress Studio', () => {
     cy.get('a').contains('Cancel').click()
 
     // Cyprss re-runs after you cancel Studio.
-    cy.waitForSpecToFinish()
+    // Original spec should pass
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.get('.command').should('have.length', 1)
+
+    // Assert the spec was executed without any new commands.
+    cy.get('.command-name-visit').within(() => {
+      cy.contains('visit')
+      cy.contains('cypress/e2e/index.html')
+    })
 
     cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
 
