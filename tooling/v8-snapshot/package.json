@@ -24,7 +24,7 @@
     "debug": "^4.1.1",
     "resolve-from": "^5.0.0",
     "source-map-js": "^0.6.2",
-    "terser": "^5.3.2",
+    "terser": "5.12.1",
     "tslib": "^2.0.1",
     "worker-nodes": "^2.3.0"
   },
