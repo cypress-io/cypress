@@ -17,18 +17,12 @@
   },
   "dependencies": {
     "@packages/packherd-require": "0.0.0-development",
-    "@packages/snapbuild": "0.0.0-development",
-    "ansi-colors": "^4.1.1",
     "debug": "^4.1.1",
-    "resolve-from": "^5.0.0",
     "source-map-js": "^0.6.2"
   },
   "devDependencies": {
     "mocha": "7.0.1",
-    "rimraf": "^3.0.2",
-    "snap-shot-it": "7.9.3",
-    "spok": "^1.3.0",
-    "stealthy-require": "^1.1.1"
+    "rimraf": "^3.0.2"
   },
   "files": [
     "dist/*",

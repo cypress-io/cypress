@@ -1315,7 +1315,9 @@ jobs:
       - restore_cached_system_tests_deps
       - unless:
           condition:
-            equal: [ *linux-arm64-executor, << parameters.executor >> ]
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557 
+              - equal: [ *windows-executor, << parameters.executor >> ] # TODO: Figure out how to support windows when we support the windows build: https://github.com/cypress-io/cypress/issues/23122
           steps:
             - run:
                 name: Run v8 integration tests
@@ -1324,13 +1326,16 @@ jobs:
                   DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
       - when:
           condition:
-            equal: [ *linux-arm64-executor, << parameters.executor >> ]
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
+              - equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
                   DEBUG=cypress:snapgen:*,cypress:mksnapshot:*,cypress:snapshot:* yarn test-integration --scope "'@tooling/packherd'"
+      # Windows and arm executors don't support verify-mocha-results
       - unless:
           condition:
             or:

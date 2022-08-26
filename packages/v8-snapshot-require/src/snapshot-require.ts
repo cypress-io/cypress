@@ -164,7 +164,7 @@ function getCaches (sr: Snapshot | undefined, useCache: boolean) {
 }
 
 /**
- * Attempts to extract the souremap embedded in the snapshot
+ * Attempts to extract the sourcemap embedded in the snapshot
  */
 function getSourceMapLookup () {
   // @ts-ignore global snapshotAuxiliaryData
