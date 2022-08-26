@@ -30,7 +30,7 @@ describe('Cypress Studio', () => {
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
-      expect(spec.trim()).to.eq(`
+      expect(spec.trim().replace(/\r/g, '')).to.eq(`
 it('visits a basic html page', () => {
   cy.visit('cypress/e2e/index.html')
   /* ==== Generated with Cypress Studio ==== */
@@ -142,7 +142,7 @@ it('visits a basic html page', () => {
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
-      expect(spec.trim()).to.eq(`
+      expect(spec.trim().replace(/\r/g, '')).to.eq(`
 it('visits a basic html page', () => {
   cy.visit('cypress/e2e/index.html')
   /* ==== Generated with Cypress Studio ==== */
@@ -203,7 +203,7 @@ it('visits a basic html page', () => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
       // No change, since we cancelled.
-      expect(spec.trim()).to.eq(`
+      expect(spec.trim().replace(/\r/g, '')).to.eq(`
 it('visits a basic html page', () => {
   cy.visit('cypress/e2e/index.html')
 })`.trim())

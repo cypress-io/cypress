@@ -57,7 +57,7 @@ function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
       </div>
       <div className='attempt-error-region'>
         <TestError model={model} />
-        {studioActive && <StudioError />}
+        {studioActive && model.state === 'failed' && <StudioError />}
       </div>
     </div>
   )
@@ -84,9 +84,7 @@ class Attempt extends Component<AttemptProps> {
     return (
       <li
         key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.state}`, {
-          'attempt-failed': model.state === 'failed',
-        })}
+        className={cs('attempt-item', `attempt-state-${model.state}`)}
         ref="container"
       >
         <Collapsible
