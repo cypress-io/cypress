@@ -34,7 +34,7 @@ interface AddGlobalListenerOptions {
   randomString: string
 }
 
-const driverToReporterEvents = 'paused session:add'.split(' ')
+const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
@@ -255,7 +255,7 @@ export class EventManager {
       this.saveState(state)
     })
 
-    this.reporterBus.on('clear:session', () => {
+    this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 
       Cypress.backend('clear:session')

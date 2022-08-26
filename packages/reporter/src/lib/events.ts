@@ -72,10 +72,6 @@ const events: Events = {
       runnablesStore.updateLog(log)
     }))
 
-    runner.on('session:add', action('session:add', (props: SessionProps) => {
-      runnablesStore._withTest(props.testId, (test) => test.addSession(props))
-    }))
-
     runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
       runnablesStore.removeLog(log)
     }))
@@ -192,8 +188,8 @@ const events: Events = {
       runner.emit('get:user:editor', cb)
     })
 
-    localBus.on('clear:session', (cb) => {
-      runner.emit('clear:session', cb)
+    localBus.on('clear:all:sessions', (cb) => {
+      runner.emit('clear:all:sessions', cb)
     })
 
     localBus.on('set:user:editor', (editor) => {

@@ -97,6 +97,14 @@ export default class Attempt {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
+        if (props.name === 'session') {
+          console.log(props)
+        }
+
+        if (props.sessionInfo) {
+          this._addSession(props) // add sessionInstrumentPanel details
+        }
+
         return this._addCommand(props as CommandProps)
       }
       case 'agent': {
@@ -115,6 +123,10 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
+      if (props.sessionInfo) {
+        this._updateSession(props) // update sessionInstrumentPanel details
+      }
+
       log.update(props)
     }
   }
@@ -180,7 +192,17 @@ export default class Attempt {
   _addSession (props: SessionProps) {
     const session = new Session(props)
 
-    this.sessions[props.sessionInfo.id] = session
+    this.sessions[props.id] = session
+  }
+
+  _updateSession (props: SessionProps) {
+    const session = this.sessions[props.id]
+
+    if (session) {
+      return session.update(props)
+    }
+
+    this._addSession(props)
   }
 
   _addRoute (props: RouteProps) {

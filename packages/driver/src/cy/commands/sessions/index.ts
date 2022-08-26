@@ -5,7 +5,6 @@ import $stackUtils from '../../../cypress/stack_utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
-  getSessionDetails,
   getConsoleProps,
   navigateAboutBlank,
 } from './utils'
@@ -345,7 +344,10 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
-        sessionInfo: getSessionDetails(existingSession),
+        sessionInfo: {
+          id: existingSession.id,
+          isGlobalSession: false,
+        },
       }
 
       return logGroup(Cypress, groupDetails, (log) => {

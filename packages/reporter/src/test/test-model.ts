@@ -136,10 +136,6 @@ export default class Test extends Runnable {
     })
   }
 
-  addSession (props: SessionProps) {
-    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
-  }
-
   updateLog (props: LogProps) {
     this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)

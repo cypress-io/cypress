@@ -217,7 +217,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(sessionInfo).to.deep.eq({
           id: 'session-1',
-          data: {},
+          isGlobalSession: false,
         })
       })
 

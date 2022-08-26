@@ -7,6 +7,9 @@ import type { TimeoutID } from '../lib/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
+type InterceptStatuses = 'req modified' | 'req + res modified' | 'res modified'
+type XHRStatuses = '---' | '(canceled)' | '(aborted)' | string // string = any xhr status
+
 export interface RenderProps {
   message?: string
   indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
@@ -15,12 +18,14 @@ export interface RenderProps {
     alias?: string
     type: 'function' | 'stub' | 'spy'
   }>
-  status?: string
+  status?: InterceptStatuses | XHRStatuses
   wentToOrigin?: boolean
 }
 
 export interface SessionRenderProps {
+  id: string
   status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
+  isGlobalSession: boolean
 }
 
 export interface CommandProps extends InstrumentProps {
