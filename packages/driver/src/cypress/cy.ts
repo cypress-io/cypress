@@ -550,6 +550,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         setWindowDocumentProps(autWindow, this.state)
 
+        if (this.Cypress.isBrowser('webkit')) {
+          // hackery
+          // https://bugs.webkit.org/show_bug.cgi?id=187822
+          let originalError = autWindow.Error
+
+          autWindow.Error = function (...args) {
+            // (┛ಠ_ಠ)┛彡┻━┻
+            autWindow.queueMicrotask(() => {})
+
+            return originalError.apply(this, args)
+          }
+        }
+
         // we may need to update the url now
         this.urlNavigationEvent('load')
 
