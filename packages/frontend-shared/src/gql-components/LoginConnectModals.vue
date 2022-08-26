@@ -5,16 +5,18 @@
     :gql="props.gql"
   >
     <LoginModal
+      v-if="status"
       :gql="props.gql"
-      :model-value="!status?.isLoggedIn || keepLoginOpen"
+      :model-value="!status.isLoggedIn || keepLoginOpen"
       utm-medium="Runs Tab"
-      :show-connect-button-after-login="!status?.isProjectConnected"
+      :show-connect-button-after-login="!status.isProjectConnected"
       @connect-project="handleConnectProject"
-      @success="handleLoginSuccess"
+      @loggedin="handleLoginSuccess(status.isProjectConnected)"
+      @update:model-value="handleUpdate(status.isProjectConnected)"
     />
     <CloudConnectModals
-      v-if="status?.isLoggedIn"
-      :show="status?.isLoggedIn"
+      v-if="status?.isLoggedIn && !keepLoginOpen"
+      :show="status?.isLoggedIn && isCloudConnectOpen"
       :gql="props.gql"
       @cancel="handleCancelConnect"
       @success="handleConnectSuccess"
@@ -42,27 +44,40 @@ const props = defineProps<{
   gql: LoginConnectModalsFragment
 }>()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const keepLoginOpen = ref(false)
+const loginConnectStore = useLoginConnectStore()
+const { setIsLoginConnectOpen } = loginConnectStore
 
-const handleLoginSuccess = () => {
-  keepLoginOpen.value = true
+const keepLoginOpen = ref(true)
+const isCloudConnectOpen = ref(true)
+
+const handleLoginSuccess = (isProjectConnected?: boolean) => {
+  if (!isProjectConnected) {
+    // avoid double modals
+    keepLoginOpen.value = true
+  }
+}
+
+const handleUpdate = (isProjectConnected?: boolean) => {
+  if (!isProjectConnected) {
+    // avoid double modals
+    keepLoginOpen.value = true
+
+    return
+  }
+
+  setIsLoginConnectOpen(false)
 }
 const handleConnectProject = () => {
   // switch to Connect modal
+  keepLoginOpen.value = false
 }
 
 const handleCancelConnect = () => {
-
+  setIsLoginConnectOpen(false)
 }
 
 const handleConnectSuccess = () => {
   // isProjectConnectOpen = false; emit('success')
 }
-
-const loginConnectStore = useLoginConnectStore()
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { setIsLoginConnectOpen } = loginConnectStore
 
 </script>
