@@ -488,10 +488,6 @@ class Command extends Component<Props> {
 
     const { model, events } = this.props
 
-    if (!model.isStudio) {
-      return
-    }
-
     events.emit('studio:remove:command', model.number)
   }
 }

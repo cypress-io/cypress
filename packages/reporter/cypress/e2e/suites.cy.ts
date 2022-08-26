@@ -1,11 +1,20 @@
+import { MobxRunnerStore } from '@packages/app/src/store'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+
+const runnerStore = new MobxRunnerStore('e2e')
+
+runnerStore.setSpec({
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+})
 
 describe('suites', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  beforeEach(() => {
+  function renderReporter ({ studioEnabled }: { studioEnabled?: boolean } = {}) {
     cy.fixture('runnables').then((_runnables) => {
       runnables = _runnables
     })
@@ -15,14 +24,8 @@ describe('suites', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        studioEnabled: true,
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
+        studioEnabled: studioEnabled || false,
+        runnerStore,
       })
     })
 
@@ -30,6 +33,10 @@ describe('suites', () => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
     })
+  }
+
+  beforeEach(() => {
+    renderReporter()
   })
 
   it('includes the class "suite"', () => {
@@ -131,6 +138,10 @@ describe('suites', () => {
   })
 
   describe('studio button', () => {
+    beforeEach(() => {
+      renderReporter({ studioEnabled: true })
+    })
+
     it('displays studio icon with half transparency when hovering over test title', () => {
       cy.contains('nested suite 1')
       .closest('.runnable-wrapper')
