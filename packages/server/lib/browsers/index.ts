@@ -106,7 +106,6 @@ export = {
   },
 
   // note: does not guarantee that `browser` is still running
-  // note: electron will return a list of pids for each webContent
   getBrowserInstance () {
     return instance
   },
@@ -120,7 +119,7 @@ export = {
     return utils.getBrowsers()
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation)
@@ -128,7 +127,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
@@ -137,7 +136,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx) {
+  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
     await kill(true)
 
     _.defaults(options, {

@@ -533,11 +533,11 @@ function waitForBrowserToConnect (options: { project: Project, socketId: string,
   const wait = () => {
     debug('waiting for socket to connect and browser to launch...')
 
-    return Bluebird.join(
+    return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type
       launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
-    )
+    ])
     .timeout(browserTimeout)
     .catch(Bluebird.TimeoutError, async (err) => {
       attempts += 1
