@@ -1,12 +1,12 @@
 import {
-  Rule, Tree, SchematicsException,
-  apply, url, applyTemplates, move,
-  chain, mergeWith,
+  Rule, Tree, SchematicsException, chain, mergeWith,
 } from '@angular-devkit/schematics'
 
-import { strings, normalize, virtualFs, workspaces } from '@angular-devkit/core'
+import { virtualFs, workspaces } from '@angular-devkit/core'
 
 import { Schema } from './schema'
+
+import { createTemplate } from '../../utils'
 
 function createSpec (tree: Tree): workspaces.WorkspaceHost {
   return {
@@ -35,6 +35,7 @@ export default function (options: Schema): Rule {
   return async (tree: Tree) => {
     const host = createSpec(tree)
     const { workspace } = await workspaces.readWorkspace('/', host)
+    const testType = options.component ? 'component' : 'e2e'
 
     let project
 
@@ -53,17 +54,13 @@ export default function (options: Schema): Rule {
     }
 
     if (options.path === undefined) {
-      options.path = `${project.root}/cypress/e2e`
+      options.path = testType === 'component' ? `${project.sourceRoot}/${project.prefix}` : `${project.root}/cypress/e2e`
     }
 
-    const templateSource = apply(url('../files/__path__'), [
-      applyTemplates({
-        classify: strings.classify,
-        dasherize: strings.dasherize,
-        name: options.name,
-      }),
-      move(normalize(options.path as string)),
-    ])
+    console.log(`Creating new ${testType} spec named: ${options.name}`)
+
+    const templatePath = testType === 'component' ? '../files/ct/__path__' : '../files/e2e/__path__'
+    const templateSource = createTemplate({ templatePath, options })
 
     return chain([
       mergeWith(templateSource),

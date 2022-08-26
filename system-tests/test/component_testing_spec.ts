@@ -123,6 +123,14 @@ describe(`Angular CLI major versions`, () => {
       expectedExitCode: 0,
     })
   }
+
+  systemTests.it('angular 14 custom config', {
+    project: 'angular-custom-config',
+    spec: 'src/app/my-component.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 describe('svelte component testing', () => {
