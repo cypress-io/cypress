@@ -127,8 +127,9 @@
             <SpecsListCloudButton
               v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
               :gql="props.gql"
-              @showLogin="showLogin('Specs Latest Runs Column')"
+              @showLogin="showLogin('Specs List Column Button')"
               @showConnectToProject="showConnectToProject"
+              @request-access="requestAccess(props.gql?.currentProject?.projectId)"
             />
           </template>
 
@@ -211,6 +212,7 @@ import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
+import { useRequestAccess } from '../composables/useRequestAccess'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -242,6 +244,8 @@ const showLogin = (utmMedium: string) => {
 const showConnectToProject = () => {
   isProjectConnectOpen.value = true
 }
+
+const requestAccess = useRequestAccess()
 
 const isGitAvailable = computed(() => {
   return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)

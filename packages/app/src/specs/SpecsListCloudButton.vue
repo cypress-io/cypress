@@ -2,10 +2,10 @@
   <Button
     v-if="!!buttonOptions.text"
     data-cy="cloud-button"
-    variant="link"
+    variant="linkBold"
     :prefix-icon="buttonOptions.icon"
     :disabled="!buttonOptions.emits"
-    prefix-icon-class="icon-light-indigo-500 icon-dark-indigo-500"
+    prefix-icon-class="icon-light-indigo-100 icon-dark-indigo-500"
     @click.stop.prevent="handleClick"
   >
     {{ buttonOptions.text }}
