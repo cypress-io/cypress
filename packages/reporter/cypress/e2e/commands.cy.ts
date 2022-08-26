@@ -957,7 +957,6 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
   context('studio commands', () => {
     beforeEach(() => {
       addCommand(runner, {

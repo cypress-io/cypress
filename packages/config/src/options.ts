@@ -226,7 +226,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    requireRestartOnChange: 'server',
+    requireRestartOnChange: 'browser',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',

@@ -20,7 +20,7 @@ import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
-interface BaseReporterProps {
+export interface BaseReporterProps {
   appState: AppState
   className?: string
   runnablesStore: RunnablesStore
@@ -151,7 +151,7 @@ if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
     // @ts-ignore
-    render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
+    render(<Reporter {...props as Required<BaseReporterProps>} />, document.getElementById('app'))
   }
 }
 
