@@ -27,6 +27,12 @@ describe('e2e stdout', () => {
       snapshot: true,
       spec: 'stdout_failing.cy.js',
       expectedExitCode: 3,
+      onStdout: (stdout) => {
+        // assert stack trace line numbers/columns mirror source map
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:7:13)')
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:15:10)')
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:27:10)')
+      },
     })
   })
 
