@@ -1925,8 +1925,7 @@ describe.skip('network stubbing', function () {
         })
 
         context('throwing errors correctly', () => {
-          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23423
-          it.skip('defineproperty', (done) => {
+          it('defineproperty', (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`defineProperty()` is not allowed.')
 
@@ -1934,6 +1933,10 @@ describe.skip('network stubbing', function () {
             })
 
             cy.intercept({ url: '/users*' }, (req) => {
+              req.reply({
+                statusCode: 200, // set response code so browser doesn't retry
+              })
+
               Object.defineProperty(req.query, 'key', {
                 enumerable: false,
                 configurable: false,
@@ -1950,12 +1953,9 @@ describe.skip('network stubbing', function () {
               xhr.open('GET', '/users?someKey=someValue')
               xhr.send()
             })
-
-            cy.wait('@getUrl')
           })
 
-          // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23147
-          it.skip('setPrototypeOf', (done) => {
+          it('setPrototypeOf', (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
 
@@ -1963,6 +1963,10 @@ describe.skip('network stubbing', function () {
             })
 
             cy.intercept({ url: '/users*' }, (req) => {
+              req.reply({
+                statusCode: 200, // set response code so browser doesn't retry
+              })
+
               Object.setPrototypeOf(req.query, null)
 
               expect(req.query).to.deep.eq({})
@@ -1974,8 +1978,6 @@ describe.skip('network stubbing', function () {
               xhr.open('GET', '/users?someKey=someValue')
               xhr.send()
             })
-
-            cy.wait('@getUrl')
           })
         })
       })
@@ -2492,7 +2494,8 @@ describe.skip('network stubbing', function () {
 
         const err = new Error('bar')
 
-        cy.intercept(url, () => {
+        cy.intercept(url, (req) => {
+          req.reply({ statusCode: 200 }) // set response code so browser doesn't retry
           throw err
         }).visit(url)
       })
@@ -2523,7 +2526,9 @@ describe.skip('network stubbing', function () {
 
         Cypress.config('defaultCommandTimeout', 50)
 
-        cy.intercept(url, () => {
+        cy.intercept(url, (res) => {
+          res.reply({ statusCode: 200 }) // set response code so browser doesn't retry
+
           return Promise.delay(200)
         }).visit(url)
       })
