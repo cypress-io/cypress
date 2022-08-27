@@ -26,8 +26,9 @@
 </template>
 <script setup lang="ts">
 import CloudViewerAndProject from './CloudViewerAndProject.vue'
-import { gql } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import type { LoginConnectModalsFragment } from '../generated/graphql'
+import { LoginConnectModals_CloudConnectModalsQueryDocument } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
 import { ref } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
@@ -40,6 +41,14 @@ fragment LoginConnectModals on Query {
 ...CloudConnectModals
 }
 `
+
+gql`
+query LoginConnectModals_CloudConnectModalsQuery {
+  ...CloudConnectModals
+}
+`
+
+const cloudModalQuery = useQuery({ query: LoginConnectModals_CloudConnectModalsQueryDocument, pause: true })
 
 const props = defineProps<{
   gql: LoginConnectModalsFragment
@@ -59,7 +68,7 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
   }
 }
 
-const handleUpdate = (isProjectConnected?: boolean, error: boolean) => {
+const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
   if (error) {
     // always allow close if there is an error
     closeLoginConnectModal()
@@ -74,7 +83,8 @@ const handleUpdate = (isProjectConnected?: boolean, error: boolean) => {
 
   closeLoginConnectModal()
 }
-const handleConnectProject = () => {
+const handleConnectProject = async () => {
+  await cloudModalQuery.executeQuery()
   // switch to Connect modal
   keepLoginOpen.value = false
 }

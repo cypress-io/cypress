@@ -16,7 +16,6 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
-      @connect-project="handleConnectProject"
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
@@ -66,9 +65,9 @@ import Spinner from '@cy/components/Spinner.vue'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
-import { MainApp_CloudConnectModalsQueryDocument, MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
 gql`
 fragment MainAppQueryData on Query {
@@ -92,22 +91,12 @@ query MainAppQuery {
 `
 
 gql`
-query MainApp_CloudConnectModalsQuery {
-  ...CloudConnectModals
-}
-`
-
-gql`
 mutation MainApp_ResetErrorsAndLoadConfig($id: ID!) {
   resetErrorAndLoadConfig(id: $id) {
     ...MainAppQueryData
   }
 }
 `
-
-const showConnectDialog = ref(false)
-
-const cloudModalQuery = useQuery({ query: MainApp_CloudConnectModalsQueryDocument, pause: true })
 
 const currentRoute = useRoute()
 
@@ -128,10 +117,5 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
-
-async function handleConnectProject () {
-  await cloudModalQuery.executeQuery()
-  showConnectDialog.value = true
-}
 
 </script>
