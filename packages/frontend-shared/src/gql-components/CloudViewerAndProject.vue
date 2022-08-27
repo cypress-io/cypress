@@ -27,6 +27,9 @@ fragment CloudViewerAndProject on Query {
     fullName
     email
   }
+  authState {
+    name
+  }
   currentProject {
     id
     projectId
@@ -72,8 +75,9 @@ const status = computed(() => {
   const isMemberOfOrganization = (props.gql.cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
   const isProjectConnected = !!props.gql.currentProject?.projectId && props.gql.currentProject.cloudProject?.__typename === 'CloudProject'
   const hasNoRecordedRuns = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && (props.gql.currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0
+  const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(props.gql.authState?.name ?? '')
 
-  return { isLoggedIn, isOrganizationLoaded, isMemberOfOrganization, isProjectConnected, hasNoRecordedRuns }
+  return { isLoggedIn, isOrganizationLoaded, isMemberOfOrganization, isProjectConnected, hasNoRecordedRuns, error }
 })
 
 const userData = computed(() => {

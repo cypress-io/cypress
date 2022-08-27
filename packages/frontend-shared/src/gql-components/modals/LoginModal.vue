@@ -133,7 +133,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
-  utmMedium: string
+  utmMedium?: string
   showConnectButtonAfterLogin?: boolean
 }>()
 

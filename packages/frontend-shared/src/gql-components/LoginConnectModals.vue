@@ -11,8 +11,9 @@
       :utm-medium="loginConnectStore.utmMedium"
       :show-connect-button-after-login="!status.isProjectConnected"
       @connect-project="handleConnectProject"
+      @cancel="closeLoginConnectModal"
       @loggedin="handleLoginSuccess(status.isProjectConnected)"
-      @update:model-value="handleUpdate(status.isProjectConnected)"
+      @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
     />
     <CloudConnectModals
       v-if="status?.isLoggedIn && !keepLoginOpen"
@@ -58,7 +59,12 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
   }
 }
 
-const handleUpdate = (isProjectConnected?: boolean) => {
+const handleUpdate = (isProjectConnected?: boolean, error: boolean) => {
+  if (error) {
+    // always allow close if there is an error
+    closeLoginConnectModal()
+  }
+
   if (!isProjectConnected) {
     // avoid double modals
     keepLoginOpen.value = true
