@@ -28,7 +28,7 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 children:font-medium children:text-gray-800"
+      class="mb-4 grid children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
       :class="[tableGridColumns]"
     >
@@ -226,7 +226,7 @@ const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
-const tableGridColumns: string = 'grid grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
+const tableGridColumns: string = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)

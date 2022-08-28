@@ -23,58 +23,46 @@
         >
           <slot name="git-info" />
         </div>
-        <div
-          ref="cloudColumnLatestRuns"
+        <SpecsListHoverCell
           data-cy="specs-list-row-latest-runs"
-          class="relative"
+          :is-hover-disabled="hasRuns"
         >
-          <slot
-            v-if="!shouldShowHoverButtonRuns"
-            name="latest-runs"
-          />
-          <div
-            v-if="shouldShowHoverButtonRuns"
-            ref="connectButtonRuns"
-            class="inset-y-1 right-0 absolute"
-          >
+          <template #content>
+            <slot name="latest-runs" />
+          </template>
+          <template #hover>
             <slot
               name="connect-button"
               :utmMedium="'Specs Latest Runs Empty State'"
             />
-          </div>
-        </div>
-        <div
-          ref="cloudColumnAverageDuration"
+          </template>
+        </SpecsListHoverCell>
+        <SpecsListHoverCell
           data-cy="specs-list-row-average-duration"
-          class="relative hidden md:block"
+          :is-hover-disabled="hasRuns"
         >
-          <slot
-            v-if="!shouldShowHoverButtonDuration"
-            name="average-duration"
-          />
-          <div
-            v-if="shouldShowHoverButtonDuration"
-            ref="connectButtonDuration"
-            class="inset-y-1 right-0 absolute"
-          >
+          <template #content>
+            <slot name="average-duration" />
+          </template>
+          <template #hover>
             <slot
               name="connect-button"
               :utmMedium="'Specs Average Duration Empty State'"
             />
-          </div>
-        </div>
+          </template>
+        </SpecsListHoverCell>
       </template>
     </component>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { Ref } from 'vue'
-import { useTimeout, useTimeoutFn, useElementHover } from '@vueuse/core'
+import SpecsListHoverCell from './SpecsListHoverCell.vue'
+
+import { useTimeout } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router'
 
-const props = defineProps<{
+defineProps<{
   isLeaf: boolean
   route?: RouteLocationRaw
   hasRuns?: boolean
@@ -91,56 +79,5 @@ function handleCtrlClick (): void {
   // noop intended to reduce the chances of opening tests multiple tabs
   // which is not a supported state in Cypress
 }
-
-const cloudColumnLatestRuns = ref()
-const cloudColumnAverageDuration = ref()
-const connectButtonRuns = ref()
-const connectButtonDuration = ref()
-
-const shouldShowHoverButtonRuns = ref(false)
-const shouldShowHoverButtonDuration = ref(false)
-
-const isHoveredLatestRuns = useElementHover(cloudColumnLatestRuns)
-const isHoveredAverageDuration = useElementHover(cloudColumnAverageDuration)
-const isHoveredConnectButtonRuns = useElementHover(connectButtonRuns)
-const isHoveredConnectButtonDuration = useElementHover(connectButtonDuration)
-
-function createWatchFunction (
-  isColumnHovered: Ref<boolean>,
-  isButtonHovered: Ref<boolean>,
-  shouldShowButton: Ref<boolean>,
-) {
-  let controls
-
-  return () => {
-    if (props.hasRuns) {
-      return
-    }
-
-    if (controls) {
-      controls.stop()
-    }
-
-    if (isButtonHovered.value) {
-      isColumnHovered.value = false
-    }
-
-    if (isColumnHovered.value || isButtonHovered.value) {
-      if (shouldShowButton.value) return
-
-      controls = useTimeoutFn(() => {
-        shouldShowButton.value = true
-      }, 200)
-    } else if (!isColumnHovered.value && !isButtonHovered.value) {
-      shouldShowButton.value = false
-    }
-  }
-}
-
-watch([isHoveredLatestRuns, isHoveredConnectButtonRuns],
-  createWatchFunction(isHoveredLatestRuns, isHoveredConnectButtonRuns, shouldShowHoverButtonRuns))
-
-watch([isHoveredAverageDuration, isHoveredConnectButtonDuration],
-  createWatchFunction(isHoveredAverageDuration, isHoveredConnectButtonDuration, shouldShowHoverButtonDuration))
 
 </script>
