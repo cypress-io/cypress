@@ -26,7 +26,6 @@ export interface ErrProps {
   name: string
   message: string
   stack: string
-  sourceMappedStack: string
   parsedStack: ParsedStackLine[]
   docsUrl: string | string[]
   templateType: string
@@ -37,7 +36,6 @@ export default class Err {
   @observable name = ''
   @observable message = ''
   @observable stack = ''
-  @observable sourceMappedStack = ''
   @observable.ref parsedStack: ParsedStackLine[] | null = null
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
