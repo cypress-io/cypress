@@ -118,7 +118,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.closeActiveProject()
       },
       getCurrentBrowser () {
-        return (openProject?.projectBase?.browser) ?? undefined
+        return (openProject?.getProject()?.browser) ?? undefined
       },
       getConfig () {
         return openProject.getConfig()
