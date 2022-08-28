@@ -40,6 +40,7 @@
         <SpecsListHoverCell
           data-cy="specs-list-row-average-duration"
           :is-hover-disabled="hasRuns"
+          class="hidden md:block"
         >
           <template #content>
             <slot name="average-duration" />

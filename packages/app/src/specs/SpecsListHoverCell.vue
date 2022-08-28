@@ -1,7 +1,7 @@
 <template>
   <div
     ref="columnRef"
-    class="relative hidden md:block"
+    class="relative"
   >
     <slot
       v-if="!shouldShowHover"
