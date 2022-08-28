@@ -28,6 +28,16 @@ function mountWithRuns (runs: Required<CloudSpecRun>[]) {
   })
 }
 
+function mountWithNoData () {
+  cy.mount(() => {
+    return (
+      <div class="flex justify-center">
+        <RunStatusDots gql={null} specFileExtension=".cy.ts" specFileName="spec"/>
+      </div>
+    )
+  })
+}
+
 describe('<RunStatusDots />', () => {
   context('runs scenario 1', () => {
     beforeEach(() => {
@@ -100,6 +110,18 @@ describe('<RunStatusDots />', () => {
   context('no runs', () => {
     beforeEach(() => {
       mountWithRuns([])
+    })
+
+    it('renders placeholder without tooltip or link', () => {
+      cy.findByTestId('external').should('not.exist')
+      cy.findByTestId('run-status-dots').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').should('not.exist')
+    })
+  })
+
+  context('runs not loaded', () => {
+    beforeEach(() => {
+      mountWithNoData()
     })
 
     it('renders placeholder without tooltip or link', () => {
