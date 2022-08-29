@@ -264,6 +264,11 @@ class $Cypress {
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
 
+    this.backend('get:cached:test:state')
+    .then((cachedTestState: Record<string, any>) => {
+      this.state(cachedTestState)
+    })
+
     return this.action('cypress:config', config)
   }
 
@@ -704,8 +709,8 @@ class $Cypress {
     }
   }
 
-  backend (eventName, ...args) {
-    return new Promise((resolve, reject) => {
+  backend (eventName, ...args): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
 
