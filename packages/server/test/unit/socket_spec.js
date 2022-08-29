@@ -756,7 +756,7 @@ describe('lib/socket', () => {
           global: { id: 'global' },
         }
 
-        state.localSessions = {
+        state.specSessions = {
           local: { id: 'local' },
         }
 
