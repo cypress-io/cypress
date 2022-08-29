@@ -226,7 +226,7 @@ const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
-const tableGridColumns: string = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
+const tableGridColumns = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
 
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
@@ -435,7 +435,7 @@ const { refetchFailedCloudData } = useCloudSpecData(
 
 const hasRuns = ref(false)
 
-watch([list], () => hasRuns.value = false)
+watch(list, () => hasRuns.value = false)
 
 function refreshPage () {
   location.reload()

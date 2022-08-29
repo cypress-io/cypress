@@ -30,7 +30,7 @@
  */
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useTimeoutFn, useElementHover } from '@vueuse/core'
+import { useTimeoutFn, useElementHover, Stoppable } from '@vueuse/core'
 
 const props = defineProps<{
   isHoverDisabled?: boolean
@@ -44,7 +44,7 @@ const shouldShowHover = ref(false)
 const isHoveredColumn = useElementHover(columnRef)
 const isHoveredItem = useElementHover(hoveredItem)
 
-let controls
+let controls: Stoppable
 
 watch([isHoveredColumn, isHoveredItem], () => {
   if (props.isHoverDisabled) {
