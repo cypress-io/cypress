@@ -341,8 +341,8 @@ class Command extends Component<Props> {
               <span className='command-controls'>
                 {isSessionCommand && (
                   <Tag
-                    content={model.renderProps.status}
-                    type={`${model.renderProps.status === 'failed' ? 'failed' : 'successful'}-status`}
+                    content={model.sessionInfo?.status}
+                    type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
                   />
                 )}
                 {!model.visible && (

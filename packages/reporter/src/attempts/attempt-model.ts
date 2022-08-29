@@ -97,12 +97,9 @@ export default class Attempt {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
-        if (props.name === 'session') {
-          console.log(props)
-        }
-
+        // @ts-ignore satisfied by CommandProps
         if (props.sessionInfo) {
-          this._addSession(props) // add sessionInstrumentPanel details
+          this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
         }
 
         return this._addCommand(props as CommandProps)
@@ -123,8 +120,9 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
+      // @ts-ignore satisfied by CommandProps
       if (props.sessionInfo) {
-        this._updateSession(props) // update sessionInstrumentPanel details
+        this._updateSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
       }
 
       log.update(props)

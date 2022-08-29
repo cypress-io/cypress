@@ -56,6 +56,7 @@ const Sessions = ({ model }: SessionPanelProps) => {
         <Collapsible
           header={<>Sessions <i style={{ textTransform: 'none' }}>({sessions.length})</i></>}
           headerClass='hook-header'
+          isOpen
           headerExtras={
             <div
               className="clear-sessions"
@@ -66,9 +67,7 @@ const Sessions = ({ model }: SessionPanelProps) => {
           }
           contentClass='instrument-content session-content'
         >
-          <div>
-            {sessions.map((session) => <SessionRow key={session.id} {...session} />)}
-          </div>
+          {sessions.map((session) => (<SessionRow key={session.id} {...session} />))}
         </Collapsible>
       </li>
     </ul>

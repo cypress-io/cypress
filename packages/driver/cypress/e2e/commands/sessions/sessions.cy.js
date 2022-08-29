@@ -173,7 +173,9 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[0].get()).to.deep.contain({
           name: 'session',
           id: sessionGroupId,
-          renderProps: {
+          sessionInfo: {
+            id: 'session-1',
+            isGlobalSession: false,
             status: 'created',
           },
         })
@@ -218,6 +220,7 @@ describe('cy.session', { retries: 0 }, () => {
         expect(sessionInfo).to.deep.eq({
           id: 'session-1',
           isGlobalSession: false,
+          status: 'created',
         })
       })
 
@@ -233,11 +236,13 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('create session with validation flow', () => {
+      let sessionId
+
       before(() => {
         setupTestContext()
         cy.log('Creating new session with validation to test against')
-
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        sessionId = `session-${Cypress.state('test').id}`
+        cy.session(sessionId, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -252,7 +257,9 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[0].get()).to.deep.contain({
           name: 'session',
           id: sessionGroupId,
-          renderProps: {
+          sessionInfo: {
+            id: sessionId,
+            isGlobalSession: false,
             status: 'created',
           },
         })
@@ -317,7 +324,9 @@ describe('cy.session', { retries: 0 }, () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
             id: sessionGroupId,
-            renderProps: {
+            sessionInfo: {
+              id: `session-${Cypress.state('test').id}`,
+              isGlobalSession: false,
               status: 'failed',
             },
           })
@@ -372,17 +381,20 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('restores saved session flow', () => {
+      let sessionId
+
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session(`session-${Cypress.state('test').id}`, setup)
+        sessionId = `session-${Cypress.state('test').id}`
+        cy.session(sessionId, setup)
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session(`session-${Cypress.state('test').id}`, setup)
+        cy.session(sessionId, setup)
         cy.url().should('eq', 'about:blank')
       })
 
@@ -401,7 +413,9 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[0].get()).to.deep.contain({
           name: 'session',
           id: sessionGroupId,
-          renderProps: {
+          sessionInfo: {
+            id: sessionId,
+            isGlobalSession: false,
             status: 'restored',
           },
         })
@@ -431,17 +445,20 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('restores saved session with validation flow', () => {
+      let sessionId
+
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        sessionId = `session-${Cypress.state('test').id}`
+        cy.session(sessionId, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
         })
 
         cy.log('restore session to test against')
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        cy.session(sessionId, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -460,7 +477,9 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[0].get()).to.deep.contain({
           name: 'session',
           id: sessionGroupId,
-          renderProps: {
+          sessionInfo: {
+            id: sessionId,
+            isGlobalSession: false,
             status: 'restored',
           },
         })
@@ -502,10 +521,13 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('recreates existing session flow', () => {
+      let sessionId
+
       before(() => {
         setupTestContext()
         cy.log('Creating new session for test')
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        sessionId = `session-${Cypress.state('test').id}`
+        cy.session(sessionId, setup, { validate })
         .then(() => {
           // reset and only test restored session
           resetMocks()
@@ -517,7 +539,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.log('restore session to test against')
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        cy.session(sessionId, setup, { validate })
         cy.url().should('eq', 'about:blank')
       })
 
@@ -536,7 +558,9 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[0].get()).to.deep.contain({
           name: 'session',
           id: sessionGroupId,
-          renderProps: {
+          sessionInfo: {
+            id: sessionId,
+            isGlobalSession: false,
             status: 'recreated',
           },
         })
@@ -649,7 +673,9 @@ describe('cy.session', { retries: 0 }, () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
             id: sessionGroupId,
-            renderProps: {
+            sessionInfo: {
+              id: `session-${Cypress.state('test').id}`,
+              isGlobalSession: false,
               status: 'failed',
             },
           })
