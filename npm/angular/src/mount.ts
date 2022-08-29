@@ -13,6 +13,7 @@ import {
   ComponentFixture,
   getTestBed,
   TestModuleMetadata,
+  TestBed,
 } from '@angular/core/testing'
 import {
   BrowserDynamicTestingModule,
@@ -171,7 +172,9 @@ function createComponentFixture<T> (
   component: Type<T> | string,
 ): Type<T | WrapperComponent> {
   if (typeof component === 'string') {
-    getTestBed().overrideTemplate(WrapperComponent, component)
+    // getTestBed().overrideTemplate is available in v14+
+    // The static TestBed.overrideTemplate is available across versions
+    TestBed.overrideTemplate(WrapperComponent, component)
 
     return WrapperComponent
   }
