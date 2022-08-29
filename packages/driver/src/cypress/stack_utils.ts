@@ -347,13 +347,7 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
 }
 
 const reconstructStack = (parsedStack) => {
-  // Actual stack trace begins after messages printed by Cypress
-  // Get beginning of stack trace by finding first line with `function` property
-  const startIndex = parsedStack.findIndex((parsedLine) => Boolean(parsedLine.function))
-
-  return parsedStack
-  .slice(startIndex)
-  .map((parsedLine) => {
+  return _.map(parsedStack, (parsedLine) => {
     if (parsedLine.message != null) {
       return `${parsedLine.whitespace}${parsedLine.message}`
     }
