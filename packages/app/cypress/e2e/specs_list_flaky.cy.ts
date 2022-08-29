@@ -14,14 +14,7 @@ describe('App: Spec List - Flaky Indicator', () => {
 
     cy.remoteGraphQLIntercept(async (obj) => {
       await new Promise((r) => setTimeout(r, 20))
-      if (obj.result.data && 'cloudProjectBySlug' in obj.result.data) {
-        obj.result.data.cloudProjectBySlug = {
-          __typename: 'CloudProject',
-          retrievedAt: new Date().toISOString(),
-          id: `id${obj.variables.slug}`,
-          projectId: 'abc123',
-        }
-      } else if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
+      if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
         if (obj.variables.specPath.includes('123.spec.js')) {
           obj.result.data.cloudSpecByPath = {
             __typename: 'CloudProjectSpec',

@@ -184,6 +184,27 @@
       "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
       "explainer2": "Please refresh the page to try again and visit our {0} if this behavior continues.",
       "refreshButton": "Try again"
+    },
+    "banners": {
+      "login": {
+        "title": "Optimize and record your CI test runs with Cypress Dashboard",
+        "content": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
+        "buttonLabel": "Get started with Cypress Dashboard"
+      },
+      "createOrganization": {
+        "title": "Finish setting up Cypress Dashboard",
+        "content": "Join or create an organization in Cypress Dashboard to access your projects and recorded test runs.",
+        "buttonLabel": "Set up your organization"
+      },
+      "connectProject": {
+        "title": "Connect your project to Cypress Dashboard",
+        "content": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "buttonLabel": "Connect your project"
+      },
+      "record": {
+        "title": "Record your first run",
+        "content": "Record a run to see your test results in Cypress Dashboard. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+      }
     }
   },
   "noResults": {

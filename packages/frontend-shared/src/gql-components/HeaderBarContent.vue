@@ -166,7 +166,7 @@
 
 <script setup lang="ts">
 import { gql, useMutation, useSubscription } from '@urql/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
@@ -181,6 +181,7 @@ import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
+import type { AllowedState } from '@packages/types'
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -247,7 +248,7 @@ const userData = computed(() => {
 })
 
 const savedState = computed(() => {
-  return props.gql?.currentProject?.savedState
+  return props.gql?.currentProject?.savedState as AllowedState
 })
 
 const currentProject = computed(() => props.gql.currentProject)
@@ -299,7 +300,20 @@ const prompts = sortBy([
   },
 ], 'interval')
 const isForceOpenAllowed = ref(true)
+const isOpenDelayElapsed = ref(false)
+
+onMounted(() => {
+  setTimeout(() => isOpenDelayElapsed.value = true, 2000)
+})
+
 const isShowablePromptInSavedState = computed(() => {
+  // We do not want to show a prompt if a banner is going to be shown, but some banners rely on cloud data
+  // getting loaded before deciding whether to display. Add a delay here of a few seconds to give banners
+  // a chance to display before deciding whether to show a prompt.
+  if (!isOpenDelayElapsed.value) {
+    return false
+  }
+
   if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
@@ -318,8 +332,9 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   }
 
   const now = Date.now()
-  const timeSinceOpened = now - savedState.value?.firstOpened
+  const timeSinceOpened = now - (savedState.value?.firstOpened ?? now)
   const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => typeof banner === 'object' && banner?.lastShown).filter((val): val is number => !!val)
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
@@ -328,6 +343,11 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // any other prompt has been shown in the last 24 hours
   if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+    return false
+  }
+
+  // If any tracked banners have been shown in the last 24 hours
+  if (bannersLastShown.some((bannerLastShown) => (now - bannerLastShown) < interval('24 hours'))) {
     return false
   }
 

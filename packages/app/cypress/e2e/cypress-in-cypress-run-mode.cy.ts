@@ -30,7 +30,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23306
@@ -61,7 +61,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('hides reporter when NO_COMMAND_LOG is set in run mode', () => {

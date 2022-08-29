@@ -547,7 +547,7 @@ describe('App Top Nav Workflows', () => {
             cy.contains('button', loginText.actionCancel).should('be.visible')
           })
 
-          cy.percySnapshot()
+          // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.withCtx((ctx) => {
             (ctx._apis.authApi.logIn as SinonStub).callsFake(async (onMessage) => {
@@ -594,7 +594,7 @@ describe('App Top Nav Workflows', () => {
             cy.contains('An unexpected error occurred').should('be.visible')
           })
 
-          cy.percySnapshot()
+          // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.findByRole('dialog', { name: loginText.titleFailed }).within(() => {
             cy.contains('button', loginText.actionTryAgain).should('be.visible')
@@ -655,6 +655,7 @@ describe('Growth Prompts Can Open Automatically', () => {
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: {},
+          banners: { _disabled: true },
         })
       },
     )
@@ -672,6 +673,7 @@ describe('Growth Prompts Can Open Automatically', () => {
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: { ci1: 1609459200000 },
+          banners: { _disabled: true },
         })
       },
     )
