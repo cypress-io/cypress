@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "cypress-schematics-generate-ct-specs",
+  "title": "Cypress E2E Spec Options Schema",
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The path where the spec will be created.",
+      "visible": false
+    },
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "alias": "p",
+      "$default": {
+        "$source": "projectName"
+      }
+    }
+  },
+  "required": []
+}
