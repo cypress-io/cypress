@@ -435,8 +435,6 @@ const { refetchFailedCloudData } = useCloudSpecData(
 
 const hasRuns = ref(false)
 
-watch(list, () => hasRuns.value = false)
-
 function refreshPage () {
   location.reload()
 }
