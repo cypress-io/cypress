@@ -86,7 +86,7 @@ describe('src/cy/commands/window', () => {
         this.remoteWindow.foo = 'foo'
 
         cy.on('fail', () => {
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -263,7 +263,7 @@ describe('src/cy/commands/window', () => {
         this.remoteDocument.foo = 'foo'
 
         cy.on('fail', () => {
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -382,7 +382,8 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    it('retries finding the title', () => {
+    // TODO: Re-enable once .title is migrated to be a selector.
+    it.skip('retries finding the title', () => {
       cy.$$('title').remove()
 
       const retry = _.after(2, () => {
@@ -394,7 +395,8 @@ describe('src/cy/commands/window', () => {
       cy.title().should('eq', 'waiting on title')
     })
 
-    it('eventually resolves', () => {
+    // TODO: Re-enable once .title is migrated to be a selector.
+    it.skip('eventually resolves', () => {
       _.delay(() => {
         cy.$$('title').text('about page')
       }, 100)

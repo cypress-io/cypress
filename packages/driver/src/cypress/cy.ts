@@ -1344,6 +1344,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     subject.push(selectorFn)
     cySubjects[chainerId] = subject
+    this.state('subjects', cySubjects)
 
     const links = this.state('subjectLinks') || {}
 
