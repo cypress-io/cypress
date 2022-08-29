@@ -19,13 +19,13 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
         <Button variant="tertiary">Tertiary with text</Button>
         <Button variant="tertiary" disabled>Tertiary with text</Button>
         <Button variant="link">Link with text</Button>
-        <Button variant="link" disabled>Link with text</Button>
+        <Button variant="link" disabled>Link with text disabled</Button>
         <Button variant="linkBold">Link bold with text</Button>
-        <Button variant="linkBold" disabled>Link bold with text</Button>
+        <Button variant="linkBold" disabled>Link bold with text disabled</Button>
         <Button variant="text">Text with text</Button>
-        <Button variant="text" disabled>Text with text</Button>
+        <Button variant="text" disabled>Text with text disabled</Button>
         <Button variant="secondary">Secondary with text</Button>
-        <Button variant="secondary" disabled>Secondary with text</Button>
+        <Button variant="secondary" disabled>Secondary with text disabled</Button>
       </div>
     ))
 
