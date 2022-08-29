@@ -36,7 +36,7 @@ export class FileDataSource {
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
-      const workingDirectoryPrefix = path.join(cwd, '/')
+      const workingDirectoryPrefix = path.join(cwd, path.sep)
 
       // If the pattern includes the working directory, we strip it from the pattern.
       // The working directory path may include characters that conflict with glob
