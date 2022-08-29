@@ -118,7 +118,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
             return ensureUrl.isListening(baseUrl)
             .return(null)
             .catch((err) => {
-              debug(err)
+              debug('ensuring baseUrl (%s) errored: %o', baseUrl, error)
 
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
