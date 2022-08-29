@@ -35,6 +35,32 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.percySnapshot()
     })
 
+    it('does not render helpLink when noHelp is true', () => {
+      cy.mount(
+        <StandardModal
+          class="w-400px"
+          modelValue={true}
+          noHelp={true}
+          title={title}
+        >
+          {body}
+        </StandardModal>,
+      )
+
+      cy.contains('a', defaultMessages.links.needHelp).should('not.exist')
+
+      cy.findByLabelText(defaultMessages.actions.close, {
+        selector: 'button',
+      })
+      .should('be.visible')
+      .and('not.be.disabled')
+
+      cy.contains('h2', title).should('be.visible')
+      cy.contains(body).should('be.visible')
+
+      cy.percySnapshot()
+    })
+
     it('bare variant renders without padding in body', () => {
       cy.mount(<StandardModal
         class="w-400px"

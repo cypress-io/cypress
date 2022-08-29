@@ -1,17 +1,26 @@
 import type { FoundBrowser } from './browser'
+import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
 
-export interface LaunchOpts {
-  browser?: FoundBrowser
-  url?: string
-  automationMiddleware?: AutomationMiddleware
-  projectRoot?: string
-  shouldLaunchNewTab?: boolean
+export type OpenProjectLaunchOpts = {
+  projectRoot: string
+  shouldLaunchNewTab: boolean
+  automationMiddleware: AutomationMiddleware
+  onWarning: (err: Error) => void
+}
+
+export type BrowserLaunchOpts = {
+  browsers: FoundBrowser[]
+  browser: FoundBrowser
+  url: string | undefined
+  proxyServer: string
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
-  onWarning?: (err: Error) => void
-}
+} & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
+& Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'isTextTerminal' | 'downloadsFolder' | 'experimentalSessionAndOrigin' | 'experimentalModifyObstructiveThirdPartyCode'>
+
+export type BrowserNewTabOpts = { onInitializeNewBrowserTab: () => void } & BrowserLaunchOpts
 
 export interface LaunchArgs {
   _: [string] // Cypress App binary location

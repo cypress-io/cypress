@@ -26,6 +26,7 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
+import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -59,8 +60,6 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    UnifiedRunner.StudioRecorder,
-    // created once when opening runner at the very top level in main.ts
     window.ws,
   )
 }
@@ -109,7 +108,6 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: getEventManager().studioRecorder,
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
@@ -140,17 +138,23 @@ function setupRunner () {
   getEventManager().start(config)
 
   const autStore = useAutStore()
+  const studioStore = useStudioStore()
 
   watchEffect(() => {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
+
+  watchEffect(() => {
+    window.UnifiedRunner.MobX.runInAction(() => {
+      mobxRunnerStore.setCanSaveStudioLogs(studioStore.logs.length > 0)
+    })
+  })
 
   _autIframeModel = new AutIframe(
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
-    getEventManager().studioRecorder,
   )
 
   createIframeModel()
@@ -345,7 +349,7 @@ function runSpecE2E (spec: SpecFile) {
 }
 
 export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**
@@ -366,7 +370,14 @@ async function initialize () {
     return
   }
 
+  // Reset stores
   const autStore = useAutStore()
+
+  autStore.$reset()
+
+  const studioStore = useStudioStore()
+
+  studioStore.cancel()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
