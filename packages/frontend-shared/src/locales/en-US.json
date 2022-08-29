@@ -494,6 +494,10 @@
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
+      },
+      "experimentalStudio": {
+        "name": "Studio",
+        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
       }
     },
     "device": {
@@ -798,6 +802,27 @@
       "buttonHref": "https://on.cypress.io/viewport",
       "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
       "configText": "Additionally, you can override this value in your {2} or via the {4} command."
+    },
+    "studio": {
+      "studio": "Studio",
+      "studioDescription": "Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.",
+      "studioDetailedDescription": "Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:",
+      "getStartedButton": "Get Started",
+      "feedbackPrompt": "Your {0} will be highly influential to our team.",
+      "experimentalMessage": "This feature is currently experimental and we will be adding more commands and abilities in the future.",
+      "feedbackLink": "feedback",
+      "saveTest": "Save Test",
+      "testName": "Test Name",
+      "saveTestButton": "Save",
+      "closeStudio": "Close Studio",
+      "restartStudio": "Restart Studio",
+      "copyCommands": "Copy Commands to Clipboard",
+      "commandsCopied": "Commands Copied!",
+      "availableCommands": "Available commands",
+      "giveFeedback": "Give Feedback",
+      "enterValidUrl": "Enter a valid URL to visit",
+      "continue": "Continue",
+      "actionCancel": "Cancel"
     }
   },
   "warnings": {
