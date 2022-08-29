@@ -4,7 +4,7 @@ import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 
-import type { ServerRunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -407,17 +407,15 @@ export class EventManager {
       onSpecReady: () => {
         // get the current runnable states and cached test state
         // in case we reran mid-test due to a visit to a new domain
-        this.ws.emit('get:cached:test:state', (runState: ServerRunState = {}, testState: CachedTestState) => {
-          if (runState === null) {
-            runState = {}
-          }
-
+        this.ws.emit('get:cached:test:state', (runState: RunState = {}, testState: CachedTestState) => {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
           }
 
-          this.studioRecorder.initialize(config, runState)
+          if (runState?.studio) {
+            this.studioRecorder.initialize(config, runState)
+          }
 
           const runnables = Cypress.runner.normalizeAll(runState.tests)
 
@@ -730,7 +728,7 @@ export class EventManager {
     window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
-  _runDriver (runState: ServerRunState, testState: CachedTestState) {
+  _runDriver (runState: RunState, testState: CachedTestState) {
     performance.mark('run-s')
     Cypress.run(testState, () => {
       performance.mark('run-e')

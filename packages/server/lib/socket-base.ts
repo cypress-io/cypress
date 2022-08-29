@@ -133,7 +133,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let runState: RunState = {}
+    let runState: RunState = undefined
 
     _.defaults(options, {
       socketId: null,
@@ -148,7 +148,7 @@ export class SocketBase {
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
-      onSavedAppStateChanged () {},
+      onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
     })
@@ -471,19 +471,19 @@ export class SocketBase {
       socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
         const s = runState
 
-        if (s) {
-          runState = null
-        }
-
         const cachedTestState: CachedTestState = {
           activeSessions: session.getActiveSessions(),
         }
 
-        return cb(runState, cachedTestState)
+        if (s) {
+          runState = undefined
+        }
+
+        return cb(s || {}, cachedTestState)
       })
 
       socket.on('save:app:state', (state, cb) => {
-        options.onSavedAppStateChanged(state)
+        options.onSavedStateChanged(state)
 
         // we only use the 'ack' here in tests
         if (cb) {

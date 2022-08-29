@@ -1,4 +1,6 @@
-export interface RunState {
+import type { ReporterRunState, StudioRecorderState } from './reporter'
+
+interface MochaRunnerState {
   startTime?: number
   currentId?: number | null
   emissions?: Emissions
@@ -7,6 +9,10 @@ export interface RunState {
   failed?: number
   pending?: number
   numLogs?: number
+}
+
+export type RunState = MochaRunnerState & ReporterRunState & {
+  studio?: StudioRecorderState
 }
 
 export interface Emissions {

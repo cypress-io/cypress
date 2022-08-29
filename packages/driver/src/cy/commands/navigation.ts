@@ -1176,7 +1176,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           type ReporterRunRecords = ReporterRunState & {
             studio?: StudioRecorderState
-          }
+          } | any // any for any user-specified event that is hooking into this
 
           return Cypress.action('cy:collect:run:state')
           .then((a: ReporterRunRecords[] = []) => {
