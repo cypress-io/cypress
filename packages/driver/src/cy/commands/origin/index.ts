@@ -233,6 +233,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
                   isStable: Cypress.state('isStable'),
                   autOrigin: Cypress.state('autOrigin'),
+                  crossOriginCookies: Cypress.state('crossOriginCookies'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

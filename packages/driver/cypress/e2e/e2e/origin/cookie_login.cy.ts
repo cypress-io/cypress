@@ -653,6 +653,22 @@ describe('cy.origin - cookie login', () => {
   describe('document.cookie', () => {
     let username
 
+    before(() => {
+      cy.origin('http://foobar.com:3500', () => {
+        Cypress.Commands.add('assertDocumentCookieIncludes', (value: string) => {
+          cy.get('[data-cy="document-cookie"]').invoke('text')
+          .should('include', value)
+        })
+      })
+
+      cy.origin('http://idp.com:3501', () => {
+        Cypress.Commands.add('assertDocumentCookieIncludes', (value: string) => {
+          cy.get('[data-cy="document-cookie"]').invoke('text')
+          .should('include', value)
+        })
+      })
+    })
+
     beforeEach(() => {
       username = getUsername()
 
@@ -660,16 +676,19 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('gets cookie set by http request', () => {
-      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', { args: { username } }, ({ username }) => {
-        cy.document().its('cookie').should('include', `user=${username}`)
+      cy.origin('http://idp.com:3501', { args: { username } }, ({ username }) => {
+        cy.assertDocumentCookieIncludes(`user=${username}`)
       })
     })
+
+    // TODO: test where idp won't redirect unless document.cookie is right
+    // TODO: convert more tests to use cy.assertDocumentCookieIncludes()
 
     it('works when setting cookie', () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()

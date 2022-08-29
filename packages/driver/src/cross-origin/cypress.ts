@@ -20,11 +20,14 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { patchDocumentCookie } from './patches/cookies'
+import { createDocumentCookiePatch, DocumentCookiePatch } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+
+console.log(location.origin, '🔵 exists')
 
 const createCypress = () => {
   // @ts-ignore
@@ -62,6 +65,8 @@ const createCypress = () => {
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
+
+let documentCookiePatch: DocumentCookiePatch
 
 const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   const Cypress = window.Cypress
@@ -111,6 +116,18 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleTestEvents(Cypress)
   handleUnsupportedAPIs(Cypress, cy)
 
+  documentCookiePatch = createDocumentCookiePatch(Cypress)
+
+  Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+    console.log(location.origin, '🔵 got cookies:', cookies.map((c) => `${c.name}=${c.value}`))
+
+    documentCookiePatch.updateCookies(cookies)
+
+    Cypress.state('crossOriginCookies', cookies)
+
+    Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
+  })
+
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 }
 
@@ -126,7 +143,11 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     patchElementIntegrity(autWindow)
   }
 
-  patchDocumentCookie(Cypress, autWindow)
+  console.log(location.origin, '🔵 patch it:', Cypress.state('crossOriginCookies'))
+  documentCookiePatch.patch(autWindow)
+
+  // reset the cookies
+  Cypress.state('crossOriginCookies', [])
 
   // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')

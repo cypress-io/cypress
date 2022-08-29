@@ -842,7 +842,7 @@ describe('http/response-middleware', function () {
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
     })
 
-    it('does not send cross:origin:automation:cookies if request does not need cross-origin handling', async () => {
+    it('does not send cross:origin:cookies if request does not need cross-origin handling', async () => {
       const { ctx } = prepareSameOriginContext()
 
       await testMiddleware([CopyCookiesFromIncomingRes], ctx)
@@ -850,7 +850,7 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('does not send cross:origin:automation:cookies if there are no added cookies', async () => {
+    it('does not send cross:origin:cookies if there are no added cookies', async () => {
       const cookieJar = {
         getAllCookies: () => [{ key: 'cookie', value: 'value' }],
       }
@@ -869,7 +869,7 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('sends cross:origin:automation:cookies if there are added cookies and resolves on cross:origin:automation:cookies:received', async () => {
+    it('sends cross:origin:cookies if there are added cookies and resolves on cross:origin:cookies:received', async () => {
       const cookieJar = {
         getAllCookies: sinon.stub(),
       }
@@ -888,13 +888,13 @@ describe('http/response-middleware', function () {
 
       // test will hang if this.next() is not called, so this also tests
       // that we move on once receiving this event
-      ctx.serverBus.once.withArgs('cross:origin:automation:cookies:received').yields()
+      ctx.serverBus.once.withArgs('cross:origin:cookies:received').yields()
 
       await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:automation:cookies')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:cookies')
 
-      const cookies = ctx.serverBus.emit.withArgs('cross:origin:automation:cookies').args[0][1]
+      const cookies = ctx.serverBus.emit.withArgs('cross:origin:cookies').args[0][1]
 
       expect(cookies[0].name).to.equal('cookie')
       expect(cookies[0].value).to.equal('value')

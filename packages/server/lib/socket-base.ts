@@ -475,8 +475,8 @@ export class SocketBase {
               return this.localBus.emit('cross:origin:release:html')
             case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
-            case 'cross:origin:automation:cookies:received':
-              return this.localBus.emit('cross:origin:automation:cookies:received')
+            case 'cross:origin:cookies:received':
+              return this.localBus.emit('cross:origin:cookies:received')
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }

@@ -21,6 +21,7 @@
     <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
     <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
     <li><a data-cy="cookie-login-land-on-idp">Login with Social (lands on idp)</a></li>
+    <li><a data-cy="cookie-login-land-on-document-cookie">Login with Social (lands on document.cookie)</a></li>
   </ul>
   <script>
     function setHref (dataCy, redirect2, primaryQueryAddition = '') {
@@ -41,7 +42,8 @@
     setHref('cookie-login-subdomain', 'http://localhost:3500/login&subdomain=true')
     setHref('cookie-login-alias', 'http://localhost:3500/login&alias=true')
     setHref('cookie-login-override', 'https://localhost:3502/login', '&override=true')
-    setHref('cookie-login-land-on-idp', 'http://www.idp.com:3500/welcome')
+    setHref('cookie-login-land-on-idp', 'http://www.idp.com:3501/welcome')
+    setHref('cookie-login-land-on-document-cookie', 'http://www.idp.com:3501/fixtures/document-cookie.html')
   </script>
 </body>
 </html>

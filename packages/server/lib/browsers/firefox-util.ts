@@ -117,6 +117,44 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
+function setupAutomation (cdp: CdpAutomation, automation: Automation) {
+  automation.use({
+    onRequest (message, data) {
+      // console.log('🟢 firefox onRequest:', message)
+
+      switch (message) {
+        case 'get:cookies':
+        case 'get:cookie':
+        case 'set:cookie':
+        case 'add:cookies':
+        case 'set:cookies':
+        case 'clear:cookie':
+        case 'clear:cookies':
+          return cdp.onRequest(message, data)
+        default:
+          throw new Error(`No automation handler registered for: '${message}'`)
+      }
+    },
+
+    handles (message) {
+      // console.log('🟢 handles?', message)
+
+      switch (message) {
+        case 'get:cookies':
+        case 'get:cookie':
+        case 'set:cookie':
+        case 'add:cookies':
+        case 'set:cookies':
+        case 'clear:cookie':
+        case 'clear:cookies':
+          return true
+        default:
+          return false
+      }
+    },
+  })
+}
+
 async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
   debug('firefox: reconnecting to blank tab')
 
@@ -126,7 +164,9 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  const cdp = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  setupAutomation(cdp, automation)
 
   await options.onInitializeNewBrowserTab()
 
@@ -138,7 +178,9 @@ async function setupRemote (remotePort, automation, onError, options): Promise<B
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  const cdp = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  setupAutomation(cdp, automation)
 
   return browserCriClient
 }

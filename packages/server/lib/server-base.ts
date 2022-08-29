@@ -182,12 +182,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.socket.toDriver('cross:origin:delaying:html', request)
     })
 
-    this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
-        this._eventBus.emit('cross:origin:automation:cookies:received')
+    this._eventBus.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+      this.socket.localBus.once('cross:origin:cookies:received', () => {
+        this._eventBus.emit('cross:origin:cookies:received')
       })
 
-      this.socket.toDriver('cross:origin:automation:cookies', cookies)
+      this.socket.toDriver('cross:origin:cookies', cookies)
     })
   }
 

@@ -374,28 +374,21 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      const existingCookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
+    // TODO: receive origin and then it will only apply to that one?
+    Cypress.on('cross:origin:cookies', ({ origin, cookies }: { origin: string, cookies: AutomationCookie[] }) => {
+      const existingCookies: AutomationCookie[] = state('cross:origin:cookies') || []
 
-      this.state('cross:origin:automation:cookies', existingCookies.concat(cookies))
+      console.log(location.origin, '🟢 got cookies:', origin, cookies.map((c) => `${c.name}=${c.value}`))
 
-      Cypress.backend('cross:origin:automation:cookies:received')
-    })
+      this.state('crossOriginCookies', existingCookies.concat(cookies))
 
-    Cypress.on('before:stability:release', (stable: boolean) => {
-      const cookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
-
-      if (!stable || !cookies.length) return
-
-      // reset the state cookies before setting them via automation in case
-      // any more get set in the interim
-      state('cross:origin:automation:cookies', [])
-
-      // this will be awaited before any stability-reliant actions
-      return Cypress.automation('add:cookies', cookies)
-      .catch(() => {
-        // errors here can be ignored as they're not user-actionable
+      // TODO: is this necessary? maybe spec bridge can just send it directly?
+      Cypress.primaryOriginCommunicator.once('cross:origin:cookies:received', () => {
+        this.state('crossOriginCookies', [])
+        Cypress.backend('cross:origin:cookies:received')
       })
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'cross:origin:cookies', cookies)
     })
   }
 

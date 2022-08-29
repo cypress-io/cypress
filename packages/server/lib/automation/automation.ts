@@ -48,12 +48,21 @@ export class Automation {
       }
 
       const onReq = this.get('onRequest')
+      const handles = this.get('handles') || (() => true)
+
+      // console.log('🟢 automationValve:', message)
+      // console.log('   - onReq:', onReq)
+      // console.log('   - handles:', handles)
 
       // if we have an onRequest function
       // then just invoke that
-      if (onReq) {
+      if (onReq && handles(message)) {
+        // console.log('   - can handle')
+
         return Bluebird.resolve(onReq(msg, data))
       }
+
+      // console.log('   - different path')
 
       // do the default
       return Bluebird.resolve(this.requestAutomationResponse(msg, data, fn))

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>document.cookie</title>
+</head>
+<body>
+  <p>
+    <strong>document.cookie:</strong>
+    <span data-cy="document-cookie"></span>
+  </p>
+  <script>
+    document.querySelector('[data-cy="document-cookie"]').textContent = document.cookie;
+    const originalDate = Date.now()
+    console.log(Date.now())
+    console.log('- document.cookie:', document.cookie)
+
+    const id = setInterval(() => {
+      if (document.cookie) {
+        const setDate = Date.now()
+        // document.querySelector('[data-cy="document-cookie"]').textContent = document.cookie;
+
+        console.log(setDate)
+        console.log('- document.cookie:', document.cookie)
+        console.log('- diff:', setDate - originalDate)
+        clearInterval(id)
+      }
+    }, 0)
+  </script>
+</body>
+</html>
