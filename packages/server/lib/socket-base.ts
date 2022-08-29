@@ -439,6 +439,7 @@ export class SocketBase {
             case 'get:session':
               return session.getSession(args[0])
             case 'reset:cached:test:state':
+              runState = undefined
               cookieJar.removeAllCookies()
               session.clearSessions()
 
