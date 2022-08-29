@@ -17,11 +17,6 @@ export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
-  // use `undefined` instead of `unspecified`
-  sameSite?: 'no_restriction' | 'lax' | 'strict'
-}
-
 // Cypress uses the webextension-style filtering
 // https://developer.chrome.com/extensions/cookies#method-getAll
 type CyCookieFilter = chrome.cookies.GetAllDetails
@@ -33,7 +28,7 @@ export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY
   }
 }
 
-function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
+function convertSameSiteExtensionToCdp (str: Cypress.Cookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
   return str ? ({
     'no_restriction': 'None',
     'lax': 'Lax',
@@ -60,7 +55,7 @@ export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
   return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
 }
 
-export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+export const _cookieMatches = (cookie: Cypress.Cookie, filter: CyCookieFilter) => {
   if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
     return false
   }
@@ -87,7 +82,7 @@ export function isHostOnlyCookie (cookie) {
   return parsedDomain && parsedDomain.tld !== cookie.domain
 }
 
-const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
+const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): Cypress.Cookie => {
   if (cookie.expires === -1) {
     // @ts-ignore
     delete cookie.expires
@@ -114,7 +109,7 @@ const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
   return _.map(cookies, normalizeGetCookieProps)
 }
 
-const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
+const normalizeSetCookieProps = (cookie: Cypress.Cookie): Protocol.Network.SetCookieRequest => {
   // this logic forms a SetCookie request that will be received by Chrome
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
@@ -244,7 +239,7 @@ export class CdpAutomation {
     return this.sendDebuggerCommandFn('Network.getAllCookies')
     .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
-      .filter((cookie: CyCookie) => {
+      .filter((cookie: Cypress.Cookie) => {
         const matches = _cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
@@ -254,7 +249,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
+  private getCookiesByUrl = (url): Promise<Cypress.Cookie[]> => {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
@@ -281,7 +276,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
+  private getCookie = (filter: CyCookieFilter): Promise<Cypress.Cookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)

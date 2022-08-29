@@ -6,11 +6,6 @@ import { normalizeResourceType } from './cdp_automation'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
-  // use `undefined` instead of `unspecified`
-  sameSite?: 'no_restriction' | 'lax' | 'strict'
-}
-
 type CookieFilter = {
   name: string
   domain: string
@@ -22,11 +17,11 @@ const extensionMap = {
   'strict': 'Strict',
 } as const
 
-function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
+function convertSameSiteExtensionToCypress (str: Cypress.Cookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
   return str ? extensionMap[str] : undefined
 }
 
-const normalizeGetCookieProps = (cookie: any): CyCookie => {
+const normalizeGetCookieProps = (cookie: any): Cypress.Cookie => {
   if (cookie.expires === -1) {
     delete cookie.expires
   }
@@ -41,10 +36,10 @@ const normalizeGetCookieProps = (cookie: any): CyCookie => {
     cookie.sameSite = cookie.sameSite.toLowerCase()
   }
 
-  return cookie as CyCookie
+  return cookie as Cypress.Cookie
 }
 
-const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
+const normalizeSetCookieProps = (cookie: Cypress.Cookie): playwright.Cookie => {
   return {
     name: cookie.name,
     value: cookie.value,

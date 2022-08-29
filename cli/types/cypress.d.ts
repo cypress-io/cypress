@@ -1,3 +1,4 @@
+/// <reference types='chrome'/>
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
@@ -5824,15 +5825,9 @@ declare namespace Cypress {
     setSystemTime(now?: number | Date): void
   }
 
-  interface Cookie {
-    name: string
-    value: string
-    path: string
-    domain: string
-    httpOnly: boolean
-    secure: boolean
-    expiry?: number
-    sameSite?: SameSiteStatus
+  interface Cookie extends Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> {
+    // use `undefined` instead of `unspecified`
+    sameSite?: Cypress.SameSiteStatus
   }
 
   interface EnqueuedCommand {
