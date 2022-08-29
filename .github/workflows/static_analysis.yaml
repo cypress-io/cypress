@@ -4,7 +4,9 @@ name: Snyk Static Analysis Scan
 # Develop branches.  We use this as a control to prevent vulnerabilities 
 # from being introduced into the codebase. 
 on:
-  pull_request:
+  pull_request_target:
+    types:
+      - opened
     branches: 
       - master
       - develop
