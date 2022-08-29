@@ -1,8 +1,7 @@
 const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
-// TODO(webkit): fix+unskip for experimental webkit release
-describe('src/cy/commands/actions/type - #type errors', { browser: '!webkit' }, () => {
+describe('src/cy/commands/actions/type - #type errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })

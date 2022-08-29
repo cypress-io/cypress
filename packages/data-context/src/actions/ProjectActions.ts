@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
@@ -40,7 +40,7 @@ export interface ProjectApiShape {
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
-    updateSpecs(specs: FoundSpec[]): void
+    updateSpecs(specs: SpecWithRelativeRoot[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
     emitter: EventEmitter
@@ -313,7 +313,7 @@ export class ProjectActions {
     this.api.setPromptShown(slug)
   }
 
-  setSpecs (specs: FoundSpec[]) {
+  setSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
 
@@ -324,7 +324,7 @@ export class ProjectActions {
     this.ctx.emitter.specsChange()
   }
 
-  refreshSpecs (specs: FoundSpec[]) {
+  refreshSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
