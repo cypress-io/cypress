@@ -23,6 +23,8 @@ import { gql } from '@urql/vue'
 import type { SpecCloudDataHoverButtonFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
+type ProjectConnectionStatus = 'NOT_FOUND' | 'LOGGED_OUT' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED'
+
 const { t } = useI18n()
 
 const emits = defineEmits<{
@@ -33,7 +35,7 @@ const emits = defineEmits<{
 
 const props = defineProps<{
   gql: SpecCloudDataHoverButtonFragment
-  projectConnectionStatus: 'NOT_FOUND' | 'LOGGED_OUT' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED'
+  projectConnectionStatus: ProjectConnectionStatus
 }>()
 
 gql`
@@ -57,45 +59,46 @@ type ButtonOptions = {
   text: string
   textShort: string
   icon: FunctionalComponent<SVGAttributes>
-  emits: 'showLogin' | 'showConnectToProject' | 'requestAccess'
+  emits: 'showLogin' | 'showConnectToProject' | 'requestAccess' | undefined
 }
 
-const VALUES = {
+const VALUES: Record<ProjectConnectionStatus, ButtonOptions> = {
   LOGGED_OUT: {
     text: t('specPage.hoverButton.connect'),
-    text_short: t('specPage.hoverButton.connect'),
+    textShort: t('specPage.hoverButton.connect'),
     icon: UserIcon,
     emits: 'showLogin',
   },
   NOT_CONNECTED: {
     text: t('specPage.hoverButton.connectProject'),
-    text_short: t('specPage.hoverButton.connectProjectShort'),
+    textShort: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
     emits: 'showConnectToProject',
   },
   NOT_FOUND: {
     text: t('specPage.hoverButton.connectProject'),
-    text_short: t('specPage.hoverButton.connectProjectShort'),
+    textShort: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
     emits: 'showConnectToProject',
   },
   UNAUTHORIZED: {
     text: t('specPage.hoverButton.requestAccess'),
-    text_short: t('specPage.hoverButton.requestAccessShort'),
+    textShort: t('specPage.hoverButton.requestAccessShort'),
     icon: PlayIcon,
     emits: 'requestAccess',
   },
   ACCESS_REQUESTED: {
     text: t('specPage.hoverButton.requestSent'),
-    text_short: t('specPage.hoverButton.requestSentShort'),
+    textShort: t('specPage.hoverButton.requestSentShort'),
     icon: PlayIcon,
+    emits: undefined,
   },
 }
 
 const buttonOptions = computed(() => {
   const options: ButtonOptions = {
     text: VALUES[props.projectConnectionStatus]?.text,
-    textShort: VALUES[props.projectConnectionStatus]?.text_short,
+    textShort: VALUES[props.projectConnectionStatus]?.textShort,
     icon: VALUES[props.projectConnectionStatus]?.icon,
     emits: VALUES[props.projectConnectionStatus]?.emits,
   }
