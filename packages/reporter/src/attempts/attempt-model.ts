@@ -5,7 +5,8 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Test, { UpdatableTestProps, TestProps } from '../test/test-model'
+import type { TestState } from '@packages/types'
 import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/types'
 import { LogProps } from '../runnables/runnables-store'
@@ -91,7 +92,9 @@ export default class Attempt {
   }
 
   @computed get studioIsNotEmpty () {
-    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
+    return this.hooks.some((hook) => {
+      return hook.isStudio && hook.commands.some((cmd) => cmd.isStudio)
+    })
   }
 
   addLog = (props: LogProps) => {
