@@ -526,11 +526,11 @@ export class ProjectActions {
     const config = this.ctx.lifecycleManager.loadedConfigFile
 
     // If devServer is a function, they are using a custom dev server.
-    if (typeof config?.component?.devServer === 'function') {
+    if (!config?.component?.devServer || typeof config?.component?.devServer === 'function') {
       return undefined
     }
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer?.framework)
+    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }
