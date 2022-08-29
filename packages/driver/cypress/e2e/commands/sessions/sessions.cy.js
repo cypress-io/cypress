@@ -100,18 +100,29 @@ describe('cy.session', { retries: 0 }, () => {
     let validate
 
     const handleSetup = () => {
-      cy.then(() => {
-        expect(clearPageCount, 'cleared page before executing session setup').to.eq(1)
-      })
+      // create session clears page before running
+      cy.contains('Default blank page')
+      cy.contains('This page was cleared by navigating to about:blank.')
 
-      cy.contains('This is a blank page')
-      cy.contains('We always navigate you here after')
-      cy.contains('cy.session(...)')
+      cy.visit('/fixtures/auth/index.html')
+      cy.contains('You are not logged in')
+      cy.window().then((win) => {
+        win.sessionStorage.setItem('cypressAuthToken', JSON.stringify({ body: { username: 'tester' } }))
+      })
+    }
+
+    const handleValidate = () => {
+      // both create & restore session clears page after running
+      cy.contains('Default blank page')
+      cy.contains('This page was cleared by navigating to about:blank.')
+
+      cy.visit('/fixtures/auth/index.html')
+      cy.contains('Welcome tester')
     }
 
     before(() => {
       setup = cy.stub().callsFake(handleSetup).as('setupSession')
-      validate = cy.stub().as('validateSession')
+      validate = cy.stub().callsFake(handleValidate).as('validateSession')
     })
 
     const resetMocks = () => {
@@ -119,7 +130,9 @@ describe('cy.session', { retries: 0 }, () => {
       clearPageCount = 0
       sessionGroupId = undefined
       setup.reset()
+      setup.callsFake(handleSetup)
       validate.reset()
+      validate.callsFake(handleValidate)
     }
 
     const setupTestContext = () => {
@@ -159,14 +172,18 @@ describe('cy.session', { retries: 0 }, () => {
       before(() => {
         setupTestContext()
         cy.log('Creating new session to test against')
+        expect(clearPageCount, 'total times session cleared the page').to.eq(0)
         cy.session('session-1', setup)
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('clears page after setup runs', () => {
         cy.url().should('eq', 'about:blank')
       })
 
       it('successfully creates new session', () => {
         expect(setup).to.be.calledOnce
-        // FIXME: currently page is cleared 3 times when it should clear 2 times
-        expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+        expect(clearPageCount, 'total times session cleared the page').to.eq(2)
       })
 
       it('groups session logs correctly', () => {
@@ -207,11 +224,6 @@ describe('cy.session', { retries: 0 }, () => {
           name: 'Clear page',
           group: createNewSessionGroup.id,
         })
-
-        expect(logs[6].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
       })
 
       it('creates new session instrument with session details', () => {
@@ -243,14 +255,17 @@ describe('cy.session', { retries: 0 }, () => {
         cy.log('Creating new session with validation to test against')
         sessionId = `session-${Cypress.state('test').id}`
         cy.session(sessionId, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully creates new session and validates it', () => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledOnce
-        // FIXME: currently page is cleared 3 times when it should clear twice
-        expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+        expect(clearPageCount, 'total times session cleared the page').to.eq(2)
       })
 
       it('groups session logs correctly', () => {
@@ -302,11 +317,6 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[7].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
-        })
-
-        expect(logs[8].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
         })
       })
     })
@@ -395,13 +405,17 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session(sessionId, setup)
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('clears page after setup runs', () => {
         cy.url().should('eq', 'about:blank')
       })
 
       it('successfully restores saved session', () => {
         expect(setup).to.not.be.called
         expect(validate).to.not.be.called
-        expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        expect(clearPageCount, 'total times session cleared the page').to.eq(1)
       })
 
       it('groups session logs correctly', () => {
@@ -436,11 +450,6 @@ describe('cy.session', { retries: 0 }, () => {
           displayName: 'Restore saved session',
           group: sessionGroupId,
         })
-
-        expect(logs[4].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
       })
     })
 
@@ -459,13 +468,17 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session(sessionId, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully restores saved session', () => {
         expect(setup).to.not.be.called
         expect(validate).to.be.calledOnce
-        expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        expect(clearPageCount, 'total times session cleared the page').to.eq(1)
       })
 
       it('groups session logs correctly', () => {
@@ -512,11 +525,6 @@ describe('cy.session', { retries: 0 }, () => {
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
-
-        expect(logs[6].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
       })
     })
 
@@ -535,18 +543,24 @@ describe('cy.session', { retries: 0 }, () => {
             if (validate.callCount === 1) {
               return false
             }
+
+            handleValidate()
           })
         })
 
         cy.log('restore session to test against')
         cy.session(sessionId, setup, { validate })
-        cy.url().should('eq', 'about:blank')
+      })
+
+      // test must be first to run before blank page visit between each test
+      it('does not clear page visit from validate function', () => {
+        cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
       it('successfully recreates session', () => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledTwice
-        expect(clearPageCount, 'total times session cleared the page').to.eq(4)
+        expect(clearPageCount, 'total times session cleared the page').to.eq(3)
       })
 
       it('groups session logs correctly', () => {
@@ -639,11 +653,6 @@ describe('cy.session', { retries: 0 }, () => {
         expect(logs[13].get()).to.deep.contain({
           alias: ['validateSession'],
           group: secondValidateSessionGroup.id,
-        })
-
-        expect(logs[14].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
         })
       })
     })

@@ -36,6 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,6 +46,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ "lmiller/experimental-single-tab-component-testing", << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,6 +67,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - equal: [ 'marktnoonan/windows-path-fix', << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -78,6 +81,7 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: linux
+      CI_DOCKER: "true"
 
   # Docker image with non-root "node" user
   non-root-docker-user:
@@ -1200,8 +1204,10 @@ jobs:
       - run:
           name: Check env canaries on Linux
           command: |
-            # Windows/Mac M1 CircleCI does not have a way to pull per-job env
-            [[ $PLATFORM == 'linux' ]] && node ./scripts/circle-env.js --check-canaries || true
+            # only Docker has the required env data for this
+            if [[ $CI_DOCKER == 'true' ]]; then
+              node ./scripts/circle-env.js --check-canaries
+            fi
       - build-and-persist
       - store-npm-logs
 
@@ -1825,7 +1831,6 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
     steps:
       - restore_cached_workspace
       - run:
@@ -2314,7 +2319,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - percy-finalize:
-        context: test-runner:poll-circle-workflow
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
@@ -2379,11 +2384,10 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
-    # TODO: Fix keyboard tests to fix the majority of these tests before re-enabling
-    # - driver-integration-tests-webkit:
-    #     context: test-runner:cypress-record-key
-    #     requires:
-    #       - build
+    - driver-integration-tests-webkit:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:

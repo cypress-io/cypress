@@ -375,8 +375,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(existingSession)
-        }).then(async () => {
-          await navigateAboutBlank()
+        }).then(() => {
           _log.set({ state: 'passed' })
         })
       })

@@ -113,7 +113,13 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     it('fires textInput event with e.data', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        expect(e.originalEvent.data).to.eq('{')
+        if (Cypress.isBrowser('webkit')) {
+          // For WebKit, the simulated textInput event is not
+          // emitted with the char data to prevent double entry.
+          expect(e.originalEvent.data).to.eq('')
+        } else {
+          expect(e.originalEvent.data).to.eq('{')
+        }
 
         done()
       })
@@ -308,8 +314,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -351,8 +357,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -446,9 +452,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -492,8 +497,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ textarea })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -998,7 +1003,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.get('input[type="number"]:first')
       .invoke('val', '12.34')
       .type('{uparrow}{uparrow}')
-      .should('have.value', '14')
+      // WebKit does not round to the step value when calling stepUp/stepDown,
+      // as we do here for the ArrowUp handler.
+      // https://bugs.webkit.org/show_bug.cgi?id=244206
+      .should('have.value', Cypress.isBrowser('webkit') ? '14.34' : '14')
     })
   })
 
@@ -1056,7 +1064,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.get('input[type="number"]:first')
       .invoke('val', '12.34')
       .type('{downarrow}{downarrow}')
-      .should('have.value', '11')
+      // WebKit does not round to the step value when calling stepUp/stepDown,
+      // as we do here for the ArrowDown handler
+      // https://bugs.webkit.org/show_bug.cgi?id=244206
+      .should('have.value', Cypress.isBrowser('webkit') ? '10.34' : '11')
     })
 
     it('downarrow ignores current selection', () => {
@@ -1291,7 +1302,6 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
         this.$forms.find('#single-input').submit((e) => {
           e.preventDefault()
-
           events.push('submit')
         })
 
@@ -1735,7 +1745,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
       })
 
-      it('will not submit the form', function (done) {
+      // WebKit still emits the submit event on the form in this configuration.
+      it('will not submit the form', { browser: '!webkit' }, function (done) {
         this.$forms.find('#multiple-inputs-and-multiple-submits').submit(() => {
           done(new Error('should not receive submit event'))
         })

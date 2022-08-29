@@ -314,7 +314,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get(averageDurationSelector('accounts_new.spec.js')).contains('2:03')
     })
 
-    it('lazily loads data for off-screen specs', () => {
+    it('lazily loads data for off-screen specs', { viewportHeight: 500 }, () => {
       // make sure the virtualized list didn't load z008.spec.js
       cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
@@ -621,7 +621,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       allVisibleSpecsShouldBePlaceholders()
     })
 
-    it('shows offline alert then hides it after coming online', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
+    it.skip('shows offline alert then hides it after coming online', () => {
       cy.findByTestId('offline-alert')
       .should('contain.text', defaultMessages.specPage.offlineWarning.title)
       .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)

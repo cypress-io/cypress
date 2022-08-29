@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { checkSupportFile } from './project_utils'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
 import { ServerCt } from './server-ct'
@@ -20,7 +19,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -34,10 +33,12 @@ export interface Cfg extends ReceivedCypressOptions {
     firstOpened?: number | null
     lastOpened?: number | null
     promptsShown?: object | null
+    banners?: BannersState | null
   }
   e2e: Partial<Cfg>
   component: Partial<Cfg>
   additionalIgnorePattern?: string | string[]
+  resolved: ResolvedConfigurationOptions
 }
 
 const localCwd = process.cwd()
@@ -222,8 +223,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     await this.saveState(stateToSave)
-
-    await checkSupportFile(cfg.supportFile)
 
     if (cfg.isTextTerminal) {
       return
@@ -431,13 +430,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   shouldCorrelatePreRequests = () => {
-    if (!this.browser) {
-      return false
-    }
-
-    const { family, majorVersion } = this.browser
-
-    return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
+    return !!this.browser
   }
 
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
