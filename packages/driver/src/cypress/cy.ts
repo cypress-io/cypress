@@ -557,9 +557,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // unhandled rejections to the user), we patch the AUT's Error constructor
           // to enqueue a no-op microtask when executed, which ensures that the unhandledrejection
           // event handler will be executed if this Error is uncaught.
-          let originalError = autWindow.Error
+          const originalError = autWindow.Error
 
-          autWindow.Error = function (...args) {
+          autWindow.Error = function __CyWebKitError (...args) {
             autWindow.queueMicrotask(() => {})
 
             return originalError.apply(this, args)
