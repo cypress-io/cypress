@@ -2,19 +2,35 @@ import { launchStudio } from './helper'
 
 describe('Cypress Studio', () => {
   it('updates an existing test with a click action', () => {
+    function addStudioClick (initialCount: number) {
+      cy.getAutIframe().within(() => {
+        cy.get('p').contains(`Count is ${initialCount}`)
+
+        // (1) First Studio action - get
+        cy.get('#increment')
+
+        // (2) Second Studio action - click
+        .realClick().then(() => {
+          cy.get('p').contains(`Count is ${initialCount + 1}`)
+        })
+      })
+    }
+
     launchStudio()
 
-    cy.getAutIframe().within(() => {
-      cy.get('p').contains('Count is 0')
+    cy.get('button').contains('Save Commands').should('be.disabled')
 
-      // (1) First Studio action - get
-      cy.get('#increment')
+    addStudioClick(0)
 
-      // (2) Second Studio action - click
-      .realClick().then(() => {
-        cy.get('p').contains('Count is 1')
-      })
-    })
+    cy.get('button').contains('Save Commands').should('not.be.disabled')
+
+    cy.get('.studio-command-remove').click()
+
+    cy.get('button').contains('Save Commands').should('be.disabled')
+
+    addStudioClick(1)
+
+    cy.get('button').contains('Save Commands').should('not.be.disabled')
 
     cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
       cy.get('.command').should('have.length', 2)
