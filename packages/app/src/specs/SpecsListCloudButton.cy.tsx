@@ -4,7 +4,7 @@ import { set } from 'lodash'
 
 describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, () => {
   function mountWithStatus (
-    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
+    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
   ) {
     cy.mountFragment(SpecCloudDataHoverButtonFragmentDoc, {
       onResult: (result) => {
@@ -36,7 +36,6 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
             })
 
             break
-          case 'CONNECTED':
           default:
             set(result, 'currentProject.cloudProject.__typename', 'CloudProjectSpec')
             break
@@ -51,6 +50,7 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
           <div class="flex justify-around">
             <SpecsListCloudButton
               gql={gql}
+              projectConnectionStatus={status}
               onShowLogin={showLoginSpy}
               onShowConnectToProject={showConnectToProjectSpy}
               onRequestAccess={requestAccessSpy}
@@ -96,16 +96,6 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       cy.get('@showLoginSpy').should('have.been.calledOnce')
 
       takeSnapshots()
-    })
-  })
-
-  context('connected', () => {
-    beforeEach(() => {
-      mountWithStatus('CONNECTED')
-    })
-
-    it('should not render', () => {
-      cy.findByTestId('cloud-button').should('not.exist')
     })
   })
 

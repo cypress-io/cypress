@@ -1,6 +1,5 @@
 <template>
   <Button
-    v-if="!!buttonOptions.text"
     data-cy="cloud-button"
     variant="linkBold"
     :prefix-icon="buttonOptions.icon"
@@ -34,6 +33,7 @@ const emits = defineEmits<{
 
 const props = defineProps<{
   gql: SpecCloudDataHoverButtonFragment
+  projectConnectionStatus: 'NOT_FOUND' | 'LOGGED_OUT' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED'
 }>()
 
 gql`
@@ -52,24 +52,6 @@ fragment SpecCloudDataHoverButton on Query {
   ...RequestAccessButton
 }
 `
-
-const projectConnectionStatus = computed(() => {
-  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
-
-  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    if (props.gql.currentProject?.cloudProject?.hasRequestedAccess) {
-      return 'ACCESS_REQUESTED'
-    }
-
-    return 'UNAUTHORIZED'
-  }
-
-  return 'CONNECTED'
-})
 
 type ButtonOptions = {
   text: string
@@ -112,17 +94,17 @@ const VALUES = {
 
 const buttonOptions = computed(() => {
   const options: ButtonOptions = {
-    text: VALUES[projectConnectionStatus.value]?.text,
-    textShort: VALUES[projectConnectionStatus.value]?.text_short,
-    icon: VALUES[projectConnectionStatus.value]?.icon,
-    emits: VALUES[projectConnectionStatus.value]?.emits,
+    text: VALUES[props.projectConnectionStatus]?.text,
+    textShort: VALUES[props.projectConnectionStatus]?.text_short,
+    icon: VALUES[props.projectConnectionStatus]?.icon,
+    emits: VALUES[props.projectConnectionStatus]?.emits,
   }
 
   return options
 })
 
 const handleClick = () => {
-  switch (projectConnectionStatus.value) {
+  switch (props.projectConnectionStatus) {
     case 'LOGGED_OUT':
       emits('showLogin')
       break

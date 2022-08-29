@@ -25,7 +25,7 @@
         </div>
         <SpecsListHoverCell
           data-cy="specs-list-row-latest-runs"
-          :is-hover-disabled="hasRuns"
+          :is-hover-disabled="isProjectConnected"
         >
           <template #content>
             <slot name="latest-runs" />
@@ -39,7 +39,7 @@
         </SpecsListHoverCell>
         <SpecsListHoverCell
           data-cy="specs-list-row-average-duration"
-          :is-hover-disabled="hasRuns"
+          :is-hover-disabled="isProjectConnected"
           class="hidden md:block"
         >
           <template #content>
@@ -66,7 +66,7 @@ import type { RouteLocationRaw } from 'vue-router'
 defineProps<{
   isLeaf: boolean
   route?: RouteLocationRaw
-  hasRuns?: boolean
+  isProjectConnected?: boolean
   gridColumns: string
 }>()
 

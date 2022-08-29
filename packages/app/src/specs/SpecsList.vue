@@ -85,7 +85,7 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
-          :has-runs="hasRuns"
+          :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
@@ -128,8 +128,9 @@
 
           <template #connect-button="{ utmMedium }">
             <SpecsListCloudButton
-              v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
+              v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
               :gql="props.gql"
+              :project-connection-status="projectConnectionStatus"
               @showLogin="showLogin(utmMedium)"
               @showConnectToProject="showConnectToProject"
               @request-access="requestAccess(props.gql?.currentProject?.projectId)"
@@ -145,7 +146,6 @@
                 :gql="row.data.data.cloudSpec ?? null"
                 :spec-file-extension="row.data.data.specFileExtension"
                 :spec-file-name="row.data.data.fileName"
-                @hasRuns="(v) => hasRuns = v"
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
@@ -232,14 +232,28 @@ const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
 const loginUtmMedium = ref('')
 
+const projectConnectionStatus = computed(() => {
+  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
+
+  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    if (props.gql.currentProject?.cloudProject?.hasRequestedAccess) {
+      return 'ACCESS_REQUESTED'
+    }
+
+    return 'UNAUTHORIZED'
+  }
+
+  return 'CONNECTED'
+})
+
 const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
 
 const hasRequestedAccess = computed(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    return props.gql.currentProject.cloudProject.hasRequestedAccess || false
-  }
-
-  return false
+  return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
 
 const showLogin = (utmMedium: string) => {
@@ -432,8 +446,6 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
-
-const hasRuns = ref(false)
 
 function refreshPage () {
   location.reload()
