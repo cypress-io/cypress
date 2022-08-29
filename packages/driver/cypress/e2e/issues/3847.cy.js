@@ -4,7 +4,7 @@ describe('issue 3847', () => {
   let queryKey = '\'input\''
 
   // like Sizzle throw error
-  let error = new Error(`Syntax error, unrecognized expression: ${queryKey}`)
+  let error = new Error(`Timed out retrying after 50ms: Syntax error, unrecognized expression: ${queryKey}`)
 
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -20,6 +20,7 @@ describe('issue 3847', () => {
     })
 
     // get 'input'
+    cy.timeout(50)
     cy.get(queryKey)
   })
 
@@ -36,6 +37,7 @@ describe('issue 3847', () => {
     })
 
     // get 'input'
+    cy.timeout(50)
     cy.get(queryKey, { log: false })
   })
 })

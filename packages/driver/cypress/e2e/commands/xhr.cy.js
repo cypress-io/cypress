@@ -812,7 +812,7 @@ describe('src/cy/commands/xhr', () => {
               event: true,
               alias: 'getFoo',
               aliasType: 'route',
-              state: 'pending',
+              state: 'passed',
             })
 
             expect(lastLog.get('renderProps')()).to.include({ wentToOrigin: false })
@@ -843,7 +843,7 @@ describe('src/cy/commands/xhr', () => {
               event: true,
               alias: 'getFoo',
               aliasType: 'route',
-              state: 'pending',
+              state: 'passed',
             })
 
             expect(lastLog.get('renderProps')()).to.include({ wentToOrigin: false })
@@ -2757,7 +2757,8 @@ describe('src/cy/commands/xhr', () => {
     })
 
     // TODO(webkit): fix+unskip. seems to be related to `cy.click` event not firing on the <a>, not an actual issue in cy.route
-    it('reapplies server + route automatically during page transitions', { browser: '!webkit' }, () => {
+    // TODO: Re-enable once .url is migrated to be a selector.
+    it.skip('reapplies server + route automatically during page transitions', { browser: '!webkit' }, () => {
       // this tests that the server + routes are automatically reapplied
       // after the 2nd visit - which is an example of the remote iframe
       // causing an onBeforeLoad event

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 
-const reExistence = /exist/
+const reExistence = /exist|undefined|ok/
 const reHaveLength = /length/
 
 const onBeforeLog = (log, command, logIndex) => {

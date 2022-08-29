@@ -134,16 +134,14 @@ describe('src/cy/commands/assertions', () => {
       cy.noop(obj).its('requestJSON').should('have.property', 'teamIds').should('deep.eq', [2])
     })
 
-    // TODO: make cy.then retry
-    // https://github.com/cypress-io/cypress/issues/627
-    it.skip('outer assertions retry on cy.then', () => {
+    it('outer assertions retry on cy.then', () => {
       const obj = { foo: 'bar' }
 
       cy.wrap(obj).then(() => {
         setTimeout(() => {
           obj.foo = 'baz'
         }
-        , 1000)
+        , 100)
 
         return obj
       }).should('deep.eq', { foo: 'baz' })
@@ -405,8 +403,7 @@ describe('src/cy/commands/assertions', () => {
         .should('have.length', 'asdf')
       })
 
-      // TODO: Reenable once `contains` is a selector
-      it.skip('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
+      it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
 
@@ -425,8 +422,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/6384
-      // TODO: Reenable once `contains` is a selector
-      it.skip('can chain contains assertions off of cy.contains', () => {
+      it('can chain contains assertions off of cy.contains', () => {
         cy.timeout(50)
         cy.contains('foo')
         .should('not.contain', 'asdfasdf')
@@ -447,8 +443,7 @@ describe('src/cy/commands/assertions', () => {
     })
 
     describe('have.class', () => {
-      // TODO: Reenable once `contains` is a selector
-      it.skip('snapshots and ends the assertion after retrying', () => {
+      it('snapshots and ends the assertion after retrying', () => {
         cy.on('command:retry', _.after(3, () => {
           cy.$$('#foo').addClass('active')
         }))

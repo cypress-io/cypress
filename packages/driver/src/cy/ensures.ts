@@ -135,7 +135,9 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureChildCommand = (command, args) => {
-    if (!command.get('prev') || command.get('prev').get('chainerId') !== command.get('chainerId')) {
+    const subjects = cy.state('subjects')
+
+    if (subjects[command.get('chainerId')] === undefined) {
       const stringifiedArg = $utils.stringifyActual(args[0])
 
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
