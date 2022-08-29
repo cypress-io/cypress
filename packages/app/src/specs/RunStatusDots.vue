@@ -76,7 +76,7 @@
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { RunStatusDotsFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -142,20 +142,12 @@ const props = defineProps<{
   specFileExtension: string
 }>()
 
-const emits = defineEmits<{
-  (eventName: 'hasRuns', value: boolean): void
-}>()
-
 const runs = computed(() => {
   return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
 })
 
 const isRunsLoaded = computed(() => {
   return !!props.gql?.data
-})
-
-watchEffect(() => {
-  emits('hasRuns', isRunsLoaded.value)
 })
 
 const dotClasses = computed(() => {
