@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { checkSupportFile } from './project_utils'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
 import { ServerCt } from './server-ct'
@@ -224,8 +223,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     await this.saveState(stateToSave)
-
-    await checkSupportFile(cfg.supportFile)
 
     if (cfg.isTextTerminal) {
       return
