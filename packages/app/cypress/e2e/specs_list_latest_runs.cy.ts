@@ -111,7 +111,6 @@ function simulateRunData () {
 }
 
 function allVisibleSpecsShouldBePlaceholders () {
-  // cy.findByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
   cy.findAllByTestId('run-status-empty').should('exist').should('have.class', 'text-gray-400')
   cy.findAllByTestId('run-status-dot-0').should('not.exist')
   cy.findAllByTestId('run-status-dot-1').should('not.exist')

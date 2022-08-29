@@ -30,7 +30,7 @@
       v-if="specs.length"
       class="mb-4 grid children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
-      :class="[tableGridColumns]"
+      :class="tableGridColumns"
     >
       <div
         class="flex items-center justify-between"

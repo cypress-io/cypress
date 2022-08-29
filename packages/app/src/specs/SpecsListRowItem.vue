@@ -3,7 +3,7 @@
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
       class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
-      :class="[gridColumns]"
+      :class="gridColumns"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
       @click="emit('toggleRow')"
@@ -33,7 +33,7 @@
           <template #hover>
             <slot
               name="connect-button"
-              :utmMedium="'Specs Latest Runs Empty State'"
+              utmMedium="Specs Latest Runs Empty State"
             />
           </template>
         </SpecsListHoverCell>
@@ -48,7 +48,7 @@
           <template #hover>
             <slot
               name="connect-button"
-              :utmMedium="'Specs Average Duration Empty State'"
+              utmMedium="Specs Average Duration Empty State"
             />
           </template>
         </SpecsListHoverCell>
