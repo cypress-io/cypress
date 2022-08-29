@@ -138,10 +138,17 @@ function setupRunner () {
   getEventManager().start(config)
 
   const autStore = useAutStore()
+  const studioStore = useStudioStore()
 
   watchEffect(() => {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
+
+  watchEffect(() => {
+    window.UnifiedRunner.MobX.runInAction(() => {
+      mobxRunnerStore.setCanSaveStudioLogs(studioStore.logs.length > 0)
+    })
+  })
 
   _autIframeModel = new AutIframe(
     'Test Project',
