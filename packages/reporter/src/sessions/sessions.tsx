@@ -56,7 +56,6 @@ const Sessions = ({ model }: SessionPanelProps) => {
         <Collapsible
           header={<>Sessions <i style={{ textTransform: 'none' }}>({sessions.length})</i></>}
           headerClass='hook-header'
-          isOpen
           headerExtras={
             <div
               className="clear-sessions"

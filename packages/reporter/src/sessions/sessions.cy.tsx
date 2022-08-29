@@ -14,36 +14,45 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
 
   describe('renders with sessions', () => {
     const specSession = new SessionsModel({
-      name: 'spec_session',
+      name: 'session',
       state: 'passed',
       type: 'parent',
       testId: '1',
       id: 1,
-      isGlobalSession: false,
       testCurrentRetry: 1,
-      status: 'created',
+      sessionInfo: {
+        id: 'spec_session',
+        isGlobalSession: false,
+        status: 'created',
+      },
     })
 
     const globalSession = new SessionsModel({
-      name: 'global_session',
+      name: 'session',
       state: 'passed',
       type: 'parent',
       testId: '1',
       id: 2,
-      isGlobalSession: true,
       testCurrentRetry: 1,
-      status: 'restored',
+      sessionInfo: {
+        id: 'global_session',
+        isGlobalSession: true,
+        status: 'restored',
+      },
     })
 
     const failedSpecSession = new SessionsModel({
-      name: 'spec_session_failed',
+      name: 'session',
       state: 'failed',
       type: 'parent',
       testId: '1',
       id: 3,
-      isGlobalSession: false,
+      sessionInfo: {
+        id: 'spec_session_failed',
+        isGlobalSession: false,
+        status: 'failed',
+      },
       testCurrentRetry: 1,
-      status: 'failed',
     })
 
     beforeEach(() => {

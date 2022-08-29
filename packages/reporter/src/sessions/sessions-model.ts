@@ -5,7 +5,6 @@ export interface SessionProps extends InstrumentProps {
   name: string
   testId: string
   testCurrentRetry: number
-  status: string
   sessionInfo: {
     id: string
     isGlobalSession: boolean

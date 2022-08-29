@@ -5,7 +5,6 @@ import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runna
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
-import { SessionProps } from '../sessions/sessions-model'
 
 const localBus = new EventEmitter()
 
