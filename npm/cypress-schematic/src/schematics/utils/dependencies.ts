@@ -4,7 +4,7 @@
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- * https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utility/dependencies.ts
+ * https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utils/dependencies.ts
  */
 
 import { Tree } from '@angular-devkit/schematics'

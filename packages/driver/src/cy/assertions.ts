@@ -333,12 +333,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         try {
           if (_.isFunction(onFail)) {
             // pass in the err and the upcoming assertion commands
+            finishAssertions()
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          throw e3
-        } finally {
           finishAssertions()
+          throw e3
         }
 
         if (_.isFunction(onRetry)) {

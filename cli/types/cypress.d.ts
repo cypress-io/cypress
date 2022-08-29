@@ -1,5 +1,6 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
+/// <reference path="./cypress-type-helpers.d.ts" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -3047,16 +3048,29 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
+  interface AngularDevServerProjectConfig {
+    root: string,
+    sourceRoot: string,
+    buildOptions: Record<string, any>
+  }
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'angular'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue'
+    framework: 'react' | 'vue' | 'svelte'
     viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+  } | {
+    bundler: 'webpack',
+    framework: 'angular',
+    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    options?: {
+      projectConfig: AngularDevServerProjectConfig
+    }
   }
 
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
@@ -5783,6 +5797,26 @@ declare namespace Cypress {
      *   cy.clock().invoke('restore')
      */
     restore(): void
+    /**
+     * Change the time without invoking any timers.
+     *
+     * Default value with no argument or undefined is 0.
+     *
+     * This can be useful if you need to change the time by an hour
+     * while there is a setInterval registered that may otherwise run thousands
+     * of times.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.setSystemTime(60 * 60 * 1000)
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('setSystemTime', 60 * 60 * 1000)
+     */
+    setSystemTime(now?: number | Date): void
   }
 
   interface Cookie {
