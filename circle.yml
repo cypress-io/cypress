@@ -1831,7 +1831,6 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
     steps:
       - restore_cached_workspace
       - run:
@@ -2320,7 +2319,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - percy-finalize:
-        context: test-runner:poll-circle-workflow
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
