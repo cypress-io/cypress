@@ -563,10 +563,6 @@ export default {
   },
 
   get: {
-    alias_invalid: {
-      message: '`{{prop}}` is not a valid alias property. Only `numbers` or `all` is permitted.',
-      docsUrl: 'https://on.cypress.io/get',
-    },
     alias_zero: {
       message: '`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`',
       docsUrl: 'https://on.cypress.io/get',

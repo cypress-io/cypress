@@ -64,8 +64,7 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
-    // TODO: Re-enable once .contains is a selector
-    it.skip('recognizes dot and non dot with same alias names', () => {
+    it('recognizes dot and non dot with same alias names', () => {
       cy.get('body').as('body').then(() => {
         expect(cy.state('aliases')['body']).to.exist
 

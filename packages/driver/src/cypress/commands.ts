@@ -151,7 +151,9 @@ export default {
       },
 
       addSelector (name, prevSubject, fn) {
-        if (cy[name]) {
+        // TODO: Remove the special case for 'get' once we no longer rely on cy.now('get').
+        // See cy/commands/querying.ts for an explanation.
+        if (name !== 'get' && cy[name]) {
           internalError('miscellaneous.invalid_new_selector', name)
         }
 
