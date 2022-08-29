@@ -97,10 +97,10 @@ const VALUES: Record<ProjectConnectionStatus, ButtonOptions> = {
 
 const buttonOptions = computed(() => {
   const options: ButtonOptions = {
-    text: VALUES[props.projectConnectionStatus]?.text,
-    textShort: VALUES[props.projectConnectionStatus]?.textShort,
-    icon: VALUES[props.projectConnectionStatus]?.icon,
-    emits: VALUES[props.projectConnectionStatus]?.emits,
+    text: VALUES[props.projectConnectionStatus].text,
+    textShort: VALUES[props.projectConnectionStatus].textShort,
+    icon: VALUES[props.projectConnectionStatus].icon,
+    emits: VALUES[props.projectConnectionStatus].emits,
   }
 
   return options
