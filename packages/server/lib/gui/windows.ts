@@ -21,6 +21,8 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   onCrashed?: () => void
 }
 
+export type WindowOpenOptions = WindowOptions & { url: string }
+
 type TrackStateMap = Record<'width' | 'height' | 'x' | 'y' | 'devTools', string>
 
 let windows = {}
@@ -213,7 +215,7 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
 }
 
 // open launchpad BrowserWindow
-export async function open (projectRoot: string, options: WindowOptions & { url: string }, newBrowserWindow = _newBrowserWindow): Promise<BrowserWindow> {
+export async function open (projectRoot: string, options: WindowOpenOptions, newBrowserWindow = _newBrowserWindow): Promise<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   const knownWin = options.type && getByType(options.type)
