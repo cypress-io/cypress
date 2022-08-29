@@ -24,6 +24,7 @@ const SessionRow = ({ name, isGlobalSession, id, state, status }: SessionsModel)
       message='Printed output to your console'
       onClick={() => printToConsole(id)}
       shouldShowMessage={() => true}
+      wrapperClassName='session-item-wrapper'
     >
       <div className='session-item'>
         <span className={cs('session-info', { 'spec-session': !isGlobalSession })}>
@@ -63,7 +64,7 @@ const Sessions = ({ model }: SessionPanelProps) => {
               <span><i className="fas fa-ban" /> Clear All Sessions</span>
             </div>
           }
-          contentClass='instrument-content'
+          contentClass='instrument-content session-content'
         >
           <div>
             {sessions.map((session) => <SessionRow key={session.id} {...session} />)}

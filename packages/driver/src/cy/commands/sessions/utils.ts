@@ -190,7 +190,6 @@ function navigateAboutBlank (session: boolean = true) {
 }
 
 export {
-  getSessionDetails,
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getConsoleProps,
