@@ -216,7 +216,7 @@ it('visits a basic html page', () => {
     cy.openProject('experimental-studio')
     cy.startAppServer('e2e')
     cy.visitApp()
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=cypress/e2e/empty.cy.js`)
+    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
 
     cy.waitForSpecToFinish()
 
