@@ -1,0 +1,29 @@
+name: Snyk Static Analysis Scan
+# This git workflow leverages Snyk actions to perform a Static Application 
+# Testing scan (SAST) on our first-party code upon Pull Requests to Main & 
+# Develop branches.  We use this as a control to prevent vulnerabilities 
+# from being introduced into the codebase. 
+on:
+  pull_request_target:
+    types:
+      - opened
+    branches: 
+      - master
+      - develop
+jobs:
+  Snyk_SAST_Scan :
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: snyk/actions/setup@master
+      - name: Perform Static Analysis Test
+        continue-on-error: true
+        run: |
+          snyk code test --yarn-workspaces --strict-out-of-sync=false --detection-depth=6 --exclude=docker,Dockerfile --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # The Following Requires Advanced Security License
+      # - name: Upload results to Github Code Scanning
+      #   uses: github/codeql-action/upload-sarif@v1
+      #   with:
+      #     sarif_file: snyk_sarif
