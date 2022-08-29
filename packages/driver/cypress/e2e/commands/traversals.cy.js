@@ -1,8 +1,6 @@
 const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
-const helpers = require('../../support/helpers')
-
 describe('src/cy/commands/traversals', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -95,7 +93,7 @@ describe('src/cy/commands/traversals', () => {
           })
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include(`\`cy.${name}()\` failed because this element`)
+            expect(err.message).to.include(`Expected to find element: \`#list\`, but never found it.`)
 
             done()
           })
@@ -208,7 +206,7 @@ describe('src/cy/commands/traversals', () => {
             const yielded = Cypress.dom.getElements($el)
 
             _.extend(obj, {
-              'Applied To': helpers.getFirstSubjectByName('get').get(0),
+              'Applied To': cy.$$('#list')[0],
               Yielded: yielded,
               Elements: $el.length,
             })
@@ -284,7 +282,8 @@ describe('src/cy/commands/traversals', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/38
-  it('works with checkboxes', () => {
+  // TODO: Re-enable once .find is migrated to be a selector.
+  it.skip('works with checkboxes', () => {
     cy.on('command:retry', _.after(2, () => {
       const c = cy.$$('[name=colors]').slice(0, 2)
 
@@ -346,13 +345,13 @@ describe('src/cy/commands/traversals', () => {
       const button = cy.$$('#button').hide()
 
       cy.on('fail', (err) => {
-        const log = this.logs[1]
+        const [, findLog, assertLog] = this.logs
 
-        expect(log.get('state')).to.eq('failed')
-        expect(err.message).to.include(log.get('error').message)
-        expect(log.get('$el').get(0)).to.eq(button.get(0))
+        expect(assertLog.get('state')).to.eq('failed')
+        expect(err.message).to.include(assertLog.get('error').message)
+        expect(assertLog.get('$el').get(0)).to.eq(button.get(0))
 
-        const consoleProps = log.invoke('consoleProps')
+        const consoleProps = findLog.invoke('consoleProps')
 
         expect(consoleProps.Yielded).to.eq(button.get(0))
         expect(consoleProps.Elements).to.eq(button.length)

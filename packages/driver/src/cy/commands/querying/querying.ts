@@ -297,7 +297,8 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       if (aliasObj) {
-        let { subject, alias, command } = aliasObj
+        let { alias, command } = aliasObj
+        let subject = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
 
         const resolveAlias = () => {
           // if this is a DOM element
