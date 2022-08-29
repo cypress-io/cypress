@@ -80,6 +80,7 @@ class Reporter extends Component<SingleReporterProps> {
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
             studioEnabled={studioEnabled}
+            canSaveStudioLogs={this.props.runnerStore.canSaveStudioLogs}
           />
         )}
       </div>

@@ -23,6 +23,7 @@ import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets
 interface StudioControlsProps {
   events: Events
   model: TestModel
+  canSaveStudioLogs: boolean
 }
 
 interface StudioControlsState {
@@ -66,7 +67,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
   }
 
   render () {
-    const { studioIsNotEmpty } = this.props.model
+    const { canSaveStudioLogs } = this.props
     const { copySuccess } = this.state
 
     return (
@@ -76,14 +77,14 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
           className='cy-tooltip'
           wrapperClassName='studio-copy-wrapper'
-          visible={!studioIsNotEmpty ? false : null}
+          visible={!canSaveStudioLogs ? false : null}
           updateCue={copySuccess}
         >
           <button
             className={cs('studio-copy', {
               'studio-copy-success': copySuccess,
             })}
-            disabled={!studioIsNotEmpty}
+            disabled={!canSaveStudioLogs}
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
@@ -94,7 +95,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             )}
           </button>
         </Tooltip>
-        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+        <button className='studio-save' disabled={!canSaveStudioLogs} onClick={this._save}>Save Commands</button>
       </div>
     )
   }
@@ -107,6 +108,7 @@ interface TestProps {
   scroller: Scroller
   model: TestModel
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 @observer
@@ -220,7 +222,7 @@ class Test extends Component<TestProps> {
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
         <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
-        {appState.studioActive && <StudioControls model={model} />}
+        {appState.studioActive && <StudioControls model={model} canSaveStudioLogs={this.props.canSaveStudioLogs}/>}
       </div>
     )
   }

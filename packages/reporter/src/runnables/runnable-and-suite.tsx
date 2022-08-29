@@ -19,9 +19,10 @@ interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
-const Suite = observer(({ eventManager = events, model, studioEnabled }: SuiteProps) => {
+const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -57,6 +58,7 @@ const Suite = observer(({ eventManager = events, model, studioEnabled }: SuitePr
             key={runnable.id}
             model={runnable}
             studioEnabled={studioEnabled}
+            canSaveStudioLogs={canSaveStudioLogs}
           />))}
       </ul>
     </Collapsible>
@@ -67,6 +69,7 @@ export interface RunnableProps {
   model: TestModel | SuiteModel
   appState: AppState
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -80,7 +83,7 @@ class Runnable extends Component<RunnableProps> {
   }
 
   render () {
-    const { appState, model, studioEnabled } = this.props
+    const { appState, model, studioEnabled, canSaveStudioLogs } = this.props
 
     return (
       <li
@@ -91,8 +94,8 @@ class Runnable extends Component<RunnableProps> {
         data-model-state={model.state}
       >
         {model.type === 'test'
-          ? <Test model={model as TestModel} studioEnabled={studioEnabled} />
-          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} />}
+          ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
+          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />}
       </li>
     )
   }

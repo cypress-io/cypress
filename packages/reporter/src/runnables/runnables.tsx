@@ -88,15 +88,17 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
 interface RunnablesListProps {
   runnables: RunnableArray
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
-const RunnablesList = observer(({ runnables, studioEnabled }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
       {_.map(runnables, (runnable) =>
         (<Runnable
           key={runnable.id}
           model={runnable}
+          canSaveStudioLogs={canSaveStudioLogs}
           studioEnabled={studioEnabled}
         />))}
     </ul>
@@ -108,9 +110,10 @@ export interface RunnablesContentProps {
   spec: Cypress.Cypress['spec']
   error?: RunnablesErrorModel
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
-const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled }: RunnablesContentProps) => {
+const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -135,6 +138,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled 
     <RunnablesList
       runnables={isRunning ? runnables : runnablesHistory[specPath]}
       studioEnabled={studioEnabled}
+      canSaveStudioLogs={canSaveStudioLogs}
     />
   )
 })
@@ -147,12 +151,13 @@ export interface RunnablesProps {
   scroller: Scroller
   appState?: AppState
   studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, spec, studioEnabled } = this.props
+    const { error, runnablesStore, spec, studioEnabled, canSaveStudioLogs } = this.props
 
     return (
       <div ref='container' className='container'>
@@ -160,6 +165,7 @@ class Runnables extends Component<RunnablesProps> {
         <RunnablesContent
           runnablesStore={runnablesStore}
           studioEnabled={studioEnabled}
+          canSaveStudioLogs={canSaveStudioLogs}
           spec={spec}
           error={error}
         />
