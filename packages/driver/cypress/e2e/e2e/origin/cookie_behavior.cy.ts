@@ -1056,13 +1056,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
               })
 
-              // current expected assertion. NOTE: This SHOULD be consistent
-              if (Cypress.isBrowser('firefox')) {
-                // firefox actually sets the cookie correctly
-                cy.getCookie('foo1').its('value').should('equal', 'bar1')
-              } else {
-                cy.getCookie('foo1').its('value').should('equal', null)
-              }
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
               cy.window().then((win) => {
                 return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include'))
@@ -1089,13 +1083,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
               })
 
-              // current expected assertion. NOTE: This SHOULD be consistent
-              if (Cypress.isBrowser('firefox')) {
-                // firefox actually sets the cookie correctly
-                cy.getCookie('foo1').its('value').should('equal', 'bar1')
-              } else {
-                cy.getCookie('foo1').its('value').should('equal', null)
-              }
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
               cy.window().then((win) => {
                 return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
