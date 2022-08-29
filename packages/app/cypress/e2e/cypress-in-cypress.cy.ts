@@ -253,6 +253,35 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.findByTestId('reporter-panel').should('not.be.visible')
       cy.findByTestId('sidebar').should('be.visible')
     })
+
+    it(`checks that specs load when devServer configuration is not set in open mode for ${testingType}`, () => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+      cy.openProject('cypress-in-cypress')
+      cy.startAppServer()
+      cy.visitApp()
+      cy.contains('dom-content.spec').should('exist')
+      cy.withCtx(async (ctx, o) => {
+        ctx.coreData.app.browserStatus = 'open'
+
+        let config = await ctx.actions.file.readFileInProject('cypress.config.js')
+
+        let oldFramework = `framework: 'react',`
+        let oldBundler = `bundler: 'webpack',`
+        let oldWebPackConfig = `webpackConfig: require('./webpack.config.js'),`
+
+        config = config.replace(oldFramework, ``).replace(oldBundler, ``).replace(oldWebPackConfig, ``).replace(`devServer: {`, ``).replace(/},/i, ``)
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+        o.sinon.stub(ctx.actions.browser, 'closeBrowser')
+        o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
+      })
+
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.exist')
+      cy.contains('accounts_list.spec').should('be.visible')
+    })
   })
 
   it('restarts browser if there is a change on the config file affecting the browser', () => {
@@ -265,6 +294,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
+
       await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
       o.sinon.stub(ctx.actions.browser, 'closeBrowser')

@@ -531,6 +531,6 @@ export class ProjectActions {
     }
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer?.framework)
   }
 }
