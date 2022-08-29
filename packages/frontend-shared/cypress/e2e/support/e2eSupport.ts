@@ -294,6 +294,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
         await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
+        // @ts-expect-error this interface is strict about the options it expects
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
         if (!o.skipMockingPrompts
