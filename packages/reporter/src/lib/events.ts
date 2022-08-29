@@ -192,8 +192,8 @@ const events: Events = {
       runner.emit('get:user:editor', cb)
     })
 
-    localBus.on('clear:session', (cb) => {
-      runner.emit('clear:session', cb)
+    localBus.on('clear:all:sessions', (cb) => {
+      runner.emit('clear:all:sessions', cb)
     })
 
     localBus.on('set:user:editor', (editor) => {

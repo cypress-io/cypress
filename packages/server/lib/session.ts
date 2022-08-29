@@ -3,31 +3,56 @@ import type { CyCookie } from './browsers/cdp_automation'
 interface SessionData {
   cookies: CyCookie[]
   id: string
-  localStorage: object
-  sessionStorage: object
-}
-const state = {
-  sessions: {},
+  cacheAcrossSpecs: boolean
+  localStorage: Array<Record<string, string>>
+  sessionStorage: Array<Record<string, string>>
+  setup: string
 }
 
-export function saveSession (data: SessionData) {
+export type StoredSessions = Record<string, SessionData>
+
+type State = {
+  globalSessions: StoredSessions
+  specSessions: StoredSessions
+}
+
+const state: State = {
+  globalSessions: {},
+  specSessions: {},
+}
+
+export function saveSession (data: SessionData): void {
   if (!data.id) throw new Error('session data had no id')
 
-  state.sessions[data.id] = data
+  if (data.cacheAcrossSpecs) {
+    state.globalSessions[data.id] = data
+
+    return
+  }
+
+  state.specSessions[data.id] = data
+}
+
+export function getActiveSessions (): StoredSessions {
+  return state.globalSessions
 }
 
 export function getSession (id: string): SessionData {
-  const session = state.sessions[id]
+  const session = state.globalSessions[id] || state.specSessions[id]
 
   if (!session) throw new Error(`session with id "${id}" not found`)
 
   return session
 }
 
-export function getState () {
+export function getState (): State {
   return state
 }
 
-export function clearSessions () {
-  state.sessions = {}
+export function clearSessions (clearAllSessions: boolean = false): void {
+  state.specSessions = {}
+
+  if (clearAllSessions) {
+    state.globalSessions = {}
+  }
 }

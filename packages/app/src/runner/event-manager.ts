@@ -89,8 +89,7 @@ export class EventManager {
 
     const rerun = () => {
       if (!this) {
-        // if the tests have been reloaded
-        // then there is nothing to rerun
+        // if the tests have been reloaded then there is nothing to rerun
         return
       }
 
@@ -255,10 +254,10 @@ export class EventManager {
       this.saveState(state)
     })
 
-    this.reporterBus.on('clear:session', () => {
+    this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 
-      Cypress.backend('clear:session')
+      Cypress.backend('clear:sessions', true)
       .then(() => {
         rerun()
       })
@@ -352,7 +351,7 @@ export class EventManager {
     const $window = this.$CypressDriver.$(window)
 
     // This is a test-only even. It's used to
-    // trigger a re-reun for the drive rerun.cy.js spec.
+    // trigger a re-rerun for the drive rerun.cy.js spec.
     $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
@@ -759,8 +758,8 @@ export class EventManager {
     state.setIsLoading(true)
 
     if (!isRerun) {
-      // only clear session state when a new spec is selected
-      Cypress.backend('reset:session:state')
+      // only clear test state when a new spec is selected
+      Cypress.backend('reset:cached:test:state')
     }
 
     // when we are re-running we first need to stop cypress always
