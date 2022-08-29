@@ -3,19 +3,21 @@
     ref="columnRef"
     class="relative"
   >
-    <slot
-      v-if="!shouldShowHover"
-      name="content"
-    />
-    <div
-      v-if="shouldShowHover"
-      ref="hoverButton"
-      class="inset-y-1 right-0 absolute"
-    >
+    <TransitionQuickFade>
       <slot
-        name="hover"
+        v-if="!shouldShowHover"
+        name="content"
       />
-    </div>
+      <div
+        v-else
+        ref="hoverButton"
+        class="inset-y-1 right-0 absolute"
+      >
+        <slot
+          name="hover"
+        />
+      </div>
+    </TransitionQuickFade>
   </div>
 </template>
 
@@ -31,6 +33,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useTimeoutFn, useElementHover, Stoppable } from '@vueuse/core'
+import TransitionQuickFade from '../../../frontend-shared/src/components/transitions/TransitionQuickFade.vue'
 
 const props = defineProps<{
   isHoverDisabled?: boolean
