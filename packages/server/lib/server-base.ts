@@ -123,6 +123,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
+  private getCurrentBrowser: undefined | (() => Browser)
 
   constructor () {
     this.isListening = false
@@ -232,10 +233,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       networkProxy: this._networkProxy!,
       onError,
       getSpec,
-      getCurrentBrowser,
       testingType,
-      exit,
     }
+
+    this.getCurrentBrowser = getCurrentBrowser
 
     this.setupCrossOriginRequestHandling()
 
@@ -428,6 +429,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
+      if (this.getCurrentBrowser && this.getCurrentBrowser()?.name === 'webkit') {
+        // webkit uses polling transport for websocket, which will not trigger socketAllowed.add(...)
+        // skip isRequestAllowed for webkit
+        return
+      }
+
       if (!this.socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()

@@ -12,20 +12,28 @@ import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
+
+export type Frameworks = Extract<Cypress.DevServerConfigOptions, { bundler: 'webpack' }>['framework']
+
+type FrameworkConfig = {
+  framework?: Exclude<Frameworks, 'angular'>
+} | {
+  framework: 'angular'
+  options?: {
+    projectConfig: Cypress.AngularDevServerProjectConfig
+  }
+}
 
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
-} & {
-  framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
   webpackConfig?: unknown // Derived from the user's webpack
-}
-
-export const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
+} & FrameworkConfig
 
 /**
  * @internal
@@ -115,17 +123,17 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
     case 'next':
       return await nextHandler(devServerConfig)
 
-      // TODO: revert once Angular is slated for release
-      // case 'angular':
-      //   return await angularHandler(devServerConfig)
+    case 'angular':
+      return await angularHandler(devServerConfig)
 
     case 'react':
     case 'vue':
+    case 'svelte':
     case undefined:
       return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 
     default:
-      throw new Error(`Unexpected framework ${devServerConfig.framework}, expected one of ${ALL_FRAMEWORKS.join(', ')}`)
+      throw new Error(`Unexpected framework ${(devServerConfig as any).framework}, please visit https://docs.cypress.io/guides/component-testing/component-framework-configuration to see a list of supported frameworks`)
   }
 }
 

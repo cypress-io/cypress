@@ -30,7 +30,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .click()
 
-    cy.percySnapshot('after browsers open')
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('after browsers open')
+    */
 
     cy.contains('Edge Canary')
     .should('be.visible')
@@ -55,7 +58,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Unsupported browser').should('be.visible')
 
-    cy.percySnapshot('unsupported browser tooltip')
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('unsupported browser tooltip')
+    */
   })
 
   describe('breadcrumbs', () => {
@@ -357,7 +363,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         function mountWithSavedState (options?: {state?: object, projectId?: string }) {
-          return cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+          const mountResult = cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
               if (!result.currentProject) {
                 return
@@ -378,6 +384,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
             },
             render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
           })
+
+          // Auto-opening prompts wait 2000ms after mount before opening
+          // Advance to that point so that prompts will have had a chance to open
+          cy.tick(2000)
+
+          return mountResult
         }
 
         it('opens when after 4 days from first open, no projectId, and not already shown', () => {

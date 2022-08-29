@@ -6,9 +6,9 @@ const check = require('check-more-types')
 const { exec } = require('child_process')
 const util = require('util')
 const os = require('os')
+const { BROWSER_FAMILY } = require('@packages/types')
 
-// returns true if the passed string is a known browser family name
-const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
+const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
 
 let instance = null
 
@@ -78,6 +78,10 @@ const getBrowserLauncher = function (browser) {
 
   if (browser.family === 'firefox') {
     return require('./firefox')
+  }
+
+  if (browser.family === 'webkit') {
+    return require('./webkit')
   }
 }
 

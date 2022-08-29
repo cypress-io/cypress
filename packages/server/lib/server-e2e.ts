@@ -5,7 +5,7 @@ import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
-import { getRouteForRequest } from '@packages/net-stubbing'
+import { getRoutesForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
 import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
 
@@ -118,6 +118,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
             return ensureUrl.isListening(baseUrl)
             .return(null)
             .catch((err) => {
+              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
           }
@@ -191,7 +193,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       // @ts-ignore
-      return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
+      const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
+      // If the iterator is exhausted (done) on the first try, then 0 matches were found
+      const zeroMatches = iterator.next().done
+
+      return !zeroMatches
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {

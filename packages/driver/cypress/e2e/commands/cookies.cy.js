@@ -435,7 +435,8 @@ describe('src/cy/commands/cookies', () => {
     })
   })
 
-  context('#setCookie', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+  context.skip('#setCookie', () => {
     beforeEach(() => {
       cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
@@ -500,7 +501,8 @@ describe('src/cy/commands/cookies', () => {
       cy.setCookie('five', 'bar')
 
       // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-      if (Cypress.isBrowser('firefox')) {
+      // TODO(webkit): pw webkit has the same issue as firefox (no "unspecified" state), need a patched binary
+      if (Cypress.isBrowser('firefox') || Cypress.isBrowser('webkit')) {
         cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
       } else {
         cy.getCookie('five').should('not.have.property', 'sameSite')
@@ -508,7 +510,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
@@ -520,7 +523,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can override timeout', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('can override timeout', () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -530,7 +534,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('clears the current timeout and restores after success', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('clears the current timeout and restores after success', () => {
         Cypress.automation.resolves(null)
 
         cy.timeout(100)
@@ -562,7 +567,8 @@ describe('src/cy/commands/cookies', () => {
         return null
       })
 
-      it('logs once on error', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('logs once on error', function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'
@@ -582,7 +588,8 @@ describe('src/cy/commands/cookies', () => {
         cy.setCookie('foo', 'bar')
       })
 
-      it('throws after timing out', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('throws after timing out', function (done) {
         Cypress.automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {

@@ -10,7 +10,7 @@ import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
 } from '../../types'
-import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
+import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
   setDefaultHeaders,
@@ -41,21 +41,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  const matchingRoutes: BackendRoute[] = []
-
-  const populateMatchingRoutes = (prevRoute?) => {
-    const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
-
-    if (!route) {
-      return
-    }
-
-    matchingRoutes.push(route)
-
-    populateMatchingRoutes(route)
-  }
-
-  populateMatchingRoutes()
+  const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
   if (!matchingRoutes.length) {
     // not intercepted, carry on normally...

@@ -139,7 +139,8 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      transports: ['websocket'],
+      // allow polling in dev-mode-only, remove once webkit is no longer gated behind development
+      transports: process.env.CYPRESS_INTERNAL_ENV === 'production' ? ['websocket'] : ['websocket', 'polling'],
     })
   }
 
@@ -466,16 +467,12 @@ export class SocketBase {
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
-              resetRenderedHTMLOrigins()
-
-              return
+              return resetRenderedHTMLOrigins()
             }
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
+              throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
         }
 
@@ -605,5 +602,9 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
+  }
+
+  changeToUrl (url: string) {
+    return this.toRunner('change:to:url', url)
   }
 }

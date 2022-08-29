@@ -19,7 +19,7 @@ import { autoBindDebug } from '@packages/data-context/src/util'
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  projectBase: ProjectBase<any> | null = null
+  private projectBase: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
 
   constructor () {
@@ -221,6 +221,21 @@ export class OpenProject {
     debug('closing opened project')
 
     this.closeOpenProjectAndBrowsers()
+  }
+
+  changeUrlToSpec (spec: Cypress.Spec) {
+    if (!this.projectBase) {
+      return
+    }
+
+    const newSpecUrl = getSpecUrl({
+      projectRoot: this.projectBase.projectRoot,
+      spec,
+    })
+
+    debug(`New url is ${newSpecUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
   // close existing open project if it exists, for example

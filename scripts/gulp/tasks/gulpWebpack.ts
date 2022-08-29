@@ -15,14 +15,6 @@ export function webpackReporter () {
   })
 }
 
-export function webpackRunnerCT () {
-  return runWebpack({
-    cwd: monorepoPaths.pkgRunnerCt,
-    prefix: 'webpack:runner:ct',
-    args: ['-w'],
-  })
-}
-
 export function webpackRunner () {
   return runWebpack({
     cwd: monorepoPaths.pkgRunner,

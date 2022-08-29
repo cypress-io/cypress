@@ -7,6 +7,29 @@ import $errUtils from '../../cypress/error_utils'
 const reExistence = /exist/
 const reHaveLength = /length/
 
+const onBeforeLog = (log, command, commandLogId) => {
+  log.set('commandLogId', commandLogId)
+
+  const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
+
+  if (previousLogInstance) {
+    // log.merge unsets any keys that aren't set on the new log instance. We
+    // copy over 'snapshots' beforehand so that existing snapshots aren't lost
+    // in the merge operation.
+    log.set('snapshots', previousLogInstance.get('snapshots'))
+    previousLogInstance.merge(log)
+
+    if (previousLogInstance.get('end')) {
+      previousLogInstance.end()
+    }
+
+    // Returning false prevents this new log from being added to the command log
+    return false
+  }
+
+  return true
+}
+
 export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
@@ -24,8 +47,44 @@ export default function (Commands, Cypress, cy, state) {
   }
 
   const shouldFn = function (subject, chainers, ...args) {
+    const command = cy.state('current')
+
+    // Most commands are responsible for creating and managing their own log messages directly.
+    // .should(), however, is an exception - it is invoked by earlier commands, as part of
+    // `verifyUpcomingAssertions`. This callback can also be invoked any number of times, but we only want
+    // to display a few log messages (one for each assertion).
+
+    // Therefore, we each time Cypress.log() is called, we need a way to identify if this log call
+    // a duplicate of a previous one that's just being retried. This is the purpose of `commandLogId` - it should
+    // remain the same across multiple invocations of verifyUpcomingAssertions().
+
+    // It is composed of two parts: assertionIndex and logIndex. Assertion index is "which .should() command are we
+    // inside". Consider the following case:
+    // `cy.noop(3).should('be.lessThan', 4).should('be.greaterThan', 2)`
+    // cy.state('current') is always the 'noop' command, which rolls up the two upcoming assertions, lessThan and
+    // greaterThan. `assertionIndex` lets us tell them apart even though they have the same logIndex of 0 (since it
+    // resets each time .should() is called).
+
+    // As another case, consider:
+    // cy.noop(3).should((n) => { expect(n).to.be.lessThan(4); expect(n).to.be.greaterThan(2); })
+    // Here, assertionIndex is 0 for both - one .should() block generates two log messages. In this case, logIndex is
+    // used to tell them apart, since it increments each time Cypress.log() is called within a single retry of a single
+    // .should().
+    const assertionIndex = cy.state('upcomingAssertions') ? cy.state('upcomingAssertions').indexOf(command.get('currentAssertionCommand')) : 0
+    let logIndex = 0
+
     if (_.isFunction(chainers)) {
-      return shouldFnWithCallback.apply(this, [subject, chainers])
+      cy.state('onBeforeLog', (log) => {
+        logIndex++
+
+        return onBeforeLog(log, command, `${assertionIndex}-${logIndex}`)
+      })
+
+      try {
+        return shouldFnWithCallback.apply(this, [subject, chainers])
+      } finally {
+        cy.state('onBeforeLog', undefined)
+      }
     }
 
     let exp = cy.expect(subject).to
@@ -35,6 +94,7 @@ export default function (Commands, Cypress, cy, state) {
       // since we are throwing our own error
       // without going through the assertion we need
       // to ensure our .should command gets logged
+      logIndex++
       const log = Cypress.log({
         name: 'should',
         type: 'child',
@@ -58,31 +118,40 @@ export default function (Commands, Cypress, cy, state) {
     const isCheckingLengthOrExistence = isCheckingExistence || reHaveLength.test(chainers)
 
     const applyChainer = function (memo, value) {
-      if (value === lastChainer && !isCheckingExistence) {
+      logIndex++
+      cy.state('onBeforeLog', (log) => {
+        return onBeforeLog(log, command, `${assertionIndex}-${logIndex}`)
+      })
+
+      try {
+        if (value === lastChainer && !isCheckingExistence) {
         // https://github.com/cypress-io/cypress/issues/16006
         // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
         // It creates duplicated messages and confuses users.
-        const cmd = memo[value]
+          const cmd = memo[value]
 
-        if (_.isFunction(cmd)) {
-          try {
-            return cmd.apply(memo, args)
-          } catch (err: any) {
-            // if we made it all the way to the actual
-            // assertion but its set to retry false then
-            // we need to log out this .should since there
-            // was a problem with the actual assertion syntax
-            if (err.retry === false) {
-              return throwAndLogErr(err)
+          if (_.isFunction(cmd)) {
+            try {
+              return cmd.apply(memo, args)
+            } catch (err: any) {
+              // if we made it all the way to the actual
+              // assertion but its set to retry false then
+              // we need to log out this .should since there
+              // was a problem with the actual assertion syntax
+              if (err.retry === false) {
+                return throwAndLogErr(err)
+              }
+
+              throw err
             }
-
-            throw err
+          } else {
+            return cmd
           }
         } else {
-          return cmd
+          return memo[value]
         }
-      } else {
-        return memo[value]
+      } finally {
+        cy.state('onBeforeLog', undefined)
       }
     }
 

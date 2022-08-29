@@ -30,7 +30,8 @@ describe('cy.origin logging', () => {
     })
   })
 
-  it('logs cy.origin as group when failing with validation failure', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
+  it.skip('logs cy.origin as group when failing with validation failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -50,7 +51,8 @@ describe('cy.origin logging', () => {
     cy.origin(false, () => {})
   })
 
-  it('logs cy.origin as group when failing with serialization failure', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
+  it.skip('logs cy.origin as group when failing with serialization failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {

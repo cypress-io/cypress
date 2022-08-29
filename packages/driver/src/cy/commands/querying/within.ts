@@ -35,7 +35,9 @@ export default (Commands, Cypress, cy, state) => {
 
     fn.call(cy.state('ctx'), subject)
 
-    const cleanup = () => cy.removeListener('command:start', setWithinSubject)
+    const cleanup = () => {
+      cy.removeListener('command:start', setWithinSubject)
+    }
 
     // we need a mechanism to know when we should remove
     // our withinSubject so we dont accidentally keep it
@@ -75,6 +77,10 @@ export default (Commands, Cypress, cy, state) => {
         state('withinSubject', null)
       })
     }
+
+    // TODO: Rework cy.within to use chainer-based subject chaining, rather than its custom withinSubject state.
+    // For now, we leave this logic in place and just ensure that the new rules don't interfere with it.
+    cy.breakSubjectLinksToCurrentChainer()
 
     return subject
   }

@@ -205,6 +205,19 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           cy.percySnapshot()
         })
       })
+
+      it('delays popping tooltip', () => {
+        cy.clock()
+        mountWithStatus('CONNECTED', mode, msgKeys)
+        cy.get(tooltipContentSelector).trigger('mouseenter')
+        cy.findByTestId('cloud-data-tooltip-content')
+        .should('not.exist')
+
+        cy.tick(500)
+
+        cy.findByTestId('cloud-data-tooltip-content')
+        .should('be.visible')
+      })
     })
   })
 })

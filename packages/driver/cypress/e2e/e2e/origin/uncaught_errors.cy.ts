@@ -237,7 +237,8 @@ describe('cy.origin - uncaught errors', () => {
       })
     })
 
-    it('fails the current test/command if a promise is rejected from the cy.origin callback after it is finished running', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23484
+    it.skip('fails the current test/command if a promise is rejected from the cy.origin callback after it is finished running', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')

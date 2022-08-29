@@ -38,7 +38,8 @@ describe('slow network: launchpad', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
   })
 
-  it('shows the versions after they resolve', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21897
+  it.skip('shows the versions after they resolve', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('Log In')

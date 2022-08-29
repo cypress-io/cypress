@@ -25,7 +25,7 @@ const getLogProperties = (displayName) => {
 export default class SessionsManager {
   Cypress
   cy
-  currentTestRegisteredSessions = new Map()
+  registeredSessions = new Map()
 
   constructor (Cypress, cy) {
     this.Cypress = Cypress

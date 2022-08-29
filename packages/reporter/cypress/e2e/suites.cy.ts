@@ -22,7 +22,6 @@ describe('suites', () => {
             absolute: '/absolute/path/to/foo.js',
           },
         },
-        experimentalStudioEnabled: true,
       })
     })
 
@@ -76,8 +75,8 @@ describe('suites', () => {
 
         cy.get('@suiteWrapper')
         .should('not.have.class', 'is-open')
-        .find('.collapsible-content').eq(0)
-        .should('not.be.visible')
+        .find('.collapsible-content')
+        .should('not.exist')
 
         cy.contains('suite 1')
         .click()
@@ -95,8 +94,8 @@ describe('suites', () => {
 
         cy.get('@suiteWrapper')
         .should('not.have.class', 'is-open')
-        .find('.collapsible-content').eq(0)
-        .should('not.be.visible')
+        .find('.collapsible-content')
+        .should('not.exist')
 
         cy.contains('suite 1')
         .parents('.collapsible-header')
@@ -115,8 +114,8 @@ describe('suites', () => {
 
         cy.get('@suiteWrapper')
         .should('not.have.class', 'is-open')
-        .find('.collapsible-content').eq(0)
-        .should('not.be.visible')
+        .find('.collapsible-content')
+        .should('not.exist')
 
         cy.contains('suite 1')
         .parents('.collapsible-header')
@@ -130,7 +129,8 @@ describe('suites', () => {
     })
   })
 
-  describe('studio button', () => {
+  // FIXME: When studio support is re-introduced we can enable these tests.
+  describe.skip('studio button', () => {
     it('displays studio icon with half transparency when hovering over test title', () => {
       cy.contains('nested suite 1')
       .closest('.runnable-wrapper')

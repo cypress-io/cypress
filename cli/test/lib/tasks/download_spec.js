@@ -74,6 +74,13 @@ describe('lib/tasks/download', function () {
       snapshot('desktop url from template', normalize(url))
     })
 
+    it('returns custom url from template with version', () => {
+      process.env.CYPRESS_DOWNLOAD_PATH_TEMPLATE = 'https://mycompany/${version}/${platform}-${arch}/cypress.zip'
+      const url = download.getUrl('ARCH', '0.20.2')
+
+      snapshot('desktop url from template with version', normalize(url))
+    })
+
     it('returns custom url from template with escaped dollar sign', () => {
       process.env.CYPRESS_DOWNLOAD_PATH_TEMPLATE = '\\${endpoint}/\\${platform}-\\${arch}/cypress.zip'
       const url = download.getUrl('ARCH', '0.20.2')

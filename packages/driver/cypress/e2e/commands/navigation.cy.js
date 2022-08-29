@@ -89,8 +89,8 @@ describe('src/cy/commands/navigation', () => {
       cy.on('window:unload', stub3)
 
       cy.reload().then(() => {
-        expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
-        expect(stub1.secondCall).to.be.calledWith(true, 'load')
+        expect(stub1.getCall(0)).to.be.calledWith(false, 'beforeunload')
+        expect(stub1.getCall(1)).to.be.calledWith(true, 'load')
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
       })
@@ -271,7 +271,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#go', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
+  context.skip('#go', () => {
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
@@ -300,17 +301,17 @@ describe('src/cy/commands/navigation', () => {
         cy.go('back')
       })
       .then(function () {
-        expect(emit.firstCall).to.be.calledWith(
+        expect(emit.getCall(0)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html',
         )
 
-        expect(emit.secondCall).to.be.calledWith(
+        expect(emit.getCall(1)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html#hashchange',
         )
 
-        expect(emit.thirdCall).to.be.calledWith(
+        expect(emit.getCall(2)).to.be.calledWith(
           'url:changed',
           'http://localhost:3500/fixtures/generic.html',
         )
@@ -376,8 +377,8 @@ describe('src/cy/commands/navigation', () => {
         cy.on('window:unload', stub3)
       })
       .go('back').then(() => {
-        expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
-        expect(stub1.secondCall).to.be.calledWith(true, 'load')
+        expect(stub1.getCall(0)).to.be.calledWith(false, 'beforeunload')
+        expect(stub1.getCall(1)).to.be.calledWith(true, 'load')
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
       })
@@ -580,17 +581,34 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('removes window:load listeners', () => {
-      const listeners = cy.listeners('window:load')
+    describe('removes window:load listeners when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
+      it('removes 2x for about:blank and first url visit', () => {
+        const listeners = cy.listeners('window:load')
 
-      const winLoad = cy.spy(cy, 'once').withArgs('window:load')
+        const winLoad = cy.spy(cy, 'once').withArgs('window:load')
 
-      cy.visit('/fixtures/generic.html').then(() => {
-        // once for about:blank, once for $iframe src
-        expect(winLoad).to.be.calledTwice
-        expect(cy.listeners('window:load')).to.deep.eq(listeners)
+        cy.visit('/fixtures/generic.html').then(() => {
+          // once for about:blank, once for $iframe src
+          expect(winLoad).to.be.calledTwice
+          expect(cy.listeners('window:load')).to.deep.eq(listeners)
+        })
       })
     })
+
+    if (Cypress.config('experimentalSessionAndOrigin')) {
+      describe('removes window:load listeners when testIsolation=strict', () => {
+        it('removes for first url visit', () => {
+          const listeners = cy.listeners('window:load')
+
+          const winLoad = cy.spy(cy, 'once').withArgs('window:load')
+
+          cy.visit('/fixtures/generic.html').then(() => {
+            expect(winLoad).to.be.calledOnce
+            expect(cy.listeners('window:load')).to.deep.eq(listeners)
+          })
+        })
+      })
+    }
 
     it('can visit pages on the same originPolicy', () => {
       cy
@@ -735,7 +753,8 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14445
-    it('should eventually fail on assertion despite redirects', (done) => {
+    // TODO: skip flaky test https://github.com/cypress-io/cypress/issues/23472
+    it.skip('should eventually fail on assertion despite redirects', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
 
@@ -746,7 +765,7 @@ describe('src/cy/commands/navigation', () => {
       cy.get('div').should('contain', 'this should fail?')
     })
 
-    describe('when only hashes are changing', () => {
+    describe('when only hashes are changing when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
       it('short circuits the visit if the page will not refresh', () => {
         let count = 0
         const urls = []
@@ -784,8 +803,47 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    if (Cypress.config('experimentalSessionAndOrigin')) {
+      describe('when only hashes are changing when testIsolation=strict', () => {
+        it('short circuits the visit if the page will not refresh', () => {
+          let count = 0
+          const urls = []
+
+          cy.on('window:load', () => {
+            urls.push(cy.state('window').location.href)
+
+            count += 1
+          })
+
+          cy
+          .visit('/fixtures/generic.html?foo#bar') // yes (1)
+          .visit('/fixtures/generic.html?foo#foo') // no (1)
+          .visit('/fixtures/generic.html?bar#bar') // yes (2)
+          .visit('/fixtures/dimensions.html?bar#bar') // yes (3)
+          .visit('/fixtures/dimensions.html?baz#bar') // yes (4)
+          .visit('/fixtures/dimensions.html#bar') // yes (5)
+          .visit('/fixtures/dimensions.html') // yes (6)
+          .visit('/fixtures/dimensions.html#baz') // no (6)
+          .visit('/fixtures/dimensions.html#') // no (6)
+          .then(() => {
+            expect(count).to.eq(6)
+
+            expect(urls).to.deep.eq([
+              'http://localhost:3500/fixtures/generic.html?foo#bar',
+              'http://localhost:3500/fixtures/generic.html?bar#bar',
+              'http://localhost:3500/fixtures/dimensions.html?bar#bar',
+              'http://localhost:3500/fixtures/dimensions.html?baz#bar',
+              'http://localhost:3500/fixtures/dimensions.html#bar',
+              'http://localhost:3500/fixtures/dimensions.html',
+            ])
+          })
+        })
+      })
+    }
+
     // https://github.com/cypress-io/cypress/issues/1311
-    it('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23201
+    it.skip('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', () => {
       const onLoad = cy.stub()
 
       cy
@@ -1925,7 +1983,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#page load', () => {
+  // TODO(webkit): fix+unskip for experimental webkit release
+  context('#page load', { browser: '!webkit' }, () => {
     it('sets initial=true and then removes', () => {
       Cookie.remove('__cypress.initial')
 
@@ -2231,12 +2290,12 @@ describe('src/cy/commands/navigation', () => {
       .visit('/timeout?ms=10', {
         onBeforeLoad () {
           expect(emit).to.be.calledOnce
-          expect(emit.firstCall).to.be.calledWith('page:loading', true)
+          expect(emit.getCall(0)).to.be.calledWith('page:loading', true)
         },
       })
       .then(() => {
         expect(emit).to.be.calledTwice
-        expect(emit.secondCall).to.be.calledWith('page:loading', false)
+        expect(emit.getCall(1)).to.be.calledWith('page:loading', false)
       })
     })
 
@@ -2250,7 +2309,7 @@ describe('src/cy/commands/navigation', () => {
         cy.once('window:unload', () => {
           expected = true
           expect(emit.callCount).to.eq(3)
-          expect(emit.thirdCall).to.be.calledWith('page:loading', true)
+          expect(emit.getCall(2)).to.be.calledWith('page:loading', true)
         })
       }).get('#dimensions').click()
       .then(() => {
@@ -2353,7 +2412,8 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  context('#url:changed', () => {
+  // TODO(webkit): fix+unskip for experimental webkit release
+  context('#url:changed', { browser: '!webkit' }, () => {
     beforeEach(function () {
       this.logs = []
 
@@ -2502,17 +2562,17 @@ describe('src/cy/commands/navigation', () => {
           }).then(() => {
             expect(emit.callCount).to.eq(4)
 
-            expect(emit.firstCall).to.be.calledWith(
+            expect(emit.getCall(0)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html',
             )
 
-            expect(emit.secondCall).to.be.calledWith(
+            expect(emit.getCall(1)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html#hashchange',
             )
 
-            expect(emit.thirdCall).to.be.calledWith(
+            expect(emit.getCall(2)).to.be.calledWith(
               'url:changed',
               'http://localhost:3500/fixtures/generic.html',
             )
@@ -2525,104 +2585,204 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      // https://github.com/cypress-io/cypress/issues/19230
-      it('filters page load events when going back with window navigation', () => {
-        const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
+      describe('filters page load events when going back with window navigation when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
+        // https://github.com/cypress-io/cypress/issues/19230
+        it('when going back with window navigation', () => {
+          const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
 
-        cy
-        .visit('/fixtures/generic.html')
-        .get('#hashchange').click()
-        .window().then((win) => {
-          return new Promise((resolve) => {
-            cy.once('navigation:changed', resolve)
-
-            win.history.back()
-          }).then(() => {
+          cy
+          .visit('/fixtures/generic.html')
+          .get('#hashchange').click()
+          .window().then((win) => {
             return new Promise((resolve) => {
               cy.once('navigation:changed', resolve)
 
-              win.history.forward()
+              win.history.back()
+            }).then(() => {
+              return new Promise((resolve) => {
+                cy.once('navigation:changed', resolve)
+
+                win.history.forward()
+              })
             })
           })
-        })
 
-        cy.get('#dimensions').click()
-        .window().then((win) => {
-          return new Promise((resolve) => {
-            cy.on('navigation:changed', (event) => {
-              if (event.includes('(load)')) {
-                resolve()
-              }
-            })
-
-            win.history.back()
-          })
-          .then(() => {
+          cy.get('#dimensions').click()
+          .window().then((win) => {
             return new Promise((resolve) => {
-              cy.on('navigation:changed', resolve)
+              cy.on('navigation:changed', (event) => {
+                if (event.includes('(load)')) {
+                  resolve()
+                }
+              })
+
               win.history.back()
             })
-          })
-          .then(() => {
-            expect(emit.firstCall).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (load)',
-            )
+            .then(() => {
+              return new Promise((resolve) => {
+                cy.on('navigation:changed', resolve)
+                win.history.back()
+              })
+            })
+            .then(() => {
+              expect(emit.getCall(0)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
 
-            expect(emit.secondCall).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (before:load)',
-            )
+              expect(emit.getCall(1)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
 
-            expect(emit.thirdCall).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (load)',
-            )
+              expect(emit.getCall(2)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
 
-            expect(emit.getCall(3)).to.be.calledWithMatch(
-              'navigation:changed',
-              'hashchange',
-            )
+              expect(emit.getCall(3)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
 
-            expect(emit.getCall(4)).to.be.calledWithMatch(
-              'navigation:changed',
-              'hashchange',
-            )
+              expect(emit.getCall(4)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
 
-            expect(emit.getCall(5)).to.be.calledWithMatch(
-              'navigation:changed',
-              'hashchange',
-            )
+              expect(emit.getCall(5)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
 
-            expect(emit.getCall(6)).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (before:load)',
-            )
+              expect(emit.getCall(6)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
 
-            expect(emit.getCall(7)).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (load)',
-            )
+              expect(emit.getCall(7)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
 
-            expect(emit.getCall(8)).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (before:load)',
-            )
+              expect(emit.getCall(8)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
 
-            expect(emit.getCall(9)).to.be.calledWith(
-              'navigation:changed',
-              'page navigation event (load)',
-            )
+              expect(emit.getCall(9)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
 
-            expect(emit.getCall(10)).to.be.calledWithMatch(
-              'navigation:changed',
-              'hashchange',
-            )
+              expect(emit.getCall(10)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
 
-            expect(emit.callCount).to.eq(11)
+              expect(emit.callCount).to.eq(11)
+            })
           })
         })
       })
+
+      if (Cypress.config('experimentalSessionAndOrigin')) {
+        describe('filters page load events when going back with window navigation when testIsolation=strict', () => {
+          // https://github.com/cypress-io/cypress/issues/19230
+          it('when going back with window navigation', () => {
+            const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
+
+            cy
+            .visit('/fixtures/generic.html')
+            .get('#hashchange').click()
+            .window().then((win) => {
+              return new Promise((resolve) => {
+                cy.once('navigation:changed', resolve)
+
+                win.history.back()
+              }).then(() => {
+                return new Promise((resolve) => {
+                  cy.once('navigation:changed', resolve)
+
+                  win.history.forward()
+                })
+              })
+            })
+
+            cy.get('#dimensions').click()
+            .window().then((win) => {
+              return new Promise((resolve) => {
+                cy.on('navigation:changed', (event) => {
+                  if (event.includes('(load)')) {
+                    resolve()
+                  }
+                })
+
+                win.history.back()
+              })
+              .then(() => {
+                return new Promise((resolve) => {
+                  cy.on('navigation:changed', resolve)
+                  win.history.back()
+                })
+              })
+              .then(() => {
+                expect(emit.getCall(0)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
+
+                expect(emit.getCall(1)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
+
+                expect(emit.getCall(2)).to.be.calledWith(
+                  'navigation:changed',
+                  'hashchange',
+                )
+
+                expect(emit.getCall(3)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
+
+                expect(emit.getCall(4)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
+
+                expect(emit.getCall(5)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
+
+                expect(emit.getCall(6)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
+
+                expect(emit.getCall(7)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
+
+                expect(emit.getCall(8)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
+
+                expect(emit.getCall(9)).to.be.calledWith(
+                  'navigation:changed',
+                  'hashchange',
+                )
+
+                expect(emit.callCount).to.eq(10)
+              })
+            })
+          })
+        })
+      }
 
       it('logs url changed event', () => {
         cy

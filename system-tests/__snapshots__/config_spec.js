@@ -154,7 +154,7 @@ Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config
 
 The error occurred while validating the browsers list.
 
-Expected family to be either chromium or firefox.
+Expected family to be either chromium, firefox or webkit.
 
 Instead the value was: 
 

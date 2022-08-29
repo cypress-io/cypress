@@ -392,7 +392,8 @@ describe('errors', () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('fails in cy.origin when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23481
+  it.skip('fails in cy.origin when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
       expect(err.message).to.include(`The command was expected to run against origin \`http://idp.com:3500\` but the application is at origin \`http://localhost:3500\`.`)

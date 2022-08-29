@@ -329,11 +329,15 @@ describe('src/cy/commands/assertions', () => {
       it('resolves eventually not exist', () => {
         const button = cy.$$('button:first')
 
-        cy.on('command:retry', _.after(2, _.once(() => {
+        cy.on('command:retry', _.after(3, _.once(() => {
           button.remove()
         })))
 
         cy.get('button:first').click().should('not.exist')
+
+        cy.then(function () {
+          assertLogLength(this.logs, 3)
+        })
       })
 
       it('resolves all 3 assertions', (done) => {
@@ -608,6 +612,19 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.class', 'does-not-have-class')
       })
 
+      it('has a pending state while retrying', (done) => {
+        cy.on('command:retry', (command) => {
+          const [getLog, shouldLog] = cy.state('current').get('logs')
+
+          expect(getLog.get('state')).to.eq('pending')
+          expect(shouldLog.get('state')).to.eq('pending')
+
+          done()
+        })
+
+        cy.get('button:first', { timeout: 100 }).should('have.class', 'does-not-have-class')
+      })
+
       it('throws when the subject isnt in the DOM', function (done) {
         cy.$$('button:first').click(function () {
           $(this).addClass('foo').remove()
@@ -715,7 +732,6 @@ describe('src/cy/commands/assertions', () => {
       it('does not log ensureElExistence errors', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 1)
-
           done()
         })
 
@@ -790,23 +806,22 @@ describe('src/cy/commands/assertions', () => {
       cy.noop({}).should('have.property', 'foo')
     })
 
-    it('ends and snapshots immediately and sets child', (done) => {
+    it('snapshots immediately and sets child', (done) => {
       cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-
-          expect(log.get('ended')).to.be.true
-          expect(log.get('state')).to.eq('passed')
-          expect(log.get('snapshots').length).to.eq(1)
-          expect(log.get('snapshots')[0]).to.be.an('object')
-          expect(log.get('type')).to.eq('child')
-
-          done()
+        if (attrs.name !== 'assert') {
+          return
         }
+
+        cy.removeAllListeners('log:added')
+        expect(log.get('snapshots').length).to.eq(1)
+        expect(log.get('snapshots')[0]).to.be.an('object')
+        expect(log.get('type')).to.eq('child')
+
+        done()
       })
 
       cy.get('body').then(() => {
-        expect(cy.state('subject')).to.match('body')
+        expect(cy.currentSubject()).to.match('body')
       })
     })
 

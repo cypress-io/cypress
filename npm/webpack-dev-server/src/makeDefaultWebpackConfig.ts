@@ -38,9 +38,8 @@ export function makeDefaultWebpackConfig (
     plugins: [
       new HtmlWebpackPlugin({
         template: indexHtmlFile,
-        // TODO: revert once Angular is slated for release
         // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
-        // ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
       }),
     ],
   } as any

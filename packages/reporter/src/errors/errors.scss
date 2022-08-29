@@ -56,12 +56,7 @@ $code-border-radius: 4px;
   }
 
   .studio-err-wrapper {
-    display: none;
     text-align: center;
-  }
-
-  &.studio-active .attempt-failed .studio-err-wrapper {
-    display: block;
   }
 
   .runnable-err {

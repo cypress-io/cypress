@@ -16,12 +16,12 @@
       class="icon-dark-white icon-light-gray-200"
     />
     <div
-      :title="props.name"
+      :title="name"
       class="text-gray-600 truncate"
     >
       <HighlightedText
-        :text="props.name"
-        :indexes="props.indexes"
+        :text="name"
+        :indexes="indexes"
         class="font-medium"
         highlight-classes="text-gray-1000"
       />
@@ -34,7 +34,7 @@
 import IconFolder from '~icons/cy/folder_x16.svg'
 import HighlightedText from './HighlightedText.vue'
 
-const props = withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], depth: number }>(), {
+withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], depth: number }>(), {
   name: '',
   expanded: false,
   indexes: () => [],

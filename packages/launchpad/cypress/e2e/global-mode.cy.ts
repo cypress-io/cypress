@@ -169,7 +169,7 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="dropzone"]').should('not.exist')
     })
 
-    it('updates breadcrumb when selecting a project and navigating back', () => {
+    it('updates "Projects" link when a project is selected and allows navigating back', () => {
       const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
         // The timeout is increased to account for variability in configuration load times in CI.
         return cy.findByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
@@ -196,16 +196,6 @@ describe('Launchpad: Global Mode', () => {
       // Component testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="component"]').click()
-      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
-      resetSpies()
-      getBreadcrumbLink('todos').click()
-      getBreadcrumbLink('todos', { disabled: true })
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
-
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
@@ -216,15 +206,6 @@ describe('Launchpad: Global Mode', () => {
 
       // E2E testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
-      cy.get('[data-cy-testingtype="e2e"]').click()
-      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
-      resetSpies()
-      getBreadcrumbLink('todos').click()
-      getBreadcrumbLink('todos', { disabled: true })
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
-
       cy.get('[data-cy-testingtype="e2e"]').click()
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()

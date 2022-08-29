@@ -105,7 +105,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       queueFinished = true
       setRunnableStateToPassed()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
-        subject: cy.state('subject'),
+        subject: cy.currentSubject(),
       }, {
         syncGlobals: true,
       })

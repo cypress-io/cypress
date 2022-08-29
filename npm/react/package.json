@@ -4,7 +4,7 @@
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open --component",
@@ -16,8 +16,7 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
+    "@types/semver": "7.3.9",
     "@vitejs/plugin-react": "1.3.1",
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
@@ -26,9 +25,8 @@
     "react-dom": "16.8.6",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
-    "rollup": "^2.38.5",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "^4.2.3",
+    "semver": "^7.3.2",
+    "typescript": "^4.7.4",
     "vite": "3.0.3",
     "vite-plugin-require-transform": "1.0.3"
   },

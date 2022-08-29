@@ -52,7 +52,7 @@ context('cy.origin navigation', () => {
         onLoad: primaryVisitLoadSpy,
       }).then(() => {
         expect(primaryCyBeforeLoadSpy).to.be.calledOnce
-        expect(primaryCyLoadSpy).to.be.calledTwice // twice because it's also called for 'about:blank'
+        expect(primaryCyLoadSpy).to.be.calledOnce
         expect(primaryVisitBeforeLoadSpy).to.be.calledOnce
         expect(primaryVisitLoadSpy).to.be.calledOnce
       })
@@ -77,7 +77,7 @@ context('cy.origin navigation', () => {
         })
       }).then(() => {
         expect(primaryCyBeforeLoadSpy).to.be.calledOnce
-        expect(primaryCyLoadSpy).to.be.calledThrice // The call in cy.origin also causes an on load event in the primary origin.
+        expect(primaryCyLoadSpy).to.be.calledOnce
         expect(primaryVisitBeforeLoadSpy).to.be.calledOnce
         expect(primaryVisitLoadSpy).to.be.calledOnce
       })

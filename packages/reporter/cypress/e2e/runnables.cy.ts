@@ -31,7 +31,6 @@ describe('runnables', () => {
               relative: 'foo/bar',
             },
           },
-          experimentalStudioEnabled: true,
         }, renderProps))
       })
     }
@@ -146,7 +145,7 @@ describe('runnables', () => {
       cy.contains('No tests found.').should('be.visible')
       cy.contains('Cypress could not detect tests in this file.').should('be.visible')
       cy.contains('Open file in IDE').should('be.visible')
-      cy.contains('Create test with Cypress Studio').should('be.visible')
+      cy.contains('Create test with Cypress Studio').should('not.exist')
       cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
       cy.get('.help-link').should('have.attr', 'target', '_blank')
       cy.percySnapshot()
@@ -171,7 +170,8 @@ describe('runnables', () => {
       cy.get('.help-link').should('have.attr', 'target', '_blank')
     })
 
-    it('can launch studio', () => {
+    // FIXME: When studio support is re-introduced we can enable these tests.
+    it.skip('can launch studio', () => {
       start().then(() => {
         cy.stub(runner, 'emit')
 
