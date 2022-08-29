@@ -280,6 +280,13 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.get('[data-cy="loading-spinner"]').should('be.visible')
       cy.get('[data-cy="loading-spinner"]').should('not.exist')
+
+      // We navigate to another page to allow enough time for the specs page to re-render with the updated changes in cypress config
+      // so we can assert on an up to date specs page when we navigate back to it.
+
+      cy.get('[href="#/runs"]').click()
+      cy.location('hash').should('eq', '#/runs')
+      cy.get('[href="#/specs"').click()
       cy.contains('accounts_list.spec').should('be.visible')
     })
   })
