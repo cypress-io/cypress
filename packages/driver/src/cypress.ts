@@ -40,6 +40,8 @@ import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 
+import type { CachedTestState } from '@packages/types'
+
 const debug = debugFn('cypress:driver:cypress')
 
 declare global {
@@ -264,11 +266,6 @@ class $Cypress {
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
 
-    this.backend('get:cached:test:state')
-    .then((cachedTestState: Record<string, any>) => {
-      this.state(cachedTestState)
-    })
-
     return this.action('cypress:config', config)
   }
 
@@ -281,10 +278,12 @@ class $Cypress {
     }
   }
 
-  run (fn) {
+  run (cachedTestState: CachedTestState, fn) {
     if (!this.runner) {
       $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
+
+    this.state(cachedTestState)
 
     return this.runner.run(fn)
   }

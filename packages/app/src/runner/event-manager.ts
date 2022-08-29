@@ -1,10 +1,10 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-import type { AutomationElementId, FileDetails } from '@packages/types'
+
+import type { ServerRunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -405,46 +405,50 @@ export class EventManager {
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
-        // get the current runnable in case we reran mid-test due to a visit
-        // to a new domain
-        this.ws.emit('get:existing:run:state', (state: RunState = {}) => {
+        // get the current runnable states and cached test state
+        // in case we reran mid-test due to a visit to a new domain
+        this.ws.emit('get:cached:test:state', (runState: ServerRunState = {}, testState: CachedTestState) => {
+          if (runState === null) {
+            runState = {}
+          }
+
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
           }
 
-          this.studioRecorder.initialize(config, state)
+          this.studioRecorder.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(state.tests)
+          const runnables = Cypress.runner.normalizeAll(runState.tests)
 
           const run = () => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
 
-            this._runDriver(state)
+            this._runDriver(runState, testState)
           }
 
           this.reporterBus.emit('runnables:ready', runnables)
 
-          if (state?.numLogs) {
-            Cypress.runner.setNumLogs(state.numLogs)
+          if (runState?.numLogs) {
+            Cypress.runner.setNumLogs(runState.numLogs)
           }
 
-          if (state.startTime) {
-            Cypress.runner.setStartTime(state.startTime)
+          if (runState.startTime) {
+            Cypress.runner.setStartTime(runState.startTime)
           }
 
-          if (config.isTextTerminal && !state.currentId) {
+          if (config.isTextTerminal && !runState.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to dashboard
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
-          if (state.currentId) {
+          if (runState.currentId) {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
-            Cypress.runner.resumeAtTest(state.currentId, state.emissions)
+            Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
           return run()
@@ -470,7 +474,7 @@ export class EventManager {
       }
 
       return new Bluebird((resolve) => {
-        this.reporterBus.emit('reporter:collect:run:state', (reporterState) => {
+        this.reporterBus.emit('reporter:collect:run:state', (reporterState: ReporterRunState) => {
           resolve({
             ...reporterState,
             studio: this.studioRecorder.state,
@@ -726,23 +730,23 @@ export class EventManager {
     window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
-  _runDriver (state) {
+  _runDriver (runState: ServerRunState, testState: CachedTestState) {
     performance.mark('run-s')
-    Cypress.run(() => {
+    Cypress.run(testState, () => {
       performance.mark('run-e')
       performance.measure('run', 'run-s', 'run-e')
     })
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
-      numPassed: state.passed,
-      numFailed: state.failed,
-      numPending: state.pending,
-      autoScrollingEnabled: state.autoScrollingEnabled,
-      isSpecsListOpen: state.isSpecsListOpen,
-      scrollTop: state.scrollTop,
+      numPassed: runState.passed,
+      numFailed: runState.failed,
+      numPending: runState.pending,
+      autoScrollingEnabled: runState.autoScrollingEnabled,
+      isSpecsListOpen: runState.isSpecsListOpen,
+      scrollTop: runState.scrollTop,
       studioActive: this.studioRecorder.hasRunnableId,
-    })
+    } as ReporterStartInfo)
   }
 
   stop () {

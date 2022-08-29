@@ -193,7 +193,7 @@ export class StudioRecorder {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
   }
 
-  @action initialize = (config, state) => {
+  @action initialize = (config, state = {}) => {
     const { studio } = state
 
     if (studio) {

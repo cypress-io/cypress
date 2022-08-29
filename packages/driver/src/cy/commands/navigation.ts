@@ -9,6 +9,8 @@ import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 
+import type { RunState, ReporterRunState, StudioRecorderState } from '@packages/types'
+
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
@@ -1160,7 +1162,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // tell our backend we're changing origins
           // TODO: add in other things we want to preserve
           // state for like scrollTop
-          let s: Record<string, any> = {
+          let s: RunState = {
             currentId: id,
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),
@@ -1172,8 +1174,12 @@ export default (Commands, Cypress, cy, state, config) => {
           s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
           s.numLogs = LogUtils.countLogsByTests(s.tests)
 
+          type ReporterRunRecords = ReporterRunState & {
+            studio?: StudioRecorderState
+          }
+
           return Cypress.action('cy:collect:run:state')
-          .then((a = []) => {
+          .then((a: ReporterRunRecords[] = []) => {
             // merge all the states together holla'
             s = _.reduce(a, (memo, obj) => {
               return _.extend(memo, obj)

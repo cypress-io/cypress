@@ -23,6 +23,8 @@ import path from 'path'
 import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
+import type { RunState, CachedTestState } from '@packages/types'
+
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
@@ -131,7 +133,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let existingState = null
+    let runState: RunState = {}
 
     _.defaults(options, {
       socketId: null,
@@ -146,7 +148,7 @@ export class SocketBase {
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
-      onSavedStateChanged () {},
+      onSavedAppStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
     })
@@ -368,8 +370,7 @@ export class SocketBase {
           })
         }
 
-        // retry for up to data.timeout
-        // or 1 second
+        // retry for up to data.timeout or 1 second
         return Bluebird
         .try(tryConnected)
         .timeout(data.timeout != null ? data.timeout : 1000)
@@ -394,7 +395,7 @@ export class SocketBase {
 
           switch (eventName) {
             case 'preserve:run:state':
-              existingState = args[0]
+              runState = args[0]
 
               return null
             case 'resolve:url': {
@@ -437,10 +438,6 @@ export class SocketBase {
               return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])
-            case 'get:cached:test:state':
-              return {
-                activeSessions: session.getActiveSessions(),
-              }
             case 'reset:cached:test:state':
               cookieJar.removeAllCookies()
               session.clearSessions()
@@ -471,20 +468,22 @@ export class SocketBase {
         })
       })
 
-      socket.on('get:existing:run:state', (cb) => {
-        const s = existingState
+      socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        const s = runState
 
         if (s) {
-          existingState = null
-
-          return cb(s)
+          runState = null
         }
 
-        return cb()
+        const cachedTestState: CachedTestState = {
+          activeSessions: session.getActiveSessions(),
+        }
+
+        return cb(runState, cachedTestState)
       })
 
       socket.on('save:app:state', (state, cb) => {
-        options.onSavedStateChanged(state)
+        options.onSavedAppStateChanged(state)
 
         // we only use the 'ack' here in tests
         if (cb) {

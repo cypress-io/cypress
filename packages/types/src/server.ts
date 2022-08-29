@@ -1,5 +1,7 @@
 import type { FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
+import type { RunState } from './driver'
+import type { ReporterRunState, StudioRecorderState } from './reporter'
 
 export interface LaunchOpts {
   browser?: FoundBrowser
@@ -82,4 +84,8 @@ export interface OpenProjectLaunchOptions {
 export interface AddProject {
   open?: boolean | null
   path: string
+}
+
+export type ServerRunState = RunState & ReporterRunState & {
+  studio?: StudioRecorderState
 }

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../../../cypress/location'
-
+import type { ServerSessionData } from '@packages/types'
 import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
@@ -8,7 +8,10 @@ import {
 } from './utils'
 
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
-type SessionData = Cypress.Commands.Session.SessionData
+type SessionData = ServerSessionData & {
+  setup: () => null
+  validate: () => null
+}
 
 const getLogProperties = (displayName) => {
   return {
