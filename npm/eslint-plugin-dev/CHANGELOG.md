@@ -1,3 +1,10 @@
+# [@cypress/eslint-plugin-dev-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.3.1...@cypress/eslint-plugin-dev-v5.3.2) (2022-08-15)
+
+
+### Bug Fixes
+
+* clear session state when changing specs in open mode ([#23146](https://github.com/cypress-io/cypress/issues/23146)) ([f1122fc](https://github.com/cypress-io/cypress/commit/f1122fcf62c14abddc0ae96116572402c1be2372))
+
 # [@cypress/eslint-plugin-dev-v5.3.1](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.3.0...@cypress/eslint-plugin-dev-v5.3.1) (2022-08-11)
 
 

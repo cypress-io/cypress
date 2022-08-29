@@ -1665,7 +1665,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    # parallelism: 3 TODO: Add parallelism once we have more specs
+    parallelism: 2
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
@@ -2533,6 +2533,8 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

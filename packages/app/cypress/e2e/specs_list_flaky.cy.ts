@@ -94,7 +94,7 @@ describe('App: Spec List - Flaky Indicator', () => {
     cy.contains('[data-cy="spec-item"]', '123.spec.js').find('.v-popper').trigger('mouseenter')
 
     cy.findByTestId('flaky-spec-summary').within(() => {
-      cy.contains('123.js')
+      cy.contains('123.spec.js')
       cy.contains('Low')
       cy.contains('4% flaky rate')
       cy.contains('2 flaky runs / 50 total')
