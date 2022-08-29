@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, EventEmitter, Type } from '@angular/core'
+import { Component, EventEmitter, SimpleChange, SimpleChanges, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -215,10 +215,9 @@ function setupFixture<T> (
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
  * @returns {T} Component being mounted
  */
-function setupComponent<T> (
+function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void }> (
   config: MountConfig<T>,
-  fixture: ComponentFixture<T>,
-): T {
+  fixture: ComponentFixture<T>): T {
   let component: T = fixture.componentInstance
 
   if (config?.componentProperties) {
@@ -233,6 +232,20 @@ function setupComponent<T> (
         component[key] = createOutputSpy(`${key}Spy`)
       }
     })
+  }
+
+  if (component.ngOnChanges && config.componentProperties) {
+    const { componentProperties } = config
+    let simpleChanges: SimpleChanges
+
+    Object.keys(componentProperties).forEach((key: string, index: number, keys: string[]) => {
+      simpleChanges = {
+        ...simpleChanges,
+        [key]: new SimpleChange(null, componentProperties[key], true),
+      }
+    })
+
+    component.ngOnChanges(simpleChanges)
   }
 
   return component
