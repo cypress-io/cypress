@@ -2,6 +2,7 @@ import * as os from 'os'
 import path from 'path'
 import md5 from 'md5'
 import Bluebird from 'bluebird'
+import del from 'del'
 
 function createDeferred<T> () {
   let resolve: (thenableOrResult?: T | PromiseLike<T> | undefined) => void
@@ -23,6 +24,10 @@ function hash (contents: string) {
   return md5(contents)
 }
 
+function rmdir (dir) {
+  return del(dir)
+}
+
 function tmpdir () {
   return path.join(os.tmpdir(), 'cypress', 'webpack-preprocessor')
 }
@@ -30,5 +35,6 @@ function tmpdir () {
 export default {
   createDeferred,
   hash,
+  rmdir,
   tmpdir,
 }

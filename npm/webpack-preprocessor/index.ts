@@ -447,6 +447,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           bundler.close(cb)
         }
       }
+
+      // clean up temp dir where cross-origin callback files are output
+      utils.rmdir(utils.tmpdir())
     })
 
     // return the promise, which will resolve with the outputPath or reject

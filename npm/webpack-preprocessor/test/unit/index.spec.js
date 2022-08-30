@@ -18,6 +18,7 @@ mockery.enable({
 mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../../index')
+const utils = require('../../lib/utils').default
 const typescriptOverrides = require('../../lib/typescript-overrides')
 const crossOriginCallbackStore = require('../../lib/cross-origin-callback-store').crossOriginCallbackStore
 const crossOriginCallbackCompile = require('../../lib/cross-origin-callback-compile')
@@ -61,6 +62,9 @@ describe('webpack preprocessor', function () {
       fileUpdated: sinon.spy(),
       onClose: sinon.stub(),
     }
+
+    sinon.stub(utils, 'rmdir')
+    sinon.stub(utils, 'tmpdir').returns('/path/to/tmp/dir')
 
     this.run = (options, file = this.file) => {
       return preprocessor(options)(file)
@@ -373,6 +377,15 @@ describe('webpack preprocessor', function () {
         return this.run().then(() => {
           this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).not.to.be.called
+        })
+      })
+
+      it('deletes temp dir when `close` is emitted', function () {
+        this.compilerApi.watch.yields(null, this.statsApi)
+
+        return this.run().then(() => {
+          this.file.on.withArgs('close').yield()
+          expect(utils.rmdir).to.be.calledWith(utils.tmpdir())
         })
       })
 
