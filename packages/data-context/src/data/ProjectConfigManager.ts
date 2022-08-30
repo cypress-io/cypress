@@ -191,12 +191,6 @@ export class ProjectConfigManager {
       return
     }
 
-    const result = await isDependencyInstalled(bundler, this.options.projectRoot)
-
-    if (!result.satisfied) {
-      unsupportedDeps.set(result.dependency.type, result)
-    }
-
     const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
       for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
