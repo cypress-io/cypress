@@ -533,13 +533,6 @@ exports['React major versions with Vite executes all of the tests for React v18 
 `
 
 exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
-We detected that you have versions of dependencies that are not officially supported:
-
- - \`webpack\`. Expected >=4.0.0 || >=5.0.0 but dependency was not found.
-
-If you're experiencing problems, downgrade dependencies and restart Cypress.
-
-   30 modules
 
 ====================================================================================================
 
@@ -557,6 +550,7 @@ If you're experiencing problems, downgrade dependencies and restart Cypress.
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  1_fails.cy.js                                                                   (1 of 4)
+   30 modules
 
 
   simple failing spec
