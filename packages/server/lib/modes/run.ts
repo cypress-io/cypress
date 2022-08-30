@@ -309,14 +309,10 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
-  const { browser, spec, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
+  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
   const warnings = {}
-
-  if (options.writeVideoFrame && browser.family === 'firefox') {
-    project.on('capture:video:frames', options.writeVideoFrame)
-  }
 
   const browserOpts: OpenProjectLaunchOpts = {
     projectRoot,
@@ -501,7 +497,7 @@ function waitForBrowserToConnect (options: { project: Project, socketId: string,
   return wait()
 }
 
-function waitForSocketConnection (project, id) {
+function waitForSocketConnection (project: Project, id: string) {
   if (globalThis.CY_TEST_MOCK?.waitForSocketConnection) return
 
   debug('waiting for socket connection... %o', { id })
@@ -638,18 +634,19 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
     const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
-    await postProcessRecording(
-      videoName,
-      videoRecording.info.compressedVideoName,
-      videoCompression,
-      shouldUploadVideo,
-      quiet,
-      ffmpegChaptersConfig,
-    )
-    .catch(warnVideoRecordingFailed)
+    try {
+      await postProcessRecording(
+        videoName,
+        videoRecording.info.compressedVideoName,
+        videoCompression,
+        shouldUploadVideo,
+        quiet,
+        ffmpegChaptersConfig,
+      )
+    } catch (err) {
+      warnVideoRecordingFailed(err)
+    }
   }
-
-  console.log('results done')
 
   return results
 }
@@ -862,8 +859,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       shouldLaunchNewTab: !isFirstSpec,
     }),
   ])
-
-  console.log('tests done, browser done')
 
   return { results }
 }
