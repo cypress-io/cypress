@@ -1,6 +1,6 @@
 name: Snyk Static Analysis Scan
 # This git workflow leverages Snyk actions to perform a Static Application 
-# Testing scan (SAST) on our first-party code upon Pull Requests to Main & 
+# Testing scan (SAST) on our first-party code upon Pull Requests to Master & 
 # Develop branches. We use this as a control to prevent vulnerabilities 
 # from being introduced into the codebase. 
 on:
