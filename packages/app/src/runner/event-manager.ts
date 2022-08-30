@@ -385,7 +385,7 @@ export class EventManager {
 
     this.ws.emit('watch:test:file', config.spec)
 
-    if (config.experimentalInteractiveRunEvents) {
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
       this.ws.emit('plugins:before:spec', config.spec)
     }
   }

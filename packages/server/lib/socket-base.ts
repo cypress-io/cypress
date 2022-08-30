@@ -85,14 +85,14 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
-  protected experimentalInteractiveRunEvents: boolean
+  protected supportsRunEvents: boolean
   protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
-    this.experimentalInteractiveRunEvents = config.experimentalInteractiveRunEvents
+    this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
@@ -559,7 +559,7 @@ export class SocketBase {
         openFile(fileDetails)
       })
 
-      if (this.experimentalInteractiveRunEvents) {
+      if (this.supportsRunEvents) {
         socket.on('plugins:before:spec', async (spec) => {
           await runEvents.execute('before:spec', {}, spec)
         })
