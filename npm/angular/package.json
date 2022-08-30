@@ -2,7 +2,6 @@
   "name": "@cypress/angular",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
-  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -13,9 +12,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^14.0.6",
-    "@angular/core": "^14.0.6",
-    "@angular/platform-browser-dynamic": "^14.0.6",
+    "@angular/common": "^14.2.0",
+    "@angular/core": "^14.2.0",
+    "@angular/platform-browser-dynamic": "^14.2.0",
     "@cypress/mount-utils": "0.0.0-development",
     "typescript": "^4.7.4",
     "zone.js": "~0.11.4"

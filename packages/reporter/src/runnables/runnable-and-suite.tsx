@@ -2,8 +2,6 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
-// @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
 
 import { indent } from '../lib/util'
 
@@ -15,14 +13,16 @@ import Collapsible from '../collapsible/collapsible'
 import SuiteModel from './suite-model'
 import TestModel from '../test/test-model'
 
-import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 
 interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
+  studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
-const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
+const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -33,13 +33,12 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
   const _header = () => (
     <>
       <span className='runnable-title'>{model.title}</span>
-      {appState.studioActive && (
+      {(studioEnabled && !appState.studioActive) && (
         <span className='runnable-controls'>
-          <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
-            <a onClick={_launchStudio} className='runnable-controls-studio'>
-              <WandIcon />
-            </a>
-          </Tooltip>
+          <LaunchStudioIcon
+            title='Add New Test'
+            onClick={_launchStudio}
+          />
         </span>
       )}
     </>
@@ -54,7 +53,13 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
       isOpen
     >
       <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+        {_.map(model.children, (runnable) =>
+          (<Runnable
+            key={runnable.id}
+            model={runnable}
+            studioEnabled={studioEnabled}
+            canSaveStudioLogs={canSaveStudioLogs}
+          />))}
       </ul>
     </Collapsible>
   )
@@ -63,6 +68,8 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
 export interface RunnableProps {
   model: TestModel | SuiteModel
   appState: AppState
+  studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -76,7 +83,7 @@ class Runnable extends Component<RunnableProps> {
   }
 
   render () {
-    const { appState, model } = this.props
+    const { appState, model, studioEnabled, canSaveStudioLogs } = this.props
 
     return (
       <li
@@ -86,7 +93,9 @@ class Runnable extends Component<RunnableProps> {
         })}
         data-model-state={model.state}
       >
-        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+        {model.type === 'test'
+          ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
+          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />}
       </li>
     )
   }

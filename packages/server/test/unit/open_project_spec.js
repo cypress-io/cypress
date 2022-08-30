@@ -21,6 +21,7 @@ describe('lib/open_project', () => {
     this.config = {
       excludeSpecPattern: '**/*.nope',
       projectRoot: todosPath,
+      proxyServer: 'http://cy-proxy-server',
     }
 
     this.onError = sinon.stub()
