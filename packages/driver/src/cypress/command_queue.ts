@@ -105,6 +105,8 @@ function retrySelector (command: $Command, ret: any, cy: $Cy) {
 
       return cy.retry(onRetry, options)
     }
+
+    return
   }
 
   return onRetry()

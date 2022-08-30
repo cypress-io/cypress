@@ -691,7 +691,7 @@ export class Keyboard {
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
-      cancelled: _.noop,
+      cancelled: () => false,
       delay: 0,
       force: false,
       simulated: false,
