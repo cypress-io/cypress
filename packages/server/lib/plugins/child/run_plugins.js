@@ -125,8 +125,11 @@ class RunPlugins {
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
-      // provide the config globally so plugins can access it
-      global.__CYPRESS_CONFIG__ = modifiedCfg
+
+      if (modifiedCfg.experimentalSessionAndOrigin) {
+        // TODO: write this comment
+        global.__cypressCallbackReplacementCommands = ['origin']
+      }
 
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,

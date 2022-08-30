@@ -3,6 +3,7 @@ import { parse } from '@babel/parser'
 import { default as traverse } from '@babel/traverse'
 import { default as generate } from '@babel/generator'
 import { NodePath, types as t } from '@babel/core'
+import * as loaderUtils from 'loader-utils'
 import * as pathUtil from 'path'
 import Debug from 'debug'
 
@@ -31,6 +32,11 @@ const debug = Debug('cypress:webpack')
 //     run it in its origin's context.
 export default function (source: string, map, meta, store = crossOriginCallbackStore) {
   const { resourcePath } = this
+  const options = typeof this.getOptions === 'function'
+    ? this.getOptions() // webpack 5
+    : loaderUtils.getOptions(this) // webpack 4
+
+  const commands = (options.commands || []) as string[]
 
   let ast: t.File
 
@@ -63,8 +69,10 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
 
       if (!callee.isMemberExpression()) return
 
-      // check if we're inside a cy.origin() callback
-      if ((callee.node.property as t.Identifier).name !== 'origin') return
+      // bail if we're not inside a supported command
+      if (!commands.includes((callee.node.property as t.Identifier).name)) {
+        return
+      }
 
       const lastArg = _.last(path.get('arguments'))
 

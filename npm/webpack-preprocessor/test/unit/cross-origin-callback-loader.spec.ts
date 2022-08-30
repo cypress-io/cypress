@@ -16,14 +16,18 @@ const expectAddFileSource = (store) => {
 }
 
 describe('./lib/cross-origin-callback-loader', () => {
-  const callLoader = (source) => {
+  const callLoader = (source, commands = ['origin']) => {
     const store = new CrossOriginCallbackStore()
+    const context = {
+      resourcePath: '/path/to/file',
+      query: { commands },
+    }
 
     store.addFile = sinon.stub()
 
     return {
       store,
-      result: loader.call({ resourcePath: '/path/to/file' }, source, null, null, store),
+      result: loader.call(context, source, null, null, store),
     }
   }
 
@@ -81,6 +85,25 @@ describe('./lib/cross-origin-callback-loader', () => {
       expect(result).to.equal(stripIndent`
         it('test', () => {
           cy.origin('http://foobar.com:3500', {
+            "callbackName": "__cypressCrossOriginCallback",
+            "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123.js"
+          });
+        });`)
+    })
+
+    it('replaces cy.other() when specified in commands', () => {
+      const { result } = callLoader(
+        `it('test', () => {
+          cy.other('http://foobar.com:3500', () => {
+            Cypress.require('../support/utils')
+          })
+        })`,
+        ['other'],
+      )
+
+      expect(result).to.equal(stripIndent`
+        it('test', () => {
+          cy.other('http://foobar.com:3500', {
             "callbackName": "__cypressCrossOriginCallback",
             "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123.js"
           });

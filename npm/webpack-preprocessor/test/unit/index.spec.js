@@ -159,7 +159,7 @@ describe('webpack preprocessor', function () {
 
       describe('cross-origin callback compilation', function () {
         beforeEach(function () {
-          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: true }
+          global.__cypressCallbackReplacementCommands = ['origin']
 
           this.files = []
 
@@ -179,7 +179,7 @@ describe('webpack preprocessor', function () {
         })
 
         afterEach(function () {
-          global.__CYPRESS_CONFIG__ = {}
+          global.__cypressCallbackReplacementCommands = undefined
         })
 
         it('adds cross-origin callback loader when flag is on', function () {
@@ -212,8 +212,8 @@ describe('webpack preprocessor', function () {
           })
         })
 
-        it('does not compile files when experimental flag is off', function () {
-          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: false }
+        it('does not compile files when no commands are specified', function () {
+          global.__cypressCallbackReplacementCommands = undefined
 
           return this.run().then(() => {
             expect(crossOriginCallbackStore.hasFilesFor).not.to.be.called
@@ -222,8 +222,6 @@ describe('webpack preprocessor', function () {
         })
 
         it('does not compile files there are no files', function () {
-          global.__CYPRESS_CONFIG__ = { experimentalSessionAndOrigin: false }
-
           crossOriginCallbackStore.hasFilesFor.returns(false)
 
           return this.run().then(() => {

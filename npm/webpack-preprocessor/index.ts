@@ -12,16 +12,12 @@ import { compileCrossOriginCallbackFiles } from './lib/cross-origin-callback-com
 const debug = Debug('cypress:webpack')
 const debugStats = Debug('cypress:webpack:stats')
 
-interface CypressConfigPartial {
-  experimentalSessionAndOrigin: boolean
-}
-
 declare global {
-  // this could be undefined if used with an older version of Cypress or if
-  // it's removed in a future version. this global should have the entire
-  // config, but only declaring the properties used for brevity's sake
+  // this indicates which commands should be acted upon by the
+  // cross-origin-callback-loader. its absense means the loader should not
+  // be utilized at all
   // eslint-disable-next-line no-var
-  var __CYPRESS_CONFIG__: CypressConfigPartial | undefined
+  var __cypressCallbackReplacementCommands: string[] | undefined
 }
 
 type FilePath = string
@@ -194,10 +190,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       return bundles[filePath].promise
     }
 
-    const cypressConfig = global.__CYPRESS_CONFIG__ || {
-      experimentalSessionAndOrigin: false,
-    }
-
     const defaultWebpackOptions = getDefaultWebpackOptions()
 
     // we're provided a default output path that lives alongside Cypress's
@@ -243,13 +235,18 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
-    if (!crossOriginCallbackLoaderAdded && cypressConfig.experimentalSessionAndOrigin) {
+    const callbackReplacementCommands = global.__cypressCallbackReplacementCommands
+
+    if (!crossOriginCallbackLoaderAdded && !!callbackReplacementCommands) {
       // webpack runs loaders last-to-first and we want ours to run last
       // so that it's working with plain javascript
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
         use: [{
           loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
+          options: {
+            commands: callbackReplacementCommands,
+          },
         }],
       })
 
@@ -386,7 +383,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           return
         }
 
-        if (!cypressConfig.experimentalSessionAndOrigin) {
+        if (!callbackReplacementCommands) {
           return resolveAllBundles()
         }
 
