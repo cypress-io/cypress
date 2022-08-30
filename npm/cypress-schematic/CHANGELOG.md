@@ -1,3 +1,15 @@
+# [@cypress/schematic-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.3...@cypress/schematic-v2.1.0) (2022-08-30)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+
+
+### Features
+
+* **cypress/schematic:** add support for component testing ([#23385](https://github.com/cypress-io/cypress/issues/23385)) ([99562af](https://github.com/cypress-io/cypress/commit/99562af65a10abb0fab211fd97b13f98e2b0f959))
+
 # [@cypress/schematic-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.2...@cypress/schematic-v2.0.3) (2022-08-17)
 
 
