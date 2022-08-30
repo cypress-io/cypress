@@ -5,6 +5,7 @@
     :title="title"
     :model-value="show"
     :help-link="helpLink"
+    :no-help="!helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
