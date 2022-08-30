@@ -25,7 +25,6 @@ import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
-import pDefer from 'p-defer'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -226,7 +225,7 @@ async function trashAssets (config: Cfg) {
 
 type VideoRecording = {
   info: VideoBrowserOpt
-  promise: Promise<VideoController | undefined>
+  controller?: VideoController
 }
 
 async function startVideoRecording (options: { project: Project, spec: SpecWithRelativeRoot, videosFolder: string }): Promise<VideoRecording> {
@@ -255,22 +254,22 @@ async function startVideoRecording (options: { project: Project, spec: SpecWithR
     onError(err)
   }
 
-  const videoPromise = pDefer<VideoController>()
-
-  return {
+  const videoRecording: VideoRecording = {
     info: {
       onError,
       videoName,
       compressedVideoName,
       setVideoController (videoController) {
-        videoPromise.resolve(videoController)
+        videoRecording.controller = videoController
       },
       onProjectCaptureVideoFrames (fn) {
         options.project.on('capture:video:frames', fn)
       },
     },
-    promise: videoPromise.promise.catch(onError),
+    controller: undefined,
   }
+
+  return videoRecording
 }
 
 const warnVideoRecordingFailed = (err) => {
@@ -530,13 +529,18 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const results = await listenForProjectEnd(project, exit)
 
+  debug('received project end %o', results)
+
   // https://github.com/cypress-io/cypress/issues/2370
   // delay 1 second if we're recording a video to give
   // the browser padding to render the final frames
   // to avoid chopping off the end of the video
-  const videoController = await videoRecording?.promise
+  const videoController = videoRecording?.controller //await videoRecording?.promise
+
+  debug('received videoController %o', { videoController })
 
   if (videoController) {
+    debug('delaying to extend video %o', { DELAY_TO_LET_VIDEO_FINISH_MS })
     await Bluebird.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
   }
 
@@ -576,6 +580,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     //      if (endVideoCapture) {
     try {
       await videoController.endVideoCapture()
+      debug('ended video capture')
     } catch (err) {
       videoCaptureFailed = true
       // TODO; could this warn twice...?
@@ -585,6 +590,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   }
 
   await runEvents.execute('after:spec', config, spec, results)
+  debug('executed after:spec')
 
   const videoName = videoRecording?.info.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
@@ -608,11 +614,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     printResults.displayResults(results, estimated)
   }
 
-  // TODO: not needed right?
-  // const project = openProject.getProject()
-
-  if (!project) throw new Error('Missing project!')
-
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
@@ -635,6 +636,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
     try {
+      debug('post processing recording')
       await postProcessRecording(
         videoName,
         videoRecording.info.compressedVideoName,
