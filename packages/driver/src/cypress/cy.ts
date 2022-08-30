@@ -156,6 +156,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
 
   retry: IRetries['retry']
+  retryIfCommandAUTOriginMismatch: IRetries['retryIfCommandAUTOriginMismatch']
 
   $$: IJQuery['$$']
   getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
@@ -198,6 +199,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   ensureValidPosition: IEnsures['ensureValidPosition']
   ensureScrollability: IEnsures['ensureScrollability']
   ensureNotReadonly: IEnsures['ensureNotReadonly']
+  ensureCommandIsSameOrigin: IEnsures['ensureCommandIsSameOrigin']
 
   createSnapshot: ISnapshots['createSnapshot']
   detachDom: ISnapshots['detachDom']
@@ -209,7 +211,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // Private methods
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
-  ensureCommandIsSameOrigin: ReturnType<typeof createEnsures>['ensureCommandIsSameOrigin']
 
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 

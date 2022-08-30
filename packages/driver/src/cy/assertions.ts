@@ -283,7 +283,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       }
 
       const determineEl = ($el, subject) => {
-        // prefer $el unless it is strickly undefined
+        // prefer $el unless it is strictly undefined
         if (!_.isUndefined($el)) {
           return $el
         }
@@ -344,6 +344,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         if (_.isFunction(onRetry)) {
+          //@ts-ignore
           return cy.retry(onRetry, options)
         }
 

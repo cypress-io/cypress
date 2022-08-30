@@ -421,15 +421,15 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
+    ensureCommandIsSameOrigin,
 
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
-    ensureCommandIsSameOrigin,
   }
 }
 
 export interface IEnsures extends Omit<
   ReturnType<typeof create>,
-  'ensureSubjectByType' | 'ensureRunnable' | 'ensureCommandIsSameOrigin'
+  'ensureSubjectByType' | 'ensureRunnable'
 > {}
