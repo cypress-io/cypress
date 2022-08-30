@@ -536,7 +536,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  })
+  }, launchOptions.env)
 
   try {
     browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })

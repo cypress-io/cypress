@@ -5480,6 +5480,7 @@ declare namespace Cypress {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
+    env: { [key: string]: any }
   }
 
   interface Dimensions {
