@@ -1,9 +1,13 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import _ from 'lodash'
 import EventEmitter from 'events'
+import _ from 'lodash'
+import path from 'path'
+import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
+
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import exec from './exec'
@@ -17,11 +21,10 @@ import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
+import runEvents from './plugins/run_events'
+
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
-import path from 'path'
-import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -82,12 +85,14 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected experimentalInteractiveRunEvents: boolean
   protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
+    this.experimentalInteractiveRunEvents = config.experimentalInteractiveRunEvents
     this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
@@ -553,6 +558,12 @@ export class SocketBase {
 
         openFile(fileDetails)
       })
+
+      if (this.experimentalInteractiveRunEvents) {
+        socket.on('plugins:before:spec', async (spec) => {
+          await runEvents.execute('before:spec', {}, spec)
+        })
+      }
 
       reporterEvents.forEach((event) => {
         socket.on(event, (data) => {
