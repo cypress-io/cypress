@@ -21,6 +21,19 @@
     font-family: $monospace;
   }
 
+  .command-is-studio {
+    cursor: auto;
+    
+    &.command-type-parent .commands-controls .studio-command-remove {
+      display: block;
+      padding-left: 5px;
+
+      &:hover {
+        color: #565554;
+      }
+    }
+  }
+
   // System Command Styles
   .command-type-system {
     user-select: none;
