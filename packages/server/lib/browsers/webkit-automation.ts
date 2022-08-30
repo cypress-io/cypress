@@ -3,6 +3,8 @@ import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
+import os from 'os'
+import type { VideoBrowserOpt } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -90,19 +92,22 @@ export class WebKitAutomation {
   private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string) {
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, video?: VideoBrowserOpt) {
     const wkAutomation = new WebKitAutomation(automation, browser)
 
-    await wkAutomation.reset(initialUrl)
+    await wkAutomation.reset(initialUrl, video)
 
     return wkAutomation
   }
 
-  public async reset (newUrl?: string) {
+  public async reset (newUrl?: string, video?: VideoBrowserOpt) {
     debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      recordVideo: video && {
+        dir: os.tmpdir(),
+      },
     })
     const oldPwPage = this.page
 
@@ -110,6 +115,7 @@ export class WebKitAutomation {
     this.context = this.page.context()
 
     this.attachListeners(this.page)
+    if (video) this.recordVideo(video)
 
     let promises: Promise<any>[] = []
 
@@ -118,6 +124,26 @@ export class WebKitAutomation {
     if (newUrl) promises.push(this.page.goto(newUrl))
 
     if (promises.length) await Promise.all(promises)
+  }
+
+  private recordVideo (video: VideoBrowserOpt) {
+    const _this = this
+
+    video.setVideoController({
+      async endVideoCapture () {
+        const pwVideo = _this.page.video()
+
+        if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
+
+        const p = pwVideo.saveAs(video.videoName)
+
+        await Promise.all([
+          _this.page.close(),
+          p,
+        ])
+      },
+      startedVideoCapture: new Date(),
+    })
   }
 
   private attachListeners (page: playwright.Page) {

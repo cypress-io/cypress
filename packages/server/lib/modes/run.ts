@@ -40,7 +40,7 @@ let exitEarly = (err) => {
   earlyExitErr = err
 }
 let earlyExitErr: Error
-let currentWriteVideoFrameCallback: WriteVideoFrame
+// let currentWriteVideoFrameCallback: WriteVideoFrame
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
@@ -260,6 +260,7 @@ async function startVideoRecording (options: { project: Project, spec: SpecWithR
       videoName,
       compressedVideoName,
       setVideoController (videoController) {
+        debug('setting videoController for videoRecording %o', videoRecording)
         videoRecording.controller = videoController
       },
       onProjectCaptureVideoFrames (fn) {
@@ -269,6 +270,8 @@ async function startVideoRecording (options: { project: Project, spec: SpecWithR
     controller: undefined,
   }
 
+  debug('created videoRecording %o', videoRecording)
+
   return videoRecording
 }
 
@@ -276,12 +279,6 @@ const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
   // but failed and dont let this change the run exit code
   errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
-}
-
-function navigateToNextSpec (spec) {
-  debug('navigating to next spec %s', spec)
-
-  return openProject.changeUrlToSpec(spec)
 }
 
 async function postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet, ffmpegChaptersConfig) {
@@ -406,33 +403,33 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-/**
- * In CT mode, browser do not relaunch.
- * In browser laucnh is where we wire the new video
- * recording callback.
- * This has the effect of always hitting the first specs
- * video callback.
- *
- * This allows us, if we need to, to call a different callback
- * in the same browser
- */
-function writeVideoFrameCallback (data: Buffer) {
-  return currentWriteVideoFrameCallback(data)
-}
+// /**
+//  * In CT mode, browser do not relaunch.
+//  * In browser laucnh is where we wire the new video
+//  * recording callback.
+//  * This has the effect of always hitting the first specs
+//  * video callback.
+//  *
+//  * This allows us, if we need to, to call a different callback
+//  * in the same browser
+//  */
+// function writeVideoFrameCallback (data: Buffer) {
+//   return currentWriteVideoFrameCallback(data)
+// }
 
-function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
-  const { project, socketId, onError, writeVideoFrame, spec } = options
+  const { project, socketId, onError, spec } = options
   const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
   let attempts = 0
 
-  // short circuit current browser callback so that we
-  // can rewire it without relaunching the browser
-  if (writeVideoFrame) {
-    currentWriteVideoFrameCallback = writeVideoFrame
-    options.writeVideoFrame = writeVideoFrameCallback
-  }
+  // // short circuit current browser callback so that we
+  // // can rewire it without relaunching the browser
+  // if (writeVideoFrame) {
+  //   currentWriteVideoFrameCallback = writeVideoFrame
+  //   options.writeVideoFrame = writeVideoFrameCallback
+  // }
 
   // without this the run mode is only setting new spec
   // path for next spec in launch browser.
@@ -451,12 +448,14 @@ function waitForBrowserToConnect (options: { project: Project, socketId: string,
 
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
     // reset browser state to match default behavior when opening/closing a new tab
-    return openProject.resetBrowserState().then(() => {
-      // If we do not launch the browser,
-      // we tell it that we are ready
-      // to receive the next spec
-      return navigateToNextSpec(options.spec)
-    })
+    await openProject.resetBrowserState()
+
+    // If we do not launch the browser,
+    // we tell it that we are ready
+    // to receive the next spec
+    debug('navigating to next spec %s', spec)
+
+    return openProject.changeUrlToSpec(spec)
   }
 
   const wait = async () => {
