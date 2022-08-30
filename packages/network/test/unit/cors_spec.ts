@@ -3,12 +3,12 @@ import { expect } from 'chai'
 
 describe('lib/cors', () => {
   context('.parseUrlIntoDomainTldPort', () => {
-    const assertParsesUrlCorrectly = (url, obj) => {
+    const expectsUrlToBeParsedCorrectly = (url, obj) => {
       expect(cors.parseUrlIntoDomainTldPort(url)).to.deep.eq(obj)
     }
 
     it('parses https://www.google.com', function () {
-      assertParsesUrlCorrectly('https://www.google.com', {
+      expectsUrlToBeParsedCorrectly('https://www.google.com', {
         port: '443',
         domain: 'google',
         tld: 'com',
@@ -16,7 +16,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://localhost:8080', function () {
-      assertParsesUrlCorrectly('http://localhost:8080', {
+      expectsUrlToBeParsedCorrectly('http://localhost:8080', {
         port: '8080',
         domain: '',
         tld: 'localhost',
@@ -24,7 +24,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://app.localhost:8080', function () {
-      assertParsesUrlCorrectly('http://app.localhost:8080', {
+      expectsUrlToBeParsedCorrectly('http://app.localhost:8080', {
         port: '8080',
         domain: 'app',
         tld: 'localhost',
@@ -32,7 +32,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://app.localhost.dev:8080', function () {
-      assertParsesUrlCorrectly('http://app.localhost.dev:8080', {
+      expectsUrlToBeParsedCorrectly('http://app.localhost.dev:8080', {
         port: '8080',
         domain: 'localhost',
         tld: 'dev',
@@ -40,7 +40,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://app.local:8080', function () {
-      assertParsesUrlCorrectly('http://app.local:8080', {
+      expectsUrlToBeParsedCorrectly('http://app.local:8080', {
         port: '8080',
         domain: 'app',
         tld: 'local',
@@ -49,7 +49,7 @@ describe('lib/cors', () => {
 
     // public suffix example of a private tld
     it('parses https://example.herokuapp.com', function () {
-      assertParsesUrlCorrectly('https://example.herokuapp.com', {
+      expectsUrlToBeParsedCorrectly('https://example.herokuapp.com', {
         port: '443',
         domain: 'example',
         tld: 'herokuapp.com',
@@ -57,7 +57,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://www.local.nl', function () {
-      assertParsesUrlCorrectly('http://www.local.nl', {
+      expectsUrlToBeParsedCorrectly('http://www.local.nl', {
         port: '80',
         domain: 'local',
         tld: 'nl',
@@ -66,7 +66,7 @@ describe('lib/cors', () => {
 
     // https://github.com/cypress-io/cypress/issues/3717
     it('parses http://dev.classea12.beta.gouv.fr', function () {
-      assertParsesUrlCorrectly('http://dev.classea12.beta.gouv.fr', {
+      expectsUrlToBeParsedCorrectly('http://dev.classea12.beta.gouv.fr', {
         port: '80',
         domain: 'beta',
         tld: 'gouv.fr',
@@ -74,7 +74,7 @@ describe('lib/cors', () => {
     })
 
     it('parses http://www.local.nl:8080', function () {
-      assertParsesUrlCorrectly('http://www.local.nl:8080', {
+      expectsUrlToBeParsedCorrectly('http://www.local.nl:8080', {
         port: '8080',
         domain: 'local',
         tld: 'nl',
@@ -82,7 +82,7 @@ describe('lib/cors', () => {
     })
 
     it('parses 192.168.1.1:8080', function () {
-      assertParsesUrlCorrectly('http://192.168.1.1:8080', {
+      expectsUrlToBeParsedCorrectly('http://192.168.1.1:8080', {
         port: '8080',
         domain: '',
         tld: '192.168.1.1',

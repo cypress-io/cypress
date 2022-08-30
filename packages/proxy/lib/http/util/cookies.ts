@@ -32,9 +32,9 @@ export const areUrlsSameSite = (url1: string, url2: string) => {
   return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
 }
 
-export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieString: string[] = []): string => {
+export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {
   const cookieMap = new Map<string, Cookie>()
-  const requestCookies: Cookie[] = requestCookieString.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
+  const requestCookies: Cookie[] = requestCookieStringArray.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
 
   // Always have cookies in the jar overwrite cookies in the request if they are the same
   requestCookies.forEach((cookie) => cookieMap.set(cookie.key, cookie))

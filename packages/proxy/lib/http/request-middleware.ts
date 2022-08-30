@@ -45,12 +45,12 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   )
 
   const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const cookiesOnRequestString = (this.req.headers['cookie'] ? this.req.headers['cookie'] : '').split('; ')
+  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
 
   this.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
-  this.debug('add cookies to request from header: %s', cookiesOnRequestString.join('; '))
+  this.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
 
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequestString)
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest)
 
   this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
   this.next()
