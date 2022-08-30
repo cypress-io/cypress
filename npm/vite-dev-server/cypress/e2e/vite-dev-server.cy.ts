@@ -61,7 +61,7 @@ describe('Config options', () => {
 
   it('supports viteConfig as an async function', () => {
     cy.scaffoldProject('vite-async-function-config')
-    cy.openProject('vite-async-function-config')
+    cy.openProject('vite-async-function-config', ['--config-file', 'cypress-vite-async-function-config.config.ts'])
     cy.startAppServer('component')
 
     cy.visitApp()

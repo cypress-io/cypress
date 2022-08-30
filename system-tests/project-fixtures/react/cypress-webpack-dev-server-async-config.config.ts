@@ -1,17 +1,17 @@
 import { defineConfig } from 'cypress'
-import path from 'path'
-import fs from 'fs'
+import * as path from 'path'
+import * as fs from 'fs'
 
 export default defineConfig({
   component: {
     devServer: {
       framework: 'react',
       bundler: 'webpack',
-      webpackConfig: async (baseConfig) => {
+      webpackConfig: async (baseConfig: any) => {
         console.log(baseConfig)
         fs.writeFileSync(path.join(__dirname, 'wrote-to-file'), 'OK')
-
-        return await import('./webpack.config.js')
+        const cfg = await import('./webpack.config.js')
+        return cfg.default
       },
     },
   },

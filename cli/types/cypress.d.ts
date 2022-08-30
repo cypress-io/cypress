@@ -3061,6 +3061,10 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
+  type ConfigHandler<T> = T
+    | ((baseConfig: T) => T) 
+    | ((baseConfig: T) => Promise<T>)
+
   type DevServerConfigOptions = {
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
@@ -3068,11 +3072,11 @@ declare namespace Cypress {
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
-    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+    viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack',
     framework: 'angular',
-    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
