@@ -24,8 +24,8 @@ describe('Config options', () => {
   })
 
   it('supports webpackConfig as an async function', () => {
-    cy.scaffoldProject('webpack5_wds4-async-function-config')
-    cy.openProject('webpack5_wds4-async-function-config', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts'])
+    cy.scaffoldProject('webpack5_wds4-react')
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts'])
     cy.startAppServer('component')
 
     cy.visitApp()
