@@ -5,6 +5,7 @@ import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
+import * as cors from '@packages/network/lib/cors'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
 
@@ -383,6 +384,26 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     })
   }
 
+  /**
+   * ensureCommandIsSameOrigin will check if the command window origin matches the AUT origin.
+   * If the origins do not match it throws an error.
+   * Intended to use within retry loops.
+   * @returns true or throws an error
+   */
+  const ensureCommandIsSameOrigin = (): boolean => {
+    const commandOrigin = window.location.origin
+    const autOrigin = Cypress.state('autOrigin')
+
+    if (autOrigin && autOrigin !== 'about://blank' && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+      $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
+        commandOrigin,
+        autOrigin,
+      } })
+    }
+
+    return true
+  }
+
   return {
     ensureElement,
     ensureAttached,
@@ -404,10 +425,11 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
+    ensureCommandIsSameOrigin,
   }
 }
 
 export interface IEnsures extends Omit<
   ReturnType<typeof create>,
-  'ensureSubjectByType' | 'ensureRunnable'
+  'ensureSubjectByType' | 'ensureRunnable' | 'ensureCommandIsSameOrigin'
 > {}

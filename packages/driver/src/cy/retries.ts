@@ -2,7 +2,6 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../cypress/error_utils'
-import * as cors from '@packages/network/lib/cors'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
@@ -135,30 +134,21 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       return whenStable(fn)
     })
   },
-  ensureCommandAUTSameOrigin (fn: () => any, timeout: number) {
+  retryIfCommandAUTOriginMismatch (fn: () => any, timeout: number) {
     const options = {
       log: true,
       timeout,
       interval: 100,
     }
 
-    const getValue = () => {
-      const commandOrigin = window.location.origin
-      const autOrigin = Cypress.state('autOrigin')
-
-      if (autOrigin && autOrigin !== 'about://blank' && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
-        $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
-          commandOrigin,
-          autOrigin,
-        } })
-      }
-
-      return fn()
-    }
-
     const retryValue = () => {
       return Promise
-      .try(getValue)
+      .try(() => {
+        // If command is not same origin, this will throw an error.
+        cy.ensureCommandIsSameOrigin()
+
+        return fn()
+      })
       .catch((err) => {
         options.error = err
 

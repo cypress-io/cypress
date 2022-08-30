@@ -209,6 +209,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // Private methods
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
+  ensureCommandIsSameOrigin: ReturnType<typeof createEnsures>['ensureCommandIsSameOrigin']
 
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
@@ -274,7 +275,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
 
     this.retry = retries.retry
-    this.ensureCommandAUTSameOrigin = retries.ensureCommandAUTSameOrigin
+    this.retryIfCommandAUTOriginMismatch = retries.retryIfCommandAUTOriginMismatch
 
     const jquery = createJQuery(state)
 
@@ -348,6 +349,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
+    this.ensureCommandIsSameOrigin = ensures.ensureCommandIsSameOrigin
 
     const snapshots = createSnapshots(this.$$, state)
 

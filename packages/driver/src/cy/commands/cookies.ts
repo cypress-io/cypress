@@ -229,7 +229,7 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail })
       }
 
-      return cy.ensureCommandAUTSameOrigin(() => {
+      return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookie', { name }, options._log, responseTimeout)
         .then(pickCookieProps)
         .then((resp) => {
@@ -270,7 +270,7 @@ export default function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      return cy.ensureCommandAUTSameOrigin(() => {
+      return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, responseTimeout)
         .then(pickCookieProps)
         .then((resp) => {
@@ -355,7 +355,7 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('setCookie.host_prefix', { onFail })
       }
 
-      return cy.ensureCommandAUTSameOrigin(() => {
+      return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('set:cookie', cookie, options._log, responseTimeout)
         .then(pickCookieProps)
         .then((resp) => {
@@ -405,7 +405,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       // TODO: prevent clearing a cypress namespace
-      return cy.ensureCommandAUTSameOrigin(() => {
+      return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('clear:cookie', { name }, options._log, responseTimeout)
         .then(pickCookieProps)
         .then((resp) => {
@@ -449,7 +449,7 @@ export default function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      return cy.ensureCommandAUTSameOrigin(() => {
+      return cy.retryIfCommandAUTOriginMismatch(() => {
         return getAndClear(options._log, responseTimeout, { domain: options.domain })
         .then((resp) => {
           options.cookies = resp

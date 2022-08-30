@@ -77,7 +77,7 @@ context('cy.origin navigation', () => {
         })
       }).then(() => {
         expect(primaryCyBeforeLoadSpy).to.be.calledOnce
-        expect(primaryCyLoadSpy).to.be.calledOnce
+        expect(primaryCyLoadSpy).to.be.calledTwice
         expect(primaryVisitBeforeLoadSpy).to.be.calledOnce
         expect(primaryVisitLoadSpy).to.be.calledOnce
       })

@@ -307,6 +307,8 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
+          // Ensure the command is on the same origin as the AUT
+          cy.ensureCommandIsSameOrigin()
           ensureExistence()
         } catch (e2) {
           err = e2
