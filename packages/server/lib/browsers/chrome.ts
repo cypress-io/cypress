@@ -12,15 +12,15 @@ import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
+import * as videoCapture from '../video_capture'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
-import type { Browser } from './types'
+import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
-import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, WriteVideoFrame } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, VideoBrowserOpt } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -249,10 +249,14 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, writeVideoFrame: WriteVideoFrame, browserMajorVersion: number) {
-  const opts = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: VideoBrowserOpt, browserMajorVersion: number) {
+  const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, opts)
+  const videoController = await videoCapture.start(videoOptions)
+
+  videoOptions.setVideoController(videoController)
+
+  await cdpAutomation.startVideoRecording(videoController.writeVideoFrame, screencastOptions)
 }
 
 // a utility function that navigates to the given URL
@@ -552,7 +556,7 @@ export = {
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await this.attachListeners(browser, options.url, pageCriClient, automation, options)
+    await this.attachListeners(options.url, pageCriClient, automation, options)
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
@@ -570,7 +574,7 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (browser: Browser, url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
@@ -580,7 +584,7 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
-      options.writeVideoFrame && this._recordVideo(cdpAutomation, options.writeVideoFrame, browser.majorVersion),
+      options.video && _recordVideo(cdpAutomation, options.video, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
@@ -590,9 +594,11 @@ export = {
       await this._handlePausedRequests(pageCriClient)
       _listenForFrameTreeChanges(pageCriClient)
     }
+
+    return cdpAutomation
   },
 
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<LaunchedBrowser> {
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -644,7 +650,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
+    const launchedBrowser = await launch(browser, 'about:blank', port, args) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -671,7 +677,6 @@ export = {
 
     launchedBrowser.browserCriClient = browserCriClient
 
-    /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
 
@@ -686,7 +691,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this.attachListeners(browser, url, pageCriClient, automation, options)
+    await this.attachListeners(url, pageCriClient, automation, options)
 
     // return the launched browser process
     // with additional method to close the remote connection

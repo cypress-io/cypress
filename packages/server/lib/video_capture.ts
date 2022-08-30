@@ -21,7 +21,7 @@ ffmpeg.setFfmpegPath(ffmpegPath)
 const deferredPromise = function () {
   let reject
   let resolve
-  const promise = new Bluebird((_resolve, _reject) => {
+  const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
   })
@@ -108,14 +108,16 @@ export function copy (src, dest) {
   })
 }
 
-type StartOptions = {
+export type StartOptions = {
+  // Path to write video to.
+  videoName: string
   // If set, expect input frames as webm chunks.
   webmInput?: boolean
   // Callback for asynchronous errors in video processing/compression.
   onError?: (err: Error, stdout: string, stderr: string) => void
 }
 
-export function start (name, options: StartOptions = {}) {
+export function start (options: StartOptions) {
   const pt = new stream.PassThrough()
   const ended = deferredPromise()
   let done = false
@@ -203,7 +205,7 @@ export function start (name, options: StartOptions = {}) {
   }
 
   const startCapturing = () => {
-    return new Bluebird((resolve) => {
+    return new Promise((resolve) => {
       const cmd = ffmpeg({
         source: pt,
         priority: 20,
@@ -256,7 +258,7 @@ export function start (name, options: StartOptions = {}) {
         .inputOptions('-use_wallclock_as_timestamps 1')
       }
 
-      return cmd.save(name)
+      return cmd.save(options.videoName)
     })
   }
 

@@ -4,11 +4,31 @@ import type { PlatformName } from './platform'
 
 export type WriteVideoFrame = (data: Buffer) => void
 
+/**
+ * Interface yielded by the browser to control video recording.
+ */
+export type VideoController = {
+  endVideoCapture: () => Promise<void>
+  startedVideoCapture: Date
+}
+
+export type VideoBrowserOpt = {
+  onError: (err: Error) => void
+  videoName: string
+  compressedVideoName?: string
+  setVideoController: (videoController?: VideoController) => void
+  /**
+   * Registers a handler for project.on('capture:video:frames').
+   */
+  onProjectCaptureVideoFrames: (fn: (data: Buffer) => void) => void
+}
+
 export type OpenProjectLaunchOpts = {
   projectRoot: string
   shouldLaunchNewTab: boolean
   automationMiddleware: AutomationMiddleware
   writeVideoFrame?: WriteVideoFrame
+  video?: VideoBrowserOpt
   onWarning: (err: Error) => void
   onError: (err: Error) => void
 }

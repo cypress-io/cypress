@@ -21,10 +21,11 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, WriteVideoFrame } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, WriteVideoFrame, VideoController, VideoBrowserOpt } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
+import pDefer from 'p-defer'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -223,13 +224,29 @@ async function trashAssets (config: Cfg) {
   }
 }
 
-async function createVideoRecording (videoName, options = {}) {
+type VideoRecording = {
+  info: VideoBrowserOpt
+  promise: Promise<VideoController | undefined>
+}
+
+async function startVideoRecording (options: { project: Project, spec: SpecWithRelativeRoot, videosFolder: string }): Promise<VideoRecording> {
+  if (!options.videosFolder) throw new Error('Missing videoFolder for recording')
+
+  function videoPath (suffix: string) {
+    return path.join(options.videosFolder, options.spec.relativeToCommonRoot + suffix)
+  }
+
+  const videoName = videoPath('.mp4')
+  const compressedVideoName = videoPath('-compressed.mp4')
+
   const outputDir = path.dirname(videoName)
 
   const onError = _.once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
-    return errors.warning('VIDEO_RECORDING_FAILED', err)
+    errors.warning('VIDEO_RECORDING_FAILED', err)
+
+    return undefined
   })
 
   try {
@@ -238,44 +255,21 @@ async function createVideoRecording (videoName, options = {}) {
     onError(err)
   }
 
-  return videoCapture.start(videoName, _.extend({}, options, { onError }))
-}
-
-const getVideoRecordingDelay = function (startedVideoCapture) {
-  if (startedVideoCapture) {
-    return DELAY_TO_LET_VIDEO_FINISH_MS
-  }
-
-  return 0
-}
-
-async function maybeStartVideoRecording (options: { spec: SpecWithRelativeRoot, browser: Browser, video: boolean, videosFolder: string }) {
-  const { spec, browser, video, videosFolder } = options
-
-  debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
-
-  if (!video) {
-    return
-  }
-
-  if (!videosFolder) {
-    throw new Error('Missing videoFolder for recording')
-  }
-
-  const videoPath = (suffix) => {
-    return path.join(videosFolder, spec.relativeToCommonRoot + suffix)
-  }
-
-  const videoName = videoPath('.mp4')
-  const compressedVideoName = videoPath('-compressed.mp4')
-  const props = await createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
+  const videoPromise = pDefer<VideoController>()
 
   return {
-    videoName,
-    compressedVideoName,
-    endVideoCapture: props.endVideoCapture,
-    writeVideoFrame: props.writeVideoFrame,
-    startedVideoCapture: props.startedVideoCapture,
+    info: {
+      onError,
+      videoName,
+      compressedVideoName,
+      setVideoController (videoController) {
+        videoPromise.resolve(videoController)
+      },
+      onProjectCaptureVideoFrames (fn) {
+        options.project.on('capture:video:frames', fn)
+      },
+    },
+    promise: videoPromise.promise.catch(onError),
   }
 }
 
@@ -315,7 +309,7 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
   const { browser, spec, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
   const warnings = {}
@@ -328,7 +322,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
     projectRoot,
     shouldLaunchNewTab,
     onError,
-    writeVideoFrame: options.writeVideoFrame,
+    video: options.videoRecording?.info,
     automationMiddleware: {
       onBeforeRequest (message, data) {
         if (message === 'take:screenshot') {
@@ -431,7 +425,7 @@ function writeVideoFrameCallback (data: Buffer) {
   return currentWriteVideoFrameCallback(data)
 }
 
-function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean }) {
+function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, writeVideoFrame, spec } = options
@@ -470,7 +464,7 @@ function waitForBrowserToConnect (options: { project: Project, socketId: string,
     })
   }
 
-  const wait = () => {
+  const wait = async () => {
     debug('waiting for socket to connect and browser to launch...')
 
     return Bluebird.all([
@@ -533,123 +527,131 @@ function waitForSocketConnection (project, id) {
   })
 }
 
-function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], startedVideoCapture?: any, endVideoCapture?: () => Promise<void>, videoName?: string, compressedVideoName?: string, videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType}) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+
+  const results = await listenForProjectEnd(project, exit)
 
   // https://github.com/cypress-io/cypress/issues/2370
   // delay 1 second if we're recording a video to give
   // the browser padding to render the final frames
   // to avoid chopping off the end of the video
-  const delay = getVideoRecordingDelay(startedVideoCapture)
+  const videoController = await videoRecording?.promise
 
-  return listenForProjectEnd(project, exit)
-  .delay(delay)
-  .then(async (results) => {
-    _.defaults(results, {
-      error: null,
-      hooks: null,
-      tests: null,
-      video: null,
-      screenshots: null,
-      reporterStats: null,
-    })
+  if (videoController) {
+    await Bluebird.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
+  }
 
-    // dashboard told us to skip this spec
-    const skippedSpec = results.skippedSpec
-
-    if (startedVideoCapture) {
-      results.video = videoName
-    }
-
-    if (screenshots) {
-      results.screenshots = screenshots
-    }
-
-    results.spec = spec
-
-    const { tests, stats } = results
-    const attempts = _.flatMap(tests, (test) => test.attempts)
-
-    // if we have a video recording
-    if (startedVideoCapture && tests && tests.length) {
-      // always set the video timestamp on tests
-      Reporter.setVideoTimestamp(startedVideoCapture, attempts)
-    }
-
-    let videoCaptureFailed = false
-
-    if (endVideoCapture) {
-      try {
-        await endVideoCapture()
-      } catch (err) {
-        videoCaptureFailed = true
-        warnVideoRecordingFailed(err)
-      }
-    }
-
-    await runEvents.execute('after:spec', config, spec, results)
-
-    const videoExists = videoName ? await fs.pathExists(videoName) : false
-
-    if (startedVideoCapture && !videoExists) {
-      // the video file no longer exists at the path where we expect it,
-      // likely because the user deleted it in the after:spec event
-      debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
-
-      results.video = null
-    }
-
-    const hasFailingTests = _.get(stats, 'failures') > 0
-    // we should upload the video if we upload on passes (by default)
-    // or if we have any failures and have started the video
-    const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
-
-    results.shouldUploadVideo = shouldUploadVideo
-
-    if (!quiet && !skippedSpec) {
-      printResults.displayResults(results, estimated)
-    }
-
-    const project = openProject.getProject()
-
-    if (!project) throw new Error('Missing project!')
-
-    // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
-    const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
-
-    if (usingExperimentalSingleTabMode) {
-      await project.server.destroyAut()
-    }
-
-    // we do not support experimentalSingleTabRunMode for e2e
-    if (!usingExperimentalSingleTabMode) {
-      debug('attempting to close the browser tab')
-
-      await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
-
-      debug('resetting server state')
-
-      project.server.reset()
-    }
-
-    if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
-      const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
-
-      await postProcessRecording(
-        videoName,
-        compressedVideoName,
-        videoCompression,
-        shouldUploadVideo,
-        quiet,
-        ffmpegChaptersConfig,
-      )
-      .catch(warnVideoRecordingFailed)
-    }
-
-    return results
+  _.defaults(results, {
+    error: null,
+    hooks: null,
+    tests: null,
+    video: null,
+    screenshots: null,
+    reporterStats: null,
   })
+
+  // dashboard told us to skip this spec
+  const skippedSpec = results.skippedSpec
+
+  if (screenshots) {
+    results.screenshots = screenshots
+  }
+
+  results.spec = spec
+
+  const { tests, stats } = results
+  const attempts = _.flatMap(tests, (test) => test.attempts)
+
+  let videoCaptureFailed = false
+
+  // if we have a video recording
+  if (videoController) {
+    results.video = videoRecording!.info.videoName
+
+    if (tests && tests.length) {
+      // always set the video timestamp on tests
+      Reporter.setVideoTimestamp(videoController.startedVideoCapture, attempts)
+    }
+
+    // TODO: should always have endvideocapture?
+    //      if (endVideoCapture) {
+    try {
+      await videoController.endVideoCapture()
+    } catch (err) {
+      videoCaptureFailed = true
+      // TODO; could this warn twice...?
+      warnVideoRecordingFailed(err)
+    }
+  //    }
+  }
+
+  await runEvents.execute('after:spec', config, spec, results)
+
+  const videoName = videoRecording?.info.videoName
+  const videoExists = videoName && await fs.pathExists(videoName)
+
+  if (!videoExists) {
+    // the video file no longer exists at the path where we expect it,
+    // possibly because the user deleted it in the after:spec event
+    debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
+
+    results.video = null
+  }
+
+  const hasFailingTests = _.get(stats, 'failures') > 0
+  // we should upload the video if we upload on passes (by default)
+  // or if we have any failures and have started the video
+  const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((/* startedVideoCapture */ videoExists && hasFailingTests))
+
+  results.shouldUploadVideo = shouldUploadVideo
+
+  if (!quiet && !skippedSpec) {
+    printResults.displayResults(results, estimated)
+  }
+
+  // TODO: not needed right?
+  // const project = openProject.getProject()
+
+  if (!project) throw new Error('Missing project!')
+
+  // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
+  const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
+
+  if (usingExperimentalSingleTabMode) {
+    await project.server.destroyAut()
+  }
+
+  // we do not support experimentalSingleTabRunMode for e2e
+  if (!usingExperimentalSingleTabMode) {
+    debug('attempting to close the browser tab')
+
+    await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+
+    debug('resetting server state')
+
+    project.server.reset()
+  }
+
+  if (videoExists && !skippedSpec && !videoCaptureFailed) {
+    const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+    await postProcessRecording(
+      videoName,
+      videoRecording.info.compressedVideoName,
+      videoCompression,
+      shouldUploadVideo,
+      quiet,
+      ffmpegChaptersConfig,
+    )
+    .catch(warnVideoRecordingFailed)
+  }
+
+  console.log('results done')
+
+  return results
 }
 
 function screenshotMetadata (data, resp) {
@@ -818,12 +820,11 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   await runEvents.execute('before:spec', config, spec)
 
-  const videoRecordProps = await maybeStartVideoRecording({
+  const videoRecording = options.video ? await startVideoRecording({
+    project,
     spec,
-    browser,
-    video: options.video,
     videosFolder: options.videosFolder,
-  })
+  }) : undefined
 
   // we know we're done running headlessly
   // when the renderer has connected and
@@ -836,10 +837,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       estimated,
       screenshots,
-      videoName: videoRecordProps?.videoName,
-      compressedVideoName: videoRecordProps?.compressedVideoName,
-      endVideoCapture: videoRecordProps?.endVideoCapture,
-      startedVideoCapture: videoRecordProps?.startedVideoCapture,
+      videoRecording,
       exit: options.exit,
       testingType: options.testingType,
       videoCompression: options.videoCompression,
@@ -854,7 +852,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       browser,
       screenshots,
       onError,
-      writeVideoFrame: videoRecordProps?.writeVideoFrame,
+      videoRecording,
       socketId: options.socketId,
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
@@ -864,6 +862,8 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       shouldLaunchNewTab: !isFirstSpec,
     }),
   ])
+
+  console.log('tests done, browser done')
 
   return { results }
 }
