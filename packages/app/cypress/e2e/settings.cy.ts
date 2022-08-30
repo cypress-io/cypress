@@ -438,7 +438,7 @@ describe('App: Settings without cloud', () => {
       cy.contains(`channel: 'stable',`)
       cy.contains(`displayName: 'Chrome',`)
 
-      cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
   })
 })

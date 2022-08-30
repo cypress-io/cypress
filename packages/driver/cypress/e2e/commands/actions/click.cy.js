@@ -45,6 +45,7 @@ const getMidPoint = (el) => {
 }
 
 const isFirefox = Cypress.isBrowser('firefox')
+const isWebKit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -3595,7 +3596,8 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
 
-      cy.getAll('el', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('el', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('rightclick cancel contextmenu', () => {
@@ -4061,11 +4063,27 @@ describe('mouse state', () => {
           y: 10,
         }
 
+        const coordsWebKit = {
+          clientX: 500,
+          clientY: 10,
+          layerX: 500,
+          layerY: 226,
+          pageX: 500,
+          pageY: 226,
+          screenX: 500,
+          screenY: 10,
+          x: 500,
+          y: 10,
+        }
+
         let coords
 
         switch (Cypress.browser.family) {
           case 'firefox':
             coords = coordsFirefox
+            break
+          case 'webkit':
+            coords = coordsWebKit
             break
           default:
             coords = coordsChrome
@@ -4495,9 +4513,10 @@ describe('mouse state', () => {
       // cy.wrap(onAction).should('calledOnce')
 
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
 
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox ? shouldBeCalled : shouldNotBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
@@ -4521,7 +4540,9 @@ describe('mouse state', () => {
       cy.get('#btn').click()
 
       cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
+
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
 
       cy.getAll('btn', 'mouseup click').each(shouldNotBeCalled)
     })
@@ -4596,8 +4617,8 @@ describe('mouse state', () => {
 
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
 
-      // on disabled inputs, pointer events are still fired in chrome, not in firefox
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('can target new element after mousedown sequence', () => {

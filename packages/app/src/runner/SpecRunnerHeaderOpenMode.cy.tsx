@@ -2,6 +2,7 @@ import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 
 function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
@@ -124,7 +125,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.contains(url).should('exist').should('have.attr', 'href', url)
+    cy.findByTestId('aut-url-input').invoke('val').should('contain', url)
     cy.percySnapshot()
   })
 
@@ -163,6 +164,20 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
     cy.contains('Firefox').should('be.hidden')
+    cy.percySnapshot()
+  })
+
+  it('shows generic browser icon when current browser icon is not configured', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (ctx) => {
+        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Fake Browser') ?? null
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
     cy.percySnapshot()
   })
 

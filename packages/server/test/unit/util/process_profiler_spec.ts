@@ -187,6 +187,7 @@ describe('lib/util/process_profiler', function () {
       const result = _aggregateGroups(_groupCyProcesses({ list: processes }))
 
       // main process will have variable pid, replace it w constant for snapshotting
+      // @ts-ignore
       _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
 
       // @ts-ignore

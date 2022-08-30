@@ -2,7 +2,8 @@
   <div data-cy="specs-list-row">
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
-      class="h-full outline-none ring-inset grid pr-20px grid-cols-7 group md:grid-cols-9 focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      :class="gridColumns"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
       @click="emit('toggleRow')"
@@ -11,7 +12,6 @@
     >
       <div
         data-cy="specs-list-row-file"
-        class="col-span-4"
       >
         <slot name="file" />
       </div>
@@ -20,28 +20,54 @@
       >
         <div
           data-cy="specs-list-row-git-info"
-          class="col-span-2"
         >
           <slot name="git-info" />
         </div>
-        <div>
-          <slot name="latest-runs" />
-        </div>
-        <div class="hidden md:col-span-2 md:block">
-          <slot name="average-duration" />
-        </div>
+        <SpecsListHoverCell
+          data-cy="specs-list-row-latest-runs"
+          :is-hover-disabled="isProjectConnected"
+        >
+          <template #content>
+            <slot name="latest-runs" />
+          </template>
+          <template #hover>
+            <slot
+              name="connect-button"
+              utmMedium="Specs Latest Runs Empty State"
+            />
+          </template>
+        </SpecsListHoverCell>
+        <SpecsListHoverCell
+          data-cy="specs-list-row-average-duration"
+          :is-hover-disabled="isProjectConnected"
+          class="hidden md:block"
+        >
+          <template #content>
+            <slot name="average-duration" />
+          </template>
+          <template #hover>
+            <slot
+              name="connect-button"
+              utmMedium="Specs Average Duration Empty State"
+            />
+          </template>
+        </SpecsListHoverCell>
       </template>
     </component>
   </div>
 </template>
 
 <script setup lang="ts">
+import SpecsListHoverCell from './SpecsListHoverCell.vue'
+
 import { useTimeout } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router'
 
 defineProps<{
   isLeaf: boolean
   route?: RouteLocationRaw
+  isProjectConnected?: boolean
+  gridColumns: string
 }>()
 
 const emit = defineEmits<{
@@ -54,4 +80,5 @@ function handleCtrlClick (): void {
   // noop intended to reduce the chances of opening tests multiple tabs
   // which is not a supported state in Cypress
 }
+
 </script>

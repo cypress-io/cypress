@@ -157,7 +157,12 @@ declare global {
        * Tabs until the result of fn is true
        */
       tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<any>
+      /**
+       * Get the AUT <iframe>. Useful for Cypress in Cypress tests.
+       */
+      getAutIframe(): Chainable<JQuery<HTMLIFrameElement>>
     }
+
   }
 }
 
@@ -294,6 +299,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
         await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
+        // @ts-expect-error this interface is strict about the options it expects
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
         if (!o.skipMockingPrompts
@@ -304,6 +310,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
             firstOpened: 1609459200000,
             lastOpened: 1609459200000,
             promptsShown: { ci1: 1609459200000 },
+            banners: { _disabled: true },
           })
         }
 
@@ -524,9 +531,15 @@ function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10)
   })
 }
 
+function getAutIframe () {
+  return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
+}
+
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
+
+Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
@@ -543,6 +556,9 @@ Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'elemen
 
 installCustomPercyCommand({
   elementOverrides: {
+    '[data-cy=top-nav-cypress-version-current-link]': ($el) => {
+      $el.attr('style', 'display: none !important') // TODO: display and set dummy text to vX.X.X once flake is fixed. See issue https://github.com/cypress-io/cypress/issues/21897
+    },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
     },

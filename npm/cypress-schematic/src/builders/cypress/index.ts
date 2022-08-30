@@ -75,6 +75,10 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
     spec: '',
   }
 
+  if (userOptions.component || userOptions.testingType === 'component') {
+    userOptions.e2e = false
+  }
+
   const options: CypressOptions = {
     ...defaultOptions,
     ...userOptions,

@@ -26,7 +26,8 @@ describe('e2e plugins', function () {
     },
   })
 
-  it('fails when there is an async error inside an event handler', function () {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23493
+  it.skip('fails when there is an async error inside an event handler', function () {
     return systemTests.exec(this, {
       spec: 'app.cy.js',
       project: 'plugins-async-error',
