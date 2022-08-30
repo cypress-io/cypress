@@ -78,7 +78,7 @@ describe('lib/browsers/electron', () => {
   context('.connectToNewSpec', () => {
     it('calls open with the browser, url, options, and automation', async function () {
       sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
-      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
       expect(electron.open).to.be.called
     })
   })
@@ -120,7 +120,8 @@ describe('lib/browsers/electron', () => {
 
         expect(this.win.webContents.getOSProcessId).to.be.calledOnce
 
-        expect(obj.pid).to.deep.eq([ELECTRON_PID])
+        expect(obj.pid).to.eq(ELECTRON_PID)
+        expect(obj.allPids).to.deep.eq([ELECTRON_PID])
       })
     })
 
@@ -722,7 +723,7 @@ describe('lib/browsers/electron', () => {
         )
       })
 
-      it('adds pid of new BrowserWindow to pid list', function () {
+      it('adds pid of new BrowserWindow to allPids list', function () {
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
@@ -739,7 +740,7 @@ describe('lib/browsers/electron', () => {
         }).then((instance) => {
           return opts.onNewWindow.call(this.win, {}, this.url)
           .then(() => {
-            expect(instance.pid).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
+            expect(instance.allPids).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
           })
         })
       })
