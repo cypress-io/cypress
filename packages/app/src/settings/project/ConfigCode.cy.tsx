@@ -1,7 +1,6 @@
 import ConfigCode from './ConfigCode.vue'
 import config from '@packages/frontend-shared/cypress/fixtures/config.json'
 import { defaultMessages } from '@cy/i18n'
-import _ from 'lodash'
 
 const selector = '[data-cy=code]'
 
@@ -46,7 +45,7 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      _.each(arrayTest, (val) => {
+      Cypress._.each(arrayTest, (val) => {
         const valElement = cy.findByText(`'${val}',`)
 
         valElement.realHover()
@@ -93,7 +92,7 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      _.each(Object.values(objectTest), (value) => {
+      Cypress._.each(Object.values(objectTest), (value) => {
         const valElement = cy.findByText(`'${value}',`)
 
         valElement.realHover()
