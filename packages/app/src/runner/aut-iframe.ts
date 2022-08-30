@@ -24,7 +24,6 @@ export class AutIframe {
     private eventManager: any,
     private $: $CypressJQuery,
     private selectorPlayground: any,
-    private studioRecorder: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }

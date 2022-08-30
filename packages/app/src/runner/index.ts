@@ -155,7 +155,6 @@ function setupRunner () {
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.selectorPlayground,
-    getEventManager().studioRecorder,
   )
 
   createIframeModel()
