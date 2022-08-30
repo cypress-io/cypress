@@ -21,8 +21,10 @@ const __stackReplacementMarker = (fn, args) => {
 const commandRunningFailed = async (Cypress, state, err) => {
   const current = state('current')
 
-  current.snapshotLogs()
-  current.finishLogs()
+  if (current) {
+    current.snapshotLogs()
+    current.finishLogs()
+  }
 
   // allow for our own custom onFail function
   if (err.onFail) {
