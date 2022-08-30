@@ -1,7 +1,5 @@
-import type { CyCookie } from './browsers/cdp_automation'
-
 interface SessionData {
-  cookies: CyCookie[]
+  cookies: Cypress.Cookie[]
   id: string
   localStorage: object
   sessionStorage: object

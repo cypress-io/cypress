@@ -5825,9 +5825,27 @@ declare namespace Cypress {
     setSystemTime(now?: number | Date): void
   }
 
-  interface Cookie extends Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> {
-    // use `undefined` instead of `unspecified`
-    sameSite?: Cypress.SameSiteStatus
+  interface Cookie {
+    /** The name of the cookie. */
+    name: string;
+    /** The value of the cookie. */
+    value: string;
+    /** Optional. The expiration date of the cookie as the number of seconds since the UNIX epoch. Not provided for session cookies.  */
+    expirationDate?: number;
+    /** True if the cookie is marked as HttpOnly (i.e. the cookie is inaccessible to client-side scripts). */
+    httpOnly: boolean;
+    /** The domain of the cookie (e.g. "www.google.com", "example.com"). */
+    domain: string;
+    /** The path of the cookie. */
+    path: string;
+    /** True if the cookie is marked as Secure (i.e. its scope is limited to secure channels, typically HTTPS). */
+    secure: boolean;
+    /** True if the cookie is a host-only cookie (i.e. a request's host must exactly match the domain of the cookie). */
+    hostOnly: boolean;
+    /**
+     * The cookie's same-site status (i.e. whether the cookie is sent with cross-site requests).
+     */
+    sameSite?: SameSiteStatus
   }
 
   interface EnqueuedCommand {

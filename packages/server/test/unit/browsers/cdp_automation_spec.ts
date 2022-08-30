@@ -4,7 +4,6 @@ import {
   CdpAutomation,
   _cookieMatches,
   _domainIsWithinSuperdomain,
-  CyCookie,
 } from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
@@ -61,7 +60,7 @@ context('lib/browsers/cdp_automation', () => {
           expected: true,
         },
       ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
+        expect(_cookieMatches(cookie as Cypress.Cookie, filter)).to.eq(expected)
       })
     })
   })
