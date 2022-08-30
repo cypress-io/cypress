@@ -92,7 +92,6 @@ export default function (Commands, Cypress, cy) {
       let existingSession: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
-      console.log('session', existingSession)
       if (!setup) {
         if (!existingSession || !isRegisteredSessionForSpec) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })

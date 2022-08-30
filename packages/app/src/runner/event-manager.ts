@@ -90,7 +90,7 @@ export class EventManager {
     this._setUnload()
   }
 
-  addGlobalListeners (state: MobxRunnerStore, config, options: AddGlobalListenerOptions) {
+  addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     console.log('addGlobalListeners')
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
@@ -143,7 +143,6 @@ export class EventManager {
     })
 
     this.ws.on('change:to:url', (url) => {
-      console.log('change:to:url')
       window.location.href = url
     })
 
@@ -437,8 +436,6 @@ export class EventManager {
             return
           }
 
-          console.log('get:existing:run:state', state)
-
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
           const run = () => {
@@ -606,8 +603,6 @@ export class EventManager {
           return
         }
 
-        // console.log('driverToLocalEvents: event', event, args)
-
         // @ts-ignore
         // TODO: UNIFY-1318 - strongly typed event emitter.
         return this.emit(event, ...args)
@@ -709,7 +704,6 @@ export class EventManager {
     })
 
     Cypress.primaryOriginCommunicator.on('url:changed', ({ url }) => {
-      console.log('primaryOriginCommunicator: on URL Change', url)
       this.localBus.emit('url:changed', url)
     })
 
@@ -791,7 +785,6 @@ export class EventManager {
     state.setIsLoading(true)
 
     if (!isRerun) {
-      console.log('clear session state')
       // only clear test state when a new spec is selected
       Cypress.backend('reset:session:state')
     }

@@ -132,7 +132,7 @@ function setupRunner () {
   const runnerUiStore = useRunnerUiStore()
   const config = getRunnerConfigFromWindow()
 
-  getEventManager().addGlobalListeners(mobxRunnerStore, config, {
+  getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
     element: getAutomationElementId(),
   })
@@ -225,7 +225,6 @@ export function addCrossOriginIframe (location) {
  *
  */
 function runSpecCT (spec: SpecFile) {
-  console.log('run spec ct')
   // TODO: UNIFY-1318 - figure out how to manage window.config.
   const config = getRunnerConfigFromWindow()
 
@@ -291,7 +290,6 @@ function setSpecForDriver (spec: SpecFile) {
  * initialize Cypress on the AUT.
  */
 function runSpecE2E (spec: SpecFile) {
-  console.log('run spec e2e')
   // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
   const config = getRunnerConfigFromWindow()
 
@@ -368,14 +366,12 @@ async function initialize () {
 
   isTorndown = false
 
-  console.log('getRunnerConfigFromWindow')
   const config = getRunnerConfigFromWindow()
 
   if (isTorndown) {
     return
   }
 
-  console.log('getRunnerConfigFromWindow')
   const autStore = useAutStore()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions

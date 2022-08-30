@@ -60,7 +60,6 @@ export class IframeModel {
     })
 
     this.eventManager.on('url:changed', (url: string) => {
-      // console.log('update URL', url)
       const autStore = useAutStore()
 
       autStore.updateUrl(url)
@@ -108,7 +107,6 @@ export class IframeModel {
   }
 
   setSnapshots = (snapshotProps: AutSnapshot) => {
-    console.log('set snapshots')
     const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
 

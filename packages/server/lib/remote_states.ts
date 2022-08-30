@@ -62,7 +62,6 @@ export class RemoteStates {
   getPrimary () {
     const state = Array.from(this.remoteStates.entries())[0][1]
 
-    console.log('primary remote state', this.remoteStates.entries())
     debug('getting primary remote state: %o', state)
 
     return state
@@ -82,7 +81,6 @@ export class RemoteStates {
   }
 
   reset () {
-    console.log('resetting remote state')
     debug('resetting remote state')
 
     const stateArray = Array.from(this.remoteStates.entries())

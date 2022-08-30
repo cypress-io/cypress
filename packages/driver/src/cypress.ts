@@ -169,7 +169,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  configure (config: Record<string, any> = {}, cachedState: Promise<Record<string, any>>) {
+  configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -217,15 +217,6 @@ class $Cypress {
 
     _.extend(this, browserInfo(config))
     this.state = $SetterGetter.create({}) as unknown as StateFunc
-    // this.state = $SetterGetter.create({
-    //   ...cachedState.then((state) => {
-    //     console.log(state.globalSessions)
-
-    //     return {
-    //       activeSessions: state.globalSessions || {},
-    //     }
-    //   }),
-    // }) as unknown as StateFunc
 
     /*
      * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.
@@ -361,7 +352,7 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-      console.log('SPEC IS READY')
+
       this.onSpecReady()
     })
   }

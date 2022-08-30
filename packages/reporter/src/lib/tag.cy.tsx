@@ -116,6 +116,5 @@ describe('Tag', () => {
     cy.get('.reporter-tag-count').should('have.class', 'command-alias-count')
 
     cy.percySnapshot()
-    cy.pause()
   })
 })

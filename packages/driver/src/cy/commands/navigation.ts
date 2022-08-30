@@ -160,7 +160,7 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // get the current url of our remote application
   const url = cy.getRemoteLocation('href')
 
-  // console.log('navigation changed:', url)
+  debug('navigation changed:', url)
 
   // dont trigger for empty url's or about:blank
   if (_.isEmpty(url) || (url === 'about:blank')) {
@@ -1179,8 +1179,6 @@ export default (Commands, Cypress, cy, state, config) => {
               return _.extend(memo, obj)
             }, s)
 
-            console.log('preserve', s)
-
             return Cypress.backend('preserve:run:state', s)
           })
           .then(() => {
@@ -1272,7 +1270,6 @@ export default (Commands, Cypress, cy, state, config) => {
         if (!hasVisitedAboutBlank && !Cypress.isCrossOriginSpecBridge) {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
-          // console.log('visit about blank......')
 
           return aboutBlank(cy, win)
           .then(() => {
@@ -1281,8 +1278,6 @@ export default (Commands, Cypress, cy, state, config) => {
             return go()
           })
         }
-
-        // console.log('just go to url......')
 
         return go()
       }
