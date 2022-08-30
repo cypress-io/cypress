@@ -301,8 +301,9 @@ export default function (Commands, Cypress, cy, state, config) {
 
       let keydownEvents: any[] = []
 
-      return keyboard.type({
+      const typeOptions = {
         $el: options.$el,
+        cancelled: () => state('canceled') || state('error'),
         chars,
         delay: options.delay,
         release: options.release,
@@ -473,7 +474,9 @@ export default function (Commands, Cypress, cy, state, config) {
             args: { chars: `{${chars}}`, allChars },
           })
         },
-      })
+      }
+
+      return keyboard.type(typeOptions)
     }
 
     const handleFocused = function () {

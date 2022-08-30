@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
+import type { Log } from '../../../cypress/log'
 import $utils from '../../../cypress/utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
@@ -126,7 +127,7 @@ function getAlias (selector, log, cy) {
           return {
             Alias: selector,
             Yielded: $dom.getElements(subject),
-            Elements: subject.length,
+            Elements: (subject as JQuery<HTMLElement>).length,
           }
         },
       })
@@ -144,6 +145,18 @@ function getAlias (selector, log, cy) {
 
     return subject
   }
+}
+
+interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
+  _log?: Log
+  _retries?: number
+  filter?: any
+  onRetry?: Function
+  verify?: boolean
+}
+
+interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> {
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
@@ -502,7 +515,7 @@ export default (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.addSelector('get', null, function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow> = {}) {
+  Commands.addSelector('get', null, function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
@@ -553,18 +566,6 @@ export default (Commands, Cypress, cy, state) => {
         }
 
         throw err
-      }
-
-      // if that didnt find anything and we have a within subject
-      // and we have been explictly told to filter
-      // then just attempt to filter out elements from our within subject
-      if (!$el.length && withinSubject && userOptions.filter) {
-        const filtered = (withinSubject as JQuery).filter(selector)
-
-        // reset $el if this found anything
-        if (filtered.length) {
-          $el = filtered
-        }
       }
 
       log && log.set({

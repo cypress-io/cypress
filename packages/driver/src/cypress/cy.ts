@@ -250,6 +250,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
+    this.currentSubject = this.currentSubject.bind(this)
 
     // init traits
 
@@ -357,7 +358,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
+    this.queue = new CommandQueue(state, stability, this)
 
     setTopOnError(Cypress, this)
 
@@ -843,7 +844,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
-      callback(chainer, userInvocationStack, args, true)
+      callback(chainer, userInvocationStack, args)
 
       // if we're the first call onto a cy
       // command, then kick off the run
@@ -1081,7 +1082,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
 
-  private cleanup () {
+  cleanup () {
     // cleanup could be called during a 'stop' event which
     // could happen in between a runnable because they are async
     if (this.state('runnable')) {

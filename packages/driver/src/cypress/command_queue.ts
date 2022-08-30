@@ -11,7 +11,6 @@ import type $Command from './command'
 import type { StateFunc } from './state'
 import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
-import type { ITimeouts } from '../cy/timeouts'
 
 const debugErrors = Debug('cypress:driver:errors')
 
@@ -68,8 +67,8 @@ const commandRunningFailed = async (Cypress, state, err) => {
  * cy.verifyUpcomingAssertions, but inverted - the command_queue calls retrySelector for selectors, while each
  * individual action command is responsible for calling verifyUpcomingAssertions.
  */
-function retrySelector (command: $Command, ret: any, isCy) {
-  if ($utils.isPromiseLike(ret) && !isCy(ret)) {
+function retrySelector (command: $Command, ret: any, cy: $Cy) {
+  if ($utils.isPromiseLike(ret) && !cy.isCy(ret)) {
     $errUtils.throwErrByPath(
       'selector_command.returned_promise', {
         args: { name: command.get('name') },
@@ -87,6 +86,7 @@ function retrySelector (command: $Command, ret: any, isCy) {
 
   const options = {
     timeout: command.get('timeout'),
+    error: null,
   }
 
   const onRetry = () => {
@@ -110,33 +110,18 @@ function retrySelector (command: $Command, ret: any, isCy) {
 
 export class CommandQueue extends Queue<$Command> {
   state: StateFunc
-  timeout: $Cy['timeout']
   stability: IStability
-  cleanup: $Cy['cleanup']
-  fail: $Cy['fail']
-  isCy: $Cy['isCy']
-  clearTimeout: ITimeouts['clearTimeout']
-  setSubjectForChainer: $Cy['setSubjectForChainer']
+  cy: $Cy
 
   constructor (
     state: StateFunc,
-    timeout: $Cy['timeout'],
     stability: IStability,
-    cleanup: $Cy['cleanup'],
-    fail: $Cy['fail'],
-    isCy: $Cy['isCy'],
-    clearTimeout: ITimeouts['clearTimeout'],
-    setSubjectForChainer: $Cy['setSubjectForChainer'],
+    cy: $Cy,
   ) {
     super()
     this.state = state
-    this.timeout = timeout
     this.stability = stability
-    this.cleanup = cleanup
-    this.fail = fail
-    this.isCy = isCy
-    this.clearTimeout = clearTimeout
-    this.setSubjectForChainer = setSubjectForChainer
+    this.cy = cy
   }
 
   logs (filter) {
@@ -256,7 +241,7 @@ export class CommandQueue extends Queue<$Command> {
         // We save the original return value on the $Command though - it's what gets added to the subject chain later.
         if (isSelector) {
           command.set('selectorFn', ret)
-          ret = retrySelector(command, ret, this.isCy)
+          ret = retrySelector(command, ret, this.cy)
         }
       } catch (err) {
         throw err
@@ -270,7 +255,7 @@ export class CommandQueue extends Queue<$Command> {
       // we cannot pass our cypress instance or our chainer
       // back into bluebird else it will create a thenable
       // which is never resolved
-      if (this.isCy(ret)) {
+      if (this.cy.isCy(ret)) {
         return null
       }
 
@@ -343,7 +328,7 @@ export class CommandQueue extends Queue<$Command> {
         // command belongs to another chainer (end of a chain).
 
         // This is done so that any selector's logs remain in the 'pending' state until the subject chain is finished.
-        cy.addSelectorToChainer(command.get('chainerId'), subject)
+        this.cy.addSelectorToChainer(command.get('chainerId'), subject)
 
         const next = command.get('next')
 
@@ -353,7 +338,7 @@ export class CommandQueue extends Queue<$Command> {
       } else {
         // For action commands, the "subject" here is the command's return value, which replaces
         // the current subject chain. We cannot re-invoke action commands - the return value here is final.
-        cy.setSubjectForChainer(command.get('chainerId'), subject)
+        this.cy.setSubjectForChainer(command.get('chainerId'), subject)
         command.finishLogs()
       }
 
@@ -393,7 +378,7 @@ export class CommandQueue extends Queue<$Command> {
 
         this.state('index', index + 1)
 
-        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 
@@ -424,12 +409,12 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       // store the previous timeout
-      const prevTimeout = this.timeout()
+      const prevTimeout = this.cy.timeout()
 
       // If we have created a timeout but are in an unstable state, clear the
       // timeout in favor of the on load timeout already running.
       if (!this.state('isStable')) {
-        this.clearTimeout()
+        this.cy.clearTimeout()
       }
 
       // store the current runnable
@@ -448,7 +433,7 @@ export class CommandQueue extends Queue<$Command> {
         let fn
 
         if (!runnable.state) {
-          this.timeout(prevTimeout)
+          this.cy.timeout(prevTimeout)
         }
 
         // mutate index by incrementing it
@@ -498,13 +483,13 @@ export class CommandQueue extends Queue<$Command> {
 
       commandRunningFailed(Cypress, this.state, err)
 
-      return this.fail(err)
+      return this.cy.fail(err)
     }
 
     const { promise, reject, cancel } = super.run({
       onRun: next,
       onError,
-      onFinish: this.cleanup,
+      onFinish: this.cy.cleanup,
     })
 
     this.state('promise', promise)

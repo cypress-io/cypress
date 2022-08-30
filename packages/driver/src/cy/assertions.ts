@@ -465,7 +465,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return overrideAssert.apply(this, args)
       }
 
-      return assertFn.apply(this, args)
+      return assertFn.apply(this, args as any)
     },
   }
 }

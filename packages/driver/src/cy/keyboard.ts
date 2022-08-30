@@ -691,6 +691,7 @@ export class Keyboard {
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
+      cancelled: _.noop,
       delay: 0,
       force: false,
       simulated: false,
@@ -748,6 +749,10 @@ export class Keyboard {
       keyDetailsArr,
       (key: KeyInfo, currentKeyIndex: number) => {
         return () => {
+          if (options.cancelled()) {
+            return
+          }
+
           const activeEl = this.getActiveEl(options)
 
           if (key.type === 'shortcut') {
