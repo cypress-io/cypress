@@ -4,7 +4,7 @@
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
@@ -20,7 +20,7 @@
     "react-dom": "^16",
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.7.4"
   },
   "peerDependencies": {
     "@types/react": "^18",

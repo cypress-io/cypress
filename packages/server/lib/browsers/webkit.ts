@@ -3,13 +3,14 @@ import { EventEmitter } from 'events'
 import type playwright from 'playwright-webkit'
 import type { Browser, BrowserInstance } from './types'
 import type { Automation } from '../automation'
-import { WebkitAutomation } from './webkit-automation'
+import { WebKitAutomation } from './webkit-automation'
+import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit')
 
-let wkAutomation: WebkitAutomation | undefined
+let wkAutomation: WebKitAutomation | undefined
 
-export async function connectToNewSpec (browser: Browser, options, automation: Automation) {
+export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
 
   automation.use(wkAutomation)
@@ -18,7 +19,11 @@ export async function connectToNewSpec (browser: Browser, options, automation: A
   await wkAutomation.reset(options.url)
 }
 
-export async function open (browser: Browser, url, options: any = {}, automation: Automation): Promise<BrowserInstance> {
+export function connectToExisting () {
+  throw new Error('Cypress-in-Cypress is not supported for WebKit.')
+}
+
+export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   // resolve pw from user's project path
   const pwModulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
   const pw = require(pwModulePath) as typeof playwright
@@ -31,7 +36,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     headless: browser.isHeadless,
   })
 
-  wkAutomation = await WebkitAutomation.create(automation, pwBrowser, url)
+  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url)
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {
