@@ -1324,6 +1324,8 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+            - verify-mocha-results:
+                expectedResultCount: 3
       - when:
           condition:
             or:
@@ -1335,8 +1337,8 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope "'@tooling/packherd'"
-      - verify-mocha-results:
-          expectedResultCount: 3
+            - verify-mocha-results:
+                expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
