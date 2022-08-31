@@ -4,7 +4,7 @@ import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
 import os from 'os'
-import type { VideoBrowserOpt } from '@packages/types'
+import type { RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -92,21 +92,22 @@ export class WebKitAutomation {
   private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, video?: VideoBrowserOpt) {
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, videoApi?: RunModeVideoApi) {
     const wkAutomation = new WebKitAutomation(automation, browser)
 
-    await wkAutomation.reset(initialUrl, video)
+    await wkAutomation.reset(initialUrl, videoApi)
 
     return wkAutomation
   }
 
-  public async reset (newUrl?: string, video?: VideoBrowserOpt) {
+  public async reset (newUrl?: string, videoApi?: RunModeVideoApi) {
     debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
-      recordVideo: video && {
+      recordVideo: videoApi && {
         dir: os.tmpdir(),
+        size: { width: 1280, height: 720 },
       },
     })
     const oldPwPage = this.page
@@ -115,7 +116,7 @@ export class WebKitAutomation {
     this.context = this.page.context()
 
     this.attachListeners(this.page)
-    if (video) this.recordVideo(video)
+    if (videoApi) this.recordVideo(videoApi)
 
     let promises: Promise<any>[] = []
 
@@ -126,20 +127,21 @@ export class WebKitAutomation {
     if (promises.length) await Promise.all(promises)
   }
 
-  private recordVideo (video: VideoBrowserOpt) {
+  private recordVideo (videoApi: RunModeVideoApi) {
     const _this = this
 
-    video.setVideoController({
+    videoApi.setVideoController({
       async endVideoCapture () {
         const pwVideo = _this.page.video()
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
-        const p = pwVideo.saveAs(video.videoName)
+        debug('ending video capture, closing page...')
 
         await Promise.all([
+          // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
           _this.page.close(),
-          p,
+          pwVideo.saveAs(videoApi.videoName),
         ])
       },
       writeVideoFrame: () => {

@@ -11,7 +11,7 @@ import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, VideoBrowserOpt } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -109,8 +109,8 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
   }))
 }
 
-async function recordVideo (cdpAutomation: CdpAutomation, videoOptions: VideoBrowserOpt) {
-  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
+async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.newFfmpegVideoController()
 
   await cdpAutomation.startVideoRecording(writeVideoFrame)
 }
@@ -198,7 +198,7 @@ export = {
       win.maximize()
     }
 
-    const launched = await this._launch(win, url, automation, preferences, options.video)
+    const launched = await this._launch(win, url, automation, preferences, options.videoApi)
 
     automation.use(await _getAutomation(win, preferences, automation))
 
@@ -231,7 +231,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoOptions?: VideoBrowserOpt) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -279,7 +279,7 @@ export = {
     automation.use(cdpAutomation)
 
     await Promise.all([
-      videoOptions && recordVideo(cdpAutomation, videoOptions),
+      videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
 

@@ -19,7 +19,7 @@ import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, VideoBrowserOpt } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -248,7 +248,7 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: VideoBrowserOpt, browserMajorVersion: number) {
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
   const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
   const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
@@ -583,7 +583,7 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
-      options.video && _recordVideo(cdpAutomation, options.video, Number(options.browser.majorVersion)),
+      options.videoApi && _recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 

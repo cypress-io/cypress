@@ -21,7 +21,7 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, VideoController, VideoRecording } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -251,7 +251,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
   if (options.previous) {
     debug('in single-tab mode, re-using previous videoController')
 
-    Object.assign(options.previous.info, {
+    Object.assign(options.previous.api, {
       videoName,
       compressedVideoName,
       onError,
@@ -262,17 +262,17 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
     return options.previous
   }
 
-  let ffmpegController: VideoController
+  let ffmpegController: BrowserVideoController
   let _ffmpegOpts: Pick<videoCapture.StartOptions, 'webmInput'>
 
   const videoRecording: VideoRecording = {
-    info: {
+    api: {
       onError,
       videoName,
       compressedVideoName,
       async newFfmpegVideoController (ffmpegOpts) {
         _ffmpegOpts = ffmpegOpts || _ffmpegOpts
-        ffmpegController = await videoCapture.start({ ...videoRecording.info, ..._ffmpegOpts })
+        ffmpegController = await videoCapture.start({ ...videoRecording.api, ..._ffmpegOpts })
 
         // This wrapper enables re-binding writeVideoFrame to a new video stream when running in single-tab mode.
         const controllerWrap = {
@@ -283,11 +283,11 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
             ffmpegController.writeVideoFrame(data)
           },
           async restart () {
-            await videoRecording.info.newFfmpegVideoController(_ffmpegOpts)
+            await videoRecording.api.newFfmpegVideoController(_ffmpegOpts)
           },
         }
 
-        videoRecording.info.setVideoController(controllerWrap)
+        videoRecording.api.setVideoController(controllerWrap)
 
         return controllerWrap
       },
@@ -348,7 +348,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
     projectRoot,
     shouldLaunchNewTab,
     onError,
-    video: options.videoRecording?.info,
+    videoApi: options.videoRecording?.api,
     automationMiddleware: {
       onBeforeRequest (message, data) {
         if (message === 'take:screenshot') {
@@ -579,7 +579,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   // if we have a video recording
   if (videoController) {
-    results.video = videoRecording!.info.videoName
+    results.video = videoRecording!.api.videoName
 
     if (tests && tests.length) {
       // always set the video timestamp on tests
@@ -598,7 +598,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   await runEvents.execute('after:spec', config, spec, results)
   debug('executed after:spec')
 
-  const videoName = videoRecording?.info.videoName
+  const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
 
   if (!videoExists) {
@@ -645,7 +645,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       debug('post processing recording')
       await postProcessRecording(
         videoName,
-        videoRecording.info.compressedVideoName,
+        videoRecording.api.compressedVideoName,
         videoCompression,
         shouldUploadVideo,
         quiet,

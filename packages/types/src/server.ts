@@ -5,14 +5,14 @@ import type { PlatformName } from './platform'
 export type WriteVideoFrame = (data: Buffer) => void
 
 export type VideoRecording = {
-  info: VideoBrowserOpt
-  controller?: VideoController
+  api: RunModeVideoApi
+  controller?: BrowserVideoController
 }
 
 /**
  * Interface yielded by the browser to control video recording.
  */
-export type VideoController = {
+export type BrowserVideoController = {
   /**
    * A function that resolves once the video is fully captured and flushed to disk.
    */
@@ -28,18 +28,21 @@ export type VideoController = {
   writeVideoFrame: WriteVideoFrame
 }
 
-export type VideoBrowserOpt = {
+/**
+ * Interface passed to the browser to enable capturing video.
+ */
+export type RunModeVideoApi = {
   onError: (err: Error) => void
   videoName: string
   compressedVideoName?: string
   /**
    * Create+use a new VideoController that uses ffmpeg to stream frames from `writeVideoFrame` to disk.
    */
-  newFfmpegVideoController: (opts?: { webmInput?: boolean}) => Promise<VideoController>
+  newFfmpegVideoController: (opts?: { webmInput?: boolean}) => Promise<BrowserVideoController>
   /**
    * Register a non-ffmpeg video controller.
    */
-  setVideoController: (videoController?: VideoController) => void
+  setVideoController: (videoController?: BrowserVideoController) => void
   /**
    * Registers a handler for project.on('capture:video:frames').
    */
@@ -51,7 +54,7 @@ export type OpenProjectLaunchOpts = {
   shouldLaunchNewTab: boolean
   automationMiddleware: AutomationMiddleware
   writeVideoFrame?: WriteVideoFrame
-  video?: VideoBrowserOpt
+  videoApi?: RunModeVideoApi
   onWarning: (err: Error) => void
   onError: (err: Error) => void
 }

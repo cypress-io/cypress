@@ -20,7 +20,7 @@ import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, VideoBrowserOpt } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -379,10 +379,10 @@ export function connectToExisting () {
   getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
-async function recordVideo (videoOptions: VideoBrowserOpt) {
-  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController({ webmInput: true })
+async function recordVideo (videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.newFfmpegVideoController({ webmInput: true })
 
-  videoOptions.onProjectCaptureVideoFrames(writeVideoFrame)
+  videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
@@ -462,7 +462,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
-    options.video && recordVideo(options.video),
+    options.videoApi && recordVideo(options.videoApi),
   ])
 
   if (Array.isArray(launchOptions.extensions)) {
