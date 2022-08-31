@@ -71,6 +71,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
+import { useStudioStore } from '../store/studio-store'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -115,6 +116,11 @@ const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
 }
 
 const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+  // If the user selects a new spec while in studio mode, turn studio mode off
+  const studioStore = useStudioStore()
+
+  studioStore.cancel()
+
   activeItem.value = idx
 
   if (row.isLeaf) {

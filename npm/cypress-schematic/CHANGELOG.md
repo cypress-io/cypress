@@ -1,3 +1,10 @@
+# [@cypress/schematic-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.2...@cypress/schematic-v2.0.3) (2022-08-17)
+
+
+### Bug Fixes
+
+* cypress-schematic add exception for nguniversal ssr dev server ([#23348](https://github.com/cypress-io/cypress/issues/23348)) ([1f05ff0](https://github.com/cypress-io/cypress/commit/1f05ff0fd75db2d02a777bd497b30179b4b407f5))
+
 # [@cypress/schematic-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.1...@cypress/schematic-v2.0.2) (2022-08-10)
 
 

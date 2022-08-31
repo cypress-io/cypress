@@ -31,10 +31,25 @@ describe('@cypress/schematic: ng-add', () => {
     appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
   })
 
-  it('should create cypress files', async () => {
-    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
+  it('should create cypress files for e2e testing by default', async () => {
+    await schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree: UnitTestTree) => {
       const files = tree.files
 
+      expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/e2e.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/tsconfig.json')
+      expect(files).to.contain('/projects/sandbox/cypress.config.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/fixtures/example.json')
+    })
+  })
+
+  it('should create cypress files for component testing', async () => {
+    await schematicRunner.runSchematicAsync('ng-add', { 'component': true }, appTree).toPromise().then((tree: UnitTestTree) => {
+      const files = tree.files
+
+      expect(files).to.contain('/projects/sandbox/cypress/support/component.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/component-index.html')
       expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
       expect(files).to.contain('/projects/sandbox/cypress/support/e2e.ts')
       expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')
