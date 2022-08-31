@@ -28,6 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 'feature/v8-snapshots'
+        - 'ryanm/feat/add-v8-snapshot-to-monorepo'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,6 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-monorepo', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -46,6 +48,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-monorepo', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,6 +68,12 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-monorepo', << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
@@ -1304,18 +1313,36 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
-      - run:
-          name: Run v8 integration tests
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn test-integration --scope @tooling/packherd
+      # TODO: Remove this once we switch off self-hosted M1 runners
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run: rm -f /tmp/cypress/junit/* 
       - unless:
           condition:
             or:
-              - equal: [ *windows-executor, << parameters.executor >> ]
-              - equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557 
+              - equal: [ *windows-executor, << parameters.executor >> ] # TODO: Figure out how to support windows when we support the windows build: https://github.com/cypress-io/cypress/issues/23122
           steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+            - verify-mocha-results:
+                expectedResultCount: 3
+      - when:
+          condition:
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
+              - equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/packherd'"
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:
@@ -1352,7 +1379,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 16
+                expectedResultCount: 18
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output

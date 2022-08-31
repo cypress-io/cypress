@@ -32,7 +32,7 @@ if (
 function checkArmArchitectures (version: string): boolean {
   if (process.arch.startsWith('arm') && process.platform !== 'darwin') {
     logError(
-      `WARNING: mksnapshot does not run on ${process.arch}. Download 
+      `WARNING: mksnapshot does not run on ${process.arch}. Download
      https://github.com/electron/electron/releases/download/v${version}/mksnapshot-v${version}-${process.platform}-${process.arch}-x64.zip
      on a x64 ${process.platform} OS to generate ${archToDownload} snapshots.`,
     )
@@ -61,7 +61,7 @@ export async function attemptDownload (
 ) {
   if (!checkArmArchitectures(version)) {
     throw new Error(
-      'Architecture not supported. Run with `DEBUG=\'mksnapshot:error\'` for more information',
+      'Architecture not supported. Run with `DEBUG=\'cypress:mksnapshot:error\'` for more information',
     )
   }
 

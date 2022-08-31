@@ -1,9 +1,0 @@
-{
-  "norewrite": [],
-  "deferred": [],
-  "healthy": [
-    "./entry.js"
-  ],
-  "deferredHashFile": "yarn.lock",
-  "deferredHash": "a9036d268b4ca30877ea76799a41ca10087448c65fc24f5e8888d0263d642ccb"
-}

@@ -11,7 +11,7 @@
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "test": "yarn test-integration",
-    "test-integration": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters  --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-integration": "mocha --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
@@ -24,6 +24,8 @@
     "mocha": "7.0.1"
   },
   "files": [
-    "dist/*"
-  ]
+    "dist/*",
+    "src/packherd.ts"
+  ],
+  "types": "src/packherd.ts"
 }
