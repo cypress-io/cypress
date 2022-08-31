@@ -18,7 +18,6 @@ import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
-import * as videoCapture from '../video_capture'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, VideoBrowserOpt } from '@packages/types'
@@ -381,10 +380,9 @@ export function connectToExisting () {
 }
 
 async function recordVideo (videoOptions: VideoBrowserOpt) {
-  const videoController = await videoCapture.start({ ...videoOptions, webmInput: true })
+  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController({ webmInput: true })
 
-  videoOptions.onProjectCaptureVideoFrames(videoController.writeVideoFrame)
-  videoOptions.setVideoController(videoController)
+  videoOptions.onProjectCaptureVideoFrames(writeVideoFrame)
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {

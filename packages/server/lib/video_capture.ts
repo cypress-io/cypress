@@ -270,6 +270,9 @@ export function start (options: StartOptions) {
       endVideoCapture,
       writeVideoFrame,
       startedVideoCapture,
+      restart: () => {
+        throw new Error('restart cannot be called on a plain ffmpeg stream')
+      },
     }
   })
 }

@@ -6,7 +6,6 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from './cdp_automation'
 import * as savedState from '../saved_state'
-import * as videoCapture from '../video_capture'
 import utils from './utils'
 import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
@@ -111,11 +110,9 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
 }
 
 async function recordVideo (cdpAutomation: CdpAutomation, videoOptions: VideoBrowserOpt) {
-  const videoController = await videoCapture.start(videoOptions)
+  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
 
-  videoOptions.setVideoController(videoController)
-
-  await cdpAutomation.startVideoRecording(videoController.writeVideoFrame)
+  await cdpAutomation.startVideoRecording(writeVideoFrame)
 }
 
 export = {

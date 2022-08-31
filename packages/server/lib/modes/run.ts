@@ -21,7 +21,7 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, WriteVideoFrame, VideoController, VideoBrowserOpt } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, VideoController, VideoRecording } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -40,7 +40,6 @@ let exitEarly = (err) => {
   earlyExitErr = err
 }
 let earlyExitErr: Error
-// let currentWriteVideoFrameCallback: WriteVideoFrame
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
@@ -223,12 +222,7 @@ async function trashAssets (config: Cfg) {
   }
 }
 
-type VideoRecording = {
-  info: VideoBrowserOpt
-  controller?: VideoController
-}
-
-async function startVideoRecording (options: { project: Project, spec: SpecWithRelativeRoot, videosFolder: string }): Promise<VideoRecording> {
+async function startVideoRecording (options: { previous?: VideoRecording, project: Project, spec: SpecWithRelativeRoot, videosFolder: string }): Promise<VideoRecording> {
   if (!options.videosFolder) throw new Error('Missing videoFolder for recording')
 
   function videoPath (suffix: string) {
@@ -254,11 +248,49 @@ async function startVideoRecording (options: { project: Project, spec: SpecWithR
     onError(err)
   }
 
+  if (options.previous) {
+    debug('in single-tab mode, re-using previous videoController')
+
+    Object.assign(options.previous.info, {
+      videoName,
+      compressedVideoName,
+      onError,
+    })
+
+    await options.previous.controller?.restart().catch(onError)
+
+    return options.previous
+  }
+
+  let ffmpegController: VideoController
+  let _ffmpegOpts: Pick<videoCapture.StartOptions, 'webmInput'>
+
   const videoRecording: VideoRecording = {
     info: {
       onError,
       videoName,
       compressedVideoName,
+      async newFfmpegVideoController (ffmpegOpts) {
+        _ffmpegOpts = ffmpegOpts || _ffmpegOpts
+        ffmpegController = await videoCapture.start({ ...videoRecording.info, ..._ffmpegOpts })
+
+        // This wrapper enables re-binding writeVideoFrame to a new video stream when running in single-tab mode.
+        const controllerWrap = {
+          ...ffmpegController,
+          writeVideoFrame: function writeVideoFrameWrap (data) {
+            if (!ffmpegController) throw new Error('missing ffmpegController in writeVideoFrameWrap')
+
+            ffmpegController.writeVideoFrame(data)
+          },
+          async restart () {
+            await videoRecording.info.newFfmpegVideoController(_ffmpegOpts)
+          },
+        }
+
+        videoRecording.info.setVideoController(controllerWrap)
+
+        return controllerWrap
+      },
       setVideoController (videoController) {
         debug('setting videoController for videoRecording %o', videoRecording)
         videoRecording.controller = videoController
@@ -270,7 +302,9 @@ async function startVideoRecording (options: { project: Project, spec: SpecWithR
     controller: undefined,
   }
 
-  debug('created videoRecording %o', videoRecording)
+  options.project.videoRecording = videoRecording
+
+  debug('created videoRecording %o', { videoRecording })
 
   return videoRecording
 }
@@ -305,7 +339,7 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
   const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
   const warnings = {}
@@ -403,33 +437,12 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-// /**
-//  * In CT mode, browser do not relaunch.
-//  * In browser laucnh is where we wire the new video
-//  * recording callback.
-//  * This has the effect of always hitting the first specs
-//  * video callback.
-//  *
-//  * This allows us, if we need to, to call a different callback
-//  * in the same browser
-//  */
-// function writeVideoFrameCallback (data: Buffer) {
-//   return currentWriteVideoFrameCallback(data)
-// }
-
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
   const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
   let attempts = 0
-
-  // // short circuit current browser callback so that we
-  // // can rewire it without relaunching the browser
-  // if (writeVideoFrame) {
-  //   currentWriteVideoFrameCallback = writeVideoFrame
-  //   options.writeVideoFrame = writeVideoFrameCallback
-  // }
 
   // without this the run mode is only setting new spec
   // path for next spec in launch browser.
@@ -450,9 +463,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
-    // If we do not launch the browser,
-    // we tell it that we are ready
-    // to receive the next spec
+    // since we aren't re-launching the browser, we have to navigate to the next spec instead
     debug('navigating to next spec %s', spec)
 
     return openProject.changeUrlToSpec(spec)
@@ -534,7 +545,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // delay 1 second if we're recording a video to give
   // the browser padding to render the final frames
   // to avoid chopping off the end of the video
-  const videoController = videoRecording?.controller //await videoRecording?.promise
+  const videoController = videoRecording?.controller
 
   debug('received videoController %o', { videoController })
 
@@ -575,17 +586,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       Reporter.setVideoTimestamp(videoController.startedVideoCapture, attempts)
     }
 
-    // TODO: should always have endvideocapture?
-    //      if (endVideoCapture) {
     try {
       await videoController.endVideoCapture()
       debug('ended video capture')
     } catch (err) {
       videoCaptureFailed = true
-      // TODO; could this warn twice...?
       warnVideoRecordingFailed(err)
     }
-  //    }
   }
 
   await runEvents.execute('after:spec', config, spec, results)
@@ -818,11 +825,21 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   await runEvents.execute('before:spec', config, spec)
 
-  const videoRecording = options.video ? await startVideoRecording({
-    project,
-    spec,
-    videosFolder: options.videosFolder,
-  }) : undefined
+  async function getVideoRecording () {
+    if (!options.video) return undefined
+
+    const opts = { project, spec, videosFolder: options.videosFolder }
+
+    if (config.experimentalSingleTabRunMode && !isFirstSpec && project.videoRecording) {
+      // in single-tab mode, only the first spec needs to create a videoRecording object
+      // which is then re-used between specs
+      return await startVideoRecording({ ...opts, previous: project.videoRecording })
+    }
+
+    return await startVideoRecording(opts)
+  }
+
+  const videoRecording = await getVideoRecording()
 
   // we know we're done running headlessly
   // when the renderer has connected and

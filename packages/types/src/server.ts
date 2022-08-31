@@ -4,18 +4,41 @@ import type { PlatformName } from './platform'
 
 export type WriteVideoFrame = (data: Buffer) => void
 
+export type VideoRecording = {
+  info: VideoBrowserOpt
+  controller?: VideoController
+}
+
 /**
  * Interface yielded by the browser to control video recording.
  */
 export type VideoController = {
+  /**
+   * A function that resolves once the video is fully captured and flushed to disk.
+   */
   endVideoCapture: () => Promise<void>
+  /**
+   * Timestamp of when the video capture started - used for chapter timestamps.
+   */
   startedVideoCapture: Date
+  /**
+   * Used in single-tab mode to restart the video capture to a new file without relaunching the browser.
+   */
+  restart: () => Promise<void>
+  writeVideoFrame: WriteVideoFrame
 }
 
 export type VideoBrowserOpt = {
   onError: (err: Error) => void
   videoName: string
   compressedVideoName?: string
+  /**
+   * Create+use a new VideoController that uses ffmpeg to stream frames from `writeVideoFrame` to disk.
+   */
+  newFfmpegVideoController: (opts?: { webmInput?: boolean}) => Promise<VideoController>
+  /**
+   * Register a non-ffmpeg video controller.
+   */
   setVideoController: (videoController?: VideoController) => void
   /**
    * Registers a handler for project.on('capture:video:frames').

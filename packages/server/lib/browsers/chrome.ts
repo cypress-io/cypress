@@ -12,7 +12,6 @@ import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
-import * as videoCapture from '../video_capture'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
@@ -252,11 +251,9 @@ const _disableRestorePagesPrompt = function (userDir) {
 async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: VideoBrowserOpt, browserMajorVersion: number) {
   const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
-  const videoController = await videoCapture.start(videoOptions)
+  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
 
-  videoOptions.setVideoController(videoController)
-
-  await cdpAutomation.startVideoRecording(videoController.writeVideoFrame, screencastOptions)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
 }
 
 // a utility function that navigates to the given URL
@@ -576,6 +573,8 @@ export = {
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
+
+    debug('attaching listeners to chrome %o', { url, options })
 
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 

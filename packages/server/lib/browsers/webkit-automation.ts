@@ -142,6 +142,12 @@ export class WebKitAutomation {
           p,
         ])
       },
+      writeVideoFrame: () => {
+        throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
+      },
+      async restart () {
+        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
+      },
       startedVideoCapture: new Date(),
     })
   }
