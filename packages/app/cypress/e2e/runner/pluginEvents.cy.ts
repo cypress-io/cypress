@@ -49,7 +49,7 @@ describe('plugin events', () => {
           fileExtension: '.js',
           fileName: 'run_events_spec_1',
           name: 'run_events_spec_1.cy.js',
-          relative: 'cypress/e2e/run_events_spec_1.cy.js',
+          relative: path.join('cypress', 'e2e', 'run_events_spec_1.cy.js'),
           specFileExtension: '.cy.js',
           specType: 'integration',
         })
@@ -68,7 +68,7 @@ describe('plugin events', () => {
           fileExtension: '.js',
           fileName: 'run_events_spec_2',
           name: 'run_events_spec_2.cy.js',
-          relative: 'cypress/e2e/run_events_spec_2.cy.js',
+          relative: path.join('cypress', 'e2e', 'run_events_spec_2.cy.js'),
           specFileExtension: '.cy.js',
           specType: 'integration',
         })
