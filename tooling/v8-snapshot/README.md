@@ -35,7 +35,7 @@ When creating a snapshot the bundled code provided to it is executed and whateve
 in the heap at the end is then embedded into the snapshot which is loaded whenever the app
 starts up.
 
-Once the snapshot is loaded we can retrieve fully instantiated modules from it or instantiated
+Once the snapshot is loaded we can retrieve fully instantiated modules from it or instantiate
 them by invoking embedded functions which when called produce the `module.exports`.
 
 However since the environment is different when generating the snapshot and not everything is
@@ -45,7 +45,7 @@ snapshottable, certain requirements need to be respected.
 
 When creating a snapshot via `mksnapshot` certain requirements need to be respected:
 
-- cannot `require` and Node.js core modules like `fs`
+- cannot `require` any Node.js core modules like `fs`
 - cannot access and/or instantiate specific JS runtime objects like `Error` or `Promise`
 - cannot load Node.js native modules
 
@@ -96,9 +96,9 @@ The possible consequences affect the module we verified in the following manner:
 - NoRewrite: we should not _rewrite_ the module as it results in invalid code
 - None: no consequence, i.e. a light weight warning for informative purposes only
 
-Once we did this for all leaves the doctor finds all modules that only depend on those and
+Once we have done this for all leaves, the doctor finds all modules that only depend on those and
 repeats the process.  However the bundle that is generated takes the current (somewhat less
-optimistic _heal state_ into account and rewrites the code of the dependents to _defer_ loading
+optimistic) _heal state_ into account and rewrites the code of the dependents to _defer_ loading
 the _unhealthy_ leaves.  
 The next set of modules to verify is obtained via [the next stage function][doctor-next-stage].
 
