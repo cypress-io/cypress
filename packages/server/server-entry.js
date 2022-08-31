@@ -1,8 +1,3 @@
-// if running in production mode (CYPRESS_INTERNAL_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
-
 const { patchFs } = require('./lib/util/patch-fs')
 const fs = require('fs')
 

@@ -1,5 +1,5 @@
 import { createBundleAsync } from './create-snapshot-script'
-import type { CreateSnapshotScriptOpts, Metadata } from './types'
+import type { CreateSnapshotScriptOpts, Metadata } from '../types'
 
 const prelude = `function get_process() {
   if (typeof process === 'undefined') return undefined

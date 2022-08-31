@@ -86,7 +86,9 @@ Object.defineProperties(Error, {
 //
 // Promise
 //
-Promise = proxyPrevent(Promise, {
+// TODO: Try and remove Promis entirely. It doesn't play nice with lodash's promise
+// eslint-disable-next-line no-undef
+Promis = proxyPrevent(Promise, {
   construction: true,
   get: true,
   set: true,

@@ -1,8 +1,8 @@
 import path from 'path'
 import fs from 'fs'
-import type { CreateBundleOpts } from './types'
+import type { CreateBundleOpts } from '../types'
 import { tmpdir } from 'os'
-import { createHash, ensureDirSync } from './utils'
+import { createHash, ensureDirSync } from '../utils'
 
 type SnapshotConfig = {
   entryfile: string

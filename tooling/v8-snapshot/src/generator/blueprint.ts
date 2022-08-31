@@ -1,15 +1,15 @@
 import fs from 'fs'
 import path from 'path'
 import { BUNDLE_WRAPPER_OPEN } from './create-snapshot-script'
-import { inlineSourceMapComment } from './sourcemap/inline-sourcemap'
-import { processSourceMap } from './sourcemap/process-sourcemap'
+import { inlineSourceMapComment } from '../sourcemap/inline-sourcemap'
+import { processSourceMap } from '../sourcemap/process-sourcemap'
 import debug from 'debug'
-import { forwardSlash } from './utils'
+import { forwardSlash } from '../utils'
 
 const logDebug = debug('cypress:snapgen:debug')
 
 function read (part: string, indent = '  ') {
-  const p = require.resolve(`./blueprint/${part}`)
+  const p = require.resolve(`../blueprint/${part}`)
   const s = fs.readFileSync(p, 'utf8')
 
   return s.split('\n').join(`\n${indent}`)

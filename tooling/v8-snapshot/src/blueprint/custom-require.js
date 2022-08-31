@@ -294,8 +294,15 @@ function createResolveOpts (relFilename, relDirname) {
  * @param relDirname dirname or module to resolve relative to project root
  * @returns result of invoking `require.resolve` with enhanced info
  */
-customRequire.resolve = function (mod, relFilename, relDirname) {
+customRequire.resolve = function (mod, ...args) {
   try {
+    // Handle the case where args is { paths: string[] }. The module is expected to be outside of the cypress snapshot.
+    if (args.length === 0 || (args[0] != null && typeof args[0] !== 'string')) {
+      return require.resolve(mod, ...args)
+    }
+
+    const relFilename = args.length > 0 ? args[0] : null
+    const relDirname = args.length > 1 ? args[1] : null
     const opts =
       relFilename != null && relDirname != null
         ? createResolveOpts(relFilename, relDirname)
@@ -303,9 +310,6 @@ customRequire.resolve = function (mod, relFilename, relDirname) {
 
     return require.resolve(mod, opts)
   } catch (err) {
-    // console.error(err.toString())
-    // console.error('Failed to resolve', mod)
-    // debugger
     throw err
   }
 }

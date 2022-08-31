@@ -2,10 +2,10 @@ import debug from 'debug'
 import path from 'path'
 import { promises as fs } from 'fs'
 import { createBundleAsync } from './create-snapshot-script'
-import type { CreateBundleOpts, Metadata } from './types'
-import { getBundlerPath } from './utils'
+import type { CreateBundleOpts, Metadata } from '../types'
+import { getBundlerPath } from '../utils'
 
-const snapshotUtils = require('../package.json').name
+const snapshotUtils = require('../../package.json').name
 const logInfo = debug('cypress:snapgen:info')
 const logError = debug('cypress:snapgen:error')
 

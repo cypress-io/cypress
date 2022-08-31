@@ -5,7 +5,7 @@ import { dirname, join, basename } from 'path'
 import { minify } from 'terser'
 import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
-import { determineDeferred } from './doctor/determine-deferred'
+import { determineDeferred } from '../doctor/determine-deferred'
 import {
   backupName,
   checkDirSync,
@@ -14,7 +14,7 @@ import {
   fileExistsSync,
   getBundlerPath,
   resolveElectronVersion,
-} from './utils'
+} from '../utils'
 import { createExportScript, ExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
@@ -398,7 +398,7 @@ export class SnapshotGenerator {
     this.snapshotScript = result.snapshotScript
 
     // 3. Since we don't want the `mksnapshot` command to bomb with cryptic
-    //    errors w verify that the generated script is snapshot-able.
+    //    errors we verify that the generated script is snapshot-able.
     if (this.verify) {
       logInfo('Verifying snapshot script')
       try {
@@ -556,7 +556,7 @@ export class SnapshotGenerator {
       const { snapshotBlobFile, v8ContextFile } = await syncAndRun(
         this.electronVersion,
         args,
-      )
+      ) as { snapshotBlobFile: string, v8ContextFile: string }
 
       this.v8ContextFile = v8ContextFile
       this.snapshotBinPath = join(this.snapshotBinDir, snapshotBlobFile)
@@ -571,10 +571,10 @@ export class SnapshotGenerator {
 
         runInstructions()
 
-        return null
+        throw new Error('Failed `mksnapshot` command')
       }
 
-      return { v8ContextFile: this.v8ContextFile! }
+      return { v8ContextFile: this.v8ContextFile }
     } catch (err: any) {
       if (err.stderr != null) {
         logError(err.stderr.toString())

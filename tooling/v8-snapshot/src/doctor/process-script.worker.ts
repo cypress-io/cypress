@@ -1,8 +1,8 @@
 import { strict as assert } from 'assert'
 import debug from 'debug'
 import fs from 'fs'
-import { assembleScript } from '../create-snapshot-script'
-import { SnapshotVerifier } from '../snapshot-verifier'
+import { assembleScript } from '../generator/create-snapshot-script'
+import { SnapshotVerifier } from '../generator/snapshot-verifier'
 import type { ProcessScriptOpts, ProcessScriptResult } from '../types'
 import { createHash } from '../utils'
 

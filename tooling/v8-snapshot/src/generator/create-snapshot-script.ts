@@ -4,7 +4,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { execSync, ExecSyncOptions, StdioOptions } from 'child_process'
 import { BlueprintConfig, scriptFromBlueprint } from './blueprint'
-import type { CreateBundleOpts, CreateSnapshotScriptOpts, Metadata } from './types'
+import type { CreateBundleOpts, CreateSnapshotScriptOpts, Metadata } from '../types'
 import {
   CreateBundle,
   packherd,
@@ -12,9 +12,9 @@ import {
   CreateBundleResult,
   CreateBundleSourcemap,
 } from '@tooling/packherd'
-import { dependencyMapArrayFromInputs } from './meta/dependency-map'
+import { dependencyMapArrayFromInputs } from '../meta/dependency-map'
 import { writeConfigJSON } from './write-config-json'
-import { tryRemoveFileSync } from './utils'
+import { tryRemoveFileSync } from '../utils'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -293,7 +293,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
       )
 
       try {
-      // 3. Receive the JSON encoded result via stdout and parse it
+        // 3. Receive the JSON encoded result via stdout and parse it
         const stdout = execSync(cmd, execOpts)
         const { warnings, outfiles, metafile } = JSON.parse(stdout.toString())
 
@@ -394,7 +394,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
 
 /**
  * Creates a bundle via {@link https://github.com/thlorenz/packherd}
- * Note that we overrid the `createBundle` function in order to use our custom
+ * Note that we override the `createBundle` function in order to use our custom
  * bundler and handle extracting the results from JSON passed via `stdout`.
  *
  * @param opts configure how the bundle is generated {@link CreateBundleOpts}

@@ -2,6 +2,7 @@ import debug from 'debug'
 import path from 'path'
 import type {
   GetModuleKey,
+  GetModuleKeyOpts,
   ModuleNeedsReload,
   PackherdTranspileOpts,
 } from '@packages/packherd-require'
@@ -332,8 +333,17 @@ export function snapshotRequire (
 
       // @ts-ignore custom method on require
       require._tryLoad = tryLoad
+      const oldRequireResolve = require.resolve
+
       // @ts-ignore opts not exactly matching
-      require.resolve = resolve
+      require.resolve = function (id: string, opts: GetModuleKeyOpts & { paths?: string[] | undefined } | undefined) {
+        if (opts?.fromSnapshot) {
+          return resolve(id, opts)
+        }
+
+        return oldRequireResolve(id, opts)
+      }
+
       // @ts-ignore custom method on require
       require.shouldBypassCache = shouldBypassCache
       // @ts-ignore custom method on require

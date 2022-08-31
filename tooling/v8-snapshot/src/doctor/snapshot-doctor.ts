@@ -4,7 +4,7 @@ import fs from 'fs'
 import { tmpdir } from 'os'
 import path from 'path'
 import { circularImports } from './circular-imports'
-import { createBundleAsync } from '../create-snapshot-script'
+import { createBundleAsync } from '../generator/create-snapshot-script'
 import { AsyncScriptProcessor } from './process-script.async'
 import type { CreateSnapshotScriptOpts, Entries, Metadata } from '../types'
 import {
@@ -301,7 +301,7 @@ export class SnapshotDoctor {
    *    process
    * 4. Keep doing that until we arrive at a heal state which will result in a
    *    bundle that doesn't cause any issues when assembled into a snapshot script
-   *    and used to initalize the snapshot
+   *    and used to initialize the snapshot
    * 5. Return that heal state as well as the last collected bundle and related
    *    metadata
    */
