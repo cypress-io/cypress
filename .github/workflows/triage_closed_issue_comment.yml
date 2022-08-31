@@ -1,4 +1,4 @@
-name: Triage stale issue comment
+name: Triage closed issue comment
 on:
   issue_comment:
     types:

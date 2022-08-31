@@ -1,4 +1,4 @@
-name: Add to routed-to project
+name: Triage add to routed-to project
 on:
   issues:
     types:
