@@ -1,6 +1,6 @@
 import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
-import { getEventManager } from '.'
+import { getEventManager, getRunnerConfigFromWindow } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 
@@ -39,14 +39,17 @@ function renderReporter (
 ) {
   const runnerUiStore = useRunnerUiStore()
 
+  const config = getRunnerConfigFromWindow()
+
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
     autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
-    error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
+    error: null,
     resetStatsOnSpecChange: true,
-    experimentalStudioEnabled: false,
+    // Studio can only be enabled for e2e testing
+    studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e' && config.experimentalStudio,
     runnerStore: store,
   })
 
