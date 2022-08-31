@@ -138,9 +138,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
-          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'CloudConnectModals_RefreshCloudViewer_refreshCloudViewer_cloudViewer') {
+          testState.refetchCount = (testState.refetchCount || 0) + 1
+        }
+
+        if (obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer' || (obj.operationName === 'CloudConnectModals_RefreshCloudViewer_refreshCloudViewer_cloudViewer' && testState.refetchCount <= 1)) {
+          if (obj?.result?.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
           }
         }
@@ -159,6 +163,36 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
 
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+    })
+
+    it('refetches cloudViewer data on open', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'CloudConnectModals_RefreshCloudViewer_refreshCloudViewer_cloudViewer') {
+          testState.refetchCalled = true
+        }
+
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      moveToRunsPage()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.withCtx((_, o) => {
+        expect(o.testState.refetchCalled).to.eql(true)
+      })
     })
   })
 
