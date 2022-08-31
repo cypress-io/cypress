@@ -121,33 +121,6 @@ describe('lib/open_project', () => {
         sinon.stub(runEvents, 'execute').resolves()
       })
 
-      it('executes before:spec if in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).to.be.calledWith('before:spec', this.config, this.spec)
-        })
-      })
-
-      it('does not execute before:spec if not in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = true
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
-      it('does not execute before:spec if experimental flag is not enabled', function () {
-        this.config.experimentalInteractiveRunEvents = false
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
       it('executes after:spec on browser close if in interactive mode', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false

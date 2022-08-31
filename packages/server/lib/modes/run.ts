@@ -876,8 +876,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   const screenshots = []
 
-  await runEvents.execute('before:spec', config, spec)
-
   const videoRecordProps = await maybeStartVideoRecording({
     spec,
     browser,
