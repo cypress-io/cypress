@@ -1,11 +1,11 @@
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
 import { debug as launcherDebug, launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
@@ -20,6 +20,7 @@ import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
+import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -370,7 +371,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   return detachedInstance
 }
 
-export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation) {
+export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
 
@@ -378,7 +379,7 @@ export function connectToExisting () {
   getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
-export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
@@ -427,7 +428,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
       'network.proxy.http_port': +port,
       'network.proxy.ssl_port': +port,
       'network.proxy.no_proxies_on': '',
-      'browser.download.dir': options.downloadsFolder,
+      'browser.download.dir': os.platform() === 'win32' ? doubleEscape(options.downloadsFolder) : options.downloadsFolder,
     })
   }
 
@@ -440,7 +441,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Bluebird.all([getPort(), getPort()])
+  ] = await Promise.all([getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
@@ -451,7 +452,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     cacheDir,
     extensionDest,
     launchOptions,
-  ] = await Bluebird.all([
+  ] = await Promise.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),

@@ -1,0 +1,12 @@
+---
+fileName: <%= fileName %>
+---
+
+import <%- componentName %> from '<%- componentPath %>'
+
+describe('<<%=componentName%> />', () => {
+  it('renders', () => {
+    // see: https://test-utils.vuejs.org/guide/
+    cy.mount(<%- componentName %>)
+  })
+})

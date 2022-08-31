@@ -8,7 +8,7 @@
  * - reporter
  * which are built with React and bundle with webpack.
  *
- * The entry point for the webpack bundle is `runner-ct/main.tsx`.
+ * The entry point for the webpack bundle is `runner/main.tsx`.
  * Any time you need to consume some existing code, add it to the `window.UnifiedRunner`
  * namespace there, and access it with `window.UnifiedRunner`.
  *
@@ -26,6 +26,7 @@ import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
+import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
@@ -36,6 +37,12 @@ export function createWebsocket (socketIoRoute: string) {
   }
 
   const ws = client(socketConfig)
+
+  ws.on('connect_error', () => {
+    // fall back to polling if websocket fails to connect (webkit)
+    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
+    ws.io.opts.transports = ['polling', 'websocket']
+  })
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -53,8 +60,6 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
-    UnifiedRunner.StudioRecorder,
-    // created once when opening runner at the very top level in main.ts
     window.ws,
   )
 }
@@ -103,7 +108,6 @@ function createIframeModel () {
     autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
-      recorder: getEventManager().studioRecorder,
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
@@ -134,17 +138,23 @@ function setupRunner () {
   getEventManager().start(config)
 
   const autStore = useAutStore()
+  const studioStore = useStudioStore()
 
   watchEffect(() => {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
+
+  watchEffect(() => {
+    window.UnifiedRunner.MobX.runInAction(() => {
+      mobxRunnerStore.setCanSaveStudioLogs(studioStore.logs.length > 0)
+    })
+  })
 
   _autIframeModel = new AutIframe(
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
-    getEventManager().studioRecorder,
   )
 
   createIframeModel()
@@ -165,10 +175,10 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec () {
+function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
 
-  return getEventManager().teardown(getMobxRunnerStore())
+  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
 let isTorndown = false
@@ -215,18 +225,7 @@ export function addCrossOriginIframe (location) {
  * Cypress on it.
  *
  */
-function runSpecCT (spec: SpecFile) {
-  // TODO: UNIFY-1318 - figure out how to manage window.config.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
+function runSpecCT (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -245,7 +244,7 @@ function runSpecCT (spec: SpecFile) {
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.showInitialBlankContentsCT()
+  autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -280,18 +279,7 @@ function setSpecForDriver (spec: SpecFile) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (spec: SpecFile) {
-  // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
+function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -314,7 +302,7 @@ function runSpecE2E (spec: SpecFile) {
     el.remove()
   })
 
-  autIframe.showInitialBlankContentsE2E()
+  autIframe.showInitialBlankContents()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
@@ -339,7 +327,7 @@ function runSpecE2E (spec: SpecFile) {
 }
 
 export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**
@@ -360,7 +348,14 @@ async function initialize () {
     return
   }
 
+  // Reset stores
   const autStore = useAutStore()
+
+  autStore.$reset()
+
+  const studioStore = useStudioStore()
+
+  studioStore.cancel()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
@@ -399,8 +394,8 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
-  await teardownSpec()
+async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
+  await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
 
@@ -410,12 +405,22 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
+  // TODO: UNIFY-1318 - figure out how to manage window.config.
+  const config = getRunnerConfigFromWindow()
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = setSpecForDriver(spec)
+
+  // creates a new instance of the Cypress driver for this spec,
+  // initializes a bunch of listeners watches spec file for changes.
+  getEventManager().setup(config)
+
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-    return runSpecE2E(spec)
+    return runSpecE2E(config, spec)
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    return runSpecCT(spec)
+    return runSpecCT(config, spec)
   }
 
   throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')

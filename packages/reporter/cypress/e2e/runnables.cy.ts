@@ -1,17 +1,23 @@
 import { EventEmitter } from 'events'
-import { RunnablesErrorModel } from '../../src/runnables/runnable-error'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
+import type { BaseReporterProps } from '../../src/main'
+import type { RunnablesErrorModel } from '../../src/runnables/runnable-error'
+import { MobxRunnerStore } from '@packages/app/src/store'
 
-interface RenderProps {
-  error?: RunnablesErrorModel
-}
+const runnerStore = new MobxRunnerStore('e2e')
+
+runnerStore.setSpec({
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+})
 
 describe('runnables', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let render: Function
-  let start: Function
+  let render: (renderProps?: Partial<BaseReporterProps>) => void
+  let start: (renderProps?: Partial<BaseReporterProps>) => Cypress.Chainable
 
   beforeEach(() => {
     cy.fixture('runnables').then((_runnables) => {
@@ -20,23 +26,19 @@ describe('runnables', () => {
 
     runner = new EventEmitter()
 
-    render = (renderProps: RenderProps = {}, cypressMode = 'open') => {
-      cy.visit('/').then((win) => {
+    render = (renderProps: Partial<BaseReporterProps> = {}, cypressMode = 'open') => {
+      cy.visit('/').then((win: Cypress.AUTWindow) => {
         win.__CYPRESS_MODE__ = cypressMode
-        win.render(Object.assign({
+        win.render({
           runner,
-          runnerStore: {
-            spec: {
-              name: 'foo',
-              absolute: '/foo/bar',
-              relative: 'foo/bar',
-            },
-          },
-        }, renderProps))
+          studioEnabled: renderProps.studioEnabled || false,
+          runnerStore,
+          ...renderProps,
+        })
       })
     }
 
-    start = (renderProps?: RenderProps) => {
+    start = (renderProps?: Partial<BaseReporterProps>) => {
       render(renderProps)
 
       return cy.get('.reporter').then(() => {
@@ -62,7 +64,7 @@ describe('runnables', () => {
   })
 
   it('displays bundle error if specified', () => {
-    const error = {
+    const error: RunnablesErrorModel = {
       title: 'Oops...we found an error preparing this test file:',
       link: 'https://on.cypress.io/we-found-an-error-preparing-your-test-file',
       callout: '/path/to/spec',
@@ -131,7 +133,7 @@ describe('runnables', () => {
 
   it('does not display time if no time taken', () => {
     start()
-    cy.get('.runnable-header span:first').should('have.text', 'foo')
+    cy.get('.runnable-header span:first').should('have.text', 'foo.js')
     cy.get('.runnable-header span:last').should('not.have.text', '--')
   })
 
@@ -152,28 +154,8 @@ describe('runnables', () => {
       cy.percySnapshot()
     })
 
-    it('does not display links to work with file if running all specs', () => {
-      start({
-        runnerStore: {
-          spec: {
-            name: 'All Integration Specs',
-            absolute: '__all',
-            relative: '__all',
-          },
-        },
-      })
-
-      cy.contains('No tests found.').should('be.visible')
-      cy.contains('Cypress could not detect tests in this file.').should('be.visible')
-      cy.contains('Open file in IDE').should('not.exist')
-      cy.contains('Create test with Cypress Studio').should('not.exist')
-      cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
-      cy.get('.help-link').should('have.attr', 'target', '_blank')
-    })
-
-    // FIXME: When studio support is re-introduced we can enable these tests.
-    it.skip('can launch studio', () => {
-      start().then(() => {
+    it('can launch studio', () => {
+      start({ studioEnabled: true }).then(() => {
         cy.stub(runner, 'emit')
 
         cy.contains('Cypress Studio').click()
@@ -185,13 +167,7 @@ describe('runnables', () => {
     describe('open in ide', () => {
       beforeEach(() => {
         start({
-          runnerStore: {
-            spec: {
-              name: 'foo.js',
-              relative: 'relative/path/to/foo.js',
-              absolute: '/absolute/path/to/foo.js',
-            },
-          },
+          runnerStore,
         })
       })
 
@@ -212,13 +188,7 @@ describe('runnables', () => {
       cy.window().then((win) => win.__vite__ = true)
 
       start({
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
+        runnerStore,
       })
     })
 

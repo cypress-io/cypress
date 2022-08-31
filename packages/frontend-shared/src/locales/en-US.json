@@ -105,7 +105,7 @@
     "component": {
       "importFromComponent": {
         "header": "Create from component",
-        "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
+        "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
       "importEmptySpec": {
@@ -158,7 +158,16 @@
       "severityHigh": "High",
       "flakyRate": "{0}% flaky rate",
       "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
-      "lastFlaky": "Last flaky {runsSinceLastFlake} runs ago | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
+      "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
+    },
+    "hoverButton": {
+      "connect": "Connect",
+      "connectProject": "Connect project",
+      "connectProjectShort": "Connect",
+      "requestAccess": "Request access",
+      "requestAccessShort": "Request",
+      "requestSent": "Request sent",
+      "requestSentShort": "Sent"
     },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
@@ -184,6 +193,27 @@
       "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
       "explainer2": "Please refresh the page to try again and visit our {0} if this behavior continues.",
       "refreshButton": "Try again"
+    },
+    "banners": {
+      "login": {
+        "title": "Optimize and record your CI test runs with Cypress Dashboard",
+        "content": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
+        "buttonLabel": "Get started with Cypress Dashboard"
+      },
+      "createOrganization": {
+        "title": "Finish setting up Cypress Dashboard",
+        "content": "Join or create an organization in Cypress Dashboard to access your projects and recorded test runs.",
+        "buttonLabel": "Set up your organization"
+      },
+      "connectProject": {
+        "title": "Connect your project to Cypress Dashboard",
+        "content": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "buttonLabel": "Connect your project"
+      },
+      "record": {
+        "title": "Record your first run",
+        "content": "Record a run to see your test results in Cypress Dashboard. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+      }
     }
   },
   "noResults": {
@@ -466,9 +496,17 @@
         "name": "Modify Obstructive Third Party Code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
       },
+      "experimentalSingleTabRunMode": {
+        "name": "Single Tab Run Mode",
+        "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
+      },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
+      },
+      "experimentalStudio": {
+        "name": "Studio",
+        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
       }
     },
     "device": {
@@ -773,6 +811,27 @@
       "buttonHref": "https://on.cypress.io/viewport",
       "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
       "configText": "Additionally, you can override this value in your {2} or via the {4} command."
+    },
+    "studio": {
+      "studio": "Studio",
+      "studioDescription": "Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.",
+      "studioDetailedDescription": "Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:",
+      "getStartedButton": "Get Started",
+      "feedbackPrompt": "Your {0} will be highly influential to our team.",
+      "experimentalMessage": "This feature is currently experimental and we will be adding more commands and abilities in the future.",
+      "feedbackLink": "feedback",
+      "saveTest": "Save Test",
+      "testName": "Test Name",
+      "saveTestButton": "Save",
+      "closeStudio": "Close Studio",
+      "restartStudio": "Restart Studio",
+      "copyCommands": "Copy Commands to Clipboard",
+      "commandsCopied": "Commands Copied!",
+      "availableCommands": "Available commands",
+      "giveFeedback": "Give Feedback",
+      "enterValidUrl": "Enter a valid URL to visit",
+      "continue": "Continue",
+      "actionCancel": "Cancel"
     }
   },
   "warnings": {
@@ -780,6 +839,7 @@
   },
   "versions": {
     "alpha": "Alpha",
-    "beta": "Beta"
+    "beta": "Beta",
+    "new": "New"
   }
 }

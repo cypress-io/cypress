@@ -1,36 +1,13 @@
-import { initial, initialCT, session, sessionLifecycle, visitFailure } from './Blank'
+import { initial, session, sessionLifecycle, visitFailure } from './Blank'
 import { getContainerEl } from '@cypress/mount-utils'
 
-describe('initial - e2e', () => {
+describe('initial', () => {
   beforeEach(() => {
     getContainerEl()!.innerHTML = initial()
   })
 
   it('works', () => {
-    cy.percySnapshot()
-  })
-
-  it('links to docs', () => {
-    cy.contains('cy.visit').should('have.attr', 'href', 'https://on.cypress.io/visit')
-  })
-})
-
-describe('initial - ct', () => {
-  it('works', () => {
-    getContainerEl()!.innerHTML = initialCT()
-
-    cy.percySnapshot()
-  })
-
-  it('links to docs', () => {
-    getContainerEl()!.innerHTML = initialCT()
-
-    cy.contains('mount').should('have.attr', 'href', 'https://on.cypress.io/mount')
-  })
-
-  it('works with small viewport', () => {
-    cy.viewport(200, 1000)
-    getContainerEl()!.innerHTML = initial()
+    cy.get('[data-cy="cypress-logo"]')
 
     cy.percySnapshot()
   })
@@ -38,6 +15,17 @@ describe('initial - ct', () => {
 
 describe('session', () => {
   it('works', () => {
+    getContainerEl()!.innerHTML = session()
+
+    cy.get('[data-cy="cypress-logo"]')
+    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
+    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.')
+
+    cy.percySnapshot()
+  })
+
+  it('works with small viewport', () => {
+    cy.viewport(200, 500)
     getContainerEl()!.innerHTML = session()
 
     cy.percySnapshot()
@@ -48,7 +36,16 @@ describe('sessionLifecycle', () => {
   it('works', () => {
     getContainerEl()!.innerHTML = sessionLifecycle()
 
-    cy.get('.warn').contains('experimentalSessionAndOrigin')
+    cy.get('[data-cy="cypress-logo"]')
+    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
+    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
+
+    cy.percySnapshot()
+  })
+
+  it('works with small viewport', () => {
+    cy.viewport(200, 500)
+    getContainerEl()!.innerHTML = sessionLifecycle()
 
     cy.percySnapshot()
   })

@@ -1,15 +1,15 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { FoundBrowser } from '@packages/types'
+import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
+import * as launcher from '@packages/launcher'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
-const launcher = require('@packages/launcher')
 const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
@@ -132,13 +132,14 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(getError(
+    // eslint-disable-next-line no-console
+    (options.onWarning || console.warn)(getError(
       'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
@@ -182,44 +183,93 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const getBrowsers = () => {
+const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
+
+const getWebKitBrowserVersion = async () => {
+  try {
+    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
+    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
+    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
+    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
+    const wkBrowserContents = await fs.readFile(wkBrowserPath)
+    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+
+    if (!result || !result.groups!.version) return '0'
+
+    return result.groups!.version
+  } catch (err) {
+    debug('Error detecting WebKit browser version %o', err)
+
+    return '0'
+  }
+}
+
+const getWebKitBrowser = async () => {
+  try {
+    const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
+    const mod = require(modulePath) as typeof import('playwright-webkit')
+    const version = await getWebKitBrowserVersion()
+
+    const browser: FoundBrowser = {
+      name: 'webkit',
+      channel: 'stable',
+      family: 'webkit',
+      displayName: 'WebKit',
+      version,
+      path: mod.webkit.executablePath(),
+      majorVersion: version.split('.')[0],
+      warning: 'WebKit support is not currently available in production.',
+    }
+
+    return browser
+  } catch (err) {
+    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+
+    return
+  }
+}
+
+const getBrowsers = async () => {
   debug('getBrowsers')
 
-  return launcher.detect()
-  .then((browsers: FoundBrowser[] = []) => {
-    let majorVersion
+  const browsers = await launcher.detect()
+  let majorVersion
 
-    debug('found browsers %o', { browsers })
+  debug('found browsers %o', { browsers })
 
-    if (!process.versions.electron) {
-      debug('not in electron, skipping adding electron browser')
+  if (!process.versions.electron) {
+    debug('not in electron, skipping adding electron browser')
 
-      return browsers
-    }
+    return browsers
+  }
 
-    // @ts-ignore
-    const version = process.versions.chrome || ''
+  // @ts-ignore
+  const version = process.versions.chrome || ''
 
-    if (version) {
-      majorVersion = getMajorVersion(version)
-    }
+  if (version) {
+    majorVersion = getMajorVersion(version)
+  }
 
-    const electronBrowser: FoundBrowser = {
-      name: 'electron',
-      channel: 'stable',
-      family: 'chromium',
-      displayName: 'Electron',
-      version,
-      path: '',
-      majorVersion,
-      info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
-    }
+  const electronBrowser: FoundBrowser = {
+    name: 'electron',
+    channel: 'stable',
+    family: 'chromium',
+    displayName: 'Electron',
+    version,
+    path: '',
+    majorVersion,
+    info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+  }
 
-    // the internal version of Electron, which won't be detected by `launcher`
-    debug('adding Electron browser %o', electronBrowser)
+  browsers.push(electronBrowser)
 
-    return browsers.concat(electronBrowser)
-  })
+  if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+    const wkBrowser = await getWebKitBrowser()
+
+    if (wkBrowser) browsers.push(wkBrowser)
+  }
+
+  return browsers
 }
 
 const isValidPathToBrowser = (str) => {
@@ -244,50 +294,47 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers: FoundBrowser[]): Bluebird<FoundBrowser>
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers: FoundBrowser[]): Bluebird<FoundBrowser[]>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []) {
-  const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
+async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
+  const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
-  return findBrowsers
-  .then((browsers: FoundBrowser[] = []) => {
-    const filter = parseBrowserOption(nameOrPath)
+  const filter = parseBrowserOption(nameOrPath)
 
-    debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
+  debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
 
-    // try to find the browser by name with the highest version property
-    const sortedBrowsers = _.sortBy(browsers, ['version'])
+  // try to find the browser by name with the highest version property
+  const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-    const browser = _.findLast(sortedBrowsers, filter)
+  const browser = _.findLast(sortedBrowsers, filter)
 
-    if (browser) {
-      // short circuit if found
+  if (browser) {
+    // short circuit if found
+    if (returnAll) {
+      return browsers
+    }
+
+    return browser
+  }
+
+  // did the user give a bad name, or is this actually a path?
+  if (isValidPathToBrowser(nameOrPath)) {
+    // looks like a path - try to resolve it to a FoundBrowser
+    return launcher.detectByPath(nameOrPath)
+    .then((browser) => {
       if (returnAll) {
-        return browsers
+        return [browser].concat(browsers)
       }
 
       return browser
-    }
+    }).catch((err) => {
+      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+    })
+  }
 
-    // did the user give a bad name, or is this actually a path?
-    if (isValidPathToBrowser(nameOrPath)) {
-      // looks like a path - try to resolve it to a FoundBrowser
-      return launcher.detectByPath(nameOrPath)
-      .then((browser) => {
-        if (returnAll) {
-          return [browser].concat(browsers)
-        }
-
-        return browser
-      }).catch((err) => {
-        errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-      })
-    }
-
-    // not a path, not found by name
-    throwBrowserNotFound(nameOrPath, browsers)
-  })
+  // not a path, not found by name
+  throwBrowserNotFound(nameOrPath, browsers)
 }
 
 const formatBrowsersToOptions = (browsers) => {

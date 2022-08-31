@@ -13,21 +13,23 @@ import url, { URL } from 'url'
 const DEFAULT_PROTOCOL_PORTS = {
   'https:': '443',
   'http:': '80',
-}
+} as const
 
-const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS)
+type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
-const portIsDefault = (port) => {
+const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
+
+const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
 
-const parseClone = (urlObject) => {
+const parseClone = (urlObject: any) => {
   return url.parse(_.clone(urlObject))
 }
 
 export const parse = url.parse
 
-export function stripProtocolAndDefaultPorts (urlToCheck) {
+export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   // grab host which is 'hostname:port' only
   const { host, hostname, port } = url.parse(urlToCheck)
 
@@ -41,7 +43,7 @@ export function stripProtocolAndDefaultPorts (urlToCheck) {
   return host
 }
 
-export function removePort (urlObject) {
+export function removePort (urlObject: any) {
   const parsed = parseClone(urlObject)
 
   // set host to undefined else url.format(...) will ignore the port property
@@ -55,7 +57,7 @@ export function removePort (urlObject) {
   return parsed
 }
 
-export function removeDefaultPort (urlToCheck) {
+export function removeDefaultPort (urlToCheck: any) {
   let parsed = parseClone(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
@@ -65,7 +67,7 @@ export function removeDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function addDefaultPort (urlToCheck) {
+export function addDefaultPort (urlToCheck: any) {
   const parsed = parseClone(urlToCheck)
 
   if (!parsed.port) {
@@ -74,7 +76,7 @@ export function addDefaultPort (urlToCheck) {
     /* @ts-ignore */
     delete parsed.host
     if (parsed.protocol) {
-      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
+      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
     } else {
       /* @ts-ignore */
       delete parsed.port
@@ -84,7 +86,7 @@ export function addDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function getPath (urlToCheck) {
+export function getPath (urlToCheck: string) {
   return url.parse(urlToCheck).path
 }
 
@@ -102,4 +104,16 @@ export function isLocalhost (url: URL) {
     // See https://datatracker.ietf.org/doc/html/rfc5735 (Page 3)
     || localhostIPRegex.test(url.hostname)
   )
+}
+
+export function origin (urlStr: string) {
+  const parsed = url.parse(urlStr)
+
+  parsed.hash = null
+  parsed.search = null
+  parsed.query = null
+  parsed.path = null
+  parsed.pathname = null
+
+  return url.format(parsed)
 }

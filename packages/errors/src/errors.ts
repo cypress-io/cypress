@@ -1085,6 +1085,18 @@ export const AllCypressErrors = {
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSingleTabRunMode`)} experiment is currently only supported for Component Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
+  },
+  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.

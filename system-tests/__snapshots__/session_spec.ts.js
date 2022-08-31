@@ -86,9 +86,6 @@ exports['e2e sessions / session tests'] = `
   can wait for login redirect automatically
     ✓ t1
 
-  can wait for a js redirect with an assertion
-    ✓ t1
-
   same session name, different options, multiple tests
     ✓ t1
     ✓ t2
@@ -107,15 +104,15 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
 
-  43 passing
+  42 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        44                                                                               │
-  │ Passing:      43                                                                               │
+  │ Tests:        43                                                                               │
+  │ Passing:      42                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -133,9 +130,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                            XX:XX       44       43        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       43       42        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       44       43        -        1        -  
+    ✔  All specs passed!                        XX:XX       43       42        -        1        -  
 
 
 `

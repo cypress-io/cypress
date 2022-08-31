@@ -1,4 +1,4 @@
-import { client } from '@packages/socket'
+import { client } from '@packages/socket/lib/browser'
 
 export const handleSocketEvents = (Cypress) => {
   const webSocket = client({

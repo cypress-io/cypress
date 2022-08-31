@@ -7,6 +7,7 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
+import type { WriteVideoFrame } from '@packages/types'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -150,7 +151,7 @@ export function start (name, options: StartOptions = {}) {
 
   const lengths = {}
 
-  const writeVideoFrame = function (data) {
+  const writeVideoFrame: WriteVideoFrame = function (data) {
     // make sure we haven't ended
     // our stream yet because paint
     // events can linger beyond

@@ -1,9 +1,13 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import _ from 'lodash'
 import EventEmitter from 'events'
+import _ from 'lodash'
+import path from 'path'
+import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
+
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import exec from './exec'
@@ -17,11 +21,10 @@ import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
+import runEvents from './plugins/run_events'
+
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
-import path from 'path'
-import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -82,12 +85,14 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected supportsRunEvents: boolean
   protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
+    this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
@@ -139,7 +144,8 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      transports: ['websocket'],
+      // allow polling in dev-mode-only, remove once webkit is no longer gated behind development
+      transports: process.env.CYPRESS_INTERNAL_ENV === 'production' ? ['websocket'] : ['websocket', 'polling'],
     })
   }
 
@@ -466,9 +472,7 @@ export class SocketBase {
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins': {
-              resetRenderedHTMLOrigins()
-
-              return
+              return resetRenderedHTMLOrigins()
             }
             case 'cross:origin:bridge:ready':
               return this.localBus.emit('cross:origin:bridge:ready', args[0])
@@ -479,9 +483,7 @@ export class SocketBase {
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
+              throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
         }
 
@@ -557,6 +559,12 @@ export class SocketBase {
         openFile(fileDetails)
       })
 
+      if (this.supportsRunEvents) {
+        socket.on('plugins:before:spec', async (spec) => {
+          await runEvents.execute('before:spec', {}, spec)
+        })
+      }
+
       reporterEvents.forEach((event) => {
         socket.on(event, (data) => {
           this.toRunner(event, data)
@@ -611,5 +619,9 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
+  }
+
+  changeToUrl (url: string) {
+    return this.toRunner('change:to:url', url)
   }
 }

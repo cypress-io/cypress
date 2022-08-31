@@ -209,7 +209,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   overrides: IOverrides
 
   // Private methods
-
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
 
@@ -221,7 +220,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
-  private selectorFns: Record<string, Function> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -252,6 +250,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
+    this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
 
     // init traits
 
@@ -362,7 +361,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
 
     setTopOnError(Cypress, this)
 
@@ -551,6 +550,22 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         setWindowDocumentProps(autWindow, this.state)
 
+        if (this.Cypress.isBrowser('webkit')) {
+          // WebKit's unhandledrejection event will sometimes not fire within the AUT
+          // due to a documented bug: https://bugs.webkit.org/show_bug.cgi?id=187822
+          // To ensure that the event will always fire (and always report these
+          // unhandled rejections to the user), we patch the AUT's Error constructor
+          // to enqueue a no-op microtask when executed, which ensures that the unhandledrejection
+          // event handler will be executed if this Error is uncaught.
+          const originalError = autWindow.Error
+
+          autWindow.Error = function __CyWebKitError (...args) {
+            autWindow.queueMicrotask(() => {})
+
+            return originalError.apply(this, args)
+          }
+        }
+
         // we may need to update the url now
         this.urlNavigationEvent('load')
 
@@ -643,6 +658,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const s = this.state()
 
       const backup = {
+        test,
         window: s.window,
         document: s.document,
         $autIframe: s.$autIframe,
@@ -659,9 +675,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.queue.reset()
       this.queue.clear()
       this.resetTimer()
-      this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
-
       this.removeAllListeners()
+      this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
     } catch (err) {
       this.fail(err)
     }
@@ -935,7 +950,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.state('promise', undefined)
     this.state('hookId', hookId)
     this.state('runnable', runnable)
-    this.state('test', $utils.getTestFromRunnable(runnable))
     this.state('ctx', runnable.ctx)
 
     const { fn } = runnable
@@ -1187,7 +1201,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // if this is a number, then we know we're about to insert this
     // into our commands and need to reset next + increment the index
-    if (_.isNumber(nestedIndex)) {
+    if (_.isNumber(nestedIndex) && nestedIndex < this.queue.length) {
       this.state('nestedIndex', (nestedIndex += 1))
     }
 

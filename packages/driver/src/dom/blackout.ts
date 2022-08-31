@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import $dimensions from '@packages/runner-shared/src/dimensions'
+import $dimensions from '@packages/runner/src/dom/dimensions'
 
 const resetStyles = `
   border: none !important;

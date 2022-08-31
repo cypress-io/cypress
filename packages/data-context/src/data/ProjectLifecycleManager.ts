@@ -23,7 +23,6 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
-import { makeTestingTypeData } from './coreDataShape'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -288,7 +287,7 @@ export class ProjectLifecycleManager {
       if (this.ctx.coreData.activeBrowser) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
 
         return
@@ -408,7 +407,7 @@ export class ProjectLifecycleManager {
         })
       }
 
-      s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
+      s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
 
@@ -495,8 +494,11 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      if (testingType) {
+        d.diagnostics = {
+          error: null,
+          warnings: [],
+        }
       }
     })
 
@@ -516,9 +518,6 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
-      }
     })
 
     if (this._currentTestingType === testingType) {

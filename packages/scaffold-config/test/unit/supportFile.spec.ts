@@ -1,170 +1,305 @@
 import { supportFileComponent } from '../../src/supportFile'
-import { WIZARD_FRAMEWORKS, WizardFrontendFramework } from '../../src/frameworks'
 import dedent from 'dedent'
 import { expect } from 'chai'
 
-function findByMountingModule (mountModule: WizardFrontendFramework['mountModule']) {
-  return WIZARD_FRAMEWORKS.find((x) => x.mountModule === mountModule)!
-}
-
 describe('supportFileComponent', () => {
-  it('handles cypress/react and JS (example with JSX)', () => {
-    const actual = supportFileComponent('js', findByMountingModule('cypress/react'))
+  context('react', () => {
+    for (const mountModule of ['cypress/react', 'cypress/react18'] as const) {
+      it(`handles ${mountModule} and JS`, () => {
+        const actual = supportFileComponent('js', mountModule)
 
-    expect(actual).to.eq(dedent`
-    // ***********************************************************
-    // This example support/component.js is processed and
-    // loaded automatically before your test files.
-    //
-    // This is a great place to put global configuration and
-    // behavior that modifies Cypress.
-    //
-    // You can change the location of this file or turn off
-    // automatically serving support files with the
-    // 'supportFile' configuration option.
-    //
-    // You can read more here:
-    // https://on.cypress.io/configuration
-    // ***********************************************************
+        expect(actual).to.eq(dedent`
+          // ***********************************************************
+          // This example support/component.js is processed and
+          // loaded automatically before your test files.
+          //
+          // This is a great place to put global configuration and
+          // behavior that modifies Cypress.
+          //
+          // You can change the location of this file or turn off
+          // automatically serving support files with the
+          // 'supportFile' configuration option.
+          //
+          // You can read more here:
+          // https://on.cypress.io/configuration
+          // ***********************************************************
 
-    // Import commands.js using ES2015 syntax:
-    import './commands'
+          // Import commands.js using ES2015 syntax:
+          import './commands'
 
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
+          // Alternatively you can use CommonJS syntax:
+          // require('./commands')
 
-    import { mount } from 'cypress/react'
+          import { mount } from '${mountModule}'
 
-    Cypress.Commands.add('mount', mount)
+          Cypress.Commands.add('mount', mount)
 
-    // Example use:
-    // cy.mount(<MyComponent />)
-    `)
-  })
+          // Example use:
+          // cy.mount(<MyComponent />)
+          `)
+      })
 
-  it('handles cypress/react and TS (example with JSX)', () => {
-    const actual = supportFileComponent('ts', findByMountingModule('cypress/react'))
+      it(`handles ${mountModule} and TS`, () => {
+        const actual = supportFileComponent('ts', mountModule)
 
-    expect(actual).to.eq(dedent`
-    // ***********************************************************
-    // This example support/component.ts is processed and
-    // loaded automatically before your test files.
-    //
-    // This is a great place to put global configuration and
-    // behavior that modifies Cypress.
-    //
-    // You can change the location of this file or turn off
-    // automatically serving support files with the
-    // 'supportFile' configuration option.
-    //
-    // You can read more here:
-    // https://on.cypress.io/configuration
-    // ***********************************************************
+        expect(actual).to.eq(dedent`
+        // ***********************************************************
+        // This example support/component.ts is processed and
+        // loaded automatically before your test files.
+        //
+        // This is a great place to put global configuration and
+        // behavior that modifies Cypress.
+        //
+        // You can change the location of this file or turn off
+        // automatically serving support files with the
+        // 'supportFile' configuration option.
+        //
+        // You can read more here:
+        // https://on.cypress.io/configuration
+        // ***********************************************************
 
-    // Import commands.js using ES2015 syntax:
-    import './commands'
+        // Import commands.js using ES2015 syntax:
+        import './commands'
 
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
+        // Alternatively you can use CommonJS syntax:
+        // require('./commands')
 
-    import { mount } from 'cypress/react'
+        import { mount } from '${mountModule}'
 
-    // Augment the Cypress namespace to include type definitions for
-    // your custom command.
-    // Alternatively, can be defined in cypress/support/component.d.ts
-    // with a <reference path="./component" /> at the top of your spec.
-    declare global {
-      namespace Cypress {
-        interface Chainable {
-          mount: typeof mount
+        // Augment the Cypress namespace to include type definitions for
+        // your custom command.
+        // Alternatively, can be defined in cypress/support/component.d.ts
+        // with a <reference path="./component" /> at the top of your spec.
+        declare global {
+          namespace Cypress {
+            interface Chainable {
+              mount: typeof mount
+            }
+          }
         }
-      }
+
+        Cypress.Commands.add('mount', mount)
+
+        // Example use:
+        // cy.mount(<MyComponent />)
+      `)
+      })
     }
-
-    Cypress.Commands.add('mount', mount)
-
-    // Example use:
-    // cy.mount(<MyComponent />)
-    `)
   })
 
-  it('handles cypress/vue and JS (example no JSX)', () => {
-    const actual = supportFileComponent('js', findByMountingModule('cypress/vue'))
+  context('vue', () => {
+    for (const mountModule of ['cypress/vue2', 'cypress/vue'] as const) {
+      it(`handles ${mountModule} and JS`, () => {
+        const actual = supportFileComponent('js', mountModule)
 
-    expect(actual).to.eq(dedent`
-    // ***********************************************************
-    // This example support/component.js is processed and
-    // loaded automatically before your test files.
-    //
-    // This is a great place to put global configuration and
-    // behavior that modifies Cypress.
-    //
-    // You can change the location of this file or turn off
-    // automatically serving support files with the
-    // 'supportFile' configuration option.
-    //
-    // You can read more here:
-    // https://on.cypress.io/configuration
-    // ***********************************************************
+        expect(actual).to.eq(dedent`
+          // ***********************************************************
+          // This example support/component.js is processed and
+          // loaded automatically before your test files.
+          //
+          // This is a great place to put global configuration and
+          // behavior that modifies Cypress.
+          //
+          // You can change the location of this file or turn off
+          // automatically serving support files with the
+          // 'supportFile' configuration option.
+          //
+          // You can read more here:
+          // https://on.cypress.io/configuration
+          // ***********************************************************
 
-    // Import commands.js using ES2015 syntax:
-    import './commands'
+          // Import commands.js using ES2015 syntax:
+          import './commands'
 
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
+          // Alternatively you can use CommonJS syntax:
+          // require('./commands')
 
-    import { mount } from 'cypress/vue'
+          import { mount } from '${mountModule}'
 
-    Cypress.Commands.add('mount', mount)
+          Cypress.Commands.add('mount', mount)
 
-    // Example use:
-    // cy.mount(MyComponent)
-    `)
-  })
+          // Example use:
+          // cy.mount(MyComponent)
+          `)
+      })
 
-  it('handles cypress/vue and TS (example no JSX)', () => {
-    const actual = supportFileComponent('ts', findByMountingModule('cypress/vue'))
+      it(`handles ${mountModule} and TS`, () => {
+        const actual = supportFileComponent('ts', mountModule)
 
-    expect(actual).to.eq(dedent`
-    // ***********************************************************
-    // This example support/component.ts is processed and
-    // loaded automatically before your test files.
-    //
-    // This is a great place to put global configuration and
-    // behavior that modifies Cypress.
-    //
-    // You can change the location of this file or turn off
-    // automatically serving support files with the
-    // 'supportFile' configuration option.
-    //
-    // You can read more here:
-    // https://on.cypress.io/configuration
-    // ***********************************************************
+        expect(actual).to.eq(dedent`
+        // ***********************************************************
+        // This example support/component.ts is processed and
+        // loaded automatically before your test files.
+        //
+        // This is a great place to put global configuration and
+        // behavior that modifies Cypress.
+        //
+        // You can change the location of this file or turn off
+        // automatically serving support files with the
+        // 'supportFile' configuration option.
+        //
+        // You can read more here:
+        // https://on.cypress.io/configuration
+        // ***********************************************************
 
-    // Import commands.js using ES2015 syntax:
-    import './commands'
+        // Import commands.js using ES2015 syntax:
+        import './commands'
 
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
+        // Alternatively you can use CommonJS syntax:
+        // require('./commands')
 
-    import { mount } from 'cypress/vue'
+        import { mount } from '${mountModule}'
 
-    // Augment the Cypress namespace to include type definitions for
-    // your custom command.
-    // Alternatively, can be defined in cypress/support/component.d.ts
-    // with a <reference path="./component" /> at the top of your spec.
-    declare global {
-      namespace Cypress {
-        interface Chainable {
-          mount: typeof mount
+        // Augment the Cypress namespace to include type definitions for
+        // your custom command.
+        // Alternatively, can be defined in cypress/support/component.d.ts
+        // with a <reference path="./component" /> at the top of your spec.
+        declare global {
+          namespace Cypress {
+            interface Chainable {
+              mount: typeof mount
+            }
+          }
         }
-      }
+
+        Cypress.Commands.add('mount', mount)
+
+        // Example use:
+        // cy.mount(MyComponent)
+      `)
+      })
     }
+  })
 
-    Cypress.Commands.add('mount', mount)
+  context('angular', () => {
+    for (const mountModule of ['cypress/angular'] as const) {
+      it(`handles ${mountModule} and TS`, () => {
+        const actual = supportFileComponent('ts', mountModule)
 
-    // Example use:
-    // cy.mount(MyComponent)
-    `)
+        expect(actual).to.eq(dedent`
+        // ***********************************************************
+        // This example support/component.ts is processed and
+        // loaded automatically before your test files.
+        //
+        // This is a great place to put global configuration and
+        // behavior that modifies Cypress.
+        //
+        // You can change the location of this file or turn off
+        // automatically serving support files with the
+        // 'supportFile' configuration option.
+        //
+        // You can read more here:
+        // https://on.cypress.io/configuration
+        // ***********************************************************
+
+        // Import commands.js using ES2015 syntax:
+        import './commands'
+
+        // Alternatively you can use CommonJS syntax:
+        // require('./commands')
+
+        import { mount } from '${mountModule}'
+
+        // Augment the Cypress namespace to include type definitions for
+        // your custom command.
+        // Alternatively, can be defined in cypress/support/component.d.ts
+        // with a <reference path="./component" /> at the top of your spec.
+        declare global {
+          namespace Cypress {
+            interface Chainable {
+              mount: typeof mount
+            }
+          }
+        }
+
+        Cypress.Commands.add('mount', mount)
+
+        // Example use:
+        // cy.mount(MyComponent)
+      `)
+      })
+    }
+  })
+
+  context('svelte', () => {
+    it(`handles cypress/svelte and JS`, () => {
+      const actual = supportFileComponent('js', 'cypress/svelte')
+
+      expect(actual).to.eq(dedent`
+          // ***********************************************************
+          // This example support/component.js is processed and
+          // loaded automatically before your test files.
+          //
+          // This is a great place to put global configuration and
+          // behavior that modifies Cypress.
+          //
+          // You can change the location of this file or turn off
+          // automatically serving support files with the
+          // 'supportFile' configuration option.
+          //
+          // You can read more here:
+          // https://on.cypress.io/configuration
+          // ***********************************************************
+
+          // Import commands.js using ES2015 syntax:
+          import './commands'
+
+          // Alternatively you can use CommonJS syntax:
+          // require('./commands')
+
+          import { mount } from 'cypress/svelte'
+
+          Cypress.Commands.add('mount', mount)
+
+          // Example use:
+          // cy.mount(MyComponent)
+          `)
+    })
+
+    it(`handles cypress/svelte and TS`, () => {
+      const actual = supportFileComponent('ts', 'cypress/svelte')
+
+      expect(actual).to.eq(dedent`
+        // ***********************************************************
+        // This example support/component.ts is processed and
+        // loaded automatically before your test files.
+        //
+        // This is a great place to put global configuration and
+        // behavior that modifies Cypress.
+        //
+        // You can change the location of this file or turn off
+        // automatically serving support files with the
+        // 'supportFile' configuration option.
+        //
+        // You can read more here:
+        // https://on.cypress.io/configuration
+        // ***********************************************************
+
+        // Import commands.js using ES2015 syntax:
+        import './commands'
+
+        // Alternatively you can use CommonJS syntax:
+        // require('./commands')
+
+        import { mount } from 'cypress/svelte'
+
+        // Augment the Cypress namespace to include type definitions for
+        // your custom command.
+        // Alternatively, can be defined in cypress/support/component.d.ts
+        // with a <reference path="./component" /> at the top of your spec.
+        declare global {
+          namespace Cypress {
+            interface Chainable {
+              mount: typeof mount
+            }
+          }
+        }
+
+        Cypress.Commands.add('mount', mount)
+
+        // Example use:
+        // cy.mount(MyComponent)
+      `)
+    })
   })
 })
