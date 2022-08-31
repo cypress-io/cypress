@@ -185,7 +185,7 @@ export = {
 
   _getAutomation,
 
-  async _render (url: string, automation: Automation, preferences, options: Pick<ElectronOpts, 'isTextTerminal' | 'projectRoot'>) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -485,7 +485,7 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, _.pick(electronOptions, ['isTextTerminal', 'projectRoot']))
+    const win = await this._render(url, automation, preferences, electronOptions)
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 

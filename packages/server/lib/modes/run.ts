@@ -275,7 +275,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
         ffmpegController = await videoCapture.start({ ...videoRecording.api, ..._ffmpegOpts })
 
         // This wrapper enables re-binding writeVideoFrame to a new video stream when running in single-tab mode.
-        const controllerWrap = {
+        const controllerWrap: BrowserVideoController = {
           ...ffmpegController,
           writeVideoFrame: function writeVideoFrameWrap (data) {
             if (!ffmpegController) throw new Error('missing ffmpegController in writeVideoFrameWrap')
