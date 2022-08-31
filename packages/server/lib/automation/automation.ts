@@ -48,14 +48,17 @@ export class Automation {
       }
 
       const onReq = this.get('onRequest')
+      const supports = this.get('supports') || (() => true)
 
-      // if we have an onRequest function
-      // then just invoke that
-      if (onReq) {
+      // if we have an onRequest function and it supports the given message,
+      // invoke that. currently, Firefox uses a mix of the extension and
+      // CDP for automation, so only some messages are supported
+      if (onReq && supports(message)) {
         return Bluebird.resolve(onReq(msg, data))
       }
 
-      // do the default
+      // fallback to the default action, which is only used by Firefox to
+      // invoke the automation via the extension
       return Bluebird.resolve(this.requestAutomationResponse(msg, data, fn))
     }
   }

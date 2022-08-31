@@ -487,6 +487,8 @@ describe('src/cy/commands/cookies', () => {
       Cypress.utils.addTwentyYears.restore()
 
       cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
+      // FIXME: fails in Firefox because CDP Network.getAllCookies does not
+      // includes sameSite value in cookies
       cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
 
       cy.setCookie('two', 'bar', { sameSite: 'no_restriction', secure: true })

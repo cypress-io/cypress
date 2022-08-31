@@ -117,6 +117,31 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
+const supportedCdpEvents = {
+  'get:cookies': true,
+  'get:cookie': true,
+  'set:cookie': true,
+  'add:cookies': true,
+  'set:cookies': true,
+  'clear:cookie': true,
+  'clear:cookies': true,
+}
+
+function setupAutomation (cdp: CdpAutomation, automation: Automation) {
+  automation.use({
+    onRequest (message, data) {
+      if (supportedCdpEvents[message]) {
+        return cdp.onRequest(message, data)
+      }
+
+      throw new Error(`No automation handler registered for: '${message}'`)
+    },
+    supports (message) {
+      return supportedCdpEvents[message]
+    },
+  })
+}
+
 async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
   debug('firefox: reconnecting to blank tab')
 
@@ -126,7 +151,9 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  const cdp = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  setupAutomation(cdp, automation)
 
   await options.onInitializeNewBrowserTab()
 
@@ -138,7 +165,9 @@ async function setupRemote (remotePort, automation, onError, options): Promise<B
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  const cdp = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+
+  setupAutomation(cdp, automation)
 
   return browserCriClient
 }
