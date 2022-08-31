@@ -134,23 +134,11 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
   await navigateToUrl(options.url)
 }
 
-async function setupRemote (remotePort, automation: Automation, onError, options): Promise<BrowserCriClient> {
+async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
-
-  const onRequest = automation.get('onRequest')
-
-  automation.use({
-    onRequest (eventName, data) {
-      if (eventName === 'remote:debugger:protocol') {
-        return pageCriClient.send(data.command, data.params)
-      }
-
-      return onRequest?.(eventName, data)
-    },
-  })
 
   return browserCriClient
 }
