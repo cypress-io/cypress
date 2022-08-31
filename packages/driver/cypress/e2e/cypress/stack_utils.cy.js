@@ -149,7 +149,8 @@ describe('driver/src/cypress/stack_utils', () => {
     it('receives generated stack and returns object with source stack and parsed source stack', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (some_other_file.ts:2:2)
     at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
 
@@ -184,7 +185,8 @@ describe('driver/src/cypress/stack_utils', () => {
     it('works when first line is the error message', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (some_other_file.ts:2:2)
     at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
     })
@@ -202,7 +204,12 @@ describe('driver/src/cypress/stack_utils', () => {
       generatedStack = `Some\nmore\nlines\n\n${generatedStack}`
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
+      expect(sourceStack.sourceMapped).to.equal(`Some
+more
+lines
+
+Error: spec iframe stack
+    at foo.bar (some_other_file.ts:2:2)
     at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
     })
@@ -222,7 +229,8 @@ describe('driver/src/cypress/stack_utils', () => {
 
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (cypress:///some_other_file.ts:2:2)
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (cypress:///some_other_file.ts:2:2)
     at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
 
@@ -269,7 +277,8 @@ describe('driver/src/cypress/stack_utils', () => {
 
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:2)
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:2)
     at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
 
