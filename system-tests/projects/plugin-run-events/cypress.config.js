@@ -35,7 +35,7 @@ module.exports = {
         })
       })
 
-      on('before:spec', (spec = {}) => {
+      on('before:spec', (spec) => {
         if (config.isTextTerminal) {
           console.log('before:spec:', spec.relative)
         } else {
