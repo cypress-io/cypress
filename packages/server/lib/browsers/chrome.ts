@@ -583,7 +583,7 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
-      options.videoApi && _recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
+      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
