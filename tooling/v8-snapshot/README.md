@@ -106,7 +106,7 @@ We then repeat this process again for parents of modules we just verified and so
 verified all of them.
 
 More nitty gritty details are involved like handling circular imports and it is recommended to
-read the [snapshot doctor API][doctor-class] and code.
+read the [snapshot doctor API][snapshot-doctor-class] and code.
 
 ### Strict vs. Non-Strict Mode
 
@@ -169,7 +169,6 @@ our app. See [makeAndInstallSnapshot][makeAndInstallSnapshot].
 	provided to the snapshot bundler
  
 [doctor-next-stage]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L628
-[doctor-class]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L261
 [makeAndInstallSnapshot]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L669
 
 [blueprint-config]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/blueprint.ts#L51

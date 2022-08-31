@@ -95,6 +95,8 @@ describe('loading', () => {
     const projectName = 'v8-snapshot/external-from-healthy'
 
     const projectBaseDir = await scaffoldProject(projectName)
+
+    await fs.move(path.join(projectBaseDir, 'bluebird'), path.join(projectBaseDir, 'node_modules', 'bluebird'))
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
