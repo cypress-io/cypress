@@ -1,3 +1,10 @@
+# [@cypress/schematic-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.1.0...@cypress/schematic-v2.1.1) (2022-08-31)
+
+
+### Bug Fixes
+
+* **cypress-schematic:** suffix template files so they are not ignored ([#23645](https://github.com/cypress-io/cypress/issues/23645)) ([3fd56bc](https://github.com/cypress-io/cypress/commit/3fd56bc1f21224150569434e94b64e781b22008d))
+
 # [@cypress/schematic-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.3...@cypress/schematic-v2.1.0) (2022-08-30)
 
 
