@@ -132,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/22272-globbing-working-dir" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/23380-root-spec-pattern" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1831,7 +1831,6 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
     steps:
       - restore_cached_workspace
       - run:
@@ -2320,7 +2319,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - percy-finalize:
-        context: test-runner:poll-circle-workflow
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build

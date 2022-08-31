@@ -4,6 +4,7 @@ import { logger } from './logger'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
+import { useStudioStore } from '../store/studio-store'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -18,7 +19,6 @@ export class AutIframe {
     private eventManager: any,
     private $: $CypressJQuery,
     private dom: any,
-    private studioRecorder: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -76,7 +76,7 @@ export class AutIframe {
   }
 
   _body () {
-    return this._contents()?.find('body')
+    return this._contents()?.find('body') as unknown as JQuery<HTMLBodyElement>
   }
 
   detachDom = () => {
@@ -481,15 +481,25 @@ export class AutIframe {
     })
   }
 
-  startStudio = () => {
-    if (this.studioRecorder.isLoading) {
-      this.studioRecorder.start(this._body()?.[0])
+  startStudio () {
+    const studioStore = useStudioStore()
+
+    if (studioStore.isLoading) {
+      studioStore.start(this._body()?.[0])
     }
   }
 
-  reattachStudio = () => {
-    if (this.studioRecorder.isActive) {
-      this.studioRecorder.attachListeners(this._body()?.[0])
+  reattachStudio () {
+    const studioStore = useStudioStore()
+
+    if (studioStore.isActive) {
+      const body = this._body()?.[0]
+
+      if (!body) {
+        throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
+      }
+
+      studioStore.attachListeners(body)
     }
   }
 }

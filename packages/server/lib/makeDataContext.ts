@@ -7,9 +7,9 @@ import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 import type {
   AllModeOptions,
   AllowedState,
+  OpenProjectLaunchOpts,
   FoundBrowser,
   InitializeProjectOptions,
-  LaunchOpts,
   OpenProjectLaunchOptions,
   Preferences,
 } from '@packages/types'
@@ -75,7 +75,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
+      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {

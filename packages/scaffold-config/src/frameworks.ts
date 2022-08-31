@@ -86,7 +86,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ])
@@ -107,7 +106,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ])
     },
@@ -127,7 +125,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ])
     },
@@ -263,5 +260,24 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',
+  },
+  {
+    type: 'svelte',
+    configFramework: 'svelte',
+    category: 'library',
+    name: 'Svelte.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_SVELTE],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        getBundlerDependency(bundler, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_SVELTE, projectPath),
+      ])
+    },
+    codeGenFramework: 'svelte',
+    glob: '*.svelte',
+    mountModule: mountModule('cypress/svelte'),
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

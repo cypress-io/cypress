@@ -16,10 +16,10 @@ import { CypressBuilderOptions } from './cypressBuilderOptions'
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
 Partial<CypressCommandLine.CypressOpenOptions>;
 
-type StartDevServerProps = {
+type CypressStartDevServerProps = {
   devServerTarget: string
   watch: boolean
-  context: any
+  context: BuilderContext
 }
 
 function runCypress (
@@ -75,6 +75,10 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
     spec: '',
   }
 
+  if (userOptions.component || userOptions.testingType === 'component') {
+    userOptions.e2e = false
+  }
+
   const options: CypressOptions = {
     ...defaultOptions,
     ...userOptions,
@@ -98,20 +102,33 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
 export function startDevServer ({
   devServerTarget,
   watch,
-  context }: StartDevServerProps): Observable<string> {
-  const overrides = {
-    watch,
-  }
+  context }: CypressStartDevServerProps): Observable<string> {
+  const buildTarget = targetFromTargetString(devServerTarget)
 
-  //@ts-ignore
-  return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
-    //@ts-ignore
-    map((output: any) => {
-      if (!output.success && !watch) {
-        throw new Error('Could not compile application files')
+  return from(context.getBuilderNameForTarget(buildTarget)).pipe(
+    switchMap((builderName) => {
+      let overrides = {}
+
+      // @NOTE: Do not forward watch option if not supported by the target dev server,
+      // this is relevant for running Cypress against dev server target that does not support this option,
+      // for instance @nguniversal/builders:ssr-dev-server.
+      // see https://github.com/nrwl/nx/blob/f930117ed6ab13dccc40725c7e9551be081cc83d/packages/cypress/src/executors/cypress/cypress.impl.ts
+      if (builderName !== '@nguniversal/builders:ssr-dev-server') {
+        console.info(`Passing watch mode to DevServer - watch mode is ${watch}`)
+        overrides = {
+          watch,
+        }
       }
 
-      return output.baseUrl as string
+      return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
+        map((output: any) => {
+          if (!output.success && !watch) {
+            throw new Error('Could not compile application files')
+          }
+
+          return output.baseUrl as string
+        }),
+      )
     }),
   )
 }

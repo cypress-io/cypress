@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export type ScriptError = { type: string, error: string } | null
 
 interface AutStoreState {
-  url?: string
+  url: string | undefined
   highlightUrl: boolean
   viewportWidth: number
   viewportHeight: number
@@ -77,12 +77,15 @@ export const useAutStore = defineStore({
       this.highlightUrl = false
       this.isLoadingUrl = false
     },
+
     setScriptError (err: ScriptError) {
       this.scriptError = err
     },
+
     setScale (scale: number) {
       this.scale = scale
     },
+
     setSpecRunnerHeaderHeight (height: number) {
       this.specRunnerHeaderHeight = height
     },
