@@ -43,7 +43,7 @@ describe('e2e cy.origin errors', () => {
       expect(res.stdout).to.contain('Timed out retrying after 1000ms: Expected to find element: `#doesnotexist`, but never found it.')
 
       // check to make sure the snapshot contains the 'cy.origin' sourcemap
-      expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/e2e/cy_origin_error.cy.ts:102:12')
+      expect(res.stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:102:12')
     },
   })
 })

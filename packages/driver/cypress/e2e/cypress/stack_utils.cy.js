@@ -1,6 +1,5 @@
 const $stackUtils = require('@packages/driver/src/cypress/stack_utils').default
 const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
-const { stripIndent } = require('common-tags')
 
 describe('driver/src/cypress/stack_utils', () => {
   context('.replacedStack', () => {
@@ -317,7 +316,7 @@ Error: spec iframe stack
 
   context('.getSourceDetailsForFirstLine', () => {
     it('parses good stack trace', () => {
-      const stack = stripIndent`
+      const stack = `
         Error
           at Suite.eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:101:3)
           at Object../cypress/integration/spec.js (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:100:1)
@@ -336,7 +335,7 @@ Error: spec iframe stack
     })
 
     it('parses anonymous eval line', () => {
-      const stack = stripIndent`
+      const stack = `
         SyntaxError: The following error originated from your application code, not from Cypress.
 
           > Identifier 'app' has already been declared
@@ -387,7 +386,7 @@ Error: spec iframe stack
         line: 1,
         originalFile: undefined,
         relativeFile: undefined,
-        whitespace: '    ',
+        whitespace: '            ',
       })
     })
 
@@ -400,7 +399,7 @@ Error: spec iframe stack
       })
 
       // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
-      const stack = stripIndent`
+      const stack = `
         Error
           at Object../cypress/integration/spec%with space &^$ emoji👍_你好.js (http://localhost:50129/__cypress/tests?p=cypress/integration/spec%25with%20space%20%26^$%20emoji👍_你好.js:99:1)
       `
@@ -421,7 +420,7 @@ Error: spec iframe stack
       })
 
       // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
-      const stack = stripIndent`
+      const stack = `
         Error
           at Object../cypress/integration/spec.js (http://localhost:50129/__cypress/tests?p=/root/path/cypress/integration/spec.js:99:1)
       `
