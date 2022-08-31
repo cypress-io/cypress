@@ -110,13 +110,14 @@ export class WebKitAutomation {
         size: { width: 1280, height: 720 },
       },
     })
+    const contextStarted = new Date
     const oldPwPage = this.page
 
     this.page = await newContext.newPage()
     this.context = this.page.context()
 
     this.attachListeners(this.page)
-    if (videoApi) this.recordVideo(videoApi)
+    if (videoApi) this.recordVideo(videoApi, contextStarted)
 
     let promises: Promise<any>[] = []
 
@@ -127,7 +128,7 @@ export class WebKitAutomation {
     if (promises.length) await Promise.all(promises)
   }
 
-  private recordVideo (videoApi: RunModeVideoApi) {
+  private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
     const _this = this
 
     videoApi.setVideoController({
@@ -150,7 +151,14 @@ export class WebKitAutomation {
       async restart () {
         throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
       },
-      startedVideoCapture: new Date(),
+      postProcessFfmpegOptions: {
+        // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
+        // otherwise compressing with all these dupe frames can take a really long time
+        // https://stackoverflow.com/q/37088517/3474615
+        outputOptions: ['-vsync vfr'],
+        videoFilters: 'mpdecimate',
+      },
+      startedVideoCapture,
     })
   }
 
