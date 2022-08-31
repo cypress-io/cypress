@@ -572,6 +572,8 @@ export = {
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+    const browserCriClient = this._getBrowserCriClient()
+
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     debug('attaching listeners to chrome %o', { url, options })

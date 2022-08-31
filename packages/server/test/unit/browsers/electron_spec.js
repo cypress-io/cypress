@@ -19,6 +19,7 @@ describe('lib/browsers/electron', () => {
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
+      isTextTerminal: false,
       some: 'var',
       projectRoot: '/foo/',
       onWarning: sinon.stub().returns(),
