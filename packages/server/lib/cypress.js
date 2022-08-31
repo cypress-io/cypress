@@ -248,9 +248,6 @@ module.exports = {
       case 'interactive':
         return this.runElectron(mode, options)
 
-      case 'openProject':
-        throw new Error('Unused')
-
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)
     }

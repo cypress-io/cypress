@@ -18,7 +18,6 @@ describe('deprecated before:browser:launch args', () => {
   systemTests.setup()
 
   systemTests.it('fails when adding unknown properties to launchOptions', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
       video: false,
       env: {
@@ -32,7 +31,6 @@ describe('deprecated before:browser:launch args', () => {
   })
 
   systemTests.it('push and no return - warns user exactly once', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
       video: false,
       env: {
@@ -46,7 +44,7 @@ describe('deprecated before:browser:launch args', () => {
   })
 
   systemTests.it('using non-deprecated API - no warning', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
+    browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -64,11 +62,11 @@ describe('deprecated before:browser:launch args', () => {
   })
 
   systemTests.it('concat return returns once', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
+    browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
     config: {
       video: false,
       env: {
@@ -113,7 +111,6 @@ describe('deprecated before:browser:launch args', () => {
   // printed. we should print that we are aborting the run because
   // the before:browser:launch handler threw an error / rejected
   systemTests.it('displays errors thrown and aborts the run', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
       video: false,
       env: {
@@ -132,7 +129,6 @@ describe('deprecated before:browser:launch args', () => {
   // printed. we should print that we are aborting the run because
   // the before:browser:launch handler threw an error / rejected
   systemTests.it('displays promises rejected and aborts the run', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
       video: false,
       env: {
