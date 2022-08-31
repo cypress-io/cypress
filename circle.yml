@@ -1318,7 +1318,7 @@ jobs:
           condition:
             equal: [ *darwin-arm64-executor ]
           steps:
-            - run: rm /tmp/cypress/junit/* 
+            - run: rm -f /tmp/cypress/junit/* 
       - unless:
           condition:
             or:
