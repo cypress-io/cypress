@@ -298,7 +298,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
     return {
-      message: line,
+      message: line.replace(whitespace, ''), // strip leading whitespace
       whitespace,
     }
   }
