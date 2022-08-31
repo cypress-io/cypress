@@ -298,7 +298,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
     return {
-      message: line,
+      message: line.startsWith(whitespace) ? line.replace(whitespace, '') : line,
       whitespace,
     }
   }
@@ -361,8 +361,9 @@ const reconstructStack = (parsedStack) => {
 const getSourceStack = (stack, projectRoot?) => {
   if (!_.isString(stack)) return {}
 
-  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
-  const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
+  const parsed = stack.split('\n').map((line) => {
+    return getSourceDetailsForLine(projectRoot, line)
+  })
 
   return {
     parsed,
