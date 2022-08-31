@@ -10,15 +10,23 @@ import fs from 'fs-extra'
 
 const exec = promisify(execOrig)
 
+const scaffoldProject = async (project: string): Promise<string> => {
+  Fixtures.remove()
+  await FixturesScaffold.scaffoldCommonNodeModules()
+  await FixturesScaffold.symlinkNodeModule('electron')
+  await FixturesScaffold.symlinkNodeModule('@packages/v8-snapshot-require')
+  const projectBaseDir = await Fixtures.scaffoldProject(project)
+
+  await FixturesScaffold.scaffoldProjectNodeModules({ project, updateLockFile: false })
+
+  return projectBaseDir
+}
+
 describe('loading', () => {
   it('loads a healthy module requires a deferred one', async () => {
     const projectName = 'v8-snapshot/deferred-from-healthy'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -52,11 +60,7 @@ describe('loading', () => {
   it('loads an entry esm module importing a lodash function', async () => {
     const projectName = 'v8-snapshot/esm'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.mjs')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -90,11 +94,7 @@ describe('loading', () => {
   it('loads a healthy module that requires an external one', async () => {
     const projectName = 'v8-snapshot/external-from-healthy'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -130,11 +130,7 @@ describe('loading', () => {
     it('loads an app loading and using fsevents which has native module component', async () => {
       const projectName = 'v8-snapshot/native-modules'
 
-      Fixtures.remove()
-      await FixturesScaffold.scaffoldCommonNodeModules()
-      const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-      await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+      const projectBaseDir = await scaffoldProject(projectName)
       const cacheDir = path.join(projectBaseDir, 'cache')
       const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
       const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -169,11 +165,7 @@ describe('loading', () => {
   it('loads a cached module that modifies require cache', async () => {
     const projectName = 'v8-snapshot/require-cache'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await fs.remove(cacheDir)
@@ -211,11 +203,7 @@ describe('loading', () => {
   it('loads an uncached module that modifies require cache', async () => {
     const projectName = 'v8-snapshot/require-cache'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await fs.remove(cacheDir)
@@ -254,11 +242,7 @@ describe('loading', () => {
   it('loads from full path provided via variable', async () => {
     const projectName = 'v8-snapshot/require-full-path-var'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
@@ -292,11 +276,7 @@ describe('loading', () => {
   it('loads all cached ', async () => {
     const projectName = 'v8-snapshot/stealthy-require'
 
-    Fixtures.remove()
-    await FixturesScaffold.scaffoldCommonNodeModules()
-    const projectBaseDir = await Fixtures.scaffoldProject(projectName)
-
-    await FixturesScaffold.scaffoldProjectNodeModules({ project: projectName, updateLockFile: false })
+    const projectBaseDir = await scaffoldProject(projectName)
     const cacheDir = path.join(projectBaseDir, 'cache')
 
     await fs.remove(cacheDir)

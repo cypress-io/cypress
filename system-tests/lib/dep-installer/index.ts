@@ -288,14 +288,11 @@ export async function scaffoldCommonNodeModules () {
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
-    '@packages/v8-snapshot-require',
     '@tooling/system-tests',
-    '@tooling/v8-snapshot',
     'bluebird',
     'chai',
     'dayjs',
     'debug',
-    'electron',
     'execa',
     'fs-extra',
     'https-proxy-agent',
@@ -310,7 +307,7 @@ export async function scaffoldCommonNodeModules () {
   ].map(symlinkNodeModule))
 }
 
-async function symlinkNodeModule (pkg) {
+export async function symlinkNodeModule (pkg) {
   const from = path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 
