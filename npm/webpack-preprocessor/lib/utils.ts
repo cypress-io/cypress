@@ -25,7 +25,7 @@ function hash (contents: string) {
 }
 
 function rmdir (dir) {
-  return del(dir)
+  return del(dir, { force: true })
 }
 
 function tmpdir () {
