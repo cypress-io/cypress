@@ -526,7 +526,7 @@ export class ProjectActions {
     const config = this.ctx.lifecycleManager.loadedConfigFile
 
     // If devServer is a function, they are using a custom dev server.
-    if (typeof config?.component?.devServer === 'function') {
+    if (!config?.component?.devServer || typeof config?.component?.devServer === 'function') {
       return undefined
     }
 

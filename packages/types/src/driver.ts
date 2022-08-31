@@ -13,3 +13,7 @@ export interface Emissions {
   started: Record<string, boolean>
   ended: Record<string, boolean>
 }
+
+export type Instrument = 'agent' | 'command' | 'route'
+
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
