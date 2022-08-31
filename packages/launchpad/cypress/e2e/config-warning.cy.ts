@@ -187,4 +187,14 @@ describe('component testing dependency warnings', () => {
     cy.contains('Choose a Browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
+
+  it('does not show warning for project that does not require bundler to be installed', () => {
+    cy.scaffoldProject('next-12')
+    cy.openProject('next-12')
+    cy.visitLaunchpad()
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+  })
 })
