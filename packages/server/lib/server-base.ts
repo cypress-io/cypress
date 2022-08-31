@@ -241,9 +241,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       networkProxy: this._networkProxy!,
       onError,
       getSpec,
-      getCurrentBrowser,
       testingType,
-      exit,
     }
 
     this.getCurrentBrowser = getCurrentBrowser

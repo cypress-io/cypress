@@ -193,7 +193,7 @@ export class Automation {
     }
   }
 
-  get = (fn: keyof AutomationMiddleware) => {
+  get = <K extends keyof AutomationMiddleware>(fn: K): AutomationMiddleware[K] => {
     return this.middleware[fn]
   }
 }

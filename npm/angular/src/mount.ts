@@ -12,8 +12,8 @@ import { Component, EventEmitter, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
-  TestBed,
   TestModuleMetadata,
+  TestBed,
 } from '@angular/core/testing'
 import {
   BrowserDynamicTestingModule,
@@ -144,12 +144,12 @@ function initTestBed<T> (
 
   const componentFixture = createComponentFixture(component) as Type<T>
 
-  TestBed.configureTestingModule({
+  getTestBed().configureTestingModule({
     ...bootstrapModule(componentFixture, configRest),
   })
 
   if (providers != null) {
-    TestBed.overrideComponent(componentFixture, {
+    getTestBed().overrideComponent(componentFixture, {
       add: {
         providers,
       },
@@ -172,6 +172,8 @@ function createComponentFixture<T> (
   component: Type<T> | string,
 ): Type<T | WrapperComponent> {
   if (typeof component === 'string') {
+    // getTestBed().overrideTemplate is available in v14+
+    // The static TestBed.overrideTemplate is available across versions
     TestBed.overrideTemplate(WrapperComponent, component)
 
     return WrapperComponent
@@ -192,7 +194,7 @@ function setupFixture<T> (
   component: Type<T>,
   config: MountConfig<T>,
 ): ComponentFixture<T> {
-  const fixture = TestBed.createComponent(component)
+  const fixture = getTestBed().createComponent(component)
 
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
@@ -309,6 +311,6 @@ getTestBed().initTestEnvironment(
 
 setupHooks(() => {
   // Not public, we need to call this to remove the last component from the DOM
-  TestBed['tearDownTestingModule']()
-  TestBed.resetTestingModule()
+  getTestBed()['tearDownTestingModule']()
+  getTestBed().resetTestingModule()
 })
