@@ -405,6 +405,12 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.stack).to.equal('replaced stack')
     })
 
+    it('attaches source mapped stack', () => {
+      const result = $errUtils.enhanceStack({ err, userInvocationStack })
+
+      expect(result.sourceMappedStack).to.equal(sourceStack.sourceMapped)
+    })
+
     it('attaches parsed stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
