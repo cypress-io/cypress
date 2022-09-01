@@ -384,6 +384,10 @@ export class EventManager {
     this._addListeners()
 
     this.ws.emit('watch:test:file', config.spec)
+
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      this.ws.emit('plugins:before:spec', config.spec)
+    }
   }
 
   isBrowser (browserName) {
