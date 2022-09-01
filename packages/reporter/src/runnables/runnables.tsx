@@ -177,7 +177,6 @@ class Runnables extends Component<RunnablesProps> {
     const { scroller, appState } = this.props
 
     // Cypress is interactive so let's add the scroll listener and an attribute for testing
-    // this.refs.container.setAttribute('data-cy-scroll')
 
     let maybeHandleScroll: UserScrollCallback | undefined = undefined
 
