@@ -299,7 +299,11 @@ class Command extends Component<Props> {
     }
 
     return (
-      <li className={cs('command', `command-name-${commandName}`)}>
+      <li className={
+        cs('command', `command-name-${commandName}`, {
+          'command-is-studio': model.isStudio,
+        })
+      }>
         <div
           className={
             cs(
@@ -339,6 +343,12 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
+                {model.type === 'parent' && model.isStudio && (
+                  <i
+                    className='far fa-times-circle studio-command-remove'
+                    onClick={this._removeStudioCommand}
+                  />
+                )}
                 {isSessionCommand && (
                   <Tag
                     content={model.renderProps.status}
@@ -470,6 +480,15 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
+  }
+
+  _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { model, events } = this.props
+
+    events.emit('studio:remove:command', model.number)
   }
 }
 

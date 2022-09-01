@@ -28,17 +28,18 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-7 md:grid-cols-9 children:font-medium children:text-gray-800"
+      class="mb-4 grid children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
+      :class="tableGridColumns"
     >
       <div
-        class="flex col-span-4 items-center justify-between"
+        class="flex items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex col-span-2 items-center justify-between truncate">
+      <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
@@ -50,7 +51,7 @@
           @showConnectToProject="showConnectToProject"
         />
       </div>
-      <div class="hidden items-center justify-end truncate md:flex md:col-span-2">
+      <div class="hidden items-center justify-end truncate md:flex">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           mode="AVG_DURATION"
@@ -84,6 +85,8 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
+          :is-project-connected="projectConnectionStatus === 'CONNECTED'"
+          :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
         >
@@ -123,9 +126,20 @@
             />
           </template>
 
+          <template #connect-button="{ utmMedium }">
+            <SpecsListCloudButton
+              v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
+              :gql="props.gql"
+              :project-connection-status="projectConnectionStatus"
+              @showLogin="showLogin(utmMedium)"
+              @showConnectToProject="showConnectToProject"
+              @request-access="requestAccess(props.gql?.currentProject?.projectId)"
+            />
+          </template>
+
           <template #latest-runs>
             <div
-              class="h-full grid justify-items-end items-center"
+              class="h-full grid justify-items-end items-center relative"
             >
               <RunStatusDots
                 v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
@@ -178,6 +192,7 @@ import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import LoginModal from '@cy/gql-components/modals/LoginModal.vue'
+import SpecsListCloudButton from './SpecsListCloudButton.vue'
 import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
@@ -201,6 +216,7 @@ import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
+import { useRequestAccess } from '../composables/useRequestAccess'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -210,18 +226,34 @@ const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
+const tableGridColumns = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
+
 const isProjectConnectOpen = ref(false)
 const isLoginOpen = ref(false)
 const loginUtmMedium = ref('')
 
+const projectConnectionStatus = computed(() => {
+  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
+
+  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    if (props.gql.currentProject?.cloudProject?.hasRequestedAccess) {
+      return 'ACCESS_REQUESTED'
+    }
+
+    return 'UNAUTHORIZED'
+  }
+
+  return 'CONNECTED'
+})
+
 const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
 
 const hasRequestedAccess = computed(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    return props.gql.currentProject.cloudProject.hasRequestedAccess || false
-  }
-
-  return false
+  return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
 
 const showLogin = (utmMedium: string) => {
@@ -232,6 +264,8 @@ const showLogin = (utmMedium: string) => {
 const showConnectToProject = () => {
   isProjectConnectOpen.value = true
 }
+
+const requestAccess = useRequestAccess()
 
 const isGitAvailable = computed(() => {
   return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)

@@ -19,7 +19,7 @@ export interface HookHeaderProps {
 }
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
-  <span className='hook-name'>
+  <span className='hook-name' data-cy={`hook-name-${model.hookName}`}>
     {model.hookName} {number && `(${number})`}
     {model.failed && <span className='hook-failed-message'> (failed)</span>}
   </span>

@@ -1,4 +1,12 @@
 <template>
+  <StudioInstructionsModal
+    :open="studioStore.instructionModalIsOpen"
+    @close="studioStore.closeInstructionModal"
+  />
+  <StudioSaveModal
+    :open="studioStore.saveModalIsOpen"
+    @close="studioStore.closeSaveModal"
+  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex border-gray-900"
@@ -120,6 +128,9 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
+import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
+import StudioSaveModal from './studio/StudioSaveModal.vue'
+import { useStudioStore } from '../store/studio-store'
 
 const {
   preferredMinimumPanelWidth,
@@ -190,6 +201,8 @@ const {
   startSpecWatcher,
   cleanupRunner,
 } = useEventManager()
+
+const studioStore = useStudioStore()
 
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
