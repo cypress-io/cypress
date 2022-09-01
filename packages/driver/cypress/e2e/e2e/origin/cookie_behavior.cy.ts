@@ -482,11 +482,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: remove X-Set-Cookie option
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
-              // FIXME: remove X-Set-Cookie option
               it('does set cookie if withCredentials is true, but does not send cookie if withCredentials is false', () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
                   // current expected assertion
@@ -611,7 +609,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
 
               // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
-              // FIXME: remove X-Set-Cookie option
               it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
                   // current expected assertion
@@ -665,7 +662,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: remove X-Set-Cookie option
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
@@ -1143,7 +1139,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.wait('@cookieCheck')
             })
 
-            // FIXME: remove X-Set-Cookie option
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
@@ -1240,7 +1235,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
 
               // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
-              // FIXME: remove X-Set-Cookie option
               it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
                   // current expected assertion
@@ -1283,7 +1277,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: remove X-Set-Cookie option
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
