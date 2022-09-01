@@ -11,7 +11,7 @@ import type {
   UnmountArgs,
 } from '@cypress/react'
 
-let root: ReactDOM.Root | null = null
+let root: ReactDOM.Root | null
 
 const cleanup = () => {
   if (root) {
