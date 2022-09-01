@@ -46,7 +46,8 @@ describe('Proxy Logging', () => {
   }
 
   context('request logging', () => {
-    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
+    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -95,8 +96,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
       })
@@ -133,8 +133,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -181,8 +180,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -265,7 +263,8 @@ describe('Proxy Logging', () => {
         .visit('/fixtures/empty.html')
       })
 
-      it('intercept log has consoleProps with intercept info', (done) => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
+      it.skip('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')

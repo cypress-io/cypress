@@ -3,12 +3,18 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { WriteVideoFrame } from '@packages/types'
+
+export type CdpCommand = keyof ProtocolMapping.Commands
+
+export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -150,7 +156,7 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   return setCookieRequest
 }
 
-const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
+export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
   resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
   if (validResourceTypes.includes(resourceType as ResourceType)) {
     return resourceType as ResourceType
@@ -163,9 +169,9 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
-type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any>
-type OnFn = (eventName: string, cb: Function) => void
+type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
+type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -181,6 +187,15 @@ export class CdpAutomation {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+  }
+
+  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {
+    this.onFn('Page.screencastFrame', async (e) => {
+      writeVideoFrame(Buffer.from(e.data, 'base64'))
+      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+    })
+
+    await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {

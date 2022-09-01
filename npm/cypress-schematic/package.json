@@ -9,26 +9,26 @@
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts"
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1401.0",
-    "@angular-devkit/core": "^14.1.0",
-    "@angular-devkit/schematics": "^14.1.0",
-    "@schematics/angular": "^14.1.0",
+    "@angular-devkit/architect": "^0.1402.1",
+    "@angular-devkit/core": "^14.2.1",
+    "@angular-devkit/schematics": "^14.2.1",
+    "@schematics/angular": "^14.2.1",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^14.1.0",
-    "@angular/cli": "^14.1.0",
+    "@angular-devkit/schematics-cli": "^14.2.1",
+    "@angular/cli": "^14.2.1",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^18.0.6",
     "chai": "4.2.0",
     "mocha": "3.5.3",
-    "typescript": "~4.2.3"
+    "typescript": "^4.7.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=14.1.0",
-    "@angular/core": ">=14.1.0"
+    "@angular/cli": ">=12",
+    "@angular/core": ">=12"
   },
   "license": "MIT",
   "repository": {

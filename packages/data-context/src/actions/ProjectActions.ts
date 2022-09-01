@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
@@ -22,7 +22,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: OpenProjectLaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
@@ -35,12 +35,12 @@ export interface ProjectApiShape {
   getConfig(): ReceivedCypressOptions | undefined
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
-  getCurrentProjectSavedState(): {} | undefined
+  getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
-    updateSpecs(specs: FoundSpec[]): void
+    updateSpecs(specs: SpecWithRelativeRoot[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
     emitter: EventEmitter
@@ -175,7 +175,7 @@ export class ProjectActions {
         // When switching testing type, the project should be relaunched in the previously selected browser
         if (this.ctx.coreData.app.relaunchBrowser) {
           this.ctx.project.setRelaunchBrowser(false)
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
       })
     } catch (e) {
@@ -228,7 +228,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: Cypress.TestingType | null, options: LaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options?: OpenProjectLaunchOpts, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -313,7 +313,7 @@ export class ProjectActions {
     this.api.setPromptShown(slug)
   }
 
-  setSpecs (specs: FoundSpec[]) {
+  setSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
 
@@ -324,7 +324,7 @@ export class ProjectActions {
     this.ctx.emitter.specsChange()
   }
 
-  refreshSpecs (specs: FoundSpec[]) {
+  refreshSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
@@ -336,15 +336,13 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
-    if (!project) {
-      throw Error(`Cannot create spec without currentProject.`)
-    }
+    assert(project, 'Cannot create spec without currentProject.')
 
     const getCodeGenPath = () => {
-      return codeGenType === 'e2e' || erroredCodegenCandidate
+      return codeGenType === 'e2e'
         ? this.ctx.path.join(
           project,
           codeGenCandidate,
@@ -354,18 +352,22 @@ export class ProjectActions {
 
     const codeGenPath = getCodeGenPath()
 
+    const { specPattern = [] } = await this.ctx.project.specPatterns()
+
     const newSpecCodeGenOptions = new SpecOptions({
       codeGenPath,
       codeGenType,
-      erroredCodegenCandidate,
       framework: this.getWizardFrameworkFromConfig(),
       isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
+      specPattern,
+      currentProject: this.ctx.currentProject,
+      specs: this.ctx.project.specs,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenOptions.templateKey], target: path.parse(codeGenPath).dir },
+      { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
       codeGenOptions,
     )
 
@@ -524,7 +526,7 @@ export class ProjectActions {
     const config = this.ctx.lifecycleManager.loadedConfigFile
 
     // If devServer is a function, they are using a custom dev server.
-    if (typeof config?.component?.devServer === 'function') {
+    if (!config?.component?.devServer || typeof config?.component?.devServer === 'function') {
       return undefined
     }
 

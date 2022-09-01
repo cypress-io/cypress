@@ -246,10 +246,9 @@ export const mutation = mutationType({
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
-        erroredCodegenCandidate: stringArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
       },
     })
 
@@ -291,7 +290,7 @@ export const mutation = mutationType({
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, undefined, args.specPath)
 
         return ctx.lifecycleManager
       },
