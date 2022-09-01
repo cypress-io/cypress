@@ -1,4 +1,4 @@
-name: Triage issue metrics
+name: 'Triage: issue metrics'
 
 on:
   workflow_dispatch:
@@ -107,7 +107,7 @@ jobs:
             }
 
             const issuesRoutedOrClosedIn7Days = issues.filter((issue) => issue.elapsedDays <= 7).length
-            const percentage = Number(issuesRoutedOrClosedIn7Days / issues.length).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2 })
+            const percentage = Number(issues.length > 0 ? issuesRoutedOrClosedIn7Days / issues.length : 0).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2 })
 
             console.log(`Triage Metrics (${dateRange.startDate} - ${dateRange.endDate})`)
             console.log('Total issues:', issues.length)

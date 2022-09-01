@@ -1,4 +1,4 @@
-name: Triage add to routed-to project
+name: 'Triage: route to team project board'
 on:
   issues:
     types:

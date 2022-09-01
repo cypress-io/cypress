@@ -1,4 +1,4 @@
-name: Triage add issue/PR to project
+name: 'Triage: add issue/PR to project'
 
 on:
   issues:
