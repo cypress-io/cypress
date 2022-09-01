@@ -246,6 +246,7 @@ const _providerCiParams = () => {
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
       'GITHUB_RUN_ID',
+      'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
@@ -513,6 +514,7 @@ const _providerCommitParams = () => {
       branch: env.GH_BRANCH || env.GITHUB_REF,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
+      runAttempt: env.GITHUB_RUN_ATTEMPT,
     },
     gitlab: {
       sha: env.CI_COMMIT_SHA,

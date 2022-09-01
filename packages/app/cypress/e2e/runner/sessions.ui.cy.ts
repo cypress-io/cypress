@@ -56,7 +56,7 @@ describe('runner/cypress sessions.ui.spec', {
       validateSetupSessionGroup()
     })
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
     cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
     cy.get('.command').should('have.length', 2)
@@ -91,7 +91,7 @@ describe('runner/cypress sessions.ui.spec', {
       .contains('runValidation')
     })
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
     cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
 
@@ -128,7 +128,7 @@ describe('runner/cypress sessions.ui.spec', {
 
     cy.contains('CypressError')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   describe('restores saved session', () => {
@@ -160,7 +160,7 @@ describe('runner/cypress sessions.ui.spec', {
           cy.contains('user1')
           cy.contains('restored')
 
-          cy.get('.command-name-Clear-page').should('have.length', 2)
+          cy.get('.command-name-Clear-page').should('have.length', 1)
 
           cy.contains('Restore saved session')
 
@@ -231,7 +231,7 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-expander')
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('.command-name-Clear-page').should('have.length', 3)
+        cy.get('.command-name-Clear-page').should('have.length', 2)
 
         validateSetupSessionGroup(false)
 
@@ -246,7 +246,8 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-alias')
         .contains('runValidation')
       })
-      .percySnapshot()
+
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.get('.runnable-err').should('have.length', 1)
 
@@ -309,7 +310,7 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-alias')
         .contains('runValidation')
       })
-      .percySnapshot()
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.get('.runnable-err').should('have.length', 2)
     })
@@ -323,7 +324,7 @@ describe('runner/cypress sessions.ui.spec', {
     })
 
     validateSessionsInstrumentPanel(['user1', 'user2'])
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 })
 

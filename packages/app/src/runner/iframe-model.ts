@@ -2,6 +2,7 @@ import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 import { defaultMessages } from '@cy/i18n'
+import { useStudioStore } from '../store/studio-store'
 
 export interface AutSnapshot {
   id?: number
@@ -38,7 +39,6 @@ export class IframeModel {
     private eventManager: EventManager,
     private studio: {
       selectorPlaygroundModel: any
-      recorder: any
     },
   ) {
     this._reset()
@@ -109,6 +109,7 @@ export class IframeModel {
   setSnapshots = (snapshotProps: AutSnapshot) => {
     const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
+    const studioStore = useStudioStore()
 
     if (snapshotStore.isSnapshotPinned) {
       return
@@ -118,7 +119,7 @@ export class IframeModel {
       return snapshotStore.setTestsRunningError()
     }
 
-    if (this.studio.recorder.isOpen) {
+    if (studioStore.isOpen) {
       return this._studioOpenError()
     }
 
@@ -258,7 +259,7 @@ export class IframeModel {
        * The spec bridge that matches the origin policy will take a snapshot and send it back to the primary for the runner to store in originalState.
        */
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', autStore.url || '')
-      Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
+      Cypress.primaryOriginCommunicator.once('snapshot:final:generated', (finalSnapshot) => {
         // todo(lachlan): UNIFY-1318 - find correct default, if they are even needed, for required fields ($el, coords...)
         // @ts-ignore
         this.originalState = {

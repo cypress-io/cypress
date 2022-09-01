@@ -59,6 +59,85 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    context('setSystemTime', () => {
+      it('takes number now arg', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+        })
+      })
+
+      it('takes Date now arg', () => {
+        // April 15, 2017
+        const now = new Date(2017, 3, 15)
+        const nowTimestamp = now.getTime()
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(nowTimestamp)
+        })
+      })
+
+      it('defaults to 0 ms with no argument', () => {
+        const now = 1111111111111
+
+        cy.clock(now).then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.setSystemTime()
+          expect(new this.window.Date().getTime()).to.equal(0)
+        })
+      })
+
+      it('combines correctly with tick', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(4321)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(now + 4321)
+        })
+      })
+
+      it('doesn\'t call timers on setSystemTime, but does on tick', function () {
+        cy.clock().then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          })
+
+          clock.setSystemTime(1111111)
+          expect(callCount).to.equal(0)
+          clock.tick()
+          expect(callCount).to.equal(1)
+        })
+      })
+
+      it('doesn\'t shift the time left for timers to trigger', function () {
+        cy.clock(0).then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          }, 100)
+
+          clock.setSystemTime(1111111)
+          clock.tick(99)
+          expect(callCount).to.equal(0)
+          clock.tick(1)
+          expect(callCount).to.equal(1)
+        })
+      })
+    })
+
     it('restores window time methods when calling restore', (done) => {
       cy.clock().then(function (clock) {
         this.window.setTimeout(() => {

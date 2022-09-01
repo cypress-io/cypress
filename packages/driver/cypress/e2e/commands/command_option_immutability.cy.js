@@ -233,9 +233,10 @@ describe('command log', () => {
 
       // Ignore cy.server() because it doesn't log to reporter.
 
-      testOptions('setCookie', { httpOnly: true }, 0, (options) => {
-        cy.setCookie('auth_key', '123key', options)
-      })
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      // testOptions('setCookie', { httpOnly: true }, 0, (options) => {
+      //   cy.setCookie('auth_key', '123key', options)
+      // })
 
       // Ignore cy.should() because it doesn't have options.
 
