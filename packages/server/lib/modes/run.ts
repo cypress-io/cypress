@@ -608,7 +608,7 @@ function waitForTestsToFinishRunning (options: { project: Project, screenshots: 
 
     results.shouldUploadVideo = shouldUploadVideo
 
-    if (shouldUploadVideo) {
+    if (!shouldUploadVideo) {
       debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip processing video. Video path: ${videoName}`)
       results.video = null
     }
@@ -647,7 +647,14 @@ function waitForTestsToFinishRunning (options: { project: Project, screenshots: 
         quiet,
         ffmpegChaptersConfig,
       )
-      .catch(warnVideoRecordingFailed)
+      .catch((err) => {
+        videoCaptureFailed = true
+        warnVideoRecordingFailed(err)
+      })
+    }
+
+    if (videoCaptureFailed) {
+      results.video = null
     }
 
     return results
