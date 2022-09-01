@@ -449,7 +449,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       }
 
       // clean up temp dir where cross-origin callback files are output
-      utils.rmdir(utils.tmpdir())
+      utils.rmdir(utils.tmpdir()).catch((err) => {
+        // not the end of the world if removing the tmpdir fails, but we
+        // don't want it to crash the whole process by going uncaught
+        debug('failing removing temp directory: %s', err.stack)
+      })
     })
 
     // return the promise, which will resolve with the outputPath or reject
