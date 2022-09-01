@@ -59,10 +59,25 @@ describe('FileRow', () => {
 
     cy.get('pre.shiki').should('exist')
 
-    cy.contains('cypress/integration/support.ts')
-    cy.contains('cypress/integration/command.js')
-    cy.contains('cypress.config.js')
-    cy.contains('cypress/integration/index.js')
+    cy.get('[data-cy=valid]').within(() => {
+      cy.contains('cypress/integration/support.ts')
+      cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
+    })
+
+    cy.get('[data-cy=changes]').within(() => {
+      cy.contains('cypress/integration/command.js')
+      cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'true')
+    })
+
+    cy.get('[data-cy=skipped]').within(() => {
+      cy.contains('cypress.config.js')
+      cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
+    })
+
+    cy.get('[data-cy=error]').within(() => {
+      cy.contains('cypress/integration/index.js')
+      cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
+    })
 
     cy.percySnapshot()
   })

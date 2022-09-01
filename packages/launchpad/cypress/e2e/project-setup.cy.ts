@@ -84,6 +84,7 @@ describe('Launchpad: Setup Project', () => {
       cy.containsPath('cypress/support/e2e.js')
       cy.containsPath('cypress/support/commands.js')
       cy.containsPath('cypress/fixtures/example.json')
+      cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
     })
 
     verifyScaffoldedFiles('e2e')
@@ -239,6 +240,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
+          cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -305,6 +307,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
+          cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -337,6 +340,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
+          cy.get('[data-cy=collapsible-header]').invoke('attr', 'aria-expanded').should('eq', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
