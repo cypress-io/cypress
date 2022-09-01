@@ -608,6 +608,11 @@ function waitForTestsToFinishRunning (options: { project: Project, screenshots: 
 
     results.shouldUploadVideo = shouldUploadVideo
 
+    if (shouldUploadVideo) {
+      debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip processing video. Video path: ${videoName}`)
+      results.video = null
+    }
+
     if (!quiet && !skippedSpec) {
       printResults.displayResults(results, estimated)
     }
@@ -621,10 +626,7 @@ function waitForTestsToFinishRunning (options: { project: Project, screenshots: 
 
     if (usingExperimentalSingleTabMode) {
       await project.server.destroyAut()
-    }
-
-    // we do not support experimentalSingleTabRunMode for e2e
-    if (!usingExperimentalSingleTabMode) {
+    } else {
       debug('attempting to close the browser tab')
 
       await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
@@ -845,7 +847,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       quiet: options.quiet,
       shouldKeepTabOpen: !isLastSpec,
     }),
-
     waitForBrowserToConnect({
       spec,
       project,
