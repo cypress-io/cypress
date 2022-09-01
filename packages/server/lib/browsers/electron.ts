@@ -44,7 +44,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = async function (win, options, parent) {
+const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   async function sendCommand (method: CdpCommand, data?: object) {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -72,7 +72,7 @@ const _getAutomation = async function (win, options, parent) {
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.video) {
+        if (!options.videoApi) {
           await sendCommand('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
