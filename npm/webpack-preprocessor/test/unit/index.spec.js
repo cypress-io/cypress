@@ -63,7 +63,7 @@ describe('webpack preprocessor', function () {
       onClose: sinon.stub(),
     }
 
-    sinon.stub(utils, 'rmdir')
+    sinon.stub(utils, 'rmdir').resolves()
     sinon.stub(utils, 'tmpdir').returns('/path/to/tmp/dir')
 
     this.run = (options, file = this.file) => {
