@@ -316,7 +316,7 @@ export class AutIframe {
       // switch to using offsetWidth + offsetHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = this.getOffsetSize($_el.get(0))
+      const dimensions = this._getOffsetSize($_el.get(0))
 
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
@@ -627,7 +627,7 @@ export class AutIframe {
     return box
   }
 
-  private getOffsetSize (el: HTMLElement) {
+  private _getOffsetSize (el: HTMLElement) {
     return {
       width: el.offsetWidth,
       height: el.offsetHeight,
@@ -770,8 +770,7 @@ export class AutIframe {
 
       return {
         container: containers[0],
-        shadowRoot,
-        reactContainer: shadowRoot.querySelector('.react-container'),
+        vueContainer: shadowRoot.querySelector('.vue-container'),
       }
     }
 
@@ -789,11 +788,11 @@ export class AutIframe {
 
     const shadowRoot = container.attachShadow({ mode: 'open' })
 
-    const reactContainer = document.createElement('div')
+    const vueContainer = document.createElement('div')
 
-    reactContainer.classList.add('react-container')
+    vueContainer.classList.add('vue-container')
 
-    shadowRoot.appendChild(reactContainer)
+    shadowRoot.appendChild(vueContainer)
 
     // Prepend style element
 
@@ -805,7 +804,7 @@ export class AutIframe {
 
     return {
       container,
-      reactContainer,
+      vueContainer,
     }
   }
 
@@ -832,7 +831,7 @@ export class AutIframe {
   private listeners: any[] = []
 
   private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
-    const { container, reactContainer } = this._getOrCreateHelperDom({
+    const { container, vueContainer } = this._getOrCreateHelperDom({
       body: $body.get(0),
       className: '__cypress-selector-playground',
       css: highlightMounter.css,
@@ -840,7 +839,7 @@ export class AutIframe {
 
     const removeContainerClickListeners = () => {
       this.listeners.forEach((listener) => {
-        reactContainer.removeEventListener('click', listener)
+        vueContainer.removeEventListener('click', listener)
       })
 
       this.listeners = []
@@ -860,11 +859,11 @@ export class AutIframe {
       removeContainerClickListeners()
 
       if (onClick) {
-        reactContainer.addEventListener('click', onClick)
+        vueContainer.addEventListener('click', onClick)
         this.listeners.push(onClick)
       }
     }
 
-    highlightMounter.mount(reactContainer, selector, styles)
+    highlightMounter.mount(vueContainer, selector, styles)
   }
 }
