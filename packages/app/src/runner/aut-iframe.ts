@@ -2,6 +2,7 @@ import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
 import { getElementDimensions, setOffset, getOffset } from './dimensions'
+import highlightMounter from './selector-playground/highlight-mounter'
 
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
@@ -804,7 +805,6 @@ export class AutIframe {
 
     return {
       container,
-      shadowRoot,
       reactContainer,
     }
   }
@@ -821,8 +821,8 @@ export class AutIframe {
         padding: `0px`,
         width: `${el.offsetWidth}px`,
         height: `${el.offsetHeight}px`,
-        top: offset.top - borderSize,
-        left: offset.left - borderSize,
+        top: `${offset.top - borderSize}px`,
+        left: `${offset.left - borderSize}px`,
         transform: getComputedStyle(el, null).transform,
         zIndex: this._getZIndex(el),
       }
@@ -832,10 +832,10 @@ export class AutIframe {
   private listeners: any[] = []
 
   private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
-    const { container, shadowRoot, reactContainer } = this._getOrCreateHelperDom({
+    const { container, reactContainer } = this._getOrCreateHelperDom({
       body: $body.get(0),
       className: '__cypress-selector-playground',
-      css: this.selectorPlayground.css,
+      css: highlightMounter.css,
     })
 
     const removeContainerClickListeners = () => {
@@ -847,7 +847,6 @@ export class AutIframe {
     }
 
     if (!$el) {
-      this.selectorPlayground.highlight.unmount(reactContainer)
       removeContainerClickListeners()
       container.remove()
 
@@ -866,11 +865,6 @@ export class AutIframe {
       }
     }
 
-    this.selectorPlayground.highlight.render(reactContainer, {
-      selector,
-      appendTo: shadowRoot,
-      showTooltip,
-      styles,
-    })
+    highlightMounter.mount(reactContainer, selector, styles)
   }
 }
