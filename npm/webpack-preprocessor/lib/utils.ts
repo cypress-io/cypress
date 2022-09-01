@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as os from 'os'
 import path from 'path'
 import md5 from 'md5'
@@ -24,12 +25,14 @@ function hash (contents: string) {
   return md5(contents)
 }
 
-function rmdir (dir) {
-  return del(dir, { force: true })
+function rmdir (dirPath: string) {
+  return del(dirPath, { force: true })
 }
 
-function tmpdir () {
-  return path.join(os.tmpdir(), 'cypress', 'webpack-preprocessor')
+function tmpdir (dirname?: string) {
+  const pathParts = _.compact([os.tmpdir(), 'cypress', 'webpack-preprocessor', dirname])
+
+  return path.join(...pathParts)
 }
 
 export default {

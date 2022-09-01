@@ -128,9 +128,16 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
       const callbackName = '__cypressCrossOriginCallback'
       const generatedCode = generate(lastArg.node, {}).code
       const modifiedGeneratedCode = `${callbackName} = ${generatedCode}`
-      const hash = utils.hash(modifiedGeneratedCode)
-      const outputDir = utils.tmpdir()
-      const inputFileName = `cross-origin-cb-${hash}`
+      // the tmpdir path uses a hashed version of the source file path
+      // so that it can be cleaned up without removing other in-use tmpdirs
+      // (notably the support file persists between specs, so its cross-origin
+      // callback output files need to persist as well)
+      const sourcePathHash = utils.hash(resourcePath)
+      const outputDir = utils.tmpdir(sourcePathHash)
+      // use a hash of the contents in file name to ensure it's unique. if
+      // the contents happen to be the same, it's okay if they share a file
+      const codeHash = utils.hash(modifiedGeneratedCode)
+      const inputFileName = `cross-origin-cb-${codeHash}`
       const outputFilePath = `${pathUtil.join(outputDir, inputFileName)}.js`
 
       store.addFile(resourcePath, {
