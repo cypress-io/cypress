@@ -9,7 +9,7 @@ const downloadsProject = Fixtures.projectPath('downloads')
 describe('e2e downloads', () => {
   systemTests.setup()
 
-  systemTests.it.only('handles various file downloads', {
+  systemTests.it('handles various file downloads', {
     project: 'downloads',
     spec: 'downloads.cy.ts',
     config: {
