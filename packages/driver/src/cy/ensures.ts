@@ -39,6 +39,18 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       case 'window':
         return ensureWindow(subject, name)
 
+      case false:
+        return ensureNull(subject, name)
+      case true:
+        // TODO: Removed this conditional while refactoring cy.as() to alias selectors.
+        // It has subject: true to indicate that it's a child command, but the actual subject can be undefined
+        // when aliasing cy.intercept (which returns undefined).
+        if (cmd.get('selector')) {
+          return ensureNotNull(subject, name)
+        }
+
+        return
+
       default:
         return
     }
@@ -47,7 +59,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   const ensureSubjectByType = (subject, type) => {
     const current = state('current')
 
-    let types: string[] = [].concat(type)
+    let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
     // here then just return cuz we good to go
@@ -92,11 +104,46 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
+  const ensureNull = (subject, name) => {
+    // Null or undefined
+    if (subject != null) {
+      const previous = state('current').get('prev').get('name')
+
+      $errUtils.throwErrByPath('subject.not_null', {
+        args: { name, previous },
+      })
+    }
+  }
+
+  const ensureNotNull = (subject, name) => {
+    // Not null or undefined
+    if (subject == null) {
+      $errUtils.throwErrByPath('subject.is_null', {
+        args: { name },
+      })
+    }
+  }
+
   const ensureRunnable = (name) => {
     if (!state('runnable')) {
       $errUtils.throwErrByPath('miscellaneous.outside_test_with_cmd', {
         args: {
           cmd: name,
+        },
+      })
+    }
+  }
+
+  const ensureChildCommand = (command, args) => {
+    const subjects = cy.state('subjects')
+
+    if (subjects[command.get('chainerId')] === undefined) {
+      const stringifiedArg = $utils.stringifyActual(args[0])
+
+      $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        args: {
+          cmd: command.get('name'),
+          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
         },
       })
     }
@@ -256,9 +303,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureElExistence = ($el) => {
-    // dont throw if this isnt even a DOM object
-    // return if not $dom.isJquery($el)
-
     // ensure that we either had some assertions
     // or that the element existed
     if ($el && $el.length) {
@@ -404,6 +448,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
+    ensureChildCommand,
   }
 }
 

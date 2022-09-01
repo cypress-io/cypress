@@ -820,23 +820,8 @@ describe('src/cy/commands/assertions', () => {
         done()
       })
 
-      cy.get('body').then(() => {
-        expect(cy.currentSubject()).to.match('body')
-      })
-    })
-
-    it('sets type to child when subject matches', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          expect(log.get('type')).to.eq('child')
-
-          done()
-        }
-      })
-
-      cy.wrap('foo').then(() => {
-        expect('foo').to.eq('foo')
+      cy.get('body').then((subject) => {
+        expect(subject).to.match('body')
       })
     })
 

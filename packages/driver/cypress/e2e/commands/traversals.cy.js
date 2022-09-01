@@ -1,8 +1,6 @@
 const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
-const helpers = require('../../support/helpers')
-
 describe('src/cy/commands/traversals', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -208,7 +206,7 @@ describe('src/cy/commands/traversals', () => {
             const yielded = Cypress.dom.getElements($el)
 
             _.extend(obj, {
-              'Applied To': helpers.getFirstSubjectByName('get').get(0),
+              'Applied To': cy.$$('#list')[0],
               Yielded: yielded,
               Elements: $el.length,
             })

@@ -324,7 +324,7 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('stores the agent as the subject', function () {
-          expect(cy.state('aliases').myStub.subject).to.eq(this.stub)
+          expect(cy.state('aliases').myStub.subjectChain[0]).to.eq(this.stub)
         })
 
         it('assigns subject to runnable ctx', function () {
@@ -405,7 +405,7 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('stores the agent as the subject', function () {
-          expect(cy.state('aliases')['my.stub'].subject).to.eq(this.stub)
+          expect(cy.state('aliases')['my.stub'].subjectChain[0]).to.eq(this.stub)
         })
 
         it('assigns subject to runnable ctx', function () {

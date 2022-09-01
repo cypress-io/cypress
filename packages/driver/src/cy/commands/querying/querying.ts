@@ -5,8 +5,147 @@ import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
 import type { Log } from '../../../cypress/log'
+import $utils from '../../../cypress/utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
+import { aliasRe, aliasIndexRe } from '../../aliases'
+
+function getAlias (selector, log, cy) {
+  const alias = selector.slice(1)
+
+  return () => {
+    let toSelect
+
+    // Aliases come in two types: raw names, or names followed by an index.
+    // For example, "@foo.bar" or "@foo.bar.1" or "@foo.bar.all", where 1 or all are the index.
+    if ((cy.state('aliases') || {})[alias]) {
+      toSelect = selector
+    } else {
+      // If the name isn't in our state, then this is probably a dynamic alias -
+      // which is to say, it includes an index.
+      toSelect = selector.replace(/\.(\d+|all)$/, '')
+    }
+
+    let aliasObj
+
+    try {
+      aliasObj = cy.getAlias(toSelect)
+    } catch (err) {
+      // possibly this is a dynamic alias, check to see if there is a request
+      const requests = getAliasedRequests(alias, cy.state)
+
+      if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
+        throw err
+      }
+
+      aliasObj = {
+        alias,
+        command: cy.state('routes')[requests[0].routeId].command,
+      }
+    }
+
+    if (!aliasObj) {
+      return
+    }
+
+    const { command } = aliasObj
+
+    log && log.set('referencesAlias', { name: alias })
+
+    /*
+     * There are three cases for aliases, each explained in more detail below:
+     * 1. Route aliases
+     * 2. Intercept aliases
+     * 3. Subject aliases (either DOM elements or primitives).
+     */
+
+    if (command.get('name') === 'route') {
+      // In the case of a route alias, getRequestsByAlias handles selecting the proper index
+      // and returns one or more requests.
+      const requests = cy.getRequestsByAlias(alias) || null
+
+      log && log.set({
+        aliasType: 'route',
+        consoleProps: () => {
+          return {
+            Alias: selector,
+            Yielded: requests,
+          }
+        },
+      })
+
+      return requests
+    }
+
+    if (command.get('name') === 'intercept') {
+      // Intercept aliases are fairly similar, but `getAliasedRequests` does *not* handle indexes
+      // and we have to do it ourselves here.
+
+      // Posible TODO: Unify this index identifying and selecting logic with that from `getRequestsByAlias`
+      const requests = getAliasedRequests(aliasObj.alias, cy.state)
+
+      // If the user provides an index ("@foo.1" or "@foo.all"), use that. Otherwise, return the most recent request.
+      const match = selector.match(aliasIndexRe)
+      const index = match ? match[1] : (requests.length - 1)
+
+      const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10)] || null)
+
+      log && log.set({
+        aliasType: 'intercept',
+        consoleProps: () => {
+          return {
+            Alias: selector,
+            Yielded: returnValue,
+          }
+        },
+      })
+
+      return returnValue
+    }
+
+    // If we've fallen through to here, then this is a subject alias - the result of one or more previous
+    // cypress commands. We replay their subject chain (including possibly re-quering the DOM)
+    // and use this as the result of the alias.
+
+    // If we have a test similar to
+    // cy.get('li').as('alias').then(li => li.remove())
+    // cy.get('@alias').should('not.exist')
+
+    // then Cypress can be very confused: the original 'get' command was not followed by 'should not exist'
+    // but when reinvoked, it is! We therefore set a special piece of state,
+    // which the 'should exist' assertion can read to determine if the *current* command is followed by a 'should not
+    // exist' assertion.
+    cy.state('aliasCurrentCommand', this)
+    const subject = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+
+    cy.state('aliasCurrentCommand', undefined)
+
+    if ($dom.isElement(subject)) {
+      log && log.set({
+        aliasType: 'dom',
+        consoleProps: () => {
+          return {
+            Alias: selector,
+            Yielded: $dom.getElements(subject),
+            Elements: (subject as JQuery<HTMLElement>).length,
+          }
+        },
+      })
+    } else {
+      log && log.set({
+        aliasType: 'primitive',
+        consoleProps: () => {
+          return {
+            Alias: selector,
+            Yielded: subject,
+          }
+        },
+      })
+    }
+
+    return subject
+  }
+}
 
 interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
   _log?: Log
@@ -21,6 +160,21 @@ interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Tim
 }
 
 export default (Commands, Cypress, cy, state) => {
+  /*
+   * cy.get() is currently in a strange state: There are two implementations of it in this file, registered one after
+   * another. It first is registered as an action command (Commands.addAll()) - but below it, we *also* add .get()
+   * via Commands.addSelector(), which overwrites it.
+   *
+   * This is because other commands in the driver rely on the original .get() implementation, via
+   * `cy.now('get', selector, getOptions)`.
+   *
+   * The key is that cy.now() relies on `cy.commandFns[name]` - which addAll() sets, but addSelector() does not.
+   *
+   * The upshot is that any test that relies on `cy.get()` is using the selector-based implementation, but various
+   * driver commands have access to the original implementation of .get() via cy.now(). This is a temporary state
+   * of affairs while we refactor other commands to also be selectors - we'll eventually be able to delete this
+   * original version of .get() entirely.
+   */
   Commands.addAll({
     get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> = {}) {
       const ctx = this
@@ -156,7 +310,8 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       if (aliasObj) {
-        let { subject, alias, command } = aliasObj
+        let { alias, command } = aliasObj
+        let subject = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
 
         const resolveAlias = () => {
           // if this is a DOM element
@@ -358,6 +513,75 @@ export default (Commands, Cypress, cy, state) => {
 
       return resolveElements()
     },
+  })
+
+  Commands.addSelector('get', null, function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
+    if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
+      $errUtils.throwErrByPath('get.invalid_options', {
+        args: { options: userOptions },
+      })
+    }
+
+    const log = userOptions.log !== false && Cypress.log({
+      message: selector,
+      timeout: userOptions.timeout,
+      consoleProps: () => ({}),
+    })
+
+    cy.state('current').set('timeout', userOptions.timeout)
+    cy.state('current').set('_log', log)
+
+    if (aliasRe.test(selector)) {
+      return getAlias.call(this, selector, log, cy)
+    }
+
+    const withinSubject = cy.state('withinSubject')
+    const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
+
+    return () => {
+      let $el
+
+      try {
+        let scope: (typeof withinSubject) | Node[] = withinSubject
+
+        if (includeShadowDom) {
+          const root = withinSubject ? withinSubject[0] : cy.state('document')
+          const elementsWithShadow = $dom.findAllShadowRoots(root)
+
+          scope = elementsWithShadow.concat(root)
+        }
+
+        $el = cy.$$(selector, scope)
+
+        // jQuery v3 has removed its deprecated properties like ".selector"
+        // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
+        // but our error messages use this property to actually show the missing element
+        // so let's put it back
+        if ($el.selector == null) {
+          $el.selector = selector
+        }
+      } catch (err: any) {
+        // this is usually a sizzle error (invalid selector)
+        if (log) {
+          err.onFail = () => log.error(err)
+        }
+
+        throw err
+      }
+
+      log && log.set({
+        $el,
+        consoleProps: () => {
+          return {
+            Selector: selector,
+            Yielded: $dom.getElements($el),
+            Elements: $el.length,
+          }
+        },
+      })
+
+      return $el
+    }
   })
 
   Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {

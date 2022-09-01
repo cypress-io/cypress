@@ -1,9 +1,13 @@
 import _ from 'lodash'
 import type { $Cy } from '../cypress/cy'
 
+import $utils from '../cypress/utils'
 import $errUtils from '../cypress/error_utils'
 
-const aliasRe = /^@.+/
+export const aliasRe = /^@.+/
+
+export const aliasIndexRe = /\.(all|[\d]+)$/
+
 const aliasDisplayRe = /^([@]+)/
 const requestXhrRe = /\.request$/
 
@@ -16,16 +20,19 @@ const aliasDisplayName = (name) => {
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (cy: $Cy) => ({
   addAlias (ctx, aliasObj) {
-    const { alias, subject } = aliasObj
+    const { alias } = aliasObj
 
     const aliases = cy.state('aliases') || {}
 
     aliases[alias] = aliasObj
     cy.state('aliases', aliases)
 
-    const remoteSubject = cy.getRemotejQueryInstance(subject)
-
-    ctx[alias] = remoteSubject ?? subject
+    Object.defineProperty(ctx, alias, {
+      configurable: true,
+      get () {
+        return $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+      },
+    })
   },
 
   getAlias (name, cmd, log) {

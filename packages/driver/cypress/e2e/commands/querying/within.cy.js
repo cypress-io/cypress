@@ -280,20 +280,6 @@ describe('src/cy/commands/querying/within', () => {
           cy.get('body').within(value)
         })
       })
-
-      it('throws when subject is not in the document', (done) => {
-        cy.on('command:end', () => {
-          cy.$$('#list').remove()
-        })
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.within()` failed because this element')
-
-          done()
-        })
-
-        cy.get('#list').within(() => {})
-      })
     })
   })
 
