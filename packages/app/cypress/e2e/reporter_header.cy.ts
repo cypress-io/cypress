@@ -19,18 +19,20 @@ describe('Reporter Header', () => {
     it('filters the list of specs when searching for specs', () => {
       cy.get('body').type('f')
 
-      cy.get('input').type('dom', { force: true })
+      cy.findByTestId('specs-list-panel').within(() => {
+        cy.get('input').as('searchInput').type('dom', { force: true })
+      })
 
       cy.get('[data-cy="spec-file-item"]').should('have.length', 3)
       .should('contain', 'dom-content.spec')
 
-      cy.get('input').clear()
+      cy.get('@searchInput').clear()
 
       cy.get('[data-cy="spec-file-item"]').should('have.length', 3)
 
-      cy.get('input').type('asdf', { force: true })
+      cy.get('@searchInput').type('asdf', { force: true })
 
-      cy.get('[data-cy="spec-file-item"]').should('have.length', 0)
+      cy.findByTestId('spec-file-item').should('have.length', 0)
     })
   })
 

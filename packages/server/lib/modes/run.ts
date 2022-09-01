@@ -21,7 +21,7 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -315,26 +315,31 @@ const warnVideoRecordingFailed = (err) => {
   errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
-async function postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet, ffmpegChaptersConfig) {
-  debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
+async function postProcessRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
+  debug('ending the video recording %o', options)
 
   // once this ended promises resolves
   // then begin processing the file
   // dont process anything if videoCompress is off
   // or we've been told not to upload the video
-  if (videoCompression === false || shouldUploadVideo === false) {
+  if (options.videoCompression === false || options.shouldUploadVideo === false) {
     return
   }
 
-  function continueProcessing (onProgress?: (progress: number) => void) {
-    return videoCapture.process(name, cname, videoCompression, ffmpegChaptersConfig, onProgress)
+  const processOptions: ProcessOptions = {
+    ...options.processOptions,
+    videoCompression: Number(options.videoCompression),
   }
 
-  if (quiet) {
+  function continueProcessing (onProgress?: (progress: number) => void) {
+    return videoCapture.process({ ...processOptions, onProgress })
+  }
+
+  if (options.quiet) {
     return continueProcessing()
   }
 
-  const { onProgress } = printResults.displayVideoProcessingProgress({ name, videoCompression })
+  const { onProgress } = printResults.displayVideoProcessingProgress(processOptions)
 
   return continueProcessing(onProgress)
 }
@@ -639,18 +644,21 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   }
 
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
-    const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+    const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
     try {
       debug('post processing recording')
-      await postProcessRecording(
-        videoName,
-        videoRecording.api.compressedVideoName,
-        videoCompression,
+      await postProcessRecording({
         shouldUploadVideo,
         quiet,
-        ffmpegChaptersConfig,
-      )
+        videoCompression,
+        processOptions: {
+          compressedVideoName: videoRecording.api.compressedVideoName,
+          videoName,
+          chaptersConfig,
+          ...(videoRecording.controller!.postProcessFfmpegOptions || {}),
+        },
+      })
     } catch (err) {
       warnVideoRecordingFailed(err)
     }
@@ -822,8 +830,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   }
 
   const screenshots = []
-
-  await runEvents.execute('before:spec', config, spec)
 
   async function getVideoRecording () {
     if (!options.video) return undefined

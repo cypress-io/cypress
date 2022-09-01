@@ -163,13 +163,9 @@ export class OpenProject {
         spec.relative,
       )
 
-      if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-        await runEvents.execute('before:spec', cfg, spec)
-      } else {
-        // clear cookies and all session data before each spec
-        cookieJar.removeAllCookies()
-        session.clearSessions()
-      }
+      // clear cookies and all session data before each spec
+      cookieJar.removeAllCookies()
+      session.clearSessions()
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {

@@ -7,7 +7,7 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
-import type { WriteVideoFrame } from '@packages/types'
+import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -31,7 +31,7 @@ const deferredPromise = function () {
 
 export function generateFfmpegChaptersConfig (tests) {
   if (!tests) {
-    return null
+    return
   }
 
   const configString = tests.map((test) => {
@@ -277,18 +277,14 @@ export function start (options: StartOptions) {
   })
 }
 
-// Progress callback called with percentage `0 <= p <= 1` of compression progress.
-type OnProgress = (p: number) => void
-
-export async function process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress: OnProgress = function () {}) {
+export async function process (options: ProcessOptions) {
   let total = null
 
-  const metaFileName = `${name}.meta`
-  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
+  const metaFileName = `${options.videoName}.meta`
+  const addChaptersMeta = options.chaptersConfig && await fs.writeFile(metaFileName, options.chaptersConfig).then(() => true)
 
-  return new Bluebird((resolve, reject) => {
-    debug('processing video from %s to %s video compression %o',
-      name, cname, videoCompression)
+  return new Promise<void>((resolve, reject) => {
+    debug('processing video %o', options)
 
     const command = ffmpeg({
       priority: 20,
@@ -324,12 +320,13 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       '-preset fast',
       // Compression Rate Factor is essentially the quality dial; 0 would be lossless
       // (big files), while 51 (the maximum) would lead to low quality (and small files).
-      `-crf ${videoCompression}`,
+      `-crf ${options.videoCompression}`,
 
       // Discussion of pixel formats is beyond the scope of these comments. See
       // https://en.wikipedia.org/wiki/Chroma_subsampling if you want the gritty details.
       // Short version: yuv420p is a standard video format supported everywhere.
       '-pix_fmt yuv420p',
+      ...(options.outputOptions || []),
     ]
 
     if (addChaptersMeta) {
@@ -337,10 +334,13 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       outputOptions.push('-map_metadata 1')
     }
 
-    command.input(name)
+    let chain = command.input(options.videoName)
     .videoCodec('libx264')
     .outputOptions(outputOptions)
-    // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
+
+    if (options.videoFilters) chain = chain.videoFilters(options.videoFilters)
+
+    chain
     .on('start', (command) => {
       debug('compression started %o', { command })
     })
@@ -366,7 +366,7 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       const percent = progressed / total
 
       if (percent < 1) {
-        return onProgress(percent)
+        return options.onProgress?.(percent)
       }
     })
     .on('error', (err, stdout, stderr) => {
@@ -378,10 +378,10 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       debug('compression ended')
 
       // we are done progressing
-      onProgress(1)
+      options.onProgress?.(1)
 
       // rename and obliterate the original
-      await fs.move(cname, name, {
+      await fs.move(options.compressedVideoName, options.videoName, {
         overwrite: true,
       })
 
@@ -390,6 +390,6 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       }
 
       resolve()
-    }).save(cname)
+    }).save(options.compressedVideoName)
   })
 }
