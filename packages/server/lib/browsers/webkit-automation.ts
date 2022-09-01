@@ -136,7 +136,7 @@ export class WebKitAutomation {
 
     let promises: Promise<any>[] = []
 
-    if (this.shouldMarkAutIframeRequests) promises.push(this._markAutIframeRequests())
+    if (this.shouldMarkAutIframeRequests) promises.push(this.markAutIframeRequests())
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 
@@ -179,7 +179,7 @@ export class WebKitAutomation {
     })
   }
 
-  private async _markAutIframeRequests () {
+  private async markAutIframeRequests () {
     function isAutIframeRequest (request: playwright.Request) {
       // is an iframe
       return (request.resourceType() === 'document')
