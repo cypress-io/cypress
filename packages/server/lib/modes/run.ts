@@ -1,13 +1,10 @@
-/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
+/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces */
 import _ from 'lodash'
-import la from 'lazy-ass'
 import pkg from '@packages/root'
 import path from 'path'
 import chalk from 'chalk'
-import human from 'human-interval'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
-import logSymbols from 'log-symbols'
 import assert from 'assert'
 
 import recordMode from './record'
@@ -22,26 +19,17 @@ import env from '../util/env'
 import trash from '../util/trash'
 import random from '../util/random'
 import system from '../util/system'
-import duration from '../util/duration'
-import newlines from '../util/newlines'
-import terminal from '../util/terminal'
-import humanTime from '../util/human_time'
 import chromePolicyCheck from '../util/chrome_policy_check'
-import * as experiments from '../experiments'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, LaunchOpts, SpecFile, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, WriteVideoFrame } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import { debugElapsedTime } from '../util/performance_benchmark'
+import * as printResults from '../util/print-run'
 
-type Screenshot = {
-  width: number
-  height: number
-  path: string
-  specName: string
-}
-type SetScreenshotMetadata = (data: Screenshot) => void
+type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
+type TakeScreenshotProps = any
 type RunEachSpec = any
 type BeforeSpecRun = any
 type AfterSpecRun = any
@@ -53,49 +41,12 @@ let exitEarly = (err) => {
   earlyExitErr = err
 }
 let earlyExitErr: Error
-let currentWriteVideoFrameCallback: videoCapture.WriteVideoFrame
+let currentWriteVideoFrameCallback: WriteVideoFrame
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
-
-const color = (val, c) => {
-  return chalk[c](val)
-}
-
-const gray = (val) => {
-  return color(val, 'gray')
-}
-
-const colorIf = function (val, c) {
-  if (val === 0 || val == null) {
-    val = '-'
-    c = 'gray'
-  }
-
-  return color(val, c)
-}
-
-const getSymbol = function (num?: number) {
-  if (num) {
-    return logSymbols.error
-  }
-
-  return logSymbols.success
-}
-
-const getWidth = (table, index) => {
-  // get the true width of a table's column,
-  // based off of calculated table options for that column
-  const columnWidth = table.options.colWidths[index]
-
-  if (columnWidth) {
-    return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
-  }
-
-  throw new Error('Unable to get width for column')
-}
 
 const relativeSpecPattern = (projectRoot, pattern) => {
   if (typeof pattern === 'string') {
@@ -103,353 +54,6 @@ const relativeSpecPattern = (projectRoot, pattern) => {
   }
 
   return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
-}
-
-const formatBrowser = (browser) => {
-  // TODO: finish browser
-  return _.compact([
-    browser.displayName,
-    browser.majorVersion,
-    browser.isHeadless && gray('(headless)'),
-  ]).join(' ')
-}
-
-const formatFooterSummary = (results) => {
-  const { totalFailed, runs } = results
-
-  const isCanceled = _.some(results.runs, { skippedSpec: true })
-
-  // pass or fail color
-  const c = isCanceled ? 'magenta' : totalFailed ? 'red' : 'green'
-
-  const phrase = (() => {
-    if (isCanceled) {
-      return 'The run was canceled'
-    }
-
-    // if we have any specs failing...
-    if (!totalFailed) {
-      return 'All specs passed!'
-    }
-
-    // number of specs
-    const total = runs.length
-    const failingRuns = _.filter(runs, 'stats.failures').length
-    const percent = Math.round((failingRuns / total) * 100)
-
-    return `${failingRuns} of ${total} failed (${percent}%)`
-  })()
-
-  return [
-    isCanceled ? '-' : formatSymbolSummary(totalFailed),
-    color(phrase, c),
-    gray(duration.format(results.totalDuration)),
-    colorIf(results.totalTests, 'reset'),
-    colorIf(results.totalPassed, 'green'),
-    colorIf(totalFailed, 'red'),
-    colorIf(results.totalPending, 'cyan'),
-    colorIf(results.totalSkipped, 'blue'),
-  ]
-}
-
-const formatSymbolSummary = (failures) => {
-  return getSymbol(failures)
-}
-
-const macOSRemovePrivate = (str: string): string => {
-  // consistent snapshots when running system tests on macOS
-  if (process.platform === 'darwin' && str.startsWith('/private')) {
-    return str.slice(8)
-  }
-
-  return str
-}
-
-const formatPath = (name, n, colour = 'reset', caller?) => {
-  if (!name) return ''
-
-  const fakeCwdPath = env.get('FAKE_CWD_PATH')
-
-  if (fakeCwdPath && env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-    // if we're testing within Cypress, we want to strip out
-    // the current working directory before calculating the stdout tables
-    // this will keep our snapshots consistent everytime we run
-    const cwdPath = process.cwd()
-
-    name = name
-    .split(cwdPath)
-    .join(fakeCwdPath)
-
-    name = macOSRemovePrivate(name)
-  }
-
-  // add newLines at each n char and colorize the path
-  if (n) {
-    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
-
-    return `${color(nameWithNewLines, colour)}`
-  }
-
-  return `${color(name, colour)}`
-}
-
-const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg, 'resolvedNodeVersion' | 'resolvedNodePath'>, width) => {
-  debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
-
-  if (resolvedNodePath) return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
-
-  return
-}
-
-const formatRecordParams = function (runUrl, parallel, group, tag) {
-  if (runUrl) {
-    if (!group) {
-      group = false
-    }
-
-    if (!tag) {
-      tag = false
-    }
-
-    return `Tag: ${tag}, Group: ${group}, Parallel: ${Boolean(parallel)}`
-  }
-
-  return
-}
-
-const displayRunStarting = function (options: { browser: Browser, config: Cfg, group: string | undefined, parallel?: boolean, runUrl?: string, specPattern: string | RegExp | string[], specs: SpecFile[], tag: string | undefined }) {
-  const { browser, config, group, parallel, runUrl, specPattern, specs, tag } = options
-
-  console.log('')
-
-  terminal.divider('=')
-
-  console.log('')
-
-  terminal.header('Run Starting', {
-    color: ['reset'],
-  })
-
-  console.log('')
-
-  const experimental = experiments.getExperimentsFromResolved(config.resolved)
-  const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !_.isEmpty(enabledExperiments)
-
-  // if we show Node Version, then increase 1st column width
-  // to include wider 'Node Version:'.
-  // Without Node version, need to account for possible "Experiments" label
-  const colWidths = config.resolvedNodePath ? [16, 84] : (
-    hasExperiments ? [14, 86] : [12, 88]
-  )
-
-  const table = terminal.table({
-    colWidths,
-    type: 'outsideBorder',
-  })
-
-  const formatSpecPattern = (projectRoot, specPattern) => {
-    // foo.spec.js, bar.spec.js, baz.spec.js
-    // also inserts newlines at col width
-    if (typeof specPattern === 'string') {
-      specPattern = [specPattern]
-    }
-
-    specPattern = relativeSpecPattern(projectRoot, specPattern)
-
-    if (specPattern) {
-      return formatPath(specPattern.join(', '), getWidth(table, 1))
-    }
-
-    throw new Error('No specPattern in formatSpecPattern')
-  }
-
-  const formatSpecs = (specs) => {
-    // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'baseName')
-    const specsTruncated = _.truncate(names.join(', '), { length: 250 })
-
-    const stringifiedSpecs = [
-      `${names.length} found `,
-      '(',
-      specsTruncated,
-      ')',
-    ]
-    .join('')
-
-    return formatPath(stringifiedSpecs, getWidth(table, 1))
-  }
-
-  const data = _
-  .chain([
-    [gray('Cypress:'), pkg.version],
-    [gray('Browser:'), formatBrowser(browser)],
-    [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
-    [gray('Specs:'), formatSpecs(specs)],
-    [gray('Searched:'), formatSpecPattern(config.projectRoot, specPattern)],
-    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
-    [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
-    [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
-  ])
-  .filter(_.property(1))
-  .value()
-
-  table.push(...data)
-
-  const heading = table.toString()
-
-  console.log(heading)
-
-  console.log('')
-
-  return heading
-}
-
-const displaySpecHeader = function (name, curr, total, estimated) {
-  console.log('')
-
-  const PADDING = 2
-
-  const table = terminal.table({
-    colWidths: [10, 70, 20],
-    colAligns: ['left', 'left', 'right'],
-    type: 'pageDivider',
-    style: {
-      'padding-left': PADDING,
-      'padding-right': 0,
-    },
-  })
-
-  table.push(['', ''])
-  table.push([
-    'Running:',
-    `${formatPath(name, getWidth(table, 1), 'gray')}`,
-    gray(`(${curr} of ${total})`),
-  ])
-
-  console.log(table.toString())
-
-  if (estimated) {
-    const estimatedLabel = `${' '.repeat(PADDING)}Estimated:`
-
-    return console.log(estimatedLabel, gray(humanTime.long(estimated)))
-  }
-}
-
-const collectTestResults = (obj: { video?: boolean, screenshots?: Screenshot[] }, estimated) => {
-  return {
-    name: _.get(obj, 'spec.name'),
-    baseName: _.get(obj, 'spec.baseName'),
-    tests: _.get(obj, 'stats.tests'),
-    passes: _.get(obj, 'stats.passes'),
-    pending: _.get(obj, 'stats.pending'),
-    failures: _.get(obj, 'stats.failures'),
-    skipped: _.get(obj, 'stats.skipped'),
-    duration: humanTime.long(_.get(obj, 'stats.wallClockDuration')),
-    estimated: estimated && humanTime.long(estimated),
-    screenshots: obj.screenshots && obj.screenshots.length,
-    video: Boolean(obj.video),
-  }
-}
-
-const renderSummaryTable = (runUrl) => {
-  return function (results) {
-    const { runs } = results
-
-    console.log('')
-
-    terminal.divider('=')
-
-    console.log('')
-
-    terminal.header('Run Finished', {
-      color: ['reset'],
-    })
-
-    if (runs && runs.length) {
-      const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [3, 41, 11, 9, 9, 9, 9, 9]
-
-      const table1 = terminal.table({
-        colAligns,
-        colWidths,
-        type: 'noBorder',
-        head: [
-          '',
-          gray('Spec'),
-          '',
-          gray('Tests'),
-          gray('Passing'),
-          gray('Failing'),
-          gray('Pending'),
-          gray('Skipped'),
-        ],
-      })
-
-      const table2 = terminal.table({
-        colAligns,
-        colWidths,
-        type: 'border',
-      })
-
-      const table3 = terminal.table({
-        colAligns,
-        colWidths,
-        type: 'noBorder',
-        head: formatFooterSummary(results),
-      })
-
-      _.each(runs, (run) => {
-        const { spec, stats } = run
-
-        const ms = duration.format(stats.wallClockDuration || 0)
-
-        const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
-
-        if (run.skippedSpec) {
-          return table2.push([
-            '-',
-            formattedSpec, color('SKIPPED', 'gray'),
-            '-', '-', '-', '-', '-',
-          ])
-        }
-
-        return table2.push([
-          formatSymbolSummary(stats.failures),
-          formattedSpec,
-          color(ms, 'gray'),
-          colorIf(stats.tests, 'reset'),
-          colorIf(stats.passes, 'green'),
-          colorIf(stats.failures, 'red'),
-          colorIf(stats.pending, 'cyan'),
-          colorIf(stats.skipped, 'blue'),
-        ])
-      })
-
-      console.log('')
-      console.log('')
-      console.log(terminal.renderTables(table1, table2, table3))
-      console.log('')
-
-      if (runUrl) {
-        console.log('')
-
-        const table4 = terminal.table({
-          colWidths: [100],
-          type: 'pageDivider',
-          style: {
-            'padding-left': 2,
-          },
-        })
-
-        table4.push(['', ''])
-        console.log(terminal.renderTables(table4))
-
-        console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
-        console.log('')
-      }
-    }
-  }
 }
 
 const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg }) {
@@ -515,83 +119,6 @@ async function getProjectId (project, id) {
     // no id no problem
     return null
   }
-}
-
-const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onError) => {
-  la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
-
-  if (browser.name === 'electron') {
-    return getElectronProps(browser.isHeaded, writeVideoFrame, onError)
-  }
-
-  if (browser.family === 'chromium') {
-    return getChromeProps(writeVideoFrame)
-  }
-
-  if (browser.family === 'firefox') {
-    return getFirefoxProps(project, writeVideoFrame)
-  }
-
-  return {}
-}
-
-const getFirefoxProps = (project, writeVideoFrame) => {
-  if (writeVideoFrame) {
-    project.on('capture:video:frames', writeVideoFrame)
-
-    return { onScreencastFrame: true }
-  }
-
-  return {}
-}
-
-const getCdpVideoPropSetter = (writeVideoFrame) => {
-  if (!writeVideoFrame) {
-    return _.noop
-  }
-
-  return (props) => {
-    props.onScreencastFrame = (e) => {
-      // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-      writeVideoFrame(Buffer.from(e.data, 'base64'))
-    }
-  }
-}
-
-const getChromeProps = (writeVideoFrame) => {
-  const shouldWriteVideo = Boolean(writeVideoFrame)
-
-  debug('setting Chrome properties %o', { shouldWriteVideo })
-
-  return _
-  .chain({})
-  .tap(getCdpVideoPropSetter(writeVideoFrame))
-  .value()
-}
-
-const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
-  return _
-  .chain({
-    width: 1280,
-    height: 720,
-    show: isHeaded,
-    onCrashed () {
-      const err = errors.get('RENDERER_CRASHED')
-
-      errors.log(err)
-
-      onError(err)
-    },
-    onNewWindow (e, url, frameName, disposition, options) {
-      // force new windows to automatically open with show: false
-      // this prevents window.open inside of javascript client code
-      // to cause a new BrowserWindow instance to open
-      // https://github.com/cypress-io/cypress/issues/123
-      options.show = false
-    },
-  })
-  .tap(getCdpVideoPropSetter(writeVideoFrame))
-  .value()
 }
 
 const sumByProp = (runs, prop) => {
@@ -727,13 +254,11 @@ async function maybeStartVideoRecording (options: { spec: SpecWithRelativeRoot, 
   const { spec, browser, video, videosFolder } = options
 
   debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
-  // bail if we've been told not to capture
-  // a video recording
+
   if (!video) {
     return
   }
 
-  // make sure we have a videosFolder
   if (!videosFolder) {
     throw new Error('Missing videoFolder for recording')
   }
@@ -767,84 +292,6 @@ function navigateToNextSpec (spec) {
   return openProject.changeUrlToSpec(spec)
 }
 
-function displayResults (obj = {}, estimated) {
-  const results = collectTestResults(obj, estimated)
-
-  const c = results.failures ? 'red' : 'green'
-
-  console.log('')
-
-  terminal.header('Results', {
-    color: [c],
-  })
-
-  const table = terminal.table({
-    colWidths: [14, 86],
-    type: 'outsideBorder',
-  })
-
-  const data = _.chain([
-    ['Tests:', results.tests],
-    ['Passing:', results.passes],
-    ['Failing:', results.failures],
-    ['Pending:', results.pending],
-    ['Skipped:', results.skipped],
-    ['Screenshots:', results.screenshots],
-    ['Video:', results.video],
-    ['Duration:', results.duration],
-    estimated ? ['Estimated:', results.estimated] : undefined,
-    ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
-  ])
-  .compact()
-  .map((arr) => {
-    const [key, val] = arr
-
-    return [color(key, 'gray'), color(val, c)]
-  })
-  .value()
-
-  table.push(...data)
-
-  console.log('')
-  console.log(table.toString())
-  console.log('')
-}
-
-function displayScreenshots (screenshots: Screenshot[] = []) {
-  console.log('')
-
-  terminal.header('Screenshots', { color: ['yellow'] })
-
-  console.log('')
-
-  const table = terminal.table({
-    colWidths: [3, 82, 15],
-    colAligns: ['left', 'left', 'right'],
-    type: 'noBorder',
-    style: {
-      'padding-right': 0,
-    },
-    chars: {
-      'left': ' ',
-      'right': '',
-    },
-  })
-
-  screenshots.forEach((screenshot) => {
-    const dimensions = gray(`(${screenshot.width}x${screenshot.height})`)
-
-    table.push([
-      '-',
-      formatPath(`${screenshot.path}`, getWidth(table, 1)),
-      gray(dimensions),
-    ])
-  })
-
-  console.log(table.toString())
-
-  console.log('')
-}
-
 async function postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet, ffmpegChaptersConfig) {
   debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
@@ -864,91 +311,25 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
     return continueProcessing()
   }
 
-  console.log('')
-
-  terminal.header('Video', {
-    color: ['cyan'],
-  })
-
-  console.log('')
-
-  const table = terminal.table({
-    colWidths: [3, 21, 76],
-    colAligns: ['left', 'left', 'left'],
-    type: 'noBorder',
-    style: {
-      'padding-right': 0,
-    },
-    chars: {
-      'left': ' ',
-      'right': '',
-    },
-  })
-
-  table.push([
-    gray('-'),
-    gray('Started processing:'),
-    chalk.cyan(`Compressing to ${videoCompression} CRF`),
-  ])
-
-  console.log(table.toString())
-
-  const started = Date.now()
-  let progress = Date.now()
-  const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
-
-  const onProgress = function (float) {
-    if (float === 1) {
-      const finished = Date.now() - started
-      const dur = `(${humanTime.long(finished)})`
-
-      const table = terminal.table({
-        colWidths: [3, 21, 61, 15],
-        colAligns: ['left', 'left', 'left', 'right'],
-        type: 'noBorder',
-        style: {
-          'padding-right': 0,
-        },
-        chars: {
-          'left': ' ',
-          'right': '',
-        },
-      })
-
-      table.push([
-        gray('-'),
-        gray('Finished processing:'),
-          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-          gray(dur),
-      ])
-
-      console.log(table.toString())
-
-      console.log('')
-    }
-
-    if (Date.now() - progress > throttle) {
-      // bump up the progress so we dont
-      // continuously get notifications
-      progress += throttle
-      const percentage = `${Math.ceil(float * 100)}%`
-
-      console.log('    Compression progress: ', chalk.cyan(percentage))
-    }
-  }
+  const { onProgress } = printResults.displayVideoProcessingProgress({ name, videoCompression })
 
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: videoCapture.WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
-  const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
+  const { browser, spec, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
   const warnings = {}
 
-  const browserOpts: LaunchOpts = {
-    ...getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError),
+  if (options.writeVideoFrame && browser.family === 'firefox') {
+    project.on('capture:video:frames', options.writeVideoFrame)
+  }
+
+  const browserOpts: OpenProjectLaunchOpts = {
     projectRoot,
     shouldLaunchNewTab,
+    onError,
+    writeVideoFrame: options.writeVideoFrame,
     automationMiddleware: {
       onBeforeRequest (message, data) {
         if (message === 'take:screenshot') {
@@ -1051,7 +432,7 @@ function writeVideoFrameCallback (data: Buffer) {
   return currentWriteVideoFrameCallback(data)
 }
 
-function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: videoCapture.WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean }) {
+function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, writeVideoFrame, spec } = options
@@ -1093,11 +474,11 @@ function waitForBrowserToConnect (options: { project: Project, socketId: string,
   const wait = () => {
     debug('waiting for socket to connect and browser to launch...')
 
-    return Bluebird.join(
+    return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type
       launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
-    )
+    ])
     .timeout(browserTimeout)
     .catch(Bluebird.TimeoutError, async (err) => {
       attempts += 1
@@ -1153,7 +534,7 @@ function waitForSocketConnection (project, id) {
   })
 }
 
-function waitForTestsToFinishRunning (options: { project: Project, screenshots: Screenshot[], startedVideoCapture?: any, endVideoCapture?: () => Promise<void>, videoName?: string, compressedVideoName?: string, videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType}) {
+function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], startedVideoCapture?: any, endVideoCapture?: () => Promise<void>, videoName?: string, compressedVideoName?: string, videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType}) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
   const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
@@ -1229,10 +610,7 @@ function waitForTestsToFinishRunning (options: { project: Project, screenshots: 
     results.shouldUploadVideo = shouldUploadVideo
 
     if (!quiet && !skippedSpec) {
-      displayResults(results, estimated)
-      if (screenshots && screenshots.length) {
-        displayScreenshots(screenshots)
-      }
+      printResults.displayResults(results, estimated)
     }
 
     const project = openProject.getProject()
@@ -1285,6 +663,7 @@ function screenshotMetadata (data, resp) {
     path: resp.path,
     height: resp.dimensions.height,
     width: resp.dimensions.width,
+    pathname: undefined as string | undefined,
   }
 }
 
@@ -1299,7 +678,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   browser.isHeaded = !isHeadless
 
   if (!options.quiet) {
-    displayRunStarting({
+    printResults.displayRunStarting({
       config,
       specs,
       group,
@@ -1315,7 +694,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     if (!options.quiet) {
-      displaySpecHeader(spec.baseName, index + 1, length, estimated)
+      printResults.displaySpecHeader(spec.baseName, index + 1, length, estimated)
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
@@ -1438,8 +817,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   const screenshots = []
 
-  await runEvents.execute('before:spec', config, spec)
-
   const videoRecordProps = await maybeStartVideoRecording({
     spec,
     browser,
@@ -1490,7 +867,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: Browser[], webSecurity: boolean }) {
+async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1548,11 +925,11 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   const [sys, browser] = await Promise.all([
     system.info(),
     (async () => {
-      const browsers = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
+      const browser = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
 
-      await removeOldProfiles(browsers)
+      await removeOldProfiles(browser)
 
-      return browsers
+      return browser
     })(),
     trashAssets(config),
   ])
@@ -1580,6 +957,8 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       socketId,
       parallel,
       onError,
+      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
+      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,
@@ -1602,7 +981,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     })
 
     if (!options.quiet) {
-      renderSummaryTable(runUrl)(results)
+      printResults.renderSummaryTable(runUrl, results)
     }
 
     return results
