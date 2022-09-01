@@ -39,7 +39,7 @@ const logError = debug('cypress:snapgen:error')
  * without being deferred
  *
  * @property previousDeferred relative paths to modules that were previously
- * determnied as problematic, that is it cannot be initialized during snapshot
+ * determined as problematic, that is it cannot be initialized during snapshot
  * creation and thus need to be _deferred_ during snapshot creation
  *
  * @property previousNoRewrite relative paths to modules that were previously
@@ -56,8 +56,8 @@ const logError = debug('cypress:snapgen:error')
  *
  * This map is determined via metadata that the bundler emits during bundle
  * generation.  The keys are the directory relative to the project base dir,
- * from which a module was resolved concatentated with the import request
- * string (seprated by `'***'`, see ./loading/snapshot-require
+ * from which a module was resolved concatenated with the import request
+ * string (separated by `'***'`, see ./loading/snapshot-require
  * RESOLVER_MAP_KEY_SEP) and the value the fully resolved path relative to the
  * project base dir.
  *
@@ -246,6 +246,9 @@ export class SnapshotGenerator {
       nodeModulesOnly: this.nodeModulesOnly,
       sourcemapEmbed: this.sourcemapEmbed,
       sourcemapInline: this.sourcemapInline,
+      previousDeferred: this.previousDeferred.size,
+      previousHealthy: this.previousHealthy.size,
+      previousNoRewrite: this.previousNoRewrite.size,
       forceNoRewrite: this.forceNoRewrite.size,
       auxiliaryData: auxiliaryDataKeys,
     })
@@ -332,9 +335,7 @@ export class SnapshotGenerator {
     try {
       this._verifyScript()
     } catch (err) {
-      logInfo(
-        `Script failed verification, writing to ${this.snapshotScriptPath}`,
-      )
+      logInfo(`Script failed verification, writing to ${this.snapshotScriptPath}`)
 
       await fs.promises.writeFile(
         this.snapshotScriptPath,
@@ -462,7 +463,7 @@ export class SnapshotGenerator {
       const { snapshotBlobFile, v8ContextFile } = await syncAndRun(
         this.electronVersion,
         args,
-      ) as { snapshotBlobFile: string, v8ContextFile: string }
+      )
 
       this.v8ContextFile = v8ContextFile
       this.snapshotBinPath = join(this.snapshotBinDir, snapshotBlobFile)

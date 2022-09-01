@@ -310,7 +310,7 @@ export async function scaffoldCommonNodeModules () {
   ].map(symlinkNodeModule))
 }
 
-async function symlinkNodeModule (pkg) {
+export async function symlinkNodeModule (pkg) {
   const from = path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 

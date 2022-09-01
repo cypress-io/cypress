@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { TestState } from '../test/test-model'
+import { Instrument, TestState } from '@packages/types'
 
 export interface AliasObject {
   name: string
@@ -22,7 +22,7 @@ export interface InstrumentProps {
   testCurrentRetry?: number
   state: TestState
   referencesAlias?: Alias
-  instrument?: 'agent' | 'command' | 'route'
+  instrument?: Instrument
   testId: string
 }
 

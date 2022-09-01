@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { checkSupportFile } from './project_utils'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
 import { ServerCt } from './server-ct'
@@ -225,8 +224,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await this.saveState(stateToSave)
 
-    await checkSupportFile(cfg.supportFile)
-
     if (cfg.isTextTerminal) {
       return
     }
@@ -297,14 +294,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
     return runEvents.execute('after:run', config)
-  }
-
-  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
-    debug('got plugins error', err.stack)
-
-    browsers.close()
-
-    options.onError(err)
   }
 
   initializeReporter ({

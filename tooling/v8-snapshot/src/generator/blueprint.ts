@@ -25,19 +25,14 @@ const setGlobals = read('set-globals')
  * templates.
  *
  * @property processPlatform value to return during snapshot creation for `process.platform`
- *
  * @property processNodeVersion value to return during snapshot creation for `process.version`
- *
  * @property mainModuleRequirePath relative path to the module we consider the
  * main entry point.
  * NOTE: the {@link SnapshotDoctor} changes this in order to verify multiple
  * modules using the same bundle.
- *
  * @property auxiliaryData data to embed with the snapshot
- *
  * @property customRequireDefinitions a hash of module initializer functions
  * that are bundled
- *
  * @property includeStrictVerifiers see {@link GenerationOpts} includeStrictVerifiers
  * @property nodeEnv see {@link GenerationOpts} nodeEnv
  * @property basedir the base dir of the project for which we are creating the

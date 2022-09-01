@@ -17,6 +17,9 @@ describe('integration: express', () => {
   it('installs snapshot for example-express', async () => {
     Fixtures.remove()
     await FixturesScaffold.scaffoldCommonNodeModules()
+    await FixturesScaffold.symlinkNodeModule('@tooling/v8-snapshot')
+    await FixturesScaffold.symlinkNodeModule('electron')
+    await FixturesScaffold.symlinkNodeModule('@packages/v8-snapshot-require')
     const projectBaseDir = await Fixtures.scaffoldProject(EXPRESS_MINIMAL_PROJECT)
 
     await FixturesScaffold.scaffoldProjectNodeModules({ project: EXPRESS_MINIMAL_PROJECT, updateLockFile: false, forceCopyDependencies: true })
@@ -35,14 +38,17 @@ describe('integration: express', () => {
     const _MB = 1024 * 1024
     const cmd = `node ./snapshot/install-snapshot.js`
 
+    let stdout = ''
+    let stderr = ''
+
     try {
-      await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env })
+      ({ stdout, stderr } = await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env }))
 
       const { deferredHash, ...metadata } = require(metadataFile)
 
       snapshot(metadata)
     } catch (err: any) {
-      assert.fail(err.toString())
+      assert.fail(`error: ${err.toString()}\nstdout: ${stdout}\nstderr: ${stderr}`)
     }
   })
 })
