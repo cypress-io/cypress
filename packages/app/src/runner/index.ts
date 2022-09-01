@@ -225,18 +225,7 @@ export function addCrossOriginIframe (location) {
  * Cypress on it.
  *
  */
-function runSpecCT (spec: SpecFile) {
-  // TODO: UNIFY-1318 - figure out how to manage window.config.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
+function runSpecCT (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -290,18 +279,7 @@ function setSpecForDriver (spec: SpecFile) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (spec: SpecFile) {
-  // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
-  const config = getRunnerConfigFromWindow()
-
-  // this is how the Cypress driver knows which spec to run.
-  config.spec = setSpecForDriver(spec)
-
-  // creates a new instance of the Cypress driver for this spec,
-  // initializes a bunch of listeners
-  // watches spec file for changes.
-  getEventManager().setup(config)
-
+function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -427,12 +405,22 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
 
   UnifiedReporterAPI.setupReporter()
 
+  // TODO: UNIFY-1318 - figure out how to manage window.config.
+  const config = getRunnerConfigFromWindow()
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = setSpecForDriver(spec)
+
+  // creates a new instance of the Cypress driver for this spec,
+  // initializes a bunch of listeners watches spec file for changes.
+  getEventManager().setup(config)
+
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-    return runSpecE2E(spec)
+    return runSpecE2E(config, spec)
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    return runSpecCT(spec)
+    return runSpecCT(config, spec)
   }
 
   throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')

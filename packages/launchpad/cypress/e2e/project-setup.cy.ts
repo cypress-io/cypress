@@ -379,9 +379,9 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
         cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
 
-        cy.contains('li', 'webpack')
         cy.contains('li', 'react-scripts')
         cy.contains('li', 'react')
+        cy.contains('li', 'react-dom')
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
