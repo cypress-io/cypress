@@ -31,6 +31,11 @@ interface serializedRunnable {
   titlePath: string
 }
 
+interface GetFileResult {
+  contents?: string
+  error?: string
+}
+
 const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   let runnable
 
@@ -138,11 +143,18 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         value = window.eval(`(${fn})`)(args)
       } else {
         const { callbackName, outputFilePath } = fn
-        const contents = await $networkUtils.fetch(`/__cypress/get-file/${encodeURIComponent(outputFilePath)}`) as string
+        const rawResult = await $networkUtils.fetch(`/__cypress/get-file/${encodeURIComponent(outputFilePath)}`) as string
+        const result = JSON.parse(rawResult) as GetFileResult
+
+        if (result.error) {
+          $errUtils.throwErrByPath('origin.failed_to_get_callback', {
+            args: { error: result.error },
+          })
+        }
 
         value = window.eval(`(args) => {
           let ${callbackName};
-          ${contents}
+          ${result.contents}
           return ${callbackName}(args);
         }`)(args)
       }

@@ -1215,6 +1215,12 @@ export default {
 
         The value you synchronously returned was: \`{{value}}\``,
     },
+    failed_to_get_callback: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to run the callback function due to the following error:
+
+      {{error}}`,
+    },
     failed_to_serialize_object: {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
