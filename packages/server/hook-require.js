@@ -28,7 +28,8 @@ function runWithSnapshot () {
   })
 }
 
-runWithSnapshot()
-
-// TODO: Incorporate a snapshot disabler that does:
-// require('@packages/ts/register')
+if (process.env.DISABLE_SNAPSHOT_REQUIRE != null) {
+  require('@packages/ts/register')
+} else {
+  runWithSnapshot()
+}

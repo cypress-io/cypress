@@ -13,7 +13,6 @@ export async function determineDeferred (
   snapshotEntryFile: string,
   cacheDir: string,
   opts: {
-    maxWorkers?: number
     nodeModulesOnly: boolean
     previousDeferred: Set<string>
     previousHealthy: Set<string>
@@ -68,7 +67,6 @@ export async function determineDeferred (
     bundlerPath,
     entryFilePath: snapshotEntryFile,
     baseDirPath: projectBaseDir,
-    maxWorkers: opts.maxWorkers,
     nodeModulesOnly: opts.nodeModulesOnly,
     previousDeferred: opts.previousDeferred,
     previousHealthy: opts.previousHealthy,

@@ -59,7 +59,6 @@ function getSnapshotGenerator ({
     previousDeferred,
     previousHealthy,
     previousNoRewrite,
-    minify: false,
     nodeModulesOnly,
     resolverMap,
     // sourcemapEmbed: true,
@@ -134,7 +133,7 @@ export async function installSnapshot (
     })
 
     await snapshotGenerator.createScript()
-    const { v8ContextFile } = await snapshotGenerator.makeSnapshot()
+    const { v8ContextFile, snapshotBinDir } = await snapshotGenerator.makeSnapshot()
 
     const cypressAppSnapshotFile = path.join(
       cypressAppSnapshotDir,
@@ -142,7 +141,7 @@ export async function installSnapshot (
     )
 
     await fs.copyFile(
-      path.join(projectBaseDir, v8ContextFile),
+      path.join(snapshotBinDir, v8ContextFile),
       cypressAppSnapshotFile,
     )
 

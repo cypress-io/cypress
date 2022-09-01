@@ -2,7 +2,6 @@ import { strict as assert } from 'assert'
 import debug from 'debug'
 import fs from 'fs'
 import { dirname, join, basename } from 'path'
-import { minify } from 'terser'
 import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
 import { determineDeferred } from '../doctor/determine-deferred'
@@ -18,6 +17,7 @@ import {
 import { createExportScript, ExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
+import tempDir from 'temp-dir'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -26,26 +26,13 @@ const logError = debug('cypress:snapgen:error')
 /**
  * Configure snapshot creation.
  *
- * @property verify if `true` the snapshot script will be verified for correctness and snapshot-ability
- *
- * @property minify if `true` the snapshot script will be minified before creating a snapshot from it (this is not actively used as no benefits from this were observed)
- *
- * @property skipWriteOnVerificationFailure if `true` the snapshot script will not be written to the file system if verification fails
- *
  * @property cacheDir the path to store the snapshot script and all snapshot generation related meta data in
- *
- * @property snapshotBinDir the path where to store the generated snapshot binary (before it is installed)
  *
  * @property nodeModulesOnly if `true` only node modules will be included in the snapshot and app modules are omitted
  *
  * @property sourcemapEmbed if `true` a sourcemap of modules included in the snapshot is embedded in the snapshot itself
  *
  * @property sourcemapInline if `true` a sourcemap of modules included in the snapshot is inlined into the snapshot script
- *
- * @property includeStrictVerifiers if `true` the snapshot script will include
- * overrides to ensure that specific snapshot incompatible accesses, i.e. to a
- * `Promise` constructor don't run during module initialization.
- * This is turned on during the doctor step.
  *
  * @property previousHealthy relative paths to modules that were previously
  * determined to be _healthy_ that is they can be included into the snapshot
@@ -90,64 +77,41 @@ const logError = debug('cypress:snapgen:error')
  * `{ './pack-uno/lib***../bar': './pack-uno/bar/index.js' }`
  * ```
  *   `
- * @property auxiliaryData any additional data to embed into the snapshot
- *
- * @property electronVersion the version of electron we're targeting with this
- * snapshot
- *
- * @property maxWorkers the maximum amounts of workers to spawn in order to run
- * verfications of a particular snapshot script provided different entry points
- * in parallel (more info see ./doctor/snapshot-doctor.ts)
  *
  * @property flags snapshot script creation flags
  *
  * @property nodeEnv the string to provide to `process.env.NODE_ENV` during
  * snapshot creation
  *
- * @property addCacheGitignore if `true` a `.gitignore` file is written to the
- * `cacheDir` ignoring large artifacts like the snapshot script
- *
  * @category snapshot
  */
 export type GenerationOpts = {
-  verify: boolean
-  minify: boolean
-  skipWriteOnVerificationFailure: boolean
   cacheDir: string
   snapshotBinDir: string
   nodeModulesOnly: boolean
   sourcemapEmbed: boolean
   sourcemapInline: boolean
-  includeStrictVerifiers: boolean
   previousHealthy?: string[]
   previousDeferred?: string[]
   previousNoRewrite?: string[]
   forceNoRewrite?: string[]
   resolverMap?: Record<string, string>
-  auxiliaryData?: Record<string, any>
-  electronVersion?: string
-  maxWorkers?: number
   flags: Flag
   nodeEnv: string
-  addCacheGitignore: boolean
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
   return {
-    verify: true,
-    minify: false,
-    skipWriteOnVerificationFailure: false,
     cacheDir: join(projectBaseDir, 'cache'),
     snapshotBinDir: projectBaseDir,
     nodeModulesOnly: true,
     sourcemapEmbed: false,
     sourcemapInline: false,
-    includeStrictVerifiers: false,
     previousDeferred: [],
     previousHealthy: [],
+    previousNoRewrite: [],
     flags: Flag.Script | Flag.MakeSnapshot | Flag.ReuseDoctorArtifacts,
     nodeEnv: 'development',
-    addCacheGitignore: true,
   }
 }
 
@@ -162,12 +126,6 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
  * @category snapshot
  */
 export class SnapshotGenerator {
-  /** See {@link GenerationOpts} verify */
-  private readonly verify: boolean
-  /** See {@link GenerationOpts} minify */
-  private readonly minify: boolean
-  /** See {@link GenerationOpts} skipWriteOnVerificationFailure */
-  private readonly skipWriteOnVerificationFailure: boolean
   /** See {@link GenerationOpts} cacheDir */
   private readonly cacheDir: string
   /** See {@link GenerationOpts} snapshotScriptPath */
@@ -188,10 +146,6 @@ export class SnapshotGenerator {
   private readonly sourcemapEmbed: boolean
   /** See {@link GenerationOpts} sourcemapInline */
   private readonly sourcemapInline: boolean
-  /** See {@link GenerationOpts} includeStrictVerifiers */
-  private readonly includeStrictVerifiers: boolean
-  /** See {@link GenerationOpts} ?: */
-  private readonly maxWorkers?: number
   /** See {@link GenerationOpts} previousDeferred */
   private readonly previousDeferred: Set<string>
   /** See {@link GenerationOpts} previousHealthy */
@@ -207,8 +161,6 @@ export class SnapshotGenerator {
    * {@link https://github.com/cypress-io/esbuild/tree/thlorenz/snap}
    */
   private readonly bundlerPath: string
-  /** See {@link GenerationOpts} addCacheGitignore */
-  private readonly addCacheGitignore: boolean
   private readonly _snapshotVerifier: SnapshotVerifier
   /** See {@link GenerationOpts} flags */
   private readonly _flags: GeneratorFlags
@@ -247,77 +199,55 @@ export class SnapshotGenerator {
     opts: Partial<GenerationOpts> = {},
   ) {
     const {
-      verify,
-      minify,
-      skipWriteOnVerificationFailure,
       cacheDir,
-      snapshotBinDir,
-      maxWorkers,
       nodeModulesOnly,
       sourcemapEmbed,
       sourcemapInline,
-      includeStrictVerifiers,
       previousDeferred,
       previousHealthy,
       previousNoRewrite,
       forceNoRewrite,
       flags: mode,
       nodeEnv,
-      electronVersion,
-      addCacheGitignore,
     }: GenerationOpts = Object.assign(
       getDefaultGenerationOpts(projectBaseDir),
       opts,
     )
 
-    ensureDirSync(cacheDir)
-    ensureDirSync(snapshotBinDir)
+    this.cacheDir = cacheDir
+    ensureDirSync(this.cacheDir)
+
+    this.snapshotBinDir = join(tempDir, 'cy-v8-snapshot-bin')
+    ensureDirSync(this.snapshotBinDir)
 
     this._snapshotVerifier = new SnapshotVerifier()
-    this.verify = verify
-    this.minify = minify
-    this.skipWriteOnVerificationFailure = skipWriteOnVerificationFailure
-    this.cacheDir = cacheDir
-    this.snapshotBinDir = snapshotBinDir
     this.snapshotScriptPath = join(cacheDir, 'snapshot.js')
     this.snapshotExportScriptPath = join(cacheDir, 'snapshot-bundle.js')
-    this.auxiliaryData = opts.auxiliaryData
     this.resolverMap = opts.resolverMap
-    this.electronVersion =
-      electronVersion ?? resolveElectronVersion(projectBaseDir)
+    this.electronVersion = resolveElectronVersion(projectBaseDir)
 
     this.nodeModulesOnly = nodeModulesOnly
     this.sourcemapEmbed = sourcemapEmbed
     this.sourcemapInline = sourcemapInline
-    this.includeStrictVerifiers = includeStrictVerifiers
     this.previousDeferred = new Set(previousDeferred)
     this.previousHealthy = new Set(previousHealthy)
     this.previousNoRewrite = new Set(previousNoRewrite)
     this.forceNoRewrite = new Set(forceNoRewrite)
-    this.maxWorkers = maxWorkers
     this.nodeEnv = nodeEnv
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
-    this.addCacheGitignore = addCacheGitignore
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
     logInfo({
       projectBaseDir,
       cacheDir,
-      snapshotBinDir,
       snapshotScriptPath: this.snapshotScriptPath,
       nodeModulesOnly: this.nodeModulesOnly,
       sourcemapEmbed: this.sourcemapEmbed,
       sourcemapInline: this.sourcemapInline,
-      includeStrictVerifiers: this.includeStrictVerifiers,
-      previousDeferred: this.previousDeferred.size,
-      previousHealthy: this.previousHealthy.size,
-      previousNoRewrite: this.previousNoRewrite.size,
       forceNoRewrite: this.forceNoRewrite.size,
       auxiliaryData: auxiliaryDataKeys,
-      verify,
-      addCacheGitignore,
     })
   }
 
@@ -346,7 +276,6 @@ export class SnapshotGenerator {
         this.snapshotEntryFile,
         this.cacheDir,
         {
-          maxWorkers: this.maxWorkers,
           nodeModulesOnly: this.nodeModulesOnly,
           previousDeferred: this.previousDeferred,
           previousHealthy: this.previousHealthy,
@@ -399,47 +328,25 @@ export class SnapshotGenerator {
 
     // 3. Since we don't want the `mksnapshot` command to bomb with cryptic
     //    errors we verify that the generated script is snapshot-able.
-    if (this.verify) {
-      logInfo('Verifying snapshot script')
-      try {
-        this._verifyScript()
-      } catch (err) {
-        if (!this.skipWriteOnVerificationFailure) {
-          logInfo(
-            `Script failed verification, writing to ${this.snapshotScriptPath}`,
-          )
+    logInfo('Verifying snapshot script')
+    try {
+      this._verifyScript()
+    } catch (err) {
+      logInfo(
+        `Script failed verification, writing to ${this.snapshotScriptPath}`,
+      )
 
-          await fs.promises.writeFile(
-            this.snapshotScriptPath,
-            this.snapshotScript,
-          )
-        }
+      await fs.promises.writeFile(
+        this.snapshotScriptPath,
+        this.snapshotScript,
+      )
 
-        throw err
-      }
-    } else {
-      logInfo('Skipping snapshot script verification')
+      throw err
     }
 
     logInfo(`Writing snapshot script to ${this.snapshotScriptPath}`)
 
-    // Optionally minify, but I haven't seen any gains from doing that since
-    // the exports and/or export definitions are included in the snapshot
-    // and not the code itself
-    if (this.minify) {
-      logInfo('Minifying snapshot script')
-      const minified = await minify(this.snapshotScript!.toString(), {
-        sourceMap: false,
-      })
-
-      assert(minified.code != null, 'Should return minified code')
-
-      return fs.promises.writeFile(this.snapshotScriptPath, minified.code)
-    }
-
-    if (this.addCacheGitignore) {
-      await this._addGitignore()
-    }
+    await this._addGitignore()
 
     // 4. Write the snapshot script to the configured file
     return fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
@@ -465,7 +372,6 @@ export class SnapshotGenerator {
         this.snapshotEntryFile,
         this.cacheDir,
         {
-          maxWorkers: this.maxWorkers,
           nodeModulesOnly: this.nodeModulesOnly,
           previousHealthy: this.previousHealthy,
           previousDeferred: this.previousDeferred,
@@ -489,7 +395,7 @@ export class SnapshotGenerator {
         baseDirPath: this.projectBaseDir,
         entryFilePath: this.snapshotEntryFile,
         bundlerPath: this.bundlerPath,
-        includeStrictVerifiers: this.includeStrictVerifiers,
+        includeStrictVerifiers: false,
         deferred,
         norewrite,
         nodeModulesOnly: this.nodeModulesOnly,
@@ -574,7 +480,7 @@ export class SnapshotGenerator {
         throw new Error('Failed `mksnapshot` command')
       }
 
-      return { v8ContextFile: this.v8ContextFile }
+      return { v8ContextFile: this.v8ContextFile, snapshotBinDir: this.snapshotBinDir }
     } catch (err: any) {
       if (err.stderr != null) {
         logError(err.stderr.toString())
@@ -648,7 +554,7 @@ export class SnapshotGenerator {
       fs.copyFileSync(electronV8ContextBin, originalV8ContextBin)
     }
 
-    const v8ContextFullPath = join(this.projectBaseDir, this.v8ContextFile)
+    const v8ContextFullPath = join(this.snapshotBinDir, this.v8ContextFile)
 
     logInfo(`Moving ${this.v8ContextFile} to '${electronV8ContextBin}'`)
     fs.renameSync(v8ContextFullPath, electronV8ContextBin)

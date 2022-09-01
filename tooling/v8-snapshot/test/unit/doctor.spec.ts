@@ -38,7 +38,7 @@ describe('doctor', () => {
     })
   })
 
-  it('snapshots entry points modules using and one reassigning console ', async () => {
+  it('snapshots entry points modules using and reassigning console ', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'console-assign')
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
@@ -188,7 +188,6 @@ describe('doctor', () => {
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
-      includeStrictVerifiers: true,
       flags: Flag.Script,
     })
 

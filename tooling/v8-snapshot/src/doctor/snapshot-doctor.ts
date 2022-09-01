@@ -28,9 +28,6 @@ const logError = debug('cypress:snapgen:error')
 /**
  * Configure the snapshot doctor
  *
- * @property maxWorkers?:  How many workers to use in order to verify snapshot
- * scripts. Defaults to number of CPUs.
- *
  * @property previousDeferred See {@link GenerationOpts} previousDeferred
  * @property previousHealthy See {@link GenerationOpts} previousHealthy
  * @property previousNoRewrite See {@link GenerationOpts} previousNoRewrite
@@ -45,7 +42,6 @@ export type SnapshotDoctorOpts = Omit<
   | 'sourcemapInline'
   | 'sourcemapExternalPath'
 > & {
-  maxWorkers?: number
   previousDeferred: Set<string>
   previousHealthy: Set<string>
   previousNoRewrite: Set<string>
@@ -280,7 +276,7 @@ export class SnapshotDoctor {
     this.baseDirPath = opts.baseDirPath
     this.entryFilePath = opts.entryFilePath
     this.bundlerPath = opts.bundlerPath
-    this._scriptProcessor = new AsyncScriptProcessor(opts)
+    this._scriptProcessor = new AsyncScriptProcessor()
     this._warningsProcessor = new WarningsProcessor(this.baseDirPath)
     this.nodeModulesOnly = opts.nodeModulesOnly
     this.previousDeferred = unpathify(opts.previousDeferred)
