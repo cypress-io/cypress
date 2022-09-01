@@ -5,10 +5,11 @@ exports['e2e plugin run events / sends events'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (run_events_spec_1.cy.js, run_events_spec_2.cy.js)                         │
-  │ Searched:   cypress/e2e/*                                                                      │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        2 found (run_events_spec_1.cy.js, run_events_spec_2.cy.js)                       │
+  │ Searched:     cypress/e2e/*                                                                    │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 before:run: cypress/e2e/run_events_spec_1.cy.js electron
