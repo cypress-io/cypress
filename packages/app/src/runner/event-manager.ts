@@ -688,6 +688,31 @@ export class EventManager {
       log?.set(attrs)
     })
 
+    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
+    Cypress.primaryOriginCommunicator.on('set:cookie', ({ cookie, href }) => {
+      const { superDomain } = Cypress.Location.create(href)
+      const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
+
+      Cypress.automation('set:cookie', automationCookie).then(() => {
+        // TODO: we should reflect this back to the originating window, not specifically the AUT window (though they should be the same)
+        Cypress.state('window').postMessage({ event: 'cross:origin:set:cookie' }, '*')
+      })
+      .catch(() => {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+      })
+    })
+
+    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
+    Cypress.primaryOriginCommunicator.on('get:cookie', async ({ href }) => {
+      const { superDomain } = Cypress.Location.create(href)
+
+      const cookies = await Cypress.automation('get:cookies', { superDomain })
+
+      // TODO: we should reflect this back to the originating window, not specifically the AUT window (though they should be the same)
+      Cypress.state('window').postMessage({ event: 'cross:origin:get:cookie', cookies }, '*')
+    })
+
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
     // Forward all message events to the current instance of the multi-origin communicator
     if (!window.top) throw new Error('missing window.top in event-manager')

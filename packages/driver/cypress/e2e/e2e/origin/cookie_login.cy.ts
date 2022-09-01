@@ -711,6 +711,10 @@ describe('cy.origin - cookie login', () => {
             value: 'value',
           })
         })
+
+        cy.document().then((doc) => {
+          expect(doc.cookie).to.equal('key=value')
+        })
       })
     })
 
@@ -794,6 +798,30 @@ describe('cy.origin - cookie login', () => {
         // ensure that each one is there
         cy.document().its('cookie').should('include', 'key=value')
         cy.document().its('cookie').should('include', `user=${username}`)
+      })
+    })
+
+    it('sets and reads document.cookie prior to attaching', () => {
+      cy.window().then(() => {
+        // Force remove the spec bridge
+        window?.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
+      })
+
+      cy.get('[data-cy="document-cookie"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.document().its('cookie').should('include', 'name=value')
+        cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
+        cy.getCookie('name').then((cookie) => {
+          expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
+            domain: '.foobar.com',
+            httpOnly: false,
+            name: 'name',
+            path: '/',
+            sameSite: 'lax',
+            secure: false,
+            value: 'value',
+          })
+        })
       })
     })
   })

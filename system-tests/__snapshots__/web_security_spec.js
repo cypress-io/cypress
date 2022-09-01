@@ -318,32 +318,23 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
   1) web security
        fails when clicking <a> to another origin:
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-      Timed out retrying after 4000ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
+This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
       [stack trace lines]
 
   2) web security
        fails when submitted a form and being redirected to another origin:
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-      Timed out retrying after 4000ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
+This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
       [stack trace lines]
 
   3) web security
        fails when using a javascript redirect to another origin:
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-      Timed out retrying after 4000ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
+This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
       [stack trace lines]
 
   4) web security

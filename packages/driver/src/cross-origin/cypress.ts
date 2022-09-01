@@ -168,21 +168,10 @@ const attachToWindow = (autWindow: Window) => {
     patchElementIntegrity(autWindow)
   }
 
-  patchDocumentCookie(Cypress, autWindow)
-
   // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
 
   cy.overrides.wrapNativeMethods(autWindow)
-
-  // const onWindowLoadPrimary = ({ url }) => {
-  //   cy.isStable(true, 'primary onload')
-
-  //   cy.state('autOrigin', cors.getOriginPolicy(url))
-  //   Cypress.emit('internal:window:load', { type: 'same:origin', url })
-  // }
-
-  // Cypress.specBridgeCommunicator.on('window:load', onWindowLoadPrimary)
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
