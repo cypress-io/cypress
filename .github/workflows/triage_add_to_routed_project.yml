@@ -4,7 +4,7 @@ on:
     types:
       - labeled
 jobs:
-  add-to-e2e:
+  route-to-e2e:
     if: github.event.label.name == 'routed-to-e2e'
     runs-on: ubuntu-latest
     steps:
