@@ -70,7 +70,6 @@ describe('baseUrl', () => {
 })
 
 describe('experimentalSingleTabRunMode', () => {
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
