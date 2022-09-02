@@ -8,6 +8,7 @@
     class="mb-16px"
     :icon="ConnectIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -51,8 +52,10 @@ query ConnectProjectBanner {
 
 withDefaults(defineProps<{
   modelValue: boolean
+  hasBannerBeenShown: boolean
 }>(), {
   modelValue: false,
+  hasBannerBeenShown: true,
 })
 
 const emit = defineEmits<{

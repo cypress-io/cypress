@@ -683,6 +683,29 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('reportTrackedBannerSeen', {
+      type: 'Boolean',
+      description: '',
+      args: {
+        campaign: nonNull(stringArg({})),
+        messageId: nonNull(stringArg({})),
+        medium: nonNull(stringArg({})),
+        // cohort: nonNull(stringArg({})),
+      },
+      resolve: (source, args, ctx) => {
+        try {
+          // We should probably use staging for this unless CYPRESS_INTERNAL_ENV is 'production'
+          // That way we're not sending this info while working in dev mode
+          ctx.util.fetch('https://dashboard-staging.cypress.io/anon-collect',
+            { method: 'POST', body: JSON.stringify({ ...args }) })
+
+          return true
+        } catch (error) {
+          return false
+        }
+      },
+    })
+
     t.boolean('_clearCloudCache', {
       description: 'Internal use only, clears the cloud cache',
       resolve: (source, args, ctx) => {

@@ -1300,6 +1300,9 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
+  """"""
+  reportTrackedBannerSeen(campaign: String!, medium: String!, messageId: String!): Boolean
+
   """Reset the Auth State"""
   resetAuthState: Query!
 
