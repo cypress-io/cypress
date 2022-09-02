@@ -804,7 +804,7 @@ describe('cy.origin - cookie login', () => {
     it('sets and reads document.cookie prior to attaching', () => {
       cy.window().then(() => {
         // Force remove the spec bridge
-        window?.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
+        window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
       })
 
       cy.get('[data-cy="document-cookie"]').click()

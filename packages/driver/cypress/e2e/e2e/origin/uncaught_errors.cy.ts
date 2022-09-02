@@ -307,6 +307,41 @@ describe('cy.origin - uncaught errors', () => {
   })
 
   describe('serializable errors', () => {
+    it('errors thrown prior to attaching are forwarded to top', (done) => {
+      cy.origin('http://foobar.com:3500', () => {})
+
+      cy.wrap(() => {
+        // Force remove the spec bridge
+        window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
+      })
+
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('Error')
+        expect(err.message).to.include('this is the message')
+        expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+        // expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+
+        done()
+      })
+
+      cy.visit('http://www.foobar.com:3500/fixtures/auth/error-on-load.html')
+    })
+
+    it('errors thrown post attaching are send by the spec bridge', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('Error')
+        expect(err.message).to.include('this is the message')
+        expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+        expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+
+        done()
+      })
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/auth/error-on-load.html')
+      })
+    })
+
     it('handles users throwing complex errors/classes', (done) => {
       cy.on('fail', (err: any) => {
         expect(err.name).to.equal('CustomError')

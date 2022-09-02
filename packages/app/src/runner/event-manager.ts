@@ -713,6 +713,17 @@ export class EventManager {
       Cypress.state('window').postMessage({ event: 'cross:origin:get:cookie', cookies }, '*')
     })
 
+    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
+    Cypress.primaryOriginCommunicator.on('throw:error', async ({ message, stack }) => {
+      const error = new Error(message)
+
+      if (stack) {
+        error.stack = stack
+      }
+
+      throw error
+    })
+
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
     // Forward all message events to the current instance of the multi-origin communicator
     if (!window.top) throw new Error('missing window.top in event-manager')

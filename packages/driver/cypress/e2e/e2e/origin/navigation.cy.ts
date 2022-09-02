@@ -449,7 +449,7 @@ describe('errors', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.window().then(() => {
       // Force remove the spec bridge
-        window?.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
+        window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
       })
 
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com

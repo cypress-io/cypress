@@ -54,6 +54,27 @@ window.addEventListener('beforeunload', () => {
   parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
 })
 
+const handleErrorEvent = (event) => {
+  if (window.Cypress) {
+    // A spec bridge has attached so we don't need to forward errors to top anymore.
+    window.removeEventListener('error', handleErrorEvent)
+  } else {
+    const { error } = event
+    const data = {}
+
+    if (error && error.stack && error.message) {
+      data.message = error.message
+      data.stack = error.stack
+    } else {
+      data.message = error
+    }
+
+    window.top.postMessage({ event: 'cross:origin:throw:error', data }, '*')
+  }
+}
+
+window.addEventListener('error', handleErrorEvent)
+
 // Apply Patches
 patchDocumentCookie(window)
 
