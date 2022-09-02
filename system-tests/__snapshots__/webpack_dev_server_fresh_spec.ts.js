@@ -68,14 +68,13 @@ SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.j
 > 8 | })
     | ^
   9 |
-
       [stack trace lines]
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-  
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 
@@ -338,14 +337,13 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
 > 8 | })
     | ^
   9 |
-
       [stack trace lines]
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-  
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 
@@ -599,14 +597,13 @@ SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.j
 > 8 | })
     | ^
   9 |
-
       [stack trace lines]
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-  
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 
@@ -872,14 +869,13 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
 > 8 | })
     | ^
   9 |
-
       [stack trace lines]
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-  
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 

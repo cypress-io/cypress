@@ -413,8 +413,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return this.state('onFail')(err)
     }
 
-    err.message = err.message.split('    at instantiate')[0]
-
     // this means the error has already been through this handler and caught
     // again. but we don't need to run it through again, so we can re-throw
     // it and it will fail the test as-is

@@ -4,7 +4,7 @@ import { stripAnsi } from '@packages/server/lib/errors'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react']
 
 describe('@cypress/webpack-dev-server', function () {
   systemTests.setup()
@@ -18,6 +18,7 @@ describe('@cypress/webpack-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
+          spec: 'src/AppCompilationError.cy.jsx',
           expectedExitCode: 3,
           onStdout: (stdout) => {
             return systemTests.normalizeWebpackErrors(stripAnsi(stdout))
