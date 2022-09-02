@@ -84,7 +84,10 @@ describe('Launchpad: Setup Project', () => {
       cy.containsPath('cypress/support/e2e.js')
       cy.containsPath('cypress/support/commands.js')
       cy.containsPath('cypress/fixtures/example.json')
-      cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
     })
 
     verifyScaffoldedFiles('e2e')
@@ -240,7 +243,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
-          cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -307,7 +313,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
-          cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -340,7 +349,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
-          cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')

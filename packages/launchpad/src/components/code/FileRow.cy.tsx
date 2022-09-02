@@ -54,29 +54,38 @@ describe('FileRow', () => {
           description={description}
           fileExtension=".js"
         />
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/function.ts"
+          description={description}
+          fileExtension=".ts"
+        />
       </div>
     ))
 
     cy.get('pre.shiki').should('exist')
 
-    cy.get('[data-cy=valid]').within(() => {
-      cy.contains('cypress/integration/support.ts')
-      cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+    cy.contains('cypress/integration/support.ts')
+    cy.contains('cypress/integration/command.js')
+    cy.contains('cypress.config.js')
+    cy.contains('cypress/integration/index.js')
+    cy.contains('cypress/integration/function.ts')
+
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
     })
 
-    cy.get('[data-cy=changes]').within(() => {
-      cy.contains('cypress/integration/command.js')
-      cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'true')
+    cy.get('[data-cy=changes] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
     })
 
-    cy.get('[data-cy=skipped]').within(() => {
-      cy.contains('cypress.config.js')
-      cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+    cy.get('[data-cy=skipped] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
     })
 
-    cy.get('[data-cy=error]').within(() => {
-      cy.contains('cypress/integration/index.js')
-      cy.get('[data-cy=collapsible-header]').should('have.attr', 'aria-expanded', 'false')
+    cy.get('[data-cy=error] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
     })
 
     cy.percySnapshot()
