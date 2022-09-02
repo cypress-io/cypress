@@ -550,6 +550,22 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         setWindowDocumentProps(autWindow, this.state)
 
+        if (this.Cypress.isBrowser('webkit')) {
+          // WebKit's unhandledrejection event will sometimes not fire within the AUT
+          // due to a documented bug: https://bugs.webkit.org/show_bug.cgi?id=187822
+          // To ensure that the event will always fire (and always report these
+          // unhandled rejections to the user), we patch the AUT's Error constructor
+          // to enqueue a no-op microtask when executed, which ensures that the unhandledrejection
+          // event handler will be executed if this Error is uncaught.
+          const originalError = autWindow.Error
+
+          autWindow.Error = function __CyWebKitError (...args) {
+            autWindow.queueMicrotask(() => {})
+
+            return originalError.apply(this, args)
+          }
+        }
+
         // we may need to update the url now
         this.urlNavigationEvent('load')
 
@@ -1214,11 +1230,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     // A workaround to ensure that when looking back, aliases don't extend beyond the current
-    // chainer. This whole area (`replayCommandsFrom` for aliases) will be replaced with subject chains as
-    // part of the detached DOM work.
+    // chainer and commands invoked inside of it. This whole area (`replayCommandsFrom` for aliases)
+    // will be replaced with subject chains as part of the detached DOM work.
+    const chainerId = command.get('chainerId')
     const prev = command.get('prev')
+    const prevChainer = prev.get('chainerId')
 
-    if (prev.get('chainerId') !== command.get('chainerId')) {
+    if (prevChainer !== chainerId && cy.state('subjectLinks')[prevChainer] !== chainerId) {
       return memo
     }
 

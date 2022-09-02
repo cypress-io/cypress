@@ -690,15 +690,16 @@ describe('lib/browsers/electron', () => {
     })
 
     it('.onFocus', function () {
-      let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
+      const headlessOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: false } })
 
-      opts.onFocus()
+      headlessOpts.onFocus()
       expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
-      opts = electron._defaultOptions('/foo', this.state, { show: false, browser: {} })
-      opts.onFocus()
+      const headedOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: true } })
+
+      headedOpts.onFocus()
 
       expect(menu.set).not.to.be.called
     })
