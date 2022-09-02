@@ -4,8 +4,12 @@ on:
     types:
       - created
 jobs:
-  add-to-e2e:
-    if: ${{ !github.event.issue.pull_request && github.event.issue.state == 'closed' && github.event.sender.login != 'cypress-bot' }}
+  move-to-new-issue-status:
+    if: |
+      !github.event.issue.pull_request &&
+      github.event.issue.state == 'closed' &&
+      github.event.comment.created_at != github.event.issue.closed_at &&
+      github.event.sender.login != 'cypress-bot'
     runs-on: ubuntu-latest
     steps:
       - name: Get project data
@@ -65,7 +69,7 @@ jobs:
       - name: Move issue to New Issue status
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
-        if: ${{ env.STATUS == 'Closed' }}
+        if: env.STATUS == 'Closed'
         run: |
           gh api graphql -f query='
             mutation (
