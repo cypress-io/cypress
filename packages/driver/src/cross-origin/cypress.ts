@@ -20,9 +20,7 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { patchDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
-import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
 
 const createCypress = () => {
@@ -165,8 +163,15 @@ const attachToWindow = (autWindow: Window) => {
 
   if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
     patchFormElementSubmit(autWindow)
-    patchElementIntegrity(autWindow)
   }
+
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
+
+  // @ts-ignore
+  Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
+  // @ts-ignore
+  Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
 
   // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')

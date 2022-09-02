@@ -8,7 +8,8 @@
  */
 
 import { createTimers } from './timers'
-import { patchDocumentCookie } from './cookies'
+import { patchDocumentCookie } from './patches/cookies'
+import { patchElementIntegrity } from './patches/setAttribute'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -53,21 +54,34 @@ window.addEventListener('beforeunload', () => {
   parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
 })
 
+// Apply Patches
+patchDocumentCookie(window)
+
+// return null to trick contentWindow into thinking
+// its not been iFramed if modifyObstructiveCode is true
+if (window.cypressConfig.modifyObstructiveCode) {
+  Object.defineProperty(window, 'frameElement', {
+    get () {
+      return null
+    },
+  })
+}
+
+if (window.cypressConfig.modifyObstructiveThirdPartyCode) {
+  patchElementIntegrity(window)
+}
+
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
 
 timers.wrap()
 
-patchDocumentCookie(window)
-
 const Cypress = findCypress()
 
+// Attach these to window so cypress can call them when it attaches.
+window.cypressTimersReset = timers.reset
+window.cypressTimersPause = timers.pause
+
 if (Cypress) {
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
-
-  Cypress.on('app:timers:reset', timers.reset)
-  Cypress.on('app:timers:pause', timers.pause)
-
   Cypress.action('app:window:before:load', window)
 }
