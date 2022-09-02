@@ -80,7 +80,6 @@ fragment MainAppQueryData on Query {
       isLoadingConfigFile
       isLoadingNodeEvents
     }
-    ...LoginConnectModals
 }
 `
 

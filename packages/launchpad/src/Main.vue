@@ -74,7 +74,7 @@
         <OpenBrowser v-else />
       </template>
     </div>
-    <LoginConnectModals :gql="query.data.value" />
+    <LoginConnectModals />
   </template>
   <div data-e2e />
 </template>
@@ -131,7 +131,6 @@ fragment MainLaunchpadQueryData on Query {
   ...GlobalPage
   ...ScaffoldedFiles
   ...WarningList
-  ...LoginConnectModals
 }
 `
 

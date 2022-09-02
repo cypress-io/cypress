@@ -1,12 +1,12 @@
 <template>
   <CloudViewerAndProject
-    v-if="props.gql && loginConnectStore.isLoginConnectOpen"
+    v-if="query.data.value && loginConnectStore.isLoginConnectOpen"
     v-slot="{status}"
-    :gql="props.gql"
+    :gql="query.data.value"
   >
     <LoginModal
       v-if="status"
-      :gql="props.gql"
+      :gql="query.data.value"
       :model-value="!status.isLoggedIn || keepLoginOpen"
       :utm-medium="loginConnectStore.utmMedium"
       :show-connect-button-after-login="!status.isProjectConnected"
@@ -18,7 +18,7 @@
     <CloudConnectModals
       v-if="status?.isLoggedIn && !keepLoginOpen"
       :show="status?.isLoggedIn && isCloudConnectOpen"
-      :gql="props.gql"
+      :gql="query.data.value"
       @cancel="handleCancelConnect"
       @success="handleConnectSuccess"
     />
@@ -27,32 +27,21 @@
 <script setup lang="ts">
 import CloudViewerAndProject from './CloudViewerAndProject.vue'
 import { gql, useQuery } from '@urql/vue'
-import type { LoginConnectModalsFragment } from '../generated/graphql'
-import { LoginConnectModals_CloudConnectModalsQueryDocument } from '../generated/graphql'
+import { LoginConnectModals_LoginConnectModalsQueryDocument } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
 import { ref } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
 
 gql`
-fragment LoginConnectModals on Query {
-...CloudViewerAndProject
-...LoginModal
-...CloudConnectModals
-}
-`
-
-gql`
-query LoginConnectModals_CloudConnectModalsQuery {
+query LoginConnectModals_LoginConnectModalsQuery {
+  ...CloudViewerAndProject
+  ...LoginModal
   ...CloudConnectModals
 }
 `
 
-const cloudModalQuery = useQuery({ query: LoginConnectModals_CloudConnectModalsQueryDocument, pause: true })
-
-const props = defineProps<{
-  gql: LoginConnectModalsFragment
-}>()
+const query = useQuery({ query: LoginConnectModals_LoginConnectModalsQueryDocument, pause: true })
 
 const loginConnectStore = useLoginConnectStore()
 const { closeLoginConnectModal } = loginConnectStore
@@ -84,7 +73,7 @@ const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
   closeLoginConnectModal()
 }
 const handleConnectProject = async () => {
-  await cloudModalQuery.executeQuery()
+  await query.executeQuery()
   // switch to Connect modal
   keepLoginOpen.value = false
 }
@@ -96,5 +85,7 @@ const handleCancelConnect = () => {
 const handleConnectSuccess = () => {
   // isProjectConnectOpen = false; emit('success')
 }
+
+query.executeQuery()
 
 </script>

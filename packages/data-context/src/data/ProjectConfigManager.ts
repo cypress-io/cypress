@@ -151,14 +151,6 @@ export class ProjectConfigManager {
     } finally {
       this.options.ctx.emitter.toLaunchpad()
       this.options.ctx.emitter.toApp()
-
-      // FIXME: this timeout prevents a hang in the launchpad when the
-      // <LoginConnectModals> is rendered in Main.vue,
-      // need to debug further to find the root cause
-      setTimeout(() => {
-        this.options.ctx.emitter.toLaunchpad()
-        this.options.ctx.emitter.toApp()
-      }, 1000)
     }
   }
 
