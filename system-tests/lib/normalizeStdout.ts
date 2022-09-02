@@ -142,6 +142,12 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
 
+  if (options.browser === 'webkit') {
+    // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
+    // This message is replaced with Chrome/Firefox's exception text for consistent diffs
+    str = str.replace(/> Can\'t find variable: (\S+)/g, '> $1 is not defined')
+  }
+
   // avoid race condition when webpack prints this at a non-deterministic timing
   const wdsFailedMsg = 'ℹ ｢wdm｣: Failed to compile.'
 
