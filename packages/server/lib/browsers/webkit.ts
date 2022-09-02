@@ -83,7 +83,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }
 
     async kill () {
-      debug('killing pwServer process tree')
+      debug('closing pwBrowser')
       await pwBrowser.close()
       wkAutomation = undefined
     }
