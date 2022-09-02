@@ -7,6 +7,7 @@ import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
+import { splitStack } from '@packages/errors/src/stackUtils'
 
 const ERROR_PROPS = 'message type name stack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -434,14 +435,9 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
-  /*
-    TODO:
-    1. See if it passes with hardcoded `stack` string using "yarn test webpack_dev_server_fresh_spec.ts --headed --no-exit"
-    2. If it passes, tweak line number in hardcoded `stack` string and see if that passes
-    3. If it doesn't, find out why getSourceStack has different numbers
-    4. If different numbers are necessary, find out why message is getting appended
-  */
-  err.stack = sourceMapped
+  const [, newStack] = splitStack(sourceMapped)
+
+  err.stack = newStack
   err.parsedStack = parsed
   err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
