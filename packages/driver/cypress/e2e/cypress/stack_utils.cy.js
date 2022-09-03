@@ -149,8 +149,8 @@ describe('driver/src/cypress/stack_utils', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -185,8 +185,8 @@ describe('driver/src/cypress/stack_utils', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -194,8 +194,8 @@ describe('driver/src/cypress/stack_utils', () => {
       generatedStack = generatedStack.split('\n').slice(1).join('\n')
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -208,8 +208,8 @@ more
 lines
 
 Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -229,8 +229,8 @@ Error: spec iframe stack
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (cypress:///some_other_file.ts:2:2)
-    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (cypress:///some_other_file.ts:2:1)
+    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -277,8 +277,8 @@ Error: spec iframe stack
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:2)
-    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:1)
+    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -380,7 +380,7 @@ Error: spec iframe stack
 
       expect(details, 'minimal details').to.deep.equal({
         absoluteFile: undefined,
-        column: 2,
+        column: 1,
         fileUrl: undefined,
         function: '<unknown>',
         line: 1,
@@ -482,6 +482,7 @@ From Your Spec Code:
       expect(index).to.equal(6)
     })
 
+    // what is this???
     it('appends at end when there is no stack replacement marker in the stack', () => {
       err.stack = err.stack.replace('    at __stackReplacementMarker (path/to/another:2:2)\n', '')
 
@@ -518,6 +519,7 @@ message 3
     })
   })
 
+  // rachel: omg is this it??
   context('.normalizedUserInvocationStack', () => {
     it('removes message and cy[name] lines and normalizes indentation', () => {
       const stack = `\
