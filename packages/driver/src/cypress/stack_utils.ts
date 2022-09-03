@@ -62,9 +62,11 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
 }
 
 const stackWithReplacementMarkerLineRemoved = (stack) => {
-  return stackWithLinesRemoved(stack, (lines) => {
-    return _.reject(lines, (line) => _.includes(line, STACK_REPLACEMENT_MARKER))
+  const linesRemoved = stackWithLinesRemoved(stack, (lines) => {
+    return _.reject(lines, (line) => line.includes(STACK_REPLACEMENT_MARKER))
   })
+
+  return linesRemoved
 }
 
 export type StackAndCodeFrameIndex = {
@@ -77,7 +79,7 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
-  let commandCallIndex = _.findIndex(stackLines, (line) => {
+  let commandCallIndex = stackLines.findIndex((line) => {
     return line.includes(STACK_REPLACEMENT_MARKER)
   })
 
@@ -85,6 +87,7 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
     commandCallIndex = stackLines.length
   }
 
+  // RACHEL OMG THIS IS ITTTTT
   stackLines.splice(commandCallIndex, stackLines.length, 'From Your Spec Code:')
   stackLines.push(userInvocationStackWithoutMessage)
 

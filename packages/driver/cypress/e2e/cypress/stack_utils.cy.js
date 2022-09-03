@@ -110,7 +110,7 @@ describe('driver/src/cypress/stack_utils', () => {
       .then((errorLocation) => {
         expect(errorLocation, 'does not have disk information').to.deep.equal({
           absoluteFile: undefined,
-          column: 4,
+          column: 3,
           fileUrl: 'http://localhost:8888/js/utils.js',
           function: '<unknown>',
           line: 9,
@@ -165,7 +165,7 @@ describe('driver/src/cypress/stack_utils', () => {
           relativeFile: 'some_other_file.ts',
           absoluteFile: '/dev/app/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -175,7 +175,7 @@ describe('driver/src/cypress/stack_utils', () => {
           relativeFile: 'cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
@@ -245,7 +245,7 @@ Error: spec iframe stack
           relativeFile: 'some_other_file.ts',
           absoluteFile: '/dev/app/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -255,7 +255,7 @@ Error: spec iframe stack
           relativeFile: 'cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
@@ -293,7 +293,7 @@ Error: spec iframe stack
           relativeFile: '/root/absolute/path/some_other_file.ts',
           absoluteFile: '/root/absolute/path/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -303,7 +303,7 @@ Error: spec iframe stack
           relativeFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
