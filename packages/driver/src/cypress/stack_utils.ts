@@ -332,8 +332,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile,
     absoluteFile,
     line: sourceDetails.line,
-    // adding 1 to column makes more sense for code frame and opening in editor
-    column: sourceDetails.column + 1,
+    column: sourceDetails.column,
     whitespace,
   }
 }
@@ -347,7 +346,7 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
 }
 
 const reconstructStack = (parsedStack) => {
-  return _.map(parsedStack, (parsedLine) => {
+  return parsedStack.map((parsedLine) => {
     if (parsedLine.message != null) {
       return `${parsedLine.whitespace}${parsedLine.message}`
     }

@@ -7,7 +7,6 @@ import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
-import { splitStack } from '@packages/errors/src/stackUtils'
 
 const ERROR_PROPS = 'message type name stack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -435,9 +434,7 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
-  const [, newStack] = splitStack(sourceMapped)
-
-  err.stack = newStack
+  err.stack = sourceMapped
   err.parsedStack = parsed
   err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
