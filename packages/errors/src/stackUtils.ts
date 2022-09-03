@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { ErrorLike } from './errorTypes'
 
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -9,7 +8,7 @@ type MessageLines = [string[], string[]] & {messageEnded?: boolean}
 export const splitStack = (stack: string) => {
   const lines = stack.split('\n')
 
-  return _.reduce(lines, (memo, line) => {
+  return lines.reduce((memo, line) => {
     if (memo.messageEnded || stackLineRegex.test(line)) {
       memo.messageEnded = true
       memo[1].push(line)
@@ -22,7 +21,7 @@ export const splitStack = (stack: string) => {
 }
 
 export const unsplitStack = (messageLines: string | string[], stackLines: string[]) => {
-  return _.castArray(messageLines).concat(stackLines).join('\n')
+  return Array.from(messageLines).concat(stackLines).join('\n')
 }
 
 export const getStackLines = (stack: string) => {

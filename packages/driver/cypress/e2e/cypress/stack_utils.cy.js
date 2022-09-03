@@ -520,7 +520,6 @@ message 3
     })
   })
 
-  // rachel: omg is this it??
   context('.normalizedUserInvocationStack', () => {
     it('removes message and cy[name] lines and normalizes indentation', () => {
       const stack = `\
