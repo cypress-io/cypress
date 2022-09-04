@@ -612,4 +612,3 @@ export default {
   warnByPath,
   wrapErr,
 }
-//   your whitespace change needs to go in `normalizeStackIndentation`

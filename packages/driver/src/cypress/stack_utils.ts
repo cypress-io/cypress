@@ -54,7 +54,7 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
     const withAboveMarkerRemoved = _.dropWhile(lines, (line: any) => {
-      return !_.includes(line, marker)
+      return !line.includes(marker)
     })
 
     return includeLast ? withAboveMarkerRemoved : withAboveMarkerRemoved.slice(1)
@@ -62,11 +62,9 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
 }
 
 const stackWithReplacementMarkerLineRemoved = (stack) => {
-  const linesRemoved = stackWithLinesRemoved(stack, (lines) => {
-    return _.reject(lines, (line) => line.includes(STACK_REPLACEMENT_MARKER))
+  return stackWithLinesRemoved(stack, (lines) => {
+    return lines.filter((line) => !line.includes(STACK_REPLACEMENT_MARKER))
   })
-
-  return linesRemoved
 }
 
 export type StackAndCodeFrameIndex = {
@@ -175,7 +173,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
 
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
-  if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
+  if (stackIndex == null) return err.parsedStack.find((line) => !!line.fileUrl)
 
   return err.parsedStack[stackIndex]
 }
@@ -237,7 +235,7 @@ const getSourceDetails = (generatedDetails) => {
 const functionExtrasRegex = /(\/<|<\/<)$/
 
 const cleanFunctionName = (functionName) => {
-  if (!_.isString(functionName)) return '<unknown>'
+  if (typeof functionName !== 'string') return '<unknown>'
 
   return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
@@ -360,7 +358,7 @@ const reconstructStack = (parsedStack) => {
 }
 
 const getSourceStack = (stack, projectRoot?) => {
-  if (!_.isString(stack)) return {}
+  if (typeof stack !== 'string') return {}
 
   const parsed = stack.split('\n').map((line) => {
     return getSourceDetailsForLine(projectRoot, line)
