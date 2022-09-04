@@ -18,14 +18,9 @@
 
 <script lang="ts">
 import { computePosition, flip, offset, arrow } from '@floating-ui/dom'
-import type { StyleValue } from 'vue'
+import { defineComponent, StyleValue } from 'vue'
 
-export default {
-  data () {
-    return {
-      show: false,
-    }
-  },
+export default defineComponent({
   mounted () {
     this.$nextTick(() => {
       const ref = this.$refs.ref as HTMLElement
@@ -49,7 +44,7 @@ export default {
       })
     })
   },
-}
+})
 </script>
 
 <script lang="ts" setup>
