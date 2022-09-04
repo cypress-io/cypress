@@ -353,7 +353,7 @@ const reconstructStack = (parsedStack) => {
     const { whitespace, originalFile, function: fn, line, column } = parsedLine
 
     return `${whitespace}at ${fn} (${originalFile || '<unknown>'}:${line}:${column})`
-  }).join('\n').trim()
+  }).join('\n').trimEnd()
 }
 
 const getSourceStack = (stack, projectRoot?) => {
