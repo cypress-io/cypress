@@ -22,7 +22,7 @@ export const splitStack = (stack: string) => {
 }
 
 export const unsplitStack = (messageLines: string | string[], stackLines: string[]) => {
-  return Array.from(messageLines).concat(stackLines).join('\n')
+  return _.castArray(messageLines).concat(stackLines).join('\n')
 }
 
 export const getStackLines = (stack: string) => {

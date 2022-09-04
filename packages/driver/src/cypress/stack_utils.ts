@@ -173,7 +173,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
 
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
-  if (stackIndex == null) return err.parsedStack.find((line) => !!line.fileUrl)
+  if (stackIndex == null) return err.parsedStack?.find((line) => !!line.fileUrl)
 
   return err.parsedStack[stackIndex]
 }
