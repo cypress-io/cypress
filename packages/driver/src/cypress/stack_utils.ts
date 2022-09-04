@@ -73,8 +73,7 @@ export type StackAndCodeFrameIndex = {
 }
 
 const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAndCodeFrameIndex => {
-  const stack = _.trim(err.stack, '\n') // trim newlines from end
-  const [messageLines, stackLines] = splitStack(stack)
+  const [messageLines, stackLines] = splitStack(err.stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
   let commandCallIndex = stackLines.findIndex((line) => {
@@ -354,7 +353,7 @@ const reconstructStack = (parsedStack) => {
     const { whitespace, originalFile, function: fn, line, column } = parsedLine
 
     return `${whitespace}at ${fn} (${originalFile || '<unknown>'}:${line}:${column})`
-  }).join('\n')
+  }).join('\n').trim()
 }
 
 const getSourceStack = (stack, projectRoot?) => {
