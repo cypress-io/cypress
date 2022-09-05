@@ -88,7 +88,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 })
 
@@ -207,7 +207,7 @@ describe('setupNodeEvents', () => {
     cy.scaffoldProject('config-update-non-migrated-value')
     cy.openProject('config-update-non-migrated-value')
     cy.visitLaunchpad()
-    cy.findByText('E2E Testing').click()
+    cy.findByText('E2E testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.percySnapshot()
   })
@@ -216,7 +216,7 @@ describe('setupNodeEvents', () => {
     cy.scaffoldProject('config-update-non-migrated-value-clone')
     cy.openProject('config-update-non-migrated-value-clone')
     cy.visitLaunchpad()
-    cy.findByText('E2E Testing').click()
+    cy.findByText('E2E testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.percySnapshot()
 
@@ -227,7 +227,7 @@ describe('setupNodeEvents', () => {
     cy.scaffoldProject('config-update-non-migrated-value-e2e')
     cy.openProject('config-update-non-migrated-value-e2e')
     cy.visitLaunchpad()
-    cy.findByText('E2E Testing').click()
+    cy.findByText('E2E testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.percySnapshot()
   })
@@ -261,7 +261,7 @@ describe('setupNodeEvents', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 
   it('handles multiple config errors and then recovers', () => {
@@ -291,7 +291,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
 

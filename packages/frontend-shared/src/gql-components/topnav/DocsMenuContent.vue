@@ -99,7 +99,7 @@ const docsMenu: {
       url: 'https://on.cypress.io/writing-and-organizing-tests',
       params: {
         utm_medium,
-        utm_content: 'Organizing Tests',
+        utm_content: 'Organizing tests',
       },
     },
   }],
@@ -111,7 +111,7 @@ const docsMenu: {
       url: 'https://on.cypress.io/best-practices',
       params: {
         utm_medium,
-        utm_content: 'Best Practices',
+        utm_content: 'Best practices',
       },
     },
   }, {

@@ -230,7 +230,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.findByRole('button', { name: 'Log In' }).click()
       })
 
-      cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
+      cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
         cy.findByRole('button', { name: 'Connect project' }).click()
       })
 
@@ -534,7 +534,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
-    it('displays how to record prompt when connected and no runs in Component Testing', () => {
+    it('displays how to record prompt when connected and no runs in Component testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
@@ -549,7 +549,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
-    it('displays a copy button and copies correct command in Component Testing', () => {
+    it('displays a copy button and copies correct command in Component testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.withCtx(async (ctx, o) => {
         o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')

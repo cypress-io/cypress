@@ -36,7 +36,7 @@ describe('baseUrl', () => {
       `)
     })
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 
@@ -46,7 +46,7 @@ describe('baseUrl', () => {
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
 
     cy.withCtx(async (ctx) => {
@@ -64,7 +64,7 @@ describe('baseUrl', () => {
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
   })
 })
@@ -96,7 +96,7 @@ describe('experimentalSingleTabRunMode', () => {
 
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('h1').contains('Initializing Config').should('not.exist')
-    cy.get('h1').contains('Choose a Browser')
+    cy.get('h1').contains('Choose a browser')
   })
 
   it('is not a valid config for e2e testing', () => {
@@ -105,7 +105,7 @@ describe('experimentalSingleTabRunMode', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header').contains('Cypress configuration error')
-    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
+    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component testing.')
   })
 })
 
@@ -172,7 +172,7 @@ describe('component testing dependency warnings', () => {
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
-    .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
+    .should('contain.text', 'Warning: Component testing Mismatched Dependencies')
     .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0, found 2.0.0-beta.70')
     .should('contain.text', 'react. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0, found 15.6.2.')
     .should('contain.text', 'react-dom. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0 but dependency was not found.')
@@ -191,7 +191,7 @@ describe('component testing dependency warnings', () => {
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
-    .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
+    .should('contain.text', 'Warning: Component testing Mismatched Dependencies')
     .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
@@ -209,7 +209,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
 
     // Wait until launch browser screen and assert warning does not exist
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 

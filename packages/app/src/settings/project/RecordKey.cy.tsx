@@ -20,11 +20,11 @@ describe('<RecordKey />', () => {
   })
 
   it('renders the record key view with the correct title', () => {
-    cy.findByText('Record Key')
+    cy.findByText('Record key')
   })
 
   it(`has an input that's hidden by default`, () => {
-    cy.get('code').as('Record Key Input')
+    cy.get('code').as('Record key input')
     .should('be.visible')
     .contains('code', key).should('not.exist')
     .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')

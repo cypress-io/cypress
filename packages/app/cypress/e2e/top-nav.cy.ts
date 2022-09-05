@@ -261,7 +261,7 @@ describe('App Top Nav Workflows', () => {
     it('shows popover with additional doc links', () => {
       cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
-      cy.findByRole('heading', { name: 'Getting Started', level: 2 })
+      cy.findByRole('heading', { name: 'Getting started', level: 2 })
       cy.findByRole('heading', { name: 'References', level: 2 })
       cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
 
@@ -275,11 +275,11 @@ describe('App Top Nav Workflows', () => {
           href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+App',
         },
         {
-          name: 'Organizing Tests',
+          name: 'Organizing tests',
           href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
         },
         {
-          name: 'Best Practices',
+          name: 'Best practices',
           href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
         },
         {
@@ -432,11 +432,11 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log In' }).click()
 
           // The Log In button transitions through a few states as the browser launch lifecycle completes
-          cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
           cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
 
-        cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
+        cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
           cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile' })
 

@@ -75,6 +75,6 @@ describe('<CloudConnectButton />', () => {
 
     cy.contains('button', 'Connect your project').click()
     cy.get('[role="dialog"]').should('be.visible')
-    cy.get('[role="dialog"] h2').should('contain', 'Connect Project')
+    cy.get('[role="dialog"] h2').should('contain', 'Connect project')
   })
 })

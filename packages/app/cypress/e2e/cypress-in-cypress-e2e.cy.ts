@@ -45,7 +45,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     snapshotAUTPanel('cy.get selector')
 
-    cy.findByTestId('playground-num-elements').contains('3 Matches')
+    cy.findByTestId('playground-num-elements').contains('3 matches')
 
     // This validates that each matching element is covered by the playground highlighting
     cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
@@ -59,14 +59,14 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       })
     })
 
-    cy.findByLabelText('Selector Methods').click()
+    cy.findByLabelText('Selector methods').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
     cy.findByTestId('playground-selector').clear().type('Item 1')
 
     snapshotAUTPanel('cy.contains selector')
 
-    cy.findByTestId('playground-num-elements').contains('1 Match')
+    cy.findByTestId('playground-num-elements').contains('1 match')
 
     cy.window().then((win) => cy.spy(win.console, 'log'))
     cy.findByTestId('playground-print').click().window().then((win) => {
@@ -202,7 +202,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.get('body').type('f')
-    cy.contains('Search Specs')
+    cy.contains('Search specs')
     cy.contains('withWait.spec').click()
     cy.waitForSpecToFinish()
 

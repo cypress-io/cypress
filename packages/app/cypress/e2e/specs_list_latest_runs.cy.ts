@@ -375,7 +375,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
         .should('have.attr', 'aria-expanded', 'false')
         .then((dir) => {
           // Perform a search/filter operation
-          cy.findByLabelText('Search Specs').type(dir.text()[0])
+          cy.findByLabelText('Search specs').type(dir.text()[0])
         })
 
         // Previously-collapsed directory should automatically expand
@@ -392,7 +392,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       // Move to Settings page and wait for render
       cy.get('a[href="#/settings"]').click()
       cy.location('hash').should('include', '/settings')
-      cy.findByText('Project Settings').should('be.visible')
+      cy.findByText('Project settings').should('be.visible')
 
       // Move back to Specs page and wait for render
       cy.get('a[href="#/specs"]').click()
