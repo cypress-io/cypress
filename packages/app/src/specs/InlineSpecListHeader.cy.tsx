@@ -40,6 +40,18 @@ describe('InlineSpecListHeader', () => {
     .should('have.been.called')
   })
 
+  it('should show correct tooltip when hovering on new spec create button', () => {
+    mountWithResultCount(0)
+
+    cy.get('[data-cy=new-spec-button]')
+    .realHover()
+
+    cy.get('.v-popper__popper--shown')
+    .should('contain.text', 'Create new spec')
+
+    cy.percySnapshot()
+  })
+
   it('clears search field when clear button is clicked', () => {
     mountWithResultCount(0)
 
