@@ -1299,8 +1299,8 @@ type Mutation {
   """
   refetchRemote: Query
 
-  """Clears the cloudViewer cache to refresh the organizations"""
-  refreshOrganizations: Query
+  """Clears the cloudViewer cache to refresh the organizations and projects"""
+  refreshCloudViewer: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query

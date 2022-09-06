@@ -41,7 +41,7 @@
       </Alert>
       <Select
         v-model="pickedOrganization"
-        :options="organizations"
+        :options="organizationOptions"
         item-value="name"
         item-key="id"
         :placeholder="orgPlaceholder"
@@ -72,7 +72,7 @@
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
-        :options="projects"
+        :options="projectOptions"
         item-value="name"
         item-key="id"
         :disabled="!pickedOrganization"
@@ -117,7 +117,7 @@
             </span>
           </label>
           <a
-            v-if="projects.length > 0"
+            v-if="projectOptions.length > 0"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
@@ -194,7 +194,7 @@ import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
-import type { SelectCloudProjectModalFragment, CloudProjectNodeFragment } from '../../generated/graphql'
+import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
@@ -286,29 +286,39 @@ const isInternalServerError = ref(false)
 const graphqlError = ref<{ extension: string, message: string} | undefined>()
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
-const organizations = computed(() => {
-  return sortBy(props.gql.cloudViewer?.organizations?.nodes.map((org) => {
+const organizationOptions = computed(() => {
+  const options = props.gql.cloudViewer?.organizations?.nodes?.map((org) => {
     return {
-      ...org,
-      projects: {
-        ...org.projects,
-        nodes: sortBy(org.projects?.nodes, 'name'),
-      },
+      id: org.id,
+      name: org.name,
       icon: FolderIcon,
     }
-  }) || [], 'name')
-})
-const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
+  })
 
-const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
-const newProject = ref(projects.value.length === 0)
-const pickedProject = ref<CloudProjectNodeFragment>()
+  return sortBy(options || [], 'name')
+})
+const pickedOrganization = ref(organizationOptions.value.length >= 1 ? organizationOptions.value[0] : undefined)
+
+const projectOptions = computed(() => {
+  const organization = props.gql.cloudViewer?.organizations?.nodes?.find((org) => org.id === pickedOrganization?.value?.id)
+  const options = organization?.projects?.nodes?.map((project) => {
+    return {
+      id: project.id,
+      name: project.name,
+      slug: project.slug,
+    }
+  })
+
+  return sortBy(options || [], 'name')
+})
+const newProject = ref(projectOptions.value.length === 0)
+const pickedProject = ref<typeof projectOptions.value[number]>()
 
 watchEffect(() => {
-  if (pickedOrganization.value?.projects?.nodes?.length === 1) {
-    pickedProject.value = pickedOrganization.value.projects.nodes[0]
+  if (projectOptions.value.length === 1) {
+    pickedProject.value = projectOptions.value[0]
   } else {
-    pickedProject.value = pickedOrganization.value?.projects?.nodes?.find((p) => p.name === projectName.value)
+    pickedProject.value = projectOptions.value.find((p) => p.name === projectName.value)
   }
 })
 

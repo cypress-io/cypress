@@ -131,6 +131,7 @@ describe('e2e sessions', () => {
   })
 
   it('session tests', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     spec: 'session.cy.js',
     snapshot: true,
     config: {
@@ -140,6 +141,7 @@ describe('e2e sessions', () => {
   })
 
   it('sessions persist on reload, and clear between specs', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
     snapshot: true,
     config: {
@@ -149,6 +151,7 @@ describe('e2e sessions', () => {
   })
 
   it('sessions recreated on reload in open mode', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     spec: 'session_recreate_reload.cy.js',
     snapshot: true,
     config: {
