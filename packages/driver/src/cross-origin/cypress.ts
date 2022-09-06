@@ -21,6 +21,7 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
+import { patchFetch, patchXmlHttpRequest } from './patches/fetchAndXMLHttpRequest'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
 
@@ -172,6 +173,15 @@ const attachToWindow = (autWindow: Window) => {
   cy.urlNavigationEvent('before:load')
 
   cy.overrides.wrapNativeMethods(autWindow)
+
+  // place after override incase fetch is polyfilled in the AUT injection
+  // this can do in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
+  // when the cy.origin block is active to track credential use
+  patchFetch(Cypress, autWindow)
+  patchXmlHttpRequest(Cypress, autWindow)
+  // also patch it in the spec bridge as well
+  patchFetch(Cypress, window)
+  patchXmlHttpRequest(Cypress, window)
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
