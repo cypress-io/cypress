@@ -1,6 +1,7 @@
 import { $Location, LocationObject } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
+import * as cors from '@packages/network/lib/cors'
 
 const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<LocationObject> => {
   return new Promise((resolve, reject) => {
@@ -55,6 +56,12 @@ export const create = (state: StateFunc) => ({
     }
 
     return autLocation
+  },
+  isAutSameOrigin (origin?: string): boolean {
+    const commandOrigin = window.location.origin
+    const autOrigin = origin ?? Cypress.state('autOrigin')
+
+    return autOrigin && (autOrigin === 'about://blank' || cors.urlOriginsMatch(commandOrigin, autOrigin))
   },
 })
 

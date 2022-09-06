@@ -163,6 +163,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   getRemoteLocation: ILocation['getRemoteLocation']
   getCrossOriginRemoteLocation: ILocation['getCrossOriginRemoteLocation']
+  isAutSameOrigin: ILocation['isAutSameOrigin']
 
   fireBlur: IFocused['fireBlur']
   fireFocus: IFocused['fireFocus']
@@ -287,6 +288,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.getRemoteLocation = location.getRemoteLocation
     this.getCrossOriginRemoteLocation = location.getCrossOriginRemoteLocation
+    this.isAutSameOrigin = location.isAutSameOrigin
 
     const focused = createFocused(state)
 
@@ -552,8 +554,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         let isSameOrigin: boolean
 
         try {
-          autWindow.location.origin
-          isSameOrigin = true
+          const autOrigin = autWindow.location.origin
+
+          isSameOrigin = this.isAutSameOrigin(autOrigin)
         } catch (err: any) {
           if (!this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
             throw err

@@ -777,6 +777,9 @@ export default (Commands, Cypress, cy, state, config) => {
         consoleProps['Options'] = _.pick(userOptions, VISIT_OPTS)
       }
 
+      const onLoadIsUserDefined = !!userOptions.onLoad
+      const onBeforeLoadIsUserDefined = !!userOptions.onBeforeLoad
+
       const options: InternalVisitOptions = _.defaults({}, userOptions, {
         auth: null,
         failOnStatusCode: true,
@@ -932,6 +935,16 @@ export default (Commands, Cypress, cy, state, config) => {
       }) => {
         // reset window on load
         win = state('window')
+
+        if (!cy.isAutSameOrigin()) {
+          if (onLoadIsUserDefined) {
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autOrigin: Cypress.state('autOrigin') }, errProps: { isCallbackError: true } })
+          }
+
+          if (onBeforeLoadIsUserDefined) {
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_before_load', { args: { url, autOrigin: Cypress.state('autOrigin') }, errProps: { isCallbackError: true } })
+          }
+        }
 
         // the onLoad callback should only be skipped if specified
         if (runOnLoadCallback !== false) {

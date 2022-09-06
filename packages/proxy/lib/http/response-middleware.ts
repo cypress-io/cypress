@@ -560,6 +560,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     isHtml: isHtml(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
+    modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
   })).on('error', this.onError)

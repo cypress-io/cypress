@@ -5,7 +5,6 @@ import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
-import * as cors from '@packages/network/lib/cors'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
 
@@ -394,7 +393,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     const commandOrigin = window.location.origin
     const autOrigin = Cypress.state('autOrigin')
 
-    if (autOrigin && autOrigin !== 'about://blank' && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+    if (!cy.isAutSameOrigin()) {
       $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
         commandOrigin,
         autOrigin,

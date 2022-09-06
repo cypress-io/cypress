@@ -18,6 +18,59 @@ describe('cy.origin', () => {
     })
   })
 
+  describe('async attach', () => {
+    it('attaches to an origin at any time', () => {
+      cy.visit('/fixtures/auth/index.html')
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      cy.log('This command runs in the primary origin while the AUT is cross origin.')
+      cy.origin('http://www.idp.com:3500', () => {
+        cy.get('[data-cy="login-idp"]')
+      })
+    })
+
+    it('errors if you try to use onload when visiting a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.visit()\` was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')\``)
+
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html')
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html', {
+        onLoad: () => {
+          cy.log('onLoad')
+        },
+      })
+    })
+
+    it('errors if you try to use onBeforeLoad when visiting a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.visit()\` was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:before:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onBeforeLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')\``)
+
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html')
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html', {
+        onBeforeLoad: () => {
+          cy.log('onBeforeLoad')
+        },
+      })
+    })
+  })
+
   context('withBeforeEach', () => {
     beforeEach(() => {
       cy.visit('/fixtures/primary-origin.html')
