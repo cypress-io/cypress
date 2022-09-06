@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
+import retargetEvents from 'react-shadow-dom-retarget-events'
+import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 import { usePopper } from 'react-popper'
 import _ from 'lodash'
 import cs from 'classnames'
@@ -146,4 +148,6 @@ const renderAssertionsMenu = (container, props) => {
 export const studioAssertionsMenu = {
   render: renderAssertionsMenu,
   unmount: unmountComponentAtNode,
+  retargetEvents,
+  css: studioAssertionsMenuCSS,
 }

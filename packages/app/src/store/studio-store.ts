@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
 import type { StudioSavePayload } from '../runner/event-manager-types'
+import { closeStudioAssertionsMenu, openStudioAssertionsMenu } from '../runner/studio/mounter'
 import { useAutStore } from './aut-store'
 
 function getCypress () {
@@ -774,7 +775,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
       this._closeAssertionsMenu()
 
-      window.UnifiedRunner.dom.openStudioAssertionsMenu({
+      openStudioAssertionsMenu({
         $el,
         $body: window.UnifiedRunner.CypressJQuery(this._body),
         props: {
@@ -790,7 +791,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         throw Error('this._body was not defined')
       }
 
-      window.UnifiedRunner.dom.closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(this._body))
+      closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(this._body))
     },
 
     _generatePossibleAssertions ($el: JQuery<Element>) {

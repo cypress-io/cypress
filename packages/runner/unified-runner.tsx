@@ -7,6 +7,7 @@ import * as MobX from 'mobx'
 
 import selectorPlayground from './src/selector-playground'
 import { dom } from './src/dom'
+import { studioAssertionsMenu } from './src/studio/assertions-menu'
 
 export const UnifiedRunner = {
   CypressJQuery: $Cypress.$,
@@ -16,6 +17,8 @@ export const UnifiedRunner = {
   selectorPlayground,
 
   dom,
+
+  studioAssertionsMenu,
 
   shortcuts,
 

@@ -47,6 +47,7 @@ declare global {
       selectorPlayground: any
       CypressJQuery: any
       dom: any
+      studioAssertionsMenu: any
 
       MobX: typeof MobX
 
