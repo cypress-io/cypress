@@ -64,8 +64,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium) {
-        return auth.start(onMessage, utmSource, utmMedium)
+      logIn (onMessage, utmSource, utmMedium, utmContent) {
+        return auth.start(onMessage, utmSource, utmMedium, utmContent)
       },
       logOut () {
         return user.logOut()

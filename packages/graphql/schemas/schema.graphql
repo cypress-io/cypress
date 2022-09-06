@@ -1234,7 +1234,7 @@ type Mutation {
   ): [RemoteFetchable]!
 
   """Auth with Cypress Dashboard"""
-  login(utmMedium: String!, utmSource: String!): Query
+  login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
   """Log out of Cypress Dashboard"""
   logout: Query
