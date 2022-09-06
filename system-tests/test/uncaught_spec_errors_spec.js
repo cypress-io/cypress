@@ -15,7 +15,7 @@ describe('e2e uncaught errors', () => {
     expectedExitCode: 1,
   })
 
-  systemTests.it.only('failing3', {
+  systemTests.it('failing3', {
     spec: 'uncaught_during_test.cy.js',
     snapshot: true,
     expectedExitCode: 3,
