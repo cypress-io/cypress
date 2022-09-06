@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1 data-cy="assertion-header">Making XHR and Fetch Requests behind the scenes if fireOnload is true!</h1>
+    <script>
+      function fireXHRAndFetchRequests() {
+        if(window.location.search.includes('fireOnload=true')){
+          xhr = new XMLHttpRequest();
+          xhr.open("GET", "http://localhost:3500/foo.bar.baz.json");
+          xhr.responseType = "json";
+          xhr.send();
+  
+          fetch("http://localhost:3500/foo.bar.baz.json")
+        }
+      }
+      
+      fireXHRAndFetchRequests()
+    </script>
+  </body>
+</html>
