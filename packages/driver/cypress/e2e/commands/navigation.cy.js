@@ -2334,7 +2334,7 @@ describe('src/cy/commands/navigation', () => {
           expect(this.lastLog).to.exist
           expect(this.lastLog.get('state')).to.eq('pending')
           expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
-          expect(this.lastLog.get('snapshots')).to.not.exist
+          expect(this.lastLog.get('snapshots')).to.have.length(0)
         })
       }).get('#dimensions').click()
       .then(function () {
@@ -2361,7 +2361,7 @@ describe('src/cy/commands/navigation', () => {
           expect(this.lastLog).to.exist
           expect(this.lastLog.get('state')).to.eq('pending')
           expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
-          expect(this.lastLog.get('snapshots')).to.not.exist
+          expect(this.lastLog.get('snapshots')).to.have.length(0)
         })
 
         cy
