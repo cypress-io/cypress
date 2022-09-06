@@ -93,7 +93,7 @@ describe('src/cy/commands/traversals', () => {
           })
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include(`\`cy.${name}()\` failed because this element`)
+            expect(err.message).to.include(`\`cy.${name}()\` failed because it requires a DOM element`)
 
             done()
           })

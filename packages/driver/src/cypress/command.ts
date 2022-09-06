@@ -54,7 +54,8 @@ export class $Command {
       if (log.get('_error')) {
         log.error(log.get('_error'))
       } else {
-        log.end()
+        log.set('snapshot', false)
+        log.finish()
       }
     })
 
