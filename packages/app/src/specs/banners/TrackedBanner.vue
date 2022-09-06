@@ -12,8 +12,9 @@
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { TrackedBanner_ProjectStateDocument, TrackedBanner_ReportTrackedBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
+import { useDebounceFn } from '@vueuse/core'
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
 type AlertComponentEmits = InstanceType<typeof Alert>['$emit']
@@ -45,8 +46,8 @@ mutation TrackedBanner_SetProjectState($value: String!) {
 `
 
 gql`
-mutation TrackedBanner_reportTrackedBannerSeen($campaign: String!, $messageId: String!, $medium: String!) {
-  reportTrackedBannerSeen(campaign: $campaign, messageId: $messageId, medium: $medium)
+mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!, $medium: String!) {
+  recordEvent(campaign: $campaign, messageId: $messageId, medium: $medium)
 }
 `
 
@@ -56,13 +57,17 @@ const emit = defineEmits<TrackedBannerComponentEmits>()
 
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
 const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
-const reportSeenMutation = useMutation(TrackedBanner_ReportTrackedBannerSeenDocument)
+const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
+
+const recordBannerShown = useDebounceFn(() => {
+  reportSeenMutation.executeMutation({ campaign: props.bannerId, messageId: '', medium: 'dev' })
+}, 1000)
 
 watchEffect(() => {
   if (props.modelValue) {
     if (!props.hasBannerBeenShown) {
-      // if the banner hasn't been shown, then this is the first time that the user is seeing it. Send a request to cloud.
-      reportSeenMutation.executeMutation({ campaign: props.bannerId, messageId: '', medium: 'dev' })
+      // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
+      recordBannerShown()
     }
 
     updateBannerState('lastShown')

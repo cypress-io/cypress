@@ -1,6 +1,6 @@
 import TrackedBanner from './TrackedBanner.vue'
 import { ref } from 'vue'
-import { TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 
 describe('<TrackedBanner />', () => {
   it('should pass through props and child content', () => {
@@ -59,6 +59,44 @@ describe('<TrackedBanner />', () => {
     cy.get('@banner').should('not.exist')
     .then(() => {
       expect(recordStub).to.have.been.calledWith('{"banners":{"test-banner":{"dismissed":1234}}}')
+    })
+  })
+
+  describe('event recording', () => {
+    beforeEach(() => {
+      const recordEventStub = cy.stub().as('recordEvent')
+
+      cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
+        recordEventStub(event)
+
+        return defineResult({ recordEvent: true })
+      })
+    })
+
+    context('when banner not previously shown', () => {
+      beforeEach(() => {
+        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} has-banner-been-shown={false} /> })
+      })
+
+      it('should record event', () => {
+        cy.get('@recordEvent').should('have.been.calledOnce')
+        cy.get('@recordEvent').should('have.been.calledWith', { campaign: 'test-banner', messageId: '', medium: 'dev' })
+      })
+
+      it('should debounce event recording', () => {
+        cy.wait(250)
+        cy.get('@recordEvent').should('have.been.calledOnce')
+      })
+    })
+
+    context('when banner has been previously shown', () => {
+      beforeEach(() => {
+        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} has-banner-been-shown={true} /> })
+      })
+
+      it('should not record event', () => {
+        cy.get('@recordEvent').should('not.have.been.called')
+      })
     })
   })
 })

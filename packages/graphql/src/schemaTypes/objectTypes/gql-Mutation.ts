@@ -683,9 +683,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('reportTrackedBannerSeen', {
+    t.field('recordEvent', {
       type: 'Boolean',
-      description: '',
+      description: 'Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
       args: {
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
@@ -693,16 +693,11 @@ export const mutation = mutationType({
         // cohort: nonNull(stringArg({})),
       },
       resolve: (source, args, ctx) => {
-        try {
-          // We should probably use staging for this unless CYPRESS_INTERNAL_ENV is 'production'
-          // That way we're not sending this info while working in dev mode
-          ctx.util.fetch('https://dashboard-staging.cypress.io/anon-collect',
-            { method: 'POST', body: JSON.stringify({ ...args }) })
-
-          return true
-        } catch (error) {
-          return false
-        }
+        return ctx.actions.eventCollector.recordEvent({
+          campaign: args.campaign,
+          messageId: args.messageId,
+          medium: args.medium,
+        })
       },
     })
 
