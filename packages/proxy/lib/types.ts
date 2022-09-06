@@ -13,6 +13,22 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
+  requestedWith?: RequestResourceType
+  credentialsLevel?: RequestCredentialLevel
+}
+
+export type RequestResourceType = 'fetch' | 'xhr'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
+
+export type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
+  resourceType: RequestResourceType
+  credentialStatus: RequestCredentialLevel
+}>>
+
+export type GetCredentialLevelOfRequest = (url: string, optionalResourceType?: RequestResourceType) => {
+  resourceType: RequestResourceType
+  credentialStatus: RequestCredentialLevel
 }
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
