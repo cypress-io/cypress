@@ -463,7 +463,7 @@ export class SnapshotGenerator {
       const { snapshotBlobFile, v8ContextFile } = await syncAndRun(
         this.electronVersion,
         args,
-      )
+      ) as { snapshotBlobFile: string, v8ContextFile: string }
 
       this.v8ContextFile = v8ContextFile
       this.snapshotBinPath = join(this.snapshotBinDir, snapshotBlobFile)

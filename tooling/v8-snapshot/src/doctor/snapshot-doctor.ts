@@ -318,15 +318,23 @@ export class SnapshotDoctor {
 
     logDebug({ circulars })
 
+    const filterStaleImports = (imports: Set<string>) => {
+      return new Set(Array.from(imports).filter((x) => !!meta.inputs[x]))
+    }
+
+    const filteredPreviousHealthy = filterStaleImports(this.previousHealthy)
+    const filteredPreviousDeferred = filterStaleImports(this.previousDeferred)
+    const filteredPreviousNoRewrite = filterStaleImports(this.previousNoRewrite)
+
     // 3. Initialize the heal state with data from previous runs that was
     //    provided to us
     //    forceNoRewrite is provided for modules which we manually determined
     //    to result in invalid/problematic code when rewritten
     const healState = new HealState(
       meta,
-      this.previousHealthy,
-      this.previousDeferred,
-      new Set([...this.previousNoRewrite, ...this.forceNoRewrite]),
+      filteredPreviousHealthy,
+      filteredPreviousDeferred,
+      new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]),
     )
 
     // 4. Process the initial bundle in order to detect issues during
@@ -455,7 +463,7 @@ export class SnapshotDoctor {
 
     // If norewrite is required we actually need to rebuild the bundle so we
     // exit early
-    if (healState.needNorewrite.size > 0 || (healState.norewrite.size > 0 && this.previousNoRewrite.size > 0)) {
+    if (healState.needNorewrite.size > 0) {
       return
     }
 
@@ -472,7 +480,7 @@ export class SnapshotDoctor {
       //    respect the heal state we're obtaining
       for (
         let nextStage = this._findNextStage(healState, circulars);
-        nextStage.length > 0;
+        nextStage.length > 0 || !healState.processedLeaves;
         nextStage = this._findNextStage(healState, circulars)
       ) {
         // Special case during the first processing step, checked all leaves
@@ -480,7 +488,7 @@ export class SnapshotDoctor {
           healState.processedLeaves = true
           // In case all leaves were determined to be healthy before we can
           // move on to the next step
-          if (nextStage.length < 0) {
+          if (nextStage.length === 0) {
             nextStage = this._findNextStage(healState, circulars)
           }
         }
@@ -646,7 +654,7 @@ export class SnapshotDoctor {
       if (
         healState.healthy.has(key) ||
         healState.deferred.has(key) ||
-        healState.needNorewrite.has(key)
+        healState.norewrite.has(key)
       ) {
         continue
       }
