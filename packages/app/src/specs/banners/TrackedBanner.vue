@@ -10,11 +10,12 @@
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { watchEffect } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
 import { useDebounceFn } from '@vueuse/core'
+import { nanoid } from 'nanoid'
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
 type AlertComponentEmits = InstanceType<typeof Alert>['$emit']
@@ -58,9 +59,11 @@ const emit = defineEmits<TrackedBannerComponentEmits>()
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
 const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
+const bannerInstanceId = ref(nanoid())
 
 const recordBannerShown = useDebounceFn(() => {
-  reportSeenMutation.executeMutation({ campaign: props.bannerId, messageId: '', medium: 'dev' })
+  // TODO Set appropriate `medium` value
+  reportSeenMutation.executeMutation({ campaign: props.bannerId, messageId: bannerInstanceId.value, medium: 'dev' })
 }, 1000)
 
 watchEffect(() => {

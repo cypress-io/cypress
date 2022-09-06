@@ -333,7 +333,7 @@ export class CloudDataSource {
     return JSON.parse(this.#lastCache ?? '')
   }
 
-  async getDashboardUrl () {
+  getDashboardUrl () {
     return REMOTE_SCHEMA_URLS[cloudEnv]
   }
 }

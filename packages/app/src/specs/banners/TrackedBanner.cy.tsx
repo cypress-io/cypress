@@ -80,7 +80,10 @@ describe('<TrackedBanner />', () => {
 
       it('should record event', () => {
         cy.get('@recordEvent').should('have.been.calledOnce')
-        cy.get('@recordEvent').should('have.been.calledWith', { campaign: 'test-banner', messageId: '', medium: 'dev' })
+        cy.get('@recordEvent').should(
+          'have.been.calledWith',
+          Cypress.sinon.match({ campaign: 'test-banner', messageId: Cypress.sinon.match.string, medium: 'dev' }),
+        )
       })
 
       it('should debounce event recording', () => {
