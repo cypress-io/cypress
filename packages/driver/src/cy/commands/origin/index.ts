@@ -197,7 +197,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   originCommandBaseUrl: location.href,
                   parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
                   isStable: Cypress.state('isStable'),
-                  autOrigin: Cypress.state('autOrigin'),
+                  autLocation: Cypress.state('autLocation').href,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

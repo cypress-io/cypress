@@ -938,11 +938,11 @@ export default (Commands, Cypress, cy, state, config) => {
 
         if (!cy.isAutSameOrigin()) {
           if (onLoadIsUserDefined) {
-            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autOrigin: Cypress.state('autOrigin') }, errProps: { isCallbackError: true } })
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autOrigin: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }
 
           if (onBeforeLoadIsUserDefined) {
-            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_before_load', { args: { url, autOrigin: Cypress.state('autOrigin') }, errProps: { isCallbackError: true } })
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_before_load', { args: { url, autOrigin: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }
         }
 
