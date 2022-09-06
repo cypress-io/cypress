@@ -342,19 +342,19 @@ const _listenForFrameTreeChanges = (client) => {
   client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
 }
 
-const _continueRequest = (client, params, header?) => {
+const _continueRequest = (client, params, headers?) => {
   const details: Protocol.Fetch.ContinueRequestRequest = {
     requestId: params.requestId,
   }
 
-  if (header) {
+  if (headers && headers.length) {
     // headers are received as an object but need to be an array
     // to modify them
     const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
 
     details.headers = [
       ...currentHeaders,
-      header,
+      ...headers,
     ]
   }
 
@@ -403,20 +403,34 @@ const _handlePausedRequests = async (client) => {
   // adds a header to the request to mark it as a request for the AUT frame
   // itself, so the proxy can utilize that for injection purposes
   client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+    const addedHeaders: {
+      name: string
+      value: string
+    }[] = []
+
+    if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
+      debug('add X-Cypress-Request header to: %s', params.request.url)
+      addedHeaders.push({
+        name: 'X-Cypress-Request',
+        value: params.resourceType.toLowerCase(),
+      })
+    }
+
     if (
       // is a script, stylesheet, image, etc
       params.resourceType !== 'Document'
       || !(await _isAUTFrame(params.frameId))
     ) {
-      return _continueRequest(client, params)
+      return _continueRequest(client, params, addedHeaders)
     }
 
     debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
-
-    _continueRequest(client, params, {
+    addedHeaders.push({
       name: 'X-Cypress-Is-AUT-Frame',
       value: 'true',
     })
+
+    return _continueRequest(client, params, addedHeaders)
   })
 }
 
