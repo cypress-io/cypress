@@ -66,6 +66,7 @@ const frameworkWebpackMapper: FrameworkWebpackMapper = {
   vue: undefined,
   next: 'next',
   'angular': '@angular-devkit/build-angular',
+  'svelte': undefined,
 }
 
 // Source the users framework from the provided projectRoot. The framework, if available, will serve
