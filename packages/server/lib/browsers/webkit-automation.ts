@@ -137,7 +137,7 @@ export class WebKitAutomation {
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
     const _this = this
 
-    videoApi.setVideoController({
+    videoApi.useVideoController({
       async endVideoCapture () {
         const pwVideo = _this.page.video()
 

@@ -48,11 +48,11 @@ export type RunModeVideoApi = {
   /**
    * Create+use a new VideoController that uses ffmpeg to stream frames from `writeVideoFrame` to disk.
    */
-  newFfmpegVideoController: (opts?: { webmInput?: boolean}) => Promise<BrowserVideoController>
+  useFfmpegVideoController: (opts?: { webmInput?: boolean}) => Promise<BrowserVideoController>
   /**
    * Register a non-ffmpeg video controller.
    */
-  setVideoController: (videoController?: BrowserVideoController) => void
+  useVideoController: (videoController?: BrowserVideoController) => void
   /**
    * Registers a handler for project.on('capture:video:frames').
    */
