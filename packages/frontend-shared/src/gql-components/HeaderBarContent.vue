@@ -236,6 +236,18 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
+    # FIXME: added cloudProject to avoid infinite loop in testing
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runs(first: 10) {
+          nodes {
+            id
+          }
+        }
+      }
+    }
   }
   isGlobalMode
   ...TopNav

@@ -100,6 +100,27 @@ fragment Auth on Query {
     id
     email
     fullName
+    # FIXME: added rest of these to avoid infinite loop in testing
+    firstOrganization: organizations(first: 1) { 
+      nodes {
+        id
+      }
+    }
+    cloudOrganizationsUrl
+    createCloudOrganizationUrl
+    organizations(first: 100) { # Not expecting there will be > 100 orgs for a user. If there are we will implement pagination
+      nodes {
+        id
+        name
+        projects(first: 100) { # Not expecting there will be > 100 projects. If there are we will implement pagination
+          nodes {
+            id
+            slug
+            name
+          }
+        }
+      }
+    }
   }
   authState {
     browserOpened

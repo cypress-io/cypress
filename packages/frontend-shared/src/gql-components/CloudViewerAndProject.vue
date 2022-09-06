@@ -38,9 +38,12 @@ fragment CloudViewerAndProject on Query {
       __typename
       ... on CloudProject {
         id
-        runs(first: 1) {
+        runs(first: 10) {
           nodes {
             id
+             # FIXME: added rest of these to avoid infinite loop in testing
+            status
+            url
           }
         }
       }
