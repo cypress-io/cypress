@@ -37,9 +37,7 @@ export npm_config_cache=/tmp/npm_config_cache/
 export npm_config_package_lock=false
 
 mkdir $npm_config_cache
-uid=$(id -u)
-gid=$(id -g)
-chown -R $uid:$gid $npm_config_cache
+chown -R 1000:1000 $npm_config_cache
 
 npx npm@latest install --unsafe-perm --allow-root --force file:$CLI_PATH
 
