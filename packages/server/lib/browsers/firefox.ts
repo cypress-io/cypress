@@ -380,7 +380,7 @@ export function connectToExisting () {
 }
 
 async function recordVideo (videoApi: RunModeVideoApi) {
-  const { writeVideoFrame } = await videoApi.newFfmpegVideoController({ webmInput: true })
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
 
   videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
 }

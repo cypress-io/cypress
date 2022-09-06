@@ -251,7 +251,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
   const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
-  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
+  const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
 
   await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
 }
