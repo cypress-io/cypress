@@ -154,7 +154,6 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.selectorPlayground,
   )
 
   createIframeModel()

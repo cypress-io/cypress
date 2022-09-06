@@ -44,9 +44,7 @@ declare global {
        */
       React: any
       ReactDOM: any
-      selectorPlayground: any
       CypressJQuery: any
-      dom: any
       studioAssertionsMenu: any
 
       MobX: typeof MobX
