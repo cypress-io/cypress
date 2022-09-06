@@ -119,7 +119,7 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
     },
     valid: {
       icon: AddedIcon,
-      initiallyOpen: true,
+      initiallyOpen: false,
     },
     error: {
       icon: ErrorIcon,
