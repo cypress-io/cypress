@@ -145,7 +145,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
     // This message is replaced with Chrome/Firefox's exception text for consistent diffs
-    str = str.replace(/> Can\'t find variable: (\S+)/g, '> $1 is not defined')
+    str = str.replace(/(ReferenceError:|>) Can\'t find variable: (\S+)/g, '$1 $2 is not defined')
   }
 
   // avoid race condition when webpack prints this at a non-deterministic timing
