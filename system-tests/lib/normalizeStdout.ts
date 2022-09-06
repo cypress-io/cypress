@@ -9,7 +9,7 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 
 export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))\??(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx)|\[unknown location\])\??(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
@@ -77,14 +77,14 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
-// '@' will be present in firefox stack trace lines
+// '@' will be present in firefox/webkit stack trace lines
 // 'at' will be present in chrome stack trace lines
-export const replaceStackTraceLines = (str: string) => {
+// Firefox includes trailing whitespace between that must be specifically replaced
+export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
   return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
-    const isFirefoxStack = parts[1] === '@'
     let post = parts[4]
 
-    if (isFirefoxStack) {
+    if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
@@ -142,6 +142,12 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
 
+  if (options.browser === 'webkit') {
+    // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
+    // This message is replaced with Chrome/Firefox's exception text for consistent diffs
+    str = str.replace(/(ReferenceError:|>) Can\'t find variable: (\S+)/g, '$1 $2 is not defined')
+  }
+
   // avoid race condition when webpack prints this at a non-deterministic timing
   const wdsFailedMsg = 'ℹ ｢wdm｣: Failed to compile.'
 
@@ -154,5 +160,5 @@ export const normalizeStdout = function (str: string, options: any = {}) {
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
   }
 
-  return replaceStackTraceLines(str)
+  return replaceStackTraceLines(str, options.browser)
 }

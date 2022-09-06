@@ -14,6 +14,11 @@ const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
+
+const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
+const webkitStackEntryName = '[unknown name]'
+const webkitStackEntryLocation = '[unknown location]:1:1'
+
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 const hasCrossFrameStacks = (specWindow) => {
@@ -390,7 +395,22 @@ const normalizedStack = (err) => {
   // Chromium-based errors do, so we normalize them so that the stack
   // always includes the name/message
   const errString = err.toString()
-  const errStack = err.stack || ''
+  let errStack = err.stack || ''
+
+  if (Cypress.isBrowser('webkit')) {
+    // WebKit will not determine the proper stack trace for an error, with stack entries
+    // missing function names, call locations, or both. We update these entries to
+    // to minimize the visual impact to the stack traces we render within the command
+    // log and console.
+    errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
+      return [
+        parts[0] || webkitStackEntryName,
+        '@',
+        parts[1] || webkitStackEntryLocation,
+        parts[2],
+      ].join('')
+    })
+  }
 
   // the stack has already been normalized and normalizing the indentation
   // again could mess up the whitespace
