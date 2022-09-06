@@ -99,7 +99,7 @@ export class RemoteStates {
 
     if (_.isString(urlOrState)) {
       const remoteOrigin = uri.origin(urlOrState)
-      const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
+      const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
         state = {
