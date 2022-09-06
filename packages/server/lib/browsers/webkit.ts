@@ -16,7 +16,7 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
   automation.use(wkAutomation)
   wkAutomation.automation = automation
   await options.onInitializeNewBrowserTab()
-  await wkAutomation.reset(options.url)
+  await wkAutomation.reset(options.url, options.videoApi)
 }
 
 export function connectToExisting () {
@@ -36,7 +36,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     headless: browser.isHeadless,
   })
 
-  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url)
+  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url, options.videoApi)
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {
