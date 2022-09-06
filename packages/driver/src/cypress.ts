@@ -403,15 +403,9 @@ class $Cypress {
         break
 
       case 'runner:end':
-        // mocha runner has finished running the tests
+        $scriptUtils.destroySourceMaps()
 
-        // end may have been caused by an uncaught error
-        // that happened inside of a hook.
-        //
-        // when this happens mocha aborts the entire run
-        // and does not do the usual cleanup so that means
-        // we have to fire the test:after:hooks and
-        // test:after:run events ourselves
+        // mocha runner has finished running the tests
         this.emit('run:end')
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])

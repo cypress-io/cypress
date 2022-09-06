@@ -14,7 +14,7 @@ const fetchScript = (scriptWindow, script) => {
 const extractSourceMap = ([script, contents]) => {
   script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
-  const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
+  const sourceMap = $sourceMapUtils.extractSourceMap(contents)
 
   return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
   .return([script, contents])
@@ -48,5 +48,9 @@ export default {
     }
 
     return runScriptsFromUrls(specWindow, scripts)
+  },
+
+  destroySourceMaps: () => {
+    $sourceMapUtils.destroySourceMapConsumers()
   },
 }
