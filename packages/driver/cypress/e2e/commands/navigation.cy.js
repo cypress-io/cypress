@@ -1010,10 +1010,10 @@ describe('src/cy/commands/navigation', () => {
           expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         })
 
-        this.win = cy.state('window')
+        this.cyWin = cy.state('window')
 
         this.eq = (attr, str) => {
-          expect(this.win.location[attr]).to.eq(str)
+          expect(this.cyWin.location[attr]).to.eq(str)
         }
       })
 
