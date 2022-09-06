@@ -32,7 +32,7 @@ export default makeConfig({
     }),
     Legacy({
       targets: ['Chrome > 64'],
-      modernPolyfills: true
+      modernPolyfills: ['es.global-this'],
     })
   ],
 })
