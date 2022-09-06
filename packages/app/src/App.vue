@@ -4,10 +4,12 @@
       :is="Component"
     />
   </router-view>
-  <template v-if="route.name !== 'SpecRunner'" />
+
+  <LoginConnectModals v-if="route.name !== 'SpecRunner'" />
 </template>
 
 <script setup lang="ts">
+import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
 const route = useRoute()

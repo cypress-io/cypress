@@ -9,7 +9,6 @@
       v-if="renderSidebar"
       class="row-span-full"
     />
-
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
@@ -48,10 +47,6 @@
           <component :is="Component" />
         </transition>
       </router-view>
-      <LoginConnectModals
-        v-if="query.data.value"
-        :gql="query.data.value"
-      />
     </main>
   </div>
 </template>
@@ -62,7 +57,6 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
-import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
