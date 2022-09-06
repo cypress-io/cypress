@@ -390,13 +390,10 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
    * @returns true or throws an error
    */
   const ensureCommandIsSameOrigin = (): boolean => {
-    const commandOrigin = window.location.origin
-    const autOrigin = Cypress.state('autOrigin')
-
     if (!cy.isAutSameOrigin()) {
       $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
-        commandOrigin,
-        autOrigin,
+        commandOrigin: window.location.origin,
+        autOrigin: Cypress.state('autLocation').origin,
       } })
     }
 

@@ -1,4 +1,5 @@
 import type { $Cy } from '../../cypress/cy'
+import { $Location } from '../../cypress/location'
 import * as cors from '@packages/network/lib/cors'
 
 export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
@@ -31,7 +32,7 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   Cypress.specBridgeCommunicator.on('window:load', ({ url }) => {
     cy.isStable(true, 'primary onload')
 
-    cy.state('autOrigin', cors.getOriginPolicy(url))
+    cy.state('autLocation', $Location.create(url))
     Cypress.action('app:window:load', undefined, url)
     Cypress.emit('internal:window:load', { type: 'same:origin', url })
   })

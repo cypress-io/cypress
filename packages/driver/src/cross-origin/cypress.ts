@@ -22,6 +22,7 @@ import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
 import $Mocha from '../cypress/mocha'
+import * as cors from '@packages/network/lib/cors'
 
 const createCypress = () => {
   // @ts-ignore
@@ -68,7 +69,7 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutOriginPolicy = cy.state('autOrigin')
+    const currentAutOriginPolicy = cors.getOriginPolicy(cy.state('autLocation').origin)
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
     if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
@@ -214,7 +215,7 @@ const attachToWindow = (autWindow: Window) => {
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
-      cy.state('autOrigin', remoteLocation.originPolicy)
+      cy.state('autLocation', remoteLocation)
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')

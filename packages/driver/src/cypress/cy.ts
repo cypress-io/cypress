@@ -554,9 +554,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         let isSameOrigin: boolean
 
         try {
-          const autOrigin = autWindow.location.origin
+          const autHref = autWindow.location.href
 
-          isSameOrigin = this.isAutSameOrigin(autOrigin)
+          isSameOrigin = this.isAutSameOrigin(autHref)
         } catch (err: any) {
           if (!this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
             throw err
@@ -591,7 +591,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           this.Cypress.action('app:window:load', this.state('window'), remoteLocation.href)
 
-          cy.state('autOrigin', remoteLocation.originPolicy)
+          cy.state('autLocation', remoteLocation)
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
         } catch (err: any) {
           // this catches errors thrown by user-registered event handlers

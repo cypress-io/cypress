@@ -9,6 +9,7 @@ import type { XHRRequest, XHRResponse } from '../cy/commands/xhr'
 import type { KeyboardModifiers } from '../cy/keyboard'
 import type { MouseCoords } from '../cy/mouse'
 import type { Server } from './server'
+import type { $Location } from './location'
 
 export interface StateFunc {
   (): Record<string, any>
@@ -20,7 +21,7 @@ export interface StateFunc {
   (k: 'document', v?: Document): Document
   (k: 'window', v?: Window): Window
   (k: 'logGroupIds', v?: Array<Cypress.InternalLogConfig['id']>): Array<Cypress.InternalLogConfig['id']>
-  (k: 'autOrigin', v?: string): string
+  (k: 'autLocation', v?: $Location): $Location
   (k: 'originCommandBaseUrl', v?: string): string
   (k: 'currentActiveOriginPolicy', v?: string): string
   (k: 'latestActiveOriginPolicy', v?: string): string

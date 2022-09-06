@@ -57,11 +57,17 @@ export const create = (state: StateFunc) => ({
 
     return autLocation
   },
-  isAutSameOrigin (origin?: string): boolean {
-    const commandOrigin = window.location.origin
-    const autOrigin = origin ?? Cypress.state('autOrigin')
+  isAutSameOrigin (href?: string): boolean {
+    const autLocation = href ? $Location.create(href) : Cypress.state('autLocation')
 
-    return autOrigin && (autOrigin === 'about://blank' || cors.urlOriginsMatch(commandOrigin, autOrigin))
+    if (autLocation.href === 'about://blank' || autLocation.href === 'about:blank') {
+      return true
+    }
+
+    const autOrigin = autLocation?.origin
+    const commandOrigin = window.location.origin
+
+    return autOrigin && cors.urlOriginsMatch(commandOrigin, autOrigin)
   },
 })
 
