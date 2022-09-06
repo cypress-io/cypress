@@ -8,7 +8,7 @@
     ref="tooltip"
     class="tooltip"
   >
-    {{ selector }}
+    <span>{{ selector }}</span>
     <div
       ref="arrow"
       class="arrow"

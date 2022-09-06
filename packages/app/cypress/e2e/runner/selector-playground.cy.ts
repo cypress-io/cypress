@@ -18,9 +18,7 @@ describe('selector playground', () => {
       cy.get('h2').realHover()
       cy.get('.__cypress-selector-playground').shadow().within(() => {
         cy.get('.highlight').should('exist')
-        // Space(' ') is added at the end of the text
-        // because of the indentation to add arrow div in the vue template.
-        cy.get('.tooltip').should('have.text', '[data-cy="h2-contents"] ')
+        cy.get('.tooltip').should('have.text', '[data-cy="h2-contents"]')
       })
     })
   })
