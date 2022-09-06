@@ -23,7 +23,7 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.visit('/fixtures/primary-origin.html')
-    cy.get('a[data-cy="xhr-fetch-requests"]').click()
+    cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
   })
 
   it('verifies XHR requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
@@ -43,7 +43,7 @@ describe('cy.origin - snapshots', () => {
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
       snapshots.forEach((snapshot) => {
-        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
+        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes if fireOnload is true!')
       })
     })
   })
@@ -66,7 +66,7 @@ describe('cy.origin - snapshots', () => {
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
       snapshots.forEach((snapshot) => {
-        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
+        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes if fireOnload is true!')
       })
     })
   })
