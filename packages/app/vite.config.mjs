@@ -31,7 +31,7 @@ export default makeConfig({
       }],
     }),
     Legacy({
-      targets: ['chrome 65'],
+      targets: ['Chrome > 64'],
       modernPolyfills: true
     })
   ],
