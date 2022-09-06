@@ -79,12 +79,11 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
 // 'at' will be present in chrome stack trace lines
-export const replaceStackTraceLines = (str: string) => {
+export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
   return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
-    const isFirefoxStack = parts[1] === '@'
     let post = parts[4]
 
-    if (isFirefoxStack) {
+    if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
@@ -160,5 +159,5 @@ export const normalizeStdout = function (str: string, options: any = {}) {
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
   }
 
-  return replaceStackTraceLines(str)
+  return replaceStackTraceLines(str, options.browser)
 }
