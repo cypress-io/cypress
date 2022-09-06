@@ -42,14 +42,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       case false:
         return ensureNull(subject, name)
       case true:
-        // TODO: Removed this conditional while refactoring cy.as() to alias selectors.
-        // It has subject: true to indicate that it's a child command, but the actual subject can be undefined
-        // when aliasing cy.intercept (which returns undefined).
-        if (cmd.get('selector')) {
-          return ensureNotNull(subject, name)
-        }
-
-        return
+        return ensureNotNull(subject, name)
 
       default:
         return

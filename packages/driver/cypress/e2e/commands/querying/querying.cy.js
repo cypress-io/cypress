@@ -47,7 +47,7 @@ describe('src/cy/commands/querying', () => {
       // into each command and not the total overall running time
       cy
       .wait(defaultCommandTimeout + 100)
-      .get('#missing-el', { timeout: defaultCommandTimeout + 50000000 })
+      .get('#missing-el', { timeout: defaultCommandTimeout + 50 })
       // it should reset the timeout back
       // to 200 after successfully finishing 'get' method
       .then(() => {
@@ -91,8 +91,7 @@ describe('src/cy/commands/querying', () => {
 
       it('can alias a custom element', () => {
         cy
-        .get('foobarbazquux:last')
-        .as('foo')
+        .get('foobarbazquux:last').as('foo')
         .get('div:first')
         .get('@foo').should('contain', 'custom element')
       })
@@ -385,10 +384,9 @@ describe('src/cy/commands/querying', () => {
       it('logs immediately before resolving', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'get') {
-            expect(log.pick('state', 'referencesAlias', 'aliasType')).to.deep.eq({
+            expect(log.pick('state', 'referencesAlias')).to.deep.eq({
               state: 'pending',
               referencesAlias: undefined,
-              aliasType: undefined,
             })
 
             done()

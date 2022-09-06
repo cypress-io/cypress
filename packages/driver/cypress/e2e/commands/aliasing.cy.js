@@ -44,6 +44,15 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
+    it('retries previous commands invoked inside custom commands', () => {
+      Cypress.Commands.add('get2', (selector) => cy.get(selector))
+
+      cy.get2('body').children('div').as('divs')
+      cy.visit('/fixtures/dom.html')
+
+      cy.get('@divs')
+    })
+
     it('retries primitives and assertions', () => {
       const obj = {}
 
