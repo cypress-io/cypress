@@ -6,8 +6,13 @@ import { CloudConnectModalsFragmentDoc } from '../../generated/graphql-test'
 import CloudConnectModals from './CloudConnectModals.vue'
 import cloneDeep from 'lodash/cloneDeep'
 
+type MountOptions = {
+  hasOrg: boolean
+  hasProjects: boolean
+}
+
 describe('<CloudConnectModals />', () => {
-  function mountDialog (hasOrg: boolean, hasProjects: boolean) {
+  function mountDialog ({ hasOrg, hasProjects }: MountOptions) {
     cy.mountFragment(CloudConnectModalsFragmentDoc, {
       onResult: (result) => {
         result.currentProject = {
@@ -41,7 +46,7 @@ describe('<CloudConnectModals />', () => {
 
   context('has no organization', () => {
     beforeEach(() => {
-      mountDialog(false, false)
+      mountDialog({ hasOrg: false, hasProjects: false })
     })
 
     it('shows the create/select org modal when orgs are added', () => {
@@ -54,7 +59,7 @@ describe('<CloudConnectModals />', () => {
   context('has organizations', () => {
     context('with no projects', () => {
       beforeEach(() => {
-        mountDialog(true, false)
+        mountDialog({ hasOrg: true, hasProjects: false })
       })
 
       it('shows the select project modal with create new project action', () => {
@@ -68,7 +73,7 @@ describe('<CloudConnectModals />', () => {
 
     context('with projects', () => {
       beforeEach(() => {
-        mountDialog(true, true)
+        mountDialog({ hasOrg: true, hasProjects: true })
       })
 
       it('shows the select project modal with list of projects', () => {

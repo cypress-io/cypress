@@ -179,7 +179,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -313,13 +313,13 @@ const projectOptions = computed(() => {
 const newProject = ref(projectOptions.value.length === 0)
 const pickedProject = ref<typeof projectOptions.value[number]>()
 
-watch([projectOptions], () => {
+watchEffect(() => {
   if (projectOptions.value.length === 1) {
     pickedProject.value = projectOptions.value[0]
   } else {
     pickedProject.value = projectOptions.value.find((p) => p.name === projectName.value)
   }
-}, { immediate: true })
+})
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {
