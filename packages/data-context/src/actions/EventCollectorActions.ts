@@ -17,7 +17,7 @@ export class EventCollectorActions {
       // TODO: Stubbed with Staging for development
       const dashboardUrl = 'https://dashboard-staging.cypress.io' //this.ctx.cloud.getDashboardUrl()
 
-      this.ctx.util.fetch(
+      await this.ctx.util.fetch(
         `${dashboardUrl}/anon-collect`,
         { method: 'POST', body: JSON.stringify({ ...event }) },
       )
