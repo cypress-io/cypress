@@ -15,9 +15,9 @@ const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 
-const webkitStackRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
-const webkitStackEntryName = '<webkit-unknown>'
-const webkitStackEntryLocation = '<webkit-unknown>:0:0'
+const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
+const webkitStackEntryName = '[unknown name]'
+const webkitStackEntryLocation = '[unknown location]:1:1'
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -398,7 +398,11 @@ const normalizedStack = (err) => {
   let errStack = err.stack || ''
 
   if (Cypress.isBrowser('webkit')) {
-    errStack = errStack.replaceAll(webkitStackRegex, (match, ...parts: string[]) => {
+    // WebKit will not determine the proper stack trace for an error, with stack entries
+    // missing function names, call locations, or both. We update these entries to
+    // to minimize the visual impact to the stack traces we render within the command
+    // log and console.
+    errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
       return [
         parts[0] || webkitStackEntryName,
         '@',
