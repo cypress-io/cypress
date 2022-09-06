@@ -251,7 +251,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
   const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
-  const { writeVideoFrame } = await videoOptions.newFfmpegVideoController()
+  const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
 
   await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
 }
@@ -271,7 +271,7 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
-const _handleDownloads = async function (client, dir, automation) {
+const _handleDownloads = async function (client, downloadsFolder: string, automation) {
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
       id: data.guid,
@@ -282,7 +282,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
     if (filename) {
       // @ts-ignore
-      downloadItem.filePath = path.join(dir, data.suggestedFilename)
+      downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
       // @ts-ignore
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
@@ -300,7 +300,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
   await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
-    downloadPath: dir,
+    downloadPath: downloadsFolder,
   })
 }
 

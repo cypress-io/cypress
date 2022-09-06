@@ -1,4 +1,4 @@
-const path = require('path')
+import { getPathForPlatform } from '../../../src/paths'
 
 describe('plugin events', () => {
   it('supports "before:run" event', () => {
@@ -17,7 +17,7 @@ describe('plugin events', () => {
         passCount: 1,
       })
 
-      cy.readFile(path.join(projectRoot, 'beforeRun.json'))
+      cy.readFile(`${projectRoot}/beforeRun.json`)
       .then((details) => {
         expect(details).to.have.property('config')
         expect(details).to.have.property('cypressVersion')
@@ -42,14 +42,14 @@ describe('plugin events', () => {
         passCount: 1,
       })
 
-      cy.readFile(path.join(projectRoot, 'beforeSpec.json'))
+      cy.readFile(`${projectRoot}/beforeSpec.json`)
       .then((spec) => {
         expect(spec).to.deep.contains({
           baseName: 'run_events_spec_1.cy.js',
           fileExtension: '.js',
           fileName: 'run_events_spec_1',
           name: 'run_events_spec_1.cy.js',
-          relative: 'cypress/e2e/run_events_spec_1.cy.js',
+          relative: getPathForPlatform('cypress/e2e/run_events_spec_1.cy.js'),
           specFileExtension: '.cy.js',
           specType: 'integration',
         })
@@ -61,14 +61,14 @@ describe('plugin events', () => {
         passCount: 1,
       })
 
-      cy.readFile(path.join(projectRoot, 'beforeSpec.json'))
+      cy.readFile(`${projectRoot}/beforeSpec.json`)
       .then((spec) => {
         expect(spec).to.deep.contains({
           baseName: 'run_events_spec_2.cy.js',
           fileExtension: '.js',
           fileName: 'run_events_spec_2',
           name: 'run_events_spec_2.cy.js',
-          relative: 'cypress/e2e/run_events_spec_2.cy.js',
+          relative: getPathForPlatform('cypress/e2e/run_events_spec_2.cy.js'),
           specFileExtension: '.cy.js',
           specType: 'integration',
         })

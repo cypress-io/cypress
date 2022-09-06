@@ -270,7 +270,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
       onError,
       videoName,
       compressedVideoName,
-      async newFfmpegVideoController (ffmpegOpts) {
+      async useFfmpegVideoController (ffmpegOpts) {
         _ffmpegOpts = ffmpegOpts || _ffmpegOpts
         ffmpegController = await videoCapture.start({ ...videoRecording.api, ..._ffmpegOpts })
 
@@ -283,15 +283,15 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
             ffmpegController.writeVideoFrame(data)
           },
           async restart () {
-            await videoRecording.api.newFfmpegVideoController(_ffmpegOpts)
+            await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },
         }
 
-        videoRecording.api.setVideoController(controllerWrap)
+        videoRecording.api.useVideoController(controllerWrap)
 
         return controllerWrap
       },
-      setVideoController (videoController) {
+      useVideoController (videoController) {
         debug('setting videoController for videoRecording %o', videoRecording)
         videoRecording.controller = videoController
       },
