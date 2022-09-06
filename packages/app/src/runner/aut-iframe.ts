@@ -1,19 +1,19 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
-import { getElementDimensions, setOffset, getOffset } from './dimensions'
+import { getElementDimensions, setOffset } from './dimensions'
 import highlightMounter from './selector-playground/highlight-mounter'
 
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
+import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
 
 const sizzleRe = /sizzle/i
-const INT32_MAX = 2147483647
 
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
@@ -722,7 +722,7 @@ export class AutIframe {
     div.style.width = `${dimensions.width}px`
     div.style.height = `${dimensions.height}px`
     div.style.position = 'absolute'
-    div.style.zIndex = `${this._getZIndex(el)}`
+    div.style.zIndex = `${getZIndex(el)}`
     div.style.backgroundColor = color
 
     div.setAttribute('data-top', dimensions.top)
@@ -752,86 +752,10 @@ export class AutIframe {
     return dimensions[`${dimension}With${attr}`]
   }
 
-  private _getZIndex (el) {
-    const value = getComputedStyle(el, null).getPropertyValue('z-index')
-
-    if (/^(auto|0)$/.test(value)) {
-      return INT32_MAX
-    }
-
-    return parseFloat(value)
-  }
-
-  private _getOrCreateHelperDom ({ body, className, css }) {
-    let containers = body.querySelectorAll(`.${className}`)
-
-    if (containers.length > 0) {
-      const shadowRoot = containers[0].shadowRoot
-
-      return {
-        container: containers[0],
-        vueContainer: shadowRoot.querySelector('.vue-container'),
-      }
-    }
-
-    // Create container element
-
-    const container = document.createElement('div')
-
-    container.classList.add(className)
-
-    container.style.position = 'static'
-
-    body.appendChild(container)
-
-    // Create react-container element
-
-    const shadowRoot = container.attachShadow({ mode: 'open' })
-
-    const vueContainer = document.createElement('div')
-
-    vueContainer.classList.add('vue-container')
-
-    shadowRoot.appendChild(vueContainer)
-
-    // Prepend style element
-
-    const style = document.createElement('style')
-
-    style.innerHTML = css.toString()
-
-    shadowRoot.prepend(style)
-
-    return {
-      container,
-      vueContainer,
-    }
-  }
-
-  private _getSelectorHighlightStyles (elements) {
-    const borderSize = 2
-
-    return elements.map((el) => {
-      const offset = getOffset(el)
-
-      return {
-        position: 'absolute',
-        margin: `0px`,
-        padding: `0px`,
-        width: `${el.offsetWidth}px`,
-        height: `${el.offsetHeight}px`,
-        top: `${offset.top - borderSize}px`,
-        left: `${offset.left - borderSize}px`,
-        transform: getComputedStyle(el, null).transform,
-        zIndex: this._getZIndex(el),
-      }
-    })
-  }
-
   private listeners: any[] = []
 
   private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
-    const { container, vueContainer } = this._getOrCreateHelperDom({
+    const { container, vueContainer } = getOrCreateHelperDom({
       body: $body.get(0),
       className: '__cypress-selector-playground',
       css: highlightMounter.css,
@@ -853,7 +777,7 @@ export class AutIframe {
     }
 
     const elements = $el.get()
-    const styles = this._getSelectorHighlightStyles(elements)
+    const styles = getSelectorHighlightStyles(elements)
 
     if (elements.length === 1) {
       removeContainerClickListeners()
