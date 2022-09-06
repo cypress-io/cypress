@@ -2,6 +2,7 @@ import { makeConfig } from '../frontend-shared/vite.config.mjs'
 import Layouts from 'vite-plugin-vue-layouts'
 import Pages from 'vite-plugin-pages'
 import Copy from 'rollup-plugin-copy'
+import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
 export default makeConfig({
@@ -29,5 +30,9 @@ export default makeConfig({
         dest: 'dist',
       }],
     }),
+    Legacy({
+      targets: ['chrome 65'],
+      modernPolyfills: true
+    })
   ],
 })
