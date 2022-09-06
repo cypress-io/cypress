@@ -3,6 +3,7 @@ import { blankContents } from '../components/Blank'
 import { logger } from './logger'
 import { getElementDimensions, setOffset } from './dimensions'
 import highlightMounter from './selector-playground/highlight-mounter'
+import Highlight from './selector-playground/Highlight.ce.vue'
 
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
@@ -758,7 +759,7 @@ export class AutIframe {
     const { container, vueContainer } = getOrCreateHelperDom({
       body: $body.get(0),
       className: '__cypress-selector-playground',
-      css: highlightMounter.css,
+      css: Highlight.styles[0],
     })
 
     const removeContainerClickListeners = () => {

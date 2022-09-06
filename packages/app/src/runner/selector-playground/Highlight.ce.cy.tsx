@@ -1,4 +1,4 @@
-import Highlight from './Highlight.vue'
+import Highlight from './Highlight.ce.vue'
 
 describe('<Highlight />', () => {
   it('playground', () => {

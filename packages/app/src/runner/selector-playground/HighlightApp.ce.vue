@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import Highlight from './Highlight.vue'
+import Highlight from './Highlight.ce.vue'
 
 defineProps <{
   selector: string
