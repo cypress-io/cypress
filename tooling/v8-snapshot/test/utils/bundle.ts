@@ -1,5 +1,5 @@
 import path from 'path'
-import fs from 'fs'
+import fs from 'fs-extra'
 
 export function readBundleResult (cacheDir: string) {
   const metaFile = path.join(cacheDir, 'snapshot-meta.json')
@@ -12,7 +12,7 @@ export function readBundleResult (cacheDir: string) {
 
 export function readSnapshotResult (cacheDir: string) {
   const metaFile = path.join(cacheDir, 'snapshot-meta.json')
-  const meta = require(metaFile)
+  const meta = fs.readJSONSync(metaFile)
 
   const snapshotFile = path.join(cacheDir, 'snapshot.js')
 

@@ -1,5 +1,5 @@
 import path from 'path'
-import { readBundleResult } from '../utils/bundle'
+import { readBundleResult, readSnapshotResult } from '../utils/bundle'
 import { SnapshotGenerator } from '../../src/snapshot-generator'
 import { Flag } from '../../src/snapshot-generator-flags'
 import { electronExecutable } from '../utils/consts'
@@ -260,5 +260,156 @@ describe('doctor', () => {
     } catch (err: any) {
       assert.fail(err.toString())
     }
+  })
+
+  it('snapshots an entry, replaces an intermediate healthy file with an intermediate deferred file, and snapshots again', async () => {
+    const templateDir = path.join(__dirname, '..', 'fixtures', 'iterative', 'templates')
+    const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'iterative', 'project')
+    const cacheDir = path.join(projectBaseDir, 'cache')
+    const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
+
+    await fs.remove(cacheDir)
+    let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+      cacheDir,
+      nodeModulesOnly: false,
+    })
+
+    // Set up project to use an intermediate healthy dependency and snapshot
+    const initialEntry = await fs.readFile(path.join(templateDir, 'entry-intermediate-healthy.js'))
+    const healthy = await fs.readFile(path.join(templateDir, 'leaf-healthy.js'))
+    const intermediateHealthy = await fs.readFile(path.join(templateDir, 'intermediate-healthy.js'))
+    const intermediateDeferred = await fs.readFile(path.join(templateDir, 'intermediate-deferred.js'))
+    const norewrite = await fs.readFile(path.join(templateDir, 'leaf-norewrite.js'))
+
+    await fs.writeFile(path.join(projectBaseDir, 'entry.js'), initialEntry)
+    await fs.writeFile(path.join(projectBaseDir, 'healthy.js'), healthy)
+    await fs.writeFile(path.join(projectBaseDir, 'intermediate-healthy.js'), intermediateHealthy)
+    await fs.writeFile(path.join(projectBaseDir, 'intermediate-deferred.js'), intermediateDeferred)
+    await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
+
+    await generator.createScript()
+    await generator.makeAndInstallSnapshot()
+    let { meta: { deferredHash, deferredHashFile, ...metadata } } = readSnapshotResult(cacheDir)
+
+    expect(metadata).to.deep.equal({
+      norewrite: [
+        './norewrite.js',
+      ],
+      deferred: [
+      ],
+      healthy: [
+        './entry.js',
+        './healthy.js',
+        './intermediate-healthy.js',
+      ],
+    })
+
+    generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+      cacheDir,
+      nodeModulesOnly: false,
+      previousDeferred: metadata.deferred,
+      previousHealthy: metadata.healthy,
+      previousNoRewrite: metadata.norewrite,
+    })
+
+    // Switch project to use an intermediate deferred dependency and re-snapshot
+    const updatedEntry = await fs.readFile(path.join(templateDir, 'entry-intermediate-deferred.js'))
+
+    await fs.writeFile(path.join(projectBaseDir, 'entry.js'), updatedEntry)
+
+    await generator.createScript()
+    await generator.makeAndInstallSnapshot()
+
+    ;({ meta: { deferredHash, deferredHashFile, ...metadata } } = readSnapshotResult(cacheDir))
+
+    expect(metadata).to.deep.equal({
+      norewrite: [
+        './norewrite.js',
+      ],
+      deferred: [
+        './intermediate-deferred.js',
+      ],
+      healthy: [
+        './entry.js',
+        './healthy.js',
+      ],
+    })
+  })
+
+  // TODO: We still have a hole where a file moves from healthy to deferred or norewrite. This doesn't happen very frequently and can be solved later:
+  // https://github.com/cypress-io/cypress/issues/23690
+  it.skip('snapshots an entry, typescripts an intermediate file, and snapshots again', async () => {
+    const templateDir = path.join(__dirname, '..', 'fixtures', 'iterative', 'templates')
+    const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'iterative', 'project')
+    const cacheDir = path.join(projectBaseDir, 'cache')
+    const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
+
+    await fs.remove(cacheDir)
+    let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+      cacheDir,
+      nodeModulesOnly: false,
+    })
+
+    // Set up project with a healthy and no rewrite leaf
+    const entry = await fs.readFile(path.join(templateDir, 'entry-base.js'))
+    const healthy = await fs.readFile(path.join(templateDir, 'leaf-healthy.js'))
+    const norewrite = await fs.readFile(path.join(templateDir, 'leaf-norewrite.js'))
+
+    await fs.writeFile(path.join(projectBaseDir, 'entry.js'), entry)
+    await fs.writeFile(path.join(projectBaseDir, 'healthy.js'), healthy)
+    await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
+
+    // First create the snapshot with an intermediate healthy file
+    const initialEntry = await fs.readFile(path.join(templateDir, 'intermediate-healthy.js'))
+
+    await fs.writeFile(path.join(projectBaseDir, 'intermediate.js'), initialEntry)
+
+    await generator.createScript()
+    await generator.makeAndInstallSnapshot()
+    let { meta: { deferredHash, deferredHashFile, ...metadata } } = readSnapshotResult(cacheDir)
+
+    expect(metadata).to.deep.equal({
+      norewrite: [
+        './norewrite.js',
+      ],
+      deferred: [],
+      healthy: [
+        './entry.js',
+        './healthy.js',
+        './intermediate.js',
+      ],
+    })
+
+    generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+      cacheDir,
+      nodeModulesOnly: false,
+      previousDeferred: metadata.deferred,
+      previousHealthy: metadata.healthy,
+      previousNoRewrite: metadata.norewrite,
+    })
+
+    // Then create the snapshot with a intermediate deferred file
+    const updatedEntry = await fs.readFile(path.join(templateDir, 'intermediate-deferred.js'))
+
+    await fs.writeFile(path.join(projectBaseDir, 'intermediate.js'), updatedEntry)
+
+    await generator.createScript()
+    await generator.makeAndInstallSnapshot()
+
+    ;({ meta: { deferredHash, deferredHashFile, ...metadata } } = readSnapshotResult(cacheDir))
+
+    expect(metadata).to.deep.equal({
+      norewrite: [
+        './norewrite.js',
+      ],
+      deferred: [
+        './intermediate-deferred.js',
+      ],
+      healthy: [
+        './entry.js',
+        './healthy.js',
+        './intermediate-healthy.js',
+      ],
+    })
   })
 })

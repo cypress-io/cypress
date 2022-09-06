@@ -293,7 +293,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
       )
 
       try {
-      // 3. Receive the JSON encoded result via stdout and parse it
+        // 3. Receive the JSON encoded result via stdout and parse it
         const stdout = execSync(cmd, execOpts)
         const { warnings, outfiles, metafile } = JSON.parse(stdout.toString())
 

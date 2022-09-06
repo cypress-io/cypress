@@ -13,7 +13,7 @@ export const SNAPSHOT_REWRITE_FAILURE = '[SNAPSHOT_REWRITE_FAILURE]'
  * Marker that the
  * {@link https://github.com/cypress-io/esbuild/tree/thlorenz/snap | snapshot bundler}
  * includes to indicate that the module includes code that would cause issues
- * during snapshot generation and thus needst to be deferred.
+ * during snapshot generation and thus needs to be deferred.
  * @category snapshot
  */
 export const SNAPSHOT_CACHE_FAILURE = '[SNAPSHOT_CACHE_FAILURE]'
