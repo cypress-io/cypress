@@ -23,6 +23,7 @@ import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
+import { patchFetch, patchXmlHttpRequest } from './patches/fetchAndXMLHttpRequest'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
 
@@ -132,6 +133,13 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
 
   cy.overrides.wrapNativeMethods(autWindow)
+
+  // place after override incase fetch is polyfilled in the AUT injection
+  patchFetch(Cypress, autWindow)
+  patchXmlHttpRequest(Cypress, autWindow)
+  // also patch it in the spec bridge as well
+  patchFetch(Cypress, window)
+  patchXmlHttpRequest(Cypress, window)
 
   const onWindowLoadPrimary = ({ url }) => {
     cy.isStable(true, 'primary onload')
