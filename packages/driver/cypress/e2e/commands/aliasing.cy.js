@@ -32,7 +32,7 @@ describe('src/cy/commands/aliasing', () => {
 
         expect(subjectChain.length).to.eql(2)
         expect(subjectChain[0]).to.be.undefined
-        // subjectChain[1] is the selector function for .get()
+        // subjectChain[1] is the query function for .get()
       })
     })
 
@@ -457,7 +457,7 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
-    it('only retries up to last action command', () => {
+    it('only retries up to last command', () => {
       cy
       .get('#list li')
       .then((items) => items.length)

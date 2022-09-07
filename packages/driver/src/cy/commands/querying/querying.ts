@@ -162,17 +162,17 @@ interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Tim
 export default (Commands, Cypress, cy, state) => {
   /*
    * cy.get() is currently in a strange state: There are two implementations of it in this file, registered one after
-   * another. It first is registered as an action command (Commands.addAll()) - but below it, we *also* add .get()
-   * via Commands.overwriteSelector(), which overwrites it.
+   * another. It first is registered as a command (Commands.addAll()) - but below it, we *also* add .get()
+   * via Commands.overwriteQuery(), which overwrites it.
    *
    * This is because other commands in the driver rely on the original .get() implementation, via
    * `cy.now('get', selector, getOptions)`.
    *
-   * The key is that cy.now() relies on `cy.commandFns[name]` - which addAll() sets, but overwriteSelector() does not.
+   * The key is that cy.now() relies on `cy.commandFns[name]` - which addAll() sets, but overwriteQuery() does not.
    *
-   * The upshot is that any test that relies on `cy.get()` is using the selector-based implementation, but various
+   * The upshot is that any test that relies on `cy.get()` is using the query-based implementation, but various
    * driver commands have access to the original implementation of .get() via cy.now(). This is a temporary state
-   * of affairs while we refactor other commands to also be selectors - we'll eventually be able to delete this
+   * of affairs while we refactor other commands to also be queries - we'll eventually be able to delete this
    * original version of .get() entirely.
    */
   Commands.addAll({
@@ -515,7 +515,7 @@ export default (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.overwriteSelector('get', function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
+  Commands.overwriteQuery('get', function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },

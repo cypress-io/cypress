@@ -150,16 +150,16 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addSelector (name, fn) {
+      addQuery (name, fn) {
         if (name !== 'get' && cy[name]) {
-          internalError('miscellaneous.invalid_new_selector', name)
+          internalError('miscellaneous.invalid_new_query', name)
         }
 
-        cy.addSelector({ name, fn })
+        cy.addQuery({ name, fn })
       },
 
-      overwriteSelector (name, fn) {
-        cy.addSelector({ name, fn })
+      overwriteQuery (name, fn) {
+        cy.addQuery({ name, fn })
       },
     }
 

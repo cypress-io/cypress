@@ -56,18 +56,17 @@ const commandRunningFailed = (Cypress, state, err) => {
 }
 
 /*
- * Selectors are simple beasts: They take arguments, and return an idempotent function. They contain no retry
+ * Queries are simple beasts: They take arguments, and return an idempotent function. They contain no retry
  * logic, have no awareness of cy.stop(), and are entirely synchronous.
  *
- * retrySelector is where we intergrate this simplicity with Cypress' retryability. It verifies the return value is
- * a sync function, and retries selectors until they pass or time out. It is conceptually similar to
- * cy.verifyUpcomingAssertions, but inverted - the command_queue calls retrySelector for selectors, while each
- * individual action command is responsible for calling verifyUpcomingAssertions.
+ * retryQuery is where we intergrate this simplicity with Cypress' retryability. It verifies the return value is
+ * a sync function, and retries queries until they pass or time out. Commands invoke cy.verifyUpcomingAssertions
+ * directly, but the command_queue is responsible for retrying queries.
  */
-function retrySelector (command: $Command, ret: any, cy: $Cy) {
+function retryQuery (command: $Command, ret: any, cy: $Cy) {
   if ($utils.isPromiseLike(ret) && !cy.isCy(ret)) {
     $errUtils.throwErrByPath(
-      'selector_command.returned_promise', {
+      'query_command.returned_promise', {
         args: { name: command.get('name') },
       },
     )
@@ -75,7 +74,7 @@ function retrySelector (command: $Command, ret: any, cy: $Cy) {
 
   if (!_.isFunction(ret)) {
     $errUtils.throwErrByPath(
-      'selector_command.returned_non_function', {
+      'query_command.returned_non_function', {
         args: { name: command.get('name'), returned: ret },
       },
     )
@@ -169,7 +168,7 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   private runCommand (command: $Command) {
-    const isSelector = command.get('selector')
+    const isQuery = command.get('query')
     const name = command.get('name')
 
     // bail here prior to creating a new promise
@@ -194,13 +193,13 @@ export class CommandQueue extends Queue<$Command> {
       let ret
       let enqueuedCmd
 
-      // Selectors can invoke other selectors - they are synchronous, and get added to the subject chain without
-      // issue. But they cannot contain action commands, which are async.
-      // This callback watches to ensure users don't try and invoke any actions while inside a selector.
+      // Queries can invoke other queries - they are synchronous, and get added to the subject chain without
+      // issue. But they cannot contain commands, which are async.
+      // This callback watches to ensure users don't try and invoke any commands while inside a query.
       const commandEnqueued = (obj) => {
-        if (isSelector && !obj.selector) {
+        if (isQuery && !obj.query) {
           $errUtils.throwErrByPath(
-            'selector_command.invoked_action', {
+            'query_command.invoked_action', {
               args: {
                 name,
                 action: obj.name,
@@ -227,12 +226,12 @@ export class CommandQueue extends Queue<$Command> {
       try {
         ret = __stackReplacementMarker(command.get('fn'), args)
 
-        // Selectors return a function which takes the current subject and returns the next subject. We wrap this in
-        // retrySelector() - and let it retry until it passes, times out or is cancelled.
+        // Queries return a function which takes the current subject and returns the next subject. We wrap this in
+        // retryQuery() - and let it retry until it passes, times out or is cancelled.
         // We save the original return value on the $Command though - it's what gets added to the subject chain later.
-        if (isSelector) {
-          command.set('selectorFn', ret)
-          ret = retrySelector(command, ret, this.cy)
+        if (isQuery) {
+          command.set('queryFn', ret)
+          ret = retryQuery(command, ret, this.cy)
         }
       } catch (err) {
         throw err
@@ -301,34 +300,34 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
-      // When a command - selector or action - first passes, we verify that we have any snapshots needed.
+      // When a command - query or normal - first passes, we verify that we have any snapshots needed.
       // The logs may still be pending, but we want to know the state of the DOM now, before any subsequent commands
       // run to alter it.
       command.snapshotLogs()
 
-      if (isSelector) {
-        subject = command.get('selectorFn')
-        // For selectors, the "subject" here is the command's return value, which is a function which
+      if (isQuery) {
+        subject = command.get('queryFn')
+        // For queries, the "subject" here is the query's return value, which is a function which
         // accepts a subject and returns a subject, and can be re-invoked at any time.
 
         // We add the command name here only to make debugging easier; It should not be relied on functionally.
         subject.commandName = name
 
-        // Even though we've snapshotted, we only end the logs a selector's logs if we're at the end of a selector
+        // Even though we've snapshotted, we only end the logs a query's logs if we're at the end of a query
         // chain - either there is no next command (end of a test), the next command is an action, or the next
         // command belongs to another chainer (end of a chain).
 
-        // This is done so that any selector's logs remain in the 'pending' state until the subject chain is finished.
-        this.cy.addSelectorToChainer(command.get('chainerId'), subject)
+        // This is done so that any query's logs remain in the 'pending' state until the subject chain is finished.
+        this.cy.addQueryToChainer(command.get('chainerId'), subject)
 
         const next = command.get('next')
 
-        if (!next || next.get('chainerId') !== command.get('chainerId') || !next.get('selector')) {
+        if (!next || next.get('chainerId') !== command.get('chainerId') || !next.get('query')) {
           command.finishLogs()
         }
       } else {
-        // For action commands, the "subject" here is the command's return value, which replaces
-        // the current subject chain. We cannot re-invoke action commands - the return value here is final.
+        // For commands, the "subject" here is the command's return value, which replaces
+        // the current subject chain. We cannot re-invoke commands - the return value here is final.
         this.cy.setSubjectForChainer(command.get('chainerId'), subject)
         command.finishLogs()
       }

@@ -794,7 +794,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  addSelector ({ name, fn }) {
+  addQuery ({ name, fn }) {
     const cy = this
 
     const callback = (chainer, userInvocationStack, args) => {
@@ -806,10 +806,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return
       }
 
-      // Selectors are functions that accept args (which is called once each time the command is used in the spec
+      // Queries are functions that accept args (which is called once each time the command is used in the spec
       // file), which return a function that accepts the subject (which is potentially called any number of times).
       // The outer function is used to store any needed state needed by a particular instance of the command, such as
-      // a Cypress.log() instance, while the inner one (selectorFn here) is the one that determines the next subject.
+      // a Cypress.log() instance, while the inner one (queryFn here) is the one that determines the next subject.
 
       // We enqueue the outer function as the "cypress command". See command_queue.ts for details on how this is
       // invoked and the inner function retried.
@@ -819,7 +819,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         type: 'dual',
         chainerId: chainer.chainerId,
         userInvocationStack,
-        selector: true,
+        query: true,
         prevSubject: 'optional',
       })
 
@@ -1238,7 +1238,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * Use `currentSubject()` to get the subject. It reads from cy.state('subjects'), but the format and details of
    * determining this should be considered an internal implementation detail of Cypress, subject to change at any time.
    *
-   * Currently, state('subjects') is an object, mapping chainerIds to the current subject and selectors for that
+   * Currently, state('subjects') is an object, mapping chainerIds to the current subject and queries for that
    * chainer. For example, it might look like:
    *
    * {
@@ -1316,7 +1316,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
    * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
    *
-   * The command_queue calls setSubjectForChainer after an action command has finished resolving, when we have the
+   * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the
    * final (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the
    * new subject for any chainers it's linked to (see cy.linkSubject for details on that process).
    */
@@ -1334,27 +1334,27 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   /*
-   * addSelectorToChainer should be considered an internal implementation detail of Cypress. Do not use it directly
+   * addQueryToChainer should be considered an internal implementation detail of Cypress. Do not use it directly
    * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
    * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
    *
-   * The command_queue calls addSelectorToChainer after a selector command returns a function. This function is
+   * The command_queue calls addQueryToChainer after a query returns a function. This function is
    * is appended to the subject chain (which begins with 'undefined' if no previous subject exists), and used
    * to resolve cy.currentSubject() as needed.
    */
-  addSelectorToChainer (chainerId: string, selectorFn: (subject: any) => any) {
+  addQueryToChainer (chainerId: string, queryFn: (subject: any) => any) {
     const cySubjects = this.state('subjects') || {}
 
     const subject = cySubjects[chainerId] || [undefined]
 
-    subject.push(selectorFn)
+    subject.push(queryFn)
     cySubjects[chainerId] = subject
     this.state('subjects', cySubjects)
 
     const links = this.state('subjectLinks') || {}
 
     if (links[chainerId]) {
-      this.addSelectorToChainer(links[chainerId], selectorFn)
+      this.addQueryToChainer(links[chainerId], queryFn)
     }
   }
 

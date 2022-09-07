@@ -494,45 +494,45 @@ describe('driver/src/cypress/cy', () => {
     })
   })
 
-  context('selectors', {
+  context('queries', {
     defaultCommandTimeout: 30,
   }, () => {
-    it('throws when selectors return a promise', (done) => {
+    it('throws when queries return a promise', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aSelector()` failed because you returned a promise from a selector.\n\nSelectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.')
+        expect(err.message).to.include('`cy.aQuery()` failed because you returned a promise from a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.')
         done()
       })
 
-      Cypress.Commands.overwriteSelector('aSelector', () => Promise.resolve())
-      cy.aSelector()
+      Cypress.Commands.overwriteQuery('aQuery', () => Promise.resolve())
+      cy.aQuery()
     })
 
-    it('throws when a selector returns a non-function value', (done) => {
+    it('throws when a query returns a non-function value', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aSelector()` failed because you returned a value other than a function from a selector.\n\nSelectors must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
+        expect(err.message).to.include('`cy.aQuery()` failed because you returned a value other than a function from a query.\n\nQueries must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
         done()
       })
 
-      Cypress.Commands.overwriteSelector('aSelector', () => 1)
-      cy.aSelector()
+      Cypress.Commands.overwriteQuery('aQuery', () => 1)
+      cy.aQuery()
     })
 
-    it('throws when an action is invoked inside a selector', (done) => {
+    it('throws when a command is invoked inside a query', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aSelector()` failed because you invoked an action command inside a selector.\n\nSelectors must be synchronous functions that return a function. You cannot invoke action commands or return promises inside of them.\n\nThe action command invoked was:\n\n  > `cy.visit()`')
+        expect(err.message).to.include('`cy.aQuery()` failed because you invoked a command inside a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.\n\nThe command invoked was:\n\n  > `cy.visit()`')
         done()
       })
 
-      Cypress.Commands.overwriteSelector('aSelector', () => cy.visit('/'))
-      cy.aSelector()
+      Cypress.Commands.overwriteQuery('aQuery', () => cy.visit('/'))
+      cy.aQuery()
     })
 
     // TODO: Make this work. Setting aside for now.
-    it.skip('does allow selectors to use other selectors', () => {
-      Cypress.Commands.overwriteSelector('aSelector', () => cy.bSelector())
-      Cypress.Commands.overwriteSelector('bSelector', () => {})
+    it.skip('does allow queries to use other queries', () => {
+      Cypress.Commands.overwriteQuery('aQuery', () => cy.bQuery())
+      Cypress.Commands.overwriteQuery('bQuery', () => {})
 
-      cy.aSelector()
+      cy.aQuery()
     })
   })
 })
