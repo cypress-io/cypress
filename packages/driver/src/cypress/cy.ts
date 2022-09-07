@@ -195,6 +195,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
   ensureExistence: IEnsures['ensureExistence']
   ensureElExistence: IEnsures['ensureElExistence']
+  ensureNull: IEnsures['ensureNull']
+  ensureNotNull: IEnsures['ensureNotNull']
   ensureDescendents: IEnsures['ensureDescendents']
   ensureValidPosition: IEnsures['ensureValidPosition']
   ensureScrollability: IEnsures['ensureScrollability']
@@ -244,6 +246,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.reset = this.reset.bind(this)
     this.addCommandSync = this.addCommandSync.bind(this)
     this.addCommand = this.addCommand.bind(this)
+    this.addQuery = this.addQuery.bind(this)
     this.now = this.now.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
@@ -343,6 +346,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.ensureNotHiddenByAncestors = ensures.ensureNotHiddenByAncestors
     this.ensureExistence = ensures.ensureExistence
     this.ensureElExistence = ensures.ensureElExistence
+    this.ensureNull = ensures.ensureNull
+    this.ensureNotNull = ensures.ensureNotNull
     this.ensureDescendents = ensures.ensureDescendents
     this.ensureValidPosition = ensures.ensureValidPosition
     this.ensureScrollability = ensures.ensureScrollability
