@@ -12,7 +12,7 @@
     :gql="props.gql"
     utm-medium="Runs Tab"
     :show-connect-button-after-login="!cloudProjectId"
-    @connect-project="isProjectConnectOpen = true"
+    @connect-project="handleConnectProject"
   />
   <CloudConnectModals
     v-if="isProjectConnectOpen"
@@ -68,6 +68,11 @@ function openConnection () {
     // if user is already logged in connect a cloud project
     isProjectConnectOpen.value = true
   }
+}
+
+const handleConnectProject = () => {
+  isProjectConnectOpen.value = true
+  isLoginOpen.value = false
 }
 
 const cloudProjectId = computed(() => {
