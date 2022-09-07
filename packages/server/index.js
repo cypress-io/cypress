@@ -23,7 +23,7 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
 
-require('./lib/unhandled_exceptions')
+require('./lib/unhandled_exceptions').handle()
 
 process.env.UV_THREADPOOL_SIZE = 128
 
