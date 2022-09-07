@@ -1122,7 +1122,7 @@ export default {
     specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
     // hold onto the _runnables for faster lookup later
-    let _test: any = null
+    let _currentTest: any = null
     let _tests: any[] = []
     let _testsById: Record<string, any> = {}
     const _logsById: Record<string, any> = {}
@@ -1159,11 +1159,11 @@ export default {
     }
 
     const getCurrentTest = () => {
-      return _test
+      return _currentTest
     }
 
     const setTest = (t) => {
-      return _test = t
+      return _currentTest = t
     }
 
     const getTestById = (id) => {
@@ -1619,7 +1619,7 @@ export default {
       },
 
       getTestsState () {
-        const id = _test != null ? _test.id : undefined
+        const id = _currentTest?.id
         const tests = {}
 
         // bail if we dont have a current test
