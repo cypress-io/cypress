@@ -162,6 +162,8 @@ export async function makeWebpackConfig (
     dynamicWebpackConfig,
   )
 
+  delete mergedConfig.output?.chunkFilename
+
   // Angular loads global styles and polyfills via script injection in the index.html
   if (framework === 'angular') {
     mergedConfig.entry = {

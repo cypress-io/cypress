@@ -13,6 +13,7 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+const webpackDevtoolNamespaceRegex = /webpack:\/\/(.*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -272,6 +273,10 @@ const stripCustomProtocol = (filePath) => {
     return
   }
 
+  if (webpackDevtoolNamespaceRegex.test(filePath)) {
+    return filePath.replace(webpackDevtoolNamespaceRegex, '')
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 
@@ -311,6 +316,10 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
+
+    if (relativeFile.includes(projectRoot)) {
+      relativeFile = relativeFile.replace(projectRoot, '').substring(1)
+    }
   }
 
   let absoluteFile
@@ -419,7 +428,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
-    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
+    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]') || line.includes('cy.<computed>') || line.includes('$Chainer.<computed>')
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)

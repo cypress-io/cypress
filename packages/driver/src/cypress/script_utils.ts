@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 import $networkUtils from './network_utils'
@@ -21,11 +20,15 @@ const extractSourceMap = ([script, contents]) => {
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {
-  _.each(scripts, ([script, contents]) => {
-    specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
-  })
+  return Bluebird.each(scripts, (_script: any) => {
+    const [script, contents] = _script
 
-  return null
+    if (script.load) {
+      return script.load()
+    }
+
+    return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
+  })
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {
@@ -38,15 +41,6 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 // Supports either scripts as objects or as async import functions
 export default {
   runScripts: (specWindow, scripts) => {
-    // if scripts contains at least one promise
-    if (scripts.length && typeof scripts[0] === 'function') {
-      // chain the loading promises
-      // NOTE: since in evalScripts, scripts are evaluated in order,
-      // we chose to respect this constraint here too.
-      // indeed _.each goes through the array in order
-      return Bluebird.each(scripts, (script: any) => script())
-    }
-
     return runScriptsFromUrls(specWindow, scripts)
   },
 }
