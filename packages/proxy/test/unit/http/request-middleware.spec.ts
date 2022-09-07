@@ -7,6 +7,7 @@ import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { HttpMiddlewareThis } from '../../../lib/http'
 
 describe('http/request-middleware', () => {
   it('exports the members in the correct order', () => {
@@ -327,8 +328,66 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
-    it('prepends cookie jar cookies to request', async () => {
+    it('is a noop if does not need to simulate top', async () => {
       const ctx = await getContext()
+
+      ctx.req.isAUTFrame = false
+      ctx.remoteStates.isPrimaryOrigin.returns(true),
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
+    })
+
+    it('is a noop if cookies do NOT need to be attached to request', async () => {
+      const ctx = await getContext(['request=cookie'], ['jar=cookie'], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'fetch'
+      ctx.req.credentialsLevel = 'omit'
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
+    })
+
+    it(`allows setting cookies on request if resource type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = true
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = false
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.be.undefined
+    })
+
+    it('sets the cookie header to undefined if no cookies exist on the request, none in the jar, but cookies should be attached', async () => {
+      const ctx = await getContext([], [], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'xhr'
+      ctx.req.credentialsLevel = true
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal(undefined)
+    })
+
+    it('prepends cookie jar cookies to request', async () => {
+      const ctx = await getContext(['request=cookie'], ['jar=cookie'], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'fetch'
+      ctx.req.credentialsLevel = 'include'
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
@@ -383,7 +442,7 @@ describe('http/request-middleware', () => {
         describe('does not add request cookie to request if cookie exists in jar, and preserves duplicate cookies when same key/value if', () => {
           describe('subdomain and TLD', () => {
             it('matches hierarchy', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
@@ -391,7 +450,7 @@ describe('http/request-middleware', () => {
             })
 
             it('matches hierarchy and gives order to the cookie that was created first', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -405,7 +464,7 @@ describe('http/request-middleware', () => {
             })
 
             it('matches hierarchy and gives order to the cookie with the most specific path, regardless of creation time', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -433,7 +492,7 @@ describe('http/request-middleware', () => {
             'jar=cookie9; Domain=exclude.foobar.com; Path=/generic/specific',
           ]
 
-          const ctx = await getContext(['request=cookie'], cookieJarCookies, 'http://app.foobar.com/generic/specific')
+          const ctx = await getContext(['request=cookie'], cookieJarCookies, 'http://app.foobar.com/generic/specific', 'http://app.foobar.com/generic/specific')
 
           const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -448,12 +507,12 @@ describe('http/request-middleware', () => {
       })
     })
 
-    async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autAndRequestUrl = 'http://foobar.com') {
+    async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {
       const cookieJar = new CookieJar()
 
       await Promise.all(cookieJarStrings.map(async (cookieString) => {
         try {
-          await cookieJar._cookieJar.setCookie(cookieString, autAndRequestUrl)
+          await cookieJar._cookieJar.setCookie(cookieString, requestUrl)
         } catch (e) {
           // likely doesn't match the url policy, path, or is another type of cookie mismatch
           return
@@ -461,18 +520,20 @@ describe('http/request-middleware', () => {
       }))
 
       return {
-        getAUTUrl: () => autAndRequestUrl,
+        getAUTUrl: () => autUrl,
         getCookieJar: () => cookieJar,
+        remoteStates: {
+          isPrimaryOrigin: sinon.stub().returns(false),
+        },
         config: { experimentalSessionAndOrigin: true },
         req: {
-          proxiedUrl: autAndRequestUrl,
+          proxiedUrl: requestUrl,
           isAUTFrame: true,
           headers: {
-
-            cookie: requestCookieStrings.join('; '),
+            cookie: requestCookieStrings.join('; ') || undefined,
           },
         },
-      }
+      } as HttpMiddlewareThis<any>
     }
   })
 

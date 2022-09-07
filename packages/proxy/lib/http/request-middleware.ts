@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
-import { getSameSiteContext, addCookieJarCookiesToRequest } from './util/cookies'
+import { getSameSiteContext, addCookieJarCookiesToRequest, shouldAttachAndSetCookies } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
@@ -71,9 +71,16 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  const currentAUTUrl = this.getAUTUrl()
+  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedToBeSimulated(this)) {
+    return this.next()
+  }
 
-  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the requestedWith and credentials and see what cookies need to be attached
+  const currentAUTUrl = this.getAUTUrl()
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
+
+  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
+  if (!shouldCookiesBeAttachedToRequest) {
     return this.next()
   }
 
@@ -89,7 +96,8 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   this.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
   this.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
 
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest)
+  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
 
   this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
   this.next()
