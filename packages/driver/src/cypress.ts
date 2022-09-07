@@ -769,7 +769,7 @@ class $Cypress {
       return
     }
 
-    this.PrimaryOriginCommunicator?.removeAllListeners()
+    this.primaryOriginCommunicator?.removeAllListeners()
     this.cy.removeAllListeners()
     this.removeAllListeners()
     this.state('window', undefined)
