@@ -17,7 +17,7 @@ const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 
 const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
 const webkitStackEntryName = '(anonymous function)'
-const webkitStackEntryLocation = '[unknown location]:0'
+const webkitStackEntryLocation = '[unknown location]:1:1'
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
