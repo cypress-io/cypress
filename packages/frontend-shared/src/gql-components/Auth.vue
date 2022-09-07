@@ -127,6 +127,16 @@ fragment Auth on Query {
     name
     message
   }
+      # FIXME: added project for testing
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+      }
+    }
+  }
 }
 `
 
