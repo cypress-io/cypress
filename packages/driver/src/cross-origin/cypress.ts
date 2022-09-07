@@ -20,7 +20,7 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { createDocumentCookiePatch } from './patches/cookies'
+import { handleDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
@@ -110,7 +110,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleScreenshots(Cypress)
   handleTestEvents(Cypress)
   handleUnsupportedAPIs(Cypress, cy)
-  createDocumentCookiePatch(Cypress)
+  handleDocumentCookie(Cypress)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 }
@@ -126,9 +126,6 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     patchFormElementSubmit(autWindow)
     patchElementIntegrity(autWindow)
   }
-
-  // reset the cookies
-  Cypress.state('crossOriginCookies', [])
 
   // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')

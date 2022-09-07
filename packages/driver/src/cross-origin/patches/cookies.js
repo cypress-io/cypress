@@ -56,8 +56,13 @@ const clearCookie = (documentCookieValue, name) => {
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const createDocumentCookiePatch = (Cypress, cookies) => {
+export const handleDocumentCookie = (Cypress) => {
+  // if cookies were sent before the spec bridge was created, they'll come
+  // through as state('crossOriginCookies'), so use them then reset them
+  const cookies = Cypress.state('crossOriginCookies')
   let documentCookieValue = mergeCookies(document.cookie, cookies)
+
+  Cypress.state('crossOriginCookies', [])
 
   const patch = (window) => {
     // Cookies added to the server-side cookie jar are optimistically
