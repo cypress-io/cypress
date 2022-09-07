@@ -8,6 +8,7 @@ import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
+import md5 from 'md5'
 import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
@@ -37,6 +38,10 @@ import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
 
 const debug = Debug('cypress:server:server-base')
+
+const hashUrl = (url: string): string => {
+  return md5(decodeURIComponent(url))
+}
 
 const _isNonProxiedRequest = (req) => {
   // proxied HTTP requests have a URL like: "http://example.com/foo"
@@ -123,6 +128,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
+  protected _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap
   private getCurrentBrowser: undefined | (() => Browser)
 
   constructor () {
@@ -141,6 +147,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         fileServerPort: this._fileServer?.port(),
       }
     })
+
+    this._appliedCredentialByUrlAndResourceMap = new Map()
   }
 
   ensureProp = ensureProp
@@ -173,6 +181,42 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._remoteStates
   }
 
+  get appliedCredentialByUrlAndResourceMap () {
+    return this._appliedCredentialByUrlAndResourceMap
+  }
+
+  getCredentialLevelOfRequest (url: string, optionalResourceType?: RequestResourceType): {
+    resourceType: RequestResourceType
+    credentialStatus: RequestCredentialLevel
+  } {
+    const hashKey = hashUrl(url)
+
+    debug(`credentials request received for request url ${url}, hashKey ${hashKey}`)
+    let value: {
+      resourceType: RequestResourceType
+      credentialStatus: RequestCredentialLevel
+    } | undefined
+
+    const credentialsObj = this.appliedCredentialByUrlAndResourceMap.get(hashKey)
+
+    if (credentialsObj) {
+      // remove item from queue
+      value = credentialsObj?.shift()
+      debug(`credential value found ${value}`)
+    }
+
+    // if value is undefined for any reason, apply defaults and assume xhr if no optionalResourceType
+    // optionalResourceType should be provided with CDP based browsers, so at least we have a fallback that is more accurate
+    if (value === undefined) {
+      value = {
+        resourceType: optionalResourceType || 'xhr',
+        credentialStatus: optionalResourceType === 'fetch' ? 'same-origin' : false,
+      }
+    }
+
+    return value
+  }
+
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
@@ -180,6 +224,35 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
 
       this.socket.toDriver('cross:origin:automation:cookies', cookies)
+    })
+
+    this.socket.localBus.on('request:sent:with:credentials', (
+      { url,
+        resourceType,
+        credentialStatus,
+      }: {
+        url: string
+        resourceType: RequestResourceType
+        credentialStatus: RequestCredentialLevel
+      },
+    ) => {
+      const hashKey = hashUrl(url)
+
+      debug(`credentials request stored for request url ${url}, resourceType ${resourceType}, hashKey ${hashKey}`)
+
+      let urlHashValue = this.appliedCredentialByUrlAndResourceMap.get(hashKey)
+
+      if (!urlHashValue) {
+        this.appliedCredentialByUrlAndResourceMap.set(hashKey, [{
+          resourceType,
+          credentialStatus,
+        }])
+      } else {
+        urlHashValue.push({
+          resourceType,
+          credentialStatus,
+        })
+      }
     })
   }
 
@@ -218,7 +291,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({ config, getAutomation, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
+    this.createNetworkProxy({
+      config, getAutomation,
+      remoteStates: this._remoteStates,
+      appliedCredentialByUrlAndResourceMap: this._appliedCredentialByUrlAndResourceMap,
+      shouldCorrelatePreRequests,
+    })
 
     if (config.experimentalSourceRewriting) {
       createInitialWorkers()
@@ -310,7 +388,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, getAutomation, remoteStates, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, getAutomation, remoteStates, appliedCredentialByUrlAndResourceMap, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -328,6 +406,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
+      appliedCredentialByUrlAndResourceMap,
+      getCredentialLevelOfRequest: this.getCredentialLevelOfRequest,
     })
   }
 
@@ -341,6 +421,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.networkProxy.reset()
       this.netStubbingState.reset()
       this._remoteStates.reset()
+      this._appliedCredentialByUrlAndResourceMap.clear()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -475,7 +556,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset()
-
+    this._appliedCredentialByUrlAndResourceMap.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
