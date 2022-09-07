@@ -1241,11 +1241,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     // A workaround to ensure that when looking back, aliases don't extend beyond the current
-    // chainer. This whole area (`replayCommandsFrom` for aliases) will be replaced with subject chains as
-    // part of the detached DOM work.
+    // chainer and commands invoked inside of it. This whole area (`replayCommandsFrom` for aliases)
+    // will be replaced with subject chains as part of the detached DOM work.
+    const chainerId = command.get('chainerId')
     const prev = command.get('prev')
+    const prevChainer = prev.get('chainerId')
 
-    if (prev.get('chainerId') !== command.get('chainerId')) {
+    if (prevChainer !== chainerId && cy.state('subjectLinks')[prevChainer] !== chainerId) {
       return memo
     }
 

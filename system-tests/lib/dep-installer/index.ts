@@ -291,6 +291,7 @@ export async function scaffoldCommonNodeModules () {
     'jimp',
     'lazy-ass',
     'lodash',
+    'playwright-webkit',
     'proxyquire',
     'semver',
     'systeminformation',
