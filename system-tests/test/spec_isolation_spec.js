@@ -21,6 +21,7 @@ describe('e2e spec_isolation', () => {
   systemTests.setup()
 
   it('fails', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: specs,
     outputPath,
     snapshot: false,
@@ -51,6 +52,7 @@ describe('e2e spec_isolation', () => {
   })
 
   it('failing with retries enabled', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     spec: 'simple_failing_hook.cy.js,simple_retrying.cy.js',
     outputPath,
     snapshot: true,
