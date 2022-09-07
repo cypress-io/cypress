@@ -19,7 +19,7 @@ export const patchDocumentCookie = (win) => {
   const getCookiesFromCypress = () => {
     return new Promise((resolve, reject) => {
       const handler = (event) => {
-        if (event.data.event === 'cross:origin:get:cookie') {
+        if (event.data.event === 'cross:origin:aut:get:cookie') {
           window.removeEventListener('message', handler)
           resolve(event.data.cookies)
         }
@@ -32,7 +32,7 @@ export const patchDocumentCookie = (win) => {
 
       window.addEventListener('message', handler)
 
-      window.top.postMessage({ event: 'cross:origin:get:cookie', data: { href: window.location.href } }, '*')
+      window.top.postMessage({ event: 'cross:origin:aut:get:cookie', data: { href: window.location.href } }, '*')
     })
   }
 
@@ -76,7 +76,7 @@ export const patchDocumentCookie = (win) => {
       })
     } else {
       const handler = (event) => {
-        if (event.data.event === 'cross:origin:set:cookie') {
+        if (event.data.event === 'cross:origin:aut:set:cookie') {
           window.removeEventListener('message', handler)
           // Resume syncing once we've gotten confirmation that cookies have been set.
           cookieSyncIntervalId = syncCookieValues()
@@ -85,7 +85,7 @@ export const patchDocumentCookie = (win) => {
 
       window.addEventListener('message', handler)
 
-      window.top.postMessage({ event: 'cross:origin:set:cookie', data: { cookie, href: window.location.href } }, '*')
+      window.top.postMessage({ event: 'cross:origin:aut:set:cookie', data: { cookie, href: window.location.href } }, '*')
     }
   }
 

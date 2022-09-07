@@ -69,7 +69,7 @@ const handleErrorEvent = (event) => {
       data.message = error
     }
 
-    window.top.postMessage({ event: 'cross:origin:throw:error', data }, '*')
+    window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
   }
 }
 

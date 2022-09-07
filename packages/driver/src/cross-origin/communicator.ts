@@ -59,7 +59,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         data.data.err = reifySerializedError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.originPolicy)
+      this.emit(messageName, data.data, data.originPolicy, source)
 
       return
     }

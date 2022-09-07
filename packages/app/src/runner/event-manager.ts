@@ -610,8 +610,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:sync:during:user:test:execution', (__unused, originPolicy) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:sync:during:user:test:execution', cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (__unused, originPolicy) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'sync:during:user:test:execution', cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
@@ -639,7 +639,7 @@ export class EventManager {
       // In webkit the before:unload event could come in after the on load event has already happened.
       // To prevent hanging we will only set the state to unstable if we are currently on the same origin as the unload event,
       // otherwise we assume that the load event has already occurred and the event is no longer relevant.
-      if (Cypress.state('autLocation').originPolicy === origin) {
+      if (Cypress.state('autLocation')?.origin === origin) {
         // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
         cy.state('isStable', false)
       }
@@ -693,14 +693,14 @@ export class EventManager {
       log?.set(attrs)
     })
 
-    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
-    Cypress.primaryOriginCommunicator.on('set:cookie', ({ cookie, href }) => {
+    // This message comes from the AUT, not the spec bridge.
+    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookie, href }, _origin, source) => {
       const { superDomain } = Cypress.Location.create(href)
       const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
 
       Cypress.automation('set:cookie', automationCookie).then(() => {
         // TODO: we should reflect this back to the originating window, not specifically the AUT window (though they should be the same)
-        Cypress.state('window').postMessage({ event: 'cross:origin:set:cookie' }, '*')
+        source.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
       })
       .catch(() => {
       // unlikely there will be errors, but ignore them in any case, since
@@ -708,18 +708,17 @@ export class EventManager {
       })
     })
 
-    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
-    Cypress.primaryOriginCommunicator.on('get:cookie', async ({ href }) => {
+    // This message comes from the AUT, not the spec bridge.
+    Cypress.primaryOriginCommunicator.on('aut:get:cookie', async ({ href }, _origin, source) => {
       const { superDomain } = Cypress.Location.create(href)
 
       const cookies = await Cypress.automation('get:cookies', { superDomain })
 
-      // TODO: we should reflect this back to the originating window, not specifically the AUT window (though they should be the same)
-      Cypress.state('window').postMessage({ event: 'cross:origin:get:cookie', cookies }, '*')
+      source.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
     })
 
-    // TODO: clean this up, this message comes from the AUT, not the spec bridge, should we clarify that?
-    Cypress.primaryOriginCommunicator.on('throw:error', async ({ message, stack }) => {
+    // This message comes from the AUT, not the spec bridge.
+    Cypress.primaryOriginCommunicator.on('aut:throw:error', async ({ message, stack }) => {
       const error = new Error(message)
 
       if (stack) {
