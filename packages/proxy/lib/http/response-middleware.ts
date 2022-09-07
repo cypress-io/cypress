@@ -4,7 +4,7 @@ import type Debug from 'debug'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import type { HttpMiddleware, HttpMiddlewareThis } from '.'
+import type { HttpMiddleware } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -13,6 +13,7 @@ import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 interface ResponseMiddlewareProps {
   /**
@@ -397,48 +398,33 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
-  const currentAUTUrl = ctx.getAUTUrl()
-
-  // A cookie needs cross origin handling if the request itself is
-  // cross-origin or the origins between requests don't match,
-  // since the browser won't set them in that case and if it's
-  // secondary-origin -> primary-origin, we don't recognize the request as cross-origin
-  return (
-    ctx.config.experimentalSessionAndOrigin
-    && (
-      (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
-      || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
-    )
-  )
-}
-
-const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
+const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (!cookies || !cookies.length) {
     return this.next()
   }
 
-  // Cross-origin Cookie Handling
+  // Simulated Top Cookie Handling
   // ---------------------------
   // - We capture cookies sent by responses and add them to our own server-side
   //   tough-cookie cookie jar. All request cookies are captured, since any
-  //   future request could be cross-origin even if the response that sets them
+  //   future request could be cross-origin in the context of top, even if the response that sets them
   //   is not.
   // - If we sent the cookie header, it may fail to be set by the browser
   //   (in most cases). However, we cannot determine all the cases in which Set-Cookie
-  //   will currently fail, and currently is best to set optimistically until #23551 is addressed.
+  //   will currently fail. We try to address this in our tough cookie jar
+  //   by only setting cookies that would otherwise work in the browser if the AUT url was top
   // - We also set the cookies through automation so they are available in the
   //   browser via document.cookie and via Cypress cookie APIs
-  //   (e.g. cy.getCookie). This is only done for cross-origin responses, since
-  //   non-cross-origin responses will be successfully set in the browser
-  //   automatically.
+  //   (e.g. cy.getCookie). This is only done when the AUT url and top do not match responses,
+  //   since AUT and Top being same origin will be successfully set in the browser
+  //   automatically as expected.
   // - In the request middleware, we retrieve the cookies for a given URL
   //   and attach them to the request, like the browser normally would.
   //   tough-cookie handles retrieving the correct cookies based on domain,
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
-  const needsCrossOriginHandling = checkIfNeedsCrossOriginHandling(this)
+  const doesTopNeedSimulating = doesTopNeedToBeSimulated(this)
 
   const appendCookie = (cookie: string) => {
     // always call 'Set-Cookie' in the browser as cross origin or same site requests
@@ -452,7 +438,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     }
   }
 
-  if (!this.config.experimentalSessionAndOrigin) {
+  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedSimulating) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
       appendCookie(cookie)
     })
@@ -467,7 +453,9 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     request: {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
-      needsCrossOriginHandling,
+      doesTopNeedSimulating,
+      resourceType: this.req.requestedWith,
+      credentialLevel: this.req.credentialsLevel,
     },
   })
 
@@ -481,7 +469,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const addedCookies = await cookiesHelper.getAddedCookies()
 
-  if (!needsCrossOriginHandling || !addedCookies.length) {
+  if (!addedCookies.length) {
     return this.next()
   }
 
@@ -625,7 +613,7 @@ export default {
   OmitProblematicHeaders,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
-  CopyCookiesFromIncomingRes,
+  MaybeCopyCookiesFromIncomingRes,
   MaybeSendRedirectToClient,
   CopyResponseStatusCode,
   ClearCyInitialCookie,

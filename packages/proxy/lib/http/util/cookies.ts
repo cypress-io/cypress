@@ -9,7 +9,7 @@ import { calculateSiteContext } from './top-simulation'
 interface RequestDetails {
   url: string
   isAUTFrame: boolean
-  needsCrossOriginHandling: boolean
+  doesTopNeedSimulating: boolean
   resourceType?: RequestResourceType
   credentialLevel?: RequestCredentialLevel
 }
@@ -125,6 +125,7 @@ export class CookiesHelper {
   debug: Debug.Debugger
   defaultDomain: string
   sameSiteContext: 'strict' | 'lax' | 'none'
+  siteContext: 'same-origin' | 'same-site' | 'cross-site' | 'none'
   previousCookies: Cookie[] = []
 
   constructor ({ cookieJar, currentAUTUrl, request, debug }) {
@@ -133,6 +134,7 @@ export class CookiesHelper {
     this.request = request
     this.debug = debug
     this.sameSiteContext = getSameSiteContext(currentAUTUrl, request.url, request.isAUTFrame)
+    this.siteContext = calculateSiteContext(this.request.url, this.currentAUTUrl || '')
 
     const parsedRequestUrl = new URL(request.url)
 
@@ -143,7 +145,7 @@ export class CookiesHelper {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
     // is a noop
-    if (!this.request.needsCrossOriginHandling) return
+    if (!this.request.doesTopNeedSimulating) return
 
     this.previousCookies = this.cookieJar.getAllCookies()
   }
@@ -152,7 +154,7 @@ export class CookiesHelper {
     // this plays a part in adding cross-origin cookies to the browser via
     // automation. if the request doesn't need cross-origin handling, this
     // is a noop
-    if (!this.request.needsCrossOriginHandling) return []
+    if (!this.request.doesTopNeedSimulating) return []
 
     const afterCookies = this.cookieJar.getAllCookies()
 
@@ -171,7 +173,23 @@ export class CookiesHelper {
     // because Secure is required for SameSite=None. not all browsers currently
     // currently enforce this, but they're heading in that direction since
     // it's now the standard, so this is more future-proof
+    // TODO: in the future we may want to check for https, which might be tricky since localhost is considered a secure context
     if (!toughCookie || (toughCookie.sameSite === 'none' && !toughCookie.secure)) {
+      return
+    }
+
+    // don't set the cookie in our own cookie jar if the cookie would otherwise fail being set in the browser if the AUT Url
+    // was actually top. This prevents cookies from being applied to our cookie jar when they shouldn't, preventing possible security implications.
+    if (!shouldAttachAndSetCookies(this.request.url, this.currentAUTUrl, this.request.resourceType, this.request.credentialLevel)) {
+      this.debug(`not setting cookie for ${this.request.url} with simulated top ${ this.currentAUTUrl} for ${ this.request.resourceType}:${this.request.credentialLevel}, cookie: ${toughCookie}`)
+
+      return
+    }
+
+    // cross site cookies cannot set lax/strict cookies in the browser for xhr/fetch requests (but ok with navigation/document requests)
+    if (this.request.resourceType && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
+      this.debug(`cannot set cookie with SameSite=${toughCookie.sameSite} when site context is ${this.siteContext}`)
+
       return
     }
 
