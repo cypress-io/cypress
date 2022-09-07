@@ -14,10 +14,7 @@ const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
-
 const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
-const webkitStackEntryName = '(anonymous function)'
-const webkitStackEntryLocation = '[unknown location]:1:1'
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -411,9 +408,9 @@ const normalizedStack = (err) => {
     // and parsed out of test snapshots that include them.
     errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
       return [
-        parts[0] || webkitStackEntryName,
+        parts[0] || '<unknown>',
         '@',
-        parts[1] || webkitStackEntryLocation,
+        parts[1] || '<unknown>:1:1',
         parts[2],
       ].join('')
     })
