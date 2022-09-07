@@ -332,7 +332,8 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile,
     absoluteFile,
     line: sourceDetails.line,
-    column: sourceDetails.column,
+    // adding 1 to column makes more sense for code frame and opening in editor
+    column: sourceDetails.column + 1,
     whitespace,
   }
 }
