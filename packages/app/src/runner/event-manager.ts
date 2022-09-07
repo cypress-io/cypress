@@ -412,7 +412,7 @@ export class EventManager {
 
           this.studioStore.initialize(config, state)
 
-          const runnables = Cypress.runner.normalizeAll(state.tests)
+          const runnables = Cypress.runner.prepare(state.tests, state.currentId, state.emissions)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -437,12 +437,13 @@ export class EventManager {
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
-          if (state.currentId) {
-            // if we have a currentId it means
-            // we need to tell the Cypress to skip
-            // ahead to that test
-            Cypress.runner.resumeAtTest(state.currentId, state.emissions)
-          }
+          // console.log('state.currentId', state.currentId)
+          // if (state.currentId) {
+          //   // if we have a currentId it means
+          //   // we need to tell the Cypress to skip
+          //   // ahead to that test
+          //   Cypress.runner.resumeAtTest(state.currentId, state.emissions)
+          // }
 
           return run()
         })

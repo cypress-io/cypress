@@ -270,7 +270,7 @@ const findLastTestInSuite = (suite, fn: any = _.identity) => {
   }
 }
 
-const getAllSiblingTests = (suite, getTestById) => {
+const getAllSiblingTests = (suite, getTest) => {
   const tests: any[] = []
 
   suite.eachTest((testRunnable) => {
@@ -278,7 +278,8 @@ const getAllSiblingTests = (suite, getTestById) => {
     // this will iterate through all nested tests
     // as well.  and then we add it only if its
     // in our filtered tests array
-    const test = getTestById(testRunnable.id)
+
+    const test = getTest(testRunnable.id, testRunnable.order)
 
     if (test) {
       return tests.push(test)
@@ -350,7 +351,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTest, getTests) => {
+const overrideRunnerHook = (Cypress, _runner, getTest, getCurrentTest, setCurrentTest, getTests) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -376,14 +377,15 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTe
         shouldFireTestAfterRun = () => {
           // find all of the grep'd tests which share
           // the same parent suite as our current test
-          const tests = getAllSiblingTests(test.parent, getTestById)
-
           if (this.suite.root) {
             _runner._shouldBufferSuiteEnd = true
 
             // make sure this test isnt the last test overall but also
             // isnt the last test in our filtered parent suite's tests array
-            if (test.final === false || (test !== _.last(allTests)) && (test !== _.last(tests))) {
+            if (
+              test.final === false
+              || (test !== _.last(allTests)) && (test !== _.last(getAllSiblingTests(test.parent, getTest)))
+            ) {
               return true
             }
           }
@@ -397,11 +399,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTe
         shouldFireTestAfterRun = () => {
           // find all of the filtered allTests which share
           // the same parent suite as our current _test
-          // const t = getCurrentTest()
-
           if (test) {
-            const siblings = getAllSiblingTests(test.parent, getTestById)
-
             const testIsActuallyInSuite = suiteHasTest(this.suite, test.id)
 
             // we ensure the test actually belongs to this suite.
@@ -418,8 +416,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTe
             //    the last test that will run
 
             if (
-              (isRootSuite(this.suite) && isLastTest(test, allTests)) ||
-              (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(test, siblings))
+              (isRootSuite(this.suite) && isLastTest(test, allTests))
+              || (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(test, getAllSiblingTests(test.parent, getTest)))
             ) {
               return true
             }
@@ -438,7 +436,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTe
       function () {
         if (!shouldFireTestAfterRun()) return
 
-        setTest(null)
+        setCurrentTest(null)
 
         if (test.final !== false) {
           test.final = true
@@ -485,11 +483,11 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalizeAll = (suite, previouslyRanTests = {}, setTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   let hasTests = false
 
   // only loop until we find the first test
-  findTestInSuite(suite, (test) => {
+  findTestInSuite(suite, () => {
     return hasTests = true
   })
 
@@ -504,26 +502,18 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsBy
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests: Record<string, any> = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+  const normalizedSuite = normalize(suite, tests, previouslyRanTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
-  if (setTestsById) {
-    // use callback here to hand back
-    // the optimized tests
-    setTestsById(tests)
-  }
+  let i = 0
 
-  if (setTests) {
-    let i = 0
+  const testsArr = _.map(tests, (test) => {
+    test.order = i += 1
 
-    const testsArr = _.map(tests, (test) => {
-      test.order = i += 1
+    return test
+  })
 
-      return test
-    })
-
-    // same pattern here
-    setTests(testsArr)
-  }
+  // same pattern here
+  setTests(testsArr)
 
   // generate the diff of the config after spec has been executed
   // e.g. config changes via Cypress.config('...')
@@ -541,7 +531,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsBy
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalize = (runnable, tests, previouslyRanTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -552,9 +542,9 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
       runnable.type = 'suite'
     }
 
-    // if we have a runnable in the initial state
+    // if we have a runnable in the previously ran test states
     // then merge in existing properties into the runnable
-    const i = initialTests[runnable.id]
+    const i = previouslyRanTests[runnable.id]
 
     let prevAttempts
 
@@ -645,7 +635,7 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+          const normalizedChild = normalize(childRunnable, tests, previouslyRanTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -734,7 +724,7 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+        const normalizedChildSuite = normalize(childSuite, tests, previouslyRanTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -801,7 +791,7 @@ function getTestFromRunnable (runnable) {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getCurrentTest, setTest, getTestFromHookOrFindTest) => {
+const _runnerListeners = (_runner, Cypress, _emissions, getTest, getCurrentTest, setCurrentTest, getTestFromHookOrFindTest) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -895,7 +885,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getCurrentT
     // make sure we set this test as the current now
     // else its possible that our TEST_AFTER_RUN_EVENT
     // will never fire if this failed in a before hook
-    setTest(test)
+    setCurrentTest(test)
 
     return Cypress.action('runner:hook:start', wrap(hook))
   })
@@ -905,7 +895,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getCurrentT
   })
 
   _runner.on('test', (test) => {
-    setTest(test)
+    setCurrentTest(test)
 
     if (_emissions.started[test.id]) {
       return
@@ -968,7 +958,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getCurrentT
     // if this is not the last test amongst its siblings
     // then go ahead and fire its test:after:run event
     // else this will not get called
-    const tests = getAllSiblingTests(test.parent, getTestById)
+    const tests = getAllSiblingTests(test.parent, getTest)
 
     if (_.last(tests) !== test) {
       test.final = true
@@ -1068,8 +1058,8 @@ export default {
         foundTest = findTestInSuite(suite, isNotAlreadyRunTest)
       }
 
-      // if test has retried, we getTestById will give us the last attempt
-      foundTest = foundTest && getTestById(foundTest.id)
+      // if test has retried, we getTest will give us the last attempt
+      foundTest = foundTest && getTest(foundTest.id, foundTest.order)
 
       return foundTest
     }
@@ -1124,7 +1114,6 @@ export default {
     // hold onto the _runnables for faster lookup later
     let _currentTest: any = null
     let _tests: any[] = []
-    let _testsById: Record<string, any> = {}
     const _logsById: Record<string, any> = {}
     let _emissions: Emissions = {
       started: {},
@@ -1140,10 +1129,6 @@ export default {
 
     const getHookId = () => {
       return `h${++_hookId}`
-    }
-
-    const setTestsById = (tbid) => {
-      return _testsById = tbid
     }
 
     const setTests = (t) => {
@@ -1162,25 +1147,33 @@ export default {
       return _currentTest
     }
 
-    const setTest = (t) => {
+    const setCurrentTest = (t) => {
       return _currentTest = t
     }
 
-    const getTestById = (id) => {
+    const getTest = (id, order?: number) => {
       // perf short circuit
       if (!id) {
         return
       }
 
-      return _testsById[id]
+      let test
+
+      if (order) {
+        test = _tests[order - 1]
+      }
+
+      if (test === null) {
+        test = _.find(_tests, (test) => test.id === id)
+      }
+
+      return (test?.id === id) ? test : undefined
     }
 
     const replaceTest = (runnable, id) => {
       const testsIndex = _.findIndex(_tests, { id })
 
       _tests.splice(testsIndex, 1, runnable)
-
-      _testsById[id] = runnable
     }
 
     const setOnlyTestId = (testId) => {
@@ -1195,11 +1188,11 @@ export default {
 
     const getOnlySuiteId = () => _onlySuiteId
 
-    overrideRunnerHook(Cypress, _runner, getTestById, getCurrentTest, setTest, getTests)
+    overrideRunnerHook(Cypress, _runner, getTest, getCurrentTest, setCurrentTest, getTests)
 
     // this forces mocha to enqueue a duplicate test in the case of test retries
     const replacePreviousAttemptWith = (test) => {
-      const prevAttempt = _testsById[test.id]
+      const prevAttempt = getTest(test.id, test.order)
 
       const prevAttempts = prevAttempt.prevAttempts || []
 
@@ -1307,6 +1300,25 @@ export default {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
+      getStats () {
+        return {
+          _tests,
+          _logsById,
+        }
+      },
+      prepare (previouslyRanTests, id, emissions: Emissions = {
+        started: {},
+        ended: {},
+      }) {
+        // prepare the runnable states
+        const runnables = this.normalizeAll(previouslyRanTests)
+
+        if (id) {
+          this.resumeAtTest(id, emissions)
+        }
+
+        return runnables
+      },
 
       normalizeAll (tests) {
         // if we have an uncaught error then slice out
@@ -1327,7 +1339,6 @@ export default {
         return normalizeAll(
           _runner.suite,
           tests,
-          setTestsById,
           setTests,
           onLogsById,
           getRunnableId,
@@ -1343,7 +1354,7 @@ export default {
           _startTime = dayjs().toJSON()
         }
 
-        _runnerListeners(_runner, Cypress, _emissions, getTestById, getCurrentTest, setTest, getTestFromHookOrFindTest)
+        _runnerListeners(_runner, Cypress, _emissions, getTest, getCurrentTest, setCurrentTest, getTestFromHookOrFindTest)
 
         return _runner.run((failures) => {
           // if we happen to make it all the way through
@@ -1382,7 +1393,7 @@ export default {
 
         // first time seeing a retried test
         // that hasn't already replaced our test
-        if (test._currentRetry > 0 && _testsById[test.id] !== test) {
+        if (test._currentRetry > 0 && getTest(test.id, test.order) !== test) {
           replacePreviousAttemptWith(test)
         }
 
@@ -1603,7 +1614,7 @@ export default {
       },
 
       countByTestState (tests, state) {
-        const count = _.filter(tests, (test, key) => {
+        const count = _.filter(tests, (test) => {
           return test.state === state
         })
 
@@ -1722,7 +1733,7 @@ export default {
           return
         }
 
-        let test = getTestById(attrs.testId)
+        let test = getTest(attrs.testId)
 
         // bail if for whatever reason we
         // cannot associate this log to a test
@@ -1748,9 +1759,7 @@ export default {
 
         _logsById[attrs.id] = attrs
 
-        const { testId, instrument } = attrs
-
-        test = getTestById(testId)
+        const { instrument } = attrs
 
         if (test) {
           // pluralize the instrument as a property on the runnable
