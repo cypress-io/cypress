@@ -150,26 +150,16 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addSelector (name, prevSubject, fn) {
-        // TODO: Remove the special case for 'get' once we no longer rely on cy.now('get').
-        // See cy/commands/querying.ts for an explanation.
+      addSelector (name, fn) {
         if (name !== 'get' && cy[name]) {
           internalError('miscellaneous.invalid_new_selector', name)
         }
 
-        cy.addSelector({
-          name,
-          fn,
-          prevSubject,
-        })
+        cy.addSelector({ name, fn })
       },
 
-      overwriteSelector (name, prevSubject, fn) {
-        cy.addSelector({
-          name,
-          fn,
-          prevSubject,
-        })
+      overwriteSelector (name, fn) {
+        cy.addSelector({ name, fn })
       },
     }
 

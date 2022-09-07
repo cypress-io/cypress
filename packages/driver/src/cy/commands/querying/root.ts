@@ -1,5 +1,5 @@
 export default (Commands, Cypress, cy, state) => {
-  Commands.addSelector('root', null, function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addSelector('root', function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     const log = options.log !== false && Cypress.log({
       timeout: options.timeout,
     })

@@ -39,11 +39,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       case 'window':
         return ensureWindow(subject, name)
 
-      case false:
-        return ensureNull(subject, name)
-      case true:
-        return ensureNotNull(subject, name)
-
       default:
         return
     }
@@ -437,6 +432,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
+    ensureNull,
+    ensureNotNull,
 
     // internal functions
     ensureSubjectByType,
