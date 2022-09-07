@@ -1163,7 +1163,7 @@ export default {
         test = _tests[order - 1]
       }
 
-      if (test === null) {
+      if (!test) {
         test = _.find(_tests, (test) => test.id === id)
       }
 
