@@ -350,7 +350,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getCurrentTest, setTest, getTests) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -361,13 +361,12 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
   // 'test:after:run' around all of
   // the hooks surrounding a test runnable
   // const _runnerHook = _runner.hook
-
   _runner.hook = $utils.monkeypatchBefore(_runner.hook, function (name, fn) {
     if (name !== 'afterAll' && name !== 'afterEach') {
       return
     }
 
-    const test = getTest()
+    const test = getCurrentTest()
     const allTests = getTests()
 
     let shouldFireTestAfterRun = () => false
@@ -398,7 +397,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         shouldFireTestAfterRun = () => {
           // find all of the filtered allTests which share
           // the same parent suite as our current _test
-          // const t = getTest()
+          // const t = getCurrentTest()
 
           if (test) {
             const siblings = getAllSiblingTests(test.parent, getTestById)
@@ -765,11 +764,11 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
   return normalizedRunnable
 }
 
-const hookFailed = (hook, err, getTest, getTestFromHookOrFindTest) => {
+const hookFailed = (hook, err, getCurrentTest, getTestFromHookOrFindTest) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
-  const test = getTest() || getTestFromHookOrFindTest(hook)
+  const test = getCurrentTest() || getTestFromHookOrFindTest(hook)
 
   setHookFailureProps(test, hook, err)
 
@@ -802,7 +801,7 @@ function getTestFromRunnable (runnable) {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest) => {
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getCurrentTest, setTest, getTestFromHookOrFindTest) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -862,7 +861,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       delete hook.ctx.currentTest
     }
 
-    let test = getTest()
+    let test = getCurrentTest()
 
     if (test && test.state !== 'pending') {
       // if the current test isn't within the hook's suite
@@ -872,9 +871,9 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       }
     } else {
       // https://github.com/cypress-io/cypress/issues/9162
-      // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
+      // In https://github.com/cypress-io/cypress/issues/8113, getCurrentTest() call was removed to handle skip() properly.
       // But it caused tests to hang when there's a failure in before().
-      // That's why getTest() is revived and checks if the state is 'pending'.
+      // That's why getCurrentTest() is revived and checks if the state is 'pending'.
 
       // set the hook's id from the test because
       // hooks do not have their own id, their
@@ -988,7 +987,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       const parentTitle = runnable.parent.title
 
       hookName = getHookName(runnable)
-      const test = getTest() || getTestFromHookOrFindTest(runnable)
+      const test = getCurrentTest() || getTestFromHookOrFindTest(runnable)
 
       const unsupportedPlugin = $errUtils.getUnsupportedPlugin(runnable)
 
@@ -1032,7 +1031,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, getTest, getTestFromHookOrFindTest)
+      return hookFailed(runnable, runnable.err, getCurrentTest, getTestFromHookOrFindTest)
     }
   })
 }
@@ -1159,7 +1158,7 @@ export default {
       return _logsById[l.id] = l
     }
 
-    const getTest = () => {
+    const getCurrentTest = () => {
       return _test
     }
 
@@ -1196,7 +1195,7 @@ export default {
 
     const getOnlySuiteId = () => _onlySuiteId
 
-    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
+    overrideRunnerHook(Cypress, _runner, getTestById, getCurrentTest, setTest, getTests)
 
     // this forces mocha to enqueue a duplicate test in the case of test retries
     const replacePreviousAttemptWith = (test) => {
@@ -1219,7 +1218,7 @@ export default {
       const r = runnable
       const isHook = r.type === 'hook'
       const isTest = r.type === 'test'
-      const test = getTest() || getTestFromHook(runnable)
+      const test = getCurrentTest() || getTestFromHook(runnable)
       const hookName = isHook && getHookName(r)
       const isBeforeEachHook = isHook && !!hookName.match(/before each/)
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
@@ -1344,7 +1343,7 @@ export default {
           _startTime = dayjs().toJSON()
         }
 
-        _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
+        _runnerListeners(_runner, Cypress, _emissions, getTestById, getCurrentTest, setTest, getTestFromHookOrFindTest)
 
         return _runner.run((failures) => {
           // if we happen to make it all the way through
@@ -1370,8 +1369,8 @@ export default {
         // move to the next runnable - this will be our async seam
         const _next = args[0]
 
-        // don't use getTest() here since hook runnables without tests should be skipped.
-        // getTest() can be defined when a hook doesn't belong to the test.
+        // don't use getCurrentTest() here since hook runnables without tests should be skipped.
+        // getCurrentTest() can be defined when a hook doesn't belong to the test.
         // see where we set currentTest in `_runner.on('hook'`
         const test = getTestFromRunnable(runnable)
 
