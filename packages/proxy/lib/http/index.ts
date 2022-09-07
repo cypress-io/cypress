@@ -5,6 +5,8 @@ import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
   BrowserPreRequest,
+  AppliedCredentialByUrlAndResourceMap,
+  GetCredentialLevelOfRequest,
 } from '@packages/proxy'
 import Debug from 'debug'
 import chalk from 'chalk'
@@ -73,6 +75,8 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
+  appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap
+  getCredentialLevelOfRequest: GetCredentialLevelOfRequest
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -222,6 +226,8 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
+  appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap
+  getCredentialLevelOfRequest: GetCredentialLevelOfRequest
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -240,6 +246,8 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.appliedCredentialByUrlAndResourceMap = opts.appliedCredentialByUrlAndResourceMap
+    this.getCredentialLevelOfRequest = opts.getCredentialLevelOfRequest
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -267,6 +275,8 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      appliedCredentialByUrlAndResourceMap: this.appliedCredentialByUrlAndResourceMap,
+      getCredentialLevelOfRequest: this.getCredentialLevelOfRequest,
       getCookieJar: this.getCookieJar,
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return
