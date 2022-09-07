@@ -12,10 +12,7 @@ import type BluebirdPromise from 'bluebird'
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
-let sourceMapConsumers: Record<string, {
-  consumer: BasicSourceMapConsumer
-  relativeFilePath: string
-}> = {}
+let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
 const initializeSourceMapConsumer = (script, sourceMap): BluebirdPromise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return Bluebird.resolve(null)
@@ -27,10 +24,7 @@ const initializeSourceMapConsumer = (script, sourceMap): BluebirdPromise<BasicSo
 
   return Bluebird.resolve(new SourceMapConsumer(sourceMap))
   .then((consumer) => {
-    sourceMapConsumers[script.fullyQualifiedUrl] = {
-      consumer,
-      relativeFilePath: script.relative,
-    }
+    sourceMapConsumers[script.fullyQualifiedUrl] = consumer
 
     return consumer
   })
@@ -47,7 +41,6 @@ const extractSourceMap = (fileContents) => {
     const url = _.last(sourceMapMatch) as any
 
     dataUrlMatch = url.match(regexDataUrl)
-    if (!dataUrlMatch) return null
   } catch (err) {
     // ignore unable to match regex. there's nothing we
     // can do about it and we don't want to thrown an exception
@@ -55,6 +48,8 @@ const extractSourceMap = (fileContents) => {
 
     throw err
   }
+
+  if (!dataUrlMatch) return null
 
   const sourceMapBase64 = dataUrlMatch[1]
   const sourceMap = base64toJs(sourceMapBase64)
@@ -66,7 +61,7 @@ const getSourceContents = (filePath, sourceFile) => {
   if (!sourceMapConsumers[filePath]) return null
 
   try {
-    return sourceMapConsumers[filePath].consumer.sourceContentFor(sourceFile)
+    return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
   } catch (err) {
     // ignore the sourceFile not being in the source map. there's nothing we
     // can do about it and we don't want to thrown an exception
@@ -81,14 +76,22 @@ const getSourcePosition = (filePath, position) => {
 
   if (!sourceMapConsumer) return null
 
-  const sourcePosition = sourceMapConsumer.consumer.originalPositionFor(position)
+  const sourcePosition = sourceMapConsumer.originalPositionFor(position)
 
   const { source, line, column } = sourcePosition
 
   if (!source || line == null || column == null) return
 
+  // if the file is outside of the projectRoot
+  // originalPositionFor will not provide the correct relative path
+  // https://github.com/cypress-io/cypress/issues/16255
+  // @ts-ignore
+  const sourceIndex = sourceMapConsumer._absoluteSources.indexOf(source)
+  // @ts-ignore
+  const file = sourceMapConsumer._sources.at(sourceIndex)
+
   return {
-    file: sourceMapConsumer.relativeFilePath,
+    file,
     line,
     column,
   }
@@ -105,7 +108,7 @@ const base64toJs = (base64) => {
 }
 
 const destroySourceMapConsumers = () => {
-  Object.values(sourceMapConsumers).forEach(({ consumer }) => {
+  Object.values(sourceMapConsumers).forEach((consumer) => {
     consumer.destroy()
   })
 }
