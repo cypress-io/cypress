@@ -4,10 +4,10 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
-async function startSpiedVideoCapture (filename, options = {}) {
-  const props = await videoCapture.start(filename, options)
+async function startSpiedVideoCapture (videoName, options = {}) {
+  const props = await videoCapture.start({ videoName, ...options })
 
-  const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${filename}':
+  const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${videoName}':
 Output file #0 does not contain any stream\n`
 
   sinon.spy(props._pt, 'write')
@@ -57,6 +57,7 @@ describe('Video Capture', () => {
         writeVideoFrameAsBuffer(''),
       ]
 
+      // @ts-ignore
       expect(_pt.write.lastCall).calledWith(buf2)
 
       await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
