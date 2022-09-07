@@ -410,12 +410,6 @@ const normalizedStack = (err) => {
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
     errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
-      // We remove any stack entries missing both the function name and call location,
-      // as the replaced value would provide no relevant data.
-      if (!parts[0] && !parts[1]) {
-        return ''
-      }
-
       return [
         parts[0] || webkitStackEntryName,
         '@',
