@@ -694,12 +694,12 @@ export class EventManager {
     })
 
     // This message comes from the AUT, not the spec bridge.
+    // This is called in the event that cookies are set in a cross origin AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookie, href }, _origin, source) => {
       const { superDomain } = Cypress.Location.create(href)
       const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
 
       Cypress.automation('set:cookie', automationCookie).then(() => {
-        // TODO: we should reflect this back to the originating window, not specifically the AUT window (though they should be the same)
         source.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
       })
       .catch(() => {
@@ -709,6 +709,7 @@ export class EventManager {
     })
 
     // This message comes from the AUT, not the spec bridge.
+    // This is called in the event that cookies are retrieved in a cross origin AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on('aut:get:cookie', async ({ href }, _origin, source) => {
       const { superDomain } = Cypress.Location.create(href)
 
@@ -718,6 +719,7 @@ export class EventManager {
     })
 
     // This message comes from the AUT, not the spec bridge.
+    // This error is forwarded from a cross origin AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on('aut:throw:error', async ({ message, stack }) => {
       const error = new Error(message)
 

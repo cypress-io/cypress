@@ -35,18 +35,14 @@ const createCypress = () => {
 
   Cypress.specBridgeCommunicator.on('attach:to:window', () => {
     // It would be ideal to get a window identifier and attach to that window specifically instead of searching all parent windows.
+    // This will be implemented for iFrames.
     const findWindow = () => {
       for (let index = 0; index < window.parent.frames.length; index++) {
         const frame = window.parent.frames[index]
 
         try {
-          const frameHostRegex = new RegExp(`(^|\\.)${ window.location.host.replace(/\./g, '\\.') }$`)
-
-          // Compare host, protocol and test that the window's host ends with the frame's host.
-          // This works because the spec bridge's host is always created without a sub domain.
-          if (window.location.port === frame.location.port
-              && window.location.protocol === frame.location.protocol
-              && frameHostRegex.test(frame.location.host)
+          // the AUT would be the frame with a matching origin, but not the same exact href.
+          if (window.location.origin === cors.getOriginPolicy(frame.location.origin)
               && window.location.href !== frame.location.href) {
             return frame
           }
@@ -69,7 +65,7 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutOriginPolicy = cors.getOriginPolicy(cy.state('autLocation').origin)
+    const currentAutOriginPolicy = cy.state('autLocation').originPolicy
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
     if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
@@ -149,8 +145,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow: Window) => {
   autWindow.Cypress = Cypress
-  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
-  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
+
   attachToWindow(autWindow)
 }
 
@@ -169,13 +164,12 @@ const attachToWindow = (autWindow: Window) => {
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')
 
-  // @ts-ignore
+  // @ts-ignore - the injected code adds the cypressTimersReset function to window
   Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
-  // @ts-ignore
+  // @ts-ignore - the injected code adds the cypressTimersPause function to window
   Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
 
-  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
-  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
+  cy.urlNavigationEvent('before:load')
 
   cy.overrides.wrapNativeMethods(autWindow)
 
@@ -207,27 +201,20 @@ const attachToWindow = (autWindow: Window) => {
       return undefined
     },
     onLoad () {
-      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called on 'load'.
-      Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
+      cy.urlNavigationEvent('load')
 
       const remoteLocation = cy.getRemoteLocation()
 
-      // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
       cy.state('autLocation', remoteLocation)
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
-
-      // If load happened in this spec bridge stop listening.
-      // Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
-      // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
-      // Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
 
       return Cypress.action('app:window:unload', e)
     },

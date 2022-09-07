@@ -21,8 +21,11 @@ describe('cy.origin', () => {
   describe('async attach', () => {
     it('attaches to an origin at any time', () => {
       cy.visit('/fixtures/auth/index.html')
+      // Visit a cross origin page
       cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      // execute a command on the primary origin while the AUT is cross origin
       cy.log('This command runs in the primary origin while the AUT is cross origin.')
+      // attach to the cross origin aut.
       cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="login-idp"]')
       })

@@ -138,14 +138,6 @@ describe('navigation events', () => {
       .then((secondaryLogs) => {
         assertLogLength(secondaryLogs, 9)
         expect(secondaryLogs[2].get('name')).to.eq('page load')
-        // TODO: i can't capture this log event because it's happening async... i think
-        // const newUrlIndex = secondaryLogs.findIndex((log) => {
-        //   console.log('log', log.get('name'))
-        //   log.get('name') === 'new url'
-        // })
-
-        // expect(secondaryLogs[newUrlIndex].get('name')).to.eq('new url')
-        // expect(secondaryLogs[newUrlIndex].get('message')).to.eq('http://www.foobar.com:3500/fixtures/primary-origin.html')
       })
     })
   })
