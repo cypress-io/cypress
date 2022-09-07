@@ -15,7 +15,7 @@ const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLinePatchedErrorRegex = /__CyWebKitError@.*[\n\r]?/g
-const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
+const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -243,10 +243,18 @@ const cleanFunctionName = (functionName) => {
   return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
 
-const parseLine = (line) => {
-  const isStackLine = stackLineRegex.test(line)
+const isStackLine = (line) => {
+  let regex = stackLineRegex
 
-  if (!isStackLine) return
+  if (Cypress.isBrowser('webkit')) {
+    regex = webkitStackLineRegex
+  }
+
+  return regex.test(line)
+}
+
+const parseLine = (line) => {
+  if (!isStackLine(line)) return
 
   const parsed = errorStackParser.parse({ stack: line } as any)[0]
 
@@ -376,7 +384,7 @@ const getSourceStack = (stack, projectRoot?) => {
 const normalizeStackIndentation = (stack) => {
   const [messageLines, stackLines] = splitStack(stack)
   const normalizedStackLines = _.map(stackLines, (line) => {
-    if (stackLineRegex.test(line)) {
+    if (isStackLine(line)) {
       // stack lines get indented 4 spaces
       return line.replace(whitespaceRegex, '    ')
     }
@@ -411,7 +419,7 @@ const normalizedStack = (err) => {
     // the output with other browsers, minimizing the visual impact to the stack traces we render
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
-    errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
+    errStack = errStack.replaceAll(new RegExp(webkitStackLineRegex, 'g'), (match, ...parts: string[]) => {
       return [
         parts[0] || '<unknown>',
         '@',
