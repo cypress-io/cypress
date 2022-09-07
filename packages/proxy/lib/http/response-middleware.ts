@@ -483,28 +483,13 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
-  try {
-    await this.getAutomation().request('add:cookies', addedCookies, () => {})
-  } catch (err) {
-    this.debug('failed setting cookies via automation: %s', err.message)
-  } finally {
-    const origin = cors.getOriginPolicy(this.req.proxiedUrl)
+  const origin = cors.getOriginPolicy(this.req.proxiedUrl)
 
-    // TODO: rename
-    // TODO: make sure it's from the right origin?
-    this.serverBus.once('cross:origin:cookies:received', () => {
-      console.log('🟠 cookies received')
+  this.serverBus.once('cross:origin:cookies:received', () => {
+    this.next()
+  })
 
-      this.next()
-    })
-
-    console.log('🟠 send cookies')
-    console.log('   - AUT origin:', cors.getOriginPolicy(this.getAUTUrl()!))
-    console.log('   - request origin:', origin)
-    console.log('   - cookies:', addedCookies.map((c) => `${c.name}=${c.value}`))
-
-    this.serverBus.emit('cross:origin:cookies', { origin, cookies: addedCookies })
-  }
+  this.serverBus.emit('cross:origin:cookies', { origin, cookies: addedCookies })
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]

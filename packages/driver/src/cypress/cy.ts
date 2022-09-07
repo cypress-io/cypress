@@ -374,21 +374,39 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    // TODO: receive origin and then it will only apply to that one?
     Cypress.on('cross:origin:cookies', ({ origin, cookies }: { origin: string, cookies: AutomationCookie[] }) => {
-      const existingCookies: AutomationCookie[] = state('cross:origin:cookies') || []
+      const existingCookies: AutomationCookie[] = state('crossOriginCookies') || []
 
-      console.log(location.origin, '🟢 got cookies:', origin, cookies.map((c) => `${c.name}=${c.value}`))
+      state('crossOriginCookies', existingCookies.concat(cookies))
 
-      this.state('crossOriginCookies', existingCookies.concat(cookies))
+      if (Cypress.primaryOriginCommunicator.isConnectedToSpecBridge(origin)) {
+        // if spec bridge is already set up, send the cookies to it
+        Cypress.primaryOriginCommunicator.once('cross:origin:cookies:received', () => {
+          Cypress.backend('cross:origin:cookies:received')
+        })
 
-      // TODO: is this necessary? maybe spec bridge can just send it directly?
-      Cypress.primaryOriginCommunicator.once('cross:origin:cookies:received', () => {
-        this.state('crossOriginCookies', [])
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'cross:origin:cookies', cookies)
+      } else {
+        // otherwise, the spec bridge will be set up later and the cookies
+        // will be passed to it via state('crossOriginCookies')
         Cypress.backend('cross:origin:cookies:received')
-      })
+      }
+    })
 
-      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'cross:origin:cookies', cookies)
+    Cypress.on('before:stability:release', (stable: boolean) => {
+      const cookies: AutomationCookie[] = state('crossOriginCookies') || []
+
+      if (!stable || !cookies.length) return
+
+      // reset the state cookies before setting them via automation in case
+      // any more get set in the interim
+      state('crossOriginCookies', [])
+
+      // this will be awaited before any stability-reliant actions
+      return Cypress.automation('add:cookies', cookies)
+      .catch(() => {
+        // errors here can be ignored as they're not user-actionable
+      })
     })
   }
 

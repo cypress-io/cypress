@@ -107,6 +107,10 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       data: preprocessedData,
     }, '*')
   }
+
+  isConnectedToSpecBridge (originPolicy: string) {
+    return !!this.crossOriginDriverWindows[originPolicy]
+  }
 }
 
 /**

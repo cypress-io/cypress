@@ -1,6 +1,5 @@
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 import type { Cookie } from '@packages/server/lib/util/cookies'
-import type $Cypress from '../../cypress'
 
 interface CookieLike {
   name: string
@@ -26,9 +25,7 @@ const stringifyCookies = (cookies: CookieLike[]) => {
   .join('; ')
 }
 
-const mergeCookies = (documentCookieValue: string, newCookies: AutomationCookie[]) => {
-  // QUESTION: need to only do it for appropriate domain?
-  // TODO: do this on cy.setCookie, etc and get rid of polling?
+const mergeCookies = (documentCookieValue: string, newCookies: CookieLike[]) => {
   const existingCookies = parseCookieString(documentCookieValue)
   const newCookieNameIndex = newCookies.reduce((nameIndex, cookie) => {
     nameIndex[cookie.name] = cookie.value
@@ -42,11 +39,20 @@ const mergeCookies = (documentCookieValue: string, newCookies: AutomationCookie[
   return stringifyCookies(filteredExistingCookies.concat(newCookies))
 }
 
-// TODO: how to handle fact that document.cookie is only patched if cy.origin is used?
+const clearCookie = (documentCookieValue: string, name: string) => {
+  const cookies = parseCookieString(documentCookieValue)
+
+  const filteredCookies = cookies.filter((cookie) => {
+    return cookie.name !== name
+  })
+
+  return stringifyCookies(filteredCookies)
+}
 
 export interface DocumentCookiePatch {
   patch: (window: Window) => void
   updateCookies: (cookies: AutomationCookie[]) => void
+  reset: () => void
 }
 
 // document.cookie monkey-patching
@@ -64,19 +70,16 @@ export interface DocumentCookiePatch {
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: AutomationCookie[] = []): DocumentCookiePatch => {
-  console.log(location.origin, '🟠 create patch:', cookies.map((c) => `${c.name}=${c.value}`))
-
+export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: AutomationCookie[] = []) => {
   let documentCookieValue = mergeCookies(document.cookie, cookies)
 
   const patch = (window: Window) => {
-    console.log(location.origin, '🟠 patch it:', documentCookieValue)
-
     // Cookies added to the server-side cookie jar are optimistically
     // added here so that if a cross-origin request sets cookies, they're
     // available via document.cookie synchronously on page load
     const setAutomationCookie = (toughCookie: Cookie) => {
       const { superDomain } = Cypress.Location.create(window.location.href)
+      // @ts-ignore Can't figure out how to add method to internal types
       const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
 
       Cypress.automation('set:cookie', automationCookie)
@@ -88,64 +91,86 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
 
     Object.defineProperty(window.document, 'cookie', {
       get () {
-        console.log('🟠 read document.cookie')
-
         return documentCookieValue
       },
 
       set (newValue: string) {
+        // @ts-ignore Can't figure out how to add method to internal types
         const cookie = Cypress.Cookies.parse(newValue)
 
         // If cookie is undefined, it was invalid and couldn't be parsed
         if (!cookie) return documentCookieValue
 
-        const cookieString = `${cookie.key}=${cookie.value}`
-
-        // New cookies get prepended to existing cookies
-        documentCookieValue = documentCookieValue.length
-          ? `${cookieString}; ${documentCookieValue}`
-          : cookieString
+        documentCookieValue = mergeCookies(documentCookieValue, [{
+          name: cookie.key,
+          value: cookie.value,
+        }])
 
         setAutomationCookie(cookie)
 
         return documentCookieValue
       },
     })
-
-    // The interval value is arbitrary; it shouldn't be too often, but needs to
-    // be fairly frequent so that the local value is kept as up-to-date as
-    // possible. It's possible there could be a race condition where
-    // document.cookie returns an out-of-date value, but there's not really a
-    // way around that since it's a synchronous API and we can only get the
-    // browser's true cookie values asynchronously.
-    const intervalId = setInterval(async () => {
-      const { superDomain: domain } = Cypress.Location.create(window.location.href)
-
-      try {
-        const cookies = (await Cypress.automation('get:cookies', { domain })) as AutomationCookie[]
-        const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
-
-        documentCookieValue = cookiesString
-      } catch (err) {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-      }
-    }, 250)
-
-    const onUnload = () => {
-      window.removeEventListener('unload', onUnload)
-      clearInterval(intervalId)
-    }
-
-    window.addEventListener('unload', onUnload)
   }
 
   const updateCookies = (cookies: AutomationCookie[]) => {
     documentCookieValue = mergeCookies(documentCookieValue, cookies)
   }
 
-  return {
-    patch,
-    updateCookies,
+  const reset = () => {
+    documentCookieValue = ''
   }
+
+  // The interval value is arbitrary; it shouldn't be too often, but needs to
+  // be fairly frequent so that the local value is kept as up-to-date as
+  // possible. It's possible there could be a race condition where
+  // document.cookie returns an out-of-date value, but there's not really a
+  // way around that since it's a synchronous API and we can only get the
+  // browser's true cookie values asynchronously.
+  const intervalId = setInterval(async () => {
+    const { superDomain: domain } = Cypress.Location.create(window.location.href)
+
+    try {
+      const cookies = (await Cypress.automation('get:cookies', { domain })) as AutomationCookie[]
+      const cookiesString = stringifyCookies(cookies || [])
+
+      documentCookieValue = cookiesString
+    } catch (err) {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+    }
+  }, 250)
+
+  const onUnload = () => {
+    window.removeEventListener('unload', onUnload)
+    clearInterval(intervalId)
+  }
+
+  window.addEventListener('unload', onUnload)
+
+  Cypress.on('window:before:load', patch)
+
+  Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+    updateCookies(cookies)
+
+    Cypress.state('crossOriginCookies', cookies)
+
+    Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
+  })
+
+  Cypress.on('test:before:run', () => {
+    reset()
+  })
+
+  Cypress.on('set:cookie', (cookie: AutomationCookie) => {
+    updateCookies([cookie])
+  })
+
+  Cypress.on('clear:cookie', (name: string) => {
+    documentCookieValue = clearCookie(documentCookieValue, name)
+  })
+
+  Cypress.on('clear:cookies', () => {
+    reset()
+  })
 }

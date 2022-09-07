@@ -449,12 +449,13 @@ describe('cy.origin - cookie login', () => {
         const expires = (new Date()).toUTCString()
 
         cy.get('[data-cy="username"]').type(username)
-        cy.get('[data-cy="localhostCookieProps"]').type(`Expires=${expires}`)
+        cy.get('[data-cy="cookieProps"]').type(`Expires=${expires}`)
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', () => {
-        cy.clearCookie('user')
+      cy.origin('http://idp.com:3501', () => {
+        cy.wait(1000) // give cookie time to expire
+        cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
       })
     })
@@ -498,15 +499,18 @@ describe('cy.origin - cookie login', () => {
       cy.getCookie('user').should('be.null')
     })
 
-    it('past max-age -> not accessible via document.cookie', () => {
+    // expiring cookies set by automation don't seem to get unset appropriately
+    // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
+    // as it happens even using cy.setCookie()
+    it('past max-age -> not accessible via document.cookie', { browser: '!firefox' }, () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
-        cy.get('[data-cy="localhostCookieProps"]').type('Max-Age=1')
+        cy.get('[data-cy="cookieProps"]').type('Max-Age=1')
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://idp.com:3501', () => {
         cy.wait(1000) // give cookie time to expire
         cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
@@ -653,22 +657,6 @@ describe('cy.origin - cookie login', () => {
   describe('document.cookie', () => {
     let username
 
-    before(() => {
-      cy.origin('http://foobar.com:3500', () => {
-        Cypress.Commands.add('assertDocumentCookieIncludes', (value: string) => {
-          cy.get('[data-cy="document-cookie"]').invoke('text')
-          .should('include', value)
-        })
-      })
-
-      cy.origin('http://idp.com:3501', () => {
-        Cypress.Commands.add('assertDocumentCookieIncludes', (value: string) => {
-          cy.get('[data-cy="document-cookie"]').invoke('text')
-          .should('include', value)
-        })
-      })
-    })
-
     beforeEach(() => {
       username = getUsername()
 
@@ -683,12 +671,10 @@ describe('cy.origin - cookie login', () => {
       })
 
       cy.origin('http://idp.com:3501', { args: { username } }, ({ username }) => {
-        cy.assertDocumentCookieIncludes(`user=${username}`)
+        cy.get('[data-cy="document-cookie"]').invoke('text')
+        .should('include', `user=${username}`)
       })
     })
-
-    // TODO: test where idp won't redirect unless document.cookie is right
-    // TODO: convert more tests to use cy.assertDocumentCookieIncludes()
 
     it('works when setting cookie', () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
@@ -756,7 +742,7 @@ describe('cy.origin - cookie login', () => {
           doc.cookie = 'key2=value2'
         })
 
-        cy.document().its('cookie').should('equal', 'key2=value2; key1=value1')
+        cy.document().its('cookie').should('equal', 'key1=value1; key2=value2')
       })
     })
 
@@ -771,6 +757,19 @@ describe('cy.origin - cookie login', () => {
       })
     })
 
+    it('returns cookie set by cy.setCookie()', () => {
+      cy.get('[data-cy="cookie-login-land-on-idp"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://idp.com:3501', () => {
+        cy.setCookie('foo', 'bar')
+        cy.document().its('cookie').should('include', 'foo=bar')
+      })
+    })
+
     it('no longer returns cookie after cy.clearCookie()', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
@@ -778,7 +777,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://idp.com:3501', () => {
         cy.clearCookie('user')
         cy.document().its('cookie').should('equal', '')
       })
@@ -791,7 +790,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://idp.com:3501', () => {
         cy.clearCookies()
         cy.document().its('cookie').should('equal', '')
       })
@@ -804,7 +803,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.origin('http://idp.com:3500', { args: { username } }, ({ username }) => {
+      cy.origin('http://idp.com:3501', { args: { username } }, ({ username }) => {
         cy.document().then((doc) => {
           doc.cookie = 'key=value'
         })

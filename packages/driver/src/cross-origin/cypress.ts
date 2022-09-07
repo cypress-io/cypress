@@ -20,14 +20,11 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { createDocumentCookiePatch, DocumentCookiePatch } from './patches/cookies'
+import { createDocumentCookiePatch } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchElementIntegrity } from './patches/setAttribute'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
-
-console.log(location.origin, '🔵 exists')
 
 const createCypress = () => {
   // @ts-ignore
@@ -65,8 +62,6 @@ const createCypress = () => {
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
-
-let documentCookiePatch: DocumentCookiePatch
 
 const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   const Cypress = window.Cypress
@@ -115,18 +110,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleScreenshots(Cypress)
   handleTestEvents(Cypress)
   handleUnsupportedAPIs(Cypress, cy)
-
-  documentCookiePatch = createDocumentCookiePatch(Cypress)
-
-  Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
-    console.log(location.origin, '🔵 got cookies:', cookies.map((c) => `${c.name}=${c.value}`))
-
-    documentCookiePatch.updateCookies(cookies)
-
-    Cypress.state('crossOriginCookies', cookies)
-
-    Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
-  })
+  createDocumentCookiePatch(Cypress)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 }
@@ -142,9 +126,6 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     patchFormElementSubmit(autWindow)
     patchElementIntegrity(autWindow)
   }
-
-  console.log(location.origin, '🔵 patch it:', Cypress.state('crossOriginCookies'))
-  documentCookiePatch.patch(autWindow)
 
   // reset the cookies
   Cypress.state('crossOriginCookies', [])
