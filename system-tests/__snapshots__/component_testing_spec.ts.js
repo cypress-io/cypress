@@ -7,15 +7,16 @@ exports['React major versions with Webpack executes all of the tests for React v
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx)                      │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx                    │
+  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx, Rerendering.cy.jsx)  │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx, src/Rerendering.c │
+  │             y.jsx                                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
-   43 modules
+  Running:  App.cy.jsx                                                                      (1 of 4)
+   44 modules
 
 
   ✓ renders hello world
@@ -46,7 +47,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 3)
+  Running:  Unmount.cy.jsx                                                                  (2 of 4)
 
 
   Comp with componentWillUnmount
@@ -83,7 +84,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 3)
+  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 4)
 
 
   using legacy mount
@@ -114,6 +115,39 @@ exports['React major versions with Webpack executes all of the tests for React v
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/UsingLegacyMount.cy.jsx.mp4         (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Rerendering.cy.jsx                                                              (4 of 4)
+
+
+  re-render
+    ✓ maintains component state across re-renders
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -126,8 +160,10 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
@@ -141,15 +177,16 @@ exports['React major versions with Webpack executes all of the tests for React v
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx)                      │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx                    │
+  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx, Rerendering.cy.jsx)  │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx, src/Rerendering.c │
+  │             y.jsx                                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
-   40 modules
+  Running:  App.cy.jsx                                                                      (1 of 4)
+   41 modules
 
 
   ✓ renders hello world
@@ -180,7 +217,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 3)
+  Running:  Unmount.cy.jsx                                                                  (2 of 4)
 
 
   Comp with componentWillUnmount
@@ -217,7 +254,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 3)
+  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 4)
 
 
   using legacy mount
@@ -248,6 +285,39 @@ exports['React major versions with Webpack executes all of the tests for React v
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/UsingLegacyMount.cy.jsx.mp4         (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Rerendering.cy.jsx                                                              (4 of 4)
+
+
+  re-render
+    ✓ maintains component state across re-renders
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -260,8 +330,10 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
@@ -275,14 +347,15 @@ exports['React major versions with Vite executes all of the tests for React v17 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx)                      │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx                    │
+  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx, Rerendering.cy.jsx)  │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx, src/Rerendering.c │
+  │             y.jsx                                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
+  Running:  App.cy.jsx                                                                      (1 of 4)
 
 
   ✓ renders hello world
@@ -313,7 +386,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 3)
+  Running:  Unmount.cy.jsx                                                                  (2 of 4)
 
 
   Comp with componentWillUnmount
@@ -350,7 +423,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 3)
+  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 4)
 
 
   using legacy mount
@@ -381,6 +454,39 @@ exports['React major versions with Vite executes all of the tests for React v17 
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/UsingLegacyMount.cy.jsx.mp4         (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Rerendering.cy.jsx                                                              (4 of 4)
+
+
+  re-render
+    ✓ maintains component state across re-renders
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -393,8 +499,10 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
@@ -408,14 +516,15 @@ exports['React major versions with Vite executes all of the tests for React v18 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx)                      │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx                    │
+  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, UsingLegacyMount.cy.jsx, Rerendering.cy.jsx)  │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/UsingLegacyMount.cy.jsx, src/Rerendering.c │
+  │             y.jsx                                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
+  Running:  App.cy.jsx                                                                      (1 of 4)
 
 
   ✓ renders hello world
@@ -446,7 +555,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 3)
+  Running:  Unmount.cy.jsx                                                                  (2 of 4)
 
 
   Comp with componentWillUnmount
@@ -483,7 +592,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 3)
+  Running:  UsingLegacyMount.cy.jsx                                                         (3 of 4)
 
 
   using legacy mount
@@ -514,6 +623,39 @@ exports['React major versions with Vite executes all of the tests for React v18 
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/UsingLegacyMount.cy.jsx.mp4         (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Rerendering.cy.jsx                                                              (4 of 4)
+
+
+  re-render
+    ✓ maintains component state across re-renders
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -526,8 +668,10 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
