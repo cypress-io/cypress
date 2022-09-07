@@ -556,8 +556,6 @@ export class Log {
 }
 
 class LogManager {
-  logs: Record<string, any> = {}
-
   constructor () {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
@@ -565,11 +563,6 @@ class LogManager {
   trigger (log, event) {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
-      return
-    }
-
-    // bail if we've reset the logs due to a Cypress.abort
-    if (!this.logs[log.get('id')]) {
       return
     }
 
@@ -590,12 +583,6 @@ class LogManager {
     log._hasInitiallyLogged = true
 
     return this.trigger(log, 'command:log:added')
-  }
-
-  addToLogs (log) {
-    const id = log.get('id')
-
-    this.logs[id] = true
   }
 
   fireChangeEvent (log) {
@@ -639,8 +626,6 @@ class LogManager {
       }
 
       log.wrapConsoleProps()
-
-      this.addToLogs(log)
 
       if (options.sessionInfo) {
         Cypress.emit('session:add', log.toJSON())
