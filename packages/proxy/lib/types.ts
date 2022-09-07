@@ -31,6 +31,8 @@ export type GetCredentialLevelOfRequest = (url: string, optionalResourceType?: R
   credentialStatus: RequestCredentialLevel
 }
 
+export type SecFetchSite = 'same-origin' | 'same-site' | 'cross-site' | 'none'
+
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
 /**
