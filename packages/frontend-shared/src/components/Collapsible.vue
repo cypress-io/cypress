@@ -7,8 +7,8 @@
     <div
       data-cy="collapsible-header"
       :aria-expanded="isOpen"
-      class="rounded-t focus:outline-indigo-500"
-      :class="{'rounded-b': !isOpen}"
+      class="rounded-t focus:outline-indigo-500 hocus-default"
+      :class="{'rounded-b': !isOpen, 'default-ring': isOpen }"
       @click="!disable && toggle()"
       @keypress.space.enter.self="!disable && toggle()"
     >

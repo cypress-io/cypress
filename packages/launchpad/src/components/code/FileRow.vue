@@ -1,14 +1,13 @@
 <template>
   <Collapsible
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
-  overflow-hidden hocus-default"
+    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block overflow-hidden"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
     :data-cy="status"
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'border-b border-b-gray-100 rounded-b-none': open }"
+        :class="{ 'rounded-b-none default-ring': open, 'hocus-default': !open }"
         class="cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
