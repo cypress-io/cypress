@@ -869,7 +869,7 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('sends cross:origin:cookies if there are added cookies and resolves on cross:origin:cookies:received', async () => {
+    it('sends cross:origin:cookies with origin and cookies if there are added cookies and resolves on cross:origin:cookies:received', async () => {
       const cookieJar = {
         getAllCookies: sinon.stub(),
       }
@@ -894,10 +894,11 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:cookies')
 
-      const cookies = ctx.serverBus.emit.withArgs('cross:origin:cookies').args[0][1]
+      const data = ctx.serverBus.emit.withArgs('cross:origin:cookies').args[0][1]
 
-      expect(cookies[0].name).to.equal('cookie')
-      expect(cookies[0].value).to.equal('value')
+      expect(data.origin).to.equal('http://foobar.com')
+      expect(data.cookies[0].name).to.equal('cookie')
+      expect(data.cookies[0].value).to.equal('value')
     })
 
     function prepareContext (props) {
