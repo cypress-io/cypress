@@ -17,7 +17,7 @@ const stringifyCookies = (cookies) => {
   .join('; ')
 }
 
-const mergeCookies = (documentCookieValue, newCookies) => {
+const mergeCookies = (documentCookieValue, newCookies = []) => {
   const existingCookies = parseCookieString(documentCookieValue)
   const newCookieNameIndex = newCookies.reduce((nameIndex, cookie) => {
     nameIndex[cookie.name] = cookie.value
