@@ -42,7 +42,6 @@ export async function determineDeferred (
       healthy,
     } = await validateExistingDeferred(jsonPath, hashFilePath)
 
-    // TODO: Add a test for the not node modules only case. Deferred dependency, modify it to be norewrite
     if (match && opts.nodeModulesOnly) {
       const combined: Set<string> = new Set([
         ...norewrite,

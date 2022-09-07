@@ -483,16 +483,6 @@ export class SnapshotDoctor {
         nextStage.length > 0 || !healState.processedLeaves;
         nextStage = this._findNextStage(healState, circulars)
       ) {
-        // Special case during the first processing step, checked all leaves
-        if (!healState.processedLeaves) {
-          healState.processedLeaves = true
-          // In case all leaves were determined to be healthy before we can
-          // move on to the next step
-          if (nextStage.length === 0) {
-            nextStage = this._findNextStage(healState, circulars)
-          }
-        }
-
         // 5. Process the module verification in parallel
         const promises = nextStage.map(async (key): Promise<void> => {
           logDebug('Testing entry in isolation "%s"', key)
@@ -637,7 +627,10 @@ export class SnapshotDoctor {
       return this._findVerifiables(healState, circulars)
     }
 
-    return this._findLeaves(healState)
+    healState.processedLeaves = true
+    const nextStage = this._findLeaves(healState)
+
+    return nextStage.length === 0 ? this._findVerifiables(healState, circulars) : nextStage
   }
 
   /**
