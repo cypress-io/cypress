@@ -60,7 +60,8 @@ export const create = (state: StateFunc) => ({
   isAutSameOrigin (href?: string): boolean {
     const autLocation = href ? $Location.create(href) : Cypress.state('autLocation')
 
-    if (autLocation.href === 'about://blank' || autLocation.href === 'about:blank') {
+    // Special cases. About blanks is considered same origin as is an undefined AUT.
+    if (!autLocation || autLocation?.href === 'about://blank' || autLocation?.href === 'about:blank') {
       return true
     }
 
