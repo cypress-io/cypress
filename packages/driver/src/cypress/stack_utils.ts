@@ -16,8 +16,8 @@ const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 
 const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
-const webkitStackEntryName = '[unknown name]'
-const webkitStackEntryLocation = '[unknown location]:1:1'
+const webkitStackEntryName = '(anonymous function)'
+const webkitStackEntryLocation = '[unknown location]:0'
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -399,10 +399,23 @@ const normalizedStack = (err) => {
 
   if (Cypress.isBrowser('webkit')) {
     // WebKit will not determine the proper stack trace for an error, with stack entries
-    // missing function names, call locations, or both. We update these entries to
-    // to minimize the visual impact to the stack traces we render within the command
-    // log and console.
+    // missing function names, call locations, or both. This is due to a number of documented
+    // issues with WebKit:
+    // https://bugs.webkit.org/show_bug.cgi?id=86493
+    // https://bugs.webkit.org/show_bug.cgi?id=243668
+    // https://bugs.webkit.org/show_bug.cgi?id=174380
+    //
+    // We update these stack entries with placeholder names/locations to more closely align
+    // the output with other browsers, minimizing the visual impact to the stack traces we render
+    // within the command log and console and ensuring that the stacks can be identified within
+    // and parsed out of test snapshots that include them.
     errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
+      // We remove any stack entries missing both the function name and call location,
+      // as the replaced value would provide no relevant data.
+      if (!parts[0] && !parts[1]) {
+        return ''
+      }
+
       return [
         parts[0] || webkitStackEntryName,
         '@',
