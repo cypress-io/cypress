@@ -29,9 +29,6 @@ declare namespace Cypress {
     configure: (config: Cypress.ObjectLike) => void
     isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
-    Location: {
-      create: (url: string) => ({ superDomain: string })
-    }
   }
 
   interface CypressUtils {
@@ -48,12 +45,6 @@ declare namespace Cypress {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
     projectRoot?: string
-  }
-
-  interface Actions {
-    (action: 'set:cookie', fn: (cookie: AutomationCookie) => void)
-    (action: 'clear:cookie', fn: (name: string) => void)
-    (action: 'clear:cookies', fn: () => void)
   }
 }
 

@@ -1,12 +1,4 @@
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
-import type { Cookie } from '@packages/server/lib/util/cookies'
-
-interface CookieLike {
-  name: string
-  value: string
-}
-
-const parseCookieString = (cookieString: string) => {
+const parseCookieString = (cookieString) => {
   if (!cookieString || !cookieString.trim().length) return []
 
   return cookieString.split(';').map((cookieString) => {
@@ -19,19 +11,19 @@ const parseCookieString = (cookieString: string) => {
   })
 }
 
-const stringifyCookies = (cookies: CookieLike[]) => {
+const stringifyCookies = (cookies) => {
   return cookies
   .map((cookie) => `${cookie.name}=${cookie.value}`)
   .join('; ')
 }
 
-const mergeCookies = (documentCookieValue: string, newCookies: CookieLike[]) => {
+const mergeCookies = (documentCookieValue, newCookies) => {
   const existingCookies = parseCookieString(documentCookieValue)
   const newCookieNameIndex = newCookies.reduce((nameIndex, cookie) => {
     nameIndex[cookie.name] = cookie.value
 
     return nameIndex
-  }, {} as { [key: string]: string })
+  }, {})
   const filteredExistingCookies = existingCookies.filter((cookie) => {
     return !newCookieNameIndex[cookie.name]
   })
@@ -39,7 +31,7 @@ const mergeCookies = (documentCookieValue: string, newCookies: CookieLike[]) => 
   return stringifyCookies(filteredExistingCookies.concat(newCookies))
 }
 
-const clearCookie = (documentCookieValue: string, name: string) => {
+const clearCookie = (documentCookieValue, name) => {
   const cookies = parseCookieString(documentCookieValue)
 
   const filteredCookies = cookies.filter((cookie) => {
@@ -47,12 +39,6 @@ const clearCookie = (documentCookieValue: string, name: string) => {
   })
 
   return stringifyCookies(filteredCookies)
-}
-
-export interface DocumentCookiePatch {
-  patch: (window: Window) => void
-  updateCookies: (cookies: AutomationCookie[]) => void
-  reset: () => void
 }
 
 // document.cookie monkey-patching
@@ -70,16 +56,15 @@ export interface DocumentCookiePatch {
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: AutomationCookie[] = []) => {
+export const createDocumentCookiePatch = (Cypress, cookies) => {
   let documentCookieValue = mergeCookies(document.cookie, cookies)
 
-  const patch = (window: Window) => {
+  const patch = (window) => {
     // Cookies added to the server-side cookie jar are optimistically
     // added here so that if a cross-origin request sets cookies, they're
     // available via document.cookie synchronously on page load
-    const setAutomationCookie = (toughCookie: Cookie) => {
+    const setAutomationCookie = (toughCookie) => {
       const { superDomain } = Cypress.Location.create(window.location.href)
-      // @ts-ignore Can't figure out how to add method to internal types
       const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
 
       Cypress.automation('set:cookie', automationCookie)
@@ -94,8 +79,7 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
         return documentCookieValue
       },
 
-      set (newValue: string) {
-        // @ts-ignore Can't figure out how to add method to internal types
+      set (newValue) {
         const cookie = Cypress.Cookies.parse(newValue)
 
         // If cookie is undefined, it was invalid and couldn't be parsed
@@ -113,7 +97,7 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
     })
   }
 
-  const updateCookies = (cookies: AutomationCookie[]) => {
+  const updateCookies = (cookies) => {
     documentCookieValue = mergeCookies(documentCookieValue, cookies)
   }
 
@@ -131,7 +115,7 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
     const { superDomain: domain } = Cypress.Location.create(window.location.href)
 
     try {
-      const cookies = (await Cypress.automation('get:cookies', { domain })) as AutomationCookie[]
+      const cookies = await Cypress.automation('get:cookies', { domain })
       const cookiesString = stringifyCookies(cookies || [])
 
       documentCookieValue = cookiesString
@@ -150,7 +134,7 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
 
   Cypress.on('window:before:load', patch)
 
-  Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+  Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies) => {
     updateCookies(cookies)
 
     Cypress.state('crossOriginCookies', cookies)
@@ -162,11 +146,11 @@ export const createDocumentCookiePatch = (Cypress: Cypress.Cypress, cookies: Aut
     reset()
   })
 
-  Cypress.on('set:cookie', (cookie: AutomationCookie) => {
+  Cypress.on('set:cookie', (cookie) => {
     updateCookies([cookie])
   })
 
-  Cypress.on('clear:cookie', (name: string) => {
+  Cypress.on('clear:cookie', (name) => {
     documentCookieValue = clearCookie(documentCookieValue, name)
   })
 
