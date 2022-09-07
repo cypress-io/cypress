@@ -284,24 +284,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('the login modal reaches "opening browser" status', () => {
-    mountFragmentWithData()
-
-    cy.findByRole('button', { name: text.login.actionLogin })
-    .click()
-
-    cy.contains('h2', text.login.titleInitial).should('be.visible')
-    cy.percySnapshot()
-
-    cy.findByRole('button', { name: text.login.actionLogin })
-    .should('be.visible')
-    .and('have.focus')
-
-    cy.findByRole('button', { name: defaultMessages.actions.close }).click()
-
-    cy.contains('h2', text.login.titleInitial).should('not.exist')
-  })
-
   it('the logged in state is correctly presented in header', () => {
     const cloudViewer = {
       id: '1',
