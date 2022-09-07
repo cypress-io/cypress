@@ -57,11 +57,13 @@ export const create = (state: StateFunc) => ({
 
     return autLocation
   },
-  isAutSameOrigin (href?: string): boolean {
-    const autLocation = href ? $Location.create(href) : Cypress.state('autLocation')
+
+  isRunnerAbleToCommunicateWithAut (): boolean {
+    const autLocation = Cypress.state('autLocation')
+    const isChromium = Cypress.isBrowser({ family: 'chromium' })
 
     // Special cases. About blanks is considered same origin as is an undefined AUT.
-    if (!autLocation || autLocation?.href === 'about://blank' || autLocation?.href === 'about:blank') {
+    if (!autLocation || autLocation?.href === 'about://blank' || autLocation?.href === 'about:blank' || (isChromium && Cypress.config['chromeWebSecurity'] === false)) {
       return true
     }
 

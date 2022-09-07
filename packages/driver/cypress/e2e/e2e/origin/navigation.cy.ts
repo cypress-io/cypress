@@ -267,7 +267,7 @@ describe('errors', () => {
 
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-foobar"]').click()
-    cy.get('[data-cy="cannot_find"]') // Timeout here on command, cannot find element
+    cy.get('[data-cy="cannot-find"]') // Timeout here on command, cannot find element
   })
 
   it('never redirects to the cross-origin', { defaultCommandTimeout: 50 }, (done) => {

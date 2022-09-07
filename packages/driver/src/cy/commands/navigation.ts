@@ -936,7 +936,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // reset window on load
         win = state('window')
 
-        if (!cy.isAutSameOrigin()) {
+        if (!cy.isRunnerAbleToCommunicateWithAut()) {
           if (onLoadIsUserDefined) {
             $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }

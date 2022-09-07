@@ -33,7 +33,7 @@ declare namespace Cypress {
     isStable: IStability['isStable']
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
-    isAutSameOrigin: ILocation['isAutSameOrigin']
+    isRunnerAbleToCommunicateWithAut: ILocation['isRunnerAbleToCommunicateWithAut']
 
     createSnapshot:  ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']

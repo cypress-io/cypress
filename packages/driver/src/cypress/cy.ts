@@ -163,7 +163,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   getRemoteLocation: ILocation['getRemoteLocation']
   getCrossOriginRemoteLocation: ILocation['getCrossOriginRemoteLocation']
-  isAutSameOrigin: ILocation['isAutSameOrigin']
+  isRunnerAbleToCommunicateWithAut: ILocation['isRunnerAbleToCommunicateWithAut']
 
   fireBlur: IFocused['fireBlur']
   fireFocus: IFocused['fireFocus']
@@ -288,7 +288,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.getRemoteLocation = location.getRemoteLocation
     this.getCrossOriginRemoteLocation = location.getCrossOriginRemoteLocation
-    this.isAutSameOrigin = location.isAutSameOrigin
+    this.isRunnerAbleToCommunicateWithAut = location.isRunnerAbleToCommunicateWithAut
 
     const focused = createFocused(state)
 
@@ -551,21 +551,20 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       try {
         const autWindow = getContentWindow($autIframe)
 
-        let isSameOrigin: boolean
+        let isRunnerAbleToCommunicateWithAUT: boolean
 
         try {
-          const autHref = autWindow.location.href
-
-          isSameOrigin = this.isAutSameOrigin(autHref)
+          autWindow.location.href
+          isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {
           if (!this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
             throw err
           }
 
-          isSameOrigin = false
+          isRunnerAbleToCommunicateWithAUT = false
         }
 
-        if (isSameOrigin) {
+        if (isRunnerAbleToCommunicateWithAUT) {
           setWindowDocumentProps(autWindow, this.state)
 
           // we may need to update the url now

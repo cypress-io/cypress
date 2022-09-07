@@ -504,6 +504,7 @@ describe('http/response-middleware', function () {
                 },
               },
               config: {
+                modifyObstructiveCode: true,
                 experimentalModifyObstructiveThirdPartyCode: true,
               },
             })
@@ -529,6 +530,7 @@ describe('http/response-middleware', function () {
               },
             },
             config: {
+              modifyObstructiveCode: true,
               experimentalModifyObstructiveThirdPartyCode: true,
             },
           })
@@ -827,6 +829,7 @@ describe('http/response-middleware', function () {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isHtml': true,
+          'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -846,6 +849,7 @@ describe('http/response-middleware', function () {
           'deferSourceMapRewrite': undefined,
           'domainName': '127.0.0.1',
           'isHtml': true,
+          'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -861,6 +865,7 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
         },
         config: {
+          modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
         },
       })
@@ -872,6 +877,7 @@ describe('http/response-middleware', function () {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isHtml': true,
+          'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -905,6 +911,7 @@ describe('http/response-middleware', function () {
         makeResStreamPlainText () {},
         incomingResStream: stream,
         config: {
+          modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
         },
         remoteStates,
@@ -945,6 +952,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
           'isHtml': true,
+          'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -961,6 +969,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
           'isHtml': true,
+          'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -974,6 +983,7 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
         },
         config: {
+          modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
         },
       })
@@ -984,6 +994,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
           'isHtml': true,
+          'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
@@ -1015,6 +1026,7 @@ describe('http/response-middleware', function () {
         makeResStreamPlainText () {},
         incomingResStream: stream,
         config: {
+          modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
         },
         remoteStates,

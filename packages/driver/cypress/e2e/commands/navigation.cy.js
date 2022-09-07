@@ -2232,7 +2232,7 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "origin" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
+          const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "href" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
 
           // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
           expect(err.message).to.contain(stripIndent`\
