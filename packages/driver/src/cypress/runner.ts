@@ -570,8 +570,7 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
             })
           }
 
-          // reduce this runnable down to its props
-          // and collections
+          // reduce this runnable down to its props and collections
           return wrapAll(test)
         })
       }
@@ -1127,8 +1126,6 @@ export default {
     let _test: any = null
     let _tests: any[] = []
     let _testsById: Record<string, any> = {}
-    const _testsQueue: any[] = []
-    const _testsQueueById: Record<string, any> = {}
     const _logsById: Record<string, any> = {}
     let _emissions: Emissions = {
       started: {},
@@ -1180,12 +1177,6 @@ export default {
     }
 
     const replaceTest = (runnable, id) => {
-      const testsQueueIndex = _.findIndex(_testsQueue, { id })
-
-      _testsQueue.splice(testsQueueIndex, 1, runnable)
-
-      _testsQueueById[id] = runnable
-
       const testsIndex = _.findIndex(_tests, { id })
 
       _tests.splice(testsIndex, 1, runnable)
@@ -1719,35 +1710,15 @@ export default {
         return _resumedAtTestIndex
       },
 
-      cleanupQueue (numTestsKeptInMemory) {
-        const cleanup = (queue) => {
-          if (queue.length > numTestsKeptInMemory) {
-            const test = queue.shift()
-
-            delete _testsQueueById[test.id]
-
-            _.each(RUNNABLE_LOGS, (logs) => {
-              return _.each(test[logs], (attrs) => {
-                // we know our attrs have been cleaned
-                // now, so lets store that
-                attrs._hasBeenCleanedUp = true
-
-                return LogUtils.reduceMemory(attrs)
-              })
-            })
-
-            return cleanup(queue)
-          }
-        }
-
-        return cleanup(_testsQueue)
+      cleanupQueue (_numTestsKeptInMemory) {
+        // this isn't helpful since we store all tests in memory twice....
+        return null
       },
 
       addLog (attrs, isInteractive) {
         // we dont need to hold a log reference
         // to anything in memory when we're headless
         // because you cannot inspect any logs
-
         if (!isInteractive) {
           return
         }
@@ -1758,13 +1729,6 @@ export default {
         // cannot associate this log to a test
         if (!test) {
           return
-        }
-
-        // if this test isnt in the current queue
-        // then go ahead and add it
-        if (!_testsQueueById[test.id]) {
-          _testsQueueById[test.id] = true
-          _testsQueue.push(test)
         }
 
         const existing = _logsById[attrs.id]
