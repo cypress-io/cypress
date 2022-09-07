@@ -155,6 +155,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const cfg = this.getConfig()
 
+    process.chdir(this.projectRoot)
+
     this._server = this.createServer(this.testingType)
 
     const [port, warning] = await this._server.open(cfg, {
