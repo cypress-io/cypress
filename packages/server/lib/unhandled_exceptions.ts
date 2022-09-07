@@ -3,7 +3,7 @@ const debug = Debug('cypress:server:unhandled_exceptions')
 
 export function handle (shouldExitCb?: (err: Error) => boolean) {
   function globalExceptionHandler (err: Error) {
-    if (!shouldExitCb?.(err)) {
+    if (shouldExitCb && !shouldExitCb(err)) {
       debug('suppressing unhandled exception, not exiting %o', { err })
       handle(shouldExitCb)
 

@@ -1,10 +1,5 @@
 export const BROWSER_FAMILY = ['chromium', 'firefox', 'webkit']
 
-if (process.env.CYPRESS_INTERNAL_ENV === 'production') {
-  // gate webkit behind env, while still keeping types consistent
-  delete BROWSER_FAMILY[2]
-}
-
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
 
 export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
