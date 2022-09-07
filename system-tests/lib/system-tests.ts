@@ -926,6 +926,9 @@ const systemTests = {
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+
+      // opt in to WebKit experimental support if we are running w WebKit
+      ...(specifiedBrowser === 'webkit' ? { CYPRESS_experimentalWebKitSupport: 'true' } : {}),
     })
     .extend(options.processEnv)
     .value()
