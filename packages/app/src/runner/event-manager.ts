@@ -636,9 +636,14 @@ export class EventManager {
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
-      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-      // Unstable is unstable regardless of where it initiated from.
-      cy.state('isStable', false)
+      // In webkit the before:unload event could come in after the on load event has already happened.
+      // To prevent hanging we will only set the state to unstable if we are currently on the same origin as the unload event,
+      // otherwise we assume that the load event has already occurred and the event is no longer relevant.
+      if (Cypress.state('autLocation').originPolicy === origin) {
+        // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+        cy.state('isStable', false)
+      }
+
       // Re-broadcast to any other specBridges.
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', origin)
     })
