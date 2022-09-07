@@ -44,6 +44,8 @@
     "lint-changed": "lint-changed",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
+    "nx": "nx",
+    "graph": "nx graph",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
