@@ -621,6 +621,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   results.shouldUploadVideo = shouldUploadVideo
 
+  if (!shouldUploadVideo) {
+    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip processing video. Video path: ${videoName}`)
+    results.video = null
+  }
+
   if (!quiet && !skippedSpec) {
     printResults.displayResults(results, estimated)
   }
