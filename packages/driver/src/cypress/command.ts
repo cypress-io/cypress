@@ -59,11 +59,11 @@ export class $Command {
       }
     })
 
-    // If the previous command is a selector belonging to the same chainer,
+    // If the previous command is a query belonging to the same chainer,
     // we also ask it to end its own logs (and so on, up the chain).
     const prev = this.get('prev')
 
-    if (prev && prev.get('selector') && prev.get('chainerId') === this.get('chainerId')) {
+    if (prev && prev.get('query') && prev.get('chainerId') === this.get('chainerId')) {
       prev.finishLogs()
     }
   }
