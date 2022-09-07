@@ -14,8 +14,8 @@ const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
-const webkitStackEntryPatchedErrorRegex = /__CyWebKitError@([^\n\r]*)([\n\r]?)/g
-const webkitStackEntryRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
+const webkitStackLinePatchedErrorRegex = /__CyWebKitError@.*[\n\r]?/g
+const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -398,7 +398,7 @@ const normalizedStack = (err) => {
   if (Cypress.isBrowser('webkit')) {
     // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
     // be presented within the stack. If we detect it within the stack, we remove it.
-    errStack = errStack.replace(webkitStackEntryPatchedErrorRegex, '')
+    errStack = errStack.replace(webkitStackLinePatchedErrorRegex, '')
 
     // WebKit will not determine the proper stack trace for an error, with stack entries
     // missing function names, call locations, or both. This is due to a number of documented
@@ -411,11 +411,11 @@ const normalizedStack = (err) => {
     // the output with other browsers, minimizing the visual impact to the stack traces we render
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
-    errStack = errStack.replaceAll(webkitStackEntryRegex, (match, ...parts: string[]) => {
+    errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
       return [
         parts[0] || '<unknown>',
         '@',
-        parts[1],
+        parts[1] || '<unknown>',
         parts[2],
       ].join('')
     })
