@@ -69,7 +69,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
 import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'

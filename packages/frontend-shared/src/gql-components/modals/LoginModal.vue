@@ -2,7 +2,7 @@
   <Dialog
     :open="modelValue"
     class="inset-0 z-50 fixed overflow-y-auto"
-    @close="setIsOpen"
+    @close="handleClose"
   >
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
@@ -11,7 +11,7 @@
         <StandardModalHeader
           help-link="https://on.cypress.io"
           :help-text="t('links.needHelp')"
-          @close="setIsOpen(false)"
+          @close="handleClose"
         >
           {{ title }}
         </StandardModalHeader>
@@ -122,18 +122,20 @@ function continueAuth (isLoggedIn: boolean) {
 function handleConnectProject () {
   emit('loggedin')
   emit('connect-project')
+  setIsOpen(false)
 }
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
   (event: 'loggedin'): void
   (event: 'connect-project'): void
+  (event: 'cancel'): void
 }>()
 
 const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
-  utmMedium?: string
+  utmMedium: string
   showConnectButtonAfterLogin?: boolean
 }>()
 
@@ -191,5 +193,10 @@ const title = computed(() => {
 })
 
 const isOnline = computed(() => online.value)
+
+const handleClose = () => {
+  setIsOpen(false)
+  emit('cancel')
+}
 
 </script>

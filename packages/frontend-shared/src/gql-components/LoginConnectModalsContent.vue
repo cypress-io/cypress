@@ -1,29 +1,30 @@
 <template>
-  <CloudViewerAndProject
-    v-if="props.gql && loginConnectStore.isLoginConnectOpen"
-    v-slot="{status}"
-    :gql="props.gql"
-  >
-    {{ status }}
-    <LoginModal
-      v-if="status"
+  <template v-if="loginConnectStore.isLoginConnectOpen">
+    <CloudViewerAndProject
+      v-if="props.gql"
+      v-slot="{status}"
       :gql="props.gql"
-      :model-value="!status.isLoggedIn || keepLoginOpen"
-      :utm-medium="loginConnectStore.utmMedium"
-      :show-connect-button-after-login="!status.isProjectConnected"
-      @connect-project="handleConnectProject"
-      @cancel="closeLoginConnectModal"
-      @loggedin="handleLoginSuccess(status.isProjectConnected)"
-      @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
-    />
-    <CloudConnectModals
-      v-if="status?.isLoggedIn && !keepLoginOpen"
-      :show="status?.isLoggedIn && isCloudConnectOpen"
-      :gql="props.gql"
-      @cancel="handleCancelConnect"
-      @success="handleConnectSuccess"
-    />
-  </CloudViewerAndProject>
+    >
+      <LoginModal
+        v-if="status"
+        :gql="props.gql"
+        :model-value="!status.isLoggedIn || keepLoginOpen"
+        :utm-medium="loginConnectStore.utmMedium"
+        :show-connect-button-after-login="!status.isProjectConnected"
+        @connect-project="handleConnectProject"
+        @cancel="handleCancel"
+        @loggedin="handleLoginSuccess(status.isProjectConnected)"
+        @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
+      />
+      <CloudConnectModals
+        v-if="status?.isLoggedIn && !keepLoginOpen"
+        :show="status?.isLoggedIn && isCloudConnectOpen"
+        :gql="props.gql"
+        @cancel="handleCancelConnect"
+        @success="handleConnectSuccess"
+      />
+    </CloudViewerAndProject>
+  </template>
 </template>
 <script setup lang="ts">
 import CloudViewerAndProject from './CloudViewerAndProject.vue'
@@ -62,6 +63,10 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
   if (!isProjectConnected) {
     keepLoginOpen.value = true
   }
+}
+
+const handleCancel = () => {
+  closeLoginConnectModal()
 }
 
 const handleUpdate = (isProjectConnected: boolean, error: boolean) => {

@@ -4,7 +4,7 @@
   >
     <LoginConnectModalsContent
       :gql="query.data.value"
-      @handleConnectProject="handleConnectProject"
+      @handleConnectProject="executeQuery"
     />
   </template>
 </template>
@@ -12,6 +12,9 @@
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { gql, useQuery } from '@urql/vue'
 import { LoginConnectModals_LoginConnectModalsQueryDocument } from '../generated/graphql'
+import { watch } from 'vue'
+import { useLoginConnectStore } from '../store/login-connect-store'
+const loginConnectStore = useLoginConnectStore()
 
 gql`
 query LoginConnectModals_LoginConnectModalsQuery {
@@ -21,10 +24,14 @@ query LoginConnectModals_LoginConnectModalsQuery {
 
 const query = useQuery({ query: LoginConnectModals_LoginConnectModalsQueryDocument, pause: true })
 
-query.executeQuery()
+watch(() => loginConnectStore.isLoginConnectOpen, (newVal) => {
+  if (newVal) {
+    executeQuery()
+  }
+})
 
-const handleConnectProject = () => {
-  query.executeQuery()
+const executeQuery = async () => {
+  await query.executeQuery()
 }
 
 </script>
