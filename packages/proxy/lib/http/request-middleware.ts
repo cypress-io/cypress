@@ -3,6 +3,7 @@ import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
 import { getSameSiteContext, addCookieJarCookiesToRequest } from './util/cookies'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -31,6 +32,34 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.next()
 }
 
+const ExtractRequestedWithAndCredentialsIfApplicable: RequestMiddleware = function () {
+  const requestIsXhrOrFetch = this.req.headers['x-cypress-request']
+
+  if (this.req.headers['x-cypress-request']) {
+    this.debug(`found x-cypress-request header. Deleting x-cypress-request header.`)
+    delete this.req.headers['x-cypress-request']
+  }
+
+  if (!this.config.experimentalSessionAndOrigin ||
+    !doesTopNeedToBeSimulated(this) ||
+    // this should be unreachable happen as the x-cypress-request header is only attached if the resource type is 'xhr'
+    // inside the extension or electron equivalent. This should only be needed for defensive purposes
+    (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
+    this.next()
+
+    return
+  }
+
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  let { resourceType, credentialStatus } = this.getCredentialLevelOfRequest(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+
+  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+
+  this.req.requestedWith = resourceType
+  this.req.credentialsLevel = credentialStatus
+  this.next()
+}
+
 const MaybeSimulateSecHeaders: RequestMiddleware = function () {
   if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
     this.next()
@@ -38,7 +67,6 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
     return
   }
 
-  // Do NOT disclose destination to an iframe and simulate if iframe was top
   if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
     this.req.headers['sec-fetch-dest'] = 'document'
   }
@@ -248,6 +276,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  ExtractRequestedWithAndCredentialsIfApplicable,
   MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,

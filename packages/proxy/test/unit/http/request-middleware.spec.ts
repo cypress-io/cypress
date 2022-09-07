@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { expect } from 'chai'
+import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
@@ -12,6 +13,7 @@ describe('http/request-middleware', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
       'ExtractIsAUTFrameHeader',
+      'ExtractRequestedWithAndCredentialsIfApplicable',
       'MaybeSimulateSecHeaders',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
@@ -56,6 +58,165 @@ describe('http/request-middleware', () => {
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.false
+      })
+    })
+  })
+
+  describe('ExtractRequestedWithAndCredentialsIfApplicable', () => {
+    const { ExtractRequestedWithAndCredentialsIfApplicable } = RequestMiddleware
+
+    it('removes x-cypress-request header when it exists, sets in on the req', async () => {
+      const ctx = {
+        req: {
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-request']).not.to.exist
+      })
+    })
+
+    it('does not set requestedWith or credentialLevel on the request if the the experimentalSessionAndOrigin flag is off', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: false,
+        },
+        req: {
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).not.to.exist
+        expect(ctx.req.credentialsLevel).not.to.exist
+      })
+    })
+
+    it('does not set requestedWith or credentialLevel on the request if top does NOT need to be simulated', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
+        getAUTUrl: sinon.stub().returns(undefined),
+        req: {
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).not.to.exist
+        expect(ctx.req.credentialsLevel).not.to.exist
+      })
+    })
+
+    it('does not set requestedWith or credentialLevel on the request if x-cypress-request has invalid values', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimaryOrigin: sinon.stub().returns(false),
+        },
+        req: {
+          headers: {
+            'x-cypress-request': 'sub_frame',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).not.to.exist
+        expect(ctx.req.credentialsLevel).not.to.exist
+      })
+    })
+
+    // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
+    it('provides getCredentialLevelOfRequest with resourceType if able to determine from header (xhr)', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimaryOrigin: sinon.stub().returns(false),
+        },
+        getCredentialLevelOfRequest: sinon.stub().returns({}),
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-request': 'xhr',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.getCredentialLevelOfRequest).to.have.been.calledWith('http://localhost:8080', `xhr`)
+      })
+    })
+
+    // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
+    it('provides getCredentialLevelOfRequest with resourceType if able to determine from header (fetch)', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimaryOrigin: sinon.stub().returns(false),
+        },
+        getCredentialLevelOfRequest: sinon.stub().returns({}),
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-request': 'fetch',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.getCredentialLevelOfRequest).to.have.been.calledWith('http://localhost:8080', `fetch`)
+      })
+    })
+
+    it('sets the resourceType and credentialsLevel on the request from whatever is returned by getCredentialLevelOfRequest if conditions apply', async () => {
+      const ctx = {
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimaryOrigin: sinon.stub().returns(false),
+        },
+        getCredentialLevelOfRequest: sinon.stub().returns({
+          resourceType: 'fetch',
+          credentialStatus: 'same-origin',
+        }),
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).to.equal('fetch')
+        expect(ctx.req.credentialsLevel).to.equal('same-origin')
       })
     })
   })
