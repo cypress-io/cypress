@@ -172,7 +172,7 @@ fragment SpecsListBanners on Query {
       __typename
       ... on CloudProject {
         id
-        runs(first: 1) {
+        runs(first: 10) {
           nodes {
             id
           }
