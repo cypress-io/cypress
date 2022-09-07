@@ -122,7 +122,6 @@ function continueAuth (isLoggedIn: boolean) {
 function handleConnectProject () {
   emit('loggedin')
   emit('connect-project')
-  setIsOpen(false)
 }
 
 const emit = defineEmits<{
