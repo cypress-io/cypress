@@ -914,7 +914,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.getAllBrowsersWith()
+  const browsers = await browserUtils.get()
 
   debug('found all system browsers %o', browsers)
   // TODO: refactor this so we don't need to extend options
