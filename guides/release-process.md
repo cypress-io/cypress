@@ -77,7 +77,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 3. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
 
-4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
+4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/develop-<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/linux-x64/develop-<sha>/cypress.tgz`, publishing can proceed.
 
 5. Install and test the pre-release version to make sure everything is working.
     - Get the pre-release version that matches your system from the latest develop commit.
@@ -169,7 +169,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     git pull origin develop
     git log --pretty=oneline
     # copy sha of the previous commit
-    git tag -a vX.Y.Z <sha>
+    git tag -a vX.Y.Z -m vX.Y.Z <sha>
     git push origin vX.Y.Z
     ```
 

@@ -61,6 +61,7 @@ describe('e2e screenshots', () => {
   // and are also generated automatically on failure with
   // the test title as the file name
   systemTests.it('passes', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (failing partially due to broken stack trace)
     spec: 'screenshots.cy.js',
     expectedExitCode: 5,
     snapshot: true,

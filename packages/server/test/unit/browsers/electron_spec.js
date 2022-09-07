@@ -19,6 +19,7 @@ describe('lib/browsers/electron', () => {
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
+      isTextTerminal: false,
       some: 'var',
       projectRoot: '/foo/',
       onWarning: sinon.stub().returns(),
@@ -78,7 +79,7 @@ describe('lib/browsers/electron', () => {
   context('.connectToNewSpec', () => {
     it('calls open with the browser, url, options, and automation', async function () {
       sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
-      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
       expect(electron.open).to.be.called
     })
   })
@@ -99,10 +100,10 @@ describe('lib/browsers/electron', () => {
 
         expect(_.keys(options)).to.deep.eq(preferencesKeys)
 
-        expect(electron._render.firstCall.args[3]).to.deep.eql({
-          projectRoot: this.options.projectRoot,
-          isTextTerminal: this.options.isTextTerminal,
-        })
+        const electronOptionsArg = electron._render.firstCall.args[3]
+
+        expect(electronOptionsArg.projectRoot).to.eq(this.options.projectRoot)
+        expect(electronOptionsArg.isTextTerminal).to.eq(this.options.isTextTerminal)
 
         expect(electron._render).to.be.calledWith(
           this.url,
@@ -120,7 +121,8 @@ describe('lib/browsers/electron', () => {
 
         expect(this.win.webContents.getOSProcessId).to.be.calledOnce
 
-        expect(obj.pid).to.deep.eq([ELECTRON_PID])
+        expect(obj.pid).to.eq(ELECTRON_PID)
+        expect(obj.allPids).to.deep.eq([ELECTRON_PID])
       })
     })
 
@@ -689,15 +691,16 @@ describe('lib/browsers/electron', () => {
     })
 
     it('.onFocus', function () {
-      let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
+      const headlessOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: false } })
 
-      opts.onFocus()
+      headlessOpts.onFocus()
       expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
-      opts = electron._defaultOptions('/foo', this.state, { show: false, browser: {} })
-      opts.onFocus()
+      const headedOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: true } })
+
+      headedOpts.onFocus()
 
       expect(menu.set).not.to.be.called
     })
@@ -722,7 +725,7 @@ describe('lib/browsers/electron', () => {
         )
       })
 
-      it('adds pid of new BrowserWindow to pid list', function () {
+      it('adds pid of new BrowserWindow to allPids list', function () {
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
@@ -739,7 +742,7 @@ describe('lib/browsers/electron', () => {
         }).then((instance) => {
           return opts.onNewWindow.call(this.win, {}, this.url)
           .then(() => {
-            expect(instance.pid).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
+            expect(instance.allPids).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
           })
         })
       })

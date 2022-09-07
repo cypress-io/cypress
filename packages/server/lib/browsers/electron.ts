@@ -1,15 +1,23 @@
-const _ = require('lodash')
-const EE = require('events')
-const path = require('path')
-const Bluebird = require('bluebird')
-const debug = require('debug')('cypress:server:browsers:electron')
-const debugVerbose = require('debug')('cypress-verbose:server:browsers:electron')
-const menu = require('../gui/menu')
-const Windows = require('../gui/windows')
-const { CdpAutomation, screencastOpts } = require('./cdp_automation')
-const savedState = require('../saved_state')
-const utils = require('./utils')
-const errors = require('../errors')
+import _ from 'lodash'
+import EE from 'events'
+import path from 'path'
+import Debug from 'debug'
+import menu from '../gui/menu'
+import * as Windows from '../gui/windows'
+import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from './cdp_automation'
+import * as savedState from '../saved_state'
+import utils from './utils'
+import * as errors from '../errors'
+import type { Browser, BrowserInstance } from './types'
+import type { BrowserWindow, WebContents } from 'electron'
+import type { Automation } from '../automation'
+import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+
+// TODO: unmix these two types
+type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
+
+const debug = Debug('cypress:server:browsers:electron')
+const debugVerbose = Debug('cypress-verbose:server:browsers:electron')
 
 // additional events that are nice to know about to be logged
 // https://electronjs.org/docs/api/browser-window#instance-events
@@ -20,7 +28,7 @@ const ELECTRON_DEBUG_EVENTS = [
   'unresponsive',
 ]
 
-let instance = null
+let instance: BrowserInstance | null = null
 
 const tryToCall = function (win, method) {
   try {
@@ -36,15 +44,15 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = async function (win, options, parent) {
-  const sendCommand = Bluebird.method((...args) => {
+const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
+  async function sendCommand (method: CdpCommand, data?: object) {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
-      .apply(win.webContents.debugger, args)
+      .call(win.webContents.debugger, method, data)
     })
-  })
+  }
 
-  const on = (eventName, cb) => {
+  const on = (eventName: CdpEvent, cb) => {
     win.webContents.debugger.on('message', (event, method, params) => {
       if (method === eventName) {
         cb(params)
@@ -64,7 +72,7 @@ const _getAutomation = async function (win, options, parent) {
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.onScreencastFrame) {
+        if (!options.videoApi) {
           await sendCommand('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
@@ -89,49 +97,36 @@ const _getAutomation = async function (win, options, parent) {
   return automation
 }
 
-const _installExtensions = function (win, extensionPaths = [], options) {
+function _installExtensions (win: BrowserWindow, extensionPaths: string[], options) {
   Windows.removeAllExtensions(win)
 
-  return Bluebird.map(extensionPaths, (extensionPath) => {
+  return Promise.all(extensionPaths.map((extensionPath) => {
     try {
       return Windows.installExtension(win, extensionPath)
     } catch (error) {
       return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', extensionPath))
     }
-  })
+  }))
 }
 
-const _maybeRecordVideo = async function (webContents, options) {
-  const { onScreencastFrame } = options
+async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
-  debug('maybe recording video %o', { onScreencastFrame })
-
-  if (!onScreencastFrame) {
-    return
-  }
-
-  webContents.debugger.on('message', (event, method, params) => {
-    if (method === 'Page.screencastFrame') {
-      onScreencastFrame(params)
-      webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
-    }
-  })
-
-  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts())
+  await cdpAutomation.startVideoRecording(writeVideoFrame)
 }
 
-module.exports = {
-  _defaultOptions (projectRoot, state, options, automation) {
+export = {
+  _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
-    const defaults = {
-      x: state.browserX,
-      y: state.browserY,
+    const defaults: Windows.WindowOptions = {
+      x: state.browserX || undefined,
+      y: state.browserY || undefined,
       width: state.browserWidth || 1280,
       height: state.browserHeight || 720,
-      devTools: state.isBrowserDevToolsOpen,
       minWidth: 100,
       minHeight: 100,
+      devTools: state.isBrowserDevToolsOpen || undefined,
       contextMenu: true,
       partition: this._getPartition(options),
       trackState: {
@@ -144,37 +139,45 @@ module.exports = {
       webPreferences: {
         sandbox: true,
       },
+      show: !options.browser.isHeadless,
+      // prevents a tiny 1px padding around the window
+      // causing screenshots/videos to be off by 1px
+      resizable: !options.browser.isHeadless,
+      onCrashed () {
+        const err = errors.get('RENDERER_CRASHED')
+
+        errors.log(err)
+
+        if (!options.onError) throw new Error('Missing onError in onCrashed')
+
+        options.onError(err)
+      },
       onFocus () {
-        if (options.show) {
+        if (!options.browser.isHeadless) {
           return menu.set({ withInternalDevTools: true })
         }
       },
-      onNewWindow (e, url) {
+      async onNewWindow (this: BrowserWindow, e, url) {
         const _win = this
 
-        return _this._launchChild(e, url, _win, projectRoot, state, options, automation)
-        .then((child) => {
-          // close child on parent close
-          _win.on('close', () => {
-            if (!child.isDestroyed()) {
-              child.destroy()
-            }
-          })
+        const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
 
-          // add this pid to list of pids
-          tryToCall(child, () => {
-            if (instance && instance.pid) {
-              instance.pid.push(child.webContents.getOSProcessId())
-            }
-          })
+        // close child on parent close
+        _win.on('close', () => {
+          if (!child.isDestroyed()) {
+            child.destroy()
+          }
+        })
+
+        // add this pid to list of pids
+        tryToCall(child, () => {
+          if (instance && instance.pid) {
+            if (!instance.allPids) throw new Error('Missing allPids!')
+
+            instance.allPids.push(child.webContents.getOSProcessId())
+          }
         })
       },
-    }
-
-    if (options.browser.isHeadless) {
-      // prevents a tiny 1px padding around the window
-      // causing screenshots/videos to be off by 1px
-      options.resizable = false
     }
 
     return _.defaultsDeep({}, options, defaults)
@@ -182,7 +185,7 @@ module.exports = {
 
   _getAutomation,
 
-  async _render (url, automation, preferences = {}, options = {}) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -195,9 +198,11 @@ module.exports = {
       win.maximize()
     }
 
-    return this._launch(win, url, automation, preferences).tap(async () => {
-      automation.use(await _getAutomation(win, preferences, automation))
-    })
+    const launched = await this._launch(win, url, automation, preferences, options.videoApi)
+
+    automation.use(await _getAutomation(win, preferences, automation))
+
+    return launched
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -205,92 +210,88 @@ module.exports = {
 
     const [parentX, parentY] = parent.getPosition()
 
-    options = this._defaultOptions(projectRoot, state, options)
+    const electronOptions = this._defaultOptions(projectRoot, state, options, automation)
 
-    _.extend(options, {
+    _.extend(electronOptions, {
       x: parentX + 100,
       y: parentY + 100,
       trackState: false,
+      // in run mode, force new windows to automatically open with show: false
+      // this prevents window.open inside of javascript client code to cause a new BrowserWindow instance to open
+      // https://github.com/cypress-io/cypress/issues/123
+      show: !options.isTextTerminal,
     })
 
-    const win = Windows.create(projectRoot, options)
+    const win = Windows.create(projectRoot, electronOptions)
 
     // needed by electron since we prevented default and are creating
     // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
     e.newGuest = win
 
-    return this._launch(win, url, automation, options)
+    return this._launch(win, url, automation, electronOptions)
   },
 
-  _launch (win, url, automation, options) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {
+      // @ts-expect-error mapping strings to event names is failing typecheck
       win.on(e, () => {
         debug('%s fired on the BrowserWindow %o', e, { browserWindowUrl: url })
       })
     })
 
-    return Bluebird.try(() => {
-      return this._attachDebugger(win.webContents)
-    })
-    .then(() => {
-      let ua
+    this._attachDebugger(win.webContents)
 
-      ua = options.userAgent
+    const ua = options.userAgent
 
-      if (ua) {
-        this._setUserAgent(win.webContents, ua)
-        // @see https://github.com/cypress-io/cypress/issues/22953
-      } else if (options.experimentalModifyObstructiveThirdPartyCode) {
-        const userAgent = this._getUserAgent(win.webContents)
-        // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
-        const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
+    if (ua) {
+      this._setUserAgent(win.webContents, ua)
+      // @see https://github.com/cypress-io/cypress/issues/22953
+    } else if (options.experimentalModifyObstructiveThirdPartyCode) {
+      const userAgent = this._getUserAgent(win.webContents)
+      // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
+      const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
 
-        this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
+      this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
+    }
+
+    const setProxy = () => {
+      let ps
+
+      ps = options.proxyServer
+
+      if (ps) {
+        return this._setProxy(win.webContents, ps)
       }
+    }
 
-      const setProxy = () => {
-        let ps
+    await Promise.all([
+      setProxy(),
+      this._clearCache(win.webContents),
+    ])
 
-        ps = options.proxyServer
+    await win.loadURL('about:blank')
+    const cdpAutomation = await this._getAutomation(win, options, automation)
 
-        if (ps) {
-          return this._setProxy(win.webContents, ps)
-        }
-      }
+    automation.use(cdpAutomation)
 
-      return Bluebird.join(
-        setProxy(),
-        this._clearCache(win.webContents),
-      )
-    })
-    .then(() => {
-      return win.loadURL('about:blank')
-    })
-    .then(() => this._getAutomation(win, options, automation))
-    .then((cdpAutomation) => automation.use(cdpAutomation))
-    .then(() => {
-      return Promise.all([
-        _maybeRecordVideo(win.webContents, options),
-        this._handleDownloads(win, options.downloadsFolder, automation),
-      ])
-    })
-    .then(() => {
-      // enabling can only happen once the window has loaded
-      return this._enableDebugger(win.webContents)
-    })
-    .then(() => {
-      return win.loadURL(url)
-    })
-    .then(() => {
-      if (options.experimentalSessionAndOrigin) {
-        this._listenToOnBeforeHeaders(win)
-      }
-    })
-    .return(win)
+    await Promise.all([
+      videoApi && recordVideo(cdpAutomation, videoApi),
+      this._handleDownloads(win, options.downloadsFolder, automation),
+    ])
+
+    // enabling can only happen once the window has loaded
+    await this._enableDebugger(win.webContents)
+
+    await win.loadURL(url)
+    if (options.experimentalSessionAndOrigin) {
+      this._listenToOnBeforeHeaders(win)
+    }
+
+    return win
   },
 
   _attachDebugger (webContents) {
@@ -304,11 +305,12 @@ module.exports = {
 
     const originalSendCommand = webContents.debugger.sendCommand
 
-    webContents.debugger.sendCommand = function (message, data) {
+    webContents.debugger.sendCommand = async function (message, data) {
       debugVerbose('debugger: sending %s with params %o', message, data)
 
-      return originalSendCommand.call(webContents.debugger, message, data)
-      .then((res) => {
+      try {
+        const res = await originalSendCommand.call(webContents.debugger, message, data)
+
         let debugRes = res
 
         if (debug.enabled && (_.get(debugRes, 'data.length') > 100)) {
@@ -319,10 +321,10 @@ module.exports = {
         debugVerbose('debugger: received response to %s: %o', message, debugRes)
 
         return res
-      }).catch((err) => {
+      } catch (err) {
         debug('debugger: received error on %s: %o', message, err)
         throw err
-      })
+      }
     }
 
     webContents.debugger.sendCommand('Browser.getVersion')
@@ -338,7 +340,7 @@ module.exports = {
     })
   },
 
-  _enableDebugger (webContents) {
+  _enableDebugger (webContents: WebContents) {
     debug('debugger: enable Console and Network')
 
     return webContents.debugger.sendCommand('Console.enable')
@@ -375,7 +377,7 @@ module.exports = {
     })
   },
 
-  _listenToOnBeforeHeaders (win) {
+  _listenToOnBeforeHeaders (win: BrowserWindow) {
     // true if the frame only has a single parent, false otherwise
     const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
 
@@ -448,86 +450,81 @@ module.exports = {
     })
   },
 
-  async connectToNewSpec (browser, options, automation) {
-    this.open(browser, options.url, options, automation)
+  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
+    if (!options.url) throw new Error('Missing url in connectToNewSpec')
+
+    await this.open(browser, options.url, options, automation)
   },
 
-  async connectToExisting () {
+  connectToExisting () {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
-  open (browser, url, options = {}, automation) {
-    const { projectRoot, isTextTerminal } = options
-
+  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) {
     debug('open %o', { browser, url })
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.get()
-    }).then((state) => {
-      debug('received saved state %o', state)
+    const State = await savedState.create(options.projectRoot, options.isTextTerminal)
+    const state = await State.get()
 
-      // get our electron default options
-      // TODO: this is bad, don't mutate the options object
-      options = this._defaultOptions(projectRoot, state, options, automation)
+    debug('received saved state %o', state)
 
-      // get the GUI window defaults now
-      options = Windows.defaults(options)
+    // get our electron default options
+    const electronOptions: ElectronOpts = Windows.defaults(
+      this._defaultOptions(options.projectRoot, state, options, automation),
+    )
 
-      debug('browser window options %o', _.omitBy(options, _.isFunction))
+    debug('browser window options %o', _.omitBy(electronOptions, _.isFunction))
 
-      const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-        preferences: options,
-      })
-
-      return utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
-    }).then((launchOptions) => {
-      const { preferences } = launchOptions
-
-      debug('launching browser window to url: %s', url)
-
-      return this._render(url, automation, preferences, {
-        projectRoot: options.projectRoot,
-        isTextTerminal: options.isTextTerminal,
-      })
-      .then(async (win) => {
-        await _installExtensions(win, launchOptions.extensions, options)
-
-        // cause the webview to receive focus so that
-        // native browser focus + blur events fire correctly
-        // https://github.com/cypress-io/cypress/issues/1939
-        tryToCall(win, 'focusOnWebView')
-
-        const events = new EE
-
-        win.once('closed', () => {
-          debug('closed event fired')
-
-          Windows.removeAllExtensions(win)
-
-          return events.emit('exit')
-        })
-
-        instance = _.extend(events, {
-          pid: [tryToCall(win, () => {
-            return win.webContents.getOSProcessId()
-          })],
-          browserWindow: win,
-          kill () {
-            if (this.isProcessExit) {
-              // if the process is exiting, all BrowserWindows will be destroyed anyways
-              return
-            }
-
-            return tryToCall(win, 'destroy')
-          },
-          removeAllListeners () {
-            return tryToCall(win, 'removeAllListeners')
-          },
-        })
-
-        return instance
-      })
+    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
+      preferences: electronOptions,
     })
+
+    const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, electronOptions)
+
+    const { preferences } = launchOptions
+
+    debug('launching browser window to url: %s', url)
+
+    const win = await this._render(url, automation, preferences, electronOptions)
+
+    await _installExtensions(win, launchOptions.extensions, electronOptions)
+
+    // cause the webview to receive focus so that
+    // native browser focus + blur events fire correctly
+    // https://github.com/cypress-io/cypress/issues/1939
+    tryToCall(win, 'focusOnWebView')
+
+    const events = new EE()
+
+    win.once('closed', () => {
+      debug('closed event fired')
+
+      Windows.removeAllExtensions(win)
+
+      return events.emit('exit')
+    })
+
+    const mainPid: number = tryToCall(win, () => {
+      return win.webContents.getOSProcessId()
+    })
+
+    instance = _.extend(events, {
+      pid: mainPid,
+      allPids: [mainPid],
+      browserWindow: win,
+      kill (this: BrowserInstance) {
+        if (this.isProcessExit) {
+          // if the process is exiting, all BrowserWindows will be destroyed anyways
+          return
+        }
+
+        return tryToCall(win, 'destroy')
+      },
+      removeAllListeners () {
+        return tryToCall(win, 'removeAllListeners')
+      },
+    }) as BrowserInstance
+
+    return instance
   },
 }
