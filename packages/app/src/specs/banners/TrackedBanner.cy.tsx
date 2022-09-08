@@ -75,14 +75,16 @@ describe('<TrackedBanner />', () => {
 
     context('when banner not previously shown', () => {
       beforeEach(() => {
-        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={false} /> })
+        cy.mount({
+          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={false} eventData={{ campaign: 'CAM', medium: 'MED', cohort: 'COH' }} />,
+        })
       })
 
       it('should record event', () => {
         cy.get('@recordEvent').should('have.been.calledOnce')
         cy.get('@recordEvent').should(
           'have.been.calledWith',
-          Cypress.sinon.match({ campaign: 'test-banner', messageId: Cypress.sinon.match.string, medium: 'dev' }),
+          Cypress.sinon.match({ campaign: 'CAM', messageId: Cypress.sinon.match.string, medium: 'MED', cohort: 'COH' }),
         )
       })
 

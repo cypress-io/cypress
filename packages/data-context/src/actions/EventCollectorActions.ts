@@ -7,6 +7,7 @@ interface CollectableEvent {
   campaign: string
   messageId: string
   medium: string
+  cohort?: string
 }
 
 export class EventCollectorActions {
@@ -19,7 +20,7 @@ export class EventCollectorActions {
 
       await this.ctx.util.fetch(
         `${dashboardUrl}/anon-collect`,
-        { method: 'POST', body: JSON.stringify({ ...event }) },
+        { method: 'POST', body: JSON.stringify(event) },
       )
 
       debug(`Recorded event: %o`, event)

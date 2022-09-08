@@ -17,12 +17,19 @@ import { set } from 'lodash'
 import { useDebounceFn } from '@vueuse/core'
 import { nanoid } from 'nanoid'
 
+type EventData = {
+  campaign: string
+  medium: string
+  cohort?: string
+}
+
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
 type AlertComponentEmits = InstanceType<typeof Alert>['$emit']
 interface TrackedBannerComponentProps extends AlertComponentProps {
   bannerId: string
   modelValue: boolean
   hasBannerBeenShown: boolean
+  eventData: EventData
 }
 interface TrackedBannerComponentEmits extends AlertComponentEmits {
   (e: 'update:modelValue'): void
@@ -47,8 +54,8 @@ mutation TrackedBanner_SetProjectState($value: String!) {
 `
 
 gql`
-mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!, $medium: String!) {
-  recordEvent(campaign: $campaign, messageId: $messageId, medium: $medium)
+mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!, $medium: String!, $cohort: String) {
+  recordEvent(campaign: $campaign, messageId: $messageId, medium: $medium, cohort: $cohort)
 }
 `
 
@@ -61,16 +68,20 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 
-const recordBannerShown = useDebounceFn(() => {
-  // TODO Set appropriate `medium` value
-  reportSeenMutation.executeMutation({ campaign: props.bannerId, messageId: bannerInstanceId.value, medium: 'dev' })
+const recordBannerShown = useDebounceFn(({ campaign, medium, cohort }: EventData) => {
+  reportSeenMutation.executeMutation({
+    campaign,
+    messageId: bannerInstanceId.value,
+    medium,
+    cohort: cohort || null,
+  })
 }, 1000)
 
 watchEffect(() => {
   if (props.modelValue) {
-    if (!props.hasBannerBeenShown) {
+    if (!props.hasBannerBeenShown && props.eventData) {
       // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
-      recordBannerShown()
+      recordBannerShown(props.eventData)
     }
 
     updateBannerState('lastShown')

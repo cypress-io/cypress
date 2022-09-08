@@ -9,6 +9,11 @@
     :icon="OrganizationIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Set up your organization',
+      medium: 'Specs Create Organization Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">

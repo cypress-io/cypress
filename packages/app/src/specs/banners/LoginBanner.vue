@@ -9,6 +9,11 @@
     :icon="ConnectIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Log In',
+      medium: 'Specs Login Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">

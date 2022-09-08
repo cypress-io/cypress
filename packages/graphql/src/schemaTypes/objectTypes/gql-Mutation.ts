@@ -691,13 +691,14 @@ export const mutation = mutationType({
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
         medium: nonNull(stringArg({})),
-        // cohort: nonNull(stringArg({})),
+        cohort: stringArg({}),
       },
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
           campaign: args.campaign,
           messageId: args.messageId,
           medium: args.medium,
+          cohort: args.cohort,
         })
       },
     })

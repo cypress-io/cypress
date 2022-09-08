@@ -9,6 +9,11 @@
     :icon="RecordIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Record Runs',
+      medium: 'Specs Record Runs Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">

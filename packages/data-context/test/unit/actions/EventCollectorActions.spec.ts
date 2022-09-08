@@ -27,18 +27,19 @@ describe('EventCollectorActions', () => {
         campaign: 'abc',
         medium: 'def',
         messageId: 'ghi',
+        cohort: '123',
       })
 
       expect(ctx.util.fetch).to.have.been.calledOnceWith(
-        'https://dashboard-staging.cypress.io/anon-collect',
-        { method: 'POST', body: '{"campaign":"abc","medium":"def","messageId":"ghi"}' },
+        sinon.match(/anon-collect$/), // Verify URL ends with expected 'anon-collect' path
+        { method: 'POST', body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123"}' },
       )
     })
 
     it('resolve true if request succeeds', async () => {
       (ctx.util.fetch as SinonStub).resolves({} as any)
 
-      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '' })
+      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' })
 
       expect(result).to.eql(true)
     })
@@ -46,7 +47,7 @@ describe('EventCollectorActions', () => {
     it('resolves false if request fails', async () => {
       (ctx.util.fetch as SinonStub).rejects({} as any)
 
-      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '' })
+      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' })
 
       expect(result).to.eql(false)
     })

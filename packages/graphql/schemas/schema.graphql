@@ -1292,7 +1292,7 @@ type Mutation {
   """
   Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
   """
-  recordEvent(campaign: String!, medium: String!, messageId: String!): Boolean
+  recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
 
   """
   Signal that we are explicitly refetching remote data and should not use the server cache
