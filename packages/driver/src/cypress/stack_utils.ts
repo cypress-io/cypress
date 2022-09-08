@@ -14,7 +14,7 @@ const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLinePatchedErrorRegex = /__CyWebKitError@.*[\n\r]?/g
-const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/
+const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -408,7 +408,7 @@ const normalizedStack = (err) => {
     // the output with other browsers, minimizing the visual impact to the stack traces we render
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
-    errStack = errStack.replaceAll(new RegExp(webkitStackLineRegex, 'g'), (match, ...parts: string[]) => {
+    errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
       return [
         parts[0] || '<unknown>',
         '@',
