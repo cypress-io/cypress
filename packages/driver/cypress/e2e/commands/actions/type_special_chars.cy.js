@@ -1746,7 +1746,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
 
       // WebKit still emits the submit event on the form in this configuration.
-      it('will not submit the form', { browser: '!webkit' }, function (done) {
+      it('will not submit the form', { /* browser: '!webkit' */ }, function (done) {
         this.$forms.find('#multiple-inputs-and-multiple-submits').submit(() => {
           done(new Error('should not receive submit event'))
         })

@@ -431,7 +431,7 @@ describe('driver/src/cy/timers', () => {
   })
 
   // TODO(webkit): fix+unskip
-  it('does not fire queued timers if page transitions while paused', { browser: '!webkit' }, () => {
+  it('does not fire queued timers if page transitions while paused', { /* browser: '!webkit' */ }, () => {
     // at least in chrome... whenever the page is unloaded
     // the browser WILL CANCEL outstanding macrotasks automatically
     // and invoking them does nothing

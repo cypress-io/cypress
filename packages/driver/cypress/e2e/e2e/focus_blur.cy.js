@@ -510,7 +510,7 @@ describe('polyfill programmatic blur events', () => {
 })
 
 // TODO(webkit): fix+unskip for experimental webkit release
-describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
+describe('intercept blur methods correctly', { /* browser: '!webkit' */ }, () => {
   beforeEach(() => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
       top.focus()

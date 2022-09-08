@@ -1961,7 +1961,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('beforeinput special inputTypes in [contenteditable] (not WebKit)', { browser: '!webkit' }, () => {
+      it('beforeinput special inputTypes in [contenteditable] (not WebKit)', { /* browser: '!webkit' */ }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)

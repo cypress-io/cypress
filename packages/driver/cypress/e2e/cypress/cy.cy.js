@@ -114,7 +114,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     // TODO(webkit): fix+unskip for experimental webkit
-    it('stores invocation stack for first command', { browser: '!webkit' }, () => {
+    it('stores invocation stack for first command', { /* browser: '!webkit' */ }, () => {
       cy
       .get('input:first')
       .then(() => {
@@ -125,7 +125,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     // TODO(webkit): fix+unskip for experimental webkit
-    it('stores invocation stack for chained command', { browser: '!webkit' }, () => {
+    it('stores invocation stack for chained command', { /* browser: '!webkit' */ }, () => {
       cy
       .get('div')
       .find('input')
@@ -176,7 +176,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     // TODO(webkit): fix+unskip for experimental webkit
-    describe('invocation stack', { browser: '!webkit' }, () => {
+    describe('invocation stack', { /* browser: '!webkit' */ }, () => {
       beforeEach(() => {
         Cypress.Commands.add('getInput', () => cy.get('input'))
         Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {

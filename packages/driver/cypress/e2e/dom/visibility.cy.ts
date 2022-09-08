@@ -650,7 +650,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       // TODO(webkit): fix+unskip
-      it('follows regular visibility logic if option outside of select', { browser: '!webkit' }, function () {
+      it('follows regular visibility logic if option outside of select', { /* browser: '!webkit' */ }, function () {
         expect(this.$optionOutsideSelect.find('#option-hidden').is(':hidden')).to.be.true
         expect(this.$optionOutsideSelect.find('#option-hidden')).to.be.hidden
         cy.wrap(this.$optionOutsideSelect.find('#option-hidden')).should('be.hidden')

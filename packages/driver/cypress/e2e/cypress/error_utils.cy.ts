@@ -354,7 +354,7 @@ describe('driver/src/cypress/error_utils', () => {
     })
 
     // TODO(webkit): fix+unskip for experimental webkit
-    it('removes internal stack lines from stack', { browser: '!webkit' }, () => {
+    it('removes internal stack lines from stack', { /* browser: '!webkit' */ }, () => {
       // this features relies on Error.captureStackTrace, which some
       // browsers don't have (e.g. Firefox)
       if (!Error.captureStackTrace) return
@@ -600,7 +600,7 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('Error.captureStackTrace', () => {
     // TODO(webkit): fix+unskip for experimental webkit
-    it('works - even where not natively support', { browser: '!webkit' }, () => {
+    it('works - even where not natively support', { /* browser: '!webkit' */ }, () => {
       function removeMe2 () {
         const err: Record<string, any> = {}
 

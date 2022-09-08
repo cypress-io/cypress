@@ -2399,7 +2399,7 @@ describe.skip('network stubbing', function () {
 
       // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
       // or disable forceNetworkError for experimental release
-      it('can forceNetworkError', { browser: '!webkit' }, function (done) {
+      it('can forceNetworkError', { /* browser: '!webkit' */ }, function (done) {
         const url = uniqueRoute('/foo')
 
         cy.intercept(`${url}*`, function (req) {
@@ -3086,7 +3086,7 @@ describe.skip('network stubbing', function () {
 
       // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
       // or disable forceNetworkError for experimental release
-      it('can forceNetworkError', { browser: '!webkit' }, function (done) {
+      it('can forceNetworkError', { /* browser: '!webkit' */ }, function (done) {
         const url = uniqueRoute('/foo')
 
         cy.intercept(`${url}*`, function (req) {
@@ -3478,7 +3478,7 @@ describe.skip('network stubbing', function () {
 
     // @see https://github.com/cypress-io/cypress/issues/8934
     // TODO(webkit): fix+unskip. currently fails in WK because cache is disabled
-    it('can spy on a 304 not modified image response', { browser: '!webkit' }, function () {
+    it('can spy on a 304 not modified image response', { /* browser: '!webkit' */ }, function () {
       const url = `/fixtures/media/cypress.png?i=${Date.now()}`
 
       cy.intercept(url).as('image')

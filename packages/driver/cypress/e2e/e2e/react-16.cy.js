@@ -1,5 +1,5 @@
 // TODO(webkit): fix+unskip for experimental webkit release
-describe('react v16.0.0', { browser: '!webkit' }, () => {
+describe('react v16.0.0', { /* browser: '!webkit' */ }, () => {
   context('fires onChange events', () => {
     beforeEach(() => {
       cy.visit('/fixtures/react-16.html')

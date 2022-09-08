@@ -95,7 +95,7 @@ describe('e2e forms', () => {
     })
 
     systemTests.it('failing', {
-      browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
+      /* browser: '!webkit' */, // TODO(webkit): fix+unskip (failing due to broken stack trace)
       spec: 'form_submission_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
