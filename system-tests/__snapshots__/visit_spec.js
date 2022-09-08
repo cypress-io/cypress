@@ -125,10 +125,6 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
 
 
-
-      [stack trace lines]
-
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
