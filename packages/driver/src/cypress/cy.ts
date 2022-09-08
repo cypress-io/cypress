@@ -200,7 +200,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   ensureValidPosition: IEnsures['ensureValidPosition']
   ensureScrollability: IEnsures['ensureScrollability']
   ensureNotReadonly: IEnsures['ensureNotReadonly']
-  ensureCommandIsSameOrigin: IEnsures['ensureCommandIsSameOrigin']
+  ensureCommandCanCommunicateWithAUT: IEnsures['ensureCommandCanCommunicateWithAUT']
 
   createSnapshot: ISnapshots['createSnapshot']
   detachDom: ISnapshots['detachDom']
@@ -352,7 +352,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
-    this.ensureCommandIsSameOrigin = ensures.ensureCommandIsSameOrigin
+    this.ensureCommandCanCommunicateWithAUT = ensures.ensureCommandCanCommunicateWithAUT
 
     const snapshots = createSnapshots(this.$$, state)
 

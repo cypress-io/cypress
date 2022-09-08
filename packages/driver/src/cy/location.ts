@@ -18,7 +18,7 @@ const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<Loca
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (state: StateFunc) => ({
-  getRemoteLocation (key?: string | undefined, win?: Window) {
+  getRemoteLocation (key?: string | undefined, win?: Window): LocationObject {
     try {
       const remoteUrl = $utils.locToString(win ?? state('window'))
       const location = $Location.create(remoteUrl)
@@ -31,14 +31,14 @@ export const create = (state: StateFunc) => ({
     } catch (e) {
       // it is possible we do not have access to the location
       // for example, if the app has redirected to a different origin
-      return ''
+      return $Location.create('')
     }
   },
-  async getCrossOriginRemoteLocation (key?: string | undefined, win?: Window) {
+  async getCrossOriginRemoteLocation (key?: string | undefined, win?: Window): Promise<LocationObject> {
     const autWindow = win ?? state('window')
 
     if (!autWindow) {
-      return ''
+      return $Location.create('')
     }
 
     let autLocation: LocationObject

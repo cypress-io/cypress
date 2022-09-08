@@ -384,12 +384,12 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   /**
-   * ensureCommandIsSameOrigin will check if the command window origin matches the AUT origin.
-   * If the origins do not match it throws an error.
+   * ensureCommandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
+   * If we can not communicate, throw an error.
    * Intended to use within retry loops.
    * @returns true or throws an error
    */
-  const ensureCommandIsSameOrigin = (): boolean => {
+  const ensureCommandCanCommunicateWithAUT = (): boolean => {
     if (!cy.isRunnerAbleToCommunicateWithAut()) {
       $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
         commandOrigin: window.location.origin,
@@ -417,7 +417,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
-    ensureCommandIsSameOrigin,
+    ensureCommandCanCommunicateWithAUT,
 
     // internal functions
     ensureSubjectByType,

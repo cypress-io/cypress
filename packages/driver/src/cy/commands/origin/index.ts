@@ -67,7 +67,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       const validator = new Validator({
         log,
-        onFailure: () => {},
       })
 
       validator.validate({

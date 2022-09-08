@@ -339,24 +339,20 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    // Sometimes we don't have a window when loading.
-    // TODO: need to investigate what to do when this happens.
-    if (state('window')) {
-      const href = state('window').location.href
-      const count = getRedirectionCount(href)
-      const limit = config('redirectionLimit')
+    const href = state('autLocation').href
+    const count = getRedirectionCount(href)
+    const limit = config('redirectionLimit')
 
-      if (count === limit) {
-        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-          args: {
-            href,
-            limit,
-          },
-        })
-      }
-
-      updateRedirectionCount(href)
+    if (count === limit) {
+      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+        args: {
+          href,
+          limit,
+        },
+      })
     }
+
+    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 
@@ -936,6 +932,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // reset window on load
         win = state('window')
 
+        // If we are visiting a cross origin domain and have onLoad or onBeforeLoad options specified, throw an error.
         if (!cy.isRunnerAbleToCommunicateWithAut()) {
           if (onLoadIsUserDefined) {
             $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
@@ -1077,8 +1074,11 @@ export default (Commands, Cypress, cy, state, config) => {
           remote = $Location.create(url)
 
           // if the origin currently matches
+          // or if we have previously visited a location or are a spec bridge
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))) {
+          if (remote.originPolicy === existing.originPolicy
+            || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
+          ) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
