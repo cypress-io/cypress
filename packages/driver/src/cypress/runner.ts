@@ -1687,6 +1687,8 @@ export default {
         if (logAttrs) {
           return LogUtils.getConsoleProps(logAttrs)
         }
+
+        return
       },
 
       getSnapshotPropsForLog ({ testId, logId }) {
@@ -1701,6 +1703,8 @@ export default {
         if (logAttrs) {
           return LogUtils.getSnapshotProps(logAttrs)
         }
+
+        return
       },
 
       resumeAtTest (id, emissions: Emissions = {
