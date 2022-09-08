@@ -22,7 +22,6 @@
     "ansi-colors": "^4.1.1",
     "convert-source-map": "^1.8.0",
     "debug": "^4.1.1",
-    "dirt-simple-file-cache": "^0.4.0",
     "resolve-from": "^5.0.0",
     "source-map-js": "^0.6.2",
     "temp-dir": "^2.0.0",

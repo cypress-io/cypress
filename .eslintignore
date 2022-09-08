@@ -112,7 +112,6 @@ system-tests/projects/react-app-webpack-5-unconfigured/**/*
 system-tests/project-fixtures/**
 system-tests/projects/**/*/expected-cypress*/**/*
 
-packages/electron-mksnapshot/bin/**
-
 # These are generated files that are not linted
+tooling/electron-mksnapshot/bin/**
 tooling/v8-snapshot/cache/**
