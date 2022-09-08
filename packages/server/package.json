@@ -193,7 +193,8 @@
     "config",
     "lib",
     "patches",
-    "server-entry.js"
+    "server-entry.js",
+    "hook-require.js"
   ],
   "types": "index.d.ts",
   "productName": "Cypress",

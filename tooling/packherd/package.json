@@ -24,7 +24,7 @@
     "mocha": "7.0.1"
   },
   "files": [
-    "dist/*",
+    "dist",
     "src/packherd.ts"
   ],
   "types": "src/packherd.ts"

@@ -38,7 +38,7 @@
     "stealthy-require": "^1.1.1"
   },
   "files": [
-    "dist/*",
+    "dist",
     "src/v8-snapshot.ts"
   ],
   "types": "src/v8-snapshot.ts",
