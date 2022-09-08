@@ -127,9 +127,12 @@ const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
 
-const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absoluteFile }) => {
+const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, relativeFile, absoluteFile }) => {
   if (!sourceCode) return
 
+  // stack columns are 0-based but code frames and IDEs start columns at 1.
+  // add 1 so the code frame and "open in IDE" point to the right line
+  const column = originalColumn + 1
   const frame = codeFrameColumns(sourceCode, { start: { line, column } })
 
   if (!frame) return
@@ -332,8 +335,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile,
     absoluteFile,
     line: sourceDetails.line,
-    // adding 1 to column makes more sense for code frame and opening in editor
-    column: sourceDetails.column + 1,
+    column: sourceDetails.column,
     whitespace,
   }
 }
