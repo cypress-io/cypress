@@ -45,7 +45,7 @@ const cypressAppSnapshotDir = (() => {
 
 const pathsMapper = (s: string) => s.replace(/^packages\//, './packages/')
 
-const usePreviousSnapshotMetadata = process.env.PACK_FROM_SCRATCH == null
+const usePreviousSnapshotMetadata = process.env.V8_SNAPSHOT_FROM_SCRATCH == null
 
 /**
  * @typedef {Object} SnapshotConfig          - Configuration for creating snapshots.

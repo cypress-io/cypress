@@ -298,7 +298,6 @@
     "./node_modules/globby/node_modules/ignore/index.js",
     "./node_modules/globby/stream-utils.js",
     "./node_modules/graceful-fs/graceful-fs.js",
-    "./node_modules/graceful-fs/polyfills.js",
     "./node_modules/http-errors/index.js",
     "./node_modules/http-proxy/index.js",
     "./node_modules/http-proxy/lib/http-proxy.js",
@@ -447,7 +446,6 @@
     "./node_modules/prettier/parser-glimmer.js",
     "./node_modules/prettier/parser-meriyah.js",
     "./node_modules/prettier/parser-typescript.js",
-    "./node_modules/prettier/third-party.js",
     "./node_modules/process-nextick-args/index.js",
     "./node_modules/pseudomap/map.js",
     "./node_modules/pumpify/index.js",
@@ -632,7 +630,6 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/fs-extra/lib/json/jsonfile.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/fs-extra/lib/path-exists/index.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/graceful-fs.js",
-    "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/cross-spawn/node_modules/semver/semver.js",
     "./packages/server/node_modules/duplexify/index.js",
     "./packages/server/node_modules/execa/lib/errname.js",
@@ -640,7 +637,6 @@
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
     "./packages/server/node_modules/graceful-fs/graceful-fs.js",
-    "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/http-proxy/index.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy/index.js",
@@ -3450,5 +3446,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ec6192b24bb95b0eb112e649eccd53f1fd71f6759b0b4e7b497664d2cd9f7ddf"
+  "deferredHash": "e8d91aedd6aa8db8bd7ebd3961999f90a727ed5e16cc598bde3528922635401f"
 }

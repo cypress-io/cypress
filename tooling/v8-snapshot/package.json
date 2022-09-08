@@ -43,18 +43,18 @@
   ],
   "types": "src/v8-snapshot.ts",
   "optionalDependencies": {
-    "snapbuild-android-arm64": "0.0.133",
-    "snapbuild-darwin-64": "0.0.133",
-    "snapbuild-darwin-arm64": "0.0.133",
-    "snapbuild-freebsd-64": "0.0.133",
-    "snapbuild-freebsd-arm64": "0.0.133",
-    "snapbuild-linux-32": "0.0.133",
-    "snapbuild-linux-64": "0.0.133",
-    "snapbuild-linux-arm": "0.0.133",
-    "snapbuild-linux-arm64": "0.0.133",
-    "snapbuild-linux-mips64le": "0.0.133",
-    "snapbuild-linux-ppc64le": "0.0.133",
-    "snapbuild-windows-32": "0.0.133",
-    "snapbuild-windows-64": "0.0.133"
+    "@cypress/snapbuild-android-arm64": "1.0.0",
+    "@cypress/snapbuild-darwin-64": "1.0.0",
+    "@cypress/snapbuild-darwin-arm64": "1.0.0",
+    "@cypress/snapbuild-freebsd-64": "1.0.0",
+    "@cypress/snapbuild-freebsd-arm64": "1.0.0",
+    "@cypress/snapbuild-linux-32": "1.0.0",
+    "@cypress/snapbuild-linux-64": "1.0.0",
+    "@cypress/snapbuild-linux-arm": "1.0.0",
+    "@cypress/snapbuild-linux-arm64": "1.0.0",
+    "@cypress/snapbuild-linux-mips64le": "1.0.0",
+    "@cypress/snapbuild-linux-ppc64le": "1.0.0",
+    "@cypress/snapbuild-windows-32": "1.0.0",
+    "@cypress/snapbuild-windows-64": "1.0.0"
   }
 }
