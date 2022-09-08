@@ -1796,7 +1796,7 @@ export default {
 
     command_inside_should (obj) {
       return stripIndent`\
-        ${cmd('should')} failed because you invoked a command inside the callback. Use ${cmd('then')} instead of ${cmd('should')}, or move any commands outside the callback function.
+        ${cmd('should')} failed because you invoked a command inside the callback. ${cmd('should')} retries the inner function, which would result in commands being added to the queue multiple times. Use ${cmd('then')} instead of ${cmd('should')}, or move any commands outside the callback function.
 
         The command invoked was:
 
