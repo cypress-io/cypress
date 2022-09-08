@@ -132,28 +132,6 @@ export default {
     },
   },
 
-  selectFile: {
-    docsUrl: 'https://on.cypress.io/selectfile',
-    invalid_action: {
-      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
-    },
-    invalid_array_file_reference: {
-      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
-    },
-    invalid_single_file_reference: {
-      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
-    },
-    multiple_elements: {
-      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
-    },
-    not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
-    },
-    invalid_alias: {
-      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
-    },
-  },
-
   blur: {
     docsUrl: 'https://on.cypress.io/blur',
     multiple_elements: {
@@ -1646,6 +1624,28 @@ export default {
     },
   },
 
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
+    },
+  },
+
   selector_playground: {
     defaults_invalid_arg: {
       message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
@@ -1792,6 +1792,16 @@ export default {
     language_chainer: {
       message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
       docsUrl: 'https://on.cypress.io/assertions',
+    },
+
+    command_inside_should (obj) {
+      return stripIndent`\
+        ${cmd('should')} failed because you invoked a command inside the callback. Use ${cmd('then')} instead of ${cmd('should')}, or move any commands outside the callback function.
+
+        The command invoked was:
+
+          > ${cmd(obj.action)}
+      `
     },
   },
 

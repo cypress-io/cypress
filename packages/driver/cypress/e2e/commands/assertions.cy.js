@@ -302,6 +302,19 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/22587
+      it('does not allow cypress commands inside the callback', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`cy.should()` failed because you invoked a command inside the callback. Use `cy.then()` instead of `cy.should()`, or move any commands outside the callback function.\n\nThe command invoked was:\n\n  > `cy.log()`')
+
+          done()
+        })
+
+        cy.window().should((win) => {
+          cy.log(win)
+        })
+      })
+
       context('remote jQuery instances', () => {
         beforeEach(function () {
           this.remoteWindow = cy.state('window')
