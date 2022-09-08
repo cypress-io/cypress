@@ -1337,7 +1337,6 @@ export default {
           setTestsById,
           setTests,
           onRunnable,
-          () => {},
           getRunnableId,
           getHookId,
           getOnlyTestId,
