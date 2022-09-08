@@ -698,7 +698,7 @@ export const mutation = mutationType({
           campaign: args.campaign,
           messageId: args.messageId,
           medium: args.medium,
-          cohort: args.cohort,
+          cohort: args.cohort || undefined,
         })
       },
     })

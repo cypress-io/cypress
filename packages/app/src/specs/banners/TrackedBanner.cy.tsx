@@ -4,7 +4,7 @@ import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDo
 
 describe('<TrackedBanner />', () => {
   it('should pass through props and child content', () => {
-    cy.mount({ render: () => <TrackedBanner bannerId="test-banner" dismissible modelValue={true} hasBannerBeenShown={false}>Test Content</TrackedBanner> })
+    cy.mount({ render: () => <TrackedBanner bannerId="test-banner" dismissible modelValue={true} hasBannerBeenShown={false} eventData={{} as any}>Test Content</TrackedBanner> })
 
     cy.findByText('Test Content').should('be.visible')
     cy.findByTestId('alert-suffix-icon').should('be.visible')
@@ -96,7 +96,7 @@ describe('<TrackedBanner />', () => {
 
     context('when banner has been previously shown', () => {
       beforeEach(() => {
-        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={true} /> })
+        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={true} eventData={{} as any} /> })
       })
 
       it('should not record event', () => {
