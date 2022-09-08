@@ -156,15 +156,14 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 `
 
 exports['e2e spec_isolation fails [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 8,
   "totalTests": 12,
+  "totalFailed": 5,
   "totalPassed": 5,
   "totalPending": 1,
-  "totalFailed": 5,
   "totalSkipped": 1,
   "runs": [
     {
@@ -404,11 +403,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 36,
+                  "column": 37,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                    ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
               },
@@ -444,11 +443,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 8,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |          ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
               },
@@ -548,11 +547,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -609,11 +608,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -690,11 +689,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -736,19 +735,19 @@ exports['e2e spec_isolation fails [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 8,
   "totalTests": 12,
+  "totalFailed": 5,
   "totalPassed": 5,
   "totalPending": 1,
-  "totalFailed": 5,
   "totalSkipped": 1,
   "runs": [
     {
@@ -988,11 +987,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 36,
+                  "column": 37,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                    ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
               },
@@ -1028,11 +1027,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 8,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |          ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
               },
@@ -1132,11 +1131,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -1193,11 +1192,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -1274,11 +1273,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -1320,19 +1319,19 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 8,
   "totalTests": 12,
+  "totalFailed": 5,
   "totalPassed": 5,
   "totalPending": 1,
-  "totalFailed": 5,
   "totalSkipped": 1,
   "runs": [
     {
@@ -1572,11 +1571,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 36,
+                  "column": 37,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                    ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
               },
@@ -1612,11 +1611,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 8,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_failing.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js",
-                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |          ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
               },
@@ -1716,11 +1715,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -1777,11 +1776,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -1858,11 +1857,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -1904,19 +1903,19 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 6,
   "totalTests": 8,
+  "totalFailed": 4,
   "totalPassed": 2,
   "totalPending": 1,
-  "totalFailed": 4,
   "totalSkipped": 1,
   "runs": [
     {
@@ -1984,11 +1983,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2013,11 +2012,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2074,11 +2073,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2103,11 +2102,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2184,11 +2183,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2265,11 +2264,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -2294,11 +2293,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -2359,19 +2358,19 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 6,
   "totalTests": 8,
+  "totalFailed": 4,
   "totalPassed": 2,
   "totalPending": 1,
-  "totalFailed": 4,
   "totalSkipped": 1,
   "runs": [
     {
@@ -2439,11 +2438,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2468,11 +2467,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2529,11 +2528,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2558,11 +2557,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2639,11 +2638,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -2720,11 +2719,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -2749,11 +2748,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -2814,19 +2813,19 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
   "totalSuites": 6,
   "totalTests": 8,
+  "totalFailed": 4,
   "totalPassed": 2,
   "totalPending": 1,
-  "totalFailed": 4,
   "totalSkipped": 1,
   "runs": [
     {
@@ -2894,11 +2893,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2923,11 +2922,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 4,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |            ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
               },
@@ -2984,11 +2983,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -3013,11 +3012,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 16,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |            ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -3094,11 +3093,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 26,
-                  "column": 12,
+                  "column": 13,
                   "originalFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "relativeFile": "cypress/e2e/simple_failing_hook.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js",
-                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |            ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
               },
@@ -3175,11 +3174,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -3204,11 +3203,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 5,
-                  "column": 10,
+                  "column": 11,
                   "originalFile": "cypress/e2e/simple_retrying.cy.js",
                   "relativeFile": "cypress/e2e/simple_retrying.cy.js",
                   "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js",
-                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |          ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
+                  "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
               },
@@ -3269,5 +3268,6 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }

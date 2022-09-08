@@ -54,7 +54,7 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
     const withAboveMarkerRemoved = _.dropWhile(lines, (line: any) => {
-      return !line.includes(marker)
+      return !_.includes(line, marker)
     })
 
     return includeLast ? withAboveMarkerRemoved : withAboveMarkerRemoved.slice(1)
@@ -63,7 +63,7 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
 
 const stackWithReplacementMarkerLineRemoved = (stack) => {
   return stackWithLinesRemoved(stack, (lines) => {
-    return lines.filter((line) => !line.includes(STACK_REPLACEMENT_MARKER))
+    return _.reject(lines, (line) => _.includes(line, STACK_REPLACEMENT_MARKER))
   })
 }
 
@@ -77,7 +77,7 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
-  let commandCallIndex = stackLines.findIndex((line) => {
+  let commandCallIndex = _.findIndex(stackLines, (line) => {
     return line.includes(STACK_REPLACEMENT_MARKER)
   })
 
@@ -176,7 +176,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
 
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
-  if (stackIndex == null) return err.parsedStack?.find((line) => !!line.fileUrl)
+  if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
 
   return err.parsedStack[stackIndex]
 }
@@ -238,7 +238,7 @@ const getSourceDetails = (generatedDetails) => {
 const functionExtrasRegex = /(\/<|<\/<)$/
 
 const cleanFunctionName = (functionName) => {
-  if (typeof functionName !== 'string') return '<unknown>'
+  if (!_.isString(functionName)) return '<unknown>'
 
   return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
@@ -349,7 +349,7 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
 }
 
 const reconstructStack = (parsedStack) => {
-  return parsedStack.map((parsedLine) => {
+  return _.map(parsedStack, (parsedLine) => {
     if (parsedLine.message != null) {
       return `${parsedLine.whitespace}${parsedLine.message}`
     }
@@ -361,11 +361,10 @@ const reconstructStack = (parsedStack) => {
 }
 
 const getSourceStack = (stack, projectRoot?) => {
-  if (typeof stack !== 'string') return {}
+  if (!_.isString(stack)) return {}
 
-  const parsed = stack.split('\n').map((line) => {
-    return getSourceDetailsForLine(projectRoot, line)
-  })
+  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
+  const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
 
   return {
     parsed,
@@ -375,7 +374,7 @@ const getSourceStack = (stack, projectRoot?) => {
 
 const normalizeStackIndentation = (stack) => {
   const [messageLines, stackLines] = splitStack(stack)
-  const normalizedStackLines = stackLines.map((line) => {
+  const normalizedStackLines = _.map(stackLines, (line) => {
     if (stackLineRegex.test(line)) {
       // stack lines get indented 4 spaces
       return line.replace(whitespaceRegex, '    ')
@@ -416,17 +415,13 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
-  const winnowedStackLines = stackLines.filter((line) => {
+  const winnowedStackLines = _.reject(stackLines, (line) => {
     // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTOIN
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
-    if (line.includes('cy[name]') || line.includes('Chainer.prototype[key]')) {
-      return false
-    }
-
-    return true
+    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)
