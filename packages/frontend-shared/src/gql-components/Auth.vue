@@ -91,6 +91,7 @@ const props = defineProps<{
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
+  utmContent?: string
   showConnectButtonAfterLogin?: boolean
 }>()
 
@@ -118,8 +119,8 @@ mutation Auth_Logout {
 `
 
 gql`
-mutation Auth_Login ($utmSource: String!, $utmMedium: String!) {
-  login (utmSource: $utmSource, utmMedium: $utmMedium) {
+mutation Auth_Login ($utmSource: String!, $utmMedium: String!, $utmContent: String) {
+  login (utmSource: $utmSource, utmContent: $utmContent, utmMedium: $utmMedium) {
     ...Auth
   }
 }
@@ -194,7 +195,7 @@ const handleLoginOrContinue = async () => {
 
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
 const handleLogout = () => {
@@ -204,7 +205,7 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
 const handleCancel = () => {

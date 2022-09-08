@@ -1,5 +1,6 @@
 import { defaultMessages } from '@cy/i18n'
 import RecordBanner from './RecordBanner.vue'
+import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<RecordBanner />', () => {
   it('should render expected content', () => {
@@ -26,5 +27,24 @@ describe('<RecordBanner />', () => {
     cy.findByText('cypress run --component --record --key abcd-efg-1234')
 
     cy.percySnapshot()
+  })
+
+  it('should record expected event on mount', () => {
+    const recordEvent = cy.stub().as('recordEvent')
+
+    cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
+      recordEvent(event)
+
+      return defineResult({ recordEvent: true })
+    })
+
+    cy.mount({ render: () => <RecordBanner modelValue={true} hasBannerBeenShown={false} /> })
+
+    cy.get('@recordEvent').should('have.been.calledWith', {
+      campaign: 'Record Runs',
+      medium: 'Specs Record Runs Banner',
+      messageId: Cypress.sinon.match.string,
+      cohort: null,
+    })
   })
 })
