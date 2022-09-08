@@ -51,7 +51,7 @@ describe('navigation events', () => {
       cy.origin('http://foobar.com:3500', () => {
         const onLoad = (cb) => {
           const onNavChanged = (event) => {
-            if (event === 'page navigation event (\'load\')') {
+            if (event === 'page navigation event (load)') {
               cy.off('navigation:changed', onNavChanged)
               cb()
             }
