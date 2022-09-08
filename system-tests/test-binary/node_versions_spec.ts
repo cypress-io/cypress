@@ -32,3 +32,20 @@ describe('binary node versions', () => {
     'cypress/base:17.3.0',
   ].forEach(smokeTestDockerImage)
 })
+
+describe('type: module', () => {
+  [
+    'cypress/base:16.17.0',
+    'cypress/base:18.6.0',
+  ].forEach((dockerImage) => {
+    systemTests.it(`can run in ${dockerImage}`, {
+      withBinary: true,
+      project: 'config-cjs-and-esm/config-with-ts-module',
+      dockerImage,
+      testingType: 'e2e',
+      spec: 'app.cy.js',
+      browser: 'electron',
+      expectedExitCode: 0,
+    })
+  })
+})
