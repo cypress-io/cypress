@@ -114,7 +114,8 @@ const aboutBlank = (cy, win) => {
 
 const navigationChanged = async (Cypress, cy, state, source, arg) => {
   // get the current url of our remote application
-  const url = await cy.getCrossOriginRemoteLocation().href
+  const remoteLocation = await cy.getCrossOriginRemoteLocation()
+  const url = remoteLocation.href
 
   debug('navigation changed:', url)
 

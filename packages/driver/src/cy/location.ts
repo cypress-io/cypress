@@ -44,7 +44,7 @@ export const create = (state: StateFunc) => ({
     let autLocation: LocationObject
 
     try {
-      const remoteUrl = $utils.locToString(win ?? state('window'))
+      const remoteUrl = $utils.locToString(autWindow)
 
       autLocation = $Location.create(remoteUrl)
     } catch (e) {
