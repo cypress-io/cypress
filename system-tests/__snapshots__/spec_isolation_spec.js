@@ -3663,3 +3663,542 @@ exports['e2e spec_isolation failing with retries enabled [webkit] 1'] = {
   "cypressVersion": "9.9.9",
   "config": {}
 }
+
+exports['e2e spec_isolation fails [webkit] 1'] = {
+  "status": "finished",
+  "startedTestsAt": "2018-02-01T20:14:19.323Z",
+  "endedTestsAt": "2018-02-01T20:14:19.323Z",
+  "totalDuration": 5555,
+  "totalSuites": 8,
+  "totalTests": 12,
+  "totalPassed": 5,
+  "totalPending": 1,
+  "totalFailed": 5,
+  "totalSkipped": 1,
+  "runs": [
+    {
+      "stats": {
+        "suites": 1,
+        "tests": 1,
+        "passes": 1,
+        "pending": 0,
+        "skipped": 0,
+        "failures": 0,
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
+      },
+      "reporter": "spec",
+      "reporterStats": {
+        "suites": 1,
+        "tests": 1,
+        "passes": 1,
+        "pending": 0,
+        "failures": 0,
+        "start": "2018-02-01T20:14:19.323Z",
+        "end": "2018-02-01T20:14:19.323Z",
+        "duration": 1234
+      },
+      "hooks": [
+        {
+          "hookName": "before each",
+          "title": [
+            "\"before each\" hook"
+          ],
+          "body": "() => {\n    cy.wait(1000);\n  }"
+        }
+      ],
+      "tests": [
+        {
+          "title": [
+            "simple passing spec",
+            "passes"
+          ],
+          "state": "passed",
+          "body": "() => {\n    cy.wrap(true).should('be.true');\n  }",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "video": null,
+      "spec": {
+        "fileExtension": ".js",
+        "baseName": "simple_passing.cy.js",
+        "fileName": "simple_passing",
+        "specFileExtension": ".cy.js",
+        "relativeToCommonRoot": "simple_passing.cy.js",
+        "specType": "integration",
+        "name": "cypress/e2e/simple_passing.cy.js",
+        "relative": "cypress/e2e/simple_passing.cy.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_passing.cy.js"
+      },
+      "shouldUploadVideo": true
+    },
+    {
+      "stats": {
+        "suites": 1,
+        "tests": 3,
+        "passes": 3,
+        "pending": 0,
+        "skipped": 0,
+        "failures": 0,
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
+      },
+      "reporter": "spec",
+      "reporterStats": {
+        "suites": 1,
+        "tests": 3,
+        "passes": 3,
+        "pending": 0,
+        "failures": 0,
+        "start": "2018-02-01T20:14:19.323Z",
+        "end": "2018-02-01T20:14:19.323Z",
+        "duration": 1234
+      },
+      "hooks": [
+        {
+          "hookName": "before all",
+          "title": [
+            "\"before all\" hook"
+          ],
+          "body": "() => {\n    cy.wait(100);\n  }"
+        },
+        {
+          "hookName": "before each",
+          "title": [
+            "\"before each\" hook"
+          ],
+          "body": "() => {\n    cy.wait(200);\n  }"
+        },
+        {
+          "hookName": "after each",
+          "title": [
+            "\"after each\" hook"
+          ],
+          "body": "() => {\n    cy.wait(200);\n  }"
+        },
+        {
+          "hookName": "after all",
+          "title": [
+            "\"after all\" hook"
+          ],
+          "body": "() => {\n    cy.wait(100);\n  }"
+        }
+      ],
+      "tests": [
+        {
+          "title": [
+            "simple hooks spec",
+            "t1"
+          ],
+          "state": "passed",
+          "body": "() => {\n    cy.wrap('t1').should('eq', 't1');\n  }",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple hooks spec",
+            "t2"
+          ],
+          "state": "passed",
+          "body": "() => {\n    cy.wrap('t2').should('eq', 't2');\n  }",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple hooks spec",
+            "t3"
+          ],
+          "state": "passed",
+          "body": "() => {\n    cy.wrap('t3').should('eq', 't3');\n  }",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "video": null,
+      "spec": {
+        "fileExtension": ".js",
+        "baseName": "simple_hooks.cy.js",
+        "fileName": "simple_hooks",
+        "specFileExtension": ".cy.js",
+        "relativeToCommonRoot": "simple_hooks.cy.js",
+        "specType": "integration",
+        "name": "cypress/e2e/simple_hooks.cy.js",
+        "relative": "cypress/e2e/simple_hooks.cy.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_hooks.cy.js"
+      },
+      "shouldUploadVideo": true
+    },
+    {
+      "stats": {
+        "suites": 1,
+        "tests": 2,
+        "passes": 0,
+        "pending": 0,
+        "skipped": 0,
+        "failures": 2,
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
+      },
+      "reporter": "spec",
+      "reporterStats": {
+        "suites": 1,
+        "tests": 2,
+        "passes": 0,
+        "pending": 0,
+        "failures": 2,
+        "start": "2018-02-01T20:14:19.323Z",
+        "end": "2018-02-01T20:14:19.323Z",
+        "duration": 1234
+      },
+      "hooks": [],
+      "tests": [
+        {
+          "title": [
+            "simple failing spec",
+            "fails1"
+          ],
+          "state": "failed",
+          "body": "() => {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "AssertionError",
+                "message": "Timed out retrying after 100ms: expected true to be false",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fails1 (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing spec",
+            "fails2"
+          ],
+          "state": "failed",
+          "body": "() => {\n    throw new Error('fails2');\n  }",
+          "displayError": "Error: fails2\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fails2",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fails2 (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "video": null,
+      "spec": {
+        "fileExtension": ".js",
+        "baseName": "simple_failing.cy.js",
+        "fileName": "simple_failing",
+        "specFileExtension": ".cy.js",
+        "relativeToCommonRoot": "simple_failing.cy.js",
+        "specType": "integration",
+        "name": "cypress/e2e/simple_failing.cy.js",
+        "relative": "cypress/e2e/simple_failing.cy.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js"
+      },
+      "shouldUploadVideo": true
+    },
+    {
+      "stats": {
+        "suites": 5,
+        "tests": 6,
+        "passes": 1,
+        "pending": 1,
+        "skipped": 1,
+        "failures": 3,
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
+      },
+      "reporter": "spec",
+      "reporterStats": {
+        "suites": 5,
+        "tests": 5,
+        "passes": 1,
+        "pending": 1,
+        "failures": 3,
+        "start": "2018-02-01T20:14:19.323Z",
+        "end": "2018-02-01T20:14:19.323Z",
+        "duration": 1234
+      },
+      "hooks": [
+        {
+          "hookName": "before each",
+          "title": [
+            "\"before each\" hook"
+          ],
+          "body": "() => {\n      throw new Error('fail1');\n    }"
+        },
+        {
+          "hookName": "after each",
+          "title": [
+            "\"after each\" hook"
+          ],
+          "body": "() => {\n      throw new Error('fail2');\n    }"
+        },
+        {
+          "hookName": "after all",
+          "title": [
+            "\"after all\" hook"
+          ],
+          "body": "() => {\n      throw new Error('fail3');\n    }"
+        }
+      ],
+      "tests": [
+        {
+          "title": [
+            "simple failing hook spec",
+            "beforeEach hooks",
+            "never gets here"
+          ],
+          "state": "failed",
+          "body": "() => {}",
+          "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing hook spec",
+            "pending",
+            "is pending"
+          ],
+          "state": "pending",
+          "body": "",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "pending",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing hook spec",
+            "afterEach hooks",
+            "runs this"
+          ],
+          "state": "failed",
+          "body": "() => {}",
+          "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing hook spec",
+            "afterEach hooks",
+            "does not run this"
+          ],
+          "state": "skipped",
+          "body": "() => {}",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "skipped",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing hook spec",
+            "after hooks",
+            "runs this"
+          ],
+          "state": "passed",
+          "body": "() => {}",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple failing hook spec",
+            "after hooks",
+            "fails on this"
+          ],
+          "state": "failed",
+          "body": "() => {}",
+          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": null,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "video": null,
+      "spec": {
+        "fileExtension": ".js",
+        "baseName": "simple_failing_hook.cy.js",
+        "fileName": "simple_failing_hook",
+        "specFileExtension": ".cy.js",
+        "relativeToCommonRoot": "simple_failing_hook.cy.js",
+        "specType": "integration",
+        "name": "cypress/e2e/simple_failing_hook.cy.js",
+        "relative": "cypress/e2e/simple_failing_hook.cy.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js"
+      },
+      "shouldUploadVideo": true
+    }
+  ],
+  "browserPath": "path/to/browser",
+  "browserName": "FooBrowser",
+  "browserVersion": "88",
+  "osName": "FooOS",
+  "osVersion": "1234",
+  "cypressVersion": "9.9.9",
+  "config": {}
+}

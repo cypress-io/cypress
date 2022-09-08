@@ -21,7 +21,6 @@ describe('e2e spec_isolation', () => {
   systemTests.setup()
 
   it('fails', {
-    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: specs,
     outputPath,
     snapshot: false,
