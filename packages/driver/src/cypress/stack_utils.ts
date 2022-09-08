@@ -8,10 +8,9 @@ import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
 
 // Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
-import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
-const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLinePatchedErrorRegex = /__CyWebKitError@.*[\n\r]?/g
@@ -243,18 +242,8 @@ const cleanFunctionName = (functionName) => {
   return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
 
-const isStackLine = (line) => {
-  let regex = stackLineRegex
-
-  if (Cypress.isBrowser('webkit')) {
-    regex = webkitStackLineRegex
-  }
-
-  return regex.test(line)
-}
-
 const parseLine = (line) => {
-  if (!isStackLine(line)) return
+  if (!stackLineRegex.test(line)) return
 
   const parsed = errorStackParser.parse({ stack: line } as any)[0]
 
@@ -384,7 +373,7 @@ const getSourceStack = (stack, projectRoot?) => {
 const normalizeStackIndentation = (stack) => {
   const [messageLines, stackLines] = splitStack(stack)
   const normalizedStackLines = _.map(stackLines, (line) => {
-    if (isStackLine(line)) {
+    if (stackLineRegex.test(line)) {
       // stack lines get indented 4 spaces
       return line.replace(whitespaceRegex, '    ')
     }
