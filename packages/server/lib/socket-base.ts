@@ -30,49 +30,6 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
-
-const runnerEvents: RunnerEvent[] = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-]
-
-type ReporterEvent =
-  'runner:restart'
-  | 'runner:abort'
-  | 'runner:console:log'
-  | 'runner:console:error'
-  | 'runner:show:snapshot'
-  | 'runner:hide:snapshot'
-  | 'reporter:restarted'
-
-const reporterEvents: ReporterEvent[] = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-]
-
 const debug = Debug('cypress:server:socket-base')
 
 const retry = (fn: (res: any) => void) => {
@@ -564,18 +521,6 @@ export class SocketBase {
           await runEvents.execute('before:spec', {}, spec)
         })
       }
-
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toRunner(event, data)
-        })
-      })
-
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
-        })
-      })
 
       callbacks.onSocketConnection(socket)
     })
