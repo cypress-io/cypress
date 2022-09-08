@@ -190,8 +190,10 @@ export function start (options: StartOptions) {
     debugFrames('writing video frame')
 
     if (wantsWrite) {
-      if (!(wantsWrite = pt.write(data))) {
-        return pt.once('drain', () => {
+      wantsWrite = pt.write(data)
+      if (!wantsWrite) {
+        // ffmpeg stream isn't accepting data, so drop frames until the stream is ready to accept data
+        pt.once('drain', () => {
           debugFrames('video stream drained')
 
           wantsWrite = true

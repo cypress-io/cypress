@@ -296,16 +296,5 @@ describe('src/cypress/runner', () => {
       cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
       cy.get('.runnable-err-message').should('contain', 'Cypress test was stopped while running this command.')
     })
-
-    // TODO: blocked by UNIFY-1077
-    it.skip('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
-      loadSpec({
-        filePath: 'runner/disabled-command-log.runner.cy.js',
-        passCount: 0,
-        failCount: 0,
-      })
-
-      cy.get('.reporter').should('not.exist')
-    })
   })
 })

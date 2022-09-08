@@ -380,7 +380,7 @@ export function connectToExisting () {
 }
 
 async function recordVideo (videoApi: RunModeVideoApi) {
-  const { writeVideoFrame } = await videoApi.newFfmpegVideoController({ webmInput: true })
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
 
   videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
 }
@@ -531,12 +531,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  }) as unknown as BrowserInstance
+  })
 
   try {
     browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
@@ -561,7 +561,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       debug('closing firefox')
 
-      originalBrowserKill.apply(browserInstance, args)
+      return originalBrowserKill.apply(browserInstance, args)
     }
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
