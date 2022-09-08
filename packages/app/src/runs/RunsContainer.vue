@@ -95,7 +95,6 @@ fragment RunsContainer on Query {
   cloudViewer {
     id
   }
-  ...RunsConnect
 }`
 
 gql`

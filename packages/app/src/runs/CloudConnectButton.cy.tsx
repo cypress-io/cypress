@@ -1,8 +1,9 @@
 import CloudConnectButton from './CloudConnectButton.vue'
 import { CloudConnectButtonFragmentDoc } from '../generated/graphql-test'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
-describe('<CloudConnectButton />', () => {
+describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, () => {
   it('show user connect if not connected', () => {
     cy.mountFragment(CloudConnectButtonFragmentDoc, {
       onResult: (result) => {
@@ -63,18 +64,21 @@ describe('<CloudConnectButton />', () => {
     cy.contains('button', 'Connect your project').should('be.visible')
   })
 
-  it('shows connect project dialog', () => {
+  it('uses the store to open the Login Connect modal', () => {
+    const loginConnectStore = useLoginConnectStore()
+
+    loginConnectStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
     cy.mountFragment(CloudConnectButtonFragmentDoc, {
       onResult: (result) => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton gql={gqlVal} utmMedium="test"/></div>
       },
     })
 
     cy.contains('button', 'Connect your project').click()
-    cy.get('[role="dialog"]').should('be.visible')
-    cy.get('[role="dialog"] h2').should('contain', 'Connect Project')
+
+    cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'test' })
   })
 })

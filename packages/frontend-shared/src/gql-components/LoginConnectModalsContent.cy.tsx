@@ -7,7 +7,7 @@ import { useLoginConnectStore } from '../store/login-connect-store'
 describe('<LoginConnectModalsContent />', () => {
   context('when user is logged out', () => {
     it('shows login modal', () => {
-      const { openLoginConnectModal: openLoginConnectModal } = useLoginConnectStore()
+      const { openLoginConnectModal } = useLoginConnectStore()
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
@@ -30,7 +30,7 @@ describe('<LoginConnectModalsContent />', () => {
 
   context('when user is logged in', () => {
     it('reaches correct "Create Project" state if project is not set up', () => {
-      const { openLoginConnectModal: openLoginConnectModal } = useLoginConnectStore()
+      const { openLoginConnectModal } = useLoginConnectStore()
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {

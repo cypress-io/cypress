@@ -19,6 +19,7 @@
     </div>
     <CloudConnectButton
       :gql="props.gql"
+      utm-medium="Runs Tab"
       class="mx-auto mt-40px"
       @success="emit('success')"
     />

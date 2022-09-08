@@ -66,6 +66,7 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
 }
 
 const handleCancel = () => {
+  keepLoginOpen.value = false
   closeLoginConnectModal()
 }
 
