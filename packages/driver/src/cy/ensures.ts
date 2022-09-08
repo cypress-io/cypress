@@ -383,6 +383,23 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     })
   }
 
+  /**
+   * ensureCommandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
+   * If we can not communicate, throw an error.
+   * Intended to use within retry loops.
+   * @returns true or throws an error
+   */
+  const ensureCommandCanCommunicateWithAUT = (): boolean => {
+    if (!cy.isRunnerAbleToCommunicateWithAut()) {
+      $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
+        commandOrigin: window.location.origin,
+        autOrigin: Cypress.state('autLocation').originPolicy,
+      } })
+    }
+
+    return true
+  }
+
   return {
     ensureElement,
     ensureAttached,
@@ -400,6 +417,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
+    ensureCommandCanCommunicateWithAUT,
 
     // internal functions
     ensureSubjectByType,

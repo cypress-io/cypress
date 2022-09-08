@@ -59,7 +59,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         data.data.err = reifySerializedError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.originPolicy)
+      this.emit(messageName, data.data, data.originPolicy, source)
 
       return
     }
@@ -206,6 +206,26 @@ export class SpecBridgeCommunicator extends EventEmitter {
         data,
         originPolicy,
       }, '*')
+    })
+  }
+  /**
+   * Promisified event sent to the the primary communicator that expects the same event reflected back with the response.
+   * @param {string} event  - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data  - any meta data to be sent with the event.
+   * @param options - contains boolean to sync globals
+   * @returns the response from primary of the event with the same name.
+   */
+  toPrimaryPromise<T> (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+    return new Promise<T>((resolve, reject) => {
+      setTimeout(() => {
+        reject()
+      }, 1000)
+
+      this.once(event, (result) => {
+        resolve(result)
+      })
+
+      this.toPrimary(event, data, options)
     })
   }
 }

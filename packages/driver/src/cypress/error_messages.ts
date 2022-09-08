@@ -1021,29 +1021,6 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    cross_origin_load_timed_out ({ ms, projectRoot, configFile, crossOriginUrl, originPolicies }) {
-      return {
-        message: stripIndent`\
-          Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
-
-          - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
-
-          A cross-origin request for \`${crossOriginUrl.href}\` was detected.
-
-          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
-
-          \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${crossOriginUrl.origin} go here>\`
-          \`})\`
-
-          If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(projectRoot, configFile)} to wait longer.
-
-          Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
-
-          When this \`load\` event occurs, Cypress will continue running commands.`,
-        docsUrl: 'https://on.cypress.io/origin',
-      }
-    },
   },
 
   net_stubbing: {
@@ -2048,11 +2025,11 @@ export default {
       if (obj.unsupportedPlugin && obj.errMessage) {
         msg = `${stripIndent`\
           Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version
-          
+
           The following error was caught:
-          
+
           > ${obj.errMessage}
-          
+
           Because this error occurred during a \`${obj.hookName}\` hook we are skipping` } `
       } else {
         msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
@@ -2149,6 +2126,36 @@ export default {
     invalid_qs: {
       message: `${cmd('visit')} requires the \`qs\` option to be an object, but received: \`{{qs}}\``,
       docsUrl: 'https://on.cypress.io/visit',
+    },
+    invalid_cross_origin_on_load (args) {
+      return {
+        message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.
+
+          \`cy.origin('${args.autLocation.originPolicy}', () => {\`
+          \`  cy.on('window:load', () => {\`
+          \`    <onLoad callback goes here>\`
+          \`  })\`
+          \`})\`
+          \`cy.visit('${args.url}')\`
+        `,
+        docsUrl: 'https://on.cypress.io/visit',
+      }
+    },
+    invalid_cross_origin_on_before_load (args) {
+      return {
+        message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.
+
+        \`cy.origin('${args.autLocation.originPolicy}', () => {\`
+        \`  cy.on('window:before:load', () => {\`
+        \`    <onBeforeLoad callback goes here>\`
+        \`  })\`
+        \`})\`
+        \`cy.visit('${args.url}')\`
+      `,
+        docsUrl: 'https://on.cypress.io/visit',
+      }
     },
     no_duplicate_url: {
       message: stripIndent`\

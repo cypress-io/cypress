@@ -8,6 +8,8 @@
  */
 
 import { createTimers } from './timers'
+import { patchDocumentCookie } from './patches/cookies'
+import { patchElementIntegrity } from './patches/setAttribute'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -18,7 +20,7 @@ const findCypress = () => {
       if (frame.Cypress) {
         // If the ending $ is included in the template string, it breaks transpilation
         // eslint-disable-next-line no-useless-concat
-        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replaceAll('.', '\\.') }` + '$')
+        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replace(/\./gm, '\\.') }` + '$')
 
         // Compare the locations origin policy without pulling in more dependencies.
         // Compare host, protocol and test that the window's host ends with the frame's host.
@@ -38,17 +40,69 @@ const findCypress = () => {
   }
 }
 
-const Cypress = findCypress()
+// Event listener to echo back the current location of the iframe
+window.addEventListener('message', (event) => {
+  if (event.data === 'aut:cypress:location') {
+    event.ports[0].postMessage(window.location.href)
+  }
+})
+
+// Post the before unload event. We post the load event here instead of in the cross origin communicator
+// because we want to notify the primary cypress instance of unload events even if a corresponding spec bridge
+// has not been created.
+window.addEventListener('beforeunload', () => {
+  parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
+})
+
+const handleErrorEvent = (event) => {
+  if (window.Cypress) {
+    // A spec bridge has attached so we don't need to forward errors to top anymore.
+    window.removeEventListener('error', handleErrorEvent)
+  } else {
+    const { error } = event
+    const data = {}
+
+    if (error && error.stack && error.message) {
+      data.message = error.message
+      data.stack = error.stack
+    } else {
+      data.message = error
+    }
+
+    window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
+  }
+}
+
+window.addEventListener('error', handleErrorEvent)
+
+// Apply Patches
+patchDocumentCookie(window)
+
+// return null to trick contentWindow into thinking
+// its not been iFramed if modifyObstructiveCode is true
+if (window.cypressConfig.modifyObstructiveCode) {
+  Object.defineProperty(window, 'frameElement', {
+    get () {
+      return null
+    },
+  })
+}
+
+if (window.cypressConfig.modifyObstructiveThirdPartyCode) {
+  patchElementIntegrity(window)
+}
 
 // the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
 
-Cypress.removeAllListeners('app:timers:reset')
-Cypress.removeAllListeners('app:timers:pause')
-
-Cypress.on('app:timers:reset', timers.reset)
-Cypress.on('app:timers:pause', timers.pause)
-
 timers.wrap()
 
-Cypress.action('app:window:before:load', window)
+const Cypress = findCypress()
+
+// Attach these to window so cypress can call them when it attaches.
+window.cypressTimersReset = timers.reset
+window.cypressTimersPause = timers.pause
+
+if (Cypress) {
+  Cypress.action('app:window:before:load', window)
+}

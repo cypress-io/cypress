@@ -52,46 +52,16 @@ const isValidVisitMethod = (method) => {
 const timedOutWaitingForPageLoad = (ms, log) => {
   debug('timedOutWaitingForPageLoad')
 
-  const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
-
-  // Were we anticipating a cross origin page when we timed out?
-  if (!anticipatedCrossOriginHref) {
-    $errUtils.throwErrByPath('navigation.timed_out', {
-      args: {
-        configFile: Cypress.config('configFile'),
-        ms,
-      },
-      onFail: log,
-    })
-  }
-
-  // We remain in an anticipating state until either a load even happens or a timeout.
-  cy.isAnticipatingCrossOriginResponseFor(undefined)
-
-  // By default origins is just this location.
-  let originPolicies = [$Location.create(location.href).originPolicy]
-
-  const currentCommand = cy.queue.state('current')
-
-  if (currentCommand?.get('name') === 'origin') {
-    // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
-    originPolicies = [cy.state('latestActiveOriginPolicy')]
-  } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
-    // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
-    originPolicies = cy.state('parentOriginPolicies')
-  }
-
-  $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
+  $errUtils.throwErrByPath('navigation.timed_out', {
     args: {
       configFile: Cypress.config('configFile'),
       ms,
-      crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
-      originPolicies,
     },
     onFail: log,
   })
 }
 
+// TODO: remove with experimentalSessionAndOrigin
 const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
@@ -125,22 +95,6 @@ const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyV
   $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
-const cannotVisitPreviousOrigin = ({ remote, originalUrl, previouslyVisitedLocation, log }) => {
-  const errOpts = {
-    onFail: log,
-    args: {
-      attemptedUrl: remote,
-      previousUrl: previouslyVisitedLocation,
-      originalUrl,
-    },
-    errProps: {
-      isCrossOrigin: true,
-    },
-  }
-
-  $errUtils.throwErrByPath('origin.cannot_visit_previous_origin', errOpts)
-}
-
 const specifyFileByRelativePath = (url, log) => {
   $errUtils.throwErrByPath('visit.specify_file_by_relative_path', {
     onFail: log,
@@ -158,13 +112,14 @@ const aboutBlank = (cy, win) => {
   })
 }
 
-const navigationChanged = (Cypress, cy, state, source, arg) => {
+const navigationChanged = async (Cypress, cy, state, source, arg) => {
   // get the current url of our remote application
-  const url = cy.getRemoteLocation('href')
+  const remoteLocation = await cy.getCrossOriginRemoteLocation()
+  const url = remoteLocation?.href
 
   debug('navigation changed:', url)
 
-  // dont trigger for empty url's or about:blank
+  // don't trigger for empty url's or about:blank
   if (_.isEmpty(url) || (url === 'about:blank')) {
     return
   }
@@ -210,6 +165,11 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // don't output a command log for 'load' or 'before:load' events
   // return if source in command
   if (knownCommandCausedInstability) {
+    return
+  }
+
+  // Navigation changed events will be logged by the primary cypress instance.
+  if (Cypress.isCrossOriginSpecBridge) {
     return
   }
 
@@ -380,57 +340,38 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('window').location.href
-    const count = getRedirectionCount(href)
-    const limit = config('redirectionLimit')
+    if (state('window')) {
+      const href = state('window').location.href
+      const count = getRedirectionCount(href)
+      const limit = config('redirectionLimit')
 
-    if (count === limit) {
-      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-        args: {
-          href,
-          limit,
-        },
-      })
+      if (count === limit) {
+        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+          args: {
+            href,
+            limit,
+          },
+        })
+      }
+
+      updateRedirectionCount(href)
     }
-
-    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
-      const onWindowLoad = (win) => {
+      const onWindowLoad = ({ url }) => {
         // this prevents a log occurring when we navigate to about:blank in-between tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
 
-        if (win.location.href === 'about:blank') {
+        if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
           options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }
-
-        resolve()
-      }
-
-      const onCrossOriginWindowLoad = ({ url }) => {
-        options._log.set('message', '--page loaded--').snapshot().end()
-
-        // Updating the URL state, This is done to display the new url event when we return to the primary origin
-        let urls = state('urls') || []
-        let urlPosition = state('urlPosition')
-
-        if (urlPosition === undefined) {
-          urlPosition = -1
-        }
-
-        urls.push(url)
-        urlPosition = urlPosition + 1
-
-        state('urls', urls)
-        state('url', url)
-        state('urlPosition', urlPosition)
 
         resolve()
       }
@@ -444,9 +385,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       const onInternalWindowLoad = (details) => {
         switch (details.type) {
           case 'same:origin':
-            return onWindowLoad(details.window)
-          case 'cross:origin':
-            return onCrossOriginWindowLoad(details)
+            return onWindowLoad(details)
           case 'cross:origin:failure':
             return onCrossOriginFailure(details.error)
           default:
@@ -510,7 +449,7 @@ const normalizeOptions = (options) => {
   .pick(REQUEST_URL_OPTS)
   .extend({
     timeout: options.responseTimeout,
-    isCrossOrigin: Cypress.isCrossOriginSpecBridge,
+    isFromSpecBridge: Cypress.isCrossOriginSpecBridge,
     hasAlreadyVisitedUrl: options.hasAlreadyVisitedUrl,
   })
   .value()
@@ -837,6 +776,9 @@ export default (Commands, Cypress, cy, state, config) => {
         consoleProps['Options'] = _.pick(userOptions, VISIT_OPTS)
       }
 
+      const onLoadIsUserDefined = !!userOptions.onLoad
+      const onBeforeLoadIsUserDefined = !!userOptions.onBeforeLoad
+
       const options: InternalVisitOptions = _.defaults({}, userOptions, {
         auth: null,
         failOnStatusCode: true,
@@ -993,6 +935,17 @@ export default (Commands, Cypress, cy, state, config) => {
         // reset window on load
         win = state('window')
 
+        // If we are visiting a cross origin domain and have onLoad or onBeforeLoad options specified, throw an error.
+        if (!cy.isRunnerAbleToCommunicateWithAut()) {
+          if (onLoadIsUserDefined) {
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
+          }
+
+          if (onBeforeLoadIsUserDefined) {
+            $errUtils.throwErrByPath('visit.invalid_cross_origin_on_before_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
+          }
+        }
+
         // the onLoad callback should only be skipped if specified
         if (runOnLoadCallback !== false) {
           try {
@@ -1093,7 +1046,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
         return requestUrl(url, options)
         .then((resp: any = {}) => {
-          let { url, originalUrl, cookies, redirects, filePath, isPrimaryOrigin } = resp
+          let { url, originalUrl, cookies, redirects, filePath } = resp
 
           // reapply the existing hash
           url += existingHash
@@ -1124,9 +1077,14 @@ export default (Commands, Cypress, cy, state, config) => {
           remote = $Location.create(url)
 
           // if the origin currently matches
+          // or if we have previously visited a location or are a spec bridge
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy) {
-            previouslyVisitedLocation = remote
+          if (remote.originPolicy === existing.originPolicy
+            || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
+          ) {
+            if (!previouslyVisitedLocation) {
+              previouslyVisitedLocation = remote
+            }
 
             url = $Location.fullyQualifyUrl(url)
 
@@ -1147,16 +1105,6 @@ export default (Commands, Cypress, cy, state, config) => {
             const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
 
             return cannotVisitDifferentOrigin(params)
-          }
-
-          // if we are in a cross origin spec bridge and the origin policies weren't the same,
-          // we need to throw an error since the user tried to visit a new
-          // origin which isn't allowed within a cy.origin block
-          if (Cypress.isCrossOriginSpecBridge) {
-            const existingAutOrigin = win ? $Location.create(win.location.href) : $Location.create(Cypress.state('currentActiveOriginPolicy'))
-            const params = { remote, existing, originalUrl, previouslyVisitedLocation: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true, isPrimaryOrigin }
-
-            return isPrimaryOrigin ? cannotVisitPreviousOrigin(params) : cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins

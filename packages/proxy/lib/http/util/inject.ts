@@ -21,11 +21,12 @@ export function full (domain) {
   })
 }
 
-export function fullCrossOrigin (domain) {
+export function fullCrossOrigin (domain, { modifyObstructiveThirdPartyCode, modifyObstructiveCode }) {
   return getRunnerCrossOriginInjectionContents().then((contents) => {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '${domain}';
+        window.cypressConfig = { modifyObstructiveThirdPartyCode: ${modifyObstructiveThirdPartyCode}, modifyObstructiveCode: ${modifyObstructiveCode} };
 
         ${contents}
       </script>
