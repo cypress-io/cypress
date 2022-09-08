@@ -115,7 +115,7 @@ const aboutBlank = (cy, win) => {
 const navigationChanged = async (Cypress, cy, state, source, arg) => {
   // get the current url of our remote application
   const remoteLocation = await cy.getCrossOriginRemoteLocation()
-  const url = remoteLocation.href
+  const url = remoteLocation?.href
 
   debug('navigation changed:', url)
 
@@ -340,20 +340,22 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('autLocation').href
-    const count = getRedirectionCount(href)
-    const limit = config('redirectionLimit')
+    if (state('window')) {
+      const href = state('window').location.href
+      const count = getRedirectionCount(href)
+      const limit = config('redirectionLimit')
 
-    if (count === limit) {
-      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-        args: {
-          href,
-          limit,
-        },
-      })
+      if (count === limit) {
+        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+          args: {
+            href,
+            limit,
+          },
+        })
+      }
+
+      updateRedirectionCount(href)
     }
-
-    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 
