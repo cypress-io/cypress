@@ -10,13 +10,16 @@ interface CollectableEvent {
   cohort?: string
 }
 
+const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'staging') as 'development' | 'staging' | 'production'
+
 export class EventCollectorActions {
-  constructor (private ctx: DataContext) {}
+  constructor (private ctx: DataContext) {
+    debug('Using %s environment for Event Collection', cloudEnv)
+  }
 
   async recordEvent (event: CollectableEvent): Promise<boolean> {
     try {
-      // TODO: Stubbed with Staging for development
-      const dashboardUrl = 'https://dashboard-staging.cypress.io' //this.ctx.cloud.getDashboardUrl()
+      const dashboardUrl = this.ctx.cloud.getDashboardUrl(cloudEnv)
 
       await this.ctx.util.fetch(
         `${dashboardUrl}/anon-collect`,

@@ -14,7 +14,6 @@ import { ref, watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
-import { useDebounceFn } from '@vueuse/core'
 import { nanoid } from 'nanoid'
 
 type EventData = {
@@ -68,22 +67,15 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 
-const recordBannerShown = useDebounceFn(({ campaign, medium, cohort }: EventData) => {
-  reportSeenMutation.executeMutation({
-    campaign,
-    messageId: bannerInstanceId.value,
-    medium,
-    cohort: cohort || null,
-  })
-}, 1000)
+watchEffect(() => {
+  if (props.modelValue && !props.hasBannerBeenShown && props.eventData) {
+    // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
+    recordBannerShown(props.eventData)
+  }
+})
 
 watchEffect(() => {
   if (props.modelValue) {
-    if (!props.hasBannerBeenShown && props.eventData) {
-      // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
-      recordBannerShown(props.eventData)
-    }
-
     updateBannerState('lastShown')
   }
 })
@@ -102,6 +94,15 @@ function updateBannerState (field: 'lastShown' | 'dismissed') {
   set(savedState, ['banners', props.bannerId, field], Date.now())
 
   setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
+}
+
+function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
+  reportSeenMutation.executeMutation({
+    campaign,
+    messageId: bannerInstanceId.value,
+    medium,
+    cohort: cohort || null,
+  })
 }
 
 </script>
