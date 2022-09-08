@@ -159,8 +159,8 @@ const events: Events = {
       runner.emit('runner:restart')
     }))
 
-    localBus.on('show:command', (commandId) => {
-      runner.emit('runner:console:log', commandId)
+    localBus.on('show:command', (commandIds) => {
+      runner.emit('runner:console:log', commandIds)
     })
 
     localBus.on('show:error', (test: TestModel) => {
@@ -168,24 +168,25 @@ const events: Events = {
 
       runner.emit('runner:console:error', {
         err: test.err,
-        commandId: command?.id,
+        testId: command?.testId,
+        logId: command?.id,
       })
     })
 
-    localBus.on('show:snapshot', (commandId) => {
-      runner.emit('runner:show:snapshot', commandId)
+    localBus.on('show:snapshot', (commandIds) => {
+      runner.emit('runner:show:snapshot', commandIds)
     })
 
-    localBus.on('hide:snapshot', (commandId) => {
-      runner.emit('runner:hide:snapshot', commandId)
+    localBus.on('hide:snapshot', (commandIds) => {
+      runner.emit('runner:hide:snapshot', commandIds)
     })
 
-    localBus.on('pin:snapshot', (commandId) => {
-      runner.emit('runner:pin:snapshot', commandId)
+    localBus.on('pin:snapshot', (commandIds) => {
+      runner.emit('runner:pin:snapshot', commandIds)
     })
 
-    localBus.on('unpin:snapshot', (commandId) => {
-      runner.emit('runner:unpin:snapshot', commandId)
+    localBus.on('unpin:snapshot', (commandIds) => {
+      runner.emit('runner:unpin:snapshot', commandIds)
     })
 
     localBus.on('get:user:editor', (cb) => {

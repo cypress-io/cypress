@@ -181,27 +181,27 @@ export class EventManager {
       })
     })
 
-    const logCommand = (logId) => {
-      const consoleProps = Cypress.runner.getConsolePropsForLogById(logId)
+    const logCommand = (logIds) => {
+      const consoleProps = Cypress.runner.getConsolePropsForLog(logIds)
 
       logger.logFormatted(consoleProps)
     }
 
-    this.reporterBus.on('runner:console:error', ({ err, commandId }) => {
+    this.reporterBus.on('runner:console:error', ({ err, testId, logId }) => {
       if (!Cypress) return
 
-      if (commandId || err) logger.clearLog()
+      if (logId || err) logger.clearLog()
 
-      if (commandId) logCommand(commandId)
+      if (logId) logCommand({ testId, logId })
 
       if (err) logger.logError(err.stack)
     })
 
-    this.reporterBus.on('runner:console:log', (logId) => {
+    this.reporterBus.on('runner:console:log', (logIds) => {
       if (!Cypress) return
 
       logger.clearLog()
-      logCommand(logId)
+      logCommand(logIds)
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
@@ -210,24 +210,24 @@ export class EventManager {
 
     this.reporterBus.on('runner:restart', rerun)
 
-    const sendEventIfSnapshotProps = (logId, event) => {
+    const sendEventIfSnapshotProps = (logIds, event) => {
       if (!Cypress) return
 
-      const snapshotProps = Cypress.runner.getSnapshotPropsForLogById(logId)
+      const snapshotProps = Cypress.runner.getSnapshotPropsForLog(logIds)
 
       if (snapshotProps) {
         this.localBus.emit(event, snapshotProps)
       }
     }
 
-    this.reporterBus.on('runner:show:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'show:snapshot')
+    this.reporterBus.on('runner:show:snapshot', (logIds) => {
+      sendEventIfSnapshotProps(logIds, 'show:snapshot')
     })
 
     this.reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
 
-    this.reporterBus.on('runner:pin:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'pin:snapshot')
+    this.reporterBus.on('runner:pin:snapshot', (logIds) => {
+      sendEventIfSnapshotProps(logIds, 'pin:snapshot')
     })
 
     this.reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
@@ -884,7 +884,7 @@ export class EventManager {
     this.localBus.emit('save:app:state', state)
   }
 
-  // usefulf for testing
+  // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
   }
