@@ -83,7 +83,6 @@ export class EventManager {
   }
 
   _handleBeforeUnload () {
-    console.log('beforeunload')
     this.reporterBus.emit('reporter:restart:test:run')
 
     this._clearAllCookies()
@@ -91,7 +90,6 @@ export class EventManager {
   }
 
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
-    console.log('addGlobalListeners')
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
     if (!this.ws.hasListeners('connect')) {
@@ -159,20 +157,10 @@ export class EventManager {
 
     // if (config.testingType === 'component') {}
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
-      console.log('dev-server:compile:success')
       if (!specFile || specFile === state?.spec?.absolute) {
         this.rerunSpec()
       }
     })
-
-    // this.reporterBus.on('runner:start', () => {
-    //   console.log('RUN')
-    //   performance.mark('run-s')
-    //   Cypress.run(() => {
-    //     performance.mark('run-e')
-    //     performance.measure('run', 'run-s', 'run-e')
-    //   })
-    // })
 
     socketRerunEvents.forEach((event) => {
       this.ws.on(event, this.rerunSpec)
@@ -386,7 +374,6 @@ export class EventManager {
   }
 
   setup (config) {
-    console.log('setup!')
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
@@ -458,7 +445,6 @@ export class EventManager {
   }
 
   _addListeners () {
-    console.log('_addListeners')
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
@@ -761,8 +747,6 @@ export class EventManager {
       return
     }
 
-    console.log('teardown')
-
     state.setIsLoading(true)
 
     if (!isRerun) {
@@ -776,11 +760,11 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
 
     // @ts-ignore
-    const $window = this.$CypressDriver.$(window)
+    let $window = this.$CypressDriver.$(window)
 
     // This is a test-only even. It's used to
     // trigger a re-rerun for the drive rerun.cy.js spec.
-    $window.off('test:trigger:rerun', rerun)
+    $window.off('test:trigger:rerun', this.rerunSpec)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -794,14 +778,18 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.off('beforeunload', this._handleBeforeUnload)
+    $window = null
 
     Cypress.teardown()
-    window.Cypress = undefined
+
+    window.Cypress = null
+    window.cy = null
 
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
 
     this.studioRecorder.setInactive()
+    this.ws = null
   }
 
   resetReporter () {
@@ -822,7 +810,6 @@ export class EventManager {
     // this probably isn't 100% necessary since Cypress will fall out of scope
     // but we want to be aggressive here and force GC early and often
     Cypress.removeAllListeners()
-    console.log('restarting....')
     this.localBus.emit('restart')
   }
 

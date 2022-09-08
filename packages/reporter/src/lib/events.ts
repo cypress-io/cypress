@@ -159,10 +159,6 @@ const events: Events = {
       runner.emit('runner:restart')
     }))
 
-    localBus.on('start', action('start', () => {
-      runner.emit('runner:start')
-    }))
-
     localBus.on('show:command', (commandId) => {
       runner.emit('runner:console:log', commandId)
     })

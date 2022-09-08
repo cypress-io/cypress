@@ -352,8 +352,6 @@ function runSpecE2E (spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-
-  console.log('initialize Cypress (driver) with the AUT!')
   getEventManager().initialize($autIframe, config)
 }
 
@@ -369,7 +367,6 @@ export function getRunnerConfigFromWindow () {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
-  console.log('Inject the global `UnifiedRunner`')
   await dfd.promise
 
   isTorndown = false
@@ -389,7 +386,6 @@ async function initialize () {
 
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
-  console.log('initializeEventManager')
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
