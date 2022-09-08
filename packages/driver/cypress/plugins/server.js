@@ -11,8 +11,8 @@ const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
-const httpPorts = [3500, 3501]
-const httpsPorts = [3502, 3503]
+const httpPorts = [3510, 3511]
+const httpsPorts = [3512, 3513]
 
 const createApp = (port) => {
   const app = express()
