@@ -194,7 +194,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: Cypress.state('hookId'),
                   originCommandBaseUrl: location.href,
-                  parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
                   isStable: Cypress.state('isStable'),
                   autLocation: Cypress.state('autLocation').href,
                 },
