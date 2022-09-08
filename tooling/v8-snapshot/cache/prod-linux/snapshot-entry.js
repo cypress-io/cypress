@@ -1188,7 +1188,6 @@ exports['../../../../node_modules/fs-extra/node_modules/jsonfile/utils.js'] = re
 exports['../../../../node_modules/fs-extra/node_modules/universalify/index.js'] = require('../../../../node_modules/fs-extra/node_modules/universalify/index.js')
 exports['../../../../node_modules/fs.realpath/index.js'] = require('../../../../node_modules/fs.realpath/index.js')
 exports['../../../../node_modules/fs.realpath/old.js'] = require('../../../../node_modules/fs.realpath/old.js')
-exports['../../../../node_modules/fsevents/fsevents.js'] = require('../../../../node_modules/fsevents/fsevents.js')
 exports['../../../../node_modules/function-bind/implementation.js'] = require('../../../../node_modules/function-bind/implementation.js')
 exports['../../../../node_modules/function-bind/index.js'] = require('../../../../node_modules/function-bind/index.js')
 exports['../../../../node_modules/galactus/lib/DestroyerOfModules.js'] = require('../../../../node_modules/galactus/lib/DestroyerOfModules.js')

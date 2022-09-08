@@ -264,7 +264,6 @@
     "./node_modules/fs-extra/lib/json/index.js",
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
-    "./node_modules/fsevents/fsevents.js",
     "./node_modules/galactus/node_modules/fs-extra/lib/fs/index.js",
     "./node_modules/galactus/node_modules/fs-extra/lib/index.js",
     "./node_modules/galactus/node_modules/fs-extra/lib/json/index.js",
@@ -298,7 +297,6 @@
     "./node_modules/globby/node_modules/ignore/index.js",
     "./node_modules/globby/stream-utils.js",
     "./node_modules/graceful-fs/graceful-fs.js",
-    "./node_modules/graceful-fs/polyfills.js",
     "./node_modules/http-errors/index.js",
     "./node_modules/http-proxy/index.js",
     "./node_modules/http-proxy/lib/http-proxy.js",
@@ -447,7 +445,6 @@
     "./node_modules/prettier/parser-glimmer.js",
     "./node_modules/prettier/parser-meriyah.js",
     "./node_modules/prettier/parser-typescript.js",
-    "./node_modules/prettier/third-party.js",
     "./node_modules/process-nextick-args/index.js",
     "./node_modules/pseudomap/map.js",
     "./node_modules/pumpify/index.js",
@@ -632,7 +629,6 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/fs-extra/lib/json/jsonfile.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/fs-extra/lib/path-exists/index.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/graceful-fs.js",
-    "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/cross-spawn/node_modules/semver/semver.js",
     "./packages/server/node_modules/duplexify/index.js",
     "./packages/server/node_modules/execa/lib/errname.js",
@@ -640,7 +636,6 @@
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
     "./packages/server/node_modules/graceful-fs/graceful-fs.js",
-    "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/http-proxy/index.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy/index.js",
@@ -3447,7 +3442,7 @@
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/parser-v3/index.js",
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/parser-v3/utf8.js",
     "./packages/socket/node_modules/socket.io/package.json",
-    "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
+    "./tooling/v8-snapshot/cache/dev-linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
   "deferredHash": "ec6192b24bb95b0eb112e649eccd53f1fd71f6759b0b4e7b497664d2cd9f7ddf"
