@@ -101,6 +101,15 @@ describe('src/cy/commands/aliasing', () => {
           expect(this.input).to.eq(obj)
         })
       })
+
+      it('retries previous commands invoked inside custom commands', () => {
+        Cypress.Commands.add('get2', (selector) => cy.get(selector))
+
+        cy.get2('body').children('div').as('divs')
+        cy.visit('/fixtures/dom.html')
+
+        cy.get('@divs')
+      })
     })
 
     context('#assign', () => {
