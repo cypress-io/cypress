@@ -258,9 +258,7 @@ export class EventManager {
       if (!Cypress) return
 
       Cypress.backend('clear:session')
-      .then(() => {
-        rerun()
-      })
+      .then(rerun)
     })
 
     this.reporterBus.on('external:open', (url) => {
@@ -410,9 +408,11 @@ export class EventManager {
             return
           }
 
+          const hideCommandLog = window.__CYPRESS_CONFIG__.hideCommandLog
+
           this.studioStore.initialize(config, state)
 
-          const runnables = Cypress.runner.prepare(state.tests, state.currentId, state.emissions)
+          const runnables = Cypress.runner.prepare(state, hideCommandLog)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -421,14 +421,8 @@ export class EventManager {
             this._runDriver(state)
           }
 
-          this.reporterBus.emit('runnables:ready', runnables)
-
-          if (state?.numLogs) {
-            Cypress.runner.setNumLogs(state.numLogs)
-          }
-
-          if (state.startTime) {
-            Cypress.runner.setStartTime(state.startTime)
+          if (!hideCommandLog) {
+            this.reporterBus.emit('runnables:ready', runnables)
           }
 
           if (config.isTextTerminal && !state.currentId) {
@@ -436,14 +430,6 @@ export class EventManager {
             // store runnables in backend and maybe send to dashboard
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
-
-          // console.log('state.currentId', state.currentId)
-          // if (state.currentId) {
-          //   // if we have a currentId it means
-          //   // we need to tell the Cypress to skip
-          //   // ahead to that test
-          //   Cypress.runner.resumeAtTest(state.currentId, state.emissions)
-          // }
 
           return run()
         })

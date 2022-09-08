@@ -1032,6 +1032,19 @@ export default {
     let _hookId = 0
     let _uncaughtFn: (() => never) | null = null
     let _resumedAtTestIndex: number | null = null
+    let _startTime: string | null = null
+    let _onlyTestId = null
+    let _onlySuiteId = null
+    let _skipCollectingLogs = true
+
+    // hold onto the _runnables for faster lookup later
+    let _currentTest: any = null
+    let _tests: any[] = []
+    const _logsById: Record<string, any> = {}
+    let _emissions: Emissions = {
+      started: {},
+      ended: {},
+    }
 
     const _runner = mocha.getRunner()
 
@@ -1110,18 +1123,6 @@ export default {
 
     specWindow.addEventListener('error', onSpecError('error'))
     specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
-
-    // hold onto the _runnables for faster lookup later
-    let _currentTest: any = null
-    let _tests: any[] = []
-    const _logsById: Record<string, any> = {}
-    let _emissions: Emissions = {
-      started: {},
-      ended: {},
-    }
-    let _startTime: string | null = null
-    let _onlyTestId = null
-    let _onlySuiteId = null
 
     const getRunnableId = () => {
       return `r${++_runnableId}`
@@ -1300,21 +1301,30 @@ export default {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-      getStats () {
-        return {
-          _tests,
-          _logsById,
-        }
-      },
-      prepare (previouslyRanTests, id, emissions: Emissions = {
-        started: {},
-        ended: {},
-      }) {
+      prepare (savedRunState, skipCollectingLogs) {
+        const {
+          tests: previouslyRanTests,
+          currentId,
+          emissions,
+          numLogs,
+          startTime,
+        } = savedRunState
+
+        _skipCollectingLogs = skipCollectingLogs
+
         // prepare the runnable states
         const runnables = this.normalizeAll(previouslyRanTests)
 
-        if (id) {
-          this.resumeAtTest(id, emissions)
+        if (numLogs) {
+          this.setNumLogs(numLogs)
+        }
+
+        if (startTime) {
+          this.setStartTime(state.startTime)
+        }
+
+        if (currentId) {
+          this.resumeAtTest(currentId, emissions)
         }
 
         return runnables
@@ -1729,7 +1739,8 @@ export default {
         // we dont need to hold a log reference
         // to anything in memory when we're headless
         // because you cannot inspect any logs
-        if (!isInteractive) {
+
+        if (_skipCollectingLogs || !isInteractive) {
           return
         }
 
