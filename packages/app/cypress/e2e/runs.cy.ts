@@ -75,7 +75,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
       moveToRunsPage()
-      cy.contains('Log In').click()
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
       })
