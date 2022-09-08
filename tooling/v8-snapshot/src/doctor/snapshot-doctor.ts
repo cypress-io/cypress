@@ -301,7 +301,7 @@ export class SnapshotDoctor {
    *    process
    * 4. Keep doing that until we arrive at a heal state which will result in a
    *    bundle that doesn't cause any issues when assembled into a snapshot script
-   *    and used to initalize the snapshot
+   *    and used to initialize the snapshot
    * 5. Return that heal state as well as the last collected bundle and related
    *    metadata
    */
@@ -322,15 +322,23 @@ export class SnapshotDoctor {
 
     logDebug({ circulars })
 
+    const filterStaleImports = (imports: Set<string>) => {
+      return new Set(Array.from(imports).filter((x) => !!meta.inputs[x]))
+    }
+
+    const filteredPreviousHealthy = filterStaleImports(this.previousHealthy)
+    const filteredPreviousDeferred = filterStaleImports(this.previousDeferred)
+    const filteredPreviousNoRewrite = filterStaleImports(this.previousNoRewrite)
+
     // 3. Initialize the heal state with data from previous runs that was
     //    provided to us
     //    forceNoRewrite is provided for modules which we manually determined
     //    to result in invalid/problematic code when rewritten
     const healState = new HealState(
       meta,
-      this.previousHealthy,
-      this.previousDeferred,
-      new Set([...this.previousNoRewrite, ...this.forceNoRewrite]),
+      filteredPreviousHealthy,
+      filteredPreviousDeferred,
+      new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]),
     )
 
     // 4. Process the initial bundle in order to detect issues during
@@ -479,16 +487,6 @@ export class SnapshotDoctor {
         nextStage.length > 0;
         nextStage = this._findNextStage(healState, circulars)
       ) {
-        // Special case during the first processing step, checked all leaves
-        if (!healState.processedLeaves) {
-          healState.processedLeaves = true
-          // In case all leaves were determined to be healthy before we can
-          // move on to the next step
-          if (nextStage.length < 0) {
-            nextStage = this._findNextStage(healState, circulars)
-          }
-        }
-
         // 5. Process the module verification in parallel
         const promises = nextStage.map(async (key): Promise<void> => {
           logDebug('Testing entry in isolation "%s"', key)
@@ -633,7 +631,10 @@ export class SnapshotDoctor {
       return this._findVerifiables(healState, circulars)
     }
 
-    return this._findLeaves(healState)
+    healState.processedLeaves = true
+    const nextStage = this._findLeaves(healState)
+
+    return nextStage.length === 0 ? this._findVerifiables(healState, circulars) : nextStage
   }
 
   /**
@@ -650,7 +651,7 @@ export class SnapshotDoctor {
       if (
         healState.healthy.has(key) ||
         healState.deferred.has(key) ||
-        healState.needNorewrite.has(key)
+        healState.norewrite.has(key)
       ) {
         continue
       }

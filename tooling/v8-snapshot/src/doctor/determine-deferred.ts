@@ -43,7 +43,7 @@ export async function determineDeferred (
       healthy,
     } = await validateExistingDeferred(jsonPath, hashFilePath)
 
-    if (match) {
+    if (match && opts.nodeModulesOnly) {
       const combined: Set<string> = new Set([
         ...norewrite,
         ...opts.forceNoRewrite,
