@@ -140,14 +140,12 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     visit_file_404_response_failing.cy.js                                            │
+  │ Spec Ran:     visit_http_500_response_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing.cy.js/when file     (1280x720)
-      server response is 404 -- fails (failed).png                                                  
 
 
   (Video)
@@ -155,6 +153,8 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
                           .cy.js.mp4                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing.cy.js/when serv     (1280x720)
+     er response is 500 -- fails (failed).png                                                       
 
 
 ====================================================================================================
@@ -164,7 +164,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  visit_file_404_response_failing.cy.      XX:XX        1        -        1        -        - │
+  │ ✖  visit_http_500_response_failing.cy.      XX:XX        1        -        1        -        - │
   │    js                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
