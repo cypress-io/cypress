@@ -32,6 +32,7 @@ const expectDirectoriesExist = function (basePath) {
 
 describe('lib/util/trash', () => {
   beforeEach(() => {
+    sinon.stub(process, 'cwd').returns(os.tmpdir())
     mockFs({})
   })
 
