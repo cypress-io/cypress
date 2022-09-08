@@ -1,4 +1,4 @@
-const mockfs = require('mock-fs')
+const mockFs = require('mock-fs')
 
 require('../../spec_helper')
 
@@ -32,7 +32,11 @@ const expectDirectoriesExist = function (basePath) {
 
 describe('lib/util/trash', () => {
   beforeEach(() => {
-    mockfs({})
+    mockFs({})
+  })
+
+  afterEach(() => {
+    mockFs.restore()
   })
 
   context('.folder', () => {
