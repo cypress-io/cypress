@@ -143,7 +143,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing.cy.js/when serv     (1280x720)
-     er response is 500 -- fails (failed).png  
+     er response is 500 -- fails (failed).png                                                       
 
 
   (Video)
