@@ -42,7 +42,7 @@ const findCypress = () => {
 
 // Event listener to echo back the current location of the iframe
 window.addEventListener('message', (event) => {
-  if (event.data === 'cypress-location') {
+  if (event.data === 'aut:cypress:location') {
     event.ports[0].postMessage(window.location.href)
   }
 })

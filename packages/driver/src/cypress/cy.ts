@@ -491,7 +491,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     //    then it should fail
     // 4. and tests without a done will pass
 
-    // if we dont have a "fail" handler
+    // if we don't have a "fail" handler
     // 1. callback with state("done") when async
     // 2. throw the error for the promise chain
     try {
@@ -516,7 +516,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   initialize ($autIframe) {
     this.state('$autIframe', $autIframe)
 
-    // dont need to worry about a try/catch here
+    // don't need to worry about a try/catch here
     // because this is during initialize and its
     // impossible something is wrong here
     setWindowDocumentProps(getContentWindow($autIframe), this.state)
@@ -570,6 +570,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         try {
+          // Test to see if we can communicate with the AUT.
           autWindow.location.href
           isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {
@@ -580,6 +581,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           isRunnerAbleToCommunicateWithAUT = false
         }
 
+        // If the runner can communicate, we should setup all events, otherwise just setup the window and fire the load event.
         if (isRunnerAbleToCommunicateWithAUT) {
           setWindowDocumentProps(autWindow, this.state)
 
@@ -602,6 +604,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // there is a cross-origin error and the cy.origin API is
         // not utilized
         try {
+          // Get the location even if we're cross origin.
           const remoteLocation = await this.getCrossOriginRemoteLocation()
 
           this.Cypress.action('app:window:load', this.state('window'), remoteLocation.href)

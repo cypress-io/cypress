@@ -12,7 +12,7 @@ const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<Loca
       resolve($Location.create(data))
     }
 
-    autWindow.postMessage('cypress-location', '*', [channel.port2])
+    autWindow.postMessage('aut:cypress:location', '*', [channel.port2])
   })
 }
 
