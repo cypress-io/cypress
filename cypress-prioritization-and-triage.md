@@ -38,7 +38,7 @@ Here is a guide to what each column on the board represents:
 
 ## Cypress Issue Triage
 
-Whenever an issue is created in the [Cypres repo](https://github.com/cypress-io/cypress/) it is added to the [Cypress App Triage Board](https://github.com/orgs/cypress-io/projects/9/views/1). This board represents all issues we are actively working to investigate and reproduce before routing them to the appropriate team for [prioritization](#how-we-prioritize-issues). Prioritization does not necessarily mean that a ticket will be worked on - priority scoring simply helps us create a relative ordering of potential work that is ranked according to standards we have defined as most important to Cypress and the community.
+Whenever an issue is created in the [Cypress repo](https://github.com/cypress-io/cypress/) it is added to the [Cypress App Triage Board](https://github.com/orgs/cypress-io/projects/9/views/1). This board represents all issues we are actively working to investigate and reproduce before routing them to the appropriate team for [prioritization](#how-we-prioritize-issues). Prioritization does not necessarily mean that a ticket will be worked on - priority scoring simply helps us create a relative ordering of potential work that is ranked according to standards we have defined as most important to Cypress and the community.
 
 ### Cypress Triage Process
 
