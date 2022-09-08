@@ -13,8 +13,7 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
-const webkitStackLinePatchedErrorRegex = /__CyWebKitError@.*[\n\r]?/g
-const webkitStackLineRegex = /([^\n\r]*)@([^\n\r]*)([\n\r]?)/g
+const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -315,7 +314,14 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   let absoluteFile
 
-  if (relativeFile && projectRoot) {
+  // WebKit stacks may include an `<unknown>` location that is not navigable.
+  // We ensure that the absolute path is not set in this case.
+
+  const canBuildAbsolutePath = relativeFile && projectRoot && (
+    !Cypress.isBrowser('webkit') || relativeFile !== '<unknown>'
+  )
+
+  if (canBuildAbsolutePath) {
     absoluteFile = path.resolve(projectRoot, relativeFile)
 
     // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have
@@ -393,10 +399,6 @@ const normalizedStack = (err) => {
   let errStack = err.stack || ''
 
   if (Cypress.isBrowser('webkit')) {
-    // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
-    // be presented within the stack. If we detect it within the stack, we remove it.
-    errStack = errStack.replace(webkitStackLinePatchedErrorRegex, '')
-
     // WebKit will not determine the proper stack trace for an error, with stack entries
     // missing function names, call locations, or both. This is due to a number of documented
     // issues with WebKit:
@@ -409,6 +411,12 @@ const normalizedStack = (err) => {
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
     errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
+      // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
+      // be presented within the stack. If we detect it within the stack, we remove it.
+      if (parts[0] === '__CyWebKitError') {
+        return ''
+      }
+
       return [
         parts[0] || '<unknown>',
         '@',
