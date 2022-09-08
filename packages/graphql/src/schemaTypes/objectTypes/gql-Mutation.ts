@@ -683,6 +683,26 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('insertCohort', {
+      type: 'Boolean',
+      description: '',
+      args: {
+        id: nonNull(stringArg()),
+        name: nonNull(stringArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        const cohort = {
+          id: args.id,
+          name: args.name,
+          cohort: '',
+        }
+
+        await ctx.actions.cohorts.insertCohort(cohort)
+
+        return true
+      },
+    })
+
     t.boolean('_clearCloudCache', {
       description: 'Internal use only, clears the cloud cache',
       resolve: (source, args, ctx) => {

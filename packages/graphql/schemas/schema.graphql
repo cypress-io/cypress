@@ -555,6 +555,12 @@ enum CodeLanguageEnum {
   ts
 }
 
+"""used to distinguish one group of users from another"""
+type Cohort {
+  id: String
+  name: String
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -1214,6 +1220,9 @@ type Mutation {
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
+
+  """"""
+  insertCohort(id: String!, name: String!): Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1488,6 +1497,9 @@ type Query {
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
+
+  """Cohort assignments for this device used by the app for feature flags"""
+  cohort(id: String!): Cohort
 
   """The currently opened project"""
   currentProject: CurrentProject

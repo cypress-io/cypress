@@ -10,6 +10,7 @@ import {
   BrowserActions,
   DevActions,
   AuthActions,
+  CohortsActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { VersionsActions } from './actions/VersionsActions'
@@ -76,5 +77,10 @@ export class DataActions {
   @cached
   get versions () {
     return new VersionsActions(this.ctx)
+  }
+
+  @cached
+  get cohorts () {
+    return new CohortsActions(this.ctx)
   }
 }

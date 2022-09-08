@@ -1,4 +1,4 @@
-import { idArg, nonNull, objectType } from 'nexus'
+import { idArg, stringArg, nonNull, objectType } from 'nexus'
 import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -9,6 +9,7 @@ import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
+import { Cohort } from './gql-Cohorts'
 
 export const Query = objectType({
   name: 'Query',
@@ -105,6 +106,17 @@ export const Query = objectType({
     t.nonNull.boolean('invokedFromCli', {
       description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
+    })
+
+    t.field('cohort', {
+      description: 'Cohort assignments for this device used by the app for feature flags',
+      type: Cohort,
+      args: {
+        id: nonNull(stringArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.cohortsApi.getCohort(args.id)
+      },
     })
 
     t.field('node', {

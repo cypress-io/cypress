@@ -17,6 +17,7 @@ import type {
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
+import cohorts from './cohorts'
 import { openProject } from './open_project'
 import cache from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
@@ -193,6 +194,14 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         const { availableEditors } = await getUserEditor(true)
 
         return availableEditors
+      },
+    },
+    cohortsApi: {
+      async getCohort (id: string) {
+        return cohorts.get(id)
+      },
+      async insertCohort (cohort) {
+        cohorts.set(cohort)
       },
     },
   })
