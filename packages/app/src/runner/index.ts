@@ -75,7 +75,7 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
-let _autIframeModel: AutIframe
+let _autIframeModel: AutIframe | null
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -91,6 +91,14 @@ export function getAutIframeModel (): AutIframe {
   }
 
   return _autIframeModel
+}
+
+export function destroyAutIframeModel () {
+  if (_autIframeModel) {
+    _autIframeModel.destroy()
+    _autIframeModel.destroy()
+    _autIframeModel = null
+  }
 }
 
 /**

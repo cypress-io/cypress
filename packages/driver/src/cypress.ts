@@ -774,7 +774,6 @@ class $Cypress {
     this.removeAllListeners()
     this.state('window', undefined)
     this.state('specWindow', undefined)
-    $scriptUtils.destroySourceMaps()
   }
 
   addAssertionCommand () {

@@ -11,7 +11,7 @@ import type { Socket } from '@packages/socket/lib/browser'
 import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { getAutIframeModel } from '.'
+import { destroyAutIframeModel } from '.'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -100,18 +100,6 @@ export class EventManager {
       })
     }
 
-    const rerun = () => {
-      if (!this) {
-        // if the tests have been reloaded
-        // then there is nothing to rerun
-        return
-      }
-
-      console.log('rerun spec')
-
-      return this.rerunSpec()
-    }
-
     const connectionInfo: AddGlobalListenerOptions = {
       element: options.element,
       randomString: options.randomString,
@@ -166,14 +154,14 @@ export class EventManager {
 
     this.ws.on('watched:file:changed', () => {
       this.studioRecorder.cancel()
-      rerun()
+      this.rerunSpec()
     })
 
     // if (config.testingType === 'component') {}
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       console.log('dev-server:compile:success')
       if (!specFile || specFile === state?.spec?.absolute) {
-        rerun()
+        this.rerunSpec()
       }
     })
 
@@ -187,7 +175,7 @@ export class EventManager {
     // })
 
     socketRerunEvents.forEach((event) => {
-      this.ws.on(event, rerun)
+      this.ws.on(event, this.rerunSpec)
     })
 
     socketToDriverEvents.forEach((event) => {
@@ -225,7 +213,6 @@ export class EventManager {
     })
 
     this.reporterBus.on('runner:console:log', (logId) => {
-      console.log('on(runner:console:log)', logId)
       if (!Cypress) return
 
       logger.clearLog()
@@ -236,7 +223,7 @@ export class EventManager {
       this.ws.emit('set:user:editor', editor)
     })
 
-    this.reporterBus.on('runner:restart', rerun)
+    this.reporterBus.on('runner:restart', this.rerunSpec)
 
     const sendEventIfSnapshotProps = (logId, event) => {
       if (!Cypress) return
@@ -286,9 +273,7 @@ export class EventManager {
       if (!Cypress) return
 
       Cypress.backend('clear:session')
-      .then(() => {
-        rerun()
-      })
+      .then(this.rerunSpec)
     })
 
     this.reporterBus.on('external:open', (url) => {
@@ -312,7 +297,7 @@ export class EventManager {
         if (!showedStudioModal) {
           this.studioRecorder.showInitModal()
         } else {
-          rerun()
+          this.rerunSpec()
         }
       })
     }
@@ -331,7 +316,7 @@ export class EventManager {
 
     this.reporterBus.on('studio:cancel', () => {
       this.studioRecorder.cancel()
-      rerun()
+      this.rerunSpec()
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
@@ -348,7 +333,7 @@ export class EventManager {
 
     this.localBus.on('studio:start', () => {
       this.studioRecorder.closeInitModal()
-      rerun()
+      this.rerunSpec()
     })
 
     this.localBus.on('studio:copy:to:clipboard', (cb) => {
@@ -365,13 +350,11 @@ export class EventManager {
 
     this.localBus.on('studio:cancel', () => {
       this.studioRecorder.cancel()
-      rerun()
+      this.rerunSpec()
     })
 
     this.ws.on('aut:destroy:init', () => {
-      const autIframe = getAutIframeModel()
-
-      autIframe.destroy()
+      destroyAutIframeModel()
       this.ws.emit('aut:destroy:complete')
     })
 
@@ -380,12 +363,12 @@ export class EventManager {
 
     // This is a test-only even. It's used to
     // trigger a re-rerun for the drive rerun.cy.js spec.
-    $window.on('test:trigger:rerun', rerun)
+    $window.on('test:trigger:rerun', this.rerunSpec.bind(this))
 
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('unload', this._handleUnload)
+    $window.on('unload', this._handleUnload.bind(this))
 
     // when our window triggers beforeunload
     // we know we've change the URL and we need
@@ -393,9 +376,7 @@ export class EventManager {
     // additionally we set unload to true so
     // that Cypress knows not to set any more
     // cookies
-    $window.on('beforeunload', this._handleBeforeUnload)
-
-    console.log('here')
+    $window.on('beforeunload', this._handleBeforeUnload.bind(this))
   }
 
   start (config) {
