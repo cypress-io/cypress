@@ -142,15 +142,15 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
   (Screenshots)
 
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing.cy.js/when serv     (1280x720)
+     er response is 500 -- fails (failed).png  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
                           .cy.js.mp4                                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing.cy.js/when serv     (1280x720)
-     er response is 500 -- fails (failed).png                                                       
 
 
 ====================================================================================================
