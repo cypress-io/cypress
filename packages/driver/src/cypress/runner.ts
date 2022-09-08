@@ -1760,10 +1760,8 @@ export default {
       },
 
       addLog (attrs, isInteractive) {
-        // we dont need to hold a log reference
-        // to anything in memory when we're headless
-        // because you cannot inspect any logs
-
+        // we don't need to hold a log reference to anything in memory when we don't
+        // render the report or are headless because you cannot inspect any logs
         if (_skipCollectingLogs || !isInteractive) {
           return
         }
