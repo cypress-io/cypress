@@ -652,9 +652,13 @@ export class EventManager {
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', () => {
-      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-      // Unstable is unstable regardless of where it initiated from.
-      cy.state('isStable', false)
+      // TODO: Remove after the async attach PR is merged for cy.origin
+      if (Cypress.state('autOrigin') === origin) {
+        // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+        // Unstable is unstable regardless of where it initiated from.
+        cy.state('isStable', false)
+      }
+
       // Re-broadcast to any other specBridges.
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
