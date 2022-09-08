@@ -4,7 +4,7 @@ At Cypress, we love our open source community. We work every day to grow our par
 
 ## Table of Contents
 
-- [Cypress Priorities](#priorities)
+- [Cypress Priorities](#cypress-priorities)
 - [Cypress Roadmap](#cypress-roadmap)
 - [Cypress Issue Triage](#cypress-issue-triage)
   - [Cypress Triage Process](#cypress-triage-process)
