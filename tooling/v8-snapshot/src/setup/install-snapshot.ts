@@ -63,6 +63,7 @@ function getSnapshotGenerator ({
     resolverMap,
     // sourcemapEmbed: true,
     forceNoRewrite: [
+      'node_modules/@cypress/get-windows-proxy/src/registry.js',
       // recursion due to process.emit overwrites which is incorrectly rewritten
       'signal-exit/index.js',
       // recursion due to process.{chdir,cwd} overwrites which are incorrectly rewritten
