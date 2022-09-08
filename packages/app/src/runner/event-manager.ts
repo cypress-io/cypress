@@ -700,7 +700,8 @@ export class EventManager {
       const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
 
       Cypress.automation('set:cookie', automationCookie).then(() => {
-        source.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
+        // It's possible the source has already unloaded before this event has been processed.
+        source?.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
       })
       .catch(() => {
       // unlikely there will be errors, but ignore them in any case, since
@@ -715,7 +716,8 @@ export class EventManager {
 
       const cookies = await Cypress.automation('get:cookies', { superDomain })
 
-      source.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
+      // It's possible the source has already unloaded before this event has been processed.
+      source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
     })
 
     // This message comes from the AUT, not the spec bridge.
