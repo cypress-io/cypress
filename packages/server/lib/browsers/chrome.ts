@@ -15,12 +15,11 @@ import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
-import type { Browser } from './types'
+import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
-import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, WriteVideoFrame } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -249,10 +248,12 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, writeVideoFrame: WriteVideoFrame, browserMajorVersion: number) {
-  const opts = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
+  const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, opts)
+  const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
+
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
 }
 
 // a utility function that navigates to the given URL
@@ -270,7 +271,7 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
-const _handleDownloads = async function (client, dir, automation) {
+const _handleDownloads = async function (client, downloadsFolder: string, automation) {
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
       id: data.guid,
@@ -281,7 +282,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
     if (filename) {
       // @ts-ignore
-      downloadItem.filePath = path.join(dir, data.suggestedFilename)
+      downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
       // @ts-ignore
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
@@ -299,7 +300,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
   await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
-    downloadPath: dir,
+    downloadPath: downloadsFolder,
   })
 }
 
@@ -552,7 +553,7 @@ export = {
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await this.attachListeners(browser, options.url, pageCriClient, automation, options)
+    await this.attachListeners(options.url, pageCriClient, automation, options)
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
@@ -570,8 +571,12 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (browser: Browser, url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+    const browserCriClient = this._getBrowserCriClient()
+
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
+
+    debug('attaching listeners to chrome %o', { url, options })
 
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
@@ -580,7 +585,7 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
-      options.writeVideoFrame && this._recordVideo(cdpAutomation, options.writeVideoFrame, browser.majorVersion),
+      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
@@ -590,9 +595,11 @@ export = {
       await this._handlePausedRequests(pageCriClient)
       _listenForFrameTreeChanges(pageCriClient)
     }
+
+    return cdpAutomation
   },
 
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<LaunchedBrowser> {
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -644,7 +651,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
+    const launchedBrowser = await launch(browser, 'about:blank', port, args) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -671,7 +678,6 @@ export = {
 
     launchedBrowser.browserCriClient = browserCriClient
 
-    /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
 
@@ -686,7 +692,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this.attachListeners(browser, url, pageCriClient, automation, options)
+    await this.attachListeners(url, pageCriClient, automation, options)
 
     // return the launched browser process
     // with additional method to close the remote connection
