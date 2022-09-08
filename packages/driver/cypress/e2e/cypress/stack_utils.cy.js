@@ -482,7 +482,6 @@ From Your Spec Code:
       expect(index).to.equal(6)
     })
 
-    // what is this???
     it('appends at end when there is no stack replacement marker in the stack', () => {
       err.stack = err.stack.replace('    at __stackReplacementMarker (path/to/another:2:2)\n', '')
 
