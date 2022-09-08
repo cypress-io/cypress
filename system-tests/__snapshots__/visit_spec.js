@@ -306,8 +306,6 @@ The internal Cypress web server responded with:
       [stack trace lines]
 
 
-
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -587,10 +585,10 @@ Common situations why this would fail:
   - you have weird network configuration settings on your computer
       [stack trace lines]
   
+  
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
   2) response timeouts result in an error
        handles no response errors when not initially visiting:
@@ -611,10 +609,10 @@ Common situations why this would fail:
   - you have weird network configuration settings on your computer
       [stack trace lines]
   
+  
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
   3) response timeouts result in an error
        fails after reducing the responseTimeout option:
@@ -635,10 +633,10 @@ Common situations why this would fail:
   - you have weird network configuration settings on your computer
       [stack trace lines]
   
+  
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
 
 
