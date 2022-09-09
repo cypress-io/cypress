@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 export interface LoginConnectState {
   isLoginConnectOpen: boolean
   utmMedium: string
+  isLoggedIn: boolean
+  isProjectConnected: boolean
 }
 
 export const useLoginConnectStore = defineStore({
@@ -12,6 +14,8 @@ export const useLoginConnectStore = defineStore({
     return {
       isLoginConnectOpen: false,
       utmMedium: '',
+      isLoggedIn: false,
+      isProjectConnected: false,
     }
   },
 
@@ -20,13 +24,13 @@ export const useLoginConnectStore = defineStore({
       this.isLoginConnectOpen = true
       // TODO: type for all valid utm_medium values?
       this.utmMedium = utmMedium
-      if (window.Cypress) {
-        document.querySelector('body')?.setAttribute('data-cy-login-utm-medium', utmMedium)
-      }
     },
     closeLoginConnectModal () {
       this.isLoginConnectOpen = false
       this.utmMedium = ''
+    },
+    setStatus (name: 'isLoggedIn' | 'isProjectConnected', newVal: boolean) {
+      this[name] = newVal
     },
   },
 })

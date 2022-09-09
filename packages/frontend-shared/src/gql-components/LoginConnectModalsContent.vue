@@ -6,7 +6,7 @@
       :gql="props.gql"
     >
       <LoginModal
-        v-if="status"
+        v-if="status && (!status.isLoggedIn || keepLoginOpen)"
         :gql="props.gql"
         :model-value="!status.isLoggedIn || keepLoginOpen"
         :utm-medium="loginConnectStore.utmMedium"
@@ -17,7 +17,7 @@
         @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
       />
       <CloudConnectModals
-        v-if="status?.isLoggedIn && !keepLoginOpen"
+        v-else-if="status?.isLoggedIn && !keepLoginOpen"
         :show="status?.isLoggedIn && isCloudConnectOpen"
         :gql="props.gql"
         @cancel="handleCancelConnect"
@@ -31,7 +31,7 @@ import CloudViewerAndProject from './CloudViewerAndProject.vue'
 import { gql } from '@urql/vue'
 import type { LoginConnectModalsContentFragment } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
 
@@ -56,8 +56,16 @@ const { closeLoginConnectModal } = loginConnectStore
 
 // keepLoginOpen is only set if you've just logged in
 // and we want to show the "connect" button instead of "continue"
-const keepLoginOpen = ref(true)
+const keepLoginOpen = ref(false)
 const isCloudConnectOpen = ref(true)
+
+watch(() => loginConnectStore.isLoggedIn, (newVal) => {
+  // when login state changes, if we have logged in but are not connected,
+  // keep the "login" modal open in the "connect project" state
+  if (newVal && !loginConnectStore.isProjectConnected) {
+    keepLoginOpen.value = true
+  }
+})
 
 const handleLoginSuccess = (isProjectConnected?: boolean) => {
   if (!isProjectConnected) {
@@ -66,7 +74,6 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
 }
 
 const handleCancel = () => {
-  keepLoginOpen.value = false
   closeLoginConnectModal()
 }
 
@@ -74,6 +81,8 @@ const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
   if (error) {
     // always allow close if there is an error
     closeLoginConnectModal()
+
+    return
   }
 
   if (!isProjectConnected) {
@@ -96,7 +105,7 @@ const handleCancelConnect = () => {
 }
 
 const handleConnectSuccess = () => {
-  // isProjectConnectOpen = false; emit('success')
+  closeLoginConnectModal()
 }
 
 </script>
