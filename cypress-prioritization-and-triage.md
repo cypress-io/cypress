@@ -114,7 +114,7 @@ We also offer support via email with our [paid plans](https://www.cypress.io/pri
 
 ### Backpatching Strategy/Limitations
 
-At Cypress, we have a roll-forward approach to support. If you are entering an issue while using an older version of Cypress, our first step will be to verify the problem is still happening on the latest version of the app. If you are unable to upgrade, we will want to understand what blockers are keeping you from upgrading. We want to understand friction points so that we can build a tool that is easy to stay current on. As such, we will only be backpatching fixes on an ad hoc basis. We will consider the severity of the issue, the impact of the issue, and the reasons that users may be blocked from upgrading to a newer version of Cypress. 
+At Cypress, we have a roll-forward approach to support. If you are encountering an issue while using an older version of Cypress, our first step will be to verify the problem is still happening on the latest version of the app. If you are unable to upgrade, we will want to understand what blockers are keeping you from upgrading. We want to understand friction points so that we can build a tool that is easy to stay current on. As such, we will only be backpatching fixes on an ad hoc basis. We will use the [prioritization rubric](#prioritization-rubric) to assess the issue's severity/impact and we will consider the reasons that users may be blocked from upgrading to a newer version of Cypress. 
 
 ## How You Can Help
 
