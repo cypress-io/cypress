@@ -486,7 +486,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -505,7 +505,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests: Record<string, any> = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -542,7 +542,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -551,10 +551,6 @@ const normalize = (runnable, tests, initialTests, onRunnable, getRunnableId, get
     // tests have a type of 'test' whereas suites do not have a type property
     if (runnable.type == null) {
       runnable.type = 'suite'
-    }
-
-    if (onRunnable) {
-      onRunnable(runnable)
     }
 
     // if we have a runnable in the initial state
@@ -641,7 +637,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, getRunnableId, get
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, onRunnable, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -730,7 +726,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, getRunnableId, get
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, onRunnable, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -1125,7 +1121,6 @@ export default {
     const _testsQueue: any[] = []
     const _testsQueueById: Record<string, any> = {}
     // only used during normalization
-    const _runnables: any[] = []
     let _emissions: Emissions = {
       started: {},
       ended: {},
@@ -1152,11 +1147,6 @@ export default {
 
     const getTests = () => {
       return _tests
-    }
-
-    const onRunnable = (r) => {
-      // set default retries at onRunnable time instead of onRunnableRun
-      return _runnables.push(r)
     }
 
     const getTest = () => {
@@ -1336,7 +1326,6 @@ export default {
           tests,
           setTestsById,
           setTests,
-          onRunnable,
           getRunnableId,
           getHookId,
           getOnlyTestId,
