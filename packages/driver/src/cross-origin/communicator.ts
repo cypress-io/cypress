@@ -107,6 +107,33 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       data: preprocessedData,
     }, '*')
   }
+
+  /**
+   * Promisified event sent to the the primary communicator that expects the same event reflected back with the response.
+   * @param {string} event  - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data  - any meta data to be sent with the event.
+   * @param options - contains boolean to sync globals
+   * @returns the response from primary of the event with the same name.
+   */
+  toSpecBridgePromise<T> (originPolicy: string, event: string, data?: any) {
+    return new Promise<T>((resolve, reject) => {
+      let timeoutId
+
+      const handler = (result) => {
+        clearTimeout(timeoutId)
+        resolve(result)
+      }
+
+      timeoutId = setTimeout(() => {
+        this.off(event, handler)
+        reject()
+      }, 1000)
+
+      this.once(event, handler)
+
+      this.toSpecBridge(originPolicy, event, data)
+    })
+  }
 }
 
 /**
@@ -217,13 +244,19 @@ export class SpecBridgeCommunicator extends EventEmitter {
    */
   toPrimaryPromise<T> (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
     return new Promise<T>((resolve, reject) => {
-      setTimeout(() => {
+      let timeoutId
+
+      const handler = (result) => {
+        clearTimeout(timeoutId)
+        resolve(result)
+      }
+
+      timeoutId = setTimeout(() => {
+        this.off(event, handler)
         reject()
       }, 1000)
 
-      this.once(event, (result) => {
-        resolve(result)
-      })
+      this.once(event, handler)
 
       this.toPrimary(event, data, options)
     })
