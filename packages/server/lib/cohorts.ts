@@ -3,13 +3,13 @@ import type { Cohort } from '@packages/types'
 const debug = require('debug')('cypress:server:cohorts')
 
 export = {
-  get: (id: string) => {
-    debug('Get cohort id:', id)
+  get: (name: string) => {
+    debug('Get cohort name:', name)
 
     return cache.getCohorts().then((cohorts) => {
-      debug('Get cohort returning:', cohorts[id])
+      debug('Get cohort returning:', cohorts[name])
 
-      return cohorts[id]
+      return cohorts[name]
     })
   },
   set: (cohort: Cohort) => {

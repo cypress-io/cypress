@@ -16,7 +16,6 @@ export interface CachedUser {
 }
 
 export interface Cohort {
-  id: string
   name: string
   cohort: string
 }

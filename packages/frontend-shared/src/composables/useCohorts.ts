@@ -4,20 +4,20 @@ import { WeightedAlgorithm, WEIGHTED_EVEN } from '../utils/weightedChoice'
 import { UseCohorts_GetCohortDocument, UseCohorts_InsertCohortDocument } from '../generated/graphql'
 
 gql`
-query UseCohorts_GetCohort($id: String!) {
-  cohort(id: $id) {
-    id
+query UseCohorts_GetCohort($name: String!) {
+  cohort(name: $name) {
+    name
   }
 }
 `
 
 gql`
-mutation UseCohorts_InsertCohort ($id: String!, $name: String!) {
-  insertCohort (id: $id, name: $name)
+mutation UseCohorts_InsertCohort ($name: String!, $cohort: String!) {
+  insertCohort (name: $name, cohort: $cohort)
 }`
 
 export type CohortConfig = {
-  id: string
+  name: string
   cohorts: string[]
   algorithm?: WeightedAlgorithm
 }
@@ -29,31 +29,31 @@ export type Cohort = {
 export const useCohorts = (config: CohortConfig) => {
   const insertCohortMutation = useMutation(UseCohorts_InsertCohortDocument)
 
-  function getCohortFromCache (id: string): string | null | undefined {
+  function getCohortFromCache (name: string): string | null | undefined {
     const result = useQuery({
       query: UseCohorts_GetCohortDocument,
-      variables: { id },
+      variables: { name },
     })
 
-    return result.data?.value?.cohort?.id
+    return result.data?.value?.cohort?.name
   }
 
-  function setCohortInCache (id: string, cohortSelected: string) {
+  function setCohortInCache (name: string, cohortSelected: string) {
     insertCohortMutation.executeMutation({
-      id,
-      name: cohortSelected,
+      name,
+      cohort: cohortSelected,
     })
   }
 
   let cohortSelected: string
 
-  const cohortFromCache = getCohortFromCache(config.id)
+  const cohortFromCache = getCohortFromCache(config.name)
 
   if (!cohortFromCache || !_.includes(config.cohorts, cohortFromCache)) {
     const algorithm = config.algorithm || WEIGHTED_EVEN(config.cohorts)
 
     cohortSelected = algorithm.pick(config.cohorts)
-    setCohortInCache(config.id, cohortSelected)
+    setCohortInCache(config.name, cohortSelected)
   } else {
     cohortSelected = cohortFromCache
   }

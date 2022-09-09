@@ -5,15 +5,15 @@ describe('lib/cohort', () => {
   context('.get', () => {
     it('calls cache.get', async () => {
       const cohortTest = {
-        id: 'testid',
         name: 'testName',
+        cohort: 'A',
       }
 
       sinon.stub(cache, 'getCohorts').resolves({
-        [cohortTest.id]: cohortTest,
+        [cohortTest.name]: cohortTest,
       })
 
-      return cohorts.get(cohortTest.id).then((cohort) => {
+      return cohorts.get(cohortTest.name).then((cohort) => {
         expect(cohort).to.eq(cohortTest)
       })
     })
@@ -22,12 +22,12 @@ describe('lib/cohort', () => {
   context('.set', () => {
     it('calls cache.set', async () => {
       const cohortTest = {
-        id: 'testid',
         name: 'testName',
+        cohort: 'A',
       }
 
       return cohorts.set(cohortTest).then(() => {
-        return cohorts.get(cohortTest.id).then((cohort) => {
+        return cohorts.get(cohortTest.name).then((cohort) => {
           expect(cohort).to.eq(cohortTest)
         })
       })

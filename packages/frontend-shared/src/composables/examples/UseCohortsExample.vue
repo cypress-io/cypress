@@ -21,7 +21,7 @@ const props = defineProps<{
 }>()
 
 const cohortConfig: CohortConfig = {
-  id: 'login',
+  name: 'login',
   cohorts: props.copyOptions.map((option) => option.id),
   algorithm: props.algorithm,
 }

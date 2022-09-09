@@ -687,14 +687,13 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: '',
       args: {
-        id: nonNull(stringArg()),
         name: nonNull(stringArg()),
+        cohort: nonNull(stringArg()),
       },
       resolve: async (source, args, ctx) => {
         const cohort = {
-          id: args.id,
           name: args.name,
-          cohort: '',
+          cohort: arg.cohort,
         }
 
         await ctx.actions.cohorts.insertCohort(cohort)

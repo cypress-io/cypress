@@ -194,7 +194,7 @@ module.exports = {
       return tx.get('COHORTS', {}).then((cohorts) => {
         return tx.set('COHORTS', {
           ...cohorts,
-          [cohort.id]: cohort,
+          [cohort.name]: cohort,
         })
       })
     })

@@ -112,10 +112,10 @@ export const Query = objectType({
       description: 'Cohort assignments for this device used by the app for feature flags',
       type: Cohort,
       args: {
-        id: nonNull(stringArg()),
+        name: nonNull(stringArg({ description: 'the name of the cohort to find' })),
       },
       resolve: async (source, args, ctx) => {
-        return await ctx.cohortsApi.getCohort(args.id)
+        return await ctx.cohortsApi.getCohort(args.name)
       },
     })
 

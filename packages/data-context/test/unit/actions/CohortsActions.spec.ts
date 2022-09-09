@@ -17,36 +17,34 @@ describe('CohortsActions', () => {
   })
 
   context('getCohort', () => {
-    it('should return null if id not found', async () => {
-      const id = '123'
+    it('should return null if name not found', async () => {
+      const name = '123'
 
-      const cohort = await actions.getCohort(id)
+      const cohort = await actions.getCohort(name)
 
       expect(cohort).to.be.undefined
-      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(id)
+      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(name)
     })
 
     it('should return cohort if in cache', async () => {
       const cohort = {
-        id: '123',
-        name: 'cohort1',
+        name: 'loginBanner',
         cohort: 'A',
       }
 
       ;(ctx._apis.cohortsApi.getCohort as SinonStub).resolves(cohort)
 
-      const cohortReturned = await actions.getCohort(cohort.id)
+      const cohortReturned = await actions.getCohort(cohort.name)
 
       expect(cohortReturned).to.eq(cohort)
-      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(cohort.id)
+      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(cohort.name)
     })
   })
 
   context('insertCohort', () => {
     it('should insert cohort', async () => {
       const cohort = {
-        id: '123',
-        name: 'cohort1',
+        name: 'loginBanner',
         cohort: 'A',
       }
 

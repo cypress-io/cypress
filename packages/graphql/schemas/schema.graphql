@@ -557,7 +557,10 @@ enum CodeLanguageEnum {
 
 """used to distinguish one group of users from another"""
 type Cohort {
-  id: String
+  """value used to identify the indicate the cohort (e.g. "A" or "B")"""
+  cohort: String
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
   name: String
 }
 
@@ -1222,7 +1225,7 @@ type Mutation {
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
 
   """"""
-  insertCohort(id: String!, name: String!): Boolean
+  insertCohort(cohort: String!, name: String!): Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1499,7 +1502,10 @@ type Query {
   cloudViewer: CloudUser
 
   """Cohort assignments for this device used by the app for feature flags"""
-  cohort(id: String!): Cohort
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
 
   """The currently opened project"""
   currentProject: CurrentProject

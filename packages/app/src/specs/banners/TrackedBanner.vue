@@ -16,9 +16,9 @@ export type CohortOption = {
   value: string
 }
 
-export const getOptionForCohort = (id: string, options: CohortOption[]) => {
+export const getOptionForCohort = (name: string, options: CohortOption[]) => {
   const cohortConfig: CohortConfig = {
-    id,
+    name,
     cohorts: options.map((option) => option.cohort),
   }
 
