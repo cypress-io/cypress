@@ -183,7 +183,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import ExternalLink from '../ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
@@ -293,6 +293,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 
 const props = defineProps<{
   gql: SelectCloudProjectModalFragment
+  utmMedium: string
 }>()
 
 const emit = defineEmits<{
@@ -365,7 +366,7 @@ async function createOrConnectProject () {
       public: projectAccess.value === 'public',
       campaign: 'Create project',
       cohort: '',
-      medium: 'Specs Create Project Banner',
+      medium: props.utmMedium,
       source: getUtmSource(),
     })
 
