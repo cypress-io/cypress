@@ -5,6 +5,7 @@ import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
+import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
 
@@ -391,7 +392,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
    * @returns true or throws an error
    */
   const ensureCommandCanCommunicateWithAUT = (err?): boolean => {
-    if (!cy.isRunnerAbleToCommunicateWithAut()) {
+    if (!isRunnerAbleToCommunicateWithAut()) {
       const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
         commandOrigin: window.location.origin,
         autOrigin: Cypress.state('autLocation').originPolicy,

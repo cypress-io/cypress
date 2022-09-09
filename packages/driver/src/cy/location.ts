@@ -56,18 +56,6 @@ export const create = (state: StateFunc) => ({
 
     return autLocation
   },
-
-  isRunnerAbleToCommunicateWithAut (): boolean {
-    const win = Cypress.state('window')
-
-    try {
-      win.location.href
-
-      return true
-    } catch (err) {
-      return false
-    }
-  },
 })
 
 export interface ILocation extends ReturnType<typeof create> {}

@@ -57,6 +57,8 @@ window.addEventListener('beforeunload', () => {
   parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
 })
 
+// This error could also be handled by creating and attaching a spec bridge and re-throwing the error.
+// If this approach proves to be an issue we could try the new solution.
 const handleErrorEvent = (event) => {
   if (window.Cypress) {
     // A spec bridge has attached so we don't need to forward errors to top anymore.

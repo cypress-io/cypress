@@ -8,6 +8,7 @@ import $errUtils from '../../cypress/error_utils'
 import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
+import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
@@ -936,7 +937,7 @@ export default (Commands, Cypress, cy, state, config) => {
         win = state('window')
 
         // If we are visiting a cross origin domain and have onLoad or onBeforeLoad options specified, throw an error.
-        if (!cy.isRunnerAbleToCommunicateWithAut()) {
+        if (!isRunnerAbleToCommunicateWithAut()) {
           if (onLoadIsUserDefined) {
             $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }

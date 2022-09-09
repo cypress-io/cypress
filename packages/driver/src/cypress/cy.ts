@@ -163,7 +163,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   getRemoteLocation: ILocation['getRemoteLocation']
   getCrossOriginRemoteLocation: ILocation['getCrossOriginRemoteLocation']
-  isRunnerAbleToCommunicateWithAut: ILocation['isRunnerAbleToCommunicateWithAut']
 
   fireBlur: IFocused['fireBlur']
   fireFocus: IFocused['fireFocus']
@@ -288,7 +287,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.getRemoteLocation = location.getRemoteLocation
     this.getCrossOriginRemoteLocation = location.getCrossOriginRemoteLocation
-    this.isRunnerAbleToCommunicateWithAut = location.isRunnerAbleToCommunicateWithAut
 
     const focused = createFocused(state)
 
