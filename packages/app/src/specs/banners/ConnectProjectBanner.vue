@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Create project',
       medium: 'Specs Create Project Banner',
-      cohort: '' // TODO Connect cohort
+      cohort: optionSelected.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
