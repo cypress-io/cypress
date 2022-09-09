@@ -11,7 +11,7 @@ import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -44,7 +44,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = async function (win, options, parent) {
+const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   async function sendCommand (method: CdpCommand, data?: object) {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -72,7 +72,7 @@ const _getAutomation = async function (win, options, parent) {
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.writeVideoFrame) {
+        if (!options.videoApi) {
           await sendCommand('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
@@ -107,6 +107,12 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
       return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', extensionPath))
     }
   }))
+}
+
+async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
+
+  await cdpAutomation.startVideoRecording(writeVideoFrame)
 }
 
 export = {
@@ -179,7 +185,7 @@ export = {
 
   _getAutomation,
 
-  async _render (url: string, automation: Automation, preferences, options: { projectRoot?: string, isTextTerminal: boolean }) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -192,7 +198,7 @@ export = {
       win.maximize()
     }
 
-    const launched = await this._launch(win, url, automation, preferences)
+    const launched = await this._launch(win, url, automation, preferences, options.videoApi)
 
     automation.use(await _getAutomation(win, preferences, automation))
 
@@ -225,7 +231,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -239,9 +245,7 @@ export = {
 
     this._attachDebugger(win.webContents)
 
-    let ua
-
-    ua = options.userAgent
+    const ua = options.userAgent
 
     if (ua) {
       this._setUserAgent(win.webContents, ua)
@@ -273,8 +277,9 @@ export = {
     const cdpAutomation = await this._getAutomation(win, options, automation)
 
     automation.use(cdpAutomation)
+
     await Promise.all([
-      options.writeVideoFrame && cdpAutomation.startVideoRecording(options.writeVideoFrame),
+      videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
 
@@ -445,7 +450,7 @@ export = {
     })
   },
 
-  async connectToNewSpec (browser, options, automation) {
+  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
     await this.open(browser, options.url, options, automation)
@@ -480,10 +485,7 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, {
-      projectRoot: options.projectRoot,
-      isTextTerminal: options.isTextTerminal,
-    })
+    const win = await this._render(url, automation, preferences, electronOptions)
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 
