@@ -111,7 +111,8 @@ describe('experimentalSingleTabRunMode', () => {
 })
 
 describe('experimentalStudio', () => {
-  it('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+  // TODO: fix this flaky test.
+  it.skip('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
     cy.withCtx(async (ctx) => {
