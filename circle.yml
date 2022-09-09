@@ -1289,6 +1289,7 @@ jobs:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finlize || yarn percy build:finalize
+          when: on_success
 
   cli-visual-tests:
     <<: *defaults
