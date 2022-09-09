@@ -68,6 +68,7 @@ import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconMagnifyingGlass from '~icons/cy/magnifying-glass_x16'
 import IconAdd from '~icons/cy/add-large_x16'
+import { getPathForPlatform } from '../paths'
 
 const { t } = useI18n()
 
@@ -91,7 +92,7 @@ const emit = defineEmits<{
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
 
-  emit('update:modelValue', value)
+  emit('update:modelValue', getPathForPlatform(value))
 }
 
 const clearInput = (e: Event) => {
