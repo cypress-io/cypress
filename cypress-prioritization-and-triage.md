@@ -71,7 +71,7 @@ Here are the criteria we use to gauge relative issue priority:
 | Visibility | 1.0 | Is this an important issue to our community? Is there a lot of discussion around it? |
 | Does Workaround Exist | 1.0 | Does a work around exist that is reasonable? |
 | Regression | 1.0 | Did this previously work? How long ago did it last work? Was this a regression within this last (current) major version? |
-| Cypress Prioirty | 1.0 | Does Cypress have a vested interest in resolving this issue? Example, does it ease support burden for our staff? Is this part of a corporate milestone or objective? |
+| Cypress Prioirty | 1.0 | Does Cypress have a vested interest in resolving this issue? For example, does it ease support burden for our staff? Is this part of a corporate milestone or objective? |
 | Effort | 1.0 | How much effort is needed to resolve the issue? Estimates are for a single developer being assigned to the issue. |
 
 The formula for calculating the Cypress Relative Priority Score (CRPS) is the weighted sum of our priority criteria:
