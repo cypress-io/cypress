@@ -22,7 +22,7 @@ Cypress is constantly looking to improve and grow our testing platform to meet t
 
 ## Cypress Roadmap
 
-Our [high level roadmap](https://github.com/orgs/cypress-io/projects/13/views/1) shows high-level projects at Cypress. 
+Our [Cypress App Priorities](https://github.com/orgs/cypress-io/projects/13/views/1) board shows the high-level roadmap at Cypress. 
 
 The board flows from left to right as a ticket moves from the ideation and feasibility phase all the way to General Availability (GA) release. 
 
