@@ -556,6 +556,8 @@ export class Log {
 }
 
 class LogManager {
+  logs: Record<string, any> = {}
+
   constructor () {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
@@ -563,6 +565,12 @@ class LogManager {
   trigger (log, event) {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
+      return
+    }
+
+    // bail - when navigating to a new origin mid-test (i.e. change in top)
+    // this deferred log is stale and should not be sent
+    if (!this.logs[log.get('id')]) {
       return
     }
 
@@ -583,6 +591,12 @@ class LogManager {
     log._hasInitiallyLogged = true
 
     return this.trigger(log, 'command:log:added')
+  }
+
+  addToLogs (log) {
+    const id = log.get('id')
+
+    this.logs[id] = true
   }
 
   fireChangeEvent (log) {
@@ -626,6 +640,8 @@ class LogManager {
       }
 
       log.wrapConsoleProps()
+
+      this.addToLogs(log)
 
       if (options.sessionInfo) {
         Cypress.emit('session:add', log.toJSON())
