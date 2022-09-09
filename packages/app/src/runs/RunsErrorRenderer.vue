@@ -62,6 +62,7 @@
     v-if="showConnectDialog"
     :show="showConnectDialog"
     :gql="props.gql"
+    utm-medium="Runs Tab"
     @cancel="showConnectDialog = false"
     @success="showConnectDialog = false"
   />

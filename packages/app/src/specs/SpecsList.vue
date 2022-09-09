@@ -182,6 +182,7 @@
   <CloudConnectModals
     v-if="isProjectConnectOpen"
     :gql="props.gql"
+    :utm-medium="loginUtmMedium"
     @cancel="isProjectConnectOpen = false"
     @success="refreshPage"
   />
