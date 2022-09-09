@@ -7,6 +7,7 @@ gql`
 query UseCohorts_GetCohort($name: String!) {
   cohort(name: $name) {
     name
+    cohort
   }
 }
 `
@@ -35,7 +36,7 @@ export const useCohorts = (config: CohortConfig) => {
       variables: { name },
     })
 
-    return result.data?.value?.cohort?.name
+    return result.data?.value?.cohort?.cohort
   }
 
   function setCohortInCache (name: string, cohortSelected: string) {
