@@ -94,7 +94,7 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 
-watch(() => props.eventData.cohort, () => {
+watch(() => props.eventData?.cohort, () => {
   if (props.modelValue && !props.hasBannerBeenShown && props.eventData) {
     // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
     recordBannerShown(props.eventData)

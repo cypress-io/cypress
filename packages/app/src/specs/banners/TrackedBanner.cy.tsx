@@ -1,5 +1,5 @@
 import TrackedBanner from './TrackedBanner.vue'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 
 describe('<TrackedBanner />', () => {
@@ -25,7 +25,7 @@ describe('<TrackedBanner />', () => {
 
     // Initially mount as visible
     // @ts-ignore
-    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} hasBannerBeenShown={false} /> })
+    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} hasBannerBeenShown={false} eventData={{} as any}/> })
 
     cy.get('[data-cy="banner"]').as('banner')
 
@@ -48,7 +48,7 @@ describe('<TrackedBanner />', () => {
 
     // Initially mount as visible
     // @ts-ignore
-    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} dismissible hasBannerBeenShown={false} /> })
+    cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} dismissible hasBannerBeenShown={false} eventData={{} as any} /> })
 
     cy.get('[data-cy="banner"]').as('banner')
 
@@ -74,32 +74,41 @@ describe('<TrackedBanner />', () => {
     })
 
     context('when banner not previously shown', () => {
+      let eventData
+
       beforeEach(() => {
+        eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: undefined })
+
         cy.mount({
-          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={false} eventData={{ campaign: 'CAM', medium: 'MED', cohort: 'COH' }} />,
+          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={false} eventData={eventData} />,
         })
       })
 
       it('should record event', () => {
-        cy.get('@recordEvent').should('have.been.calledOnce')
+        eventData.cohort = 'COH'
         cy.get('@recordEvent').should(
-          'have.been.calledWith',
+          'have.been.calledOnceWith',
           Cypress.sinon.match({ campaign: 'CAM', messageId: Cypress.sinon.match.string, medium: 'MED', cohort: 'COH' }),
         )
       })
 
       it('should debounce event recording', () => {
+        eventData.cohort = 'COH'
         cy.wait(250)
         cy.get('@recordEvent').should('have.been.calledOnce')
       })
     })
 
     context('when banner has been previously shown', () => {
+      let eventData
+
       beforeEach(() => {
-        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={true} eventData={{} as any} /> })
+        eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: undefined })
+        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={true} eventData={eventData} /> })
       })
 
       it('should not record event', () => {
+        eventData.cohort = 'COH'
         cy.get('@recordEvent').should('not.have.been.called')
       })
     })
