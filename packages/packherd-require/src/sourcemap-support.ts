@@ -192,7 +192,8 @@ class SourcemapSupport {
     }
     state.curPos = state.nextPos = undefined
 
-    return errorString + processedStack.reverse().join('')
+    // TODO: Added \n here to get tests to pass for now. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
+    return `${errorString + processedStack.reverse().join('') }\n`
   }
 
   wrapCallSite (
