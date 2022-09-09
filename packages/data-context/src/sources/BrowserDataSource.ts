@@ -23,6 +23,12 @@ if (os.platform() === 'win32') {
 
 const platform = os.platform()
 
+export function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
+  return _.uniqBy(browsers, (browser: FoundBrowser) => {
+    return `${browser.name}-${browser.version}`
+  })
+}
+
 export interface BrowserApiShape {
   close(): Promise<any>
   ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser>
@@ -39,9 +45,7 @@ export class BrowserDataSource {
    */
   allBrowsers () {
     return Promise.all([this.userBrowsers(), this.machineBrowsers()]).then(([userBrowsers, machineBrowsers]) => {
-      return _.uniqBy([...userBrowsers, ...machineBrowsers], (browser: FoundBrowser) => {
-        return `${browser.name}-${browser.version}`
-      })
+      return removeDuplicateBrowsers([...userBrowsers, ...machineBrowsers])
     })
   }
 
