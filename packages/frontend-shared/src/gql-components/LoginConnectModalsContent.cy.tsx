@@ -1,6 +1,7 @@
 import { LoginConnectModalsContentFragmentDoc } from '../generated/graphql-test'
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { SelectCloudProjectModal_CreateCloudProjectDocument } from '../generated/graphql'
 
 import { useLoginConnectStore } from '../store/login-connect-store'
 
@@ -29,8 +30,9 @@ describe('<LoginConnectModalsContent />', () => {
   })
 
   context('when user is logged in', () => {
-    it('reaches correct "Create Project" state if project is not set up', () => {
-      const { openLoginConnectModal } = useLoginConnectStore()
+    it('shows "Create Project" state if project is not set up', () => {
+      const loginConnectStore = useLoginConnectStore()
+      const { openLoginConnectModal } = loginConnectStore
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
@@ -52,21 +54,28 @@ describe('<LoginConnectModalsContent />', () => {
               nodes: [{ __typename: 'CloudOrganization', id: '123' }],
             },
           }
-
-          result.currentProject = null
         },
         render: (gqlVal) => {
           return <LoginConnectModalsContent gql={gqlVal} />
         },
       })
 
+      const createProjectStub = cy.stub().as('createProjectStub')
+
+      cy.stubMutationResolver(SelectCloudProjectModal_CreateCloudProjectDocument, (defineResult, variables) => {
+        createProjectStub(variables)
+
+        return defineResult({} as any)
+      })
+
       cy.contains('Create project')
       .should('not.exist')
       .then(() => {
         openLoginConnectModal({ utmMedium: 'testing' })
-
-        cy.contains('Connect project').click()
       })
+
+      cy.contains('button', 'Create project').click()
+      cy.get('@createProjectStub').should('have.been.calledOnceWith', { name: 'test-project', orgId: '122', public: false })
     })
   })
 })
