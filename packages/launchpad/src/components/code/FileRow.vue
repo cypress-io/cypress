@@ -34,9 +34,8 @@
       </ListRowHeader>
     </DisclosureButton>
     <DisclosurePanel
-      max-height="500px"
       class="border rounded-b mb-4 w-full bg-light-50 border-gray-100 block"
-      :class="{'overflow-auto': open}"
+      :class="{'overflow-auto max-h-500px': open}"
     >
       <div
         v-if="status === 'changes'"
