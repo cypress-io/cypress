@@ -45,7 +45,7 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
 import CloudConnectModals from '../../runs/modals/CloudConnectModals.vue'
 
@@ -92,6 +92,13 @@ function handleModalClose () {
 }
 
 const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
-const bodyCopy = t(optionSelected.value)
+
+const bodyCopy = computed(() => {
+  if (optionSelected.value.value) {
+    return t(optionSelected.value.value)
+  }
+
+  return ''
+})
 
 </script>

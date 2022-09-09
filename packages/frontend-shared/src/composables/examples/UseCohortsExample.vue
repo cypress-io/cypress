@@ -1,12 +1,12 @@
 <template>
   <div data-cy="result">
-    {{ value }}
+    {{ cohortChoice.value }}
   </div>
 </template>
 
 <script lang="ts">
 export type CopyOption = {
-  id: string
+  cohort: string
   value: string
 }
 </script>
@@ -14,6 +14,7 @@ export type CopyOption = {
 <script setup lang="ts">
 import type { WeightedAlgorithm } from '../../utils/weightedChoice'
 import { CohortConfig, useCohorts } from '../useCohorts'
+import { computed } from 'vue'
 
 const props = defineProps<{
   algorithm?: WeightedAlgorithm
@@ -22,12 +23,20 @@ const props = defineProps<{
 
 const cohortConfig: CohortConfig = {
   name: 'login',
-  cohorts: props.copyOptions.map((option) => option.id),
+  cohorts: props.copyOptions.map((option) => option.cohort),
   algorithm: props.algorithm,
 }
 
 const cohortSelected = useCohorts(cohortConfig)
 
-const value = props.copyOptions.filter((option) => option.id === cohortSelected)[0].value
+const cohortChoice = computed(() => {
+  if (cohortSelected.value) {
+    return props.copyOptions.filter((option) => option.cohort === cohortSelected.value)[0]
+  }
+
+  return { value: '' }
+})
+
+//http://localhost:5173/__/#/specs/runner?file=src/composables/examples/UseCohortsExample.cy.tsx
 
 </script>

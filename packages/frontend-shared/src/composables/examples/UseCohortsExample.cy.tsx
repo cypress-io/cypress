@@ -3,8 +3,8 @@ import UseCohortsExample, { CopyOption } from './UseCohortsExample.vue'
 
 describe('useCohorts example', () => {
   const copyOptions: CopyOption[] = [
-    { id: 'A', value: 'Notification Title A' },
-    { id: 'B', value: 'Notification Title B' },
+    { cohort: 'A', value: 'Notification Title A' },
+    { cohort: 'B', value: 'Notification Title B' },
   ]
 
   it('should show value for one cohort with default algorithm', () => {

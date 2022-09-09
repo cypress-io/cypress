@@ -87,12 +87,15 @@ const firstRecordKey = computed(() => {
 })
 
 const optionSelected = getOptionForCohort(bannerId, props.commandOptions)
-const command = t(optionSelected.value)
+
+const command = computed(() => {
+  return optionSelected.value.value
+})
 
 const recordCommand = computed(() => {
   const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
 
-  return `${command} run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
+  return `${command.value} run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 
 </script>

@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
@@ -84,6 +84,13 @@ async function handleButtonClick () {
 }
 
 const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
-const bodyCopy = t(optionSelected.value)
+
+const bodyCopy = computed(() => {
+  if (optionSelected.value.value) {
+    return t(optionSelected.value.value)
+  }
+
+  return ''
+})
 
 </script>

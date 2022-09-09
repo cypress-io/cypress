@@ -24,14 +24,20 @@ export const getOptionForCohort = (name: string, options: CohortOption[]) => {
 
   const cohortSelected = useCohorts(cohortConfig)
 
-  return options.filter((option) => option.cohort === cohortSelected)[0]
+  return computed(() => {
+    if (cohortSelected.value) {
+      return options.filter((option) => option.cohort === cohortSelected.value)[0]
+    }
+
+    return { cohort: '', value: '' }
+  })
 }
 
 </script>
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, computed, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
@@ -88,7 +94,7 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 
-watchEffect(() => {
+watch(() => props.eventData.cohort, () => {
   if (props.modelValue && !props.hasBannerBeenShown && props.eventData) {
     // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
     recordBannerShown(props.eventData)

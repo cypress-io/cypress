@@ -93,6 +93,13 @@ const createOrganizationUrl = computed(() => {
 })
 
 const optionSelected = getOptionForCohort(bannerId, props.headerCopyOptions)
-const headerCopy = t(optionSelected.value)
+
+const headerCopy = computed(() => {
+  if (optionSelected.value.value) {
+    return t(optionSelected.value.value)
+  }
+
+  return ''
+})
 
 </script>

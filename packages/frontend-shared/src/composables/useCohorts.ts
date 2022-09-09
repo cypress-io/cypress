@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { useMutation, gql, useQuery } from '@urql/vue'
 import { WeightedAlgorithm, WEIGHTED_EVEN } from '../utils/weightedChoice'
 import { UseCohorts_GetCohortDocument, UseCohorts_InsertCohortDocument } from '../generated/graphql'
+import { ref } from 'vue'
 
 gql`
 query UseCohorts_GetCohort($name: String!) {
@@ -30,34 +31,42 @@ export type Cohort = {
 export const useCohorts = (config: CohortConfig) => {
   const insertCohortMutation = useMutation(UseCohorts_InsertCohortDocument)
 
-  function getCohortFromCache (name: string): string | null | undefined {
-    const result = useQuery({
+  const getCohortFromCache = async (name: string) => {
+    const getCohortQuery = useQuery({
       query: UseCohorts_GetCohortDocument,
       variables: { name },
     })
 
-    return result.data?.value?.cohort?.cohort
+    await getCohortQuery.executeQuery()
+
+    return getCohortQuery.data?.value?.cohort?.cohort
   }
 
-  function setCohortInCache (name: string, cohortSelected: string) {
-    insertCohortMutation.executeMutation({
+  const setCohortInCache = async (name: string, cohortSelected: string) => {
+    return await insertCohortMutation.executeMutation({
       name,
       cohort: cohortSelected,
     })
   }
 
-  let cohortSelected: string
+  const cohortSelected = ref<string>()
 
-  const cohortFromCache = getCohortFromCache(config.name)
+  const fetchCohort = async () => {
+    const cohortFromCache = await getCohortFromCache(config.name)
 
-  if (!cohortFromCache || !_.includes(config.cohorts, cohortFromCache)) {
-    const algorithm = config.algorithm || WEIGHTED_EVEN(config.cohorts)
+    if (!cohortFromCache || !_.includes(config.cohorts, cohortFromCache)) {
+      const algorithm = config.algorithm || WEIGHTED_EVEN(config.cohorts)
 
-    cohortSelected = algorithm.pick(config.cohorts)
-    setCohortInCache(config.name, cohortSelected)
-  } else {
-    cohortSelected = cohortFromCache
+      const pickedCohort = algorithm.pick(config.cohorts)
+
+      setCohortInCache(config.name, pickedCohort)
+      cohortSelected.value = pickedCohort
+    } else {
+      cohortSelected.value = cohortFromCache
+    }
   }
+
+  fetchCohort()
 
   return cohortSelected
 }
