@@ -59,13 +59,5 @@ export const useCohorts = (config: CohortConfig) => {
     cohortSelected = cohortFromCache
   }
 
-  const get = (): Cohort => {
-    return {
-      id: cohortSelected,
-    }
-  }
-
-  return {
-    get,
-  }
+  return cohortSelected
 }

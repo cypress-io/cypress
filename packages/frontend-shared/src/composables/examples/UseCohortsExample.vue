@@ -26,8 +26,8 @@ const cohortConfig: CohortConfig = {
   algorithm: props.algorithm,
 }
 
-const cohortSelected = useCohorts(cohortConfig).get()
+const cohortSelected = useCohorts(cohortConfig)
 
-const value = props.copyOptions.filter((option) => option.id === cohortSelected.id)[0].value
+const value = props.copyOptions.filter((option) => option.id === cohortSelected)[0].value
 
 </script>

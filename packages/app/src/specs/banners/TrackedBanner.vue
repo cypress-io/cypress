@@ -22,9 +22,9 @@ export const getOptionForCohort = (name: string, options: CohortOption[]) => {
     cohorts: options.map((option) => option.cohort),
   }
 
-  const cohortSelected = useCohorts(cohortConfig).get()
+  const cohortSelected = useCohorts(cohortConfig)
 
-  return options.filter((option) => option.cohort === cohortSelected.id)[0]
+  return options.filter((option) => option.cohort === cohortSelected)[0]
 }
 
 </script>
