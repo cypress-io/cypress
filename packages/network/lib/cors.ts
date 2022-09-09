@@ -151,9 +151,25 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
 
 export function getOriginPolicy (url: string) {
   // @ts-ignore
-  const { port, protocol } = new URL(url)
+  const { port, protocol, hostname } = new URL(url)
 
   // origin policy is comprised of:
+  // protocol+ subdomain + superdomain + port (subdomain is not factored in)
+  return _.compact([`${protocol}//${hostname}`, port]).join(':')
+}
+
+/**
+ * We use the parent origin policy in the driver to determine whether or not we need to reload/interact with the AUT, and
+ * currently in the spec bridge to interact with the AUT frame, which uses document.domain set to the parent
+ * @param url - the full absolute url
+ * @returns the parent origin policy -
+ * ex: http://www.example.com:8081/my/path -> http://example.com:8081/my/path
+ */
+export function getSuperDomainOriginPolicy (url: string) {
+  // @ts-ignore
+  const { port, protocol } = new URL(url)
+
+  // parent origin policy is comprised of:
   // protocol + superdomain + port (subdomain is not factored in)
   return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
 }

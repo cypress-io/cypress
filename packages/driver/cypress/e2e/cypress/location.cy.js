@@ -225,7 +225,7 @@ describe('src/cypress/location', () => {
     it('handles subdomains google', function () {
       const str = this.setup('google').getOriginPolicy()
 
-      expect(str).to.eq('https://google.com')
+      expect(str).to.eq('https://www.google.com')
     })
 
     it('issue: #255 two domains in the url', function () {
@@ -243,11 +243,61 @@ describe('src/cypress/location', () => {
     it('handles subdomains of private tlds in the public suffix', function () {
       const str = this.setup('herokuSub').getOriginPolicy()
 
-      expect(str).to.eq('https://example.herokuapp.com')
+      expect(str).to.eq('https://foo.example.herokuapp.com')
     })
 
     it('falls back to dumb check when invalid tld', function () {
       const str = this.setup('unknown').getOriginPolicy()
+
+      expect(str).to.eq('http://what.is.so.unknown')
+    })
+  })
+
+  context('#getSuperDomainOriginPolicy', () => {
+    it('handles ip addresses', function () {
+      const str = this.setup('local').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('http://127.0.0.1:8080')
+    })
+
+    it('handles 1 part localhost', function () {
+      const str = this.setup('users').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('http://localhost:2020')
+    })
+
+    it('handles 2 parts stack', function () {
+      const str = this.setup('stack').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('https://stackoverflow.com')
+    })
+
+    it('handles subdomains google', function () {
+      const str = this.setup('google').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('https://google.com')
+    })
+
+    it('issue: #255 two domains in the url', function () {
+      const str = this.setup('email').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('http://localhost:3500')
+    })
+
+    it('handles private tlds in the public suffix', function () {
+      const str = this.setup('heroku').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
+
+    it('handles subdomains of private tlds in the public suffix', function () {
+      const str = this.setup('herokuSub').getSuperDomainOriginPolicy()
+
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
+
+    it('falls back to dumb check when invalid tld', function () {
+      const str = this.setup('unknown').getSuperDomainOriginPolicy()
 
       expect(str).to.eq('http://so.unknown')
     })
@@ -256,7 +306,7 @@ describe('src/cypress/location', () => {
   context('.create', () => {
     it('returns an object literal', () => {
       const obj = Location.create(urls.cypress, urls.signin)
-      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'toString', 'originPolicy', 'superDomain']
+      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'toString', 'originPolicy', 'superDomainOriginPolicy', 'superDomain']
 
       expect(obj).to.have.keys(keys)
     })

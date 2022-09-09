@@ -1123,9 +1123,10 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the origin currently matches
+          // if the parent origin currently matches
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy) {
+          // we go off the superDomainOriginPolicy policy as we can interact with subdomains based document.domain set to the superdomain
+          if (remote.superDomainOriginPolicy === existing.superDomainOriginPolicy) {
             previouslyVisitedLocation = remote
 
             url = $Location.fullyQualifyUrl(url)

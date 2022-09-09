@@ -13,6 +13,7 @@ const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
     const frame = window.parent.frames[index]
 
+    // TODO: attempt to find the most specific spec bridge?
     try {
       // If Cypress is defined and we haven't gotten a cross origin error we have found the correct bridge.
       if (frame.Cypress) {
