@@ -431,12 +431,12 @@ class Command extends Component<Props> {
 
     if (this._isPinned()) {
       this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', { testId, logId: id })
+      this.props.events.emit('unpin:snapshot', testId, id)
       this._snapshot(true)
     } else {
       this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', { testId, logId: id })
-      this.props.events.emit('show:command', { testId, logId: id })
+      this.props.events.emit('pin:snapshot', testId, id)
+      this.props.events.emit('show:command', testId, id)
     }
   }
 
@@ -465,7 +465,7 @@ class Command extends Component<Props> {
 
       this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        this.props.events.emit('show:snapshot', { testId: model.testId, logId: model.id })
+        this.props.events.emit('show:snapshot', model.testId, model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
@@ -476,7 +476,7 @@ class Command extends Component<Props> {
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          this.props.events.emit('hide:snapshot', { testId: model.testId, logId: model.id })
+          this.props.events.emit('hide:snapshot', model.testId, model.id)
         }
       }, 50)
     }

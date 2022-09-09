@@ -181,8 +181,8 @@ export class EventManager {
       })
     })
 
-    const logCommand = (logIds) => {
-      const consoleProps = Cypress.runner.getConsolePropsForLog(logIds)
+    const logCommand = (testId, logId) => {
+      const consoleProps = Cypress.runner.getConsolePropsForLog(testId, logId)
 
       logger.logFormatted(consoleProps)
     }
@@ -192,16 +192,16 @@ export class EventManager {
 
       if (logId || err) logger.clearLog()
 
-      if (logId) logCommand({ testId, logId })
+      if (logId) logCommand(testId, logId)
 
       if (err) logger.logError(err.stack)
     })
 
-    this.reporterBus.on('runner:console:log', (logIds) => {
+    this.reporterBus.on('runner:console:log', (testId, logId) => {
       if (!Cypress) return
 
       logger.clearLog()
-      logCommand(logIds)
+      logCommand(testId, logId)
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
@@ -210,24 +210,24 @@ export class EventManager {
 
     this.reporterBus.on('runner:restart', rerun)
 
-    const sendEventIfSnapshotProps = (logIds, event) => {
+    const sendEventIfSnapshotProps = (testId, logId, event) => {
       if (!Cypress) return
 
-      const snapshotProps = Cypress.runner.getSnapshotPropsForLog(logIds)
+      const snapshotProps = Cypress.runner.getSnapshotPropsForLog(testId, logId)
 
       if (snapshotProps) {
         this.localBus.emit(event, snapshotProps)
       }
     }
 
-    this.reporterBus.on('runner:show:snapshot', (logIds) => {
-      sendEventIfSnapshotProps(logIds, 'show:snapshot')
+    this.reporterBus.on('runner:show:snapshot', (testId, logId) => {
+      sendEventIfSnapshotProps(testId, logId, 'show:snapshot')
     })
 
     this.reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
 
-    this.reporterBus.on('runner:pin:snapshot', (logIds) => {
-      sendEventIfSnapshotProps(logIds, 'pin:snapshot')
+    this.reporterBus.on('runner:pin:snapshot', (testId, logId) => {
+      sendEventIfSnapshotProps(testId, logId, 'pin:snapshot')
     })
 
     this.reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))

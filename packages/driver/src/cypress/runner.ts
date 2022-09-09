@@ -1675,7 +1675,7 @@ export default {
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
 
-      getConsolePropsForLog ({ testId, logId }) {
+      getConsolePropsForLog (testId, logId) {
         if (_skipCollectingLogs) return
 
         const test = getTestById(testId)
@@ -1691,7 +1691,7 @@ export default {
         return
       },
 
-      getSnapshotPropsForLog ({ testId, logId }) {
+      getSnapshotPropsForLog (testId, logId) {
         if (_skipCollectingLogs) return
 
         const test = getTestById(testId)
@@ -1769,7 +1769,7 @@ export default {
           return
         }
 
-        // if this test isnt in the current queue
+        // if this test isn't in the current queue
         // then go ahead and add it
         if (!_testsQueueById[test.id]) {
           _testsQueueById[test.id] = true
@@ -1778,9 +1778,6 @@ export default {
 
         const { instrument } = attrs
 
-        // test = getTestById(testId)
-
-        // if (test) {
         // pluralize the instrument as a property on the runnable
         const name = `${instrument}s`
         const logs = test[name] != null ? test[name] : (test[name] = [])

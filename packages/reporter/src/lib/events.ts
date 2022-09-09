@@ -17,7 +17,7 @@ interface InitEvent {
 }
 
 export interface Runner {
-  emit: ((event: string, payload?: any) => void)
+  emit(event: string | symbol, ...args: any[]): boolean
   on: ((event: string, action: ((...args: any) => void)) => void)
 }
 
@@ -159,8 +159,8 @@ const events: Events = {
       runner.emit('runner:restart')
     }))
 
-    localBus.on('show:command', (commandIds) => {
-      runner.emit('runner:console:log', commandIds)
+    localBus.on('show:command', (testId, logId) => {
+      runner.emit('runner:console:log', testId, logId)
     })
 
     localBus.on('show:error', (test: TestModel) => {
@@ -173,20 +173,20 @@ const events: Events = {
       })
     })
 
-    localBus.on('show:snapshot', (commandIds) => {
-      runner.emit('runner:show:snapshot', commandIds)
+    localBus.on('show:snapshot', (testId, logId) => {
+      runner.emit('runner:show:snapshot', testId, logId)
     })
 
-    localBus.on('hide:snapshot', (commandIds) => {
-      runner.emit('runner:hide:snapshot', commandIds)
+    localBus.on('hide:snapshot', (testId, logId) => {
+      runner.emit('runner:hide:snapshot', testId, logId)
     })
 
-    localBus.on('pin:snapshot', (commandIds) => {
-      runner.emit('runner:pin:snapshot', commandIds)
+    localBus.on('pin:snapshot', (testId, logId) => {
+      runner.emit('runner:pin:snapshot', testId, logId)
     })
 
-    localBus.on('unpin:snapshot', (commandIds) => {
-      runner.emit('runner:unpin:snapshot', commandIds)
+    localBus.on('unpin:snapshot', (testId, logId) => {
+      runner.emit('runner:unpin:snapshot', testId, logId)
     })
 
     localBus.on('get:user:editor', (cb) => {
