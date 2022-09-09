@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_LOGIN"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="login-banner"
     status="info"
@@ -11,7 +11,7 @@
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ t('specPage.banners.login.content') }}
+      {{ bodyCopy }}
     </p>
 
     <Button
@@ -38,7 +38,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
-import TrackedBanner from './TrackedBanner.vue'
+import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
@@ -48,10 +48,17 @@ query LoginBanner {
 }
 `
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: boolean
+  bodyCopyOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  bodyCopyOptions: () => {
+    return [
+      { cohort: 'A', value: 'specPage.banners.login.contentA' },
+      { cohort: 'B', value: 'specPage.banners.login.contentB' },
+    ]
+  },
 })
 
 const emit = defineEmits<{
@@ -59,6 +66,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_LOGIN
 const isLoginOpen = ref(false)
 const loginModalQuery = useQuery({ query: LoginBannerDocument, pause: true })
 
@@ -66,5 +74,8 @@ async function handleButtonClick () {
   await loginModalQuery.executeQuery()
   isLoginOpen.value = true
 }
+
+const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
+const bodyCopy = t(optionSelected.value)
 
 </script>

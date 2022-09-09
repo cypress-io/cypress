@@ -1,10 +1,10 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_CREATE_ORG"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="create-organization-banner"
     status="info"
-    :title="t('specPage.banners.createOrganization.title')"
+    :title="headerCopy"
     class="mb-16px"
     :icon="OrganizationIcon"
     dismissible
@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
-import TrackedBanner from './TrackedBanner.vue'
+import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
@@ -46,10 +46,17 @@ query CreateOrganizationBanner {
 }
 `
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: boolean
+  headerCopyOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  headerCopyOptions: () => {
+    return [
+      { cohort: 'A', value: 'specPage.banners.createOrganization.titleA' },
+      { cohort: 'B', value: 'specPage.banners.createOrganization.titleB' },
+    ]
+  },
 })
 
 const emit = defineEmits<{
@@ -57,6 +64,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_CREATE_ORG
 
 const query = useQuery({ query: CreateOrganizationBannerDocument })
 
@@ -75,5 +83,8 @@ const createOrganizationUrl = computed(() => {
     },
   })
 })
+
+const optionSelected = getOptionForCohort(bannerId, props.headerCopyOptions)
+const headerCopy = t(optionSelected.value)
 
 </script>

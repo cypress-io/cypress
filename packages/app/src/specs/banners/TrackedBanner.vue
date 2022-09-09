@@ -8,6 +8,27 @@
   </Alert>
 </template>
 
+<script lang="ts">
+import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
+
+export type CohortOption = {
+  cohort: string
+  value: string
+}
+
+export const getOptionForCohort = (id: string, options: CohortOption[]) => {
+  const cohortConfig: CohortConfig = {
+    id,
+    cohorts: options.map((option) => option.cohort),
+  }
+
+  const cohortSelected = useCohorts(cohortConfig).get()
+
+  return options.filter((option) => option.cohort === cohortSelected.id)[0]
+}
+
+</script>
+
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { watchEffect } from 'vue'

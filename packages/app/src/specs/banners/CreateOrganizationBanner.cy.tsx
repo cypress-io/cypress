@@ -11,9 +11,11 @@ describe('<CreateOrganizationBanner />', () => {
       cloudOrganizationsUrl: linkHref,
     } as any
 
-    cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} /> })
+    const copyOptions = [{ cohort: 'A', value: 'specPage.banners.createOrganization.titleA' }]
 
-    cy.contains(defaultMessages.specPage.banners.createOrganization.title).should('be.visible')
+    cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} headerCopyOptions={copyOptions}/> })
+
+    cy.contains(defaultMessages.specPage.banners.createOrganization.titleA).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.createOrganization.content).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.createOrganization.buttonLabel).should('be.visible')
 
