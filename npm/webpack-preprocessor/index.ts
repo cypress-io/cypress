@@ -202,6 +202,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // we need to set entry and output
       entry,
       output: {
+        // disable automatic publicPath
+        publicPath: '',
         path: path.dirname(outputPath),
         filename: path.basename(outputPath),
       },
