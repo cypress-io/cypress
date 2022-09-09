@@ -80,6 +80,7 @@
             :gql="props.gql"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
+            :utm-content="props.utmContent"
             :show-connect-button-after-login="props.showConnectButtonAfterLogin"
             @continue="continueAuth"
             @connect-project="handleConnectProject"
@@ -135,6 +136,7 @@ const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
   utmMedium: string
+  utmContent?: string
   showConnectButtonAfterLogin?: boolean
 }>()
 

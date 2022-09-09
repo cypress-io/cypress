@@ -113,18 +113,22 @@
   <RecordBanner
     v-else-if="showRecordBanner"
     v-model="showRecordBanner"
+    :has-banner-been-shown="hasRecordBannerBeenShown"
   />
   <ConnectProjectBanner
     v-else-if="showConnectBanner"
     v-model="showConnectBanner"
+    :has-banner-been-shown="hasConnectBannerBeenShown"
   />
   <CreateOrganizationBanner
     v-else-if="showCreateOrganizationBanner"
     v-model="showCreateOrganizationBanner"
+    :has-banner-been-shown="hasCreateOrganizationBannerBeenShown"
   />
   <LoginBanner
     v-else-if="showLoginBanner"
     v-model="showLoginBanner"
+    :has-banner-been-shown="hasLoginBannerBeenShown"
   />
 </template>
 
@@ -224,6 +228,11 @@ const showConnectBanner = ref(false)
 const showCreateOrganizationBanner = ref(false)
 const showLoginBanner = ref(false)
 
+const hasRecordBannerBeenShown = ref(true)
+const hasConnectBannerBeenShown = ref(true)
+const hasCreateOrganizationBannerBeenShown = ref(true)
+const hasLoginBannerBeenShown = ref(true)
+
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
   () => {
@@ -254,6 +263,11 @@ watch(
     showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
     showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
     showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
+
+    hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
+    hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
+    hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
+    hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
   },
   { immediate: true },
 )
@@ -262,6 +276,12 @@ function hasBannerBeenDismissed (bannerId: string) {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
   return !!bannersState?._disabled || !!bannersState?.[bannerId]?.dismissed
+}
+
+function hasBannerBeenShown (bannerId: string) {
+  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.lastShown
 }
 
 </script>
