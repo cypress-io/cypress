@@ -111,7 +111,7 @@ describe('experimentalSingleTabRunMode', () => {
 })
 
 describe('experimentalStudio', () => {
-  // TODO: fix this flaky test.
+  // TODO: fix this flaky test. https://github.com/cypress-io/cypress/issues/23743
   it.skip('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
