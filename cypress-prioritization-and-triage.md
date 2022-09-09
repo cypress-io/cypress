@@ -4,11 +4,14 @@ At Cypress, we love our open source community. We work every day to grow our par
 
 ## Table of Contents
 
-- [Cypress Priorities](#cypress-priorities)
-- [Cypress Roadmap](#cypress-roadmap)
-- [Cypress Issue Triage](#cypress-issue-triage)
-  - [Cypress Triage Process](#cypress-triage-process)
+- [The Cypress App Priorities](#the-cypress-app-priorities)
+- [The Cypress App Roadmap](#the-cypress-app-roadmap)
+- [The Cypress App Issue Triage](#the-cypress-app-issue-triage)
+  - [The Cypress App Triage Process](#the-cypress-app-triage-process)
+  - [The Power of a Great Ticket](#the-power-of-a-great-ticket)
 - [How We Prioritize Issues](#how-we-prioritize-issues)
+  - [Cypress Relative Priority Score](#cypress-relative-priority-score)
+  - [Cypress Relative Priority to Effort Score](#cypress-relative-priority-to-effort-score)
 - [FAQs](#faqs)
   - [Why Isn't Anyone Working on My Issue?](#why-isnt-anyone-working-on-my-issue)
   - [Why Did You Close My Ticket?](#why-did-you-close-my-ticket)
@@ -16,13 +19,13 @@ At Cypress, we love our open source community. We work every day to grow our par
 - [How You Can Help](#how-you-can-help)
 
 
-## Cypress Priorities
+## The Cypress App Priorities
 
-Cypress is constantly looking to improve and grow our testing platform to meet the ever-growing needs of the testing world. Like any software platform, we must balance research, development, and maintenance against real-world resource constraints. We feel that transparency about our future plans will help us grow a stronger relationship with end users who understand that all choices involve trade-offs.
+The Cypress app is constantly looking to improve and grow our testing platform to meet the ever-growing needs of the testing world. Like any software platform, we must balance research, development, and maintenance against real-world resource constraints. We feel that transparency about our future plans will help us grow a stronger relationship with end users who understand that all choices involve trade-offs.
 
-## Cypress Roadmap
+## The Cypress App Roadmap
 
-Our [Cypress App Priorities](https://github.com/orgs/cypress-io/projects/13/views/1) board shows the high-level roadmap at Cypress. 
+[The Cypress App Priorities](https://github.com/orgs/cypress-io/projects/13/views/1) board shows the high-level roadmap at Cypress. 
 
 The board flows from left to right as a project moves from the ideation and feasibility phase all the way to General Availability (GA) release. 
 
@@ -36,31 +39,36 @@ Here is a guide to what each column on the board represents:
 | **Experimental** | If a ticket involves a substantial refactoring of the codebase, is large in scope or is a complex feature, we often release them in a turned-off state. End users can opt in to experiment with these changes via feature flags. Work is still ongoing, but we feel it is important to get this feature in users' hands. Feedback is always welcome, but it is especially helpful during this phase of the development cycle. Not all issues are released under the experimental flag before GA. |
 | **Released** | Once an issue has been fully implemented, tested, and bundled into an official release it moves to this column. Features in this column are no longer experimental, feature flags are removed and default behaviors are implemented. |
 
-## Cypress Issue Triage
+## The Cypress App Issue Triage
 
 Whenever an issue is created in the [Cypress repo](https://github.com/cypress-io/cypress/) it is added to the [Cypress App Triage Board](https://github.com/orgs/cypress-io/projects/9/views/1). This board represents all issues we are actively working to investigate and reproduce before routing them to the appropriate team for [prioritization](#how-we-prioritize-issues). Prioritization does not necessarily mean that an issue will be worked on - priority scoring simply helps us create a relative ordering of potential work that is ranked according to standards we have defined as most important to Cypress and the community.
 
-### Cypress Triage Process
+### The Cypress App Triage Process
 
 At Cypress, we use two-week sprints. During each sprint, a rotating group of developers is assigned to the triage team. Their responsibilities are only to focus on triaging issues entered into the [Cypress repo](https://github.com/cypress-io/cypress/). Each issue is assigned to a team member for analysis and assessment and follows this general path:  
 
-- **Assessment** - The goal of this step is to do a high-level analysis of the problem. If the issue is clear and the probable impact of the ticket is large in both scope and severity and affecting many users, we will internally escalate the issue and work to get it resolved as quickly as possible.
+- **Assessment** - The goal of this step is to do a high-level analysis of the problem. If the issue is clear and the probable impact of the ticket is large in both scope and severity and affecting many users, we will internally escalate the issue and work to get it resolved as quickly as possible. During this phase we will often try and suggest work arounds they may help you get around the issue in the short term while we investigate further.  This may not always be possible, but we will try our best to make sure you are not totally impeded.  
 
 - **Reproduction** - The goal of this phase is to fully understand the issue described in the ticket and, most importantly, replicate the issue. The reason issue replication is so important to us at Cypress is that we believe our teams' development time is best spent on issues we can verify.  In order to know if any solution solves a specific problem, we first need to be able to reliably reproduce it. A vast majority of our time in triage is spent trying to reproduce the issues our users are encountering. With a huge spectrum of users using countless permutations of hardware, operating systems, versions of Cypress, Node.js, CI configurations, unique web applications they are testing, and more, it can be very challenging to narrow down problems into something that is ready for prioritization by a team. This is where our end users can help us the most. The easier it is for us to recreate your issue, the sooner we can route it to our teams for prioritization. The best way to provide a reproducible example of your problem is to fork our [cypress-test-tiny repo](https://github.com/cypress-io/cypress-test-tiny) and replicate the issue there. At a minimum we will need a [short, self contained, correct example](http://sscce.org/) in order to assist in most cases. 
 
 - **Routing** - Once we have clarified any questions we have on a submitted ticket and we are able to replicate the problem internally, the ticket is ready to be routed to the appropriate team at Cypress.
 
-- **Prioritization** - Teams meet regularly to review tickets that have been routed to them via triage. They evaluate each ticket based on the a number of criteria outlined in our [prioritization rubric](#prioritization-rubric). Each dimension of our prioritization rubric carries a weight. The following equation is then used to give us a **relative priority**. The relative priority score is then divided by the estimated effort to address the ticket to give us a **priority-to-effort** score which we then use to determine which tickets are highest priority. 
+- **Prioritization** - Teams meet regularly to review tickets that have been routed to them via triage. They evaluate each ticket based on the a number of criteria outlined in our [prioritization rubric](#prioritization-rubric). Each dimension of our prioritization rubric carries a weight. The following equation is then used to give us a **relative priority**. The relative priority score is then divided by the estimated effort to address the ticket to give us a **priority-to-effort** score which we then use to determine which tickets are the highest priority. 
 **Important note - These priorities do not dictate when a team will be able to start work. This simply gives teams the data they need to make informed prioritization choices.**
 
 - **Resolution and Verification** - Once an issue has been picked up for work, it will have the label **Stage: Under Development** attached. Developers will then begin work on the issue. Sometimes the scope of the work will be greater than the ticket submitted, and a parent ticket will be created to encapsulate the entire scope of the work. A link to the original ticket will be created in the new ticket. 
 
 - **Release** - Once work has been finished, the ticket will be scheduled for release. If the changes are non-breaking, we generally aim to include the work in the next minor release every-other Tuesday. If the changes made to address the issue require breaking changes, the issue will be scheduled for our next major release roughly every quarter.
 
+### The Power of a Great Ticket
+
+One of the best ways to help get your ticket validated, replicated, routed and prioritized is to include as much information as possible.  Our issue template will walk you through the most common information that we will need to best troubleshoot the problem.  **Please do not open issues from GitHub discussion comments.**  Here are some tips for providing a [Short, Self Contained, Correct, Example](http://sscce.org/) and our own [Troubleshooting Cypress](https://on.cypress.io/troubleshooting) guide.  Another great way to assist us in replicating your issue is to fork our [cypress-test-tiny repo](https://github.com/cypress-io/cypress-test-tiny) and recreate the issue there. 
+
+We will always need replication steps, so please include them when submitting an issue. Going back and forth to gather the basic data is all time we could be using to investigate and address the issue, so please be considerate of our developers' time and include the requested details when submitting an issue.
 
 ## How We Prioritize Issues
 
-At Cypress, we use the following guidelines to help us standardize the importance of every ticket submitted. Of course there are subjective interpretations for each of these fields, but the goal is that each ticket is considered and examined thoroughly in a standardized way. Once values have been determined for each field, a total priority is calculated. It is important to note that these values are **a guide** to making informed decisions around what issues bring the most value to the community and Cypress as an organization. They are relative and fuzzy and not to be treated as gospel. It is also important to understand that these values may change as future factors and circumstances change.
+At Cypress, we use the following guidelines to help us standardize the importance of every ticket submitted. Of course there are subjective interpretations for each of these fields, but the goal is that each ticket is considered and examined thoroughly in a standardized way. Once values have been determined for each field, a total priority is calculated. It is important to note that these values are **a guide** to make informed decisions around what issues bring the most value to the community and Cypress as an organization. They are relative and fuzzy and not to be treated as gospel. It is also important to understand that these values may change as future factors and circumstances change.
 
 ### Prioritization Rubric
 
@@ -73,7 +81,7 @@ Here are the criteria we use to gauge relative issue priority:
 | Visibility | 1.0 | Is this an important issue to our community? Is there a lot of discussion around it? |
 | Does Workaround Exist | 1.0 | Does a work around exist that is reasonable? |
 | Regression | 1.0 | Did this previously work? How long ago did it last work? Was this a regression within this last (current) major version? |
-| Cypress Prioirty | 1.0 | Does Cypress have a vested interest in resolving this issue? For example, does it ease support burden for our staff? Is this part of a corporate milestone or objective? |
+| Cypress Priority | 1.0 | Does Cypress have a vested interest in resolving this issue? For example, does it ease the support burden for our staff? Is this part of a corporate milestone or objective? |
 | Effort | 1.0 | How much effort is needed to resolve the issue? Estimates are for a single developer being assigned to the issue. |
 
 ### Cypress Relative Priority Score
