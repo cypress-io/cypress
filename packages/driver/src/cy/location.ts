@@ -59,18 +59,15 @@ export const create = (state: StateFunc) => ({
   },
 
   isRunnerAbleToCommunicateWithAut (): boolean {
-    const autLocation = Cypress.state('autLocation')
-    const isChromium = Cypress.isBrowser({ family: 'chromium' })
+    const win = Cypress.state('window')
 
-    // Special cases. About blanks is considered same origin as is an undefined AUT.
-    if (!autLocation || autLocation?.href === 'about://blank' || autLocation?.href === 'about:blank' || (isChromium && Cypress.config['chromeWebSecurity'] === false)) {
+    try {
+      win.location.href
+
       return true
+    } catch (err) {
+      return false
     }
-
-    const autOrigin = autLocation?.origin
-    const commandOrigin = window.location.origin
-
-    return autOrigin && cors.urlOriginsMatch(commandOrigin, autOrigin)
   },
 })
 
