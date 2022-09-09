@@ -25,7 +25,8 @@ export const verify = (ctx, options) => {
     stack,
   } = options
 
-  const fileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
+  const codeFrameFileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
+  const stackFileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column - 1}`)
 
   it(`✓ VERIFY`, function () {
     cy.wrap(Cypress.$(window.top.document.body))
@@ -45,7 +46,7 @@ export const verify = (ctx, options) => {
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
-      .should('match', fileRegex)
+      .should('match', stackFileRegex)
 
       _.each([].concat(stack), (stackLine) => {
         cy.get('.runnable-err-stack-trace')
@@ -60,7 +61,7 @@ export const verify = (ctx, options) => {
       cy
       .get('.test-err-code-frame .runnable-err-file-path')
       .invoke('text')
-      .should('match', fileRegex)
+      .should('match', codeFrameFileRegex)
 
       // code frames will show `fail(this,()=>` as the 1st line
       cy.get('.test-err-code-frame pre span').should('include.text', 'fail(this,()=>')

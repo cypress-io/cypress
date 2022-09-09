@@ -426,9 +426,9 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   tough-cookie cookie jar. All request cookies are captured, since any
   //   future request could be cross-origin even if the response that sets them
   //   is not.
-  // - If we sent the cookie header, it would fail to be set by the browser
-  //   (in most cases). We change the header name to 'X-Set-Cookie' to make it
-  //   clear that it's one we're handling ourselves.
+  // - If we sent the cookie header, it may fail to be set by the browser
+  //   (in most cases). However, we cannot determine all the cases in which Set-Cookie
+  //   will currently fail, and currently is best to set optimistically until #23551 is addressed.
   // - We also set the cookies through automation so they are available in the
   //   browser via document.cookie and via Cypress cookie APIs
   //   (e.g. cy.getCookie). This is only done for cross-origin responses, since
@@ -441,7 +441,9 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const needsCrossOriginHandling = checkIfNeedsCrossOriginHandling(this)
 
   const appendCookie = (cookie: string) => {
-    const headerName = needsCrossOriginHandling ? 'X-Set-Cookie' : 'Set-Cookie'
+    // always call 'Set-Cookie' in the browser as cross origin or same site requests
+    // can effectively set cookies in the browser if given correct credential permissions
+    const headerName = 'Set-Cookie'
 
     try {
       this.res.append(headerName, cookie)
