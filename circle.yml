@@ -2579,11 +2579,13 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
+          # TODO: Fix this when we resolve the issue with snapshots in the renderer process of the electron browser: https://github.com/cypress-io/cypress/issues/22985
+          # - driver-integration-tests-electron
           - driver-integration-tests-firefox-experimentalSessionAndOrigin
           - driver-integration-tests-chrome-experimentalSessionAndOrigin
           - driver-integration-tests-chrome-beta-experimentalSessionAndOrigin
-          - driver-integration-tests-electron-experimentalSessionAndOrigin
+          # TODO: Fix this when we resolve the issue with snapshots in the renderer process of the electron browser: https://github.com/cypress-io/cypress/issues/22985
+          # - driver-integration-tests-electron-experimentalSessionAndOrigin
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
