@@ -19,6 +19,7 @@ describe('lib/browsers/electron', () => {
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
+      isTextTerminal: false,
       some: 'var',
       projectRoot: '/foo/',
       onWarning: sinon.stub().returns(),
@@ -99,10 +100,10 @@ describe('lib/browsers/electron', () => {
 
         expect(_.keys(options)).to.deep.eq(preferencesKeys)
 
-        expect(electron._render.firstCall.args[3]).to.deep.eql({
-          projectRoot: this.options.projectRoot,
-          isTextTerminal: this.options.isTextTerminal,
-        })
+        const electronOptionsArg = electron._render.firstCall.args[3]
+
+        expect(electronOptionsArg.projectRoot).to.eq(this.options.projectRoot)
+        expect(electronOptionsArg.isTextTerminal).to.eq(this.options.isTextTerminal)
 
         expect(electron._render).to.be.calledWith(
           this.url,
@@ -690,15 +691,16 @@ describe('lib/browsers/electron', () => {
     })
 
     it('.onFocus', function () {
-      let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
+      const headlessOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: false } })
 
-      opts.onFocus()
+      headlessOpts.onFocus()
       expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
-      opts = electron._defaultOptions('/foo', this.state, { show: false, browser: {} })
-      opts.onFocus()
+      const headedOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: true } })
+
+      headedOpts.onFocus()
 
       expect(menu.set).not.to.be.called
     })

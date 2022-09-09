@@ -26,6 +26,7 @@ describe('e2e cy.origin retries', () => {
   })
 
   systemTests.it('Appropriately displays test retry errors without other side effects', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'cy_origin_retries.cy.ts',

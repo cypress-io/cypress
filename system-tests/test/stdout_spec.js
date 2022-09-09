@@ -65,6 +65,7 @@ describe('e2e stdout', () => {
   })
 
   systemTests.it('displays assertion errors', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     spec: 'stdout_assertion_errors.cy.js',
     snapshot: true,
     expectedExitCode: 4,
