@@ -63,7 +63,7 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.2.1",
+    "ts-node": "^10.9.1",
     "webpack": "^4.44.2"
   },
   "peerDependencies": {

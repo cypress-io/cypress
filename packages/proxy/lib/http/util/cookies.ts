@@ -10,6 +10,47 @@ interface RequestDetails {
   needsCrossOriginHandling: boolean
 }
 
+/**
+ * Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
+ * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
+ * for more details.
+ * @param {string} url1 - the first url
+ * @param {string} url2 - the second url
+ * @returns {boolean} whether or not the URL Scheme, Domain, and TLD match. This is called same-site and
+ * is allowed to have a different port or subdomain. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
+ * for more details.
+ */
+export const areUrlsSameSite = (url1: string, url2: string) => {
+  if (!url1 || !url2) return false
+
+  const { port: port1, ...parsedUrl1 } = cors.parseUrlIntoDomainTldPort(url1)
+  const { port: port2, ...parsedUrl2 } = cors.parseUrlIntoDomainTldPort(url2)
+
+  // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
+  const doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
+
+  return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
+}
+
+export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {
+  const cookieMap = new Map<string, Cookie>()
+  const requestCookies: Cookie[] = requestCookieStringArray.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
+
+  // Always have cookies in the jar overwrite cookies in the request if they are the same
+  requestCookies.forEach((cookie) => cookieMap.set(cookie.key, cookie))
+  // Two or more cookies on the same request can happen per https://www.rfc-editor.org/rfc/rfc6265
+  // But if a value for that cookie already exists in the cookie jar, do NOT add the cookie jar cookie
+  applicableCookieJarCookies.forEach((cookie) => {
+    if (cookieMap.get(cookie.key)) {
+      cookieMap.delete(cookie.key)
+    }
+  })
+
+  const requestCookiesThatNeedToBeAdded = Array.from(cookieMap).map(([key, cookie]) => cookie)
+
+  return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
+}
+
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it
 // simulate what a browser would do when determining whether or not it should
 // be set from a response or a attached to a response. it shouldn't be confused
@@ -19,15 +60,15 @@ interface RequestDetails {
 // see https://github.com/salesforce/tough-cookie#samesite-cookies
 export const getSameSiteContext = (autUrl: string | undefined, requestUrl: string, isAUTFrameRequest: boolean) => {
   // if there's no AUT URL, it's a request for the first URL visited, or if
-  // the request origin matches the AUT origin; both indicate that it's not
-  // a cross-origin request
-  if (!autUrl || cors.urlOriginsMatch(autUrl, requestUrl)) {
+  // the request origin is considered the same site as the AUT origin;
+  // both indicate that it's not a cross-site request
+  if (!autUrl || areUrlsSameSite(autUrl, requestUrl)) {
     return 'strict'
   }
 
   // being an AUT frame request means it's via top-level navigation, and we've
   // ruled out same-origin navigation, so the context is 'lax'.
-  // anything else is a non-navigation, cross-origin request
+  // anything else is a non-navigation, cross-site request
   return isAUTFrameRequest ? 'lax' : 'none'
 }
 
