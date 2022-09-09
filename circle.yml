@@ -2472,10 +2472,11 @@ linux-x64-workflow: &linux-x64-workflow
     #     context: test-runner:cypress-record-key
     #     requires:
     #       - build
-    - driver-integration-tests-webkit:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
+    # TODO: Fix this when we resolve issues with webkit: https://github.com/cypress-io/cypress/issues/23754
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:
