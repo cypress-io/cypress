@@ -31,6 +31,21 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.next()
 }
 
+const MaybeSimulateSecHeaders: RequestMiddleware = function () {
+  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+    this.next()
+
+    return
+  }
+
+  // Do NOT disclose destination to an iframe and simulate if iframe was top
+  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
+    this.req.headers['sec-fetch-dest'] = 'document'
+  }
+
+  this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const currentAUTUrl = this.getAUTUrl()
 
@@ -233,6 +248,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
