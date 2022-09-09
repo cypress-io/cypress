@@ -54,6 +54,8 @@ describe('<LoginConnectModalsContent />', () => {
               nodes: [{ __typename: 'CloudOrganization', id: '123' }],
             },
           }
+
+          result.currentProject = null
         },
         render: (gqlVal) => {
           return <LoginConnectModalsContent gql={gqlVal} />
@@ -74,8 +76,23 @@ describe('<LoginConnectModalsContent />', () => {
         openLoginConnectModal({ utmMedium: 'testing' })
       })
 
-      cy.contains('button', 'Create project').click()
-      cy.get('@createProjectStub').should('have.been.calledOnceWith', { name: 'test-project', orgId: '122', public: false })
+      cy.findAllByLabelText('Project Name*(You can change this later)').type('test-project')
+
+      cy.contains('button', 'Create project')
+      .click()
+      .then(() => {
+        expect(createProjectStub.lastCall.args[0]).to.deep.eq({
+          name: 'test-project',
+          orgId: '122',
+          medium: 'testing',
+          source: 'Binary: Launchpad',
+          public: false,
+          campaign: 'Create project',
+          cohort: '',
+        })
+      })
+
+      cy.get('@createProjectStub').should('have.been.calledOnce')
     })
   })
 })

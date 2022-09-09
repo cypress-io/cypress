@@ -20,6 +20,7 @@
         v-else-if="status?.isLoggedIn && !keepLoginOpen && !status.isProjectConnected"
         :show="status?.isLoggedIn"
         :gql="props.gql"
+        :utm-medium="loginConnectStore.utmMedium"
         @cancel="handleCancelConnect"
         @success="handleConnectSuccess"
       />
