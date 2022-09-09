@@ -2445,11 +2445,10 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
-    # TODO: Fix this when we resolve issues with webkit: https://github.com/cypress-io/cypress/issues/23754
-    # - system-tests-webkit:
-    #     context: test-runner:performance-tracking
-    #     requires:
-    #       - system-tests-node-modules-install
+    - system-tests-webkit:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
     - system-tests-non-root:
         context: test-runner:performance-tracking
         executor: non-root-docker-user
@@ -2472,11 +2471,10 @@ linux-x64-workflow: &linux-x64-workflow
     #     context: test-runner:cypress-record-key
     #     requires:
     #       - build
-    # TODO: Fix this when we resolve issues with webkit: https://github.com/cypress-io/cypress/issues/23754
-    # - driver-integration-tests-webkit:
-    #     context: test-runner:cypress-record-key
-    #     requires:
-    #       - build
+    - driver-integration-tests-webkit:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - driver-integration-tests-chrome-experimentalSessionAndOrigin:
         context: test-runner:cypress-record-key
         requires:
