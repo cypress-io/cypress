@@ -1734,7 +1734,12 @@ export default {
       },
 
       cleanupQueue (_numTestsKeptInMemory) {
-        // this isn't helpful since we store all tests in memory twice....
+        // this wasn't helpful since we store all tests in memory twice....
+        // must offload test state to the server to correctly leverage /
+        // store the defined number of tests in memory.
+        // TODO: EMILY - finishing making this work
+        //    off-load the deferred log events - get out of sync & are 'pending' when reloaded mid-spec
+        //    off-load the log lookup to pull from memory -- if no log, make backend request for log details
         return null
       },
 
