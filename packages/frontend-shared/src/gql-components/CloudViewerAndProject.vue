@@ -6,9 +6,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { gql, useSubscription } from '@urql/vue'
 import { CloudViewerAndProjectFragment, CloudViewerAndProject_CheckCloudOrgMembershipDocument } from '../generated/graphql'
+import { useLoginConnectStore } from '../store/login-connect-store'
 
 gql`
 fragment CloudViewerAndProject on Query {
@@ -81,6 +82,25 @@ const status = computed(() => {
   const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(props.gql.authState?.name ?? '')
 
   return { isLoggedIn, isOrganizationLoaded, isMemberOfOrganization, isProjectConnected, hasNoRecordedRuns, error }
+})
+
+const loginConnectStore = useLoginConnectStore()
+const { setStatus } = loginConnectStore
+
+watch(() => status.value?.isProjectConnected, (newVal) => {
+  if (typeof newVal === 'boolean') {
+    if (newVal !== loginConnectStore.isProjectConnected) {
+      setStatus('isProjectConnected', newVal)
+    }
+  }
+})
+
+watch(() => status.value?.isLoggedIn, (newVal) => {
+  if (typeof newVal === 'boolean') {
+    if (newVal !== loginConnectStore.isLoggedIn) {
+      setStatus('isLoggedIn', newVal)
+    }
+  }
 })
 
 const userData = computed(() => {

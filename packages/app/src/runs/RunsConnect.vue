@@ -21,7 +21,6 @@
       :gql="props.gql"
       utm-medium="Runs Tab"
       class="mx-auto mt-40px"
-      @success="emit('success')"
     />
   </div>
 </template>
@@ -42,10 +41,6 @@ fragment RunsConnect on Query {
   ...CloudConnectButton
 }
 `
-
-const emit = defineEmits<{
-  (event: 'success'): void
-}>()
 
 const props = defineProps<{
   gql: RunsConnectFragment
