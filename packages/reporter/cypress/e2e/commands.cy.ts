@@ -450,7 +450,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       .should('have.class', 'command-is-pinned')
       .find('.command-pin')
 
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', 2)
       cy.percySnapshot()
     })
 
@@ -469,13 +469,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('prints to console', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', 2)
     })
 
     it('shows the snapshot', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 2)
     })
 
     it('unpins after clicking again, does not re-print to the console', () => {
@@ -842,7 +842,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .should('have.class', 'command-is-pinned')
         .find('.command-pin')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', fakeIdForTest)
         cy.percySnapshot()
       })
 
@@ -862,13 +862,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
       })
 
       it('shows the snapshot', () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', fakeIdForTest)
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
@@ -903,7 +903,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('shows snapshot after 50ms passes', () => {
       cy.wrap(runner.emit).should('not.be.calledWith', 'runner:show:snapshot')
       cy.tick(50)
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 1)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 1)
       cy.wrap(runner.emit).should('be.calledOnce')
     })
 
@@ -915,7 +915,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       it('hides the snapshot after 50ms pass without another mouse over', () => {
         cy.tick(50)
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 1)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 'r3', 1)
       })
 
       it('does not hide the snapshot if there is another mouseover before 50ms passes', () => {
