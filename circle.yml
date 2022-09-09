@@ -114,6 +114,8 @@ executors:
     resource_class: windows.large
     environment:
       PLATFORM: windows
+      # TODO: Disabling snapshots for now on Windows. Will revisit with https://github.com/cypress-io/cypress/issues/23122
+      DISABLE_SNAPSHOT_REQUIRE: 1
 
   darwin-arm64: &darwin-arm64-executor
     machine: true
@@ -126,6 +128,8 @@ executors:
     resource_class: arm.medium
     environment:
       PLATFORM: linux
+      # TODO: Disabling snapshots for now on Windows. Will revisit with https://github.com/cypress-io/cypress/issues/23557
+      DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
   verify_should_persist_artifacts:
