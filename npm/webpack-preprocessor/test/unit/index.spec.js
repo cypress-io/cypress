@@ -149,6 +149,7 @@ describe('webpack preprocessor', function () {
 
         return this.run().then(() => {
           expect(webpack.lastCall.args[0].output).to.eql({
+            publicPath: '',
             path: 'output',
             filename: 'output.ts.js',
           })
