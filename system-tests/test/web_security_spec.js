@@ -83,6 +83,18 @@ describe('e2e web security', () => {
     })
   })
 
+  context('when disabled', () => {
+    systemTests.it('passes', {
+      spec: 'web_security.cy.js',
+      config: {
+        chromeWebSecurity: false,
+        experimentalSessionAndOrigin: false,
+      },
+      snapshot: true,
+      browser: ['chrome', 'electron'],
+    })
+  })
+
   context('firefox', () => {
     systemTests.it('displays warning when firefox and chromeWebSecurity:false', {
       spec: 'simple_passing.cy.js',
@@ -98,25 +110,13 @@ describe('e2e web security', () => {
     })
   })
 
-  context('when disabled', () => {
-    systemTests.it('passes', {
-      spec: 'web_security.cy.js',
-      config: {
-        chromeWebSecurity: false,
-        experimentalSessionAndOrigin: false,
-      },
-      snapshot: true,
-      browser: ['chrome', 'electron'],
-    })
-  })
-
   context('when experimentalSessionAndOrigin is enabled', () => {
     systemTests.it('fails', {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'web_security.cy.js',
       config: {
         experimentalSessionAndOrigin: true,
-        pageLoadTimeout: 5000,
+        defaultCommandTimeout: 50,
       },
       snapshot: true,
       expectedExitCode: 4,

@@ -387,14 +387,23 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
    * ensureCommandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
    * If we can not communicate, throw an error.
    * Intended to use within retry loops.
+   * err: optional error to pass end to be appended to if the assertion happened while the aut was cross origin.
    * @returns true or throws an error
    */
-  const ensureCommandCanCommunicateWithAUT = (): boolean => {
+  const ensureCommandCanCommunicateWithAUT = (err?): boolean => {
     if (!cy.isRunnerAbleToCommunicateWithAut()) {
-      $errUtils.throwErrByPath('miscellaneous.cross_origin_command', { args: {
+      const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
         commandOrigin: window.location.origin,
         autOrigin: Cypress.state('autLocation').originPolicy,
-      } })
+      })
+
+      if (err) {
+        err.message = `${err.message}\n\n${crossOriginCommandError.message}`
+
+        throw err
+      } else {
+        throw crossOriginCommandError
+      }
     }
 
     return true

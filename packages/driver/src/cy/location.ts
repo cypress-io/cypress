@@ -48,7 +48,11 @@ export const create = (state: StateFunc) => ({
 
       autLocation = $Location.create(remoteUrl)
     } catch (e) {
-      autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
+      if (this.config.experimentalSessionAndOrigin) {
+        autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
+      } else {
+        return $Location.create('')
+      }
     }
 
     return autLocation
