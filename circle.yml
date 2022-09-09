@@ -1287,15 +1287,9 @@ jobs:
             unset -e
             unset -o
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            yarn percy build:finlize
-      - run:
+            yarn percy build:finlize || yarn percy build:finalize
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
           # If all other steps succeed but `build:finalize` fails, we retry it once
-          name: Retry `percy build:finalize` to sidestep Percy flake
-          command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            yarn percy build:finalize
-          when: on_fail
 
   cli-visual-tests:
     <<: *defaults
