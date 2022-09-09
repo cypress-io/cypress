@@ -12,6 +12,7 @@ import {
   AuthActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
+import { EventCollectorActions } from './actions/EventCollectorActions'
 import { VersionsActions } from './actions/VersionsActions'
 import { cached } from './util'
 
@@ -76,5 +77,10 @@ export class DataActions {
   @cached
   get versions () {
     return new VersionsActions(this.ctx)
+  }
+
+  @cached
+  get eventCollector () {
+    return new EventCollectorActions(this.ctx)
   }
 }
