@@ -1249,3 +1249,66 @@ https://on.cypress.io/config
 
 
 `
+
+exports['testConfigOverrides / successfully runs valid suite-level-only overrides'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (valid-suite-only.js)                                                      │
+  │ Searched:   cypress/e2e/testConfigOverrides/valid-suite-only.js                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  valid-suite-only.js                                                             (1 of 1)
+
+
+  suite-level-only overrides run as expected
+    ✓ 1st test passes
+    ✓ 2nd test passes
+    ✓ 3rd test passes
+
+  nested contexts 
+    nested suite-level-only overrides run as expected
+      ✓ 1st test passes
+      ✓ 2nd test passes
+      ✓ 3rd test passes
+
+
+  6 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     valid-suite-only.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  valid-suite-only.js                      XX:XX        6        6        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+
+
+`
