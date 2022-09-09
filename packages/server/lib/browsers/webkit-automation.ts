@@ -329,14 +329,11 @@ export class WebKitAutomation {
         return await this.getCookie(data)
       case 'set:cookie':
         return await this.context.addCookies([normalizeSetCookieProps(data)])
-      case 'set:cookies':
-        await this.context.clearCookies()
-
-        return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'add:cookies':
+      case 'set:cookies':
         return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'clear:cookies':
-        return await Promise.all(data.map((cookie) => this.clearCookie(cookie)))
+        return await this.context.clearCookies()
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':
