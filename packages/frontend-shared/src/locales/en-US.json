@@ -209,7 +209,8 @@
       },
       "connectProject": {
         "title": "Connect your project to Cypress Dashboard",
-        "content": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {

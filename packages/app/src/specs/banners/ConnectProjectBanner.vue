@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_CONNECT_PROJECT"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="connect-project-banner"
     status="info"
@@ -11,7 +11,7 @@
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ t('specPage.banners.connectProject.content') }}
+      {{ bodyCopy }}
     </p>
 
     <Button
@@ -37,7 +37,7 @@ import { gql, useQuery } from '@urql/vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
-import TrackedBanner from './TrackedBanner.vue'
+import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import { ref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
@@ -49,10 +49,17 @@ query ConnectProjectBanner {
 }
 `
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: boolean
+  bodyCopyOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  bodyCopyOptions: () => {
+    return [
+      { cohort: 'A', value: 'specPage.banners.connectProject.contentA' },
+      { cohort: 'B', value: 'specPage.banners.connectProject.contentB' },
+    ]
+  },
 })
 
 const emit = defineEmits<{
@@ -60,6 +67,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_CONNECT_PROJECT
 const isProjectConnectOpen = ref(false)
 
 const cloudModalsQuery = useQuery({ query: ConnectProjectBannerDocument, pause: true })
@@ -74,5 +82,8 @@ function handleModalClose () {
   isProjectConnectOpen.value = false
   emit('update:modelValue', false)
 }
+
+const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
+const bodyCopy = t(optionSelected.value)
 
 </script>
