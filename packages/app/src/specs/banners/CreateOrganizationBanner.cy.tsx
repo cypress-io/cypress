@@ -42,7 +42,7 @@ describe('<CreateOrganizationBanner />', () => {
       campaign: 'Set up your organization',
       medium: 'Specs Create Organization Banner',
       messageId: Cypress.sinon.match.string,
-      cohort: null,
+      cohort: Cypress.sinon.match.string,
     })
   })
 })

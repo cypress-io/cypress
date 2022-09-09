@@ -46,7 +46,7 @@ describe('<RecordBanner />', () => {
       campaign: 'Record Runs',
       medium: 'Specs Record Runs Banner',
       messageId: Cypress.sinon.match.string,
-      cohort: null,
+      cohort: Cypress.sinon.match.string,
     })
   })
 })

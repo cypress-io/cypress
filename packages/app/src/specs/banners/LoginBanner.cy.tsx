@@ -30,7 +30,7 @@ describe('<LoginBanner />', () => {
       campaign: 'Log In',
       medium: 'Specs Login Banner',
       messageId: Cypress.sinon.match.string,
-      cohort: null,
+      cohort: Cypress.sinon.match.string,
     })
   })
 })
