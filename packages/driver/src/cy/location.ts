@@ -1,7 +1,6 @@
 import { $Location, LocationObject } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
-import * as cors from '@packages/network/lib/cors'
 
 const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<LocationObject> => {
   return new Promise((resolve, reject) => {
