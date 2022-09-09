@@ -568,7 +568,7 @@ class LogManager {
       return
     }
 
-    // bail - when navigating to a new origin mid-test (i.e. change in top)
+    // bail - when navigating to a new origin mid-spec (i.e. change in top)
     // this deferred log is stale and should not be sent
     if (!this.logs[log.get('id')]) {
       return
