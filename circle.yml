@@ -45,7 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ "lmiller/experimental-single-tab-component-testing", << pipeline.git.branch >> ]
+    - equal: [ "fix-ci-deps", << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
