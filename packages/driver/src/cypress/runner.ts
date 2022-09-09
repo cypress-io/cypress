@@ -11,6 +11,7 @@ import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
 import type { Emissions } from '@packages/types'
 
+const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
 const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
@@ -75,6 +76,21 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
 }
 
 const reduceTestProperties = (test) => {
+  // perf loop only through
+  // a tests OWN properties and not
+  // inherited properties from its shared ctx
+  for (let key of Object.keys(test.ctx || {})) {
+    const value = test.ctx[key]
+
+    if (_.isObject(value) && !mochaCtxKeysRe.test(key)) {
+    // nuke any object properties that come from
+    // cy.as() aliases or anything set from 'this'
+    // so we aggressively perform GC and prevent obj
+    // ref's from building up
+      test.ctx[key] = undefined
+    }
+  }
+
   // minimal test properties to keep in memory to repopulate reporter on navigation to a new origin
   // (i.e. new top) and determine what test to restart from when the page reloads
   const mochaProps = ['id', 'order', 'state', 'type', 'err', 'commands', 'agents', 'hooks', 'type', 'routes']
@@ -89,6 +105,7 @@ const reduceTestProperties = (test) => {
 
       test.previousAttempts = newPreviousAttempts
     } else if (!mochaProps.includes(key)) {
+      test[key] = undefined
       delete test[key]
     }
   })
@@ -1317,7 +1334,12 @@ export default {
       setOnlyTestId,
       setOnlySuiteId,
       getStats () {
-        return _tests
+        return {
+          _tests,
+          _testsById,
+          _testsQueue,
+          _testsQueueById,
+        }
       },
       normalizeAll (tests, skipCollectingLogs) {
         _skipCollectingLogs = skipCollectingLogs
@@ -1751,7 +1773,6 @@ export default {
 
         return cleanup(_testsQueue)
       },
-
       addLog (attrs, isInteractive) {
         // we don't need to hold a log reference to anything in memory when we don't
         // render the report or are headless because you cannot inspect any logs
