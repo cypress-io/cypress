@@ -53,7 +53,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .within(() => {
       cy.findByTestId('unsupported-browser-tooltip-trigger')
       .should('exist')
-      .trigger('mouseenter')
+      .realHover()
     })
 
     cy.contains('Unsupported browser').should('be.visible')
