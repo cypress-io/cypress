@@ -1,4 +1,4 @@
-# Cypress Prioritization and Triage Methodology
+# The Cypress App Prioritization and Triage Methodology
 
 At Cypress, we love our open source community. We work every day to grow our partnership with the community through open, honest, and straightforward communication about our processes and plans for the platform. The goal of this document is to provide resources that show our plans for the future and serve as a guide to our processes around handling issues that are raised by the open source community.
 
