@@ -258,9 +258,7 @@ export class EventManager {
       if (!Cypress) return
 
       Cypress.backend('clear:session')
-      .then(() => {
-        rerun()
-      })
+      .then(rerun)
     })
 
     this.reporterBus.on('external:open', (url) => {
@@ -410,9 +408,11 @@ export class EventManager {
             return
           }
 
+          const hideCommandLog = window.__CYPRESS_CONFIG__.hideCommandLog
+
           this.studioStore.initialize(config, state)
 
-          const runnables = Cypress.runner.normalizeAll(state.tests)
+          const runnables = Cypress.runner.normalizeAll(state.tests, hideCommandLog)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -421,7 +421,9 @@ export class EventManager {
             this._runDriver(state)
           }
 
-          this.reporterBus.emit('runnables:ready', runnables)
+          if (!hideCommandLog) {
+            this.reporterBus.emit('runnables:ready', runnables)
+          }
 
           if (state?.numLogs) {
             Cypress.runner.setNumLogs(state.numLogs)
