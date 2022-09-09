@@ -1289,13 +1289,10 @@ jobs:
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
           # Tends to only happen on the first commit for the CIRCLE_WORKFLOW_WORKSPACE_ID. Hence, only retry on `develop`
           name: Retry `percy build:finalize` to sidestep Percy flake
-          when: on_fail
-            or:
-            - equal: [ develop, << pipeline.git.branch >> ]
-            - equal: [ skip-more-flake-issue-23436, << pipeline.git.branch >> ]
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize
+          when: on_fail
 
   cli-visual-tests:
     <<: *defaults
