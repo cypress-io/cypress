@@ -136,7 +136,7 @@ describe('e2e fetch polyfill', () => {
   })
 
   systemTests.it('passes', {
-    /* browser: '!webkit' */, // TODO(webkit): fix+unskip
+    /* browser: '!webkit', */ // TODO(webkit): fix+unskip
     spec: 'fetch.cy.js',
     snapshot: false,
     config: {

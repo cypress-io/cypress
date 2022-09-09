@@ -28,7 +28,7 @@ describe('e2e cy.origin errors', () => {
   })
 
   systemTests.it('captures the stack trace correctly for errors in cross origins to point users to their "cy.origin" callback', {
-    /* browser: '!webkit' */, // TODO(webkit): fix+unskip (needs multidomain support)
+    /* browser: '!webkit', */ // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'cy_origin_error.cy.ts',

@@ -37,7 +37,7 @@ describe('e2e websockets', () => {
 
   // https://github.com/cypress-io/cypress/issues/556
   systemTests.it('passes', {
-    /* browser: '!webkit' */, // TODO(webkit): fix+unskip
+    /* browser: '!webkit', */ // TODO(webkit): fix+unskip
     spec: 'websockets.cy.js',
     snapshot: true,
   })
