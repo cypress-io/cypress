@@ -8,6 +8,12 @@
     class="mb-16px"
     :icon="OrganizationIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Set up your organization',
+      medium: 'Specs Create Organization Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -48,9 +54,11 @@ query CreateOrganizationBanner {
 
 const props = withDefaults(defineProps<{
   modelValue: boolean
+  hasBannerBeenShown: boolean
   headerCopyOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  hasBannerBeenShown: true,
   headerCopyOptions: () => {
     return [
       { cohort: 'A', value: 'specPage.banners.createOrganization.titleA' },

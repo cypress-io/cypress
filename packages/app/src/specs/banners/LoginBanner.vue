@@ -8,6 +8,12 @@
     class="mb-16px"
     :icon="ConnectIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Log In',
+      medium: 'Specs Login Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -50,9 +56,11 @@ query LoginBanner {
 
 const props = withDefaults(defineProps<{
   modelValue: boolean
+  hasBannerBeenShown: boolean
   bodyCopyOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  hasBannerBeenShown: true,
   bodyCopyOptions: () => {
     return [
       { cohort: 'A', value: 'specPage.banners.login.contentA' },

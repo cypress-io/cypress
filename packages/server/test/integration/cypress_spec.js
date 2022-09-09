@@ -975,6 +975,7 @@ describe('lib/cypress', () => {
           // and only then navigates to that URL
           sinon.stub(chromeBrowser, '_navigateUsingCRI').resolves()
           sinon.stub(chromeBrowser, '_handleDownloads').resolves()
+          sinon.stub(chromeBrowser, '_recordVideo').resolves()
 
           sinon.stub(chromeBrowser, '_setAutomation').returns()
 
@@ -1004,6 +1005,7 @@ describe('lib/cypress', () => {
 
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
+            expect(chromeBrowser._recordVideo).to.have.been.calledOnce
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
@@ -1011,9 +1013,7 @@ describe('lib/cypress', () => {
         })
 
         it('electron', function () {
-          const writeVideoFrame = sinon.stub()
-
-          videoCapture.start.returns({ writeVideoFrame })
+          videoCapture.start.returns()
 
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
@@ -1024,7 +1024,6 @@ describe('lib/cypress', () => {
               browser: 'electron',
               foo: 'bar',
               onNewWindow: sinon.match.func,
-              writeVideoFrame: sinon.match.func,
             })
 
             this.expectExitWith(0)

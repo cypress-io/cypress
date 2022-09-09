@@ -8,6 +8,12 @@
     class="mb-16px"
     :icon="RecordIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Record Runs',
+      medium: 'Specs Record Runs Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -54,9 +60,11 @@ query RecordBanner {
 
 const props = withDefaults(defineProps<{
   modelValue: boolean
+  hasBannerBeenShown: boolean
   commandOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  hasBannerBeenShown: true,
   commandOptions: () => {
     return [
       { cohort: 'A', value: 'cypress' },

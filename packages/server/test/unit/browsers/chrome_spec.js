@@ -323,20 +323,6 @@ describe('lib/browsers/chrome', () => {
       return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
-    // https://github.com/cypress-io/cypress/issues/9265
-    it('respond ACK after receiving new screenshot frame', function () {
-      const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
-      const write = sinon.stub()
-      const options = { writeVideoFrame: write }
-
-      return this.onCriEvent('Page.screencastFrame', frameMeta, options)
-      .then(() => {
-        expect(this.pageCriClient.send).to.have.been.calledWith('Page.startScreencast')
-        expect(write).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
-        expect(this.pageCriClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
-      })
-    })
-
     describe('downloads', function () {
       it('pushes create:download after download begins', function () {
         const downloadData = {
@@ -520,7 +506,8 @@ describe('lib/browsers/chrome', () => {
         ...openOpts,
         url: 'https://www.google.com',
         downloadsFolder: '/tmp/folder',
-        writeVideoFrame: () => {},
+        browser: {},
+        videoApi: {},
         onInitializeNewBrowserTab: () => {
           onInitializeNewBrowserTabCalled = true
         },

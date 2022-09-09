@@ -264,10 +264,11 @@ export const mutation = mutationType({
       description: 'Auth with Cypress Dashboard',
       args: {
         utmMedium: nonNull(stringArg()),
+        utmContent: stringArg(),
         utmSource: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.auth.login(args.utmSource, args.utmMedium)
+        await ctx.actions.auth.login(args.utmSource, args.utmMedium, args.utmContent)
 
         return {}
       },
@@ -644,9 +645,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('refreshOrganizations', {
+    t.field('refreshCloudViewer', {
       type: Query,
-      description: 'Clears the cloudViewer cache to refresh the organizations',
+      description: 'Clears the cloudViewer cache to refresh the organizations and projects',
       resolve: async (source, args, ctx) => {
         await ctx.cloud.invalidate('Query', 'cloudViewer')
 
@@ -699,6 +700,25 @@ export const mutation = mutationType({
         await ctx.actions.cohorts.insertCohort(cohort)
 
         return true
+      },
+    })
+
+    t.field('recordEvent', {
+      type: 'Boolean',
+      description: 'Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      args: {
+        campaign: nonNull(stringArg({})),
+        messageId: nonNull(stringArg({})),
+        medium: nonNull(stringArg({})),
+        cohort: stringArg({}),
+      },
+      resolve: (source, args, ctx) => {
+        return ctx.actions.eventCollector.recordEvent({
+          campaign: args.campaign,
+          messageId: args.messageId,
+          medium: args.medium,
+          cohort: args.cohort || undefined,
+        })
       },
     })
 
