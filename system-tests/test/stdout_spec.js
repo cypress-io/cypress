@@ -29,9 +29,9 @@ describe('e2e stdout', () => {
       expectedExitCode: 3,
       onStdout: (stdout) => {
         // assert stack trace line numbers/columns mirror source map
-        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:7:13)')
-        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:15:10)')
-        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:27:10)')
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:7:12)')
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:15:9)')
+        expect(stdout).to.include('Context.eval (webpack:///./cypress/e2e/stdout_failing.cy.js:27:9)')
       },
     })
   })
