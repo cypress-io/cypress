@@ -17,8 +17,8 @@
         @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
       />
       <CloudConnectModals
-        v-else-if="status?.isLoggedIn && !keepLoginOpen"
-        :show="status?.isLoggedIn && isCloudConnectOpen"
+        v-else-if="status?.isLoggedIn && !keepLoginOpen && !status.isProjectConnected"
+        :show="status?.isLoggedIn"
         :gql="props.gql"
         @cancel="handleCancelConnect"
         @success="handleConnectSuccess"
@@ -57,12 +57,11 @@ const { closeLoginConnectModal } = loginConnectStore
 // keepLoginOpen is only set if you've just logged in
 // and we want to show the "connect" button instead of "continue"
 const keepLoginOpen = ref(false)
-const isCloudConnectOpen = ref(true)
 
-watch(() => loginConnectStore.isLoggedIn, (newVal) => {
+watch(() => loginConnectStore.isLoggedIn, (newVal, oldVal) => {
   // when login state changes, if we have logged in but are not connected,
   // keep the "login" modal open in the "connect project" state
-  if (newVal && !loginConnectStore.isProjectConnected) {
+  if (newVal && (!loginConnectStore.isProjectConnected || oldVal === false)) {
     keepLoginOpen.value = true
   }
 })
