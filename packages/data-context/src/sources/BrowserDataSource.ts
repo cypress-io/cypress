@@ -23,10 +23,12 @@ if (os.platform() === 'win32') {
 
 const platform = os.platform()
 
+function getBrowserKey<T extends {name: string, version: string | number}> (browser: T) {
+  return `${browser.name}-${browser.version}`
+}
+
 export function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
-  return _.uniqBy(browsers, (browser: FoundBrowser) => {
-    return `${browser.name}-${browser.version}`
-  })
+  return _.uniqBy(browsers, getBrowserKey)
 }
 
 export interface BrowserApiShape {
@@ -44,7 +46,35 @@ export class BrowserDataSource {
    * Gets the browsers from the machine and the project config
    */
   allBrowsers () {
-    return Promise.all([this.userBrowsers(), this.machineBrowsers()]).then(_.flatten).then(removeDuplicateBrowsers)
+    if (!this.ctx.coreData.allBrowsers) {
+      const p = this.ctx.project.getConfig()
+      const machineBrowsers = this.machineBrowsers()
+
+      this.ctx.coreData.allBrowsers = Promise.all([p, machineBrowsers]).then(async ([cfg, m]) => {
+        if (!cfg.browsers) return m
+
+        const userBrowsers = cfg.browsers.map<FoundBrowser | undefined>((b) => {
+          if (_.includes(_.map(m, getBrowserKey), getBrowserKey(b))) return
+
+          return {
+            ...b,
+            majorVersion: String(b.majorVersion),
+            custom: true,
+          }
+        }).filter<FoundBrowser>((b): b is FoundBrowser => b != null) || []
+
+        return _.concat(m, userBrowsers)
+      }).catch((e) => {
+        this.ctx.update((coreData) => {
+          coreData.allBrowsers = null
+          coreData.diagnostics.error = e
+        })
+
+        throw e
+      })
+    }
+
+    return this.ctx.coreData.allBrowsers
   }
 
   /**
@@ -70,37 +100,6 @@ export class BrowserDataSource {
     }
 
     return this.ctx.coreData.machineBrowsers
-  }
-
-  /**
-   * Gets the browsers from the project config, caching the Promise on the
-   * coreData so we only look them up once
-   */
-  userBrowsers () {
-    if (!this.ctx.coreData.userBrowsers) {
-      const p = this.ctx.project.getConfig()
-
-      this.ctx.coreData.userBrowsers = p.then(async (cfg) => {
-        return cfg.browsers?.map<FoundBrowser | undefined>((b) => {
-          if (!b.path) return
-
-          return {
-            ...b,
-            majorVersion: String(b.majorVersion),
-            custom: true,
-          }
-        }).filter<FoundBrowser>((b): b is FoundBrowser => b != null) || []
-      }).catch((e) => {
-        this.ctx.update((coreData) => {
-          coreData.userBrowsers = null
-          coreData.diagnostics.error = e
-        })
-
-        throw e
-      })
-    }
-
-    return this.ctx.coreData.userBrowsers
   }
 
   idForBrowser (obj: FoundBrowser) {
