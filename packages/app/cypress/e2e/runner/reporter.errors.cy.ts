@@ -34,27 +34,24 @@ describe('errors ui', {
     })
 
     verify('with expect().<foo>', {
+      line: 3,
       column: 25,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
-      ideLine: 3,
-      ideColumn: 25,
     })
 
     verify('with assert()', {
-      column: '(5|12)', // (chrome|firefox)
+      line: 7,
+      column: [5, 12], // [chrome, firefox]
       message: `should be true`,
       verifyOpenInIde: true,
-      ideLine: 7,
-      ideColumn: 5,
     })
 
     verify('with assert.<foo>()', {
+      line: 11,
       column: 12,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
-      ideLine: 11,
-      ideColumn: 12,
     })
   })
 
@@ -85,7 +82,8 @@ describe('errors ui', {
 
     verify('in file outside project', {
       message: 'An outside error',
-      regex: /\/throws\-error\.js:5:9/,
+      stackRegex: /\/throws\-error\.js:5:8/,
+      codeFrameRegex: /\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
     })
   })
@@ -100,7 +98,7 @@ describe('errors ui', {
     // https://github.com/cypress-io/cypress/issues/8288
     // https://github.com/cypress-io/cypress/issues/8350
     verify('test', {
-      column: '(7|18)', // (chrome|firefox)
+      column: [7, 18], // [chrome, firefox]
       codeFrameText: 'beforeEach(()=>',
       message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
     })
@@ -483,7 +481,7 @@ describe('errors ui', {
     })
 
     verify('from chai expect', {
-      column: '(5|12)', // (chrome|firefox)
+      column: [5, 12], // [chrome, firefox]
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
     })

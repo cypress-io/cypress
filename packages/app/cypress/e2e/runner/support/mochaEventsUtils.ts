@@ -43,7 +43,6 @@ const eventCleanseMap = {
   stack: () => 'match.string',
   file: (arg: string) => arg ? 'relative/path/to/spec.js' : undefined,
   message: () => '[error message]',
-  sourceMappedStack: () => 'match.string',
   parsedStack: () => 'match.array',
   name: (n: string) => n === 'Error' ? 'AssertionError' : n,
   err: () => {
@@ -51,7 +50,6 @@ const eventCleanseMap = {
       message: '[error message]',
       name: 'AssertionError',
       stack: 'match.string',
-      sourceMappedStack: 'match.string',
       parsedStack: 'match.array',
     }
   },
