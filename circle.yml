@@ -1284,8 +1284,6 @@ jobs:
             run-vite-dev-server-integration-tests
       - run:
           command: |
-            unset -e
-            unset -o
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finlize || yarn percy build:finalize
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
