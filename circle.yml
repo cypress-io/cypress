@@ -476,6 +476,11 @@ commands:
           name: Run driver tests in Cypress
           environment:
             CYPRESS_KONFIG_ENV: production
+            - when:
+              # TODO: Fix this when we resolve the issue with snapshots in the renderer process of the electron browser: https://github.com/cypress-io/cypress/issues/22985
+              condition: 
+                equal: [ "electron", << parameters.browser >> ]
+              DISABLE_SNAPSHOT_REQUIRE: 1
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
@@ -1353,7 +1358,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope "'@tooling/packherd'"
             - verify-mocha-results:
-                expectedResultCount: 3
+                expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -1979,6 +1984,7 @@ jobs:
         type: string
         default: medium+
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -2014,6 +2020,7 @@ jobs:
   test-kitchensink-against-staging:
     <<: *defaults
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -2039,6 +2046,7 @@ jobs:
   test-against-staging:
     <<: *defaults
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:

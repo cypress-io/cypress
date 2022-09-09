@@ -169,6 +169,10 @@ class SourcemapSupport {
     const processedStack: string[] = []
     let includeCodeFrames = INCLUDE_CODE_FRAMES
 
+    if (stack.length === 0) {
+      return errorString
+    }
+
     for (let i = stack.length - 1; i >= 0; i--) {
       const c = this.wrapCallSite(
         stack[i] as CallSite,
