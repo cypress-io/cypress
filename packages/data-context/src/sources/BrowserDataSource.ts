@@ -3,6 +3,7 @@ import os from 'os'
 import execa from 'execa'
 
 import type { DataContext } from '..'
+import _ from 'lodash'
 
 let isPowerShellAvailable: undefined | boolean
 let powerShellPromise: Promise<void> | undefined
@@ -34,6 +35,17 @@ export class BrowserDataSource {
   constructor (private ctx: DataContext) {}
 
   /**
+   * Gets the browsers from the machine and the project config
+   */
+  allBrowsers () {
+    return Promise.all([this.userBrowsers(), this.machineBrowsers()]).then(([userBrowsers, machineBrowsers]) => {
+      return _.uniqBy([...userBrowsers, ...machineBrowsers], (browser: FoundBrowser) => {
+        return `${browser.name}-${browser.version}`
+      })
+    })
+  }
+
+  /**
    * Gets the browsers from the machine, caching the Promise on the coreData
    * so we only look them up once
    */
@@ -56,6 +68,37 @@ export class BrowserDataSource {
     }
 
     return this.ctx.coreData.machineBrowsers
+  }
+
+  /**
+   * Gets the browsers from the project config, caching the Promise on the
+   * coreData so we only look them up once
+   */
+  userBrowsers () {
+    if (!this.ctx.coreData.userBrowsers) {
+      const p = this.ctx.project.getConfig()
+
+      this.ctx.coreData.userBrowsers = p.then(async (cfg) => {
+        return cfg.browsers?.map<FoundBrowser | undefined>((b) => {
+          if (!b.path) return
+
+          return {
+            ...b,
+            majorVersion: String(b.majorVersion),
+            custom: true,
+          }
+        }).filter<FoundBrowser>((b): b is FoundBrowser => b != null) || []
+      }).catch((e) => {
+        this.ctx.update((coreData) => {
+          coreData.userBrowsers = null
+          coreData.diagnostics.error = e
+        })
+
+        throw e
+      })
+    }
+
+    return this.ctx.coreData.userBrowsers
   }
 
   idForBrowser (obj: FoundBrowser) {
