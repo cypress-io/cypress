@@ -7,6 +7,9 @@
  * dependencies.
  */
 
+// Globals defined in inject.ts
+/* global cypressConfig */
+
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchElementIntegrity } from './patches/setAttribute'
@@ -80,7 +83,7 @@ patchDocumentCookie(window)
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
-if (window.cypressConfig.modifyObstructiveCode) {
+if (cypressConfig.modifyObstructiveCode) {
   Object.defineProperty(window, 'frameElement', {
     get () {
       return null
@@ -88,7 +91,7 @@ if (window.cypressConfig.modifyObstructiveCode) {
   })
 }
 
-if (window.cypressConfig.modifyObstructiveThirdPartyCode) {
+if (cypressConfig.modifyObstructiveThirdPartyCode) {
   patchElementIntegrity(window)
 }
 

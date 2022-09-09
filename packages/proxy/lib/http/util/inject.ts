@@ -26,9 +26,11 @@ export function fullCrossOrigin (domain, { modifyObstructiveThirdPartyCode, modi
     return oneLine`
       <script type='text/javascript'>
         document.domain = '${domain}';
-        window.cypressConfig = { modifyObstructiveThirdPartyCode: ${modifyObstructiveThirdPartyCode}, modifyObstructiveCode: ${modifyObstructiveCode} };
+        () => {
+          const cypressConfig = { modifyObstructiveThirdPartyCode: ${modifyObstructiveThirdPartyCode}, modifyObstructiveCode: ${modifyObstructiveCode} };
 
-        ${contents}
+          ${contents}
+        }()
       </script>
     `
   })
