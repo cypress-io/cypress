@@ -44,9 +44,7 @@ export class BrowserDataSource {
    * Gets the browsers from the machine and the project config
    */
   allBrowsers () {
-    return Promise.all([this.userBrowsers(), this.machineBrowsers()]).then(([userBrowsers, machineBrowsers]) => {
-      return removeDuplicateBrowsers([...userBrowsers, ...machineBrowsers])
-    })
+    return Promise.all([this.userBrowsers(), this.machineBrowsers()]).then(_.flatten).then(removeDuplicateBrowsers)
   }
 
   /**
