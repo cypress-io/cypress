@@ -11,7 +11,6 @@ import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
 import type { Emissions } from '@packages/types'
 
-const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
 const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
@@ -75,6 +74,40 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
   })
 }
 
+const reduceTestProperties = (test) => {
+  // minimal test properties to keep in memory to repopulate reporter on navigation to a new origin
+  // (i.e. new top) and determine what test to restart from when the page reloads
+  const mochaProps = ['id', 'order', 'state', 'type', 'err', 'commands', 'agents', 'hooks', 'type', 'routes']
+
+  Object.keys(test).forEach((key) => {
+    if (key === 'previousAttempts') {
+      const newPreviousAttempts: Cypress.ObjectLike = []
+
+      test.previousAttempts.forEach((attempt) => {
+        newPreviousAttempts.push(_.pick(attempt, mochaProps))
+      })
+
+      test.previousAttempts = newPreviousAttempts
+    } else if (!mochaProps.includes(key)) {
+      delete test[key]
+    }
+  })
+
+  test._ALREADY_RAN = true
+  test.pending = true
+
+  return null
+}
+
+// FIXME: remove when https://github.com/cypress-io/cypress/issues/23736 is fixed
+const reduceTestPropertiesOnPreviouslyRanTests = (tests) => {
+  tests.forEach((test) => {
+    if (test._ALREADY_RAN) {
+      reduceTestProperties(test)
+    }
+  })
+}
+
 const testAfterRun = (test, Cypress) => {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
@@ -89,32 +122,9 @@ const testAfterRun = (test, Cypress) => {
       // eslint-disable-next-line no-console
       console.error(e)
     }
-
-    // perf loop only through
-    // a tests OWN properties and not
-    // inherited properties from its shared ctx
-    for (let key of Object.keys(test.ctx || {})) {
-      const value = test.ctx[key]
-
-      if (_.isObject(value) && !mochaCtxKeysRe.test(key)) {
-        // nuke any object properties that come from
-        // cy.as() aliases or anything set from 'this'
-        // so we aggressively perform GC and prevent obj
-        // ref's from building up
-        test.ctx[key] = undefined
-      }
-    }
-
-    // reset the fn to be empty function
-    // for GC to be aggressive and prevent
-    // closures from hold references
-    test.fn = () => {}
-
-    // prevent loop comprehension
-    return null
   }
 
-  return null
+  return reduceTestProperties(test)
 }
 
 const setTestTimingsForHook = (test, hookName, obj) => {
@@ -461,20 +471,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
       })]
 
     return newArgs
-  })
-}
-
-const getTestResults = (tests) => {
-  return _.map(tests, (test) => {
-    const obj: Record<string, any> = _.pick(test, 'id', 'duration', 'state')
-
-    obj.title = test.originalTitle
-    // TODO FIX THIS!
-    if (!obj.state) {
-      obj.state = 'skipped'
-    }
-
-    return obj
   })
 }
 
@@ -1320,7 +1316,9 @@ export default {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-
+      getStats () {
+        return _tests
+      },
       normalizeAll (tests, skipCollectingLogs) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
@@ -1373,7 +1371,7 @@ export default {
           // synchronized with the 'end' event that
           // we manage because of uncaught hook errors
           if (fn) {
-            return fn(failures, getTestResults(_tests))
+            return fn(failures)
           }
         })
       },
@@ -1710,13 +1708,20 @@ export default {
 
         for (let test of _tests) {
           if (getTestIndexFromId(test.id) !== _resumedAtTestIndex) {
+            // FIXME: uncomment next line when https://github.com/cypress-io/cypress/issues/23736 is fixed
+            // reduceTestProperties(test)
             test._ALREADY_RAN = true
             test.pending = true
           } else {
+            // FIXME: remove when https://github.com/cypress-io/cypress/issues/23736 is fixed
+            // reduceTestPropertiesOnPreviouslyRanTests(_tests)
+
             // bail so we can stop now
             return
           }
         }
+        // FIXME: remove when https://github.com/cypress-io/cypress/issues/23736 is fixed
+        reduceTestPropertiesOnPreviouslyRanTests(_tests)
       },
 
       getResumedAtTestIndex () {
