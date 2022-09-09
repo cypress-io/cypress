@@ -47,6 +47,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ "lmiller/experimental-single-tab-component-testing", << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
+    - equal: [ 'webkit-multidomain', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
