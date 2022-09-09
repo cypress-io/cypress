@@ -1141,6 +1141,8 @@ export default {
     }
 
     const onLogsById = (l) => {
+      if (_skipCollectingLogs) return
+
       return _logsById[l.id] = l
     }
 
@@ -1330,7 +1332,8 @@ export default {
         return runnables
       },
 
-      normalizeAll (tests) {
+      normalizeAll (tests, skipCollectingLogs) {
+        _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
         // a single test since we received an uncaught
@@ -1736,10 +1739,8 @@ export default {
       },
 
       addLog (attrs, isInteractive) {
-        // we dont need to hold a log reference
-        // to anything in memory when we're headless
-        // because you cannot inspect any logs
-
+        // we don't need to hold a log reference to anything in memory when we don't
+        // render the report or are headless because you cannot inspect any logs
         if (_skipCollectingLogs || !isInteractive) {
           return
         }

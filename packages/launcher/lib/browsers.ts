@@ -166,7 +166,7 @@ export function launch (
   debuggingPort: number,
   args: string[] = [],
   defaultBrowserEnv = {},
-): LaunchedBrowser {
+) {
   debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
