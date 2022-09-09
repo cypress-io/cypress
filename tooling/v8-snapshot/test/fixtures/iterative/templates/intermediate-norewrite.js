@@ -2,6 +2,8 @@
 // This problematic code has been taken from graceful-fs/polyfill.js
 // It results in invalid code when rewritten.
 
+require('./norewrite')
+
 var origCwd = process.cwd
 var cwd = null
 

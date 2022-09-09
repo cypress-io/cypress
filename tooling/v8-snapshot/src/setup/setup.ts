@@ -28,7 +28,7 @@ const setupV8Snapshots = async () => {
 
 Note that this may take a while.`)
 
-    process.exit(err.code ?? 1)
+    process.exit(1)
   }
 }
 

@@ -1,3 +1,4 @@
 exports.healthy = require('./healthy')
+exports.deferred = require('./deferred')
 exports.intermediate = require('./intermediate-deferred')
-exports.coffee = require('./norewrite')
+exports.norwrite = require('./norewrite')

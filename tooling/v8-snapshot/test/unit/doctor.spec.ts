@@ -276,12 +276,14 @@ describe('doctor', () => {
     // Set up project to use an intermediate healthy dependency and snapshot
     const initialEntry = await fs.readFile(path.join(templateDir, 'entry-intermediate-healthy.js'))
     const healthy = await fs.readFile(path.join(templateDir, 'leaf-healthy.js'))
+    const deferred = await fs.readFile(path.join(templateDir, 'leaf-deferred.js'))
     const intermediateHealthy = await fs.readFile(path.join(templateDir, 'intermediate-healthy.js'))
     const intermediateDeferred = await fs.readFile(path.join(templateDir, 'intermediate-deferred.js'))
     const norewrite = await fs.readFile(path.join(templateDir, 'leaf-norewrite.js'))
 
     await fs.writeFile(path.join(projectBaseDir, 'entry.js'), initialEntry)
     await fs.writeFile(path.join(projectBaseDir, 'healthy.js'), healthy)
+    await fs.writeFile(path.join(projectBaseDir, 'deferred.js'), deferred)
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-healthy.js'), intermediateHealthy)
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-deferred.js'), intermediateDeferred)
     await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
@@ -295,6 +297,7 @@ describe('doctor', () => {
         './norewrite.js',
       ],
       deferred: [
+        './deferred.js',
       ],
       healthy: [
         './entry.js',
@@ -326,6 +329,7 @@ describe('doctor', () => {
         './norewrite.js',
       ],
       deferred: [
+        './deferred.js',
         './intermediate-deferred.js',
       ],
       healthy: [

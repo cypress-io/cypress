@@ -309,7 +309,7 @@ export class SnapshotDoctor {
     meta: Metadata
   }> {
     // 1. Generate the initial bundle not deferring anything yet
-    let { warnings, meta, bundle } = await this._createScript()
+    let { meta } = await this._createScript()
 
     // 2. Extract all module inputs from the metadata and detect circular
     // imports
@@ -336,6 +336,8 @@ export class SnapshotDoctor {
       filteredPreviousDeferred,
       new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]),
     )
+
+    let { warnings, bundle } = await this._createScript(new Set(filteredPreviousDeferred), new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]))
 
     // 4. Process the initial bundle in order to detect issues during
     //    verification
