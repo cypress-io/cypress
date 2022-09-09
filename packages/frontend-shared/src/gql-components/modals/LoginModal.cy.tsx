@@ -3,6 +3,7 @@ import LoginModal from './LoginModal.vue'
 import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 
 const text = defaultMessages.topNav
 
@@ -26,11 +27,21 @@ type TestCloudViewer = {
 }
 
 const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
+  const finalViewer = {
+    ...CloudUserStubs.me,
+    organizations: null,
+    firstOrganization: {
+      __typename: 'CloudOrganizationConnection' as const,
+      nodes: [],
+    },
+    ...viewer,
+  }
+
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
       result.authState.browserOpened = true
-      result.cloudViewer = viewer
+      result.cloudViewer = finalViewer
       result.cloudViewer.__typename = 'CloudUser'
     },
     render: (gqlVal) => (
@@ -100,8 +111,14 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         onResult: (result) => {
           result.__typename = 'Query'
           result.authState.browserOpened = true
-          result.cloudViewer = cloudViewer
-          result.cloudViewer.__typename = 'CloudUser'
+          result.cloudViewer = {
+            ...CloudUserStubs.me,
+            organizations: null,
+            firstOrganization: {
+              __typename: 'CloudOrganizationConnection' as const,
+              nodes: [],
+            },
+          }
         },
         render: (gqlVal) => (
           <div class="border-current border-1 h-700px resize overflow-auto">

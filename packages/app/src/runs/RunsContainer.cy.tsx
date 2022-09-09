@@ -8,6 +8,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     ...CloudUserStubs.me,
     organizations: null,
+    firstOrganization: {
+      __typename: 'CloudOrganizationConnection' as const,
+      nodes: [],
+    },
   }
 
   context('when the user is logged in', () => {

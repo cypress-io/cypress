@@ -10,7 +10,7 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
         result.cloudViewer = null
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium='test' gql={gqlVal} /></div>
       },
     })
 
@@ -49,6 +49,10 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
         },
       ],
     },
+    firstOrganization: {
+      __typename: 'CloudOrganizationConnection' as const,
+      nodes: [{ __typename: 'CloudOrganization' as const, id: '1' }],
+    },
   }
 
   it('show project connect if not connected', () => {
@@ -57,7 +61,7 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="test" gql={gqlVal} /></div>
       },
     })
 

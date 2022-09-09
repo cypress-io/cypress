@@ -1,6 +1,7 @@
 import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 
 const text = defaultMessages.topNav
 
@@ -286,6 +287,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('the logged in state is correctly presented in header', () => {
     const cloudViewer = {
+      ...CloudUserStubs.me,
+      organizations: null,
+      firstOrganization: {
+        __typename: 'CloudOrganizationConnection' as const,
+        nodes: [],
+      },
       id: '1',
       email: 'test@test.test',
       fullName: 'Tester Test',
