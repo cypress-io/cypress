@@ -3,7 +3,9 @@ import RecordBanner from './RecordBanner.vue'
 
 describe('<RecordBanner />', () => {
   it('should render expected content', () => {
-    cy.mount({ render: () => <RecordBanner modelValue={true} /> })
+    const commandOptions = [{ cohort: 'A', value: 'cypress' }]
+
+    cy.mount({ render: () => <RecordBanner modelValue={true} commandOptions={commandOptions}/> })
 
     cy.gqlStub.Query.currentProject = {
       id: 'test_id',

@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_RECORD"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="record-banner"
     status="info"
@@ -27,7 +27,7 @@ import { gql, useQuery } from '@urql/vue'
 import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
-import TrackedBanner from './TrackedBanner.vue'
+import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import { RecordBannerDocument } from '../../generated/graphql'
 import { computed } from 'vue'
@@ -52,10 +52,17 @@ query RecordBanner {
 }
 `
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: boolean
+  commandOptions?: CohortOption[]
 }>(), {
   modelValue: false,
+  commandOptions: () => {
+    return [
+      { cohort: 'A', value: 'cypress' },
+      { cohort: 'B', value: 'npx cypress' },
+    ]
+  },
 })
 
 const emit = defineEmits<{
@@ -63,16 +70,21 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_RECORD
 
 const query = useQuery({ query: RecordBannerDocument })
 
 const firstRecordKey = computed(() => {
   return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
+
+const optionSelected = getOptionForCohort(bannerId, props.commandOptions)
+const command = t(optionSelected.value)
+
 const recordCommand = computed(() => {
   const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
 
-  return `cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
+  return `${command} run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 
 </script>
