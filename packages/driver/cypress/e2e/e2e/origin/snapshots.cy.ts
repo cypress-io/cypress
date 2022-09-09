@@ -3,7 +3,7 @@ import '../../../support/utils'
 
 describe('cy.origin - snapshots', () => {
   const findLog = (logMap: Map<string, any>, displayName: string, url: string) => {
-    return Array.from(logMap.values()).find((log: any) => {
+    return Array.from(logMap.values()).reverse().find((log: any) => {
       const props = log.get()
 
       return props.displayName === displayName && (props?.consoleProps?.URL === url || props?.consoleProps()?.URL === url)
@@ -23,14 +23,15 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.visit('/fixtures/primary-origin.html')
-    cy.get('a[data-cy="xhr-fetch-requests"]').click()
   })
 
+  // TODO: for some reason the xhr event is showing up twice in the log.
   it('verifies XHR requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
       // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
       // @ts-ignore
       Cypress.config('isInteractive', true)
+      cy.visit('http://www.foobar.com:3500/fixtures/xhr-fetch-onload.html')
       cy.get(`[data-cy="assertion-header"]`).should('exist')
       cy.wait('@fooBarBaz')
     })
@@ -54,6 +55,7 @@ describe('cy.origin - snapshots', () => {
       // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
       // @ts-ignore
       Cypress.config('isInteractive', true)
+      cy.visit('http://www.foobar.com:3500/fixtures/xhr-fetch-onload.html')
       cy.get(`[data-cy="assertion-header"]`).should('exist')
       cy.wait('@fooBarBaz')
     })
@@ -72,7 +74,7 @@ describe('cy.origin - snapshots', () => {
   })
 
   it('Does not take snapshots of XHR/fetch requests from secondary origin if the wrong origin is / origin mismatch, but instead the primary origin (existing behavior)', {
-    pageLoadTimeout: 5000,
+    defaultCommandTimeout: 50,
   },
   (done) => {
     cy.on('fail', () => {
@@ -89,10 +91,13 @@ describe('cy.origin - snapshots', () => {
       done()
     })
 
+    cy.visit('http://www.foobar.com:3500/fixtures/xhr-fetch-onload.html')
+
     cy.origin('http://barbaz.com:3500', () => {
       // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
       // @ts-ignore
       Cypress.config('isInteractive', true)
+
       cy.get(`[data-cy="assertion-header"]`).should('exist')
       cy.wait('@fooBarBaz')
     })

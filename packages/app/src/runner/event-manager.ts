@@ -623,15 +623,19 @@ export class EventManager {
     }) => {
       const eventID = log.get('id')
 
-      Cypress.primaryOriginCommunicator.once(`snapshot:for:log:generated:${eventID}`, (generatedCrossOriginSnapshot) => {
-        const snapshot = generatedCrossOriginSnapshot.body ? generatedCrossOriginSnapshot : null
+      const requestSnapshot = () => {
+        return Cypress.primaryOriginCommunicator.toSpecBridgePromise(specBridge, 'snapshot:generate:for:log', {
+          name,
+          id: eventID,
+        }).then((crossOriginSnapshot) => {
+          const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
 
-        addSnapshot.apply(log, [snapshot, options, false])
-      })
+          addSnapshot.apply(log, [snapshot, options, false])
+        })
+      }
 
-      Cypress.primaryOriginCommunicator.toSpecBridge(specBridge, 'generate:snapshot:for:log', {
-        name,
-        id: eventID,
+      requestSnapshot().catch(() => {
+        // If a spec bridge isn't present to respond this isn't an error and there is nothing to do.
       })
     })
 

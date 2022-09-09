@@ -18,6 +18,20 @@ describe('cy.origin', () => {
     })
   })
 
+  describe('ensure that Visiting a cross origin page with a cy.origin command with no cy commands may cause subsequent tests to hang.', () => {
+    it('executes quickly', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        expect(true).to.equal(true)
+      })
+    })
+
+    it('it does not hang', () => {
+      cy.log('I log correctly')
+    })
+  })
+
   describe('async attach', () => {
     it('attaches to an origin at any time', () => {
       cy.visit('/fixtures/auth/index.html')

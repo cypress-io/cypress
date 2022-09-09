@@ -69,14 +69,14 @@ const createCypress = () => {
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
     if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
-      // if true, this is the correct specbridge to take the snapshot and send it back
+      // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
       Cypress.specBridgeCommunicator.toPrimary('snapshot:final:generated', finalSnapshot)
     }
   })
 
-  Cypress.specBridgeCommunicator.on('generate:snapshot:for:log', ({ name, id }) => {
+  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name, id }) => {
     // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
     let requestedCrossOriginSnapshot = {}
 
@@ -86,7 +86,7 @@ const createCypress = () => {
       requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
     }
 
-    Cypress.specBridgeCommunicator.toPrimary(`snapshot:for:log:generated:${id}`, requestedCrossOriginSnapshot)
+    Cypress.specBridgeCommunicator.toPrimary('snapshot:generate:for:log', requestedCrossOriginSnapshot)
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
