@@ -1287,7 +1287,7 @@ jobs:
             yarn percy build:finalize
       - run:
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
-          # Tends to only happen on the first commit for the CIRCLE_WORKFLOW_WORKSPACE_ID. Hence, only retry on `develop`
+          # If all other steps succeed but `build:finalize` fails, we retry it once
           name: Retry `percy build:finalize` to sidestep Percy flake
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
