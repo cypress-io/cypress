@@ -271,13 +271,13 @@ describe('lib/cache', () => {
 
     it('should insert a cohort', () => {
       const cohort = {
-        id: 'cohort_id',
-        value: 'A',
+        name: 'cohort_id',
+        cohort: 'A',
       }
 
       return cache.insertCohort(cohort).then(() => {
         return cache.getCohorts().then((cohorts) => {
-          expect(cohorts).to.deep.eq({ [cohort.id]: cohort })
+          expect(cohorts).to.deep.eq({ [cohort.name]: cohort })
         })
       })
     })
