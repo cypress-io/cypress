@@ -4,7 +4,7 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { debug as launcherDebug, launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import { debug as launcherDebug, launch } from '@packages/launcher/lib/browsers'
 import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
@@ -20,7 +20,7 @@ import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
-import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -379,6 +379,12 @@ export function connectToExisting () {
   getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
+async function recordVideo (videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
+
+  videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
+}
+
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
@@ -456,6 +462,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+    options.videoApi && recordVideo(options.videoApi),
   ])
 
   if (Array.isArray(launchOptions.extensions)) {
@@ -524,12 +531,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
+  })
 
   try {
     browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
@@ -543,7 +550,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = browserInstance.kill
 
-    /* @ts-expect-error */
     browserInstance.kill = (...args) => {
       debug('closing remote interface client')
 
@@ -555,7 +561,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       debug('closing firefox')
 
-      originalBrowserKill.apply(browserInstance, args)
+      return originalBrowserKill.apply(browserInstance, args)
     }
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)

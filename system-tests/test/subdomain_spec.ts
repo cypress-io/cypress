@@ -119,6 +119,7 @@ describe('e2e subdomain', () => {
   })
 
   systemTests.it('passes', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'subdomain.cy.js',
     snapshot: true,
     config: {

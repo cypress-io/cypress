@@ -137,7 +137,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/23380-root-spec-pattern" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "correct-dashboard-results" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -182,6 +182,14 @@ commands:
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+
+  install-webkit-deps:
+    steps:
+      - run:
+          name: Install WebKit dependencies
+          command: |
+            npx playwright install webkit
+            npx playwright install-deps webkit
 
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
@@ -472,6 +480,11 @@ commands:
             - install-chrome:
                 channel: <<parameters.install-chrome-channel>>
                 version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
+      - when:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-webkit-deps
       - run:
           name: Run driver tests in Cypress
           # TODO: Fix this when we resolve the issue with snapshots in the renderer process of the electron browser: https://github.com/cypress-io/cypress/issues/22985
@@ -480,11 +493,6 @@ commands:
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
-
-            if [[ "<<parameters.browser>>" = "webkit" ]]; then
-              npx playwright install webkit
-              npx playwright install-deps webkit
-            fi
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
@@ -621,6 +629,11 @@ commands:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - when:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-webkit-deps
       - run:
           name: Run system tests
           command: |
@@ -1383,7 +1396,7 @@ jobs:
           steps:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream
+            - run: yarn lerna run build-prod --stream --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1506,6 +1519,13 @@ jobs:
     steps:
       - run-system-tests:
           browser: firefox
+
+  system-tests-webkit:
+    <<: *defaults
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: webkit
 
   system-tests-non-root:
     <<: *defaults
@@ -2422,6 +2442,10 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install
     - system-tests-firefox:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-webkit:
         context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
