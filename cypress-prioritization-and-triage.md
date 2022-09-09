@@ -62,7 +62,9 @@ At Cypress, we use two-week sprints. During each sprint, a rotating group of dev
 
 ### The Power of a Great Ticket
 
-One of the best ways to help get your ticket validated, replicated, routed and prioritized is to include as much information as possible.  Our issue template will walk you through the most common information that we will need to best troubleshoot the problem.  **Please do not open issues from GitHub discussion comments.**  Here are some tips for providing a [Short, Self Contained, Correct, Example](http://sscce.org/) and our own [Troubleshooting Cypress](https://on.cypress.io/troubleshooting) guide.  Another great way to assist us in replicating your issue is to fork our [cypress-test-tiny repo](https://github.com/cypress-io/cypress-test-tiny) and recreate the issue there. 
+One of the best ways to help get your ticket validated, replicated, routed and prioritized is to include as much information as possible.  Our issue template will walk you through the most common information that we will need to best troubleshoot the problem.  **Please do not open issues from GitHub discussion comments.**  
+
+Here are some tips for providing a [Short, Self Contained, Correct, Example](http://sscce.org/) and our own [Troubleshooting Cypress](https://on.cypress.io/troubleshooting) guide.  Another great way to assist us in replicating your issue is to fork our [cypress-test-tiny repo](https://github.com/cypress-io/cypress-test-tiny) and recreate the issue there. 
 
 We will always need replication steps, so please include them when submitting an issue. Going back and forth to gather the basic data is all time we could be using to investigate and address the issue, so please be considerate of our developers' time and include the requested details when submitting an issue.
 
