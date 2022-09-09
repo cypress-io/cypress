@@ -14,7 +14,7 @@ interface RequestDetails {
   credentialLevel?: RequestCredentialLevel
 }
 
-export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel): boolean => {
+export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
   if (!AUTUrl) return false
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)
@@ -47,8 +47,12 @@ export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | u
 
       return false
     default:
-      // if we cannot determine a resource level, we likely should store the cookie as it is a navigation or another event
-      return true
+      // if we cannot determine a resource level, we likely should store the cookie as it is a navigation or another event as long as the context is same-origin
+      if (siteContext === 'same-origin' || isAutFrame) {
+        return true
+      }
+
+      return false
   }
 }
 
@@ -178,17 +182,19 @@ export class CookiesHelper {
       return
     }
 
-    // don't set the cookie in our own cookie jar if the cookie would otherwise fail being set in the browser if the AUT Url
-    // was actually top. This prevents cookies from being applied to our cookie jar when they shouldn't, preventing possible security implications.
-    if (!shouldAttachAndSetCookies(this.request.url, this.currentAUTUrl, this.request.resourceType, this.request.credentialLevel)) {
-      this.debug(`not setting cookie for ${this.request.url} with simulated top ${ this.currentAUTUrl} for ${ this.request.resourceType}:${this.request.credentialLevel}, cookie: ${toughCookie}`)
+    // cross site cookies cannot set lax/strict cookies in the browser for xhr/fetch requests (but ok with navigation/document requests)
+    if (this.request.resourceType && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
+      this.debug(`cannot set cookie with SameSite=${toughCookie.sameSite} when site context is ${this.siteContext}`)
 
       return
     }
 
-    // cross site cookies cannot set lax/strict cookies in the browser for xhr/fetch requests (but ok with navigation/document requests)
-    if (this.request.resourceType && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
-      this.debug(`cannot set cookie with SameSite=${toughCookie.sameSite} when site context is ${this.siteContext}`)
+    // don't set the cookie in our own cookie jar if the cookie would otherwise fail being set in the browser if the AUT Url
+    // was actually top. This prevents cookies from being applied to our cookie jar when they shouldn't, preventing possible security implications.
+    const shouldSetCookieGivenSiteContext = shouldAttachAndSetCookies(this.request.url, this.currentAUTUrl, this.request.resourceType, this.request.credentialLevel, this.request.isAUTFrame)
+
+    if (!shouldSetCookieGivenSiteContext) {
+      this.debug(`not setting cookie for ${this.request.url} with simulated top ${ this.currentAUTUrl} for ${ this.request.resourceType}:${this.request.credentialLevel}, cookie: ${toughCookie}`)
 
       return
     }

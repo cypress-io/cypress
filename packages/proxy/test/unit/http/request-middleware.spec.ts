@@ -341,6 +341,28 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
+    it(`allows setting cookies on request if resource type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = true
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = false
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.be.undefined
+    })
+
     it('sets the cookie header to undefined if no cookies exist on the request, none in the jar, but cookies should be attached', async () => {
       const ctx = await getContext([], [], 'http://foobar.com', 'http://app.foobar.com')
 
@@ -499,8 +521,7 @@ describe('http/request-middleware', () => {
           proxiedUrl: requestUrl,
           isAUTFrame: true,
           headers: {
-
-            cookie: requestCookieStrings.join('; '),
+            cookie: requestCookieStrings.join('; ') || undefined,
           },
         },
       } as HttpMiddlewareThis<any>

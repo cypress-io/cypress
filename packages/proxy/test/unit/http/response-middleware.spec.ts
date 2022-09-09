@@ -1443,7 +1443,7 @@ describe('http/response-middleware', function () {
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None')
     })
 
-    it(`allows setting cookies if request type cannot be determined (likely in the case of documents or redirects)`, async function () {
+    it(`allows setting cookies if request type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
       const appendStub = sinon.stub()
 
       const cookieJar = {
@@ -1457,6 +1457,7 @@ describe('http/response-middleware', function () {
           append: appendStub,
         },
         req: {
+          isAUTFrame: true,
           proxiedUrl: 'https://www.barbaz.com/index.html',
         },
         incomingRes: {
@@ -1476,7 +1477,42 @@ describe('http/response-middleware', function () {
         key: 'cookie',
         value: 'value',
         sameSite: 'lax',
-      }), 'https://www.barbaz.com/index.html', 'none')
+      }), 'https://www.barbaz.com/index.html', 'lax')
+
+      // send to browser anyway even though these will likely fail to be set
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+      const appendStub = sinon.stub()
+
+      const cookieJar = {
+        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
+        setCookie: sinon.stub(),
+      }
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          append: appendStub,
+        },
+        req: {
+          proxiedUrl: 'https://www.barbaz.com/some-image.png',
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': ['cookie=value'],
+          },
+        },
+      })
+
+      // a case where top would need to be simulated
+      ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+      ctx.remoteStates.isPrimaryOrigin = () => false
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(cookieJar.setCookie).not.to.have.been.called
 
       // send to browser anyway even though these will likely fail to be set
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')

@@ -231,9 +231,19 @@ context('shouldAttachAndSetCookies', () => {
   })
 
   context('misc', () => {
-    it('returns true if the resource type is unknown (could be a navigation request to set top level cookies', () => {
+    it('returns true if the resource type is unknown, but the request comes from the aut frame (could be a navigation request to set top level cookies)', () => {
       // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
-      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).to.be.true
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl, undefined, undefined, true)).to.be.true
+    })
+
+    it('returns true if the resource type is unknown, but the request is same-origin', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', 'http://www.foobar.com:3500/index.html')).to.be.true
+    })
+
+    it('returns false if the resource type is unknown and the request does NOT come from the AUTFrame', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).to.be.false
     })
 
     it('return false if the AUT url is undefined', () => {
