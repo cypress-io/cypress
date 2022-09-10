@@ -41,6 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - matches:
         pattern: "-release$"
         value: << pipeline.git.branch >>
+        
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
