@@ -25,7 +25,7 @@ describe('<SelectCloudProjectModal />', () => {
       },
       render (gql) {
         return (<div class="h-screen">
-          <SelectCloudProjectModal gql={gql}/>
+          <SelectCloudProjectModal utmMedium="test" gql={gql}/>
         </div>)
       },
     })
