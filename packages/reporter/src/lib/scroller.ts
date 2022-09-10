@@ -15,7 +15,7 @@
 
 import { TimeoutID } from './types'
 
-export type UserScrollCallback = () => void
+type UserScrollCallback = () => void
 
 const PADDING = 100
 
