@@ -9,7 +9,7 @@ import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
-import { Scroller } from '../lib/scroller'
+import { Scroller, UserScrollCallback } from '../lib/scroller'
 import type { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
@@ -176,18 +176,19 @@ class Runnables extends Component<RunnablesProps> {
   componentDidMount () {
     const { scroller, appState } = this.props
 
+    let maybeHandleScroll: UserScrollCallback | undefined = undefined
+
     const containerEl = this.refs.container as HTMLElement
 
     if (window.__CYPRESS_MODE__ === 'open') {
       // in open mode, listen for scroll events so that users can pause the command log auto-scroll
       // by manually scrolling the command log
       containerEl.setAttribute('data-cy-scroll-listen', 'true')
-
-      scroller.setContainer(this.refs.container as Element, action('user:scroll:detected', () => {
+      maybeHandleScroll = action('user:scroll:detected', () => {
         if (appState && appState.isRunning) {
           appState.temporarilySetAutoScrolling(false)
         }
-      }))
+      })
     } else {
       // in run mode, still add the data attribute so the tests have an explicit test locator,
       // but do not do any scroll handling. No user is scrolling in run mode and it can
@@ -195,6 +196,11 @@ class Runnables extends Component<RunnablesProps> {
       // see issue https://github.com/cypress-io/cypress/issues/16098
       containerEl.setAttribute('data-cy-scroll-listen', 'false')
     }
+
+    // we need to always call scroller.setContainer, but the callback can be undefined
+    // so we pass maybeHandleScroll. If we don't, Cypress blows up with an error like
+    // `A container must be set on the scroller with scroller.setContainer(container)`
+    scroller.setContainer(this.refs.container as Element, maybeHandleScroll)
   }
 }
 
