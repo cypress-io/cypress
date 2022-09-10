@@ -39,9 +39,9 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
-        pattern: "-release$"
-        value: << pipeline.git.branch >>
-        
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
