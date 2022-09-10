@@ -10,7 +10,7 @@
         :gql="props.gql"
         :model-value="!status.isLoggedIn || keepLoginOpen"
         :utm-medium="loginConnectStore.utmMedium"
-        :show-connect-button-after-login="!status.isProjectConnected"
+        :show-connect-button-after-login="!status.isProjectConnected && !!props.gql.currentProject?.currentTestingType"
         @connect-project="handleConnectProject"
         @cancel="handleCancel"
         @loggedin="handleLoginSuccess(status.isProjectConnected)"
@@ -41,6 +41,10 @@ fragment LoginConnectModalsContent on Query {
   ...CloudViewerAndProject
   ...LoginModal
   ...CloudConnectModals
+  currentProject {
+    id
+    currentTestingType
+  }
 }
 `
 
@@ -68,7 +72,7 @@ watch(() => loginConnectStore.isLoggedIn, (newVal, oldVal) => {
 })
 
 const handleLoginSuccess = (isProjectConnected?: boolean) => {
-  if (!isProjectConnected) {
+  if (!isProjectConnected && !props.gql.currentProject?.currentTestingType) {
     keepLoginOpen.value = true
   }
 }
@@ -78,8 +82,10 @@ const handleCancel = () => {
 }
 
 const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
-  if (error) {
-    // always allow close if there is an error
+  if (error || !props.gql.currentProject?.currentTestingType) {
+    // always allow close if there is an error or no testing type
+    // is found (meaning we are in the launchpad before config-loading,
+    // so projectId will always appear to be missing)
     closeLoginConnectModal()
 
     return
