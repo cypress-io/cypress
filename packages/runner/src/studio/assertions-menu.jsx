@@ -145,9 +145,23 @@ const renderAssertionsMenu = (container, props) => {
   render(<AssertionsMenu {...props} />, container)
 }
 
+const renderAssertionTypes = (container, possibleAssertions, _addAssertion) => {
+  render(
+    <>
+      {
+        possibleAssertions.map((assertion) => (
+          <AssertionType key={assertion.type} addAssertion={_addAssertion} {...assertion} />
+        ))
+      }
+    </>,
+    container,
+  )
+}
+
 export const studioAssertionsMenu = {
   render: renderAssertionsMenu,
   unmount: unmountComponentAtNode,
+  renderAssertionTypes,
   retargetEvents,
   css: studioAssertionsMenuCSS,
 }
