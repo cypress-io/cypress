@@ -189,7 +189,10 @@ class Runnables extends Component<RunnablesProps> {
         }
       }))
     } else {
-      // in run mode, still add the data attribute so the tests have an explicity locator
+      // in run mode, still add the data attribute so the tests have an explicit test locator,
+      // but do not do any scroll handling. No user is scrolling in run mode and it can
+      // cause problems in video recordings by incorrectly turning off autoscrolling,
+      // see issue https://github.com/cypress-io/cypress/issues/16098
       containerEl.setAttribute('data-cy-scroll-listen', 'false')
     }
   }
