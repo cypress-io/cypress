@@ -239,6 +239,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
 
       cy.withCtx(async (ctx, options) => {
+        ctx.coreData.app.browserStatus = 'open'
         options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
         options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
           setTimeout(() => {
