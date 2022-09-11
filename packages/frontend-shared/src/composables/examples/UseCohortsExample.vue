@@ -29,12 +29,14 @@ const cohortConfig: CohortConfig = {
 
 const cohortSelected = useCohorts(cohortConfig)
 
+const emptyOption = { value: '', cohort: '' }
+
 const cohortChoice = computed(() => {
   if (cohortSelected.value) {
-    return props.copyOptions.find((option) => option.cohort === cohortSelected.value)
+    return props.copyOptions.find((option) => option.cohort === cohortSelected.value) || emptyOption
   }
 
-  return { value: '' }
+  return emptyOption
 })
 
 </script>
