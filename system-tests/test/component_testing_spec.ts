@@ -7,7 +7,6 @@ describe('component testing projects', function () {
     project: 'create-react-app-configured',
     testingType: 'component',
     spec: 'src/App.cy.jsx',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -23,7 +22,6 @@ describe('component testing projects', function () {
     project: 'vueclivue3-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -31,7 +29,6 @@ describe('component testing projects', function () {
     project: 'react-vite-ts-configured',
     testingType: 'component',
     spec: 'src/App.cy.tsx',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -39,7 +36,6 @@ describe('component testing projects', function () {
     project: 'vue3-vite-ts-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.ts',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -48,7 +44,6 @@ describe('component testing projects', function () {
     project: 'nextjs-configured',
     testingType: 'component',
     spec: 'components/button.cy.jsx',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -56,7 +51,6 @@ describe('component testing projects', function () {
     project: 'nuxtjs-vue2-configured',
     testingType: 'component',
     spec: 'components/Tutorial.cy.js',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 
@@ -64,7 +58,6 @@ describe('component testing projects', function () {
     project: 'vuecli5vue3-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 })
@@ -81,7 +74,6 @@ describe(`React major versions with Vite`, function () {
         configFile: 'cypress-vite.config.ts',
         spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
         testingType: 'component',
-        browser: 'chrome',
         snapshot: true,
         expectedExitCode: 0,
       })
@@ -99,7 +91,6 @@ describe(`React major versions with Webpack`, function () {
         configFile: 'cypress-webpack.config.ts',
         spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
         testingType: 'component',
-        browser: 'chrome',
         snapshot: true,
         expectedExitCode: 0,
       })
@@ -119,7 +110,6 @@ describe(`Angular CLI major versions`, () => {
       project: `angular-${majorVersion}`,
       spec,
       testingType: 'component',
-      browser: 'chrome',
       expectedExitCode: 0,
     })
   }
@@ -128,7 +118,6 @@ describe(`Angular CLI major versions`, () => {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',
-    browser: 'chrome',
     expectedExitCode: 0,
   })
 })
@@ -141,7 +130,6 @@ describe('svelte component testing', () => {
       project: `svelte-${bundler}`,
       testingType: 'component',
       spec: '**/*.cy.js',
-      browser: 'chrome',
       expectedExitCode: 0,
     })
   }
@@ -154,7 +142,6 @@ describe('experimentalSingleTabRunMode', function () {
     project: 'experimentalSingleTabRunMode',
     testingType: 'component',
     spec: '**/*.cy.js',
-    browser: 'chrome',
     snapshot: true,
     expectedExitCode: 2,
   })
