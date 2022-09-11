@@ -10,7 +10,7 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
-    utm-medium="Runs Tab"
+    :utm-medium="props.utmMedium"
     :show-connect-button-after-login="!cloudProjectId"
     @connect-project="isProjectConnectOpen = true"
   />
