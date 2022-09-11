@@ -274,7 +274,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Create Project', () => {
     it('when a project is created, injects new projectId into the config file', () => {
-      cy.remoteGraphQLIntercept(async (obj) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
             slug: 'newProjectId',
@@ -291,7 +291,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
+
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -306,6 +308,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.equal('newProjectId')
+        expect(ctx.cloud.executeRemoteGraphQL).to.have.been.calledWithMatch({
+          fieldName: 'cloudProjectCreate',
+          operationVariables: {
+            medium: 'Runs Tab',
+            source: 'Binary: App',
+          } })
       })
     })
 
