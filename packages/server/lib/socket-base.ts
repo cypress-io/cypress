@@ -144,8 +144,7 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      // allow polling in dev-mode-only, remove once webkit is no longer gated behind development
-      transports: process.env.CYPRESS_INTERNAL_ENV === 'production' ? ['websocket'] : ['websocket', 'polling'],
+      transports: ['websocket', 'polling'],
     })
   }
 
