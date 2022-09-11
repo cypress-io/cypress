@@ -75,9 +75,20 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
       moveToRunsPage()
-      cy.contains('Log In').click()
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx._apis.authApi, 'logIn')
+      })
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.contains('button', 'Log In').click()
+      })
+
+      cy.withCtx((ctx, o) => {
+        // validate utmSource
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+        // validate utmMedium
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Runs Tab')
       })
     })
 
