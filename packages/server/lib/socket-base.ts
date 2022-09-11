@@ -586,6 +586,8 @@ export class SocketBase {
       })
 
       callbacks.onSocketConnection(socket)
+
+      return
     })
 
     io.of('/data-context').on('connection', (socket: Socket) => {
