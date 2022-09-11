@@ -362,7 +362,9 @@ const reconstructStack = (parsedStack) => {
 
     const { whitespace, originalFile, function: fn, line, column } = parsedLine
 
-    return `${whitespace}at ${fn} (${originalFile || '<unknown>'}:${line}:${column})`
+    const lineAndColumn = (Number.isInteger(line) || Number.isInteger(column)) ? `:${line}:${column}` : ''
+
+    return `${whitespace}at ${fn} (${originalFile || '<unknown>'}${lineAndColumn})`
   }).join('\n').trimEnd()
 }
 

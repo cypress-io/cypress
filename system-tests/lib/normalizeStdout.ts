@@ -9,10 +9,9 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 
 export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))\??(-\d+)?:\d+:\d+|<unknown>)[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(?:\s*((?:\bat\b\s.*\s\(.*\)|[\w\d]*@\[native code\])\n?)+)+/g
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
-const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
@@ -80,16 +79,8 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 // '@' will be present in firefox/webkit stack trace lines
 // 'at' will be present in chrome stack trace lines
 // Firefox includes trailing whitespace between that must be specifically replaced
-export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
-  return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
-    let post = parts[4]
-
-    if (browserName === 'firefox') {
-      post = post.replace(whiteSpaceBetweenNewlines, '\n')
-    }
-
-    return `\n      [stack trace lines]${post}`
-  })
+export const replaceStackTraceLines = (str: string) => {
+  return str.replace(stackTraceLinesRe, `\n      [stack trace lines]\n`)
 }
 
 export const normalizeStdout = function (str: string, options: any = {}) {
@@ -160,5 +151,5 @@ export const normalizeStdout = function (str: string, options: any = {}) {
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
   }
 
-  return replaceStackTraceLines(str, options.browser)
+  return replaceStackTraceLines(str)
 }
