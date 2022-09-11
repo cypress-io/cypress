@@ -557,7 +557,7 @@ enum CodeLanguageEnum {
 
 """used to distinguish one group of users from another"""
 type Cohort {
-  """value used to identify the indicate the cohort (e.g. "A" or "B")"""
+  """value used to indicate the cohort (e.g. "A" or "B")"""
   cohort: String
 
   """name used to identify the cohort topic (e.g. "LoginBanner" ) """

@@ -94,11 +94,7 @@ function handleModalClose () {
 const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
 
 const bodyCopy = computed(() => {
-  if (optionSelected.value.value) {
-    return t(optionSelected.value.value)
-  }
-
-  return ''
+  return optionSelected.value?.value ? t(optionSelected.value.value) : ''
 })
 
 </script>

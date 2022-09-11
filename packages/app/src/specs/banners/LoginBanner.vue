@@ -33,6 +33,7 @@
       v-model="isLoginOpen"
       :gql="loginModalQuery.data.value"
       utm-medium="Specs Login Banner"
+      :utm-content="optionSelected.cohort"
     />
   </TrackedBanner>
 </template>
@@ -86,11 +87,7 @@ async function handleButtonClick () {
 const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
 
 const bodyCopy = computed(() => {
-  if (optionSelected.value.value) {
-    return t(optionSelected.value.value)
-  }
-
-  return ''
+  return optionSelected.value?.value ? t(optionSelected.value.value) : ''
 })
 
 </script>

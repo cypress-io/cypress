@@ -31,12 +31,10 @@ const cohortSelected = useCohorts(cohortConfig)
 
 const cohortChoice = computed(() => {
   if (cohortSelected.value) {
-    return props.copyOptions.filter((option) => option.cohort === cohortSelected.value)[0]
+    return props.copyOptions.find((option) => option.cohort === cohortSelected.value)
   }
 
   return { value: '' }
 })
-
-//http://localhost:5173/__/#/specs/runner?file=src/composables/examples/UseCohortsExample.cy.tsx
 
 </script>

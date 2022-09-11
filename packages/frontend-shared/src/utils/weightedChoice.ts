@@ -13,6 +13,10 @@ export type WeightedAlgorithm = {
  * @param values array of values to choose from
  */
 const weightedChoice = (weights: number[], values: any[]) => {
+  if (weights.length !== values.length) {
+    throw new Error('The length of the weights and values must be the same')
+  }
+
   const cumulativeWeights = _.reduce(weights, (result: number[], value: number) => {
     if (result.length === 0) {
       result.push(value)

@@ -88,6 +88,7 @@ const createOrganizationUrl = computed(() => {
     params: {
       utm_medium: 'Specs Create Organization Banner',
       utm_campaign: 'Set up your organization',
+      utm_content: optionSelected.value?.cohort || '',
     },
   })
 })
@@ -95,11 +96,7 @@ const createOrganizationUrl = computed(() => {
 const optionSelected = getOptionForCohort(bannerId, props.headerCopyOptions)
 
 const headerCopy = computed(() => {
-  if (optionSelected.value.value) {
-    return t(optionSelected.value.value)
-  }
-
-  return ''
+  return optionSelected.value?.value ? t(optionSelected.value.value) : ''
 })
 
 </script>

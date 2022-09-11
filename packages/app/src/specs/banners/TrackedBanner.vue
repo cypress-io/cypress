@@ -24,12 +24,14 @@ export const getOptionForCohort = (name: string, options: CohortOption[]) => {
 
   const cohortSelected = useCohorts(cohortConfig)
 
+  const emptyOption = { cohort: '', value: '' }
+
   return computed(() => {
     if (cohortSelected.value) {
-      return options.filter((option) => option.cohort === cohortSelected.value)[0]
+      return options.find((option) => option.cohort === cohortSelected.value) || emptyOption
     }
 
-    return { cohort: '', value: '' }
+    return emptyOption
   })
 }
 

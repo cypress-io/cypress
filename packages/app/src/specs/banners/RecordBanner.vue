@@ -89,7 +89,7 @@ const firstRecordKey = computed(() => {
 const optionSelected = getOptionForCohort(bannerId, props.commandOptions)
 
 const command = computed(() => {
-  return optionSelected.value.value
+  return optionSelected.value?.value ? optionSelected.value.value : ''
 })
 
 const recordCommand = computed(() => {
