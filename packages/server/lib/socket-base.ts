@@ -144,6 +144,7 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
+      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
       transports: ['websocket', 'polling'],
     })
   }
@@ -205,6 +206,14 @@ export class SocketBase {
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+      if (socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
+        debug('polling WebSocket request received with non-WebKit browser, disconnecting')
+
+        // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
+        // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
+        return socket.disconnect(true)
+      }
+
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
