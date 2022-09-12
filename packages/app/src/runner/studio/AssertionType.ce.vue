@@ -38,58 +38,44 @@
 </template>
 
 <script lang="ts" setup>
-import { defineComponent } from 'vue'
+import { Ref, ref } from 'vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
 
-defineProps<{
+const props = defineProps<{
   type: string
   addAssertion: any
   options: any
 }>()
-</script>
 
-<script lang="ts">
-export default defineComponent({
-  data () {
-    return {
-      isOpen: false,
-      hasOptions: this.options && !!this.options.length,
-      popperElement: null,
-    } as {
-      isOpen: boolean
-      hasOptions: boolean
-      popperElement: HTMLElement | null
-    }
-  },
+const isOpen = ref(false)
+const hasOptions = props.options && !!props.options.length
+const popperElement: Ref<HTMLElement | null> = ref(null)
 
-  methods: {
-    _open (e) {
-      this.isOpen = true
-      e.stopPropagation()
-    },
+const _open = (e) => {
+  isOpen.value = true
+  e.stopPropagation()
+}
 
-    _close (e) {
-      if (this.popperElement && this.popperElement.contains(e.relatedTarget)) {
-        return
-      }
+const _close = (e) => {
+  if (popperElement.value && popperElement.value.contains(e.relatedTarget)) {
+    return
+  }
 
-      this.isOpen = false
-      e.stopPropagation()
-    },
+  isOpen.value = false
+  e.stopPropagation()
+}
 
-    _click (e) {
-      if (!this.hasOptions) {
-        this.addAssertion(this.type)
-      }
+const _click = (e) => {
+  if (!hasOptions) {
+    props.addAssertion(props.type)
+  }
 
-      e.stopPropagation()
-    },
+  e.stopPropagation()
+}
 
-    _setPopperElement (el) {
-      this.popperElement = el
-    },
-  },
-})
+const _setPopperElement = (el) => {
+  popperElement.value = el
+}
 </script>
 
 <style lang="scss">

@@ -28,9 +28,9 @@
 
 <script lang="ts" setup>
 import { computePosition } from '@floating-ui/dom'
-import { defineComponent } from 'vue'
+import { onMounted, ref, nextTick, Ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   type: string
   addAssertion: any
   options: any
@@ -44,36 +44,32 @@ const _truncate = (str) => {
 
   return str
 }
-</script>
 
-<script lang="ts">
-export default defineComponent({
-  mounted () {
-    this.$nextTick(() => {
-      const popper = this.$refs.popper as HTMLElement
-      const reference = popper.parentElement as HTMLElement
+const popper: Ref<HTMLElement | null> = ref(null)
 
-      computePosition(reference, popper, {
-        placement: 'right-start',
-        middleware: [],
-      }).then(({ x, y }) => {
-        Object.assign(popper.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        })
+onMounted(() => {
+  nextTick(() => {
+    const popperEl = popper.value as HTMLElement
+    const reference = popperEl.parentElement as HTMLElement
+
+    computePosition(reference, popperEl, {
+      placement: 'right-start',
+      middleware: [],
+    }).then(({ x, y }) => {
+      Object.assign(popperEl.style, {
+        left: `${x}px`,
+        top: `${y}px`,
       })
-
-      this.setPopperElement(popper)
     })
-  },
 
-  methods: {
-    _click (e, name, value) {
-      this.addAssertion(this.type, name, value)
-      e.stopPropagation()
-    },
-  },
+    props.setPopperElement(popperEl)
+  })
 })
+
+const _click = (e, name, value) => {
+  props.addAssertion(props.type, name, value)
+  e.stopPropagation()
+}
 </script>
 
 <style lang="scss">
