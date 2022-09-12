@@ -222,6 +222,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       // override typescript to always generate proper source maps
       overrideSourceMaps(true, options.typescript)
+
+      // To support dynamic imports, we have to disable any code splitting.
+      debug('Limiting number of chunks to 1')
+      opts.plugins = (opts.plugins || []).concat(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }))
     })
     .value() as any
 
