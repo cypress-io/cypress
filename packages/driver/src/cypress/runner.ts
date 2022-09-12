@@ -486,7 +486,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -505,7 +505,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsBy
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests: Record<string, any> = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -542,7 +542,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onLogsBy
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -564,21 +564,11 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
 
       if (i.prevAttempts) {
         prevAttempts = _.map(i.prevAttempts, (test) => {
-          if (test) {
-            _.each(RUNNABLE_LOGS, (type) => {
-              return _.each(test[type], onLogsById)
-            })
-          }
-
           // reduce this runnable down to its props
           // and collections
           return wrapAll(test)
         })
       }
-
-      _.each(RUNNABLE_LOGS, (type) => {
-        return _.each(i[type], onLogsById)
-      })
 
       _.extend(runnable, i)
     }
@@ -647,7 +637,7 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -736,7 +726,7 @@ const normalize = (runnable, tests, initialTests, onLogsById, getRunnableId, get
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -1130,7 +1120,7 @@ export default {
     let _testsById: Record<string, any> = {}
     const _testsQueue: any[] = []
     const _testsQueueById: Record<string, any> = {}
-    const _logsById: Record<string, any> = {}
+    // only used during normalization
     let _emissions: Emissions = {
       started: {},
       ended: {},
@@ -1157,12 +1147,6 @@ export default {
 
     const getTests = () => {
       return _tests
-    }
-
-    const onLogsById = (l) => {
-      if (_skipCollectingLogs) return
-
-      return _logsById[l.id] = l
     }
 
     const getTest = () => {
@@ -1320,7 +1304,6 @@ export default {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-
       normalizeAll (tests, skipCollectingLogs) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
@@ -1343,7 +1326,6 @@ export default {
           tests,
           setTestsById,
           setTests,
-          onLogsById,
           getRunnableId,
           getHookId,
           getOnlyTestId,
@@ -1682,19 +1664,33 @@ export default {
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
 
-      getConsolePropsForLogById (logId) {
-        const attrs = _logsById[logId]
+      getConsolePropsForLog (testId, logId) {
+        if (_skipCollectingLogs) return
 
-        if (attrs) {
-          return LogUtils.getConsoleProps(attrs)
+        const test = getTestById(testId)
+
+        if (!test) return
+
+        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+
+        if (logAttrs) {
+          return LogUtils.getConsoleProps(logAttrs)
         }
+
+        return
       },
 
-      getSnapshotPropsForLogById (logId) {
-        const attrs = _logsById[logId]
+      getSnapshotPropsForLog (testId, logId) {
+        if (_skipCollectingLogs) return
 
-        if (attrs) {
-          return LogUtils.getSnapshotProps(attrs)
+        const test = getTestById(testId)
+
+        if (!test) return
+
+        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+
+        if (logAttrs) {
+          return LogUtils.getSnapshotProps(logAttrs)
         }
 
         return
@@ -1762,14 +1758,20 @@ export default {
           return
         }
 
-        // if this test isnt in the current queue
+        // if this test isn't in the current queue
         // then go ahead and add it
         if (!_testsQueueById[test.id]) {
           _testsQueueById[test.id] = true
           _testsQueue.push(test)
         }
 
-        const existing = _logsById[attrs.id]
+        const { instrument } = attrs
+
+        // pluralize the instrument as a property on the runnable
+        const name = `${instrument}s`
+        const logs = test[name] != null ? test[name] : (test[name] = [])
+
+        const existing = _.find(logs, (log) => log.id === attrs.id)
 
         if (existing) {
           // because log:state:changed may
@@ -1785,20 +1787,7 @@ export default {
           return _.extend(existing, attrs)
         }
 
-        _logsById[attrs.id] = attrs
-
-        const { testId, instrument } = attrs
-
-        test = getTestById(testId)
-
-        if (test) {
-          // pluralize the instrument as a property on the runnable
-          const name = `${instrument}s`
-          const logs = test[name] != null ? test[name] : (test[name] = [])
-
-          // else push it onto the logs
-          return logs.push(attrs)
-        }
+        return logs.push(attrs)
       },
     }
   },

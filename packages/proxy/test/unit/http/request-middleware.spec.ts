@@ -12,6 +12,7 @@ describe('http/request-middleware', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
       'ExtractIsAUTFrameHeader',
+      'MaybeSimulateSecHeaders',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'CorrelateBrowserPreRequest',
@@ -56,6 +57,81 @@ describe('http/request-middleware', () => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.false
       })
+    })
+  })
+
+  describe('MaybeSimulateSecHeaders', () => {
+    const { MaybeSimulateSecHeaders } = RequestMiddleware
+
+    it('is a noop if experimental modify third party code is off', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+        req: {
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('iframe')
+    })
+
+    it('is a noop if the request is not the AUT Frame', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: false,
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('iframe')
+    })
+
+    it('is a noop if the request is the AUT Frame, but the sec-fetch-dest isn\t an iframe', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: true,
+          headers: {
+            'sec-fetch-dest': 'video',
+          },
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('video')
+    })
+
+    it('rewrites the sec-fetch-dest header if the experimental modify third party code is enabled, the request came from the AUT frame, and is an iframe', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: true,
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('document')
     })
   })
 
