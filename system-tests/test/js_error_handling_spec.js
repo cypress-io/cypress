@@ -46,7 +46,6 @@ describe('e2e js error handling', () => {
   })
 
   systemTests.it('fails', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     spec: 'js_error_handling_failing.cy.js',
     snapshot: true,
     expectedExitCode: 5,
