@@ -20,9 +20,9 @@ class Sessions extends React.Component<SessionsProps> {
   }
 
   printToConsole = (name) => {
-    const logId = this.props.model[name].id
+    const { id, testId } = this.props.model[name]
 
-    this.props.events.emit('show:command', logId)
+    this.props.events.emit('show:command', testId, id)
   }
 
   render () {
