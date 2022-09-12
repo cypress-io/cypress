@@ -81,6 +81,10 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 // 'at' will be present in chrome stack trace lines
 // Firefox includes trailing whitespace between that must be specifically replaced
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
+  if (browserName === 'webkit') {
+    return str.replace(/(?:\s*((?:\bat\b\s.*\s\(.*\)|[\w\d]*@\[native code\])\n?)+)+/g, `\n      [stack trace lines]\n`)
+  }
+
   return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
     let post = parts[4]
 
