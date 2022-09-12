@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Record Runs',
       medium: 'Specs Record Runs Banner',
-      cohort: optionSelected.cohort
+      cohort: optionSelected?.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -33,7 +33,8 @@ import { gql, useQuery } from '@urql/vue'
 import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
-import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
+import TrackedBanner from './TrackedBanner.vue'
+import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { RecordBannerDocument } from '../../generated/graphql'
 import { computed } from 'vue'
@@ -86,7 +87,12 @@ const firstRecordKey = computed(() => {
   return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
 
-const optionSelected = getOptionForCohort(bannerId, props.commandOptions)
+const cohortConfig: CohortConfig = {
+  name: bannerId,
+  options: props.commandOptions,
+}
+
+const optionSelected = useCohorts(cohortConfig)
 
 const command = computed(() => {
   return optionSelected.value?.value ? optionSelected.value.value : ''

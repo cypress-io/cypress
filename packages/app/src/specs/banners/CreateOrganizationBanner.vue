@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Set up your organization',
       medium: 'Specs Create Organization Banner',
-      cohort: optionSelected.cohort
+      cohort: optionSelected?.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -35,7 +35,8 @@
 <script setup lang="ts">
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
-import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
+import TrackedBanner from './TrackedBanner.vue'
+import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
@@ -93,7 +94,12 @@ const createOrganizationUrl = computed(() => {
   })
 })
 
-const optionSelected = getOptionForCohort(bannerId, props.headerCopyOptions)
+const cohortConfig: CohortConfig = {
+  name: bannerId,
+  options: props.headerCopyOptions,
+}
+
+const optionSelected = useCohorts(cohortConfig)
 
 const headerCopy = computed(() => {
   return optionSelected.value?.value ? t(optionSelected.value.value) : ''

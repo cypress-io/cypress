@@ -8,38 +8,9 @@
   </Alert>
 </template>
 
-<script lang="ts">
-import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
-
-export type CohortOption = {
-  cohort: string
-  value: string
-}
-
-export const getOptionForCohort = (name: string, options: CohortOption[]) => {
-  const cohortConfig: CohortConfig = {
-    name,
-    cohorts: options.map((option) => option.cohort),
-  }
-
-  const cohortSelected = useCohorts(cohortConfig)
-
-  const emptyOption = { cohort: '', value: '' }
-
-  return computed(() => {
-    if (cohortSelected.value) {
-      return options.find((option) => option.cohort === cohortSelected.value) || emptyOption
-    }
-
-    return emptyOption
-  })
-}
-
-</script>
-
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { ref, watchEffect, computed, watch } from 'vue'
+import { ref, watchEffect, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'

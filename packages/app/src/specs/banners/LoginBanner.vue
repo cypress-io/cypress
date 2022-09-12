@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Log In',
       medium: 'Specs Login Banner',
-      cohort: optionSelected.cohort
+      cohort: optionSelected?.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -33,7 +33,7 @@
       v-model="isLoginOpen"
       :gql="loginModalQuery.data.value"
       utm-medium="Specs Login Banner"
-      :utm-content="optionSelected.cohort"
+      :utm-content="optionSelected?.cohort"
     />
   </TrackedBanner>
 </template>
@@ -45,7 +45,8 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
-import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
+import TrackedBanner from './TrackedBanner.vue'
+import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
@@ -84,7 +85,12 @@ async function handleButtonClick () {
   isLoginOpen.value = true
 }
 
-const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
+const cohortConfig: CohortConfig = {
+  name: bannerId,
+  options: props.bodyCopyOptions,
+}
+
+const optionSelected = useCohorts(cohortConfig)
 
 const bodyCopy = computed(() => {
   return optionSelected.value?.value ? t(optionSelected.value.value) : ''

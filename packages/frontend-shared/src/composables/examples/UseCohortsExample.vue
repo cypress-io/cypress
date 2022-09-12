@@ -1,6 +1,6 @@
 <template>
   <div data-cy="result">
-    {{ cohortChoice.value }}
+    {{ cohortChoice }}
   </div>
 </template>
 
@@ -14,7 +14,6 @@ export type CopyOption = {
 <script setup lang="ts">
 import type { WeightedAlgorithm } from '../../utils/weightedChoice'
 import { CohortConfig, useCohorts } from '../useCohorts'
-import { computed } from 'vue'
 
 const props = defineProps<{
   algorithm?: WeightedAlgorithm
@@ -23,20 +22,10 @@ const props = defineProps<{
 
 const cohortConfig: CohortConfig = {
   name: 'login',
-  cohorts: props.copyOptions.map((option) => option.cohort),
+  options: props.copyOptions,
   algorithm: props.algorithm,
 }
 
-const cohortSelected = useCohorts(cohortConfig)
-
-const emptyOption = { value: '', cohort: '' }
-
-const cohortChoice = computed(() => {
-  if (cohortSelected.value) {
-    return props.copyOptions.find((option) => option.cohort === cohortSelected.value) || emptyOption
-  }
-
-  return emptyOption
-})
+const cohortChoice = useCohorts(cohortConfig)
 
 </script>

@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Create project',
       medium: 'Specs Create Project Banner',
-      cohort: optionSelected.cohort
+      cohort: optionSelected?.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -43,7 +43,8 @@ import { gql, useQuery } from '@urql/vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
-import TrackedBanner, { CohortOption, getOptionForCohort } from './TrackedBanner.vue'
+import TrackedBanner from './TrackedBanner.vue'
+import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { ref, computed } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
@@ -91,7 +92,12 @@ function handleModalClose () {
   emit('update:modelValue', false)
 }
 
-const optionSelected = getOptionForCohort(bannerId, props.bodyCopyOptions)
+const cohortConfig: CohortConfig = {
+  name: bannerId,
+  options: props.bodyCopyOptions,
+}
+
+const optionSelected = useCohorts(cohortConfig)
 
 const bodyCopy = computed(() => {
   return optionSelected.value?.value ? t(optionSelected.value.value) : ''
