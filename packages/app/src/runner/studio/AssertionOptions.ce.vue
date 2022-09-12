@@ -71,3 +71,29 @@ export default defineComponent({
   },
 })
 </script>
+
+<style lang="scss">
+@import './assertions-style.scss';
+
+.assertion-options {
+  @include menu-style;
+
+  font-size: 14px;
+  max-width: 150px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+
+  .assertion-option {
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+
+    &:hover {
+      background-color: #e9ecef;
+    }
+
+    .assertion-option-value {
+      font-weight: 600;
+    }
+  }
+}
+</style>

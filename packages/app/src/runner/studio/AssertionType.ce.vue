@@ -79,3 +79,43 @@ export default defineComponent({
   },
 })
 </script>
+
+<style lang="scss">
+@import './assertions-style.scss';
+
+.assertion-type {
+  color: #202020;
+  cursor: default;
+  font-size: 14px;
+  padding: 0.4rem 0.4rem 0.4rem 0.7rem;
+  position: relative;
+
+  &:first-of-type {
+    padding-top: 0.5rem;
+  }
+
+  &:last-of-type {
+    border-bottom-left-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
+    padding-bottom: 0.5rem;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+
+  &.single-assertion {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .assertion-type-text {
+    align-items: center;
+    display: flex;
+
+    .dropdown-arrow {
+      margin-left: auto;
+    }
+  }
+}
+</style>
