@@ -7,8 +7,8 @@
     <div
       data-cy="collapsible-header"
       :aria-expanded="isOpen"
-      class="rounded-t focus:outline-indigo-500 hocus-default"
-      :class="{'border rounded-b': !isOpen, 'default-ring': isOpen }"
+      class="rounded-t focus:outline-indigo-500"
+      :class="{'rounded-b': !isOpen}"
       @click="!disable && toggle()"
       @keypress.space.enter.self="!disable && toggle()"
     >
@@ -25,6 +25,8 @@
       :aria-hidden="!isOpen"
       :class="{
         'overflow-auto': isOpen && overflow,
+        'border rounded rounded-t-none bg-light-50 border-gray-100 mb-4 w-full block': isOpen && fileRow,
+        'overflow-hidden': !isOpen && fileRow
       }"
     >
       <slot
@@ -45,12 +47,14 @@ const props = withDefaults(defineProps<{
   lazy?: boolean
   disable?: boolean
   overflow?: boolean
+  fileRow?: boolean
 }>(), {
   initiallyOpen: false,
   maxHeight: '500px',
   lazy: false,
   disable: false,
   overflow: true,
+  fileRow: false,
 })
 
 const [isOpen, toggle] = useToggle(props.initiallyOpen)

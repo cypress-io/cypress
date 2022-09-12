@@ -1,81 +1,15 @@
 <template>
-  <Disclosure
-    v-slot="{open}"
-    as="div"
-    :default-open="statusInfo.initiallyOpen"
-    :data-cy="status"
-  >
-    <DisclosureButton
-      as="template"
-      class="rounded bg-light-50 mb-4 w-full block rounded-t focus:outline-indigo-500"
-      :class="{'border rounded-b border-gray-100 hocus-default': !open, 'default-ring mb-0.1em': open}"
-      data-cy="collapsible-header"
-    >
-      <ListRowHeader
-        :class="{ 'rounded-b-none': open }"
-        class="cursor-pointer font-medium"
-        :description="description"
-        :icon="statusInfo.icon"
-      >
-        <template #header>
-          <span class="inline-block align-top">{{ filePath }}</span>
-          <Badge
-            v-if="!open && statusInfo.badgeType"
-            :label="statusInfo.badgeLabel"
-            :status="statusInfo.badgeType"
-          />
-        </template>
-        <template #right>
-          <i-cy-chevron-down
-            :class="{ 'rotate-180': open }"
-            class="max-w-16px transform icon-dark-gray-400"
-          />
-        </template>
-      </ListRowHeader>
-    </DisclosureButton>
-    <DisclosurePanel
-      class="border rounded-b mb-4 w-full bg-light-50 border-gray-100 block"
-      :class="{'overflow-auto max-h-500px': open}"
-    >
-      <div
-        v-if="status === 'changes'"
-        class="border-b flex bg-warning-100 border-b-gray-100 p-3 top-0 text-warning-600 z-1 sticky items-center"
-      >
-        <p class="flex-grow text-left ml-1">
-          <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
-          <i18n-t
-            scope="global"
-            keypath="setupPage.configFile.changesRequiredDescription"
-          >
-            <span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">{{ filePath }}</span>
-          </i18n-t>
-        </p>
-        <Button
-          class="whitespace-nowrap"
-          href="https://on.cypress.io/guides/configuration"
-        >
-          {{ t('links.learnMoreButton') }}
-        </Button>
-      </div>
-      <ShikiHighlight
-        :lang="language"
-        :code="content"
-        line-numbers
-        copy-on-click
-      />
-    </DisclosurePanel>
-  </Disclosure>
-  <!-- <Collapsible
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
-  overflow-hidden hocus-default"
+  <Collapsible
+    class="rounded bg-light-50 border-gray-100 mb-4 w-full block"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
     :data-cy="status"
+    :file-row="true"
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'border-b border-b-gray-100 rounded-b-none': open }"
-        class="cursor-pointer font-medium"
+        :class="{ 'rounded-b-none mb-0.1em default-ring': open, 'overflow-hidden': !open }"
+        class="border hocus-default cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
       >
@@ -121,7 +55,7 @@
       line-numbers
       copy-on-click
     />
-  </Collapsible> -->
+  </Collapsible>
 </template>
 
 <script lang="ts">
@@ -147,13 +81,11 @@ import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
-// import Collapsible from '@cy/components/Collapsible.vue'
+import Collapsible from '@cy/components/Collapsible.vue'
 import AddedIcon from '~icons/cy/file-changes-added_x24.svg'
 import SkippedIcon from '~icons/cy/file-changes-skipped_x24.svg'
 import ErrorIcon from '~icons/cy/file-changes-error_x24.svg'
 import WarningIcon from '~icons/cy/file-changes-warning_x24.svg'
-
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
 const { t } = useI18n()
 
