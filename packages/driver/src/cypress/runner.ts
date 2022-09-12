@@ -1732,15 +1732,20 @@ export default {
       getResumedAtTestIndex () {
         return _resumedAtTestIndex
       },
+      cleanupQueue (testExecutionOrder, numTestsKeptInMemory) {
+        if (testExecutionOrder > numTestsKeptInMemory) {
+          const test = _tests[_tests.length - testExecutionOrder]
 
-      cleanupQueue (_numTestsKeptInMemory) {
-        // this wasn't helpful since we store all tests in memory twice....
-        // must offload test state to the server to correctly leverage /
-        // store the defined number of tests in memory.
-        // TODO: EMILY - finishing making this work
-        //    off-load the deferred log events - get out of sync & are 'pending' when reloaded mid-spec
-        //    off-load the log lookup to pull from memory -- if no log, make backend request for log details
-        return null
+          _.each(RUNNABLE_LOGS, (logs) => {
+            return _.each(test[logs], (attrs) => {
+              // we know our attrs have been cleaned
+              // now, so lets store that
+              attrs._hasBeenCleanedUp = true
+
+              return LogUtils.reduceMemory(attrs)
+            })
+          })
+        }
       },
 
       addLog (attrs, isInteractive) {

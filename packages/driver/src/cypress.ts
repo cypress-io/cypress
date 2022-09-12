@@ -548,7 +548,7 @@ class $Cypress {
         return this.emitThen('runnable:after:run:async', ...args)
 
       case 'runner:test:after:run':
-        this.runner.cleanupQueue(this.config('numTestsKeptInMemory'))
+        this.runner.cleanupQueue(args[0].order, this.config('numTestsKeptInMemory'))
 
         // this event is how the reporter knows how to display
         // stats and runnable properties such as errors
