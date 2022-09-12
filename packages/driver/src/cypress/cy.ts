@@ -593,6 +593,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           this.contentWindowListeners(autWindow)
         } else {
           this.state('window', autWindow)
+          this.state('document', undefined)
           // we may need to update the url now
           this.urlNavigationEvent('load')
         }
