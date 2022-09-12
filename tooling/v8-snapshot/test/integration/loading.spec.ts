@@ -17,7 +17,7 @@ const scaffoldProject = async (project: string): Promise<string> => {
   await FixturesScaffold.symlinkNodeModule('@packages/v8-snapshot-require')
   const projectBaseDir = await Fixtures.scaffoldProject(project)
 
-  await FixturesScaffold.scaffoldProjectNodeModules({ project, updateLockFile: false })
+  await FixturesScaffold.scaffoldProjectNodeModules({ project, updateLockFile: false, forceCopyDependencies: true })
 
   return projectBaseDir
 }
