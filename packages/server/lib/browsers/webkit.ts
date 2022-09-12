@@ -51,7 +51,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   // resolve pw from user's project path
   const pwModulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
-  const pw = await import(pwModulePath) as typeof playwright
+
+  let pw: typeof playwright
+
+  try {
+    pw = await import(pwModulePath)
+  } catch (err) {
+    err.message = `There was an error importing \`playwright-webkit\`, is it installed?\n\nError text: ${err.stack}`
+    throw err
+  }
 
   const defaultLaunchOptions = {
     preferences: {
@@ -70,7 +78,14 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   launchOptions.preferences.args = [...launchOptions.args, ...(launchOptions.preferences.args || [])]
 
-  const pwServer = await pw.webkit.launchServer(launchOptions.preferences)
+  let pwServer: playwright.BrowserServer
+
+  try {
+    pwServer = await pw.webkit.launchServer(launchOptions.preferences)
+  } catch (err) {
+    err.message = `There was an error launching \`playwright-webkit\`: \n\n\`\`\`${err.message}\n\`\`\``
+    throw err
+  }
 
   removeBadExitListener()
 
