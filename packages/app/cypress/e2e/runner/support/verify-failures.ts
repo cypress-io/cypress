@@ -3,7 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
-const verifyIdeOpen = ({ fileName, action, hasPreferredIde, ideLine, ideColumn }) => {
+const verifyIdeOpen = ({ fileName, action, hasPreferredIde, line, column }) => {
   if (hasPreferredIde) {
     cy.withCtx((ctx, o) => {
       // @ts-expect-error - check if we've stubbed it already, only need to stub it once
@@ -15,8 +15,8 @@ const verifyIdeOpen = ({ fileName, action, hasPreferredIde, ideLine, ideColumn }
     action()
 
     cy.withCtx((ctx, o) => {
-      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`${o.fileName}$`)), o.ideLine, o.ideColumn)
-    }, { fileName, ideLine, ideColumn })
+      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`${o.fileName}$`)), o.line, o.column)
+    }, { fileName, line, column })
   } else {
     action()
 
@@ -40,16 +40,22 @@ const verifyFailure = (options) => {
     fileName,
     uncaught = false,
     uncaughtMessage,
-    ideLine,
-    ideColumn,
+    line,
+    regex,
   } = options
-  let { regex, line, codeFrameText } = options
+  let { codeFrameText, stackRegex, codeFrameRegex } = options
 
   if (!codeFrameText) {
     codeFrameText = specTitle
   }
 
-  regex = regex || new RegExp(`${fileName}:${line || '\\d+'}:${column}`)
+  const codeFrameColumnArray = [].concat(column)
+  const codeFrameColumn = codeFrameColumnArray[0]
+  const stackColumnArray = codeFrameColumnArray.map((col) => col - 1)
+  const stackColumn = stackColumnArray[0]
+
+  stackRegex = regex || stackRegex || new RegExp(`${fileName}:${line || '\\d+'}:(${stackColumnArray.join('|')})`)
+  codeFrameRegex = regex || codeFrameRegex || new RegExp(`${fileName}:${line || '\\d+'}:(${codeFrameColumnArray.join('|')})`)
 
   cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
@@ -89,7 +95,7 @@ const verifyFailure = (options) => {
     cy.log('stack trace matches the specified pattern')
     cy.get('.runnable-err-stack-trace')
     .invoke('text')
-    .should('match', regex)
+    .should('match', stackRegex)
 
     if (stack) {
       const stackLines = [].concat(stack)
@@ -126,8 +132,8 @@ const verifyFailure = (options) => {
         cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
         .click('left')
       },
-      ideLine,
-      ideColumn,
+      line,
+      column: stackColumn,
     })
   }
 
@@ -160,7 +166,7 @@ const verifyFailure = (options) => {
     cy
     .get('.test-err-code-frame .runnable-err-file-path')
     .invoke('text')
-    .should('match', regex)
+    .should('match', codeFrameRegex)
 
     cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
   })
@@ -173,8 +179,8 @@ const verifyFailure = (options) => {
         cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', fileName)
         .click()
       },
-      ideLine,
-      ideColumn,
+      line,
+      column: codeFrameColumn,
     })
   }
 }
