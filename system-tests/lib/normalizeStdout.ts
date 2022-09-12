@@ -106,11 +106,11 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   const condensedStyleLine = `.*@${location}`
   // matches against remainder of stack trace until blank lines found.
   // includes group to normalize whitespace between newlines in Firefox
-  const remainderOfStack = `[\\n\\S\\s]*?(\n\s*?\n|$)`
+  const remainderOfStack = `[\\n\\S\\s]*?(\\n\\s*?\\n|$)`
 
-  const stackLineRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
+  const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
-  return str.replace(stackLineRegex, (match: string, ...parts: string[]) => {
+  return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
     let post = parts[0]
 
     if (browserName === 'firefox') {
