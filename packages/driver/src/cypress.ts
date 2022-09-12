@@ -9,6 +9,7 @@ import debugFn from 'debug'
 
 import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
+import $sourceMapUtils from './cypress/source_map_utils'
 
 import $Commands from './cypress/commands'
 import { $Cy } from './cypress/cy'
@@ -403,7 +404,7 @@ class $Cypress {
         break
 
       case 'runner:end':
-        $scriptUtils.destroySourceMaps()
+        $sourceMapUtils.destroySourceMapConsumers()
 
         // mocha runner has finished running the tests
         this.emit('run:end')
