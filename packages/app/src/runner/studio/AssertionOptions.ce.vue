@@ -34,6 +34,7 @@ defineProps<{
   type: string
   addAssertion: any
   options: any
+  setPopperElement: any
 }>()
 
 const _truncate = (str) => {
@@ -50,7 +51,7 @@ export default defineComponent({
   mounted () {
     this.$nextTick(() => {
       const popper = this.$refs.popper as HTMLElement
-      const reference = popper.previousElementSibling as HTMLElement
+      const reference = popper.parentElement as HTMLElement
 
       computePosition(reference, popper, {
         placement: 'right-start',
@@ -61,6 +62,8 @@ export default defineComponent({
           top: `${y}px`,
         })
       })
+
+      this.setPopperElement(popper)
     })
   },
 

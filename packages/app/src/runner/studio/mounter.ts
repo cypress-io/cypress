@@ -1,12 +1,14 @@
 import { App, createApp, StyleValue } from 'vue'
 import AssertionsMenu from './AssertionsMenu.ce.vue'
+import AssertionType from './AssertionType.ce.vue'
+import AssertionOptions from './AssertionOptions.ce.vue'
 import { getOrCreateHelperDom, getSelectorHighlightStyles } from '../dom'
 
 function getStudioAssertionsMenuDom (body) {
   return getOrCreateHelperDom({
     body,
     className: '__cypress-studio-assertions-menu',
-    css: window.UnifiedRunner.studioAssertionsMenu.css,
+    css: `${AssertionsMenu.styles}\n${AssertionType.styles}\n${AssertionOptions.styles}`,
   })
 }
 
@@ -18,41 +20,6 @@ export function openStudioAssertionsMenu ({ $el, $body, props }) {
   const selectorHighlightStyles = getSelectorHighlightStyles([$el.get(0)])[0]
 
   mountAssertionsMenu(vueContainer, $el, props.possibleAssertions, props.addAssertion, props.closeMenu, selectorHighlightStyles, window.UnifiedRunner.studioAssertionsMenu.renderAssertionTypes)
-}
-
-// TODO: remove this function.
-// For some reason, the root div of our AssertionsMenu app usually gets
-// all the events and does not distribute the events to the children.
-// So, we're manually distributing the events.
-// But it causes duplicated events are sent to the same object, so we're filtering them.
-// I failed to prove it's our problem or Vue's problem.
-function vueContainerListeners (vueContainer) {
-  vueContainer.addEventListener('click', (e) => {
-    const paths = e.composedPath()
-
-    for (let i = 0; i < paths.length; i++) {
-      const el = paths[i] as HTMLElement
-
-      if (el.className?.includes('single-assertion') ||
-        el.className?.includes('assertion-option')) {
-        el.dispatchEvent(new MouseEvent('click', e))
-        break
-      }
-    }
-  })
-
-  vueContainer.addEventListener('mouseover', (e) => {
-    const paths = e.composedPath()
-
-    for (let i = 0; i < paths.length; i++) {
-      const el = paths[i] as HTMLElement
-
-      if (el.className?.includes('assertion-type')) {
-        el.dispatchEvent(new MouseEvent('mouseover', e))
-        break
-      }
-    }
-  })
 }
 
 export function closeStudioAssertionsMenu ($body) {
@@ -90,4 +57,68 @@ const unmountAssertionsMenu = () => {
     app.unmount()
     app = null
   }
+}
+
+// TODO: remove these.
+// For some reason, the root div of our AssertionsMenu app usually gets
+// all the events and does not distribute the events to the children.
+// So, we're manually distributing the events.
+// But it causes duplicated events are sent to the same object, so we're filtering them.
+// I failed to prove it's our problem or Vue's problem.
+let lastTarget = null
+let lastTimeStamp = -1
+
+function vueContainerListeners (vueContainer) {
+  vueContainer.addEventListener('click', (e) => {
+    const paths = e.composedPath()
+
+    for (let i = 0; i < paths.length; i++) {
+      const el = paths[i] as HTMLElement
+
+      if (classIncludes(el, 'single-assertion') ||
+        classIncludes(el, 'assertion-option') ||
+        (el.tagName === 'A' && classIncludes(el, 'close'))) {
+        el.dispatchEvent(new MouseEvent('click', e))
+        break
+      }
+    }
+  })
+
+  vueContainer.addEventListener('mouseover', (e) => {
+    const paths = e.composedPath()
+
+    for (let i = 0; i < paths.length; i++) {
+      const el = paths[i] as HTMLElement
+
+      if (classIncludes(el, 'assertion-type')) {
+        el.dispatchEvent(new MouseEvent('mouseover', e))
+        break
+      }
+    }
+  })
+
+  vueContainer.addEventListener('mouseout', (e) => {
+    // Sometimes, there is maximum call stack size exceeded error.
+    if (lastTarget === e.target && lastTimeStamp - e.timeStamp < 100) {
+      return
+    }
+
+    lastTarget = e.target
+    lastTimeStamp = e.timeStamp
+
+    const paths = e.composedPath()
+
+    for (let i = 0; i < paths.length; i++) {
+      const el = paths[i] as HTMLElement
+
+      if (classIncludes(el, 'assertion-type')) {
+        el.dispatchEvent(new MouseEvent('mouseout', e))
+        break
+      }
+    }
+  })
+}
+
+function classIncludes (el, className) {
+  return typeof el.className === 'string' && el.className.includes(className)
 }

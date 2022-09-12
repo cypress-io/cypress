@@ -32,6 +32,7 @@
       :type="type"
       :add-assertion="addAssertion"
       :options="options"
+      :set-popper-element="_setPopperElement"
     />
   </div>
 </template>
@@ -53,6 +54,11 @@ export default defineComponent({
     return {
       isOpen: false,
       hasOptions: this.options && !!this.options.length,
+      popperElement: null,
+    } as {
+      isOpen: boolean
+      hasOptions: boolean
+      popperElement: HTMLElement | null
     }
   },
 
@@ -63,9 +69,7 @@ export default defineComponent({
     },
 
     _close (e) {
-      const popperEl = this.$refs.popper as HTMLElement
-
-      if (popperEl && popperEl.contains(e.relatedTarget)) {
+      if (this.popperElement && this.popperElement.contains(e.relatedTarget)) {
         return
       }
 
@@ -80,6 +84,10 @@ export default defineComponent({
 
       e.stopPropagation()
     },
+
+    _setPopperElement (el) {
+      this.popperElement = el
+    },
   },
 })
 </script>
@@ -92,7 +100,7 @@ export default defineComponent({
   cursor: default;
   font-size: 14px;
   padding: 0.4rem 0.4rem 0.4rem 0.7rem;
-  position: relative;
+  position: static;
 
   &:first-of-type {
     padding-top: 0.5rem;
