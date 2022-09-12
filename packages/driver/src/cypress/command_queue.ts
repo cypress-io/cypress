@@ -95,8 +95,9 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
 
         cy.ensureSubjectByType(subject, command.get('prevSubject'))
 
-        return ret(subject)
-      },
+    return cy.verifyUpcomingAssertions(subject, options, {
+      onRetry,
+      onFail: command.get('onFail'),
     })
   }
 

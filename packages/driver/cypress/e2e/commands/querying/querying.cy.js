@@ -960,7 +960,7 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('GET is scoped to the current subject', () => {
+    it('is scoped to the current subject', () => {
       const span = cy.$$('#click-me a span')
 
       cy.get('#click-me a').contains('click').then(($span) => {
@@ -1562,7 +1562,7 @@ space
       })
 
       it('sets type to child when used as a child command', () => {
-        cy.get('body').contains('foo').then(function () {
+        cy.get('#specific-contains').contains('foo').then(function () {
           expect(this.lastLog.get('type')).to.eq('child')
         })
       })
@@ -1744,7 +1744,7 @@ space
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
-          expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
+          expect(err.message).to.eq('`cy.contains()` only ever returns one element, so you cannot assert on a `length` greater than one.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           done()

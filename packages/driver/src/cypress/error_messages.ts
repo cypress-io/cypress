@@ -298,7 +298,7 @@ export default {
       docsUrl: 'https://on.cypress.io/contains',
     },
     length_option: {
-      message: `${cmd('contains')} cannot be passed a \`length\` option because it will only ever return 1 element.`,
+      message: `${cmd('contains')} only ever returns one element, so you cannot assert on a \`length\` greater than one.`,
       docsUrl: 'https://on.cypress.io/contains',
     },
     regex_conflict: {

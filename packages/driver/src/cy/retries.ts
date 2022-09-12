@@ -76,7 +76,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
 
       ({ error, onFail } = options)
 
-      const prependMsg = errByPath('miscellaneous.retry_timed_out', {
+      const prependMsg = error.retry === false ? '' : errByPath('miscellaneous.retry_timed_out', {
         ms: options._runnableTimeout,
       }).message
 
