@@ -504,10 +504,8 @@ const normalizeAll = (suite, previouslyRanTests = {}, setTests, onLogsById, getR
   const tests: Record<string, any> = {}
   const normalizedSuite = normalize(suite, tests, previouslyRanTests, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
-  let i = 0
-
-  const testsArr = _.map(tests, (test) => {
-    test.order = i += 1
+  const testsArr = _.map(tests, (test, index) => {
+    test.order = index + 1
 
     return test
   })
