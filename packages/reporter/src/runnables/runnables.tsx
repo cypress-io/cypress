@@ -178,23 +178,14 @@ class Runnables extends Component<RunnablesProps> {
 
     let maybeHandleScroll: UserScrollCallback | undefined = undefined
 
-    const containerEl = this.refs.container as HTMLElement
-
     if (window.__CYPRESS_MODE__ === 'open') {
       // in open mode, listen for scroll events so that users can pause the command log auto-scroll
       // by manually scrolling the command log
-      containerEl.setAttribute('data-cy-scroll-listen', 'true')
       maybeHandleScroll = action('user:scroll:detected', () => {
         if (appState && appState.isRunning) {
           appState.temporarilySetAutoScrolling(false)
         }
       })
-    } else {
-      // in run mode, still add the data attribute so the tests have an explicit test locator,
-      // but do not do any scroll handling. No user is scrolling in run mode and it can
-      // cause problems in video recordings by incorrectly turning off autoscrolling,
-      // see issue https://github.com/cypress-io/cypress/issues/16098
-      containerEl.setAttribute('data-cy-scroll-listen', 'false')
     }
 
     // we need to always call scroller.setContainer, but the callback can be undefined
