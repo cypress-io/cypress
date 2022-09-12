@@ -2,3 +2,4 @@ snapshot.js
 snapshot.js.map
 esbuild-meta.json
 snapshot-meta.json
+snapshot-entry.js
