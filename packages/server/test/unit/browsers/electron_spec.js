@@ -49,6 +49,9 @@ describe('lib/browsers/electron', () => {
           webRequest: {
             onBeforeSendHeaders () {},
           },
+          setUserAgent: sinon.stub(),
+          getUserAgent: sinon.stub(),
+          clearCache: sinon.stub(),
         },
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
         'debugger': {
@@ -473,104 +476,148 @@ describe('lib/browsers/electron', () => {
         })
       })
     })
+  })
 
-    describe('setUserAgent with experimentalModifyObstructiveThirdPartyCode', () => {
-      let userAgent
+  describe('setUserAgent with experimentalModifyObstructiveThirdPartyCode', () => {
+    let userAgent
+    let originalSendCommandSpy
 
+    beforeEach(function () {
+      userAgent = ''
+      this.win.webContents.session.getUserAgent.callsFake(() => userAgent)
+      // set a reference to the original sendCommand as it is decorated in electron.ts. This way, we can assert on the spy
+      originalSendCommandSpy = this.win.webContents.debugger.sendCommand
+    })
+
+    describe('disabled', function () {
+      it('does not attempt to replace the user agent', function () {
+        this.options.experimentalModifyObstructiveThirdPartyCode = false
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          expect(this.win.webContents.session.setUserAgent).not.to.be.called
+          expect(originalSendCommandSpy).not.to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent,
+          })
+        })
+      })
+    })
+
+    describe('enabled and attempts to replace obstructive user agent string containing:', function () {
       beforeEach(function () {
-        userAgent = ''
-        electron._getUserAgent.callsFake(() => userAgent)
+        this.options.experimentalModifyObstructiveThirdPartyCode = true
       })
 
-      describe('disabled', function () {
-        it('does not attempt to replace the user agent', function () {
-          this.options.experimentalModifyObstructiveThirdPartyCode = false
+      it('does not attempt to replace the user agent if the user passes in an explicit user agent', function () {
+        userAgent = 'barbaz'
+        this.options.experimentalModifyObstructiveThirdPartyCode = false
+        this.options.userAgent = 'foobar'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).not.to.be.called
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          expect(this.win.webContents.session.setUserAgent).to.be.calledWith('foobar')
+          expect(this.win.webContents.session.setUserAgent).not.to.be.calledWith('barbaz')
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: 'foobar',
           })
         })
       })
 
-      describe('enabled and attempts to replace obstructive user agent string containing:', function () {
-        beforeEach(function () {
-          this.options.experimentalModifyObstructiveThirdPartyCode = true
-        })
+      it('versioned cypress', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
 
-        it('does not attempt to replace the user agent if the user passes in an explicit user agent', function () {
-          userAgent = 'barbaz'
-          this.options.experimentalModifyObstructiveThirdPartyCode = false
-          this.options.userAgent = 'foobar'
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foobar')
-            expect(electron._setUserAgent).not.to.be.calledWith(this.win.webContents, 'barbaz')
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('versioned cypress', function () {
-          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+      it('development cypress', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('development cypress', function () {
-          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+      it('older Windows user agent', function () {
+        userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) electron/1.0.0 Chrome/53.0.2785.113 Electron/1.4.3 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('older Windows user agent', function () {
-          userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) electron/1.0.0 Chrome/53.0.2785.113 Electron/1.4.3 Safari/537.36'
+      it('newer Windows user agent', function () {
+        userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Electron/10.4.7 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36')
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('newer Windows user agent', function () {
-          userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Electron/10.4.7 Safari/537.36'
+      it('Linux user agent', function () {
+        userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Electron/9.0.5 Safari/E7FBAF'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36')
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('Linux user agent', function () {
-          userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Electron/9.0.5 Safari/E7FBAF'
+      it('older MacOS user agent', function () {
+        // this user agent containing Cypress was actually a common UA found on a website for Electron purposes...
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/8.3.0 Chrome/91.0.4472.124 Electron/13.1.7 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF')
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
+      })
 
-        it('older MacOS user agent', function () {
-          // this user agent containing Cypress was actually a common UA found on a website for Electron purposes...
-          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/8.3.0 Chrome/91.0.4472.124 Electron/13.1.7 Safari/537.36'
+      it('newer MacOS user agent', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
-          })
-        })
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
-        it('newer MacOS user agent', function () {
-          userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
-
-          return electron._launch(this.win, this.url, this.automation, this.options)
-          .then(() => {
-            expect(electron._setUserAgent).to.have.been.calledWith(this.win.webContents, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36')
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
           })
         })
       })

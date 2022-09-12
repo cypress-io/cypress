@@ -73,7 +73,6 @@ describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
-    cy.visitLaunchpad()
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `
         const { defineConfig } = require('cypress')
@@ -94,8 +93,10 @@ describe('experimentalSingleTabRunMode', () => {
         })`)
     })
 
+    cy.visitLaunchpad()
+
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.findByTestId('launchpad-Choose a Browser')
     cy.get('h1').contains('Choose a Browser')
   })
 
@@ -110,10 +111,10 @@ describe('experimentalSingleTabRunMode', () => {
 })
 
 describe('experimentalStudio', () => {
-  it('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+  // TODO: fix this flaky test. https://github.com/cypress-io/cypress/issues/23743
+  it.skip('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
-    cy.visitLaunchpad()
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `
         const { defineConfig } = require('cypress')
@@ -134,8 +135,10 @@ describe('experimentalStudio', () => {
         })`)
     })
 
+    cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('alert-body').contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
   })
 
   it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
@@ -156,7 +159,7 @@ describe('experimentalStudio', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.findByTestId('launchpad-Choose a Browser')
     cy.get('h1').contains('Choose a Browser')
   })
 })
