@@ -241,7 +241,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const body = {
         get: () => {
           if (!attachedBody) {
-            attachedBody = $$(state('document').adoptNode($body[0]))
+            attachedBody = $$(state('document')?.adoptNode($body[0]))
           }
 
           return attachedBody

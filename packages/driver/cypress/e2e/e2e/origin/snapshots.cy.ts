@@ -44,7 +44,9 @@ describe('cy.origin - snapshots', () => {
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
       snapshots.forEach((snapshot) => {
-        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
+        if (snapshot) {
+          expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
+        }
       })
     })
   })
@@ -85,7 +87,9 @@ describe('cy.origin - snapshots', () => {
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
       snapshots.forEach((snapshot) => {
-        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.be.null
+        if (snapshot) {
+          expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.be.null
+        }
       })
 
       done()
