@@ -35,11 +35,7 @@ When creating a snapshot the bundled code provided to it is executed and whateve
 in the heap at the end is then embedded into the snapshot which is loaded whenever the app
 starts up.
 
-<<<<<<< HEAD
-Once the snapshot is loaded we can retrieve fully instantiated modules from it or instantiated
-=======
 Once the snapshot is loaded we can retrieve fully instantiated modules from it or instantiate
->>>>>>> origin/feature/v8-snapshots
 them by invoking embedded functions which when called produce the `module.exports`.
 
 However since the environment is different when generating the snapshot and not everything is
@@ -49,11 +45,7 @@ snapshottable, certain requirements need to be respected.
 
 When creating a snapshot via `mksnapshot` certain requirements need to be respected:
 
-<<<<<<< HEAD
-- cannot `require` and Node.js core modules like `fs`
-=======
 - cannot `require` any Node.js core modules like `fs`
->>>>>>> origin/feature/v8-snapshots
 - cannot access and/or instantiate specific JS runtime objects like `Error` or `Promise`
 - cannot load Node.js native modules
 
@@ -175,12 +167,9 @@ our app. See [makeAndInstallSnapshot][makeAndInstallSnapshot].
 - `SNAPSHOT_BUNDLER` overrides Go binary to create the JavaScript bundle used to snapshot
 - `SNAPSHOT_KEEP_CONFIG` when set will not delete the temporary JSON config file that is
 	provided to the snapshot bundler
+- `V8_SNAPSHOT_FROM_SCRATCH` will not use the snapshot cache and generate v8 snapshots from scratch
  
 [doctor-next-stage]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L628
-<<<<<<< HEAD
-[doctor-class]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L261
-=======
->>>>>>> origin/feature/v8-snapshots
 [makeAndInstallSnapshot]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L669
 
 [blueprint-config]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/blueprint.ts#L51

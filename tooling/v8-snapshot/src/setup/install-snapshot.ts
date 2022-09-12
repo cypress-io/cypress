@@ -2,6 +2,7 @@ import path from 'path'
 import { SnapshotGenerator } from '../generator/snapshot-generator'
 import { prettyPrintError } from '../utils'
 import fs from 'fs-extra'
+import forceNoRewrite from './force-no-rewrite'
 
 const debug = require('debug')
 const logInfo = debug('cypress:snapgen:info')
@@ -61,39 +62,7 @@ function getSnapshotGenerator ({
     previousNoRewrite,
     nodeModulesOnly,
     resolverMap,
-    // sourcemapEmbed: true,
-    forceNoRewrite: [
-      'node_modules/@cypress/get-windows-proxy/src/registry.js',
-      // recursion due to process.emit overwrites which is incorrectly rewritten
-      'signal-exit/index.js',
-      // recursion due to process.{chdir,cwd} overwrites which are incorrectly rewritten
-      'graceful-fs/polyfills.js',
-
-      // wx is rewritten to __get_wx__ but not available for Node.js > 0.6
-      'lockfile/lockfile.js',
-      // rewrites dns.lookup which conflicts with our rewrite
-      'evil-dns/evil-dns.js',
-
-      // `address instanceof (__get_URL2__())` -- right hand side not an object
-      // even though function is in scope
-      'ws/lib/websocket.js',
-
-      // defers PassThroughStream which is then not accepted as a constructor
-      'get-stream/buffer-stream.js',
-
-      // deferring should be fine as it just reexports `process` which in the
-      // case of cache is the stub
-      'process-nextick-args/index.js',
-
-      //
-      // Only needed when including app files
-      //
-
-      // resuls in recursive call to __get_fs2__
-      'packages/https-proxy/lib/ca.js',
-
-      'packages/server/lib/routes-e2e.ts',
-    ],
+    forceNoRewrite,
   })
 }
 

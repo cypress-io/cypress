@@ -541,12 +541,6 @@ which will include both node modules and cypress code.
 
 During the process of snapshot generation, metadata is created/updated in `tooling/v8-snapshot/cache`. Changes to these files can and should be committed to the repo as it will make subsequent snapshot generations faster.
 
-If you want to generate the snapshots from scratch, you can set the environment variable `V8_SNAPSHOT_FROM_SCRATCH` to 1 while generating snapshots
-
-#### Using V8 Snapshots
-
-Cypress code is automatically set up to run using snapshots. If you want to run Cypress in development without the v8 snapshot (for debugging purposes or to see if there's a problem with the snapshot or the code itself) you can set the environment variable `DISABLE_SNAPSHOT_REQUIRE` to 1.
-
 ## Committing Code
 
 ### Branches

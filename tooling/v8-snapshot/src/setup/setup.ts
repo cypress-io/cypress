@@ -1,8 +1,8 @@
 import { createConfig } from './config'
 import { consolidateDeps } from './consolidate-deps'
-import { genMeta } from './gen-meta'
+import { generateMetadata } from './generate-metadata'
 import minimist from 'minimist'
-import { genEntry } from './gen-entry'
+import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
 import fs from 'fs-extra'
 
@@ -13,9 +13,9 @@ const setupV8Snapshots = async () => {
 
     await consolidateDeps(config)
 
-    const meta = await genMeta(config)
+    const meta = await generateMetadata(config)
 
-    await genEntry(config)
+    await generateEntry(config)
     const snapshotFileLocation = await installSnapshot(config, meta.resolverMap)
 
     await fs.copyFile(config.snapshotMetaFile, config.snapshotMetaPrevFile)

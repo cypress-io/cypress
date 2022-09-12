@@ -109,7 +109,7 @@ export async function generateBundlerMetadata (
  * snapshot entry which will include all deps
  * @param partial_opts
  */
-export async function generateSnapshotEntryFromEntryDeps (
+export async function generateSnapshotEntryFromEntryDependencies (
   projectBaseDir: string,
   fullPathToSnapshotEntry: string,
   config: GenerateDepsDataOpts,

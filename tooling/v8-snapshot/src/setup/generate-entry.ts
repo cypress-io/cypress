@@ -1,4 +1,4 @@
-import { generateSnapshotEntryFromEntryDeps } from '../generator/snapshot-generate-entry-via-deps'
+import { generateSnapshotEntryFromEntryDependencies } from '../generator/snapshot-generate-entry-via-dependencies'
 import debug from 'debug'
 import { ensureDirSync } from '../utils'
 import path from 'path'
@@ -12,7 +12,7 @@ const logError = debug('cypress:snapgen:error')
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */
-export async function genEntry ({
+export async function generateEntry ({
   appEntryFile,
   nodeModulesOnly,
   pathsMapper,
@@ -30,7 +30,7 @@ export async function genEntry ({
   try {
     ensureDirSync(path.dirname(snapshotEntryFile))
 
-    await generateSnapshotEntryFromEntryDeps(
+    await generateSnapshotEntryFromEntryDependencies(
       projectBaseDir,
       snapshotEntryFile,
       {

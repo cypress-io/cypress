@@ -76,3 +76,7 @@ Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instruction
 SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.js
 SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
 ```
+
+### V8 Snapshots
+
+Cypress code is automatically set up to run using snapshots. If you want to run Cypress in development without the v8 snapshot (for debugging purposes or to see if there's a problem with the snapshot or the code itself) you can set the environment variable `DISABLE_SNAPSHOT_REQUIRE` to 1.
