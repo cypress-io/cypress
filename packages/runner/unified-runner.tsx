@@ -5,14 +5,10 @@ import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
 import * as MobX from 'mobx'
 
-import { studioAssertionsMenu } from './src/studio/assertions-menu'
-
 export const UnifiedRunner = {
   CypressJQuery: $Cypress.$,
 
   CypressDriver: $Cypress,
-
-  studioAssertionsMenu,
 
   shortcuts,
 

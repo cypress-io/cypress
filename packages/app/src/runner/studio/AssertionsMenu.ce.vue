@@ -53,7 +53,6 @@ const props = defineProps <{
   addAssertion: any
   closeMenu: () => void
   highlightStyle: StyleValue
-  renderAssertionTypes: any
 }>()
 
 const _addAssertion = (...args) => {

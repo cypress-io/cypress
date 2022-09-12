@@ -19,7 +19,7 @@ export function openStudioAssertionsMenu ({ $el, $body, props }) {
 
   const selectorHighlightStyles = getSelectorHighlightStyles([$el.get(0)])[0]
 
-  mountAssertionsMenu(vueContainer, $el, props.possibleAssertions, props.addAssertion, props.closeMenu, selectorHighlightStyles, window.UnifiedRunner.studioAssertionsMenu.renderAssertionTypes)
+  mountAssertionsMenu(vueContainer, $el, props.possibleAssertions, props.addAssertion, props.closeMenu, selectorHighlightStyles)
 }
 
 export function closeStudioAssertionsMenu ($body) {
@@ -38,7 +38,6 @@ const mountAssertionsMenu = (
   addAssertion: any,
   closeMenu: any,
   highlightStyle: StyleValue,
-  renderAssertionTypes: any,
 ) => {
   app = createApp(AssertionsMenu, {
     jqueryElement,
@@ -46,7 +45,6 @@ const mountAssertionsMenu = (
     addAssertion,
     closeMenu,
     highlightStyle,
-    renderAssertionTypes,
   })
 
   app.mount(container)
