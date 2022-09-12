@@ -27,13 +27,13 @@
         </svg>
       </span>
     </div>
+    <AssertionOptions
+      v-if="hasOptions && isOpen"
+      :type="type"
+      :add-assertion="addAssertion"
+      :options="options"
+    />
   </div>
-  <AssertionOptions
-    v-if="hasOptions && isOpen"
-    :type="type"
-    :add-assertion="addAssertion"
-    :options="options"
-  />
 </template>
 
 <script lang="ts" setup>
@@ -57,8 +57,9 @@ export default defineComponent({
   },
 
   methods: {
-    _open () {
+    _open (e) {
       this.isOpen = true
+      e.stopPropagation()
     },
 
     _close (e) {
@@ -69,12 +70,15 @@ export default defineComponent({
       }
 
       this.isOpen = false
+      e.stopPropagation()
     },
 
-    _click () {
+    _click (e) {
       if (!this.hasOptions) {
         this.addAssertion(this.type)
       }
+
+      e.stopPropagation()
     },
   },
 })

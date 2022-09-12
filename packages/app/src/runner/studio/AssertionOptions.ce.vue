@@ -8,7 +8,7 @@
       v-for="{ name, value } in options"
       :key="`${name}${value}`"
       class="assertion-option"
-      @click="_click(name, value)"
+      @click="e => _click(e, name, value)"
     >
       <span
         v-if="name"
@@ -65,8 +65,9 @@ export default defineComponent({
   },
 
   methods: {
-    _click (name, value) {
+    _click (e, name, value) {
       this.addAssertion(this.type, name, value)
+      e.stopPropagation()
     },
   },
 })
