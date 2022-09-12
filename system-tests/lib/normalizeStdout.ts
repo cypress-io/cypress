@@ -77,19 +77,6 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
-  // if (browserName === 'webkit') {
-  // depending on the error, the stack will either look like
-  // 'foo@bar' or 'at foo (bar)'
-  // return str.replace(/(?:(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\(.*\)|.*@(\[native code\]|<unknown>))\n?)+)+/g, `\n      [stack trace lines]`)
-  // }
-
-  // const regex1 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|.*@(<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
-  // const regex2 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|@(?:<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
-  // const regex3 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|@(?:.*:\d+:\d+|<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
-  // const regex4 = /(\n?[^\S\n\r]*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\))+[\n\S\s]*?(\n\s*?\n|$)/g
-  // const regex5 = /(\n?[^\S\n\r]*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\)|.*@(.*:\d+:\d+|<unknown>|\[native code\]))+[\n\S\s]*?(\n\s*?\n|$)/g
-  // const regex6 = /(\n?\s*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\)|.*@(.*:\d+:\d+|<unknown>|\[native code\]))+[\n\S\s]*?(\n\s*?\n|$)/g
-
   // matches the newline preceding the stack and any leading whitespace
   const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
   // matches against the potential file location patterns, including:
