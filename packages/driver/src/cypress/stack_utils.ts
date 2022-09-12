@@ -317,11 +317,11 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   let absoluteFile
 
-  // WebKit stacks may include an `<unknown>` location that is not navigable.
+  // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
   // We ensure that the absolute path is not set in this case.
 
   const canBuildAbsolutePath = relativeFile && projectRoot && (
-    !Cypress.isBrowser('webkit') || relativeFile !== '<unknown>'
+    !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
   )
 
   if (canBuildAbsolutePath) {
