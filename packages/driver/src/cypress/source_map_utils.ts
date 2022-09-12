@@ -22,12 +22,10 @@ const initializeSourceMapConsumer = (script, sourceMap): BluebirdPromise<BasicSo
     'lib/mappings.wasm': mappingsWasm,
   })
 
-  return Bluebird.resolve(new SourceMapConsumer(sourceMap))
-  .then((consumer) => {
-    sourceMapConsumers[script.fullyQualifiedUrl] = consumer
-
-    return consumer
-  })
+  const consumer = new SourceMapConsumer(sourceMap)
+  sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+  
+  return Bluebird.resolve(consumer)
 }
 
 const extractSourceMap = (fileContents) => {
