@@ -313,20 +313,22 @@ describe('events', () => {
       events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
-        commandId: undefined,
+        testId: undefined,
+        logId: undefined,
       })
     })
 
     it('emits runner:console:error with test id and command id on show:error when it is a command error and there is a matching command', () => {
       const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
-        return { id: 'matching command id' }
+        return { id: 'matching command id', testId: 'test' }
       } }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
-        commandId: 'matching command id',
+        testId: 'test',
+        logId: 'matching command id',
       })
     })
 
@@ -339,7 +341,8 @@ describe('events', () => {
       events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
-        commandId: undefined,
+        testId: undefined,
+        logId: undefined,
       })
     })
 
