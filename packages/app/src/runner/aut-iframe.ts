@@ -756,7 +756,7 @@ export class AutIframe {
 
   private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
     const { container, vueContainer } = getOrCreateHelperDom({
-      body: $body.get(0),
+      body: $body?.get(0) || document.body,
       className: '__cypress-selector-playground',
       css: Highlight.styles[0],
     })
