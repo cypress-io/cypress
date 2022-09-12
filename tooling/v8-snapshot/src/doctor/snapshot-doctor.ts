@@ -482,7 +482,7 @@ export class SnapshotDoctor {
       //    respect the heal state we're obtaining
       for (
         let nextStage = this._findNextStage(healState, circulars);
-        nextStage.length > 0 || !healState.processedLeaves;
+        nextStage.length > 0;
         nextStage = this._findNextStage(healState, circulars)
       ) {
         // 5. Process the module verification in parallel
