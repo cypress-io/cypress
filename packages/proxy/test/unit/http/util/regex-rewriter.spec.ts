@@ -398,16 +398,26 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
 </html>\
 `
 
+const originalScriptWithModifyObstructiveThirdPartyCode = `(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po.integrity='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();`
+
+const expectedScriptWithModifyObstructiveThirdPartyCode = `(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po['cypress-stripped-integrity']='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();`
+
 describe('http/util/regex-rewriter', () => {
   context('.strip', () => {
     it('replaces obstructive code', () => {
       expect(regexRewriter.strip(original)).to.eq(expected)
     })
 
-    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (html)', () => {
       expect(regexRewriter.strip(originalWithModifyObstructiveThirdPartyCode, {
         modifyObstructiveThirdPartyCode: true,
       })).to.eq(expectedWithModifyObstructiveThirdPartyCode)
+    })
+
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (javascript)', () => {
+      expect(regexRewriter.strip(originalScriptWithModifyObstructiveThirdPartyCode, {
+        modifyObstructiveThirdPartyCode: true,
+      })).to.eq(expectedScriptWithModifyObstructiveThirdPartyCode)
     })
 
     it('replaces jira window getter', () => {
@@ -609,7 +619,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       replacer.end()
     })
 
-    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', (done) => {
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (html)', (done) => {
       const haystacks = originalWithModifyObstructiveThirdPartyCode.split('\n')
 
       const replacer = regexRewriter.stripStream({
@@ -621,6 +631,32 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
         try {
           expect(string).to.eq(expectedWithModifyObstructiveThirdPartyCode)
+
+          done()
+        } catch (err) {
+          done(err)
+        }
+      }))
+
+      haystacks.forEach((haystack) => {
+        replacer.write(`${haystack}\n`)
+      })
+
+      replacer.end()
+    })
+
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (script)', (done) => {
+      const haystacks = originalScriptWithModifyObstructiveThirdPartyCode.split('\n')
+
+      const replacer = regexRewriter.stripStream({
+        modifyObstructiveThirdPartyCode: true,
+      })
+
+      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+        const string = str.toString().trim()
+
+        try {
+          expect(string).to.eq(expectedScriptWithModifyObstructiveThirdPartyCode)
 
           done()
         } catch (err) {
