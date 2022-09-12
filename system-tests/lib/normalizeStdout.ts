@@ -91,17 +91,18 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   // const regex6 = /(\n?\s*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\)|.*@(.*:\d+:\d+|<unknown>|\[native code\]))+[\n\S\s]*?(\n\s*?\n|$)/g
 
   // matches the newline preceding the stack and any leading whitespace
-  const leadingNewLinesAndWhitespace = `(?:\\n?\\s*)`
+  const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
   // matches against the potential file location patterns, including:
   // foo.js:1:2 - file locations including line/column numbers
   // <unknown> - rendered when location cannot be determined
   // [native code] - rendered in some cases by WebKit browser
   const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\])`
   // matches stack lines with Chrome-style rendering:
-  // '  at foobar (foo.js:1:2)
-  const verboseStyleLine = `at\\s.*\\s\\(${location}\\)`
+  // '  at foobar (foo.js:1:2)'
+  // '  at foo.js:1:2'
+  const verboseStyleLine = `at\\s.*(?::\\d+:\\d+|\\s\\(${location}\\))`
   // matches stack lines with Firefox/WebKit style rendering:
-  // foobar@foo.js:1:2
+  // '  foobar@foo.js:1:2'
   const condensedStyleLine = `.*@${location}`
   // matches against remainder of stack trace until blank lines found.
   // includes group to normalize whitespace between newlines in Firefox
