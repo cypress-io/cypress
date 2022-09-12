@@ -1,7 +1,7 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-context:EventCollector')
+const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
 interface CollectableEvent {
   campaign: string
