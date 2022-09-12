@@ -22,12 +22,10 @@ const initializeSourceMapConsumer = (script, sourceMap): BluebirdPromise<BasicSo
     'lib/mappings.wasm': mappingsWasm,
   })
 
-  return Bluebird.resolve(new SourceMapConsumer(sourceMap))
-  .then((consumer) => {
-    sourceMapConsumers[script.fullyQualifiedUrl] = consumer
-
-    return consumer
-  })
+  const consumer = new SourceMapConsumer(sourceMap)
+  sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+  
+  return Bluebird.resolve(consumer)
 }
 
 const extractSourceMap = (fileContents) => {
@@ -76,9 +74,7 @@ const getSourcePosition = (filePath, position) => {
 
   if (!sourceMapConsumer) return null
 
-  const sourcePosition = sourceMapConsumer.originalPositionFor(position)
-
-  const { source, line, column } = sourcePosition
+const { source, line, column } = sourceMapConsumer.originalPositionFor(position)
 
   if (!source || line == null || column == null) return
 
