@@ -17,6 +17,19 @@ function averageDurationSelector (specFileName: string) {
   return `${specRowSelector(specFileName)} [data-cy="average-duration"]`
 }
 
+function makeTestingCloudLink (status: string) {
+  return `https://google.com?utm_medium=Specs+Latest+Runs+Dots&utm_campaign=${status.toUpperCase()}&utm_source=Binary%3A+App`
+}
+
+function assertCorrectRunsLink (specFileName: string, status: string) {
+  // we avoid the full `cy.validateExternalLink` here because that command
+  // clicks the link, which focuses the link causing tooltips to appear,
+  // which produces problems elsewhere testing tooltip behavior
+  cy.findByRole('link', { name: specFileName })
+  .should('have.attr', 'href', makeTestingCloudLink(status))
+  .should('have.attr', 'data-cy', 'external') // to confirm the ExternalLink component is used
+}
+
 function validateTooltip (status: string) {
   cy.validateExternalLink({
     // TODO: (#23778) This name is so long because the entire tooltip is wrapped in a link,
@@ -24,7 +37,7 @@ function validateTooltip (status: string) {
     // (which is currently not described) and keeping the other content separate.
     name: `accounts_new.spec.js ${status} 4 months ago 2:23 - 2:39 skipped pending passed failed`,
     // the main thing about testing this link is that is gets composed with the expected UTM params
-    href: `https://google.com?utm_medium=Specs+Latest+Runs+Dots&utm_campaign=${status.toUpperCase()}&utm_source=Binary%3A+App`,
+    href: makeTestingCloudLink(status),
   })
   .should('contain.text', 'accounts_new.spec.js')
   .and('contain.text', '4 months ago')
@@ -48,6 +61,12 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
   cy.get(dotSelector(specFileName, 'latest'))
   .should(`${latestStatusSpinning ? '' : 'not.'}have.class`, 'animate-spin')
   .and('have.attr', 'data-cy-run-status', latestRunStatus)
+
+  if (runDotsClasses?.length) {
+    assertCorrectRunsLink(`${specFileName} test results`, latestRunStatus)
+  } else {
+    cy.findByRole('link', { name: `${specFileName} test results` }).should('not.exist')
+  }
 }
 
 function simulateRunData () {
