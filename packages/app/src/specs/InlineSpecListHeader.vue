@@ -92,6 +92,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
+import { getPathForPlatform } from '../paths'
 
 const { t } = useI18n()
 const props = defineProps<{
@@ -110,7 +111,7 @@ const input = ref<HTMLInputElement>()
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
 
-  emit('update:specFilterModel', value)
+  emit('update:specFilterModel', getPathForPlatform(value))
 }
 
 const clearInput = (e: Event) => {
