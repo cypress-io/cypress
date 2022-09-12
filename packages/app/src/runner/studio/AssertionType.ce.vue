@@ -1,8 +1,7 @@
 <template>
   <div
-    ref="reference"
     :class="['assertion-type', { 'single-assertion': !hasOptions }]"
-    @click="!hasOptions ? () => addAssertion(type) : null"
+    @click="_click"
     @mouseover="_open"
     @mouseout="_close"
   >
@@ -41,13 +40,11 @@
 import { defineComponent } from 'vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
 
-const props = defineProps<{
+defineProps<{
   type: string
   addAssertion: any
   options: any
 }>()
-
-const hasOptions = props.options && !!props.options.length
 </script>
 
 <script lang="ts">
@@ -55,6 +52,7 @@ export default defineComponent({
   data () {
     return {
       isOpen: false,
+      hasOptions: this.options && !!this.options.length,
     }
   },
 
@@ -71,6 +69,12 @@ export default defineComponent({
       }
 
       this.isOpen = false
+    },
+
+    _click () {
+      if (!this.hasOptions) {
+        this.addAssertion(this.type)
+      }
     },
   },
 })
