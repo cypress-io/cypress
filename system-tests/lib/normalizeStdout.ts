@@ -9,7 +9,6 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 
 export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))\??(-\d+)?:\d+:\d+|<unknown>)[\n\S\s]*?(\n\s*?\n|$)/g
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
@@ -77,16 +76,41 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
-// '@' will be present in firefox/webkit stack trace lines
-// 'at' will be present in chrome stack trace lines
-// Firefox includes trailing whitespace between that must be specifically replaced
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
-  if (browserName === 'webkit') {
-    return str.replace(/(?:(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\(.*\)|.*@(\[native code\]|<unknown>))\n?)+)+/g, `\n      [stack trace lines]\n`)
-  }
+  // if (browserName === 'webkit') {
+  // depending on the error, the stack will either look like
+  // 'foo@bar' or 'at foo (bar)'
+  // return str.replace(/(?:(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\(.*\)|.*@(\[native code\]|<unknown>))\n?)+)+/g, `\n      [stack trace lines]`)
+  // }
 
-  return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
-    let post = parts[4]
+  // const regex1 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|.*@(<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
+  // const regex2 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|@(?:<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
+  // const regex3 = /(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\((?:.*:d+:d+|<unknown>|\[native code\])\)|@(?:.*:\d+:\d+|<unknown>|\[native code\]))\n?)+[\n\S\s]*?(\n\s*?\n|$)/g
+  // const regex4 = /(\n?[^\S\n\r]*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\))+[\n\S\s]*?(\n\s*?\n|$)/g
+  // const regex5 = /(\n?[^\S\n\r]*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\)|.*@(.*:\d+:\d+|<unknown>|\[native code\]))+[\n\S\s]*?(\n\s*?\n|$)/g
+  // const regex6 = /(\n?\s*)(?:at\s(.*)\s\((.*:\d+:\d+|<unknown>|\[native code\])\)|.*@(.*:\d+:\d+|<unknown>|\[native code\]))+[\n\S\s]*?(\n\s*?\n|$)/g
+
+  // matches the newline preceding the stack and any leading whitespace
+  const leadingNewLinesAndWhitespace = `(?:\\n?\\s*)`
+  // matches against the potential file location patterns, including:
+  // foo.js:1:2 - file locations including line/column numbers
+  // <unknown> - rendered when location cannot be determined
+  // [native code] - rendered in some cases by WebKit browser
+  const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\])`
+  // matches stack lines with Chrome-style rendering:
+  // '  at foobar (foo.js:1:2)
+  const verboseStyleLine = `at\\s.*\\s\\(${location}\\)`
+  // matches stack lines with Firefox/WebKit style rendering:
+  // foobar@foo.js:1:2
+  const condensedStyleLine = `.*@${location}`
+  // matches against remainder of stack trace until blank lines found.
+  // includes group to normalize whitespace between newlines in Firefox
+  const remainderOfStack = `[\\n\\S\\s]*?(\n\s*?\n|$)`
+
+  const stackLineRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
+
+  return str.replace(stackLineRegex, (match: string, ...parts: string[]) => {
+    let post = parts[0]
 
     if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
