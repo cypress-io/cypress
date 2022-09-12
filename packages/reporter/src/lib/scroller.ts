@@ -23,7 +23,7 @@ export class Scroller {
   private _userScrollCount = 0
   private _userScroll = true
   private _countUserScrollsTimeout?: number
-  private _userScrollThresholdMs = 50
+  private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
