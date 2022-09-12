@@ -356,7 +356,7 @@ export default (Commands, Cypress, cy, state) => {
         })
       }
 
-      return cy.retryIfCommandAUTOriginMismatch(resolveElements)
+      return cy.retryIfCommandAUTOriginMismatch(resolveElements, options.timeout)
     },
   })
 
