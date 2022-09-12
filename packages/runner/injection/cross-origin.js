@@ -108,6 +108,7 @@ const Cypress = findCypress()
 window.cypressTimersReset = timers.reset
 window.cypressTimersPause = timers.pause
 
-if (Cypress) {
+// Check for cy too to prevent a race condition for attaching.
+if (Cypress && Cypress.cy) {
   Cypress.action('app:window:before:load', window)
 }
