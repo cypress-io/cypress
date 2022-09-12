@@ -101,7 +101,7 @@ export function createConfig (env: 'dev' | 'prod' = 'prod'): SnapshotConfig {
   const snapshotMetaFile = path.join(snapshotCacheDir, 'snapshot-meta.json')
   const snapshotMetaPrevFile = path.join(
     snapshotCacheDir,
-    'snapshot-meta.prev.json',
+    'snapshot-meta.cache.json',
   )
 
   return {
