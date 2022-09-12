@@ -8,6 +8,10 @@ import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe } from '../../aliases'
 
+type GetOptions = Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable & Cypress.Withinable>
+type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
+type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
+
 function getAlias (selector, log, cy) {
   const alias = selector.slice(1)
 
@@ -147,7 +151,7 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('get', function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
@@ -221,7 +225,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('contains', function contains (filter, text, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> = {}) {
+  Commands.addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
     if (_.isRegExp(text)) {
       // .contains(filter, text)
       // Do nothing
@@ -258,12 +262,12 @@ export default (Commands, Cypress, cy, state) => {
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, userOptions)
 
-    const getOptions = _.extend({}, userOptions)
+    const getOptions = _.extend({}, userOptions) as GetOptions
     const getFn = cy.now('get', selector, getOptions)
     const log = cy.state('current').get('_log')
 
     const getPhrase = () => {
-      if (filter && !getOptions.withinSubject.is('body')) {
+      if (filter && !(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} and with the selector: '${filter}' `
@@ -273,7 +277,7 @@ export default (Commands, Cypress, cy, state) => {
         return `within the selector: '${filter}' `
       }
 
-      if (!getOptions.withinSubject.is('body')) {
+      if (!(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} `
@@ -287,7 +291,7 @@ export default (Commands, Cypress, cy, state) => {
       switch (err.type) {
         case 'length':
           if (err.expected > 1) {
-            const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+            const { message, docsUrl } = $errUtils.cypressErrByPath('contains.length_option')
 
             err.message = message
             err.docsUrl = docsUrl
@@ -315,7 +319,7 @@ export default (Commands, Cypress, cy, state) => {
         subject = cy.$$('body')
       }
 
-      getOptions.withinSubject = subject
+      getOptions.withinSubject = subject[0] ?? subject
       let $el = getFn()
 
       // .get() looks for elements *inside* the current subject, while contains() wants to also match the current
@@ -346,21 +350,13 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('shadow', function contains (userOptions: Partial<Cypress.Loggable, Cypress.Timeoutable> = {}) {
+  Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
     const log = userOptions.log !== false && Cypress.log({
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
 
     cy.state('current').set('timeout', userOptions.timeout)
-    cy.state('current').set('onFail', (err) => {
-      if (err.type === 'existence') {
-        const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
-
-        err.message = message
-        err.docsUrl = docsUrl
-      }
-    })
 
     return (subject) => {
       cy.ensureSubjectByType(subject, 'element')
