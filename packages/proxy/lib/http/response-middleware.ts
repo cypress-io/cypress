@@ -54,9 +54,9 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
+function reqMatchesSuperDomainOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesSuperDomainOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
 
   if (remoteState.strategy === 'file') {
@@ -236,7 +236,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
-  const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isCrossOrigin = !reqMatchesSuperDomainOriginPolicy(this.req, this.remoteStates.current())
   const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
@@ -276,7 +276,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isReqMatchSuperDomainOriginPolicy = reqMatchesSuperDomainOriginPolicy(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -293,7 +293,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'fullCrossOrigin'
     }
 
-    if (!isHTML || (!isReqMatchOriginPolicy && !isAUTFrame)) {
+    if (!isHTML || (!isReqMatchSuperDomainOriginPolicy && !isAUTFrame)) {
       this.debug('- no injection (not html)')
 
       return false
@@ -342,7 +342,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
      this.res.wantsInjection === 'full' ||
      this.res.wantsInjection === 'fullCrossOrigin' ||
      // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
-     (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchOriginPolicy))
+     (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchSuperDomainOriginPolicy))
 
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 

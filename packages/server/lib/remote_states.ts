@@ -52,7 +52,7 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    const state = this.remoteStates.get(cors.getOriginPolicy(url))
+    const state = this.remoteStates.get(cors.getSuperDomainOriginPolicy(url))
 
     debug('getting remote state: %o for: %s', state, url)
 
@@ -68,16 +68,16 @@ export class RemoteStates {
   }
 
   isInOriginStack (url: string): boolean {
-    return this.originStack.includes(cors.getOriginPolicy(url))
+    return this.originStack.includes(cors.getOriginPolicy(url)) || this.originStack.includes(cors.getSuperDomainOriginPolicy(url))
   }
 
   isSecondaryOrigin (url: string): boolean {
     // start at 1 to exclude the primary origin
-    return this.originStack.indexOf(cors.getOriginPolicy(url), 1) !== -1
+    return this.originStack.indexOf(cors.getOriginPolicy(url), 1) !== -1 || this.originStack.indexOf(cors.getSuperDomainOriginPolicy(url), 1) !== -1
   }
 
   isPrimaryOrigin (url: string): boolean {
-    return this.originStack[0] === cors.getOriginPolicy(url)
+    return this.originStack[0] === cors.getOriginPolicy(url) || this.originStack[0] === cors.getSuperDomainOriginPolicy(url)
   }
 
   reset () {
@@ -124,7 +124,7 @@ export class RemoteStates {
       state = urlOrState
     }
 
-    const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
+    const remoteOriginPolicy = cors.getSuperDomainOriginPolicy(state.origin)
 
     if (options.isCrossOrigin) {
       this.remoteStates.set(remoteOriginPolicy, state)

@@ -10,6 +10,8 @@
 import { createTimers } from './timers'
 
 const findCypress = () => {
+  let mostSpecificSpecBridgeCypress = undefined
+
   for (let index = 0; index < window.parent.frames.length; index++) {
     const frame = window.parent.frames[index]
 
@@ -27,7 +29,14 @@ const findCypress = () => {
         if (window.location.port === frame.location.port
           && window.location.protocol === frame.location.protocol
           && frameHostRegex.test(window.location.host)) {
-          return frame.Cypress
+          // we found a matching cypress instance. If we have a spec bridge containing a sub domain that is specific to the injection, use that spec bridge
+          // and overwrite and preexisting Cypress reference if applicable
+          if (window.location.host === frame.location.host) {
+            mostSpecificSpecBridgeCypress = frame.Cypress
+          } else if (!mostSpecificSpecBridgeCypress) {
+            // otherwise, set the spec bridge Cypress
+            mostSpecificSpecBridgeCypress = frame.Cypress
+          }
         }
       }
     } catch (error) {
@@ -37,6 +46,8 @@ const findCypress = () => {
       }
     }
   }
+
+  return mostSpecificSpecBridgeCypress
 }
 
 const Cypress = findCypress()

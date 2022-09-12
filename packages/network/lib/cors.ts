@@ -74,18 +74,20 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
-export function urlMatchesOriginPolicyProps (urlStr, props) {
+export function urlMatchesSuperDomainOriginPolicyProps (urlStr, props) {
   // take a shortcut here in the case
   // where remoteHostAndPort is null
   if (!props) {
     return false
   }
 
-  const parsedUrl = parseUrlIntoHostProtocolDomainTldPort(urlStr)
+  const { subdomain: sub1, ...parsedUrl } = parseUrlIntoHostProtocolDomainTldPort(urlStr)
+  const { subdomain: sub2, ...propsOmittedSubDomain } = props
 
-  // does the parsedUrl match the parsedHost?
-  // To fully match origin policy, the full host (including subdomain) and port is required to match. @see https://developer.mozilla.org/en-US/docs/Glossary/Origin
-  return _.isEqual(parsedUrl, props)
+  // To fully match the super domain origin policy, the full host (excluding subdomain) and port is required to match. @see https://developer.mozilla.org/en-US/docs/Glossary/Origin
+  const doSubDomainsFitSuperDomainPolicy = (sub1 === null || sub2 === null) ? true : sub1 === sub2
+
+  return _.isEqual(parsedUrl, propsOmittedSubDomain) && doSubDomainsFitSuperDomainPolicy
 }
 
 export function urlMatchesSameSitePolicyProps (urlStr, props) {
