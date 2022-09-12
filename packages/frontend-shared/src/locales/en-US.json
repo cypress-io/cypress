@@ -510,7 +510,7 @@
       },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
-        "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit for more information."
+        "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
       }
     },
     "device": {

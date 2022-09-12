@@ -2884,7 +2884,7 @@ declare namespace Cypress {
      */
     experimentalStudio: boolean
     /**
-     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit for more information.
+     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
      * @default false
      */
     experimentalWebKitSupport: boolean
