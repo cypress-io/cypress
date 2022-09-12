@@ -76,9 +76,7 @@ const getSourcePosition = (filePath, position) => {
 
   if (!sourceMapConsumer) return null
 
-  const sourcePosition = sourceMapConsumer.originalPositionFor(position)
-
-  const { source, line, column } = sourcePosition
+const { source, line, column } = sourceMapConsumer.originalPositionFor(position)
 
   if (!source || line == null || column == null) return
 
