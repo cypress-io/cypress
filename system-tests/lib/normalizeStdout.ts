@@ -82,7 +82,7 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 // Firefox includes trailing whitespace between that must be specifically replaced
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
   if (browserName === 'webkit') {
-    return str.replace(/(?:\s*((?:\bat\b\s.*\s\(.*\)|.*@(\[native code\]|<unknown>))\n?)+)+/g, `\n      [stack trace lines]\n`)
+    return str.replace(/(?:(\n?[^\S\n\r]*).*?((?:\bat\b\s.*\s\(.*\)|.*@(\[native code\]|<unknown>))\n?)+)+/g, `\n      [stack trace lines]\n`)
   }
 
   return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
