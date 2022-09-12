@@ -1284,12 +1284,11 @@ jobs:
             run-vite-dev-server-integration-tests
       - run:
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
-          # If all other steps succeed but `build:finalize` fails, we retry it once
+          # If all other jobs finish but `build:finalize` fails, we retry it once
           name: Finalize percy build - allows single retry
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            yarn percy build:finlize || yarn percy build:finalize
-          when: on_success
+            yarn percy build:finalize || yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
