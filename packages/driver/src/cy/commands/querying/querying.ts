@@ -312,6 +312,7 @@ export default (Commands, Cypress, cy, state) => {
       if (aliasObj) {
         let { alias, command } = aliasObj
         let subject = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+        throw Error('AAAAAAAAAAAA')
 
         const resolveAlias = () => {
           // if this is a DOM element
