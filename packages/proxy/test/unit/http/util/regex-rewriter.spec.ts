@@ -380,7 +380,7 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
+        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
         document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
     <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
@@ -391,7 +391,7 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
       dynamicIntegrityScript.rel = "stylesheet"
       dynamicIntegrityScript.href = 'integrity.css'
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
-      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
       document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   </body>

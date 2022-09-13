@@ -17,7 +17,7 @@ const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
 
-const integrityTagReplacementRe = new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)(=(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))`, 'g')
+const integrityTagReplacementRe = new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)((=|["|'], )(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
 
 export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
