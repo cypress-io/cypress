@@ -24,6 +24,18 @@ describe('driver/src/cypress/validate_config', () => {
       expect(overrideLevel).to.be.undefined
     })
 
+    it('returns override level of restoring', () => {
+      const state = $SetterGetter.create({
+        duringUserTestExecution: false,
+        test: {
+          _testConfig: { applied: 'restoring' },
+        },
+      })
+      const overrideLevel = getMochaOverrideLevel(state)
+
+      expect(overrideLevel).to.eq('restoring')
+    })
+
     it('returns override level of suite', () => {
       const state = $SetterGetter.create({
         duringUserTestExecution: false,
@@ -167,6 +179,20 @@ describe('driver/src/cypress/validate_config', () => {
 
       expect(() => {
         validateConfig(state, { chromeWebSecurity: true }, skipOverrideCHeck)
+      }).not.to.throw()
+    })
+
+    it('skips checking override level when restoring global configuration before next test', () => {
+      const state = $SetterGetter.create({
+        duringUserTestExecution: false,
+        test: {
+          _testConfig: { applied: 'restoring' },
+        },
+        specWindow: { Error },
+      })
+
+      expect(() => {
+        validateConfig(state, { testIsolation: 'legacy' })
       }).not.to.throw()
     })
 

@@ -174,6 +174,7 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
+      process.chdir(cachedCwd)
       testState = {}
       await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')

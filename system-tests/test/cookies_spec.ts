@@ -198,6 +198,7 @@ describe('e2e cookies', () => {
     // once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
     // we can remove this extra test case
     it('with forced SameSite strictness', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
         baseUrl,
         env: {
@@ -251,6 +252,7 @@ describe('e2e cookies', () => {
         ],
       ) => {
         it(`passes with baseurl: ${baseUrl}`, {
+          browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
             baseUrl,
             env: {
@@ -274,6 +276,7 @@ describe('e2e cookies', () => {
       })
 
       it('passes with no baseurl', {
+        browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
           env: {
             httpUrl,
@@ -347,6 +350,7 @@ describe('cross-origin cookies, set:cookies', () => {
 
   // https://github.com/cypress-io/cypress/issues/6375
   it('set:cookies', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       video: false,
       baseUrl: `http://127.0.0.3:${httpPort}`,

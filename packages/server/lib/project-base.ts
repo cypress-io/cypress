@@ -19,7 +19,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -60,6 +60,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
+  public videoRecording?: VideoRecording
   public browser: any
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
@@ -152,7 +153,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = this.getConfig()
+    const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
