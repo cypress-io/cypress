@@ -18,7 +18,7 @@ export interface StateFunc {
   (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
   (k: 'routes', v?: RouteMap): RouteMap
   (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
-  (k: 'document', v?: Document): Document
+  (k: 'document', v?: Document): Document | undefined
   (k: 'window', v?: Window): Window
   (k: 'logGroupIds', v?: Array<Cypress.InternalLogConfig['id']>): Array<Cypress.InternalLogConfig['id']>
   (k: 'autLocation', v?: LocationObject): LocationObject
