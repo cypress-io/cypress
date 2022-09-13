@@ -3,7 +3,9 @@ import { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
 import type { BaseReporterProps } from '../../src/main'
 import type { RunnablesErrorModel } from '../../src/runnables/runnable-error'
+import appState from '../../src/lib/app-state'
 import { MobxRunnerStore } from '@packages/app/src/store'
+import scroller from '../../src/lib/scroller'
 
 const runnerStore = new MobxRunnerStore('e2e')
 
@@ -16,7 +18,7 @@ runnerStore.setSpec({
 describe('runnables', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let render: (renderProps?: Partial<BaseReporterProps>) => void
+  let render: (renderProps?: Partial<BaseReporterProps>, cypressMode?: 'run' | 'open') => void
   let start: (renderProps?: Partial<BaseReporterProps>) => Cypress.Chainable
 
   beforeEach(() => {
@@ -26,12 +28,15 @@ describe('runnables', () => {
 
     runner = new EventEmitter()
 
-    render = (renderProps: Partial<BaseReporterProps> = {}) => {
+    render = (renderProps: Partial<BaseReporterProps> = {}, cypressMode = 'open') => {
       cy.visit('/').then((win: Cypress.AUTWindow) => {
+        win.__CYPRESS_MODE__ = cypressMode
         win.render({
           runner,
           studioEnabled: renderProps.studioEnabled || false,
           runnerStore,
+          scroller,
+          appState,
           ...renderProps,
         })
       })
@@ -183,12 +188,19 @@ describe('runnables', () => {
   })
 
   describe('runnable-header (unified)', () => {
+    let spy: Cypress.Agent<sinon.SinonSpy>
+
     beforeEach(() => {
-      cy.window().then((win) => win.__vite__ = true)
+      scroller.__setScrollThreholdMs(500)
+      spy = cy.spy(appState, 'temporarilySetAutoScrolling')
 
       start({
         runnerStore,
       })
+    })
+
+    afterEach(() => {
+      scroller.__reset()
     })
 
     it('contains name of spec and emits when clicked', () => {
@@ -199,6 +211,27 @@ describe('runnables', () => {
       cy.get(selector).as('spec-title').contains('foo.js')
       cy.get(selector).click().then(() => {
         expect(runner.emit).to.be.calledWith('open:file:unified')
+      })
+    })
+
+    it('adds a scroll listener in open mode', () => {
+      appState.startRunning()
+      cy.get('.container')
+      .trigger('scroll')
+      .trigger('scroll')
+      .trigger('scroll').then(() => {
+        expect(spy).to.have.been.calledWith(false)
+      })
+    })
+
+    it('does not add a scroll listener in run mode', () => {
+      render({}, 'run')
+      appState.startRunning()
+      cy.get('.container')
+      .trigger('scroll')
+      .trigger('scroll')
+      .trigger('scroll').then(() => {
+        expect(spy).not.to.have.been.calledWith(false)
       })
     })
   })
