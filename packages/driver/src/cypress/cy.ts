@@ -3,7 +3,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
 
-import $utils from './utils'
+import $utils, { SubjectChain } from './utils'
 import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
@@ -1271,8 +1271,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * Do not read cy.state('subjects') directly; This is what currentSubject() is for, turning this structure into a
    * usable subject.
    */
-  currentSubject (chainerId = this.state('chainerId')) {
-    const subjectChain = (this.state('subjects') || {})[chainerId]
+  currentSubject (chainerId: string = this.state('chainerId')) {
+    const subjectChain: SubjectChain | undefined = (this.state('subjects') || {})[chainerId]
 
     if (subjectChain) {
       return $utils.getSubjectFromChain(subjectChain, this)
@@ -1310,7 +1310,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * In this case, we want to break the connection between the inner chainer and the outer one, so that we can
    * instead use the return value as the new subject. Is this case, you'll want cy.breakSubjectLinksToCurrentChainer().
    */
-  linkSubject (childChainerId, parentChainerId) {
+  linkSubject (childChainerId: string, parentChainerId: string) {
     const links = this.state('subjectLinks') || {}
 
     links[childChainerId] = parentChainerId
@@ -1366,7 +1366,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   addQueryToChainer (chainerId: string, queryFn: (subject: any) => any) {
     const cySubjects = this.state('subjects') || {}
 
-    const subject = cySubjects[chainerId] || [undefined]
+    const subject = (cySubjects[chainerId] || [undefined]) as SubjectChain
 
     subject.push(queryFn)
     cySubjects[chainerId] = subject

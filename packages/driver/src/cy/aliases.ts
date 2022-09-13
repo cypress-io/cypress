@@ -27,12 +27,7 @@ export const create = (cy: $Cy) => ({
     aliases[alias] = aliasObj
     cy.state('aliases', aliases)
 
-    Object.defineProperty(ctx, alias, {
-      configurable: true,
-      get () {
-        return $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
-      },
-    })
+    ctx[alias] = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
   },
 
   getAlias (name, cmd, log) {

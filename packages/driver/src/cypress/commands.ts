@@ -4,6 +4,8 @@ import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
+import type { QueryFunction } from './utils'
+
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
 const builtInCommands = [
@@ -150,7 +152,7 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addQuery (name, fn) {
+      addQuery (name: string, fn: () => QueryFunction) {
         if (name !== 'get' && cy[name]) {
           internalError('miscellaneous.invalid_new_query', name)
         }

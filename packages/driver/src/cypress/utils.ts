@@ -8,6 +8,10 @@ import $dom from '../dom'
 import $jquery from '../dom/jquery'
 import { $Location } from './location'
 
+export type QueryFunction = (any) => any
+
+export type SubjectChain = [any, ...QueryFunction[]];
+
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
@@ -405,7 +409,7 @@ export default {
    * ['foobar', f()]
    * [undefined, f(), f()]
    */
-  getSubjectFromChain (subjectChain, cy) {
+  getSubjectFromChain (subjectChain: SubjectChain, cy) {
     // If we're getting the subject of a previous command, then any log messages have already
     // been added to the command log; We don't want to re-add them every time we query
     // the current subject.
