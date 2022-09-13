@@ -344,7 +344,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         if (_.isFunction(onRetry)) {
-          //@ts-ignore
+          //@ts-expect-error
           return cy.retry(onRetry, options)
         }
 

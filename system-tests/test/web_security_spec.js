@@ -112,7 +112,7 @@ describe('e2e web security', () => {
 
   context('when experimentalSessionAndOrigin is enabled', () => {
     systemTests.it('fails', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
+      browser: '!webkit', // TODO(webkit): fix+unskip Fixed by: https://github.com/cypress-io/cypress/issues/23532
       spec: 'web_security.cy.js',
       config: {
         experimentalSessionAndOrigin: true,

@@ -3,7 +3,7 @@ import '../../../support/utils'
 
 describe('cy.origin - snapshots', () => {
   const findLog = (logMap: Map<string, any>, displayName: string, url: string) => {
-    return Array.from(logMap.values()).reverse().find((log: any) => {
+    return Array.from(logMap.values()).find((log: any) => {
       const props = log.get()
 
       return props.displayName === displayName && (props?.consoleProps?.URL === url || props?.consoleProps()?.URL === url)
@@ -43,11 +43,11 @@ describe('cy.origin - snapshots', () => {
 
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
-      snapshots.forEach((snapshot) => {
-        if (snapshot) {
-          expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
-        }
-      })
+      expect(snapshots.length).to.equal(2)
+
+      // TODO: Since we have two events, one of them does not have a request snapshot
+
+      expect(snapshots[1].querySelector(`[data-cy="assertion-header"]`)).to.have.property('innerText').that.equals('Making XHR and Fetch Requests behind the scenes!')
     })
   })
 
@@ -87,9 +87,7 @@ describe('cy.origin - snapshots', () => {
       const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
       snapshots.forEach((snapshot) => {
-        if (snapshot) {
-          expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.be.null
-        }
+        expect(snapshot.querySelector(`[data-cy="assertion-header"]`)).to.be.null
       })
 
       done()

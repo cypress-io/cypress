@@ -62,7 +62,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   })
 }
 
-// TODO: remove with experimentalSessionAndOrigin
+// TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
 const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
@@ -341,22 +341,20 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    if (state('window')) {
-      const href = state('window').location.href
-      const count = getRedirectionCount(href)
-      const limit = config('redirectionLimit')
+    const href = state('window').location.href
+    const count = getRedirectionCount(href)
+    const limit = config('redirectionLimit')
 
-      if (count === limit) {
-        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-          args: {
-            href,
-            limit,
-          },
-        })
-      }
-
-      updateRedirectionCount(href)
+    if (count === limit) {
+      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+        args: {
+          href,
+          limit,
+        },
+      })
     }
+
+    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 

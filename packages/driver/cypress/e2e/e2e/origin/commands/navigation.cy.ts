@@ -189,6 +189,10 @@ context('cy.origin navigation', () => {
         // this call should succeed because we can visit a cross-origin
         cy.visit('http://www.idp.com:3500/fixtures/dom.html')
       })
+
+      cy.origin('http://www.idp.com:3500', () => {
+        cy.location('pathname').should('equal', '/fixtures/dom.html')
+      })
     })
 
     // @ts-ignore

@@ -713,9 +713,7 @@ describe('cy.origin - cookie login', () => {
           })
         })
 
-        cy.document().then((doc) => {
-          expect(doc.cookie).to.equal('key=value')
-        })
+        cy.document().its('cookie').should('equal', 'key=value')
       })
     })
 

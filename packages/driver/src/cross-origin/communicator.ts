@@ -109,9 +109,9 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Promisified event sent to the the primary communicator that expects the same event reflected back with the response.
-   * @param {string} event  - the name of the event to be sent.
-   * @param {Cypress.ObjectLike} data  - any meta data to be sent with the event.
+   * Promisified event sent from the the primary communicator that expects the same event reflected back with the response.
+   * @param {string} event - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
    * @returns the response from primary of the event with the same name.
    */
@@ -126,7 +126,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
       timeoutId = setTimeout(() => {
         this.off(event, handler)
-        reject()
+        reject(new Error(`${event} failed to receive a response from ${originPolicy} spec bridge within 1 second.`))
       }, 1000)
 
       this.once(event, handler)
@@ -237,8 +237,8 @@ export class SpecBridgeCommunicator extends EventEmitter {
   }
   /**
    * Promisified event sent to the the primary communicator that expects the same event reflected back with the response.
-   * @param {string} event  - the name of the event to be sent.
-   * @param {Cypress.ObjectLike} data  - any meta data to be sent with the event.
+   * @param {string} event - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
    * @returns the response from primary of the event with the same name.
    */
@@ -253,7 +253,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
 
       timeoutId = setTimeout(() => {
         this.off(event, handler)
-        reject()
+        reject(new Error(`${event} failed to receive a response from the primary Cypress instance within 1 second.`))
       }, 1000)
 
       this.once(event, handler)

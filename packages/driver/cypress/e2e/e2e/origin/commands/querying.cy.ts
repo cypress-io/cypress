@@ -32,7 +32,7 @@ context('cy.origin querying', () => {
     })
   })
 
-  context('#cross-origin errors', { defaultCommandTimeout: 50 }, () => {
+  context('cross-origin AUT errors', { defaultCommandTimeout: 50 }, () => {
     it('.get()', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)

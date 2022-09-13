@@ -38,7 +38,7 @@ describe('cy.origin cookies', () => {
       })
     })
 
-    context('#cross-origin errors', () => {
+    context('cross-origin AUT errors', () => {
       let logs: any = []
 
       beforeEach(() => {

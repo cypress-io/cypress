@@ -319,7 +319,7 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('this is the message')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
-        // expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+        expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
         done()
       })

@@ -13,7 +13,7 @@ context('cy.origin assertions', () => {
     })
   })
 
-  context('#cross origin AUT', () => {
+  context('cross-origin AUT errors', () => {
     it('.should() and .and() should work while the aut is cross origin', () => {
       cy.wrap(true)
       .should('be.true').and('not.be.false')

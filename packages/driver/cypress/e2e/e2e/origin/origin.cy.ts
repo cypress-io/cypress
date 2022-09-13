@@ -18,7 +18,7 @@ describe('cy.origin', () => {
     })
   })
 
-  describe('ensure that Visiting a cross origin page with a cy.origin command with no cy commands may cause subsequent tests to hang.', () => {
+  describe('ensure that visiting a cross origin page with a cy.origin command with no cy commands may cause subsequent tests to hang.', () => {
     it('executes quickly', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
