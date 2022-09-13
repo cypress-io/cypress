@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Frame</title>
+</head>
+
+<body>
+  <div>
+    <button id="trigger-unhandled-rejection">Trigger Unhandled Rejection</button>
+    <button id="flush">Flush</button>
+  </div>
+  <p>Errors Thrown: <span id="errors-emitted-label">0</span></p>
+  <p>Unhandled Rejections: <span id="unhandled-rejections-label">0</span></p>
+
+  <script>
+    let errorsThrown = 0
+    let unhandledRejections = 0
+
+    const triggerUnhandledRejectionButton = document.querySelector('#trigger-unhandled-rejection')
+    const flushButton = document.querySelector('#flush')
+
+    window.addEventListener('unhandledrejection', (event) => {
+      document.querySelector('#unhandled-rejections-label').innerText = ++unhandledRejections
+    })
+
+    function one() {
+      two()
+    }
+
+    function two() {
+      three()
+    }
+
+    function three() {
+      const error = new Error('whoops')
+
+      document.querySelector('#errors-emitted-label').innerText = ++errorsThrown
+        
+      throw error
+    }
+
+    triggerUnhandledRejectionButton.addEventListener('click', function (event) {
+      ;(async () => {
+        one()
+      })()
+    })
+
+    flushButton.addEventListener('click', function () {
+      // Any sort of operation here (or just binding a no-op handler) will flush
+      // any unexecuted unhandledrejection handlers
+      console.log('noop')
+    })
+
+    window.addEventListener('message', event => {
+      if (event.data === 'trigger unhandled rejection') {
+        triggerUnhandledRejectionButton.dispatchEvent(new MouseEvent('click'))
+      }
+    });
+  </script>
+</body>
+
+</html>

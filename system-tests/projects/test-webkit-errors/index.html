@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Index</title>
+  </head>
+  <body>
+    <p>Unhandled Rejections In Outer Window: <span id="unhandled-rejections">0</span></p>
+    <p>
+      <button id="trigger-unhandled-rejection" type="button">Trigger Unhandled Rejection in Frame</button>
+    </p>
+    <iframe id="frame" height="800" width="600"></iframe>
+    <script>
+      let unhandledRejectionCount = 0
+
+      const button = document.querySelector('#trigger-unhandled-rejection')
+      const flushButton = document.querySelector('#flush')
+
+      const frame = document.querySelector('#frame')
+
+      frame.onload = () => {
+        const frameButton = frame.contentWindow.document.querySelector('.trigger-unhandled-rejection')
+
+        frame.contentWindow.addEventListener('unhandledrejection', () => {
+          document.querySelector('#unhandled-rejections').innerHTML = ++unhandledRejectionCount
+        })
+
+        button.addEventListener('click', () => {
+          // Event created/dispatched from outer window - does not work
+          // You will see the thrown error counter within the frame increase, while the unhandledrejection counters
+          // do not. Clicking the Flush button will then cause the queued unhandledrejection handlers to execute, bringing
+          // all counters into parity.
+          frame.contentWindow.document.querySelector("#trigger-unhandled-rejection").dispatchEvent(new MouseEvent('click'))
+
+          // Event created/dispatched within frame as a result of a message - does work
+          // frame.contentWindow.postMessage('trigger unhandled rejection', window.location + '/errors.html');
+        })
+      }
+
+      frame.contentWindow.location.href = './frame.html?date=' + Date.now();
+    </script>
+  </body>
+</html>
