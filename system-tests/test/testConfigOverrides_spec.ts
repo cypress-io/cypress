@@ -10,8 +10,17 @@ const outputPath = path.join(e2ePath, 'output.json')
 describe('testConfigOverrides', () => {
   systemTests.setup()
 
+  systemTests.it('successfully runs valid suite-level-only overrides', {
+    spec: 'testConfigOverrides/valid-suite-only.js',
+    snapshot: true,
+    expectedExitCode: 0,
+    browser: 'electron',
+    config: {
+      video: false,
+    },
+  })
+
   systemTests.it('fails when passing invalid config value browser', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     spec: 'testConfigOverrides/invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,

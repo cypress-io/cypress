@@ -36,6 +36,7 @@ export default class Log {
   @observable type?: string
   @observable state: string
   @observable.ref referencesAlias?: Alias
+  testId: string
 
   constructor (props: InstrumentProps) {
     this.id = props.id
@@ -47,6 +48,7 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
+    this.testId = props.testId
   }
 
   update (props: InstrumentProps) {
