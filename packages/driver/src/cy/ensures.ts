@@ -399,7 +399,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       })
 
       if (err) {
-        err.message = $errUtils.appendErrMsg(err, crossOriginCommandError.message)
+        err = $errUtils.appendErrMsg(err, crossOriginCommandError.message)
 
         throw err
       } else {
