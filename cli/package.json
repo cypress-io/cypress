@@ -161,7 +161,9 @@
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
       "require": "./svelte/dist/cypress-svelte.cjs.js",
       "types": "./svelte/dist/index.d.ts"
-    }
+    },
+    "./angular/restore-mocha": "./angular/restore-mocha.js",
+    "./angular/save-mocha": "./angular/save-mocha.js"
   },
   "workspaces": {
     "nohoist": [

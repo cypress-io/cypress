@@ -5,7 +5,9 @@ import 'zone.js'
  */
 // @ts-ignore
 window.Mocha['__zone_patch__'] = false
+import 'cypress/angular/save-mocha'
 import 'zone.js/testing'
+import 'cypress/angular/restore-mocha'
 
 import { CommonModule } from '@angular/common'
 import { Component, EventEmitter, Type } from '@angular/core'
