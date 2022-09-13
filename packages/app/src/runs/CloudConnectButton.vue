@@ -10,7 +10,7 @@
   <LoginModal
     v-model="isLoginOpen"
     :gql="props.gql"
-    utm-medium="Runs Tab"
+    :utm-medium="props.utmMedium"
     :show-connect-button-after-login="!cloudProjectId"
     @connect-project="isProjectConnectOpen = true"
   />
@@ -18,6 +18,7 @@
     v-if="isProjectConnectOpen"
     :show="isProjectConnectOpen"
     :gql="props.gql"
+    :utm-medium="props.utmMedium"
     @cancel="isProjectConnectOpen = false"
     @success="isProjectConnectOpen = false; emit('success')"
   />
@@ -54,6 +55,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   gql: CloudConnectButtonFragment
   class?: string
+  utmMedium: string
 }>()
 
 const isLoginOpen = ref(false)

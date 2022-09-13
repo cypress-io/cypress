@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
-import Promise from 'bluebird'
 
 // @ts-ignore
 import mappingsWasm from 'source-map/lib/mappings.wasm'
@@ -12,19 +11,19 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={
 
 let sourceMapConsumers = {}
 
-const initializeSourceMapConsumer = (file, sourceMap) => {
-  if (!sourceMap) return Promise.resolve(null)
+const initializeSourceMapConsumer = async (file, sourceMap) => {
+  if (!sourceMap) return null
 
   // @ts-ignore
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': mappingsWasm,
   })
 
-  return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
-    sourceMapConsumers[file.fullyQualifiedUrl] = consumer
+  const consumer = await new SourceMapConsumer(sourceMap)
 
-    return consumer
-  })
+  sourceMapConsumers[file.fullyQualifiedUrl] = consumer
+
+  return consumer
 }
 
 const extractSourceMap = (file, fileContents) => {
