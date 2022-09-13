@@ -133,7 +133,7 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
   includePaths.push(cypressTypes)
 
   const tsConfigContent = JSON.stringify({
-    extends: getProjectFilePath('tsconfig.json'),
+    extends: getProjectFilePath(buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
       outDir: getProjectFilePath('out-tsc/cy'),
       allowSyntheticDefaultImports: true,
