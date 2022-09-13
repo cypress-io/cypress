@@ -164,7 +164,7 @@ const attachToWindow = (autWindow: Window) => {
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')
 
-  // @ts-ignore - the injected code adds the cypressTimersReset function to window
+  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
   Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
   // @ts-ignore - the injected code adds the cypressTimersPause function to window
   Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
