@@ -237,6 +237,14 @@ describe('App: Spec List (E2E)', () => {
         cy.get('button').contains('23 Matches')
       })
 
+      it('normalizes directory path separators for Windows', function () {
+        // On Windows, when a user types `e2e/accounts`, it should match `e2e\accounts`
+        clearSearchAndType('e2e/accounts')
+        cy.findAllByTestId('spec-item').should('have.length', 2)
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23305
       it.skip('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'

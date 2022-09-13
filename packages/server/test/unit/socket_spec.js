@@ -605,6 +605,11 @@ describe('lib/socket', () => {
       this.mockClient = sinon.stub({
         on () {},
         emit () {},
+        conn: {
+          transport: {
+            name: 'websocket',
+          },
+        },
       })
 
       this.io = {

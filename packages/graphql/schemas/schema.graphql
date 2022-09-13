@@ -23,7 +23,7 @@ enum AuthStateNameEnum {
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
-  disabled: Boolean!
+  disabled: Boolean
   displayName: String!
   family: BrowserFamily!
 

@@ -2304,6 +2304,12 @@ export default {
     },
   },
 
+  webkit: {
+    docsUrl: 'https://on.cypress.io/webkit-experiment',
+    origin: '`cy.origin()` is not currently supported in experimental WebKit.',
+    session: '`cy.session()` is not currently supported in experimental WebKit.',
+  },
+
   window: {
     iframe_doc_undefined: 'The remote iframe\'s document is `undefined`',
     iframe_undefined: 'The remote iframe is `undefined`',
