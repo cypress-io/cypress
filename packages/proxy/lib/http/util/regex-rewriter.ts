@@ -17,10 +17,22 @@ const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
 
-const integrityTagReplacementRe = new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)((=|["|'], )(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
+const buildIntegrityReplacementRe = (isHtml = true) => {
+  if (!isHtml) {
+    // only replace integrity if a trailing period (.) or string exists inside JS/Other resources
+    return new RegExp(`(${STRIPPED_INTEGRITY_TAG}|[\\.|"|']integrity)((\\s?=\\s?|["|'], )(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
+  }
 
-export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+  return new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)((=|["|'], )(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
+}
+
+const returnReplacedIntegrityExpression = (isHtml = true) => {
+  return isHtml ? `${STRIPPED_INTEGRITY_TAG}$2` : `['${STRIPPED_INTEGRITY_TAG}']$2`
+}
+
+export function strip (html: string, { modifyObstructiveThirdPartyCode, isHtml = true }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  isHtml: true,
 }) {
   let rewrittenHTML = html
   .replace(modifyObstructiveThirdPartyCode ? topOrParentExpandedEqualityBeforeRe : topOrParentEqualityBeforeRe, '$1self')
@@ -30,14 +42,15 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 
   if (modifyObstructiveThirdPartyCode) {
-    rewrittenHTML = rewrittenHTML.replace(integrityTagReplacementRe, `${STRIPPED_INTEGRITY_TAG}$2`)
+    rewrittenHTML = rewrittenHTML.replace(buildIntegrityReplacementRe(isHtml), returnReplacedIntegrityExpression(isHtml))
   }
 
   return rewrittenHTML
 }
 
-export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+export function stripStream ({ modifyObstructiveThirdPartyCode, isHtml = true }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  isHtml: true,
 }) {
   return pumpify(
     utf8Stream(),
@@ -49,7 +62,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
         ...(modifyObstructiveThirdPartyCode ? [
-          integrityTagReplacementRe,
+          buildIntegrityReplacementRe(isHtml),
         ] : []),
       ],
       [
@@ -59,7 +72,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
         ...(modifyObstructiveThirdPartyCode ? [
-          `${STRIPPED_INTEGRITY_TAG}$2`,
+          returnReplacedIntegrityExpression(isHtml),
         ] : []),
       ],
     ),

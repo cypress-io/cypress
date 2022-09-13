@@ -398,9 +398,25 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
 </html>\
 `
 
-const originalScriptWithModifyObstructiveThirdPartyCode = `(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po.integrity='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();`
+const originalScriptWithModifyObstructiveThirdPartyCode = `\
+(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po.integrity='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+foo.integrity = 'foo-bar'
+foo.integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+foo.integrity='foo-bar'
+foo.integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'\
+`
 
-const expectedScriptWithModifyObstructiveThirdPartyCode = `(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po['cypress-stripped-integrity']='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();`
+const expectedScriptWithModifyObstructiveThirdPartyCode = `\
+(function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po['cypress-stripped-integrity']='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+foo.integrity = 'foo-bar'
+foo['cypress-stripped-integrity'] = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+foo.integrity='foo-bar'
+foo['cypress-stripped-integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'\
+`
 
 describe('http/util/regex-rewriter', () => {
   context('.strip', () => {
@@ -417,6 +433,7 @@ describe('http/util/regex-rewriter', () => {
     it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (javascript)', () => {
       expect(regexRewriter.strip(originalScriptWithModifyObstructiveThirdPartyCode, {
         modifyObstructiveThirdPartyCode: true,
+        isHtml: false,
       })).to.eq(expectedScriptWithModifyObstructiveThirdPartyCode)
     })
 
@@ -624,6 +641,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
       const replacer = regexRewriter.stripStream({
         modifyObstructiveThirdPartyCode: true,
+        isHtml: true,
       })
 
       replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
@@ -645,11 +663,12 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       replacer.end()
     })
 
-    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (script)', (done) => {
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set (js)', (done) => {
       const haystacks = originalScriptWithModifyObstructiveThirdPartyCode.split('\n')
 
       const replacer = regexRewriter.stripStream({
         modifyObstructiveThirdPartyCode: true,
+        isHtml: false,
       })
 
       replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
