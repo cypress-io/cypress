@@ -344,6 +344,7 @@ async function initialize () {
 
   const config = getRunnerConfigFromWindow()
 
+  // I want to make gitRoot a read-only config value
   if (isTorndown) {
     return
   }

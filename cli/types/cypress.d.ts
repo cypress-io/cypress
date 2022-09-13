@@ -2988,6 +2988,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    gitRoot: string
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
@@ -3109,6 +3110,10 @@ declare namespace Cypress {
     * Absolute path to the root of the project
     */
     projectRoot: string
+    /**
+    * Relative path to the root of the closest .git directory // EDGE CASE: what if they have a .git on their desktop but not on this repo -- it would pick up the dekstop one... this makes me lean towards putting this on the Dashboard side and doing an actual query to GitHub/BitBucket/etc APIs.... but would we have access for private repos? I don't think so... but if that's the case, the GitDataSource woudln't work. Does it use the local user's git credentials? :( 
+    */ // we have this in other areas too.... can we leverage currentProjectGitInfo?
+    gitBaseDir: string
     /**
      * Type of test and associated runner that was launched.
      */

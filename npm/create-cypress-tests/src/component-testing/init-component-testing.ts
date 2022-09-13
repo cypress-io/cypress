@@ -95,7 +95,7 @@ type InitComponentTestingOptions = {
 
 export async function initComponentTesting<T> ({ config, useYarn, cypressConfigPath }: InitComponentTestingOptions) {
   const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
-
+  // Rachel: this is where it is for component testing
   const framework = await installFrameworkAdapter(cypressProjectRoot, { useYarn })
   const {
     possibleTemplates,

@@ -408,6 +408,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
+    // Rachel - this is the fail function
+
     // if an onFail handler is provided, call this in its place (currently used for cross-origin support)
     if (this.state('onFail')) {
       return this.state('onFail')(err)
@@ -511,6 +513,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   initialize ($autIframe) {
+    // Rachel - we probably want the git root during initialize
     this.state('$autIframe', $autIframe)
 
     // dont need to worry about a try/catch here
