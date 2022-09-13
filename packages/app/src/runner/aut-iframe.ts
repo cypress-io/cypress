@@ -22,7 +22,7 @@ export class AutIframe {
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
-    private dom: any,
+    private highlight: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -756,7 +756,7 @@ export class AutIframe {
     const { container, shadowRoot, vueContainer } = getOrCreateHelperDom({
       body: $body?.get(0) || document.body,
       className: '__cypress-selector-playground',
-      css: this.dom.highlight.css,
+      css: this.highlight.css,
     })
 
     const removeContainerClickListeners = () => {
@@ -768,7 +768,7 @@ export class AutIframe {
     }
 
     if (!$el) {
-      this.dom.highlight.unmount(vueContainer)
+      this.highlight.unmount(vueContainer)
       removeContainerClickListeners()
       container.remove()
 
@@ -787,7 +787,7 @@ export class AutIframe {
       }
     }
 
-    this.dom.highlight.render(vueContainer, {
+    this.highlight.render(vueContainer, {
       selector,
       appendTo: this.$(shadowRoot),
       showTooltip,
