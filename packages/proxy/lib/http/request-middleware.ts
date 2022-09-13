@@ -31,6 +31,15 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.next()
 }
 
+const ExtractRequestedWithAndCredentialsIfApplicable: RequestMiddleware = function () {
+  if (this.req.headers['x-cypress-request']) {
+    this.debug(`found x-cypress-request header. Deleting x-cypress-request header.`)
+    delete this.req.headers['x-cypress-request']
+  }
+
+  this.next()
+}
+
 const MaybeSimulateSecHeaders: RequestMiddleware = function () {
   if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
     this.next()
@@ -248,6 +257,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  ExtractRequestedWithAndCredentialsIfApplicable,
   MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,

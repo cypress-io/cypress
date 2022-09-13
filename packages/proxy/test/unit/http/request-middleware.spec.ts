@@ -12,6 +12,7 @@ describe('http/request-middleware', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
       'ExtractIsAUTFrameHeader',
+      'ExtractRequestedWithAndCredentialsIfApplicable',
       'MaybeSimulateSecHeaders',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
@@ -56,6 +57,25 @@ describe('http/request-middleware', () => {
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.false
+      })
+    })
+  })
+
+  describe('ExtractRequestedWithAndCredentialsIfApplicable', () => {
+    const { ExtractRequestedWithAndCredentialsIfApplicable } = RequestMiddleware
+
+    it('removes x-cypress-request header when it exists, sets in on the req', async () => {
+      const ctx = {
+        req: {
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractRequestedWithAndCredentialsIfApplicable], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-request']).not.to.exist
       })
     })
   })
