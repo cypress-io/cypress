@@ -181,12 +181,8 @@ const attachToWindow = (autWindow: Window) => {
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)
     },
-    async onBeforeUnload (e) {
+    onBeforeUnload (e) {
       // The before unload event is propagated to primary through code injected into the AUT.
-      // We need to sync this state value prior to changing stability otherwise we will erroneously log a loading event.
-      const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
-
-      cy.state('duringUserTestExecution', duringUserTestExecution)
 
       cy.isStable(false, 'beforeunload')
 
@@ -201,13 +197,13 @@ const attachToWindow = (autWindow: Window) => {
       return undefined
     },
     onLoad () {
-      cy.urlNavigationEvent('load')
-
       const remoteLocation = cy.getRemoteLocation()
 
-      Cypress.action('app:window:load', autWindow, remoteLocation.href)
-
       cy.state('autLocation', remoteLocation)
+
+      cy.urlNavigationEvent('load')
+
+      Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')

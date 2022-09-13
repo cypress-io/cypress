@@ -229,7 +229,7 @@ const pageLoading = (bool, Cypress, state) => {
   Cypress.action('app:page:loading', bool)
 }
 
-const stabilityChanged = (Cypress, state, config, stable) => {
+const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
   if (currentlyVisitingAboutBlank) {
     if (stable === false) {
@@ -271,6 +271,13 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   // which at that point we may keep runnable around
   if (!state('runnable')) {
     return
+  }
+
+  // We need to sync this state value prior to checking it otherwise we will erroneously log a loading event after the test is complete.
+  if (Cypress.isCrossOriginSpecBridge) {
+    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
+
+    cy.state('duringUserTestExecution', duringUserTestExecution)
   }
 
   // this prevents a log occurring when we navigate to about:blank inbetween tests
@@ -341,7 +348,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('window').location.href
+    const href = state('autLocation').href
     const count = getRedirectionCount(href)
     const limit = config('redirectionLimit')
 
