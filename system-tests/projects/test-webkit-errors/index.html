@@ -13,13 +13,9 @@
       let unhandledRejectionCount = 0
 
       const button = document.querySelector('#trigger-unhandled-rejection')
-      const flushButton = document.querySelector('#flush')
-
       const frame = document.querySelector('#frame')
 
       frame.onload = () => {
-        const frameButton = frame.contentWindow.document.querySelector('.trigger-unhandled-rejection')
-
         frame.contentWindow.addEventListener('unhandledrejection', () => {
           document.querySelector('#unhandled-rejections').innerHTML = ++unhandledRejectionCount
         })
