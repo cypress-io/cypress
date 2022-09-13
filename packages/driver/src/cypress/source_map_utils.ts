@@ -6,7 +6,6 @@ import type { BasicSourceMapConsumer } from 'source-map'
 import mappingsWasm from 'source-map/lib/mappings.wasm'
 
 import $utils from './utils'
-import type BluebirdPromise from 'bluebird'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
@@ -15,7 +14,6 @@ let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
 const initializeSourceMapConsumer = async (script, sourceMap) => BasicSourceMapConsumer | null {
   if (!sourceMap) return null
-
 
   // @ts-ignore
   SourceMapConsumer.initialize({
