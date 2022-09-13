@@ -150,9 +150,11 @@ import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocum
 import interval from 'human-interval'
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 const route = useRoute()
 const { t } = useI18n()
+const loginConnectStore = useLoginConnectStore()
 
 gql`
 fragment SpecsListBanners on Query {
@@ -245,32 +247,35 @@ watch(
 )
 
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
+const hasFourDaysOfCypressUse = computed(() => (Date.now() - props.gql.currentProject?.savedState?.firstOpened) > interval('4 days'))
 
-watch(
-  cloudData,
-  ([cloudViewer, cachedUser, currentProject]) => {
-    // Cached user covers state where we're authenticated but data isn't loaded yet
-    const isLoggedIn = !!cachedUser?.id || !!cloudViewer?.id
-    // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
-    // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
-    const isOrganizationLoaded = !!cloudViewer?.firstOrganization
-    const isMemberOfOrganization = (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
-    const isProjectConnected = !!currentProject?.projectId && currentProject.cloudProject?.__typename === 'CloudProject'
-    const hasNoRecordedRuns = currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0
-    const hasFourDaysOfCypressUse = (Date.now() - currentProject?.savedState?.firstOpened) > interval('4 days')
+const isAllowedFeature = (featureName) => {
+  // TODO - extract to helper function, nest states under features
+  const features = {
+    specsListBanner: hasFourDaysOfCypressUse.value,
+  }
 
-    showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && isLoggedIn && isProjectConnected && isMemberOfOrganization && isProjectConnected && hasNoRecordedRuns && hasFourDaysOfCypressUse
-    showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
-    showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
-    showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
+  return features[featureName]
+}
 
-    hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
-    hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
-    hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
-    hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
-  },
-  { immediate: true },
-)
+watch(cloudData, () => {
+  if (!isAllowedFeature('specsListBanner')) {
+    return
+  }
+
+  const { userStatusMatches } = loginConnectStore
+
+  showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && userStatusMatches('needsRecordedRun')
+  showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && userStatusMatches('needsProjectConnect')
+  showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && userStatusMatches('needsOrgConnect')
+  showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && userStatusMatches('isLoggedOut')
+
+  hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
+  hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
+  hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
+  hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
+},
+{ immediate: true })
 
 function hasBannerBeenDismissed (bannerId: string) {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
