@@ -86,7 +86,7 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
