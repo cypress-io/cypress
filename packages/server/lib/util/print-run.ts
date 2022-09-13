@@ -325,7 +325,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: any) {
 
       const ms = duration.format(stats.wallClockDuration || 0)
 
-      const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
+      const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 
       if (run.skippedSpec) {
         return table2.push([
