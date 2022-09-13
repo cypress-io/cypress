@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
-import Bluebird from 'bluebird'
 
 import type { BasicSourceMapConsumer } from 'source-map'
 // @ts-ignore
@@ -14,20 +13,21 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={
 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
-const initializeSourceMapConsumer = (script, sourceMap): BluebirdPromise<BasicSourceMapConsumer | null> => {
-  if (!sourceMap) return Bluebird.resolve(null)
+const initializeSourceMapConsumer = async (script, sourceMap) => BasicSourceMapConsumer | null {
+  if (!sourceMap) return null
+
 
   // @ts-ignore
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': mappingsWasm,
   })
 
-  return Bluebird.resolve(new SourceMapConsumer(sourceMap))
-  .then((consumer) => {
-    sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+  const consumer = await new SourceMapConsumer(sourceMap)
 
-    return consumer
-  })
+
+  sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+
+  return consumer
 }
 
 const extractSourceMap = (fileContents) => {

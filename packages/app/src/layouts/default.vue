@@ -49,10 +49,13 @@
           <component :is="Component" />
         </transition>
       </router-view>
+      <!-- "Nav" is the correct UTM medium below because
+        this is only opened by event emitted from the header bar-->
       <CloudConnectModals
         v-if="showConnectDialog && cloudModalQuery.data.value"
         :show="showConnectDialog"
         :gql="cloudModalQuery.data.value"
+        utm-medium="Nav"
         @cancel="showConnectDialog = false"
         @success="showConnectDialog = false"
       />

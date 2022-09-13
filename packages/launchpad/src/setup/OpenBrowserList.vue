@@ -27,7 +27,7 @@
           }"
         >
           <Tooltip
-            v-if="!browser.isVersionSupported"
+            v-if="browser.warning"
             popper-class="max-w-lg"
           >
             <i-cy-circle-bg-question-mark_x16
@@ -37,7 +37,10 @@
             />
             <template #popper>
               <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
-                <div class="font-medium text-white mb-2">
+                <div
+                  v-if="!browser.isVersionSupported"
+                  class="font-medium text-white mb-2"
+                >
                   Unsupported browser
                 </div>
                 {{ browser.warning }}
