@@ -789,7 +789,7 @@ export class AutIframe {
 
     this.highlight.render(vueContainer, {
       selector,
-      appendTo: this.$(shadowRoot),
+      appendTo: shadowRoot,
       showTooltip,
       styles,
     })
