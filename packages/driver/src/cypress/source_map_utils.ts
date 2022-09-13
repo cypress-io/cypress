@@ -12,7 +12,7 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={
 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
-const initializeSourceMapConsumer = async (script, sourceMap) => BasicSourceMapConsumer | null {
+const initializeSourceMapConsumer = async (script, sourceMap): BasicSourceMapConsumer | null => {
   if (!sourceMap) return null
 
   // @ts-ignore
