@@ -12,7 +12,7 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={
 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
-const initializeSourceMapConsumer = async (script, sourceMap): BasicSourceMapConsumer | null => {
+const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return null
 
   // @ts-ignore
@@ -21,7 +21,6 @@ const initializeSourceMapConsumer = async (script, sourceMap): BasicSourceMapCon
   })
 
   const consumer = await new SourceMapConsumer(sourceMap)
-
 
   sourceMapConsumers[script.fullyQualifiedUrl] = consumer
 
