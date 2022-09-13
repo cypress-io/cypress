@@ -103,6 +103,18 @@ watch(() => status.value?.isLoggedIn, (newVal) => {
   }
 })
 
+watch(status, (newVal) => {
+  if (typeof newVal === 'object') {
+    Object.entries(newVal).forEach((item) => {
+      const [key, val] = item
+
+      if (val !== loginConnectStore[key]) {
+        setStatus(key, val)
+      }
+    })
+  }
+})
+
 const userData = computed(() => {
   return props.gql.cloudViewer ?? props.gql.cachedUser
 })
