@@ -65,7 +65,7 @@ const handleErrorEvent = (event) => {
     window.removeEventListener('error', handleErrorEvent)
   } else {
     const { error } = event
-    const data = {}
+    const data = { href: window.location.href }
 
     if (error && error.stack && error.message) {
       data.message = error.message

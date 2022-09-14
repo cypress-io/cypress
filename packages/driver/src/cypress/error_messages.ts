@@ -1260,6 +1260,27 @@ export default {
           \`cy.visit('${args.originalUrl}')\``,
       }
     },
+    aut_error_prior_to_spec_bridge_attach ({ args }) {
+      const { errorMessage, autLocation } = args
+
+      return {
+        message: stripIndent`\
+          ${errorMessage}
+
+          This error was thrown by a cross origin page. If you wish to suppress this error you will have to use the cy.origin command to handle the error prior to visiting the page.
+
+          \`cy.origin('${autLocation.originPolicy}', () => {\`
+          \`  cy.on('uncaught:exception', (e) => {\`
+          \`  if (e.message.includes('Things went bad')) {\`
+          \`    // we expected this error, so let's ignore it\`
+          \`    // and let the test continue\`
+          \`    return false\`
+          \`  }\`
+          \`})\`
+          \`cy.visit('${autLocation.href}')\`
+          `,
+      }
+    },
   },
 
   proxy: {

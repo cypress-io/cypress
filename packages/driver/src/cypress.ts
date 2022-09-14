@@ -40,6 +40,7 @@ import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
+import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -166,6 +167,8 @@ class $Cypress {
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
+
+    setupAutEventHandlers(this)
 
     _.extend(this.$, $)
   }
