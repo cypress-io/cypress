@@ -1829,7 +1829,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn lerna run --scope '@cypress/angular'
       - store-npm-logs
 
   npm-react:
