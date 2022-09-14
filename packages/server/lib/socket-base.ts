@@ -138,7 +138,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let runState: RunState = undefined
+    let runState: RunState | undefined = undefined
 
     _.defaults(options, {
       socketId: null,
