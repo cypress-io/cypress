@@ -26,9 +26,7 @@
     "zone.js": ">=0.11.0"
   },
   "files": [
-    "dist",
-    "save-mocha.js",
-    "restore-mocha.js"
+    "dist"
   ],
   "types": "dist/index.d.ts",
   "license": "MIT",

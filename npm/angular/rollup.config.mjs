@@ -8,8 +8,6 @@ const config = {
     '@angular/platform-browser-dynamic/testing',
     'zone.js',
     'zone.js/testing',
-    'cypress/angular/save-mocha',
-    'cypress/angular/restore-mocha',
   ],
 }
 

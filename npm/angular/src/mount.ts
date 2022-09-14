@@ -5,9 +5,7 @@ import 'zone.js'
  */
 // @ts-ignore
 window.Mocha['__zone_patch__'] = false
-import 'cypress/angular/save-mocha'
 import 'zone.js/testing'
-import 'cypress/angular/restore-mocha'
 
 import { CommonModule } from '@angular/common'
 import { Component, EventEmitter, Type } from '@angular/core'
@@ -95,6 +93,11 @@ export type MountResponse<T> = {
    */
   component: T
 };
+
+// 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
+// Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
+// so we'll patch here pending a fix in that library
+globalThis.it.skip = globalThis.xit
 
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed

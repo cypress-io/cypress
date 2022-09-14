@@ -122,6 +122,14 @@ describe(`Angular CLI major versions`, () => {
       browser: 'chrome',
       expectedExitCode: 0,
     })
+
+    systemTests.it(`v${majorVersion} Zone.JS does not break Mocha`, {
+      project: `angular-${majorVersion}`,
+      spec: 'src/app/zonejs-mocha-skip.cy.ts,src/app/zonejs-mocha-only.cy.ts',
+      testingType: 'component',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
   }
 
   systemTests.it('angular 14 custom config', {
