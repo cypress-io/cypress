@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import { URL } from 'url'
+
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain, { ParsedDomain } from '@cypress/parse-domain'
@@ -23,7 +25,7 @@ export function parseDomain (domain: string, options = {}) {
 }
 
 export function parseUrlIntoDomainTldPort (str) {
-  let { hostname, port, protocol } = uri.parse(str)
+  let { hostname, port, protocol } = new URL(str)
 
   if (!hostname) {
     hostname = ''

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { toBoolean } from 'underscore.string'
-import * as uri from '@packages/network/lib/uri'
+import { URL } from 'url'
 
 export const hideKeys = (token?: string | number | boolean) => {
   if (!token) {
@@ -26,7 +26,7 @@ export function setUrls (obj: any) {
   const proxyUrl = `http://localhost:${obj.port}`
 
   const rootUrl = obj.baseUrl
-    ? uri.origin(obj.baseUrl)
+    ? new URL(obj.baseUrl).origin
     : proxyUrl
 
   return {
