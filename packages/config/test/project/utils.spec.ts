@@ -988,16 +988,6 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
     })
 
-    it('warns if experimentalStudio is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalStudio', true, {
-        experimentalStudio: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
-    })
-
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
@@ -1052,7 +1042,9 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1144,7 +1136,9 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',

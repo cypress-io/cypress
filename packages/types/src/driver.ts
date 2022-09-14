@@ -13,6 +13,7 @@ interface MochaRunnerState {
 
 export type RunState = MochaRunnerState & ReporterRunState & {
   studio?: StudioRecorderState
+  isSpecsListOpen?: boolean
 }
 
 export interface Emissions {
@@ -39,3 +40,7 @@ export type StoredSessions = Record<string, ServerSessionData>
 export interface CachedTestState {
   activeSessions: StoredSessions
 }
+
+export type Instrument = 'agent' | 'command' | 'route'
+
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'

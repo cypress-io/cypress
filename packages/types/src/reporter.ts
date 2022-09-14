@@ -17,6 +17,7 @@ export interface StatsStoreStartInfo {
 }
 
 export interface ReporterStartInfo extends StatsStoreStartInfo {
+  isSpecsListOpen: boolean
   autoScrollingEnabled: boolean
   scrollTop: number
   studioActive: boolean

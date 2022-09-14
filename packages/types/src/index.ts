@@ -39,3 +39,5 @@ export * from './warning'
 export * from './modeOptions'
 
 export * from './git'
+
+export * from './video'

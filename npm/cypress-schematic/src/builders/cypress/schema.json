@@ -39,6 +39,11 @@
       "description": "Run end to end tests",
       "default": true
     },
+    "component": {
+      "type": "boolean",
+      "description": "Run component tests",
+      "default": false
+    },
     "env": {
       "type": "object",
       "description": "A key-value pair of environment variables to pass to Cypress runner"
@@ -87,6 +92,13 @@
       "type": "boolean",
       "description": "Recompile and run tests when files change.",
       "default": false
+    },
+    "testingType": {
+      "enum": [
+        "e2e",
+        "component"
+      ],
+      "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e."
     }
   },
   "additionalProperties": true

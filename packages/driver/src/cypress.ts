@@ -9,6 +9,7 @@ import debugFn from 'debug'
 
 import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
+import $sourceMapUtils from './cypress/source_map_utils'
 
 import $Commands from './cypress/commands'
 import { $Cy } from './cypress/cy'
@@ -407,15 +408,9 @@ class $Cypress {
         break
 
       case 'runner:end':
-        // mocha runner has finished running the tests
+        $sourceMapUtils.destroySourceMapConsumers()
 
-        // end may have been caused by an uncaught error
-        // that happened inside of a hook.
-        //
-        // when this happens mocha aborts the entire run
-        // and does not do the usual cleanup so that means
-        // we have to fire the test:after:hooks and
-        // test:after:run events ourselves
+        // mocha runner has finished running the tests
         this.emit('run:end')
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])

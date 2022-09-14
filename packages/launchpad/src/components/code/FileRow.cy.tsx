@@ -54,6 +54,13 @@ describe('FileRow', () => {
           description={description}
           fileExtension=".js"
         />
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/function.ts"
+          description={description}
+          fileExtension=".ts"
+        />
       </div>
     ))
 
@@ -63,6 +70,23 @@ describe('FileRow', () => {
     cy.contains('cypress/integration/command.js')
     cy.contains('cypress.config.js')
     cy.contains('cypress/integration/index.js')
+    cy.contains('cypress/integration/function.ts')
+
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=changes] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
+
+    cy.get('[data-cy=skipped] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=error] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
 
     cy.percySnapshot()
   })

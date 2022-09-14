@@ -7,9 +7,9 @@ import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 import type {
   AllModeOptions,
   AllowedState,
+  OpenProjectLaunchOpts,
   FoundBrowser,
   InitializeProjectOptions,
-  LaunchOpts,
   OpenProjectLaunchOptions,
   Preferences,
 } from '@packages/types'
@@ -53,8 +53,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
-      relaunchBrowser () {
-        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
+      async relaunchBrowser () {
+        await openProject.relaunchBrowser()
       },
     },
     appApi: {
@@ -64,8 +64,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium) {
-        return auth.start(onMessage, utmSource, utmMedium)
+      logIn (onMessage, utmSource, utmMedium, utmContent) {
+        return auth.start(onMessage, utmSource, utmMedium, utmContent)
       },
       logOut () {
         return user.logOut()
@@ -75,8 +75,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-        return openProject.launch({ ...browser }, spec, options)
+      async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
+        await openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)
@@ -118,7 +118,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.closeActiveProject()
       },
       getCurrentBrowser () {
-        return (openProject?.projectBase?.browser) ?? undefined
+        return (openProject?.getProject()?.browser) ?? undefined
       },
       getConfig () {
         return openProject.getConfig()

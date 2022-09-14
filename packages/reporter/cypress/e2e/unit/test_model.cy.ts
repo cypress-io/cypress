@@ -27,6 +27,7 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
     numElements: 1,
     testCurrentRetry: 0,
     testId: 'r3',
+    state: 'active',
     timeout: 4000,
     wallClockStartedAt: new Date().toString(),
   } as CommandProps
@@ -102,28 +103,6 @@ describe('Test model', () => {
 
       test.finish({} as UpdatableTestProps)
       expect(test.isLongRunning).to.be.false
-    })
-  })
-
-  context('#studioIsNotEmpty', () => {
-    it('is empty when there are no studio commands', () => {
-      const test = createTest()
-
-      expect(test.studioIsNotEmpty).to.be.false
-
-      test.addLog(createCommand())
-
-      expect(test.studioIsNotEmpty).to.be.false
-    })
-
-    it('is is not empty when there are studio commands', () => {
-      const test = createTest()
-
-      expect(test.studioIsNotEmpty).to.be.false
-
-      test.addLog(createCommand({ hookId: 'r3-studio' }))
-
-      expect(test.studioIsNotEmpty).to.be.true
     })
   })
 

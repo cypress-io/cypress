@@ -2,23 +2,21 @@
   "name": "@cypress/angular",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
-  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^14.0.6",
-    "@angular/core": "^14.0.6",
-    "@angular/platform-browser-dynamic": "^14.0.6",
-    "@rollup/plugin-node-resolve": "^11.1.1",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "~4.2.3",
+    "@angular/common": "^14.2.0",
+    "@angular/core": "^14.2.0",
+    "@angular/platform-browser-dynamic": "^14.2.0",
+    "@cypress/mount-utils": "0.0.0-development",
+    "typescript": "^4.7.4",
     "zone.js": "~0.11.4"
   },
   "peerDependencies": {
