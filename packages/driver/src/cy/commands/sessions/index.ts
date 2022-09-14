@@ -53,6 +53,10 @@ export default function (Commands, Cypress, cy) {
 
   Commands.addAll({
     session (id, setup?: Function, options: { validate?: Function } = {}) {
+      if (Cypress.isBrowser('webkit')) {
+        return $errUtils.throwErrByPath('webkit.session')
+      }
+
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
@@ -365,8 +369,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(existingSession)
-        }).then(async () => {
-          await navigateAboutBlank()
+        }).then(() => {
           _log.set({ state: 'passed' })
         })
       })

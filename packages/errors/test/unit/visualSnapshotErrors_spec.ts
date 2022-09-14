@@ -1200,5 +1200,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+
+    EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { checkSupportFile } from './project_utils'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
 import { ServerCt } from './server-ct'
@@ -20,7 +19,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -39,6 +38,7 @@ export interface Cfg extends ReceivedCypressOptions {
   e2e: Partial<Cfg>
   component: Partial<Cfg>
   additionalIgnorePattern?: string | string[]
+  resolved: ResolvedConfigurationOptions
 }
 
 const localCwd = process.cwd()
@@ -60,6 +60,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
+  public videoRecording?: VideoRecording
   public browser: any
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
@@ -152,7 +153,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = this.getConfig()
+    const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -224,8 +225,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await this.saveState(stateToSave)
 
-    await checkSupportFile(cfg.supportFile)
-
     if (cfg.isTextTerminal) {
       return
     }
@@ -296,14 +295,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
     return runEvents.execute('after:run', config)
-  }
-
-  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
-    debug('got plugins error', err.stack)
-
-    browsers.close()
-
-    options.onError(err)
   }
 
   initializeReporter ({

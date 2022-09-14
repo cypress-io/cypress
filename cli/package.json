@@ -38,7 +38,7 @@
     "dayjs": "^1.10.4",
     "debug": "^4.3.2",
     "enquirer": "^2.3.6",
-    "eventemitter2": "^6.4.3",
+    "eventemitter2": "6.4.7",
     "execa": "4.1.0",
     "executable": "^4.1.1",
     "extract-zip": "2.0.1",
@@ -108,7 +108,8 @@
     "react",
     "vue2",
     "react18",
-    "angular"
+    "angular",
+    "svelte"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -155,6 +156,11 @@
       "import": "./angular/dist/index.js",
       "require": "./angular/dist/index.js",
       "types": "./angular/dist/index.d.ts"
+    },
+    "./svelte": {
+      "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
+      "require": "./svelte/dist/cypress-svelte.cjs.js",
+      "types": "./svelte/dist/index.d.ts"
     }
   },
   "workspaces": {
