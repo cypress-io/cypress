@@ -96,7 +96,9 @@ export class GitDataSource {
     if (!config.isRunMode) {
       this.#refreshAllGitData()
     } else {
-      this.#verifyGitRepo()
+      this.#verifyGitRepo().catch(() => {
+        // Empty catch for no-floating-promises rule
+      })
     }
   }
 
