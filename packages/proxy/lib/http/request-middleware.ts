@@ -21,17 +21,13 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
+const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
 
-  this.next()
-}
-
-const ExtractRequestedWithAndCredentialsIfApplicable: RequestMiddleware = function () {
   if (this.req.headers['x-cypress-request']) {
     this.debug(`found x-cypress-request header. Deleting x-cypress-request header.`)
     delete this.req.headers['x-cypress-request']
@@ -256,8 +252,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
-  ExtractIsAUTFrameHeader,
-  ExtractRequestedWithAndCredentialsIfApplicable,
+  ExtractCypressMetadataHeaders,
   MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
