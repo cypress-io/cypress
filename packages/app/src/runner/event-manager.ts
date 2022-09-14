@@ -612,8 +612,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgePromiseId }, originPolicy) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, `sync:during:user:test:execution:${specBridgePromiseId}`, cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, originPolicy) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {

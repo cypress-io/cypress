@@ -39,7 +39,7 @@ const sharedPromiseSetup = ({ resolve,
 
   const dataToSend = data || {}
 
-  dataToSend.specBridgePromiseId = Date.now()
+  dataToSend.specBridgeResponseEvent = `${event}:${Date.now()}`
 
   const handler = (result) => {
     clearTimeout(timeoutId)
@@ -51,7 +51,7 @@ const sharedPromiseSetup = ({ resolve,
     reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within 1 second.`))
   }, 1000)
 
-  communicator.once(`${event}:${dataToSend.specBridgePromiseId}`, handler)
+  communicator.once(dataToSend.specBridgeResponseEvent, handler)
 
   return dataToSend
 }
@@ -170,23 +170,6 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         specBridgeName: originPolicy,
         communicator: this,
       })
-      // let timeoutId
-
-      // const dataToSend = data || {}
-
-      // dataToSend.specBridgePromiseId = Date.now()
-
-      // const handler = (result) => {
-      //   clearTimeout(timeoutId)
-      //   resolve(result)
-      // }
-
-      // timeoutId = setTimeout(() => {
-      //   this.off(event, handler)
-      //   reject(new Error(`${event} failed to receive a response from ${originPolicy} spec bridge within 1 second.`))
-      // }, 1000)
-
-      // this.once(`${event}:${dataToSend.specBridgePromiseId}`, handler)
 
       this.toSpecBridge(originPolicy, event, dataToSend)
     })
