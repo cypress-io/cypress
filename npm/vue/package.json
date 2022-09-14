@@ -10,6 +10,7 @@
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node --require @packages/ts/register ./inline-types.ts && node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "yarn tsd && vue-tsc --noEmit",
+    "typecheck": "yarn check-ts",
     "test": "yarn cy:run",
     "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.tsd.json",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"

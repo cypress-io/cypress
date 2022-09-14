@@ -1105,7 +1105,7 @@ commands:
           name: Build NPM package
           command: |
             source ./scripts/ensure-node.sh
-            yarn build --scope cypress
+            yarn lerna run build --scope '@cypress/*'
       - run:
           name: Copy Re-exported NPM Packages
           command: node ./scripts/post-build.js
