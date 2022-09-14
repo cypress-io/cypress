@@ -24,6 +24,10 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
   }
 
+  if (forceNetworkError && Cypress.isBrowser('webkit')) {
+    err('`forceNetworkError` was passed, but it is not currently supported in experimental WebKit.')
+  }
+
   if (body && fixture) {
     err('`body` and `fixture` cannot both be set, pick one.')
   }

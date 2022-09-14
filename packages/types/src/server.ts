@@ -1,14 +1,13 @@
 import type { FoundBrowser } from './browser'
 import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
-
-export type WriteVideoFrame = (data: Buffer) => void
+import type { RunModeVideoApi } from './video'
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
   shouldLaunchNewTab: boolean
   automationMiddleware: AutomationMiddleware
-  writeVideoFrame?: WriteVideoFrame
+  videoApi?: RunModeVideoApi
   onWarning: (err: Error) => void
   onError: (err: Error) => void
 }
@@ -22,7 +21,7 @@ export type BrowserLaunchOpts = {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
-& Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalSessionAndOrigin' | 'experimentalModifyObstructiveThirdPartyCode'>
+& Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalSessionAndOrigin' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
 export type BrowserNewTabOpts = { onInitializeNewBrowserTab: () => void } & BrowserLaunchOpts
 

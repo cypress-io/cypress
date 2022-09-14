@@ -70,13 +70,33 @@ describe('baseUrl', () => {
 })
 
 describe('experimentalSingleTabRunMode', () => {
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
-  it.skip('is a valid config for component testing', () => {
+  it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          component: {
+            experimentalSingleTabRunMode: true,
+            devServer () {
+              // This test doesn't need to actually run any component tests
+              // so we create a fake dev server to make it run faster and
+              // avoid flake on CI.
+              return {
+                port: 1234,
+                close: () => {},
+              }
+            },
+          },
+        })`)
+    })
+
     cy.visitLaunchpad()
+
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.findByTestId('launchpad-Choose a Browser')
     cy.get('h1').contains('Choose a Browser')
   })
 
@@ -93,24 +113,12 @@ describe('experimentalSingleTabRunMode', () => {
 describe('experimentalStudio', () => {
   it('is not a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
+
     cy.visitLaunchpad()
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalStudio: true,
-            devServer: {
-              bundler: 'webpack',
-            },
-          },
-        })`)
-    })
-
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('alert-body').contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
   })
 
   it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
@@ -131,7 +139,7 @@ describe('experimentalStudio', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.findByTestId('launchpad-Choose a Browser')
     cy.get('h1').contains('Choose a Browser')
   })
 })

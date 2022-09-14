@@ -185,7 +185,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const experimental = experiments.getExperimentsFromResolved(config.resolved)
   const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !_.isEmpty(enabledExperiments)
+  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments)
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.
@@ -452,7 +452,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoProcessingProgress (opts: { name: string, videoCompression: number | false }) {
+export function displayVideoProcessingProgress (opts: { videoName: string, videoCompression: number | false }) {
   console.log('')
 
   terminal.header('Video', {
@@ -508,7 +508,7 @@ export function displayVideoProcessingProgress (opts: { name: string, videoCompr
         table.push([
           gray('-'),
           gray('Finished processing:'),
-            `${formatPath(opts.name, getWidth(table, 2), 'cyan')}`,
+            `${formatPath(opts.videoName, getWidth(table, 2), 'cyan')}`,
             gray(dur),
         ])
 
