@@ -380,6 +380,8 @@ export class ProjectLifecycleManager {
   }
 
   private _setCurrentProject (projectRoot: string) {
+    process.chdir(projectRoot)
+
     this._projectRoot = projectRoot
     this._initializedProject = undefined
 

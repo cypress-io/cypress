@@ -8,7 +8,7 @@ import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
 
-const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
+const ERROR_PROPS = 'message type name stack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
@@ -435,8 +435,7 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
-  err.stack = stack
-  err.sourceMappedStack = sourceMapped
+  err.stack = sourceMapped
   err.parsedStack = parsed
   err.codeFrame = $stackUtils.getCodeFrame(err, index)
 

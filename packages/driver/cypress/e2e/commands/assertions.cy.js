@@ -182,6 +182,29 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    /*
+     * There was a bug (initially discovered as part of https://github.com/cypress-io/cypress/issues/23699 but not
+     * directly related) in our copy of chai where, when an element with a trailing space was asserted on,
+     * the log message would oscilate rapidly between two states. This happened because we were re-using a global
+     * regular expression - which tracks internal state.
+     *
+     * https://stackoverflow.com/questions/15276873/is-javascript-test-saving-state-in-the-regex
+     */
+    it('should be consistent with log message across retries', (done) => {
+      let assertionMessage
+
+      cy.on('command:retry', () => {
+        if (assertionMessage) {
+          expect(assertionMessage).to.equal(cy.state('current').get('logs')[1].get('message'))
+          done()
+        }
+
+        assertionMessage = cy.state('current').get('logs')[1].get('message')
+      })
+
+      cy.get('#with-trailing-space').should('have.text', 'I\'ve got a lovely bunch of coconuts')
+    })
+
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
