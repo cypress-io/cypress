@@ -308,11 +308,11 @@ watchEffect(() => {
   }
 
   if (!cohorts.organization && showCreateOrganizationBanner.value) {
-    cohorts.login = getCohortForBanner(BannerIds.ACI_082022_CREATE_ORG)
+    cohorts.organization = getCohortForBanner(BannerIds.ACI_082022_CREATE_ORG)
   }
 
   if (!cohorts.connectProject && showConnectBanner.value) {
-    cohorts.login = getCohortForBanner(BannerIds.ACI_082022_CONNECT_PROJECT)
+    cohorts.connectProject = getCohortForBanner(BannerIds.ACI_082022_CONNECT_PROJECT)
   }
 })
 
