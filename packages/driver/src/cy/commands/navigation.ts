@@ -348,25 +348,25 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('autLocation').href
-    const count = getRedirectionCount(href)
-    const limit = config('redirectionLimit')
-
-    if (count === limit) {
-      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-        args: {
-          href,
-          limit,
-        },
-      })
-    }
-
-    updateRedirectionCount(href)
-
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
       const onWindowLoad = ({ url }) => {
+        const href = state('autLocation').href
+        const count = getRedirectionCount(href)
+        const limit = config('redirectionLimit')
+
+        if (count === limit) {
+          $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+            args: {
+              href,
+              limit,
+            },
+          })
+        }
+
+        updateRedirectionCount(href)
+
         // this prevents a log occurring when we navigate to about:blank in-between tests
         if (!state('duringUserTestExecution')) return
 

@@ -283,6 +283,7 @@ describe('cy.origin cookies', () => {
         cy.wait('@headers')
 
         cy.contains('"cookie":"foo=bar"')
+        cy.wait(0) // Give the server a chance to catch up
         cy.getCookie('foo').its('value').should('equal', 'bar')
       })
     })
