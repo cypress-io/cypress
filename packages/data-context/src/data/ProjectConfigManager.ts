@@ -479,6 +479,7 @@ export class ProjectConfigManager {
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
+      gitBaseDir: this.options.ctx.coreData.currentProjectGitInfo?.gitBaseDir,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {

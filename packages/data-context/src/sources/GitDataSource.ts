@@ -95,6 +95,8 @@ export class GitDataSource {
 
     if (!config.isRunMode) {
       this.#refreshAllGitData()
+    } else {
+      this.#verifyGitRepo()
     }
   }
 

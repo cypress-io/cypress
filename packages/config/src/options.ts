@@ -475,6 +475,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
+    name: 'gitBaseDir',
+    defaultValue: null,
+    validation: validate.isString,
+    isInternal: true,
+  }, {
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
