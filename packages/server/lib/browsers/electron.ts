@@ -384,7 +384,7 @@ export = {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-      const defaultHeaders = {
+      const requestModifications = {
         requestHeaders: {
           ...details.requestHeaders,
           ...(details.resourceType === 'xhr') ? {
@@ -401,14 +401,14 @@ export = {
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
       ) {
-        cb(defaultHeaders)
+        cb(requestModifications)
 
         return
       }
 
       cb({
         requestHeaders: {
-          ...defaultHeaders.requestHeaders,
+          ...requestModifications.requestHeaders,
           'X-Cypress-Is-AUT-Frame': 'true',
         },
       })

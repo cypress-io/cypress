@@ -61,7 +61,7 @@ const connect = function (host, path, extraOpts) {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
-      const defaultHeaders = {
+      const requestModifications = {
         requestHeaders: [
           ...(details.requestHeaders || []),
           ...(details.type === 'xmlhttprequest' ? [{
@@ -79,11 +79,11 @@ const connect = function (host, path, extraOpts) {
         || details.type !== 'sub_frame'
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
-      ) return defaultHeaders
+      ) return requestModifications
 
       return {
         requestHeaders: [
-          ...defaultHeaders.requestHeaders,
+          ...requestModifications.requestHeaders,
           {
             name: 'X-Cypress-Is-AUT-Frame',
             value: 'true',
