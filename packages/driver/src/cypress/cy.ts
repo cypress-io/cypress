@@ -579,11 +579,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           isRunnerAbleToCommunicateWithAUT = false
         }
 
-        // Get the location even if we're cross origin.
-        const remoteLocation = await this.getCrossOriginRemoteLocation()
-
-        cy.state('autLocation', remoteLocation)
-
         // If the runner can communicate, we should setup all events, otherwise just setup the window and fire the load event.
         if (isRunnerAbleToCommunicateWithAUT) {
           setWindowDocumentProps(autWindow, this.state)
@@ -608,6 +603,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // there is a cross-origin error and the cy.origin API is
         // not utilized
         try {
+          // Get the location even if we're cross origin.
+          const remoteLocation = await this.getCrossOriginRemoteLocation()
+
+          cy.state('autLocation', remoteLocation)
           this.Cypress.action('app:window:load', this.state('window'), remoteLocation.href)
 
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })

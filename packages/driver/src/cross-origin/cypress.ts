@@ -197,11 +197,11 @@ const attachToWindow = (autWindow: Window) => {
       return undefined
     },
     onLoad () {
+      cy.urlNavigationEvent('load')
+
       const remoteLocation = cy.getRemoteLocation()
 
       cy.state('autLocation', remoteLocation)
-
-      cy.urlNavigationEvent('load')
 
       Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
