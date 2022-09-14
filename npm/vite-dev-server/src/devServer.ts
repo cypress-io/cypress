@@ -18,7 +18,7 @@ export type ViteDevServerConfig = {
   onConfigNotFound?: (devServer: 'vite', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
-  viteConfig?: ConfigHandler // Derived from the user's webpack
+  viteConfig?: ConfigHandler // Derived from the user's vite config
 }
 
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {

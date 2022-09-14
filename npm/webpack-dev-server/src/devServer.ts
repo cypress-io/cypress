@@ -36,7 +36,7 @@ export type WebpackDevServerConfig = {
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
-  webpackConfig?: ConfigHandler // Derived from the user's webpack
+  webpackConfig?: ConfigHandler // Derived from the user's webpack config
 } & FrameworkConfig
 
 /**
