@@ -27,7 +27,7 @@ describe('cy.origin', () => {
       })
     })
 
-    it('it does not hang', () => {
+    it('does not hang', () => {
       cy.log('I log correctly')
     })
   })

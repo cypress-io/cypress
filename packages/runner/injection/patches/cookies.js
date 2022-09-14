@@ -51,8 +51,6 @@ export const patchDocumentCookie = (win) => {
         const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
 
         documentCookieValue = cookiesString
-
-      // console.log('documentCookieValue via sync', documentCookieValue)
       } catch (err) {
       // unlikely there will be errors, but ignore them in any case, since
       // they're not user-actionable

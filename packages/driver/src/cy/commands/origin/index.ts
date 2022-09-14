@@ -199,7 +199,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   hookId: Cypress.state('hookId'),
                   originCommandBaseUrl: location.href,
                   isStable: Cypress.state('isStable'),
-                  autLocation: Cypress.state('autLocation').href,
+                  autLocation: Cypress.state('autLocation')?.href,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

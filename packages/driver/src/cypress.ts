@@ -325,7 +325,7 @@ class $Cypress {
 
     $scriptUtils.runScripts(specWindow, scripts)
     // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-ignore
+    // @ts-expect-error
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
