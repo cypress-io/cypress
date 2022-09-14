@@ -1,3 +1,5 @@
+require('../spec_helper')
+
 const cache = require(`../../lib/cache`)
 const cohorts = require(`../../lib/cohorts`)
 
@@ -8,12 +10,36 @@ describe('lib/cohort', () => {
         name: 'testName',
         cohort: 'A',
       }
+      const cohortTest2 = {
+        name: 'testName2',
+        cohort: 'B',
+      }
+
+      const allCohorts = {
+        [cohortTest.name]: cohortTest,
+        [cohortTest2.name]: cohortTest2,
+      }
+
+      sinon.stub(cache, 'getCohorts').resolves(allCohorts)
+
+      return cohorts.get().then((cohorts) => {
+        expect(cohorts).to.eq(allCohorts)
+      })
+    })
+  })
+
+  context('.getByName', () => {
+    it('calls cache.getByName', async () => {
+      const cohortTest = {
+        name: 'testName',
+        cohort: 'A',
+      }
 
       sinon.stub(cache, 'getCohorts').resolves({
         [cohortTest.name]: cohortTest,
       })
 
-      return cohorts.get(cohortTest.name).then((cohort) => {
+      return cohorts.getByName(cohortTest.name).then((cohort) => {
         expect(cohort).to.eq(cohortTest)
       })
     })
@@ -27,7 +53,7 @@ describe('lib/cohort', () => {
       }
 
       return cohorts.set(cohortTest).then(() => {
-        return cohorts.get(cohortTest.name).then((cohort) => {
+        return cohorts.getByName(cohortTest.name).then((cohort) => {
           expect(cohort).to.eq(cohortTest)
         })
       })
