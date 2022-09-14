@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
-import Promise from 'bluebird'
 
+import type { BasicSourceMapConsumer } from 'source-map'
 // @ts-ignore
 import mappingsWasm from 'source-map/lib/mappings.wasm'
 
@@ -10,30 +10,41 @@ import $utils from './utils'
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
-let sourceMapConsumers = {}
+let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
-const initializeSourceMapConsumer = (file, sourceMap) => {
-  if (!sourceMap) return Promise.resolve(null)
+const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
+  if (!sourceMap) return null
 
   // @ts-ignore
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': mappingsWasm,
   })
 
-  return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
-    sourceMapConsumers[file.fullyQualifiedUrl] = consumer
+  const consumer = await new SourceMapConsumer(sourceMap)
 
-    return consumer
-  })
+  sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+
+  return consumer
 }
 
-const extractSourceMap = (file, fileContents) => {
-  let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
+const extractSourceMap = (fileContents) => {
+  let dataUrlMatch
 
-  if (!sourceMapMatch) return null
+  try {
+    let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
 
-  const url = _.last(sourceMapMatch) as any
-  const dataUrlMatch = url.match(regexDataUrl)
+    if (!sourceMapMatch) return null
+
+    const url = _.last(sourceMapMatch) as any
+
+    dataUrlMatch = url.match(regexDataUrl)
+  } catch (err) {
+    // ignore unable to match regex. there's nothing we
+    // can do about it and we don't want to thrown an exception
+    if (err.message === 'Maximum call stack size exceeded') return null
+
+    throw err
+  }
 
   if (!dataUrlMatch) return null
 
@@ -62,15 +73,16 @@ const getSourcePosition = (filePath, position) => {
 
   if (!sourceMapConsumer) return null
 
-  const sourcePosition = sourceMapConsumer.originalPositionFor(position)
-  const { source, line, column } = sourcePosition
+  const { source, line, column } = sourceMapConsumer.originalPositionFor(position)
 
   if (!source || line == null || column == null) return
 
   // if the file is outside of the projectRoot
   // originalPositionFor will not provide the correct relative path
   // https://github.com/cypress-io/cypress/issues/16255
+  // @ts-expect-error
   const sourceIndex = sourceMapConsumer._absoluteSources.indexOf(source)
+  // @ts-expect-error
   const file = sourceMapConsumer._sources.at(sourceIndex)
 
   return {
@@ -90,9 +102,16 @@ const base64toJs = (base64) => {
   }
 }
 
+const destroySourceMapConsumers = () => {
+  Object.values(sourceMapConsumers).forEach((consumer) => {
+    consumer.destroy()
+  })
+}
+
 export default {
   getSourcePosition,
   getSourceContents,
   extractSourceMap,
   initializeSourceMapConsumer,
+  destroySourceMapConsumers,
 }

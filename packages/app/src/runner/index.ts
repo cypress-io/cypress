@@ -30,18 +30,11 @@ import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute: string) {
-  const socketConfig = {
-    path: socketIoRoute,
-    transports: ['websocket'],
-  }
-
-  const ws = client(socketConfig)
-
-  ws.on('connect_error', () => {
-    // fall back to polling if websocket fails to connect (webkit)
-    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
-    ws.io.opts.transports = ['polling', 'websocket']
+export function createWebsocket (config: Cypress.Config) {
+  const ws = client({
+    path: config.socketIoRoute,
+    // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
+    transports: config.browser.family === 'webkit' ? ['polling'] : ['websocket'],
   })
 
   ws.on('connect', () => {

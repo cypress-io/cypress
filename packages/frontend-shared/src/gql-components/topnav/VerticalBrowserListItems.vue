@@ -19,7 +19,7 @@
         class="mr-16px min-w-26px w-26px"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
         :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
-        :alt="browser.displayName || ''"
+        alt=""
       >
       <div class="flex-grow">
         <div>

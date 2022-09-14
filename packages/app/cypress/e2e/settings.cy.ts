@@ -16,17 +16,12 @@ describe('App: Settings', () => {
     cy.visitApp()
     cy.get(SidebarSettingsLinkSelector).click()
 
-    cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
+    cy.contains('[data-cy="app-header-bar"]', 'Settings')
+    cy.contains('[data-cy="app-header-bar"] button', 'Log In').should('be.visible')
+
     cy.findByText('Device Settings').should('be.visible')
     cy.findByText('Project Settings').should('be.visible')
-  })
-
-  it('shows a button to log in if user is not connected', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.get(SidebarSettingsLinkSelector).click()
-    cy.findByText('Project Settings').click()
-    cy.get('button').contains('Log In')
+    cy.findByText('Dashboard Settings').should('be.visible')
   })
 
   describe('Cloud Settings', () => {
@@ -406,7 +401,7 @@ describe('App: Settings', () => {
 })
 
 describe('App: Settings without cloud', () => {
-  it('the projectId section shows a prompt to connect when there is no projectId', () => {
+  it('the projectId section shows a prompt to log in when there is no projectId, and uses correct UTM params', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
     cy.startAppServer('component')
@@ -415,7 +410,21 @@ describe('App: Settings without cloud', () => {
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Dashboard Settings').click()
     cy.findByText('Project ID').should('exist')
-    cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
+    cy.withCtx((ctx, o) => {
+      o.sinon.spy(ctx._apis.authApi, 'logIn')
+    })
+
+    cy.contains('button', 'Log in to the Cypress Dashboard').click()
+    cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+      cy.contains('button', 'Log In').click()
+    })
+
+    cy.withCtx((ctx, o) => {
+      // validate utmSource
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+      // validate utmMedium
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Settings Tab')
+    })
   })
 
   it('have returned browsers', () => {

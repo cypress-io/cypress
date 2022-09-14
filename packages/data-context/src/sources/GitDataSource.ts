@@ -209,6 +209,12 @@ export class GitDataSource {
           })
         })
 
+        /*
+          To get the GitHub URL, dashboard combines git repo + `originalFile`
+          `originalFile` is relative to where the `cypress.config.js` lives, which may not be the root for monorepos
+          but `.git` is definitely at the root for monorepos (we only care about repos w/ git)
+         `gitBaseDir` is what I want <3 (for both run/open modes)
+        */
         this.#gitBaseDirWatcher.on('error', (e) => {
           debug(`Failed to watch for git changes`, e.message)
           this.config.onError(e)
@@ -219,6 +225,10 @@ export class GitDataSource {
       debug(`Error loading & watching current branch %s`, e.message)
     }
   }
+
+  // Absolute path: /Users/rachel/Documents/GitHub/cypress/packages/data-context/src/sources/GitDataSource.ts
+  // originalFile: src/sources/GitDataSource.ts
+  // gitBaseDir: /Users/rachel/Documents/GitHub/cypress/
 
   async #loadCurrentBranch () {
     if (this.#git) {
