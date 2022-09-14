@@ -350,8 +350,8 @@ export class EventManager {
     // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
-    // This is a test-only even. It's used to
-    // trigger a re-rerun for the drive rerun.cy.js spec.
+    // This is a test-only event. It's used to
+    // trigger a rerun for the driver rerun.cy.js spec.
     $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
