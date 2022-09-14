@@ -19,11 +19,11 @@ export default class Session extends Instrument {
 
   constructor (props: SessionProps) {
     super(props)
-    const { sessionInfo } = props
+    const { sessionInfo: { isGlobalSession, id, status } } = props
 
-    this.isGlobalSession = sessionInfo.isGlobalSession
-    this.name = sessionInfo.id
-    this.status = sessionInfo.status
+    this.isGlobalSession = isGlobalSession
+    this.name = id
+    this.status = status
   }
 
   update (props: Partial<SessionProps>) {

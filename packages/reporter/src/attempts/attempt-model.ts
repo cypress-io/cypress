@@ -119,7 +119,7 @@ export default class Attempt {
     if (log) {
       // @ts-ignore satisfied by CommandProps
       if (props.sessionInfo) {
-        this._updateSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
+        this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
       }
 
       log.update(props)
@@ -190,11 +190,13 @@ export default class Attempt {
     this.sessions[props.id] = session
   }
 
-  _updateSession (props: SessionProps) {
+  _updateOrAddSession (props: SessionProps) {
     const session = this.sessions[props.id]
 
     if (session) {
-      return session.update(props)
+      session.update(props)
+
+      return
     }
 
     this._addSession(props)

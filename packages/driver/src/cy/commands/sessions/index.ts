@@ -117,7 +117,7 @@ export default function (Commands, Cypress, cy) {
         }
       }
 
-      function setSessionInfo (status: string) {
+      function setSessionLogStatus (status: string) {
         _log.set({
           sessionInfo: {
             id: existingSession.id,
@@ -187,7 +187,7 @@ export default function (Commands, Cypress, cy) {
 
             const onFail = (err) => {
               validateLog.set({ state: 'failed' })
-              setSessionInfo('failed')
+              setSessionLogStatus('failed')
 
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
@@ -306,7 +306,7 @@ export default function (Commands, Cypress, cy) {
        */
       const createSessionWorkflow = (existingSession, recreateSession = false) => {
         return cy.then(async () => {
-          setSessionInfo(recreateSession ? 'recreating' : 'creating')
+          setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
 
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
@@ -319,7 +319,7 @@ export default function (Commands, Cypress, cy) {
             return
           }
 
-          setSessionInfo(recreateSession ? 'recreated' : 'created')
+          setSessionLogStatus(recreateSession ? 'recreated' : 'created')
         })
       }
 
@@ -331,7 +331,7 @@ export default function (Commands, Cypress, cy) {
        */
       const restoreSessionWorkflow = (existingSession) => {
         return cy.then(async () => {
-          setSessionInfo('restoring')
+          setSessionLogStatus('restoring')
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
@@ -343,7 +343,7 @@ export default function (Commands, Cypress, cy) {
             return createSessionWorkflow(existingSession, true)
           }
 
-          setSessionInfo('restored')
+          setSessionLogStatus('restored')
         })
       }
 
