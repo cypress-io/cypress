@@ -708,8 +708,8 @@ class $Cypress {
     }
   }
 
-  backend (eventName, ...args): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
+  backend (eventName, ...args) {
+    return new Promise((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
 
