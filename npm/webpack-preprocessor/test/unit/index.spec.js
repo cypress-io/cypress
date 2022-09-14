@@ -10,6 +10,11 @@ const expect = chai.expect
 chai.use(require('sinon-chai'))
 
 const webpack = sinon.stub()
+const LimitChunkCountPluginStub = sinon.stub()
+
+webpack.optimize = {
+  LimitChunkCountPlugin: LimitChunkCountPluginStub,
+}
 
 mockery.enable({
   warnOnUnregistered: false,
