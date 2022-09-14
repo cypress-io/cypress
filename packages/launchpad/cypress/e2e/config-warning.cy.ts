@@ -111,29 +111,9 @@ describe('experimentalSingleTabRunMode', () => {
 })
 
 describe('experimentalStudio', () => {
-  // TODO: fix this flaky test. https://github.com/cypress-io/cypress/issues/23743
-  it.skip('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+  it('is not a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalStudio: true,
-            devServer () {
-              // This test doesn't need to actually run any component tests
-              // so we create a fake dev server to make it run faster and
-              // avoid flake on CI.
-              return {
-                port: 1234,
-                close: () => {},
-              }
-            },
-          },
-        })`)
-    })
+    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="component"]').click()
