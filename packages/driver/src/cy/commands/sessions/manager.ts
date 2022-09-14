@@ -8,10 +8,7 @@ import {
 } from './utils'
 
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
-type SessionData = ServerSessionData & {
-  setup: () => null
-  validate: () => null
-}
+type SessionData = Cypress.Commands.Session.SessionData
 
 const getLogProperties = (displayName) => {
   return {
@@ -210,7 +207,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string) => {
+    getSession: (id: string): Promise<ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
 

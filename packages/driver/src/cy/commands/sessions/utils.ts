@@ -3,14 +3,7 @@ import $ from 'jquery'
 import Bluebird from 'bluebird'
 import { $Location } from '../../../cypress/location'
 
-import type { ServerSessionData } from '@packages/types'
-
-export type SessionData = ServerSessionData & {
-  setup: () => null
-  validate: () => null
-}
-
-export type ActiveSessions = Record<string, SessionData>
+type SessionData = Cypress.Commands.Session.SessionData
 
 const getSessionDetails = (sessState: SessionData) => {
   return {
