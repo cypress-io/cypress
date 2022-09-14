@@ -59,12 +59,25 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('removes x-cypress-request header when it exists, sets in on the req', async () => {
+    it('removes x-cypress-request header when it exists', async () => {
       const ctx = {
         req: {
           headers: {
             'x-cypress-request': 'true',
           },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-request']).not.to.exist
+      })
+    })
+
+    it('removes x-cypress-request header when it does not exist', async () => {
+      const ctx = {
+        req: {
+          headers: {},
         } as Partial<CypressIncomingRequest>,
       }
 
