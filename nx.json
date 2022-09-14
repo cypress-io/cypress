@@ -5,6 +5,11 @@
       "dependsOn": [
         "^build"
       ]
+    },
+    "check-ts": {
+      "dependsOn": [
+        "build"
+      ]
     }
   },
   "tasksRunnerOptions": {
