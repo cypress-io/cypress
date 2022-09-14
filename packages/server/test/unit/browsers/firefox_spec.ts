@@ -145,7 +145,7 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
-      sinon.stub(launch, 'launch').resolves(this.browserInstance)
+      sinon.stub(launch, 'launch').returns(this.browserInstance)
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
       sinon.spy(FirefoxProfile.prototype, 'updatePreferences')

@@ -15,12 +15,15 @@ import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
+import type { BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
-  relaunchBrowser: (() => Promise<any>) | null = null
+  relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
+    throw new Error('bad relaunch')
+  }
 
   constructor () {
     return autoBindDebug(this)
@@ -29,7 +32,9 @@ export class OpenProject {
   resetOpenProject () {
     this.projectBase?.__reset()
     this.projectBase = null
-    this.relaunchBrowser = null
+    this.relaunchBrowser = () => {
+      throw new Error('bad relaunch after reset')
+    }
   }
 
   reset () {
@@ -84,10 +89,11 @@ export class OpenProject {
       proxyServer: cfg.proxyServer,
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
-      isTextTerminal: cfg.isTextTerminal,
+      isTextTerminal: !!cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
-      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
+      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
+      experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
     }
 
@@ -158,13 +164,9 @@ export class OpenProject {
         spec.relative,
       )
 
-      if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-        await runEvents.execute('before:spec', cfg, spec)
-      } else {
-        // clear cookies and all session data before each spec
-        cookieJar.removeAllCookies()
-        session.clearSessions()
-      }
+      // clear cookies and all session data before each spec
+      cookieJar.removeAllCookies()
+      session.clearSessions()
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {

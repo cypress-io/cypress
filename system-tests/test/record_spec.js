@@ -713,15 +713,78 @@ describe('e2e record', () => {
   })
 
   context('video recording', () => {
-    setupStubbedServer(createRoutes())
+    describe('when video=false', () => {
+      setupStubbedServer(createRoutes())
 
-    it('does not upload when not enabled', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'record_pass*',
-        record: true,
-        snapshot: true,
+      it('does not upload when not enabled', async function () {
+        const { stdout } = await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id-without-video.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          config: {
+            env: {
+              'TEST_STDIO': '1',
+            },
+          },
+        })
+
+        console.log(stdout)
+
+        expect(stdout).to.include('Run URL:')
+        expect(stdout).to.include(runUrl)
+
+        const postRun = requests[0]
+
+        // ensure its relative to projectRoot
+        expect(postRun.body.specs).to.deep.eq([
+          'cypress/e2e/record_pass.cy.js',
+        ])
+
+        const runResults = requests[3]
+
+        expect(runResults.body.video).to.be.false
+      })
+    })
+
+    describe('when videoUploadOnPasses=false', () => {
+      setupStubbedServer(createRoutes())
+      it('does not upload when specs pass', async function () {
+        const { stdout } = await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_fail*,record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+          config: {
+            env: {
+              'TEST_STDIO': '1',
+            },
+          },
+        })
+
+        console.log(stdout)
+
+        expect(stdout).to.include('Run URL:')
+        expect(stdout).to.include(runUrl)
+
+        const postRun = requests[0]
+
+        // ensure its relative to projectRoot
+        expect(postRun.body.specs).to.deep.eq([
+          'cypress/e2e/record_fail.cy.js',
+          'cypress/e2e/record_pass.cy.js',
+        ])
+
+        const recordFailSpecResults = requests[3]
+
+        expect(recordFailSpecResults.body.video).to.be.true // failed spec has video
+
+        const recordPassSpecResults = requests[9]
+
+        expect(recordPassSpecResults.body.video).to.be.false // passing spec does not have video
       })
     })
   })
