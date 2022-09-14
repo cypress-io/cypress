@@ -409,9 +409,7 @@ export class EventManager {
 
           const hideCommandLog = window.__CYPRESS_CONFIG__.hideCommandLog
 
-          if (runState?.studio) {
-            this.studioStore.initialize(config, runState)
-          }
+          this.studioStore.initialize(config, runState)
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog)
 
