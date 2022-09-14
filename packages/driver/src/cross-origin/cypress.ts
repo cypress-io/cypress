@@ -76,7 +76,7 @@ const createCypress = () => {
     }
   })
 
-  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name, id }) => {
+  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name, specBridgePromiseId }) => {
     // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
     let requestedCrossOriginSnapshot = {}
 
@@ -86,7 +86,7 @@ const createCypress = () => {
       requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
     }
 
-    Cypress.specBridgeCommunicator.toPrimary('snapshot:generate:for:log', requestedCrossOriginSnapshot)
+    Cypress.specBridgeCommunicator.toPrimary(`snapshot:generate:for:log:${specBridgePromiseId}`, requestedCrossOriginSnapshot)
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
