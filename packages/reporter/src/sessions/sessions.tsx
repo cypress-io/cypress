@@ -13,9 +13,9 @@ export interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow = ({ name, isGlobalSession, id, state, status }: SessionsModel) => {
+const SessionRow = ({ name, isGlobalSession, id, state, status, testId }: SessionsModel) => {
   const printToConsole = (id) => {
-    events.emit('show:command', id)
+    events.emit('show:command', testId, id)
   }
 
   return (

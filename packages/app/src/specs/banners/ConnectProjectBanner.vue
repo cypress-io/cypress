@@ -8,6 +8,12 @@
     class="mb-16px"
     :icon="ConnectIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Create project',
+      medium: 'Specs Create Project Banner',
+      cohort: '' // TODO Connect cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -26,6 +32,7 @@
     <CloudConnectModals
       v-if="isProjectConnectOpen && cloudModalsQuery.data.value"
       :gql="cloudModalsQuery.data.value"
+      utm-medium="Specs Create Project Banner"
       @cancel="handleModalClose"
       @success="handleModalClose"
     />
@@ -51,8 +58,10 @@ query ConnectProjectBanner {
 
 withDefaults(defineProps<{
   modelValue: boolean
+  hasBannerBeenShown: boolean
 }>(), {
   modelValue: false,
+  hasBannerBeenShown: true,
 })
 
 const emit = defineEmits<{

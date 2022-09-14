@@ -5,7 +5,8 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Test, { UpdatableTestProps, TestProps } from '../test/test-model'
+import type { TestState } from '@packages/types'
 import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/types'
 import { LogProps } from '../runnables/runnables-store'
@@ -88,10 +89,6 @@ export default class Attempt {
 
     // prev attempts open by default while test is running, otherwise only the last is open
     return this.test.isActive || this.isLast
-  }
-
-  @computed get studioIsNotEmpty () {
-    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
   }
 
   addLog = (props: LogProps) => {

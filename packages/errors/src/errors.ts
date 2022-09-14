@@ -86,7 +86,7 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
@@ -1090,6 +1090,12 @@ export const AllCypressErrors = {
         The ${fmt.highlight(`experimentalSingleTabRunMode`)} experiment is currently only supported for Component Testing.
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
+  },
+  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
