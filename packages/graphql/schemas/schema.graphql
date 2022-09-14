@@ -558,10 +558,23 @@ enum CodeLanguageEnum {
 """used to distinguish one group of users from another"""
 type Cohort {
   """value used to indicate the cohort (e.g. "A" or "B")"""
-  cohort: String
+  cohort: String!
 
   """name used to identify the cohort topic (e.g. "LoginBanner" ) """
-  name: String
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
 }
 
 """
@@ -1208,6 +1221,11 @@ type Mutation {
   copyTextToClipboard(text: String!): Boolean
 
   """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
+
+  """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
@@ -1223,9 +1241,6 @@ type Mutation {
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
-
-  """"""
-  insertCohort(cohort: String!, name: String!): Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1506,7 +1521,7 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
-  """Cohort assignments for this device used by the app for feature flags"""
+  """Return the cohort for the given name"""
   cohort(
     """the name of the cohort to find"""
     name: String!

@@ -1,21 +1,14 @@
-import _ from 'lodash'
-import { useMutation, gql, useQuery } from '@urql/vue'
-import { WeightedAlgorithm, WEIGHTED_EVEN } from '../utils/weightedChoice'
-import { UseCohorts_GetCohortDocument, UseCohorts_InsertCohortDocument } from '../generated/graphql'
+import { useMutation, gql } from '@urql/vue'
+import { UseCohorts_DetermineCohortDocument } from '../generated/graphql'
 import { ref } from 'vue'
 
 gql`
-query UseCohorts_GetCohort($name: String!) {
-  cohort(name: $name) {
+mutation UseCohorts_DetermineCohort ($name: String!, $cohorts: [String!]!) {
+  determineCohort(cohortConfig: { name: $name, cohorts: $cohorts } ) {
+    __typename
     name
     cohort
   }
-}
-`
-
-gql`
-mutation UseCohorts_InsertCohort ($name: String!, $cohort: String!) {
-  insertCohort (name: $name, cohort: $cohort)
 }`
 
 /**
@@ -39,8 +32,8 @@ export type CohortConfig = {
   /** Array of options to pick from when selecting the cohort */
   options: CohortOption[]
 
-  /** Optional weighted algorithm to use for selecting the cohort.  If not supplied, the WEIGHTED_EVEN algorithm will be used. */
-  algorithm?: WeightedAlgorithm
+  /** Optional array of weights to use for selecting the cohort.  If not supplied, an even weighting algorithm will be used. */
+  weights?: number[]
 }
 
 /**
@@ -53,47 +46,23 @@ export type CohortConfig = {
  * @returns a reactive reference to the cohort option that is selected
  */
 export const useCohorts = (config: CohortConfig) => {
-  const insertCohortMutation = useMutation(UseCohorts_InsertCohortDocument)
+  const determineCohortMutation = useMutation(UseCohorts_DetermineCohortDocument)
 
-  const getCohortFromCache = async (name: string) => {
-    const getCohortQuery = useQuery({
-      query: UseCohorts_GetCohortDocument,
-      variables: { name },
-    })
-
-    await getCohortQuery.executeQuery()
-
-    return getCohortQuery.data?.value?.cohort?.cohort
-  }
-
-  const setCohortInCache = async (name: string, cohortSelected: string) => {
-    return await insertCohortMutation.executeMutation({
+  const determineCohort = async (name: string, cohorts: string[]) => {
+    return await determineCohortMutation.executeMutation({
       name,
-      cohort: cohortSelected,
+      cohorts,
     })
   }
 
-  const cohortOptionSelected = ref<CohortOption | undefined>()
+  const cohortOptionSelected = ref<CohortOption>()
 
   const cohortIds = config.options.map((option) => option.cohort)
 
   const fetchCohort = async () => {
-    const cohortFromCache = await getCohortFromCache(config.name)
+    const cohortSelected = await determineCohort(config.name, cohortIds)
 
-    let cohortSelected: string
-
-    if (!cohortFromCache || !_.includes(cohortIds, cohortFromCache)) {
-      const algorithm = config.algorithm || WEIGHTED_EVEN(cohortIds)
-
-      const pickedCohort = algorithm.pick(cohortIds)
-
-      setCohortInCache(config.name, pickedCohort)
-      cohortSelected = pickedCohort
-    } else {
-      cohortSelected = cohortFromCache
-    }
-
-    cohortOptionSelected.value = config.options.find((option) => option.cohort === cohortSelected)
+    cohortOptionSelected.value = config.options.find((option) => option.cohort === cohortSelected.data?.determineCohort?.cohort)
   }
 
   fetchCohort()

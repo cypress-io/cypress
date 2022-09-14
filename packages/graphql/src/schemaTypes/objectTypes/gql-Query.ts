@@ -109,7 +109,7 @@ export const Query = objectType({
     })
 
     t.field('cohort', {
-      description: 'Cohort assignments for this device used by the app for feature flags',
+      description: 'Return the cohort for the given name',
       type: Cohort,
       args: {
         name: nonNull(stringArg({ description: 'the name of the cohort to find' })),

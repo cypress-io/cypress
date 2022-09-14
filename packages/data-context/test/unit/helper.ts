@@ -64,8 +64,10 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       getBrowsers: sinon.stub().resolves([]),
     } as unknown as BrowserApiShape,
     cohortsApi: {
+      getCohorts: sinon.stub().resolves(),
       getCohort: sinon.stub().resolves(),
       insertCohort: sinon.stub(),
+      determineCohort: sinon.stub().resolves(),
     } as unknown as CohortsApiShape,
   })
 

@@ -2,7 +2,7 @@ import type { DataContext } from '../../../src'
 import { CohortsActions } from '../../../src/actions/CohortsActions'
 import { createTestDataContext } from '../helper'
 import { expect } from 'chai'
-import sinon, { SinonStub } from 'sinon'
+import sinon, { SinonStub, match } from 'sinon'
 
 describe('CohortsActions', () => {
   let ctx: DataContext
@@ -41,16 +41,17 @@ describe('CohortsActions', () => {
     })
   })
 
-  context('insertCohort', () => {
-    it('should insert cohort', async () => {
-      const cohort = {
+  context('determineCohort', () => {
+    it('should determine cohort', async () => {
+      const cohortConfig = {
         name: 'loginBanner',
-        cohort: 'A',
+        cohorts: ['A', 'B'],
       }
 
-      await actions.insertCohort(cohort)
+      const pickedCohort = await actions.determineCohort(cohortConfig.name, cohortConfig.cohorts)
 
-      expect(ctx.cohortsApi.insertCohort).to.have.been.calledWith(cohort)
+      expect(ctx.cohortsApi.insertCohort).to.have.been.calledOnceWith({ name: cohortConfig.name, cohort: match.string })
+      expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).to.be.true
     })
   })
 })

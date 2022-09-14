@@ -12,12 +12,12 @@
     :event-data="{
       campaign: 'Create project',
       medium: 'Specs Create Project Banner',
-      cohort: optionSelected?.cohort
+      cohort: cohortOption.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ bodyCopy }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -44,9 +44,9 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
-import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
+import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
 import CloudConnectModals from '../../runs/modals/CloudConnectModals.vue'
 
@@ -56,20 +56,11 @@ query ConnectProjectBanner {
 }
 `
 
-const props = withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
   hasBannerBeenShown: boolean
-  bodyCopyOptions?: CohortOption[]
-}>(), {
-  modelValue: false,
-  hasBannerBeenShown: true,
-  bodyCopyOptions: () => {
-    return [
-      { cohort: 'A', value: 'specPage.banners.connectProject.contentA' },
-      { cohort: 'B', value: 'specPage.banners.connectProject.contentB' },
-    ]
-  },
-})
+  cohortOption: CohortOption
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -91,16 +82,5 @@ function handleModalClose () {
   isProjectConnectOpen.value = false
   emit('update:modelValue', false)
 }
-
-const cohortConfig: CohortConfig = {
-  name: bannerId,
-  options: props.bodyCopyOptions,
-}
-
-const optionSelected = useCohorts(cohortConfig)
-
-const bodyCopy = computed(() => {
-  return optionSelected.value?.value ? t(optionSelected.value.value) : ''
-})
 
 </script>

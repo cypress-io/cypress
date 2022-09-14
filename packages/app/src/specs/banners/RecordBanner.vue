@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Record Runs',
       medium: 'Specs Record Runs Banner',
-      cohort: optionSelected?.cohort
+      cohort: 'n/a'
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -34,7 +34,6 @@ import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import TrackedBanner from './TrackedBanner.vue'
-import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { RecordBannerDocument } from '../../generated/graphql'
 import { computed } from 'vue'
@@ -59,20 +58,10 @@ query RecordBanner {
 }
 `
 
-const props = withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
   hasBannerBeenShown: boolean
-  commandOptions?: CohortOption[]
-}>(), {
-  modelValue: false,
-  hasBannerBeenShown: true,
-  commandOptions: () => {
-    return [
-      { cohort: 'A', value: 'cypress' },
-      { cohort: 'B', value: 'npx cypress' },
-    ]
-  },
-})
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -87,21 +76,10 @@ const firstRecordKey = computed(() => {
   return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
 
-const cohortConfig: CohortConfig = {
-  name: bannerId,
-  options: props.commandOptions,
-}
-
-const optionSelected = useCohorts(cohortConfig)
-
-const command = computed(() => {
-  return optionSelected.value?.value ? optionSelected.value.value : ''
-})
-
 const recordCommand = computed(() => {
   const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
 
-  return `${command.value} run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
+  return `npx cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 
 </script>

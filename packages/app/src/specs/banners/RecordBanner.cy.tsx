@@ -4,9 +4,7 @@ import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<RecordBanner />', () => {
   it('should render expected content', () => {
-    const commandOptions = [{ cohort: 'A', value: 'cypress' }]
-
-    cy.mount({ render: () => <RecordBanner modelValue={true} commandOptions={commandOptions}/> })
+    cy.mount({ render: () => <RecordBanner modelValue={true} hasBannerBeenShown={false} /> })
 
     cy.gqlStub.Query.currentProject = {
       id: 'test_id',
@@ -26,7 +24,7 @@ describe('<RecordBanner />', () => {
     cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.record.content).should('be.visible')
 
-    cy.findByText('cypress run --component --record --key abcd-efg-1234')
+    cy.findByText('npx cypress run --component --record --key abcd-efg-1234')
 
     cy.percySnapshot()
   })
@@ -46,7 +44,7 @@ describe('<RecordBanner />', () => {
       campaign: 'Record Runs',
       medium: 'Specs Record Runs Banner',
       messageId: Cypress.sinon.match.string,
-      cohort: Cypress.sinon.match.string,
+      cohort: 'n/a',
     })
   })
 })

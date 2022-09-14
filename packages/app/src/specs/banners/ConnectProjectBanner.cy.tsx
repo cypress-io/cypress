@@ -3,10 +3,10 @@ import ConnectProjectBanner from './ConnectProjectBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<ConnectProjectBanner />', () => {
-  it('should render expected content', () => {
-    const copyOptions = [{ cohort: 'A', value: 'specPage.banners.connectProject.contentA' }]
+  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.connectProject.contentA }
 
-    cy.mount({ render: () => <ConnectProjectBanner modelValue={true} bodyCopyOptions={copyOptions}/> })
+  it('should render expected content', () => {
+    cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.connectProject.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.connectProject.contentA).should('be.visible')
@@ -15,22 +15,32 @@ describe('<ConnectProjectBanner />', () => {
     cy.percySnapshot()
   })
 
-  it('should record expected event on mount', () => {
-    const recordEvent = cy.stub().as('recordEvent')
+  context('events', () => {
+    beforeEach(() => {
+      const recordEvent = cy.stub().as('recordEvent')
 
-    cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
-      recordEvent(event)
+      cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
+        recordEvent(event)
 
-      return defineResult({ recordEvent: true })
+        return defineResult({ recordEvent: true })
+      })
     })
 
-    cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={false} /> })
+    it('should record expected event on mount', () => {
+      cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
-    cy.get('@recordEvent').should('have.been.calledWith', {
-      campaign: 'Create project',
-      medium: 'Specs Create Project Banner',
-      messageId: Cypress.sinon.match.string,
-      cohort: Cypress.sinon.match.string,
+      cy.get('@recordEvent').should('have.been.calledWith', {
+        campaign: 'Create project',
+        medium: 'Specs Create Project Banner',
+        messageId: Cypress.sinon.match.string,
+        cohort: 'A',
+      })
+    })
+
+    it('should not record event on mount if already shown', () => {
+      cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+
+      cy.get('@recordEvent').should('not.have.been.called')
     })
   })
 })

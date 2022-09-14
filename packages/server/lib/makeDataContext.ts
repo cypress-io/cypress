@@ -197,8 +197,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     cohortsApi: {
+      async getCohorts () {
+        return cohorts.get()
+      },
       async getCohort (name: string) {
-        return cohorts.get(name)
+        return cohorts.getByName(name)
       },
       async insertCohort (cohort) {
         cohorts.set(cohort)

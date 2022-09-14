@@ -12,12 +12,12 @@
     :event-data="{
       campaign: 'Log In',
       medium: 'Specs Login Banner',
-      cohort: optionSelected?.cohort
+      cohort: cohortOption.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ bodyCopy }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -33,20 +33,20 @@
       v-model="isLoginOpen"
       :gql="loginModalQuery.data.value"
       utm-medium="Specs Login Banner"
-      :utm-content="optionSelected?.cohort"
+      :utm-content="cohortOption.cohort"
     />
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
-import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
+import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
@@ -56,20 +56,11 @@ query LoginBanner {
 }
 `
 
-const props = withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
   hasBannerBeenShown: boolean
-  bodyCopyOptions?: CohortOption[]
-}>(), {
-  modelValue: false,
-  hasBannerBeenShown: true,
-  bodyCopyOptions: () => {
-    return [
-      { cohort: 'A', value: 'specPage.banners.login.contentA' },
-      { cohort: 'B', value: 'specPage.banners.login.contentB' },
-    ]
-  },
-})
+  cohortOption: CohortOption
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -84,16 +75,5 @@ async function handleButtonClick () {
   await loginModalQuery.executeQuery()
   isLoginOpen.value = true
 }
-
-const cohortConfig: CohortConfig = {
-  name: bannerId,
-  options: props.bodyCopyOptions,
-}
-
-const optionSelected = useCohorts(cohortConfig)
-
-const bodyCopy = computed(() => {
-  return optionSelected.value?.value ? t(optionSelected.value.value) : ''
-})
 
 </script>

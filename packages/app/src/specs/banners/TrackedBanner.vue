@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { ref, watchEffect, watch } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
@@ -67,8 +67,8 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 
-watch(() => props.eventData?.cohort, () => {
-  if (props.modelValue && !props.hasBannerBeenShown && props.eventData) {
+watchEffect(() => {
+  if (props.modelValue && !props.hasBannerBeenShown && props.eventData && props.eventData?.cohort) {
     // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
     recordBannerShown(props.eventData)
   }

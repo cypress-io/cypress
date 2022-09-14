@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 export type WeightedAlgorithm = {
-  pick: Function
+  pick: (values: any[]) => string
 }
 
 /**
@@ -13,20 +13,22 @@ export type WeightedAlgorithm = {
  * @param values array of values to choose from
  */
 const weightedChoice = (weights: number[], values: any[]) => {
-  if (weights.length !== values.length) {
-    throw new Error('The length of the weights and values must be the same')
+  if (weights.length > 0 && values.length > 0 && weights.length !== values.length) {
+    throw new Error('The length of the weights and values must be the same and greater than zero')
   }
 
   const cumulativeWeights = _.reduce(weights, (result: number[], value: number) => {
     if (result.length === 0) {
       result.push(value)
     } else {
+      // @ts-ignores
       result.push(value + result[result.length - 1])
     }
 
     return result
   }, [])
 
+  // @ts-ignores
   const randomNumber = Math.random() * cumulativeWeights[cumulativeWeights.length - 1]
 
   const choice = _.transform(cumulativeWeights, (result, value, index) => {

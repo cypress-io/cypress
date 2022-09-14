@@ -12,18 +12,17 @@ export type CopyOption = {
 </script>
 
 <script setup lang="ts">
-import type { WeightedAlgorithm } from '../../utils/weightedChoice'
 import { CohortConfig, useCohorts } from '../useCohorts'
 
 const props = defineProps<{
-  algorithm?: WeightedAlgorithm
+  weights?: number[]
   copyOptions: CopyOption[]
 }>()
 
 const cohortConfig: CohortConfig = {
   name: 'login',
   options: props.copyOptions,
-  algorithm: props.algorithm,
+  weights: props.weights,
 }
 
 const cohortChoice = useCohorts(cohortConfig)
