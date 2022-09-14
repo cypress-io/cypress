@@ -38,7 +38,6 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
     cy.findByText(defaultMessages.runs.connect.buttonUser).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
 

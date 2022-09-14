@@ -24,4 +24,19 @@ describe('<SettingsSection />', () => {
 
     cy.percySnapshot()
   })
+
+  it('should not render DOM elements for title and description, when slots are not set', () => {
+    cy.viewport(800, 200)
+
+    cy.mount(() => (
+      <div class="p-24px">
+        <SettingsSection>
+          <div>You haven not connected any Cypress projects</div>
+        </SettingsSection>
+      </div>))
+
+    cy.get('section')
+    .should('contain.text', 'You haven not connected any Cypress projects')
+    .children().should('have.length', 1)
+  })
 })

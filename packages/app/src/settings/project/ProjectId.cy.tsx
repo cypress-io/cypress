@@ -28,4 +28,23 @@ describe('<ProjectId />', () => {
 
     cy.percySnapshot()
   })
+
+  it('should not render Project ID when project ID is not available', () => {
+    cy.mountFragment(ProjectIdFragmentDoc, {
+      onResult: (result) => {
+        set(result, 'currentProject.projectId', undefined)
+      },
+      render: (gqlVal) => (
+        <div class="py-4 px-8">
+          <ProjectId
+            gql={gqlVal}
+          />
+        </div>
+      ),
+    })
+
+    cy.get('[data-cy=settings-codeBox]').should('not.exist')
+
+    cy.percySnapshot()
+  })
 })
