@@ -32,6 +32,7 @@
     <CloudConnectModals
       v-if="isProjectConnectOpen && cloudModalsQuery.data.value"
       :gql="cloudModalsQuery.data.value"
+      utm-medium="Specs Create Project Banner"
       @cancel="handleModalClose"
       @success="handleModalClose"
     />

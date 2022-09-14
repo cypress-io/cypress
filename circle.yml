@@ -37,7 +37,6 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
-    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -46,7 +45,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -67,7 +65,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - equal: [ 'lmiller/fixing-flake-1', << pipeline.git.branch >> ]
-    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -132,7 +129,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "correct-dashboard-results" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "webkit-experimental" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1285,9 +1282,12 @@ jobs:
             run-webpack-dev-server-integration-tests,
             run-vite-dev-server-integration-tests
       - run:
+          # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
+          # If all other jobs finish but `build:finalize` fails, we retry it once
+          name: Finalize percy build - allows single retry
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            yarn percy build:finalize
+            yarn percy build:finalize || yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults

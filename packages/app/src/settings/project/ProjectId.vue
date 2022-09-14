@@ -34,6 +34,7 @@
     <CloudConnectButton
       v-else
       :gql="props.gql"
+      utm-medium="Settings Tab"
     />
   </SettingsSection>
 </template>
