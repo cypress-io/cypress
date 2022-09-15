@@ -142,7 +142,6 @@ export class SocketBase {
 
     _.defaults(options, {
       socketId: null,
-      onCrossOriginEvent () {},
       onResetServerState () {},
       onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
@@ -343,12 +342,6 @@ export class SocketBase {
 
       socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
         return options.onTestsReceivedAndMaybeRecord(runnables, cb)
-      })
-
-      socket.on('get:cached:state', (cb) => {
-        return cb({
-          globalSessions: session.getState().globalSessions,
-        })
       })
 
       socket.on('mocha', (...args: unknown[]) => {
@@ -562,7 +555,7 @@ export class SocketBase {
       })
 
       runnerEvents.forEach((event) => {
-        socket.on(event, (data): any => {
+        socket.on(event, (data) => {
           this.toReporter(event, data)
         })
       })

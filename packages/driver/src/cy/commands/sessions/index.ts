@@ -122,8 +122,8 @@ export default function (Commands, Cypress, cy) {
       function setSessionLogStatus (status: string) {
         _log.set({
           sessionInfo: {
-            id: existingSession.id,
-            isGlobalSession: false,
+            id: session.id,
+            isGlobalSession: session.cacheAcrossSpecs,
             status,
           },
         })

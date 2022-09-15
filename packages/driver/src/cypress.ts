@@ -667,7 +667,7 @@ class $Cypress {
         return this.emit('page:loading', args[0])
 
       case 'app:window:before:load':
-        this.cy?.onBeforeAppWindowLoad(args[0])
+        this.cy.onBeforeAppWindowLoad(args[0])
 
         return this.emit('window:before:load', args[0])
 

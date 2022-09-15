@@ -23,7 +23,7 @@ const { sinon } = require('../spec_helper')
 
 let ctx
 
-describe.only('lib/socket', () => {
+describe('lib/socket', () => {
   beforeEach(async function () {
     ctx = getCtx()
     ctx.coreData.activeBrowser = {

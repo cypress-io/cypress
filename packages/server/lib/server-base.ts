@@ -335,7 +335,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
-    options.remoteStates = this._remoteStates
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
