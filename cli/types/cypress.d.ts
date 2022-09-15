@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
@@ -470,19 +471,19 @@ declare namespace Cypress {
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
       add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+        name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+        name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
       ): void
       addAll<T extends keyof Chainable>(fns: CommandFns): void
       addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
       addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-          options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+        options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
       ): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-          options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
+        options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
@@ -676,8 +677,8 @@ declare namespace Cypress {
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
-    R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
-    Chainable<S>
+      R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
+        Chainable<S>
 
   /**
    * Chainable interface for non-array Subjects
@@ -2373,8 +2374,8 @@ declare namespace Cypress {
 
   type ChainableMethods<Subject = any> = {
     [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
-        ? Chainable<Subject>[P]
-        : never
+      ? Chainable<Subject>[P]
+      : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -3095,8 +3096,8 @@ declare namespace Cypress {
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
   interface AngularDevServerProjectConfig {
-    root: string,
-    sourceRoot: string,
+    root: string
+    sourceRoot: string
     buildOptions: Record<string, any>
   }
 
@@ -3145,7 +3146,7 @@ declare namespace Cypress {
     /**
      * Hosts mappings to IP addresses.
      */
-     hosts?: null | {[key: string]: string}
+    hosts?: null | {[key: string]: string}
   }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {

@@ -24,14 +24,13 @@
         "^production"
       ]
     },
-    "test": {
+    "test-unit": {
       "inputs": [
         "default",
-        "^production",
-        "{workspaceRoot}/jest.preset.js"
+        "^production"
       ]
     },
-    "e2e": {
+    "test": {
       "inputs": [
         "default",
         "^production"
@@ -45,11 +44,11 @@
     },
     "check-ts": {
       "inputs": [
-        "deafult",
-        "{workspaceRoot}/.eslintrc.json"
+        "production",
+        "^production"
       ],
       "dependsOn": [
-        "build"
+        "^build"
       ]
     }
   },

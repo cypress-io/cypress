@@ -12,7 +12,8 @@
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "watch": "tsc -w",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "debug": "4.3.3",

@@ -9,29 +9,29 @@ exports['package.json build outputs expected properties 1'] = {
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+  'repository': {
+    'type': 'git',
+    'url': 'https://github.com/cypress-io/cypress.git',
   },
-  "keywords": [
-    "automation",
-    "browser",
-    "cypress",
-    "cypress.io",
-    "e2e",
-    "end-to-end",
-    "integration",
+  'keywords': [
+    'automation',
+    'browser',
+    'cypress',
+    'cypress.io',
+    'e2e',
+    'end-to-end',
+    'integration',
     "component",
-    "mocks",
-    "runner",
-    "spies",
-    "stubs",
-    "test",
-    "testing"
+    'mocks',
+    'runner',
+    'spies',
+    'stubs',
+    'test',
+    'testing',
   ],
-  "types": "types",
-  "scripts": {
-    "postinstall": "node index.js --exec install",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
-  }
+  'types': 'types',
+  'scripts': {
+    'postinstall': 'node index.js --exec install',
+    'size': 't="$(npm pack .)"; wc -c "${t}"; tar tvf "${t}"; rm "${t}";',
+  },
 }

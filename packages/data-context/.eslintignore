@@ -1,0 +1,8 @@
+**/dist
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+**/cypress/fixtures
+/test/unit/codegen/files
+/test/unit/codegen/tmp
+**/__snapshots__

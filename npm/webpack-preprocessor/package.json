@@ -17,7 +17,8 @@
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
     "check-ts": "tsc --noEmit",
-    "watch": "rimraf dist && tsc --watch"
+    "watch": "rimraf dist && tsc --watch",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "bluebird": "3.7.1",

@@ -1,4 +1,4 @@
-import { delegateToSchema } from '@graphql-tools/delegate'
+import { delegateToSchema, SubschemaConfig } from '@graphql-tools/delegate'
 import { wrapSchema } from '@graphql-tools/wrap'
 import type { DataContext } from '@packages/data-context'
 import type { RequestPolicy } from '@urql/core'
@@ -25,7 +25,7 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
     return (source, args, context, info) => {
       return delegateToSchema({
         rootValue: source,
-        schema: subschemaConfig,
+        schema: subschemaConfig as SubschemaConfig<any, any, any, DataContext>,
         operation,
         transformedSchema,
         context,

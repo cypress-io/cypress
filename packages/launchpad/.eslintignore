@@ -1,0 +1,6 @@
+**/dist
+**/dist-*
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+**/cypress/fixtures

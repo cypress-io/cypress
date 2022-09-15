@@ -17,7 +17,8 @@
     "test": "node ./test/scripts/run.js",
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
-    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit"
+    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "@babel/parser": "7.13.0",
