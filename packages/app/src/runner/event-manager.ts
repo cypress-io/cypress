@@ -8,7 +8,6 @@ import type { AutomationElementId, FileDetails } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import * as cors from '@packages/network/lib/cors'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
@@ -171,37 +170,33 @@ export class EventManager {
       })
     })
 
-    this.ws.on('cross:origin:delaying:html', (request) => {
-      Cypress.primaryOriginCommunicator.emit('delaying:html', request)
-    })
-
     localToReporterEvents.forEach((event) => {
       this.localBus.on(event, (...args) => {
         this.reporterBus.emit(event, ...args)
       })
     })
 
-    const logCommand = (logId) => {
-      const consoleProps = Cypress.runner.getConsolePropsForLogById(logId)
+    const logCommand = (testId, logId) => {
+      const consoleProps = Cypress.runner.getConsolePropsForLog(testId, logId)
 
       logger.logFormatted(consoleProps)
     }
 
-    this.reporterBus.on('runner:console:error', ({ err, commandId }) => {
+    this.reporterBus.on('runner:console:error', ({ err, testId, logId }) => {
       if (!Cypress) return
 
-      if (commandId || err) logger.clearLog()
+      if (logId || err) logger.clearLog()
 
-      if (commandId) logCommand(commandId)
+      if (logId) logCommand(testId, logId)
 
       if (err) logger.logError(err.stack)
     })
 
-    this.reporterBus.on('runner:console:log', (logId) => {
+    this.reporterBus.on('runner:console:log', (testId, logId) => {
       if (!Cypress) return
 
       logger.clearLog()
-      logCommand(logId)
+      logCommand(testId, logId)
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
@@ -210,24 +205,24 @@ export class EventManager {
 
     this.reporterBus.on('runner:restart', rerun)
 
-    const sendEventIfSnapshotProps = (logId, event) => {
+    const sendEventIfSnapshotProps = (testId, logId, event) => {
       if (!Cypress) return
 
-      const snapshotProps = Cypress.runner.getSnapshotPropsForLogById(logId)
+      const snapshotProps = Cypress.runner.getSnapshotPropsForLog(testId, logId)
 
       if (snapshotProps) {
         this.localBus.emit(event, snapshotProps)
       }
     }
 
-    this.reporterBus.on('runner:show:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'show:snapshot')
+    this.reporterBus.on('runner:show:snapshot', (testId, logId) => {
+      sendEventIfSnapshotProps(testId, logId, 'show:snapshot')
     })
 
     this.reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
 
-    this.reporterBus.on('runner:pin:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'pin:snapshot')
+    this.reporterBus.on('runner:pin:snapshot', (testId, logId) => {
+      sendEventIfSnapshotProps(testId, logId, 'pin:snapshot')
     })
 
     this.reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
@@ -613,7 +608,12 @@ export class EventManager {
 
     // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', window.origin)
+    })
+
+    // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, originPolicy) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
@@ -625,40 +625,33 @@ export class EventManager {
     }) => {
       const eventID = log.get('id')
 
-      Cypress.primaryOriginCommunicator.once(`snapshot:for:log:generated:${eventID}`, (generatedCrossOriginSnapshot) => {
-        const snapshot = generatedCrossOriginSnapshot.body ? generatedCrossOriginSnapshot : null
+      const requestSnapshot = () => {
+        return Cypress.primaryOriginCommunicator.toSpecBridgePromise(specBridge, 'snapshot:generate:for:log', {
+          name,
+          id: eventID,
+        }).then((crossOriginSnapshot) => {
+          const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
 
-        addSnapshot.apply(log, [snapshot, options, false])
-      })
-
-      Cypress.primaryOriginCommunicator.toSpecBridge(specBridge, 'generate:snapshot:for:log', {
-        name,
-        id: eventID,
-      })
-    })
-
-    Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
-      // Sync stable if the expected origin has loaded.
-      // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already
-      // established spec bridge, but one that is not the current or next cy.origin command.
-      if (cy.state('latestActiveOriginPolicy') === originPolicy) {
-        // We remain in an anticipating state until either a load even happens or a timeout.
-        cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
-        cy.isAnticipatingCrossOriginResponseFor(undefined)
-        cy.isStable(true, 'load')
-        // Prints out the newly loaded URL
-        Cypress.emit('internal:window:load', { type: 'cross:origin', url })
-        // Re-broadcast to any other specBridges.
-        Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url })
+          addSnapshot.apply(log, [snapshot, options, false])
+        })
       }
+
+      requestSnapshot().catch(() => {
+        // If a spec bridge isn't present to respond this isn't an error and there is nothing to do.
+      })
     })
 
-    Cypress.primaryOriginCommunicator.on('before:unload', () => {
-      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-      // Unstable is unstable regardless of where it initiated from.
-      cy.state('isStable', false)
+    Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
+      // In webkit the before:unload event could come in after the on load event has already happened.
+      // To prevent hanging we will only set the state to unstable if we are currently on the same origin as the unload event,
+      // otherwise we assume that the load event has already occurred and the event is no longer relevant.
+      if (Cypress.state('autLocation')?.origin === origin) {
+        // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+        cy.state('isStable', false)
+      }
+
       // Re-broadcast to any other specBridges.
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', origin)
     })
 
     Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {
@@ -704,6 +697,33 @@ export class EventManager {
 
       // this will trigger a log changed event for the log itself.
       log?.set(attrs)
+    })
+
+    // This message comes from the AUT, not the spec bridge.
+    // This is called in the event that cookies are set in a cross origin AUT prior to attaching a spec bridge.
+    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookie, href }, _origin, source) => {
+      const { superDomain } = Cypress.Location.create(href)
+      const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
+
+      Cypress.automation('set:cookie', automationCookie).then(() => {
+        // It's possible the source has already unloaded before this event has been processed.
+        source?.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
+      })
+      .catch(() => {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+      })
+    })
+
+    // This message comes from the AUT, not the spec bridge.
+    // This is called in the event that cookies are retrieved in a cross origin AUT prior to attaching a spec bridge.
+    Cypress.primaryOriginCommunicator.on('aut:get:cookie', async ({ href }, _origin, source) => {
+      const { superDomain } = Cypress.Location.create(href)
+
+      const cookies = await Cypress.automation('get:cookies', { superDomain })
+
+      // It's possible the source has already unloaded before this event has been processed.
+      source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
     })
 
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
@@ -884,7 +904,7 @@ export class EventManager {
     this.localBus.emit('save:app:state', state)
   }
 
-  // usefulf for testing
+  // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
   }

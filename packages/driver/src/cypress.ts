@@ -9,6 +9,7 @@ import debugFn from 'debug'
 
 import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
+import $sourceMapUtils from './cypress/source_map_utils'
 
 import $Commands from './cypress/commands'
 import { $Cy } from './cypress/cy'
@@ -39,6 +40,7 @@ import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
+import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -165,6 +167,8 @@ class $Cypress {
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
+
+    setupAutEventHandlers(this)
 
     _.extend(this.$, $)
   }
@@ -321,7 +325,7 @@ class $Cypress {
 
     $scriptUtils.runScripts(specWindow, scripts)
     // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-ignore
+    // @ts-expect-error
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -403,15 +407,9 @@ class $Cypress {
         break
 
       case 'runner:end':
-        // mocha runner has finished running the tests
+        $sourceMapUtils.destroySourceMapConsumers()
 
-        // end may have been caused by an uncaught error
-        // that happened inside of a hook.
-        //
-        // when this happens mocha aborts the entire run
-        // and does not do the usual cleanup so that means
-        // we have to fire the test:after:hooks and
-        // test:after:run events ourselves
+        // mocha runner has finished running the tests
         this.emit('run:end')
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
@@ -677,6 +675,7 @@ class $Cypress {
         this.emit('internal:window:load', {
           type: 'same:origin',
           window: args[0],
+          url: args[1],
         })
 
         return this.emit('window:load', args[0])
