@@ -1,37 +1,85 @@
 import { AppComponent } from './app.component'
 
-// Validating Mocha syntax of *.skip is still valid after being patched by `zone.js/testing`
-// Actual test content is not important but rather the parsing of the test structure
+// Validating Mocha syntax and behavior of *.skip is still valid after being patched by `zone.js/testing`
 // Github Issue: https://github.com/cypress-io/cypress/issues/23409
 describe('skip', () => {
-  describe('suite', () => {
-    suite.skip('should exist on `suite`', () => {
-      it('skipped', () => {})
+  context('01 - executions', () => {
+    describe('suite', () => {
+      suite.skip('should exist on "suite"', () => {
+        it('skipped', () => {})
+      })
+    })
+    
+    describe('describe', () => {
+      describe.skip('should exist on "describe"', () => {
+        it('skipped', () => {})
+      })
+    })
+
+    describe('context', () => {
+      context.skip('should exist on "context"', () => {
+        it('skipped', () => {})
+      })
+    })
+
+    describe('specify', () => {
+      specify.skip('should exist on "specify"', () => {})
+    })
+
+    describe('test', () => {
+      test.skip('should exist on "test"', () => {})
+    })
+
+    describe('it', () => {
+      it.skip('should exist on "it"', () => {})
     })
   })
-  
-  describe('describe', () => {
-    describe.skip('should exist on `describe`', () => {
-      it('skipped', () => {})
+
+  context('02 - validations', () => {
+    const verifyWasSkipped = (title: string) => {
+      cy.wrap(Cypress.$(window.top!.document.body)).within(() =>
+        cy
+          .contains(title)
+          .parents('[data-model-state="pending"]')          // Find parent row with class indicating test was skipped
+          .should('be.visible')
+      )
+    }
+
+    describe('suite', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "suite"')
+      })
     })
-  })
 
-  describe('context', () => {
-    context.skip('should exist on `context`', () => {
-      it('skipped', () => {})
+    describe('describe', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "describe"')
+      })
     })
-  })
 
-  describe('specify', () => {
-    specify.skip('should exist on `specify`', () => {})
-  })
+    describe('context', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "context"')
+      })
+    })
 
-  describe('test', () => {
-    test.skip('should exist on `test`', () => {})
-  })
+    describe('specify', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "specify"')
+      })
+    })
 
-  describe('it', () => {
-    it.skip('should exist on `it`', () => {})
+    describe('test', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "test"')
+      })
+    })
+
+    describe('it', () => {
+      it('should have been skipped', () => {
+        verifyWasSkipped('should exist on "it"')
+      })
+    })
   })
 })
 
