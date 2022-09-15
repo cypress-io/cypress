@@ -155,7 +155,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Promisified event sent from the the primary communicator that expects the same event reflected back with the response.
+   * Promisified event sent from the primary communicator that expects the same event reflected back with the response.
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
@@ -277,7 +277,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
     })
   }
   /**
-   * Promisified event sent to the the primary communicator that expects the same event reflected back with the response.
+   * Promisified event sent to the primary communicator that expects the same event reflected back with the response.
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
