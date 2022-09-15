@@ -2997,7 +2997,6 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
-    gitRoot: string
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
