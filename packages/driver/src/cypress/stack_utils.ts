@@ -142,7 +142,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
     line,
     column,
     originalFile: relativeFile,
-    relativeFile,
+    relativeFile: getRelativePathFromRoot(relativeFile, absoluteFile),
     absoluteFile,
     frame,
     language: getLanguageFromExtension(relativeFile),
@@ -342,8 +342,6 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     if (Cypress.config('platform') === 'win32' && absoluteFile.startsWith('/')) {
       absoluteFile = absoluteFile.substring(1)
     }
-
-    relativeFile = getRelativePathFromRoot(relativeFile, absoluteFile)
   }
 
   return {
