@@ -7,9 +7,7 @@ const debug = debugFn('cypress:vite-dev-server:devServer')
 
 const ALL_FRAMEWORKS = ['react', 'vue'] as const
 
-type ConfigHandler = UserConfig
-| ((baseConfig: InlineConfig) => Promise<UserConfig>)
-| ((baseConfig: InlineConfig) => UserConfig)
+type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
 
 export type ViteDevServerConfig = {
   specs: Cypress.Spec[]

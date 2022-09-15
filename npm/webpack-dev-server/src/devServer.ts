@@ -27,9 +27,9 @@ type FrameworkConfig = {
   }
 }
 
-export type ConfigHandler = Partial<Configuration>
-| ((baseConfig: Configuration) => Promise<Configuration>)
-| ((baseConfig: Configuration) => Configuration)
+export type ConfigHandler =
+  Partial<Configuration>
+  | (() => Partial<Configuration> | Promise<Partial<Configuration>>)
 
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]

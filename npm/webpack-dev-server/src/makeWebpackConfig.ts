@@ -126,7 +126,7 @@ export async function makeWebpackConfig (
   }
 
   userWebpackConfig = typeof userWebpackConfig === 'function'
-    ? await userWebpackConfig(frameworkWebpackConfig)
+    ? await userWebpackConfig()
     : userWebpackConfig
 
   const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(

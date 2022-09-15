@@ -93,7 +93,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   let resolvedOverrides: UserConfig = {}
 
   if (typeof viteOverrides === 'function') {
-    resolvedOverrides = await viteOverrides(viteBaseConfig)
+    resolvedOverrides = await viteOverrides()
   } else if (typeof viteOverrides === 'object') {
     resolvedOverrides = viteOverrides
   }
