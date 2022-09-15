@@ -6,17 +6,13 @@ const validOptionKeys = Object.freeze(['args'])
 
 export class Validator {
   log: Cypress.Log
-  onFailure: () => {}
 
-  constructor ({ log, onFailure }) {
+  constructor ({ log }) {
     this.log = log
-    this.onFailure = onFailure
   }
 
   validate ({ callbackFn, options, urlOrDomain }) {
     if (!isString(urlOrDomain)) {
-      this.onFailure()
-
       $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(urlOrDomain) },
@@ -25,8 +21,6 @@ export class Validator {
 
     if (options) {
       if (!isPlainObject(options)) {
-        this.onFailure()
-
         $errUtils.throwErrByPath('origin.invalid_options_argument', {
           onFail: this.log,
           args: { arg: $utils.stringify(options) },
@@ -36,8 +30,6 @@ export class Validator {
       const extraneousKeys = difference(Object.keys(options), validOptionKeys)
 
       if (extraneousKeys.length) {
-        this.onFailure()
-
         $errUtils.throwErrByPath('origin.extraneous_options_argument', {
           onFail: this.log,
           args: {
@@ -49,8 +41,6 @@ export class Validator {
     }
 
     if (typeof callbackFn !== 'function') {
-      this.onFailure()
-
       $errUtils.throwErrByPath('origin.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
@@ -61,8 +51,6 @@ export class Validator {
   validateLocation (location, urlOrDomain) {
     // we don't support query params
     if (location.search.length > 0) {
-      this.onFailure()
-
       $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(urlOrDomain) },

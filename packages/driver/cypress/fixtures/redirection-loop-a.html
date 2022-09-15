@@ -4,7 +4,12 @@
     <script>
       window.onload = function(){
         setTimeout(() => {
-          window.location.href = "/fixtures/redirection-loop-b.html"
+          const count = Number(window.sessionStorage.getItem('redirectCount')|'0')
+
+          if (count > 0) {
+            window.location.href = '/fixtures/redirection-loop-b.html'
+          }
+          sessionStorage.setItem('redirectCount', count - 1)
         }, 25);
       }
     </script>
