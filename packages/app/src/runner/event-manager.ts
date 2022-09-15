@@ -372,13 +372,6 @@ export class EventManager {
   }
 
   setup (config) {
-    //     const cachedState = new Promise((resolve) => {
-    //       this.ws.emit('get:cached:state', (cachedState = {}) => {
-    //         resolve(cachedState)
-    //       })
-    //     })
-
-    //     Cypress = this.Cypress = this.$CypressDriver.create(config, cachedState)
     Cypress = this.Cypress = this.$CypressDriver.create(config)
     // expose Cypress globally
     // @ts-ignore

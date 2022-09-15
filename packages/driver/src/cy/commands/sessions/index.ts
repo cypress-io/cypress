@@ -135,8 +135,8 @@ export default function (Commands, Cypress, cy) {
             const data = await sessions.getCurrentSessionData()
 
             _.extend(existingSession, data)
-            // existingSession.hydrated = true
-            // await sessions.saveSessionData(existingSession)
+            existingSession.hydrated = true
+            await sessions.saveSessionData(existingSession)
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
 
@@ -161,7 +161,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       function validateSession (existingSession, restoreSession = false) {
-        // const isValidSession = true
+        const isValidSession = true
 
         if (!existingSession.validate) {
           return
@@ -189,13 +189,13 @@ export default function (Commands, Cypress, cy) {
                   name: 'session',
                 })
                 .error(err)
+
+                return !isValidSession
               }
 
-              return err
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
 
-              // $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
-
-              // return cy.fail(err)
+              return cy.fail(err)
             }
 
             return validate(existingSession, onSuccess, onFail)

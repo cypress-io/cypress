@@ -127,7 +127,7 @@ export default class SessionsManager {
         cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
 
-      // this.setActiveSession({ [sess_state.id]: sess_state })
+      this.setActiveSession({ [sess_state.id]: sess_state })
 
       return sess_state
     },
@@ -156,7 +156,7 @@ export default class SessionsManager {
 
     saveSessionData: async (data) => {
       this.setActiveSession({ [data.id]: data })
-      this.registeredSessions.set(data.id, true)
+      // this.registeredSessions.set(data.id, true)
 
       // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
       // eslint-disable-next-line no-console

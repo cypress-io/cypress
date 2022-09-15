@@ -171,7 +171,6 @@ class $Cypress {
   }
 
   configure (config: Record<string, any> = {}) {
-    console.log('state', config.cachedTestState.activeSessions)
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -219,15 +218,9 @@ class $Cypress {
       ...config.cachedTestState,
     }) as unknown as StateFunc
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'cachedTestState', 'rawJson', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    // TODO: remove rawJson...
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'cachedTestState', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
-    //     this.state = $SetterGetter.create({
-    //       ...cachedState.then((state) => {
-    //         return {
-    //           activeSessions: state.globalSessions || {},
-    //         }
-    //       }),
-    //     }) as unknown as StateFunc
     _.extend(this, browserInfo(config))
 
     /*
@@ -799,7 +792,6 @@ class $Cypress {
   static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
-    console.log(config.cachedTestState)
     cypress.configure(config)
 
     return cypress
