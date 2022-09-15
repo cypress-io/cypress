@@ -153,7 +153,7 @@ const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
   // relativeFile is relative to the cypress config, which may not be the repo root (i.e. monorepos)
   const repoRoot = Cypress.config('gitBaseDir') // i think we should rename to repoRoot
 
-  if (repoRoot) {
+  if (absoluteFile.startsWith(repoRoot)) {
     return absoluteFile.replace(repoRoot, '')
   }
 
