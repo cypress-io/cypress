@@ -21,7 +21,8 @@ const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
  * @param communicator the communicator that is sending the message
  * @returns the data to send
  */
-const sharedPromiseSetup = ({ resolve,
+const sharedPromiseSetup = ({
+  resolve,
   reject,
   data,
   event,
@@ -47,7 +48,7 @@ const sharedPromiseSetup = ({ resolve,
   }
 
   timeoutId = setTimeout(() => {
-    communicator.off(event, handler)
+    communicator.off(dataToSend.specBridgeResponseEvent, handler)
     reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within 1 second.`))
   }, 1000)
 
