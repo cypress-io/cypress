@@ -475,11 +475,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
-    name: 'gitBaseDir',
-    defaultValue: null,
-    validation: validate.isString,
-    isInternal: true,
-  }, {
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
@@ -504,6 +499,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
+    validation: validate.isString,
+    isInternal: true,
+  }, {
+    name: 'repoRoot',
+    defaultValue: null,
     validation: validate.isString,
     isInternal: true,
   }, {

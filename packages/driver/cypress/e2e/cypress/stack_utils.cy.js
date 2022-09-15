@@ -45,6 +45,7 @@ describe('driver/src/cypress/stack_utils', () => {
       }
     })
 
+    // rachel - todo - add test for getRelativePathFromRoot and its use in whateer function is calilng it
     it('returns existing code frame if error already has one', () => {
       const existingCodeFrame = {}
 

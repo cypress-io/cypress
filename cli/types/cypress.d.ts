@@ -2973,10 +2973,6 @@ declare namespace Cypress {
      */
     browsers: Browser[]
     /**
-     * Directory containing the .git folder, if the project is using Git
-     */
-    gitBaseDir: string
-    /**
      * Hosts mappings to IP addresses.
      */
     hosts: null | {[key: string]: string}
@@ -2997,6 +2993,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }

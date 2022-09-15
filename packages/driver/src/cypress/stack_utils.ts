@@ -151,7 +151,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
 
 const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
   // relativeFile is relative to the cypress config, which may not be the repo root (i.e. monorepos)
-  const repoRoot = Cypress.config('gitBaseDir') // i think we should rename to repoRoot
+  const repoRoot = Cypress.config('repoRoot')
 
   if (absoluteFile.startsWith(repoRoot)) {
     return absoluteFile.replace(repoRoot, '')
