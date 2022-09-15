@@ -454,8 +454,6 @@ export class SocketBase {
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:sessions':
-              console.log('clear:sessions', args)
-
               return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])
@@ -468,11 +466,6 @@ export class SocketBase {
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            case 'cross:origin:bridge:ready':
-            case 'cross:origin:finished':
-              return this.handleCrossOriginEvent(eventName, args[0])
-            case 'cross:origin:release:html':
-              return this.localBus.emit('cross:origin:release:html')
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
