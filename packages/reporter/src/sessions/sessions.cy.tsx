@@ -130,7 +130,7 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
       cy.get('.cy-tooltip')
       .should('have.text', 'Printed output to your console')
       .then(() => {
-        expect(events.emit).to.be.calledWith('show:command', failedSpecSession.id)
+        expect(events.emit).to.be.calledWith('show:command', failedSpecSession.testId, failedSpecSession.id)
       })
     })
 
