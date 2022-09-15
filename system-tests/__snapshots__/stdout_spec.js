@@ -276,7 +276,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (spec.cy.js, stdout_specfile.cy.js, stdout_specfile_display_spec_with_a_re │
-  │             ally_long_name_that_never_has_a_line_break_or_new_line.cy.js, spec.cy.js)          │
+  │             ally_long_name_that_never_has_a_line_break_or_new_line.cy.js, nested-4/spec.cy.js) │
   │ Searched:   cypress/e2e/nested-1/nested-2/nested-3/**/*                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -414,7 +414,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.cy.js                                                                       │
+  │ Spec Ran:     nested-4/spec.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
