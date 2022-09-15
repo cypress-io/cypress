@@ -20,7 +20,6 @@ describe('creates global session', () => {
 
   it.only('restores global session', async () => {
     console.log('test two')
-    cy.task('does_not_exist')
     cy.session('global_1', () => {})
     cy.login('global_1', true)
 

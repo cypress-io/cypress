@@ -184,26 +184,8 @@ export default class Attempt {
     return agent
   }
 
-  _addSession (props: CommandProps) {
-    const updated = this._updateSession(props)
-
-    if (!updated) {
-      const session = new Session({
-        state: props.state,
-        testCurrentRetry: props.testCurrentRetry || 0,
-        testId: props.testId,
-        id: props.id,
-        name: props.message || '',
-        status: props.renderProps?.status,
-        isGlobalSession: props.renderProps?.isGlobalSession,
-      })
-
-      this.sessions[props.id] = session
-    }
-  }
-
-  _updateSession (props: LogProps) {
-    const session = this.sessions[props.id]
+  _addSession (props: SessionProps) {
+    const session = new Session(props)
 
     this.sessions[props.id] = session
   }
@@ -235,10 +217,6 @@ export default class Attempt {
     this._logs[props.id] = command
 
     this.commands.push(command)
-
-    if (props.name === 'session' && !props.displayName) {
-      this._addSession(props)
-    }
 
     const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
 
