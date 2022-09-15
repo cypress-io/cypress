@@ -23,6 +23,10 @@ type SessionData = Cypress.Commands.Session.SessionData
 
 export default function (Commands, Cypress, cy) {
   function throwIfNoSessionSupport () {
+    if (Cypress.isBrowser('webkit')) {
+      $errUtils.throwErrByPath('webkit.session')
+    }
+
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
         args: {
@@ -386,8 +390,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then(async () => {
-          await navigateAboutBlank()
+        }).then(() => {
           _log.set({ state: 'passed' })
         })
       })

@@ -75,9 +75,20 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
       moveToRunsPage()
-      cy.contains('Log In').click()
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx._apis.authApi, 'logIn')
+      })
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.contains('button', 'Log In').click()
+      })
+
+      cy.withCtx((ctx, o) => {
+        // validate utmSource
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+        // validate utmMedium
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Runs Tab')
       })
     })
 
@@ -139,10 +150,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
-          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-            obj.result.data.cloudViewer.organizations.nodes = []
-          }
+        if (obj?.result?.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
         }
 
         return obj.result
@@ -156,9 +165,44 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
+      // Clear existing remote GQL intercept to allow new queries to execute normally
+      cy.remoteGraphQLIntercept(async (obj) => {
+        return obj.result
+      })
+
       cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
 
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+    })
+
+    it('refetches cloudViewer data on open', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'CloudConnectModals_RefreshCloudViewer_refreshCloudViewer_cloudViewer') {
+          testState.refetchCalled = true
+        }
+
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      moveToRunsPage()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.withCtx((_, o) => {
+        expect(o.testState.refetchCalled).to.eql(true)
+      })
     })
   })
 
@@ -206,6 +250,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
 
       cy.withCtx(async (ctx, options) => {
+        ctx.coreData.app.browserStatus = 'open'
         options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
         options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
           setTimeout(() => {
@@ -239,8 +284,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Create Project', () => {
-    it('when a project is created, injects new projectId into the config file', () => {
-      cy.remoteGraphQLIntercept(async (obj) => {
+    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
             slug: 'newProjectId',
@@ -257,7 +302,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
+
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -272,6 +319,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.equal('newProjectId')
+        expect(ctx.cloud.executeRemoteGraphQL).to.have.been.calledWithMatch({
+          fieldName: 'cloudProjectCreate',
+          operationVariables: {
+            medium: 'Runs Tab',
+            source: 'Binary: App',
+          } })
       })
     })
 

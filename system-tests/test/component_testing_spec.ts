@@ -79,7 +79,7 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -97,7 +97,7 @@ describe(`React major versions with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -119,6 +119,28 @@ describe(`Angular CLI major versions`, () => {
       project: `angular-${majorVersion}`,
       spec,
       testingType: 'component',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+
+  systemTests.it('angular 14 custom config', {
+    project: 'angular-custom-config',
+    spec: 'src/app/my-component.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+})
+
+describe('svelte component testing', () => {
+  systemTests.setup()
+
+  for (const bundler of ['webpack', 'vite']) {
+    systemTests.it(`svelte + ${bundler}`, {
+      project: `svelte-${bundler}`,
+      testingType: 'component',
+      spec: '**/*.cy.js',
       browser: 'chrome',
       expectedExitCode: 0,
     })

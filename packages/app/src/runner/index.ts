@@ -75,7 +75,7 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
-let _autIframeModel: AutIframe
+let _autIframeModel: AutIframe | null
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -91,6 +91,14 @@ export function getAutIframeModel (): AutIframe {
   }
 
   return _autIframeModel
+}
+
+export function destroyAutIframeModel () {
+  if (_autIframeModel) {
+    _autIframeModel.destroy()
+    _autIframeModel.destroy()
+    _autIframeModel = null
+  }
 }
 
 /**
@@ -150,7 +158,6 @@ function setupRunner () {
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
-    getEventManager().studioRecorder,
   )
 
   createIframeModel()
@@ -174,7 +181,11 @@ function getSpecUrl (namespace: string, specSrc: string) {
 function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
 
-  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
+  _eventManager?.stop()
+
+  getEventManager().teardown(getMobxRunnerStore(), isRerun)
+
+  return
 }
 
 let isTorndown = false
@@ -185,6 +196,7 @@ let isTorndown = false
  * any associated events.
  */
 export async function teardown () {
+  useSnapshotStore().$reset()
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   _eventManager?.teardown(getMobxRunnerStore())
@@ -406,13 +418,9 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
-  await teardownSpec(isRerun)
+  await Promise.all([teardownSpec(isRerun), UnifiedReporterAPI.resetReporter()])
 
-  const mobxRunnerStore = getMobxRunnerStore()
-
-  mobxRunnerStore.setSpec(spec)
-
-  await UnifiedReporterAPI.resetReporter()
+  getMobxRunnerStore().setSpec(spec)
 
   UnifiedReporterAPI.setupReporter()
 

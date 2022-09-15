@@ -99,7 +99,7 @@ export class CloudDataSource {
 
   reset () {
     return this.#cloudUrqlClient = createClient({
-      url: `${REMOTE_SCHEMA_URLS[cloudEnv]}/test-runner-graphql`,
+      url: `${this.getDashboardUrl(cloudEnv)}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
         cacheExchange({
@@ -331,5 +331,9 @@ export class CloudDataSource {
     }).toPromise()
 
     return JSON.parse(this.#lastCache ?? '')
+  }
+
+  getDashboardUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
+    return REMOTE_SCHEMA_URLS[env]
   }
 }
