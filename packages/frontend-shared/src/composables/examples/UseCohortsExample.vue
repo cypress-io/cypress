@@ -25,6 +25,6 @@ const cohortConfig: CohortConfig = {
   weights: props.weights,
 }
 
-const cohortChoice = useCohorts(cohortConfig)
+const cohortChoice = useCohorts().getCohort(cohortConfig)
 
 </script>

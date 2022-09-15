@@ -291,13 +291,15 @@ const bannerCohortOptions = {
   ],
 }
 
+const cohortBuilder = useCohorts()
+
 const getCohortForBanner = (bannerId: string) => {
   const cohortConfig: CohortConfig = {
     name: bannerId,
     options: bannerCohortOptions[bannerId],
   }
 
-  return useCohorts(cohortConfig)
+  return cohortBuilder.getCohort(cohortConfig)
 }
 
 type BannerType = 'login' | 'connectProject' | 'organization'
