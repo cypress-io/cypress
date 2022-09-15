@@ -116,22 +116,22 @@
     :has-banner-been-shown="hasRecordBannerBeenShown"
   />
   <ConnectProjectBanner
-    v-else-if="showConnectBanner && cohorts.connectProject"
+    v-else-if="showConnectBanner && cohorts.connectProject?.value"
     v-model="showConnectBanner"
     :has-banner-been-shown="hasConnectBannerBeenShown"
-    :cohort-option="cohorts.connectProject"
+    :cohort-option="cohorts.connectProject.value"
   />
   <CreateOrganizationBanner
-    v-else-if="showCreateOrganizationBanner && cohorts.organization"
+    v-else-if="showCreateOrganizationBanner && cohorts.organization?.value"
     v-model="showCreateOrganizationBanner"
     :has-banner-been-shown="hasCreateOrganizationBannerBeenShown"
-    :cohort-option="cohorts.organization"
+    :cohort-option="cohorts.organization.value"
   />
   <LoginBanner
-    v-else-if="showLoginBanner && cohorts.login"
+    v-else-if="showLoginBanner && cohorts.login?.value"
     v-model="showLoginBanner"
     :has-banner-been-shown="hasLoginBannerBeenShown"
-    :cohort-option="cohorts.login"
+    :cohort-option="cohorts.login.value"
   />
 </template>
 
@@ -146,7 +146,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
@@ -304,7 +304,7 @@ const getCohortForBanner = (bannerId: string) => {
 
 type BannerType = 'login' | 'connectProject' | 'organization'
 
-const cohorts: Partial<Record<BannerType, any>> = reactive({})
+const cohorts: Partial<Record<BannerType, ReturnType<typeof getCohortForBanner>>> = {}
 
 watchEffect(() => {
   if (!cohorts.login && showLoginBanner.value) {
