@@ -115,7 +115,7 @@ export const Query = objectType({
         name: nonNull(stringArg({ description: 'the name of the cohort to find' })),
       },
       resolve: async (source, args, ctx) => {
-        return await ctx.cohortsApi.getCohort(args.name)
+        return await ctx.cohortsApi.getCohort(args.name) ?? null
       },
     })
 
