@@ -146,14 +146,14 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, reactive, ref, watch, watchEffect, Ref } from 'vue'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import interval from 'human-interval'
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
-import { CohortOption, CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
+import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -302,7 +302,7 @@ const getCohortForBanner = (bannerId: string) => {
 
 type BannerType = 'login' | 'connectProject' | 'organization'
 
-const cohorts: Partial<Record<BannerType, CohortOption | Ref<CohortOption | undefined>>> = reactive({})
+const cohorts: Partial<Record<BannerType, any>> = reactive({})
 
 watchEffect(() => {
   if (!cohorts.login && showLoginBanner.value) {
