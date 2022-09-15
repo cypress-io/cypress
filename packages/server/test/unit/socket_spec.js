@@ -4,7 +4,6 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const httpsAgent = require('https-proxy-agent')
-
 const socketIo = require('@packages/socket/lib/browser')
 const Fixtures = require('@tooling/system-tests')
 
@@ -757,7 +756,7 @@ describe.only('lib/socket', () => {
           global: { id: 'global' },
         }
 
-        state.localSessions = {
+        state.specSessions = {
           local: { id: 'local' },
         }
 

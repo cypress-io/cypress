@@ -10,6 +10,8 @@ import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 
+import type { RunState } from '@packages/types'
+
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
@@ -1116,26 +1118,26 @@ export default (Commands, Cypress, cy, state, config) => {
           // tell our backend we're changing origins
           // TODO: add in other things we want to preserve
           // state for like scrollTop
-          let s: Record<string, any> = {
+          let runState: RunState = {
             currentId: id,
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),
             emissions: Cypress.runner.getEmissions(),
           }
 
-          s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
-          s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
-          s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
-          s.numLogs = LogUtils.countLogsByTests(s.tests)
+          runState.passed = Cypress.runner.countByTestState(runState.tests, 'passed')
+          runState.failed = Cypress.runner.countByTestState(runState.tests, 'failed')
+          runState.pending = Cypress.runner.countByTestState(runState.tests, 'pending')
+          runState.numLogs = LogUtils.countLogsByTests(runState.tests)
 
           return Cypress.action('cy:collect:run:state')
-          .then((a = []) => {
+          .then((otherRunStates = []) => {
             // merge all the states together holla'
-            s = _.reduce(a, (memo, obj) => {
+            runState = _.reduce(otherRunStates, (memo, obj) => {
               return _.extend(memo, obj)
-            }, s)
+            }, runState)
 
-            return Cypress.backend('preserve:run:state', s)
+            return Cypress.backend('preserve:run:state', runState)
           })
           .then(() => {
             // and now we must change the url to be the new

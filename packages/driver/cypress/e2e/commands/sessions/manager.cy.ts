@@ -247,7 +247,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('sessions.clearAllSavedSessions()', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions').resolves(null)
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions', true).resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')

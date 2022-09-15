@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../../../cypress/location'
-
+import type { ServerSessionData } from '@packages/types'
 import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
@@ -209,7 +209,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string) => {
+    getSession: (id: string): Promise<ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
 

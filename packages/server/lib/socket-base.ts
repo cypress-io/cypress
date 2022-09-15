@@ -26,6 +26,8 @@ import runEvents from './plugins/run_events'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
+import type { RunState, CachedTestState } from '@packages/types'
+
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
@@ -136,7 +138,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let existingState = null
+    let runState: RunState | undefined = undefined
 
     _.defaults(options, {
       socketId: null,
@@ -388,8 +390,7 @@ export class SocketBase {
           })
         }
 
-        // retry for up to data.timeout
-        // or 1 second
+        // retry for up to data.timeout or 1 second
         return Bluebird
         .try(tryConnected)
         .timeout(data.timeout != null ? data.timeout : 1000)
@@ -414,7 +415,7 @@ export class SocketBase {
 
           switch (eventName) {
             case 'preserve:run:state':
-              existingState = args[0]
+              runState = args[0]
 
               return null
             case 'resolve:url': {
@@ -458,6 +459,7 @@ export class SocketBase {
             case 'get:session':
               return session.getSession(args[0])
             case 'reset:cached:test:state':
+              runState = undefined
               cookieJar.removeAllCookies()
               session.clearSessions()
 
@@ -481,16 +483,18 @@ export class SocketBase {
         })
       })
 
-      socket.on('get:existing:run:state', (cb) => {
-        const s = existingState
+      socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        const s = runState
 
-        if (s) {
-          existingState = null
-
-          return cb(s)
+        const cachedTestState: CachedTestState = {
+          activeSessions: session.getActiveSessions(),
         }
 
-        return cb()
+        if (s) {
+          runState = undefined
+        }
+
+        return cb(s || {}, cachedTestState)
       })
 
       socket.on('save:app:state', (state, cb) => {
