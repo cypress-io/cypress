@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 export type WeightedAlgorithm = {
-  pick: (values: any[]) => string
+  pick: (values: string[]) => string
 }
 
 /**
@@ -13,7 +13,7 @@ export type WeightedAlgorithm = {
  * @param values array of values to choose from
  */
 const weightedChoice = (weights: number[], values: any[]) => {
-  if (weights.length > 0 && values.length > 0 && weights.length !== values.length) {
+  if (weights.length === 0 || values.length === 0 || weights.length !== values.length) {
     throw new Error('The length of the weights and values must be the same and greater than zero')
   }
 

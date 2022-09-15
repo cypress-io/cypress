@@ -1,12 +1,12 @@
 import type { Cohort } from '@packages/types'
 import type { DataContext } from '..'
 import { WEIGHTED, WEIGHTED_EVEN } from '../util/weightedChoice'
-const debug = require('debug')('cypress:data-context:cohorts')
+const debug = require('debug')('cypress:data-context:actions:CohortActions')
 
 export interface CohortsApiShape {
-  getCohorts(): Promise<Record<string, Cohort>>
+  getCohorts(): Promise<Record<string, Cohort> | undefined>
 
-  getCohort(name: string): Promise<Cohort>
+  getCohort(name: string): Promise<Cohort | undefined>
 
   insertCohort (cohort: Cohort): Promise<void>
 }

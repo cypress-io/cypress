@@ -15,13 +15,17 @@ describe('useCohorts example', () => {
 
   it('should show value for one cohort with default algorithm', () => {
     cy.mount(() => <UseCohortsExample copyOptions={copyOptions}/>)
-    cy.findByTestId('result').contains('Notification Title')
+    cy.findByTestId('result').then((elem) => {
+      expect(copyOptions.map((option) => option.value)).to.include(elem.text())
+    })
   })
 
   it('should show value for one cohort with supplied algorithm', () => {
     const weighted25_75 = [25, 75]
 
     cy.mount(() => <UseCohortsExample copyOptions={copyOptions} weights={weighted25_75}/>)
-    cy.findByTestId('result').contains('Notification Title')
+    cy.findByTestId('result').then((elem) => {
+      expect(copyOptions.map((option) => option.value)).to.include(elem.text())
+    })
   })
 })

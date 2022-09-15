@@ -1,6 +1,6 @@
 <template>
   <div data-cy="result">
-    {{ cohortChoice }}
+    {{ cohortChoice?.value }}
   </div>
 </template>
 

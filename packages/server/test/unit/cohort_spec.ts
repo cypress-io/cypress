@@ -1,16 +1,17 @@
 require('../spec_helper')
 
-const cache = require(`../../lib/cache`)
-const cohorts = require(`../../lib/cohorts`)
+import { Cohort } from '@packages/types'
+import cache from '../../lib/cache'
+import cohorts from '../../lib/cohorts'
 
 describe('lib/cohort', () => {
   context('.get', () => {
     it('calls cache.get', async () => {
-      const cohortTest = {
+      const cohortTest: Cohort = {
         name: 'testName',
         cohort: 'A',
       }
-      const cohortTest2 = {
+      const cohortTest2: Cohort = {
         name: 'testName2',
         cohort: 'B',
       }
@@ -30,7 +31,7 @@ describe('lib/cohort', () => {
 
   context('.getByName', () => {
     it('calls cache.getByName', async () => {
-      const cohortTest = {
+      const cohortTest: Cohort = {
         name: 'testName',
         cohort: 'A',
       }
@@ -47,7 +48,7 @@ describe('lib/cohort', () => {
 
   context('.set', () => {
     it('calls cache.set', async () => {
-      const cohortTest = {
+      const cohortTest: Cohort = {
         name: 'testName',
         cohort: 'A',
       }
