@@ -1271,11 +1271,12 @@ export default {
 
           \`cy.origin('${autLocation.originPolicy}', () => {\`
           \`  cy.on('uncaught:exception', (e) => {\`
-          \`  if (e.message.includes('Things went bad')) {\`
-          \`    // we expected this error, so let's ignore it\`
-          \`    // and let the test continue\`
-          \`    return false\`
-          \`  }\`
+          \`    if (e.message.includes('Things went bad')) {\`
+          \`      // we expected this error, so let's ignore it\`
+          \`      // and let the test continue\`
+          \`      return false\`
+          \`    }\`
+          \`  })\`
           \`})\`
           \`cy.visit('${autLocation.href}')\`
           `,
