@@ -77,15 +77,29 @@ describe('<TrackedBanner />', () => {
       let eventData
 
       beforeEach(() => {
-        eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: undefined })
+        const setProjectStateStub = cy.stub().as('setProjectState')
+        const hasBannerBeenShown = ref(false)
+
+        // mock setting the project state which would reactively set the hasBannerBeenShown ref
+        cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, event) => {
+          setProjectStateStub(event)
+          const preference = JSON.parse(event.value)
+
+          expect(preference).to.have.nested.property('banners.test-banner.lastShown')
+          hasBannerBeenShown.value = true
+
+          return defineResult({ setPreferences: null }) // do not care about return value here
+        })
+
+        eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: 'COH' })
 
         cy.mount({
-          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={false} eventData={eventData} />,
+          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={hasBannerBeenShown.value} eventData={eventData} />,
         })
       })
 
       it('should record event', () => {
-        eventData.cohort = 'COH'
+        eventData.cohort = 'COH2' //Change reactive variable to confirm the record event is not recorded a second time
         cy.get('@recordEvent').should(
           'have.been.calledOnceWith',
           Cypress.sinon.match({ campaign: 'CAM', messageId: Cypress.sinon.match.string, medium: 'MED', cohort: 'COH' }),
