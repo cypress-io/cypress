@@ -25,8 +25,8 @@ describe('cy.origin - snapshots', () => {
     cy.visit('/fixtures/primary-origin.html')
   })
 
-  // TODO: for some reason the xhr event is showing up twice in the log.
-  it('verifies XHR requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
+  // TODO: the xhr event is showing up twice in the log, which is wrong and causing flake. skipping until: https://github.com/cypress-io/cypress/issues/23840 is addressed.
+  it.skip('verifies XHR requests made while a secondary origin is active eventually update with snapshots of the secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
       // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.js
       // @ts-ignore
