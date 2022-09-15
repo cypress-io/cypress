@@ -4,8 +4,12 @@ import { action, computed, observable } from 'mobx'
 import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
+import { SessionProps } from '../sessions/sessions-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
+
+type InterceptStatuses = 'req modified' | 'req + res modified' | 'res modified'
+type XHRStatuses = '---' | '(canceled)' | '(aborted)' | string // string = any xhr status
 
 export interface RenderProps {
   message?: string
@@ -15,14 +19,8 @@ export interface RenderProps {
     alias?: string
     type: 'function' | 'stub' | 'spy'
   }>
-  status?: string
+  status?: InterceptStatuses | XHRStatuses
   wentToOrigin?: boolean
-}
-
-export interface SessionRenderProps {
-  id: string
-  status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
-  isGlobalSession: boolean
 }
 
 export interface CommandProps extends InstrumentProps {
@@ -30,7 +28,8 @@ export interface CommandProps extends InstrumentProps {
   event?: boolean
   number?: number
   numElements: number
-  renderProps?: RenderProps | SessionRenderProps
+  renderProps?: RenderProps
+  sessionInfo?: SessionProps['sessionInfo']
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
@@ -45,6 +44,7 @@ export interface CommandProps extends InstrumentProps {
 
 export default class Command extends Instrument {
   @observable.struct renderProps: RenderProps = {}
+  @observable.struct sessionInfo?: SessionProps['sessionInfo']
   @observable err = new Err({})
   @observable event?: boolean = false
   @observable isLongRunning = false
@@ -128,6 +128,7 @@ export default class Command extends Instrument {
     this.number = props.number
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    this.sessionInfo = props.sessionInfo
     this.timeout = props.timeout
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
@@ -151,6 +152,7 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    this.sessionInfo = props.sessionInfo
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.visible = props.visible === undefined || props.visible

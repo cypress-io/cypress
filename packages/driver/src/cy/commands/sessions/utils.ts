@@ -5,20 +5,6 @@ import { $Location } from '../../../cypress/location'
 
 type SessionData = Cypress.Commands.Session.SessionData
 
-const getSessionDetails = (sessState: SessionData) => {
-  return {
-    id: sessState.id,
-    data: _.merge(
-      _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v.length })),
-      ..._.map(sessState.localStorage, (v) => {
-        return {
-          [$Location.create(v.origin).hostname]: { localStorage: Object.keys(v.value).length },
-        }
-      }),
-    ),
-  }
-}
-
 const getSessionDetailsForTable = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
@@ -204,7 +190,6 @@ function navigateAboutBlank (session: boolean = true) {
 }
 
 export {
-  getSessionDetails,
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getConsoleProps,

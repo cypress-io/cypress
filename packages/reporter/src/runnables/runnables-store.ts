@@ -43,11 +43,11 @@ export class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnableArray = []
   /**
-   * Stores a list of all the runables files where the reporter
+   * Stores a list of all the runnables files where the reporter
    * has passed without any specific order.
    *
    * key: spec FilePath
-   * content: RunableArray
+   * content: RunnableArray
    */
   @observable runnablesHistory: Record<string, RunnableArray> = {}
 
@@ -61,7 +61,6 @@ export class RunnablesStore {
   [key: string]: any
 
   _tests: Record<string, TestModel> = {}
-  _logs: Record<string, Log> = {}
   _runnablesQueue: Array<RunnableModel> = []
 
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
