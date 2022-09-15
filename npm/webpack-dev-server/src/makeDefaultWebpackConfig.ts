@@ -24,9 +24,17 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
+  // Webpack 5 uses `emitOnErrors: true`
+  // Webpack <= 4 uses `noEmitOnErrors: false`
+  const emitOnErrorsProperty = {
+    [config.sourceWebpackModulesResult.webpack.majorVersion === 5 ? 'emitOnErrors' : 'noEmitOnErrors']:
+    config.sourceWebpackModulesResult.webpack.majorVersion === 5,
+  }
+
   const finalConfig = {
     mode: 'development',
     optimization: {
+      ...emitOnErrorsProperty,
       splitChunks: {
         chunks: 'all',
       },

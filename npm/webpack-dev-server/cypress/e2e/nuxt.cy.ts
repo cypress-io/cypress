@@ -49,6 +49,28 @@ for (const project of PROJECTS) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('Tutorial.cy.js').click()
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+
+      // Create compilation error
+      cy.withCtx(async (ctx) => {
+        const tutorialVuePath = ctx.path.join('components', 'Tutorial.vue')
+
+        await ctx.actions.file.writeFileInProject(
+          tutorialVuePath,
+          (await ctx.file.readFileInProject(tutorialVuePath)).replace('export', 'expart'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.contains('>  8 | expart default {').should('be.visible')
+    })
+
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
     it.skip('should detect new spec', () => {
       cy.visitApp()

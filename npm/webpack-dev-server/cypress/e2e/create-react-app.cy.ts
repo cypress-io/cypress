@@ -51,6 +51,25 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('App.cy.js').click()
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(
+          ctx.path.join('src', 'App.js'),
+          (await ctx.file.readFileInProject(ctx.path.join('src', 'App.js'))).replace('export', 'expart'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.contains('> 25 | expart default App;').should('exist')
+    })
+
     it('should detect new spec', () => {
       cy.visitApp()
 

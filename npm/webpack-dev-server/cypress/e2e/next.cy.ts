@@ -55,6 +55,28 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('index.cy.js').click()
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+
+      // Create compilation error
+      cy.withCtx(async (ctx) => {
+        const indexPath = ctx.path.join('pages', 'index.js')
+
+        await ctx.actions.file.writeFileInProject(
+          indexPath,
+          (await ctx.file.readFileInProject(indexPath)).replace('export', 'expart'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.contains('5 | expart default function Home() {').should('exist')
+    })
+
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
     it.skip('should detect new spec', () => {
       cy.visitApp()

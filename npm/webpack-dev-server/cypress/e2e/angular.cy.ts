@@ -55,6 +55,26 @@ for (const project of WEBPACK_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('app.component.cy.ts').click()
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+
+      // Create compilation error
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(
+          ctx.path.join('src', 'app', 'app.component.ts'),
+          (await ctx.file.readFileInProject(ctx.path.join('src', 'app', 'app.component.ts'))).replace('class', 'classaaaaa'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.contains('> classaaaaa is not defined').should('be.visible')
+    })
+
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
     it.skip('should detect new spec', () => {
       cy.visitApp()
