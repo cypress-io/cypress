@@ -43,8 +43,8 @@ async function readCircleEnv () {
     if (!circleEnv) throw new Error('No Environment object was found.')
 
     // last-ditch effort to check that an empty circle env is accurately reflecting process.env (external PRs)
-    if (process.env.CACHE_VERSION && Object.keys(circleEnv).length === 0) {
-      throw new Error('CACHE_VERSION is set, but circleEnv is empty')
+    if (process.env.COPY_CIRCLE_ARTIFACTS && Object.keys(circleEnv).length === 0) {
+      throw new Error('COPY_CIRCLE_ARTIFACTS is set, but circleEnv is empty')
     }
 
     return circleEnv

@@ -12,6 +12,52 @@ const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}lo
 const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
 
 /**
+ * Shared Promise Setup, is a helper function to setup our promisified post messages.
+ * @param resolve the promise resolve function
+ * @param reject the promise reject function
+ * @param data the data to send
+ * @param event the name of the event to be promisified.
+ * @param specBridgeName the name of the spec bridge receiving the event.
+ * @param communicator the communicator that is sending the message
+ * @returns the data to send
+ */
+const sharedPromiseSetup = ({
+  resolve,
+  reject,
+  data,
+  event,
+  specBridgeName,
+  communicator,
+}: {
+  resolve: Function
+  reject: Function
+  data?: any
+  event: string
+  specBridgeName: string
+  communicator: EventEmitter
+}) => {
+  let timeoutId
+
+  const dataToSend = data || {}
+
+  dataToSend.specBridgeResponseEvent = `${event}:${Date.now()}`
+
+  const handler = (result) => {
+    clearTimeout(timeoutId)
+    resolve(result)
+  }
+
+  timeoutId = setTimeout(() => {
+    communicator.off(dataToSend.specBridgeResponseEvent, handler)
+    reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within 1 second.`))
+  }, 1000)
+
+  communicator.once(dataToSend.specBridgeResponseEvent, handler)
+
+  return dataToSend
+}
+
+/**
  * Primary Origin communicator. Responsible for sending/receiving events throughout
  * the driver responsible for multi-origin communication, as well as sending/receiving events to/from the
  * spec bridge communicator, respectively.
@@ -59,7 +105,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         data.data.err = reifySerializedError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.originPolicy)
+      this.emit(messageName, data.data, data.originPolicy, source)
 
       return
     }
@@ -106,6 +152,28 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       event,
       data: preprocessedData,
     }, '*')
+  }
+
+  /**
+   * Promisified event sent from the primary communicator that expects the same event reflected back with the response.
+   * @param {string} event - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
+   * @param options - contains boolean to sync globals
+   * @returns the response from primary of the event with the same name.
+   */
+  toSpecBridgePromise<T> (originPolicy: string, event: string, data?: any) {
+    return new Promise<T>((resolve, reject) => {
+      const dataToSend = sharedPromiseSetup({
+        resolve,
+        reject,
+        data,
+        event,
+        specBridgeName: originPolicy,
+        communicator: this,
+      })
+
+      this.toSpecBridge(originPolicy, event, dataToSend)
+    })
   }
 }
 
@@ -206,6 +274,27 @@ export class SpecBridgeCommunicator extends EventEmitter {
         data,
         originPolicy,
       }, '*')
+    })
+  }
+  /**
+   * Promisified event sent to the primary communicator that expects the same event reflected back with the response.
+   * @param {string} event - the name of the event to be sent.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
+   * @param options - contains boolean to sync globals
+   * @returns the response from primary of the event with the same name.
+   */
+  toPrimaryPromise<T> (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+    return new Promise<T>((resolve, reject) => {
+      const dataToSend = sharedPromiseSetup({
+        resolve,
+        reject,
+        data,
+        event,
+        specBridgeName: 'the primary Cypress',
+        communicator: this,
+      })
+
+      this.toPrimary(event, dataToSend, options)
     })
   }
 }

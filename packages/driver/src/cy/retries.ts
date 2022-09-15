@@ -2,16 +2,31 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../cypress/error_utils'
-import * as cors from '@packages/network/lib/cors'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
+import type { Log } from '../cypress/log'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
+type retryOptions = {
+  _interval?: number
+  _log?: Log
+  _retries?: number
+  _runnable?: any
+  _runnableTimeout?: number
+  _start?: Date
+  error?: Error
+  interval: number
+  log: boolean
+  onFail?: Function
+  timeout: number
+  total?: number
+}
+
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (...args: any) => any) => ({
-  retry (fn, options, log?) {
+  retry (fn, options: retryOptions, log?) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
@@ -44,17 +59,17 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     const interval = options.interval ?? options._interval
 
     // we calculate the total time we've been retrying
-    // so we dont exceed the runnables timeout
-    const total = Date.now() - options._start
+    // so we don't exceed the runnables timeout
+    const total = Date.now().valueOf() - options._start!.valueOf()
 
     options.total = total
 
     // increment retries
-    options._retries += 1
+    options._retries! += 1
 
     // if our total exceeds the timeout OR the total + the interval
     // exceed the runnables timeout, then bail
-    if ((total + interval) >= options._runnableTimeout) {
+    if ((total + interval) >= options._runnableTimeout!) {
       finishAssertions()
 
       let onFail
@@ -66,26 +81,16 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       }).message
 
       const retryErrProps = modifyErrMsg(error, prependMsg, (msg1, msg2) => {
-        const autOrigin = Cypress.state('autOrigin')
-        const commandOrigin = window.location.origin
-
-        if (!options.isCrossOriginSpecBridge && autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
-          const appendMsg = errByPath('miscellaneous.cross_origin_command', {
-            commandOrigin,
-            autOrigin,
-          }).message
-
-          return `${msg2}${msg1}\n\n${appendMsg}`
-        }
-
         return `${msg2}${msg1}`
       })
 
-      const retryErr = mergeErrProps(error, retryErrProps)
+      if (error) {
+        const retryErr = mergeErrProps(error, retryErrProps)
 
-      throwErr(retryErr, {
-        onFail: onFail || log,
-      })
+        throwErr(retryErr, {
+          onFail: onFail || log,
+        })
+      }
     }
 
     const runnableHasChanged = () => {
@@ -133,6 +138,30 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       // invoke the passed in retry fn
       // once we reach stability
       return whenStable(fn)
+    })
+  },
+  retryIfCommandAUTOriginMismatch (fn: () => any, timeout: number) {
+    const options: retryOptions = {
+      log: true,
+      timeout,
+      interval: 100,
+    }
+
+    const retryValue = () => {
+      return Promise
+      .try(() => {
+        // If command is not same origin, this will throw an error. also, in this instance, this is cy
+        this.ensureCommandCanCommunicateWithAUT()
+      })
+      .catch((err) => {
+        options.error = err
+
+        return this.retry(retryValue, options)
+      })
+    }
+
+    return retryValue().then(() => {
+      return fn()
     })
   },
 })
