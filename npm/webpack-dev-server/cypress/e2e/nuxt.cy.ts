@@ -68,7 +68,7 @@ for (const project of PROJECTS) {
 
       // The test should fail and the stack trace should appear in the command log
       cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
-      cy.contains('>  8 | expart default {').should('be.visible')
+      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455

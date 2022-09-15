@@ -12,6 +12,7 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   },
   "mode": "development",
   "optimization": {
+    "noEmitOnErrors": false,
     "splitChunks": {
       "chunks": "all"
     }
@@ -29,10 +30,14 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   },
   "devServer": {
     "progress": true,
-    "overlay": false
+    "overlay": true,
+    "client": {
+      "overlay": false
+    }
   },
   "mode": "development",
   "optimization": {
+    "emitOnErrors": true,
     "splitChunks": {
       "chunks": "all"
     }
