@@ -149,6 +149,17 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
   }
 }
 
+const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
+  // relativeFile is relative to the cypress config, which may not be the repo root (i.e. monorepos)
+  const repoRoot = Cypress.config('gitBaseDir') // i think we should rename to repoRoot
+
+  if (repoRoot) {
+    return absoluteFile.replace(repoRoot, '')
+  }
+
+  return relativeFile
+}
+
 const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userInvocationStack?: string | false) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
@@ -319,7 +330,6 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
   // We ensure that the absolute path is not set in this case.
-
   const canBuildAbsolutePath = relativeFile && projectRoot && (
     !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
   )
@@ -332,6 +342,8 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     if (Cypress.config('platform') === 'win32' && absoluteFile.startsWith('/')) {
       absoluteFile = absoluteFile.substring(1)
     }
+
+    relativeFile = getRelativePathFromRoot(relativeFile, absoluteFile)
   }
 
   return {
