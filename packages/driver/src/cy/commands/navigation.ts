@@ -38,12 +38,6 @@ const reset = (test: any = {}) => {
   // strict test isolation resets the navigation history for us.
   hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
 
-  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
-
-  // make sure we reset that we haven't visited about blank again
-  // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
-
   id = test.id
 }
 
