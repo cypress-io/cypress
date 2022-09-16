@@ -8,7 +8,7 @@ import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
-import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
+import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '../../src/actions'
 import sinon from 'sinon'
 import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
@@ -63,6 +63,12 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       focusActiveBrowserWindow: sinon.stub(),
       getBrowsers: sinon.stub().resolves([]),
     } as unknown as BrowserApiShape,
+    cohortsApi: {
+      getCohorts: sinon.stub().resolves(),
+      getCohort: sinon.stub().resolves(),
+      insertCohort: sinon.stub(),
+      determineCohort: sinon.stub().resolves(),
+    } as unknown as CohortsApiShape,
   })
 
   const origFetch = ctx.util.fetch
