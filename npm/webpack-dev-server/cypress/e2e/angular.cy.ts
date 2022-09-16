@@ -22,8 +22,8 @@ for (const project of WEBPACK_REACT) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
+
       cy.get('li.command').first().within(() => {
         cy.get('.command-method').should('contain', 'mount')
         cy.get('.command-message').should('contain', 'AppComponent')
@@ -33,8 +33,7 @@ for (const project of WEBPACK_REACT) {
     it('should live-reload on src changes', () => {
       cy.visitApp()
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -43,7 +42,7 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.get('.failed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ failCount: 1 })
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -52,15 +51,14 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
     })
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
 
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
 
       // Create compilation error
       cy.withCtx(async (ctx) => {
@@ -71,8 +69,8 @@ for (const project of WEBPACK_REACT) {
       })
 
       // The test should fail and the stack trace should appear in the command log
-      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
-      cy.contains('> classaaaaa is not defined').should('be.visible')
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
@@ -87,8 +85,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.contains('new.component.cy.ts').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
     })
   })
 }

@@ -21,8 +21,7 @@ for (const project of PROJECTS) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('HelloWorld.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
       cy.get('.commands-container').within(() => {
         cy.contains('mount')
         cy.contains('<HelloWorld ... />')
@@ -33,8 +32,7 @@ for (const project of PROJECTS) {
       cy.visitApp()
 
       cy.contains('HelloWorld.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
 
       // Create compilation error
       cy.withCtx(async (ctx) => {
@@ -47,8 +45,8 @@ for (const project of PROJECTS) {
       })
 
       // The test should fail and the stack trace should appear in the command log
-      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
-      cy.contains('> expart default {').should('exist')
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
   })
 }

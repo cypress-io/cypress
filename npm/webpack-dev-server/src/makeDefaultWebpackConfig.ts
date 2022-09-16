@@ -24,8 +24,6 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
-  // Webpack 5 uses `emitOnErrors: true`
-  // Webpack <= 4 uses `noEmitOnErrors: false`
   const optimization = <Record<string, any>>{}
 
   if (config.sourceWebpackModulesResult.webpack.majorVersion === 5) {
