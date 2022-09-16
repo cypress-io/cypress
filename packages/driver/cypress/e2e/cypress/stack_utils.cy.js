@@ -23,6 +23,39 @@ describe('driver/src/cypress/stack_utils', () => {
     })
   })
 
+  context('getRelativePathFromRoot', () => {
+    const relativeFile = 'relative/path/to/file.js'
+    const absoluteFile = 'User/ruby/cypress/packages/driver/relative/path/to/file.js'
+    const repoRoot = 'User/ruby/cypress'
+    const relativePathFromRoot = 'packages/driver/relative/path/to/file.js'
+
+    it('returns relativeFile if absoluteFile is empty', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, undefined)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if `repoRoot` is not set in the config', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if absoluteFile does not start with `repoRoot`', () => {
+      Cypress.config('repoRoot', 'User/ruby/test-repo')
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns the relative path from root if the absoluteFile starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', repoRoot)
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativePathFromRoot)
+    })
+  })
+
   context('.getCodeFrame', () => {
     let originalErr
     const sourceCode = `it('is a failing test', () => {
@@ -45,7 +78,6 @@ describe('driver/src/cypress/stack_utils', () => {
       }
     })
 
-    // rachel - todo - add test for getRelativePathFromRoot and its use in whateer function is calilng it
     it('returns existing code frame if error already has one', () => {
       const existingCodeFrame = {}
 
@@ -93,6 +125,15 @@ describe('driver/src/cypress/stack_utils', () => {
       cy.stub($sourceMapUtils, 'getSourceContents').returns(null)
 
       expect($stackUtils.getCodeFrame(originalErr)).to.be.undefined
+    })
+
+    it('returns relativePath from root when `absoluteFile` starts with `repoRoot`', () => {
+      // question - how do i mock a value in the cypress config?
+      cy.stub($sourceMapUtils, 'getSourceContents').returns(sourceCode)
+      cy.spy($stackUtils, 'getCodeFrameFromSource')
+      $stackUtils.getCodeFrame(originalErr)
+      // question - i know this is being called b/c my console log is showing up
+      expect($stackUtils.getCodeFrameFromSource).to.have.been.called
     })
   })
 

@@ -93,12 +93,14 @@ export class GitDataSource {
       debug('exception caught when loading git client')
     }
 
-    if (!config.isRunMode) {
-      this.#refreshAllGitData()
-    } else {
+    // don't watch/refresh git data in run mode since we only
+    // need it to detect the .git directory to set `repoRoot`
+    if (config.isRunMode) {
       this.#verifyGitRepo().catch(() => {
         // Empty catch for no-floating-promises rule
       })
+    } else {
+      this.#refreshAllGitData()
     }
   }
 
