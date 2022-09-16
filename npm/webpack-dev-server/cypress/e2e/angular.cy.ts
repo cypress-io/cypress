@@ -63,6 +63,7 @@ for (const project of WEBPACK_REACT) {
       // Create compilation error
       cy.withCtx(async (ctx) => {
         const componentFilePath = ctx.path.join('src', 'app', 'app.component.ts')
+
         await ctx.actions.file.writeFileInProject(
           componentFilePath,
           (await ctx.file.readFileInProject(componentFilePath)).replace('class', 'classaaaaa'),
