@@ -150,7 +150,8 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
 }
 
 const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
-  // relativeFile is relative to the cypress config, which may not be the repo root (i.e. monorepos)
+  // at this point relativeFile is relative to the cypress config
+  // we need it to be relative to the repo root, which is different for monorepos
   const repoRoot = Cypress.config('repoRoot')
 
   if (absoluteFile?.startsWith(`${repoRoot}/`)) {
