@@ -30,10 +30,7 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   },
   "devServer": {
     "progress": true,
-    "overlay": true,
-    "client": {
-      "overlay": false
-    }
+    "overlay": false
   },
   "mode": "development",
   "optimization": {
