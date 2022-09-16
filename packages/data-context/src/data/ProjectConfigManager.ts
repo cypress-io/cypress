@@ -461,6 +461,15 @@ export class ProjectConfigManager {
     )
   }
 
+  private getRepoRoot = () => {
+    /*
+      repoRoot is used to detect the full file path for the relativeFile in stack_utils
+      it's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard
+      right now we assume it's same as `.git` dir, if need be can update to look for most root-level package.json
+    */
+    return this.options.ctx.git?.gitBaseDir
+  }
+
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents, this._testingType)
@@ -479,7 +488,7 @@ export class ProjectConfigManager {
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
-      repoRoot: this.options.ctx.git?.gitBaseDir, // use .git directory to detect repo root
+      repoRoot: this.getRepoRoot(),
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
