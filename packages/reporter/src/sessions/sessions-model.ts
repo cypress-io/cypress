@@ -7,19 +7,29 @@ export interface SessionProps extends InstrumentProps {
   testCurrentRetry: number
   sessionInfo: {
     id: string
-    data: Record<string, {cookies: number, localStorage: number}>
+    isGlobalSession: boolean
+    status: 'creating' | 'created' | 'restored' |'restored' | 'recreating' | 'recreated' | 'failed'
   }
 }
 
 export default class Session extends Instrument {
   @observable name: string
-  @observable data: SessionProps['sessionInfo']['data']
+  @observable status: string
+  @observable isGlobalSession: boolean = false
 
   constructor (props: SessionProps) {
     super(props)
-    const { id, data } = props.sessionInfo
+    const { sessionInfo: { isGlobalSession, id, status } } = props
 
+    this.isGlobalSession = isGlobalSession
     this.name = id
-    this.data = { ...data }
+    this.status = status
+  }
+
+  update (props: Partial<SessionProps>) {
+    const { sessionInfo, state } = props
+
+    this.status = sessionInfo?.status || ''
+    this.state = state || ''
   }
 }

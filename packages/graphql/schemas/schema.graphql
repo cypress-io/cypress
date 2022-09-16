@@ -555,6 +555,28 @@ enum CodeLanguageEnum {
   ts
 }
 
+"""used to distinguish one group of users from another"""
+type Cohort {
+  """value used to indicate the cohort (e.g. "A" or "B")"""
+  cohort: String!
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -1199,6 +1221,11 @@ type Mutation {
   copyTextToClipboard(text: String!): Boolean
 
   """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
+
+  """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
@@ -1493,6 +1520,12 @@ type Query {
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
+
+  """Return the cohort for the given name"""
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
 
   """The currently opened project"""
   currentProject: CurrentProject
