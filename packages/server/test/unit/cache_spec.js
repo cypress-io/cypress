@@ -256,6 +256,28 @@ describe('lib/cache', () => {
           PROJECTS: ['foo'],
           PROJECT_PREFERENCES: {},
           PROJECTS_CONFIG: {},
+          COHORTS: {},
+        })
+      })
+    })
+  })
+
+  context('cohorts', () => {
+    it('should get no cohorts when empty', () => {
+      return cache.getCohorts().then((cohorts) => {
+        expect(cohorts).to.deep.eq({})
+      })
+    })
+
+    it('should insert a cohort', () => {
+      const cohort = {
+        name: 'cohort_id',
+        cohort: 'A',
+      }
+
+      return cache.insertCohort(cohort).then(() => {
+        return cache.getCohorts().then((cohorts) => {
+          expect(cohorts).to.deep.eq({ [cohort.name]: cohort })
         })
       })
     })

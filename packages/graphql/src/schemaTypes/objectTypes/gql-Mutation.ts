@@ -7,6 +7,7 @@ import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
+import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
@@ -681,6 +682,17 @@ export const mutation = mutationType({
         return {
           requestPolicy: 'network-only',
         } as const
+      },
+    })
+
+    t.field('determineCohort', {
+      type: Cohort,
+      description: 'Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.',
+      args: {
+        cohortConfig: nonNull(CohortInput),
+      },
+      resolve: async (source, args, ctx) => {
+        return ctx.actions.cohorts.determineCohort(args.cohortConfig.name, args.cohortConfig.cohorts, args.cohortConfig.weights || undefined)
       },
     })
 

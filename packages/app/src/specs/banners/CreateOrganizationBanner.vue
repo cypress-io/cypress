@@ -1,10 +1,10 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_CREATE_ORG"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="create-organization-banner"
     status="info"
-    :title="t('specPage.banners.createOrganization.title')"
+    :title="cohortOption.value"
     class="mb-16px"
     :icon="OrganizationIcon"
     dismissible
@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Set up your organization',
       medium: 'Specs Create Organization Banner',
-      cohort: '' // TODO Connect cohort
+      cohort: cohortOption.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
@@ -36,6 +36,7 @@
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
+import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
@@ -52,19 +53,18 @@ query CreateOrganizationBanner {
 }
 `
 
-withDefaults(defineProps<{
+const props = defineProps<{
   modelValue: boolean
   hasBannerBeenShown: boolean
-}>(), {
-  modelValue: false,
-  hasBannerBeenShown: true,
-})
+  cohortOption: CohortOption
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_CREATE_ORG
 
 const query = useQuery({ query: CreateOrganizationBannerDocument })
 
@@ -80,6 +80,7 @@ const createOrganizationUrl = computed(() => {
     params: {
       utm_medium: 'Specs Create Organization Banner',
       utm_campaign: 'Set up your organization',
+      utm_content: props.cohortOption.cohort,
     },
   })
 })
