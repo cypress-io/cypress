@@ -140,7 +140,7 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 }
 
 /**
- * Whitelist known experiments here to avoid accidentally showing
+ * Allow known experiments here to avoid accidentally showing
  * any config key that starts with "experimental" prefix
 */
 // @ts-ignore
