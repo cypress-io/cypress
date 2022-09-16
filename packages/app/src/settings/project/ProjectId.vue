@@ -1,12 +1,9 @@
 <template>
   <SettingsSection
-    v-if="props.gql.currentProject?.projectId"
     code="projectId"
     data-cy="settings-projectId"
   >
-    <template
-      #title
-    >
+    <template #title>
       {{ t('settingsPage.projectId.title') }}
     </template>
     <template #description>
@@ -22,10 +19,10 @@
       </i18n-t>
     </template>
     <div
+      v-if="props.gql.currentProject?.projectId"
       class="flex gap-10px items-center"
     >
       <CodeBox
-        data-cy="settings-codeBox"
         :code="props.gql.currentProject?.projectId"
         :prefix-icon="IconOctothorpe"
       />
@@ -34,10 +31,8 @@
         variant="outline"
       />
     </div>
-  </SettingsSection>
-
-  <SettingsSection v-else>
     <CloudConnectButton
+      v-else
       :gql="props.gql"
       utm-medium="Settings Tab"
     />

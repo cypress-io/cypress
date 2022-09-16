@@ -1,9 +1,6 @@
 <template>
   <section>
-    <h2
-      v-if="$slots.title || code"
-      class="font-medium text-size-16px text-gray-900 leading-24px inline-flex items-baseline align-middle"
-    >
+    <h2 class="font-medium text-size-16px text-gray-900 leading-24px inline-flex items-baseline align-middle">
       <slot name="title" />
       <code
         v-if="code"
@@ -12,10 +9,7 @@
         {{ code }}
       </code>
     </h2>
-    <p
-      v-if="$slots.description"
-      class="text-sm mb-16px text-gray-600"
-    >
+    <p class="text-sm mb-16px text-gray-600">
       <slot name="description" />
     </p>
     <slot />
