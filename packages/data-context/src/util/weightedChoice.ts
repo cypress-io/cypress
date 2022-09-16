@@ -17,19 +17,21 @@ const weightedChoice = (weights: number[], values: any[]) => {
     throw new Error('The length of the weights and values must be the same and greater than zero')
   }
 
-  const cumulativeWeights = _.reduce(weights, (result: number[], value: number) => {
-    if (result.length === 0) {
-      result.push(value)
-    } else {
-      // @ts-ignores
-      result.push(value + result[result.length - 1])
+  const cumulativeWeights = weights.reduce<number[]>((acc, curr) => {
+    if (acc.length === 0) {
+      return [curr]
     }
 
-    return result
+    const last = acc[acc.length - 1]
+
+    if (!last) {
+      return acc
+    }
+
+    return [...acc, last + curr]
   }, [])
 
-  // @ts-ignores
-  const randomNumber = Math.random() * cumulativeWeights[cumulativeWeights.length - 1]
+  const randomNumber = Math.random() * (cumulativeWeights[cumulativeWeights.length - 1] ?? 1)
 
   const choice = _.transform(cumulativeWeights, (result, value, index) => {
     if (value >= randomNumber) {
