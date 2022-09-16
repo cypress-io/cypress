@@ -461,7 +461,7 @@ There are also a set of system tests in [`system-tests`](system-tests) which att
 
 Additionally, we test the code by running it against various other example projects in CI. See CI badges and links at the top of this document.
 
-If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
+If you're curious how we manage all of these tests in CI check out our [CircleCI config](.circleci/config.yml).
 
 #### Docker
 
@@ -474,7 +474,7 @@ Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. 
 $ yarn docker
 ```
 
-There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
+There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [CircleCI config](.circleci/config.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
