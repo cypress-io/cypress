@@ -127,13 +127,12 @@ describe('driver/src/cypress/stack_utils', () => {
       expect($stackUtils.getCodeFrame(originalErr)).to.be.undefined
     })
 
-    it('returns relativePath from root when `absoluteFile` starts with `repoRoot`', () => {
-      // question - how do i mock a value in the cypress config?
+    it('relativeFile is relative to the repo root when `absoluteFile` starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', '/dev')
       cy.stub($sourceMapUtils, 'getSourceContents').returns(sourceCode)
-      cy.spy($stackUtils, 'getCodeFrameFromSource')
-      $stackUtils.getCodeFrame(originalErr)
-      // question - i know this is being called b/c my console log is showing up
-      expect($stackUtils.getCodeFrameFromSource).to.have.been.called
+      const codeFrame = $stackUtils.getCodeFrame(originalErr)
+
+      expect(codeFrame.relativeFile).to.equal('app/cypress/integration/features/source_map_spec.js')
     })
   })
 
