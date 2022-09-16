@@ -301,8 +301,7 @@ customRequire.resolve = function (mod, ...args) {
       return require.resolve(mod, ...args)
     }
 
-    const relFilename = args.length > 0 ? args[0] : null
-    const relDirname = args.length > 1 ? args[1] : null
+    const [relFilename = null, relDirname = null] = args
     const opts =
       relFilename != null && relDirname != null
         ? createResolveOpts(relFilename, relDirname)

@@ -16,7 +16,7 @@ function runWithSnapshot () {
       supportTS: isDev,
       initTranspileCache: isDev
         ? () => require('dirt-simple-file-cache').DirtSimpleFileCache.initSync(projectBaseDir, { cacheDir: path.join(projectBaseDir, 'node_modules', '.dsfc'), keepInMemoryCache: true })
-        : function () {},
+        : undefined,
       tsconfig: {
         compilerOptions: {
           useDefineForClassFields: false, // default

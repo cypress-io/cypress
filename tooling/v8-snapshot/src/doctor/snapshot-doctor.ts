@@ -308,8 +308,8 @@ export class SnapshotDoctor {
     bundle: Buffer
     meta: Metadata
   }> {
-    // 1. Generate the initial bundle not deferring anything yet
-    let { meta } = await this._createScript()
+    // 1. Generate the metadata not deferring anything yet
+    const { meta } = await this._createScript()
 
     // 2. Extract all module inputs from the metadata and detect circular
     // imports
@@ -337,14 +337,15 @@ export class SnapshotDoctor {
       new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]),
     )
 
-    let { warnings, bundle } = await this._createScript(new Set(filteredPreviousDeferred), new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]))
+    // 4. Generate the initial bundle and warnings using what was done previously
+    const { warnings, bundle } = await this._createScript(new Set(filteredPreviousDeferred), new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]))
 
-    // 4. Process the initial bundle in order to detect issues during
+    // 5. Process the initial bundle in order to detect issues during
     //    verification
     //    The heal state we pass is mutated in this step
     await this._processCurrentScript(bundle, warnings, healState, circulars)
 
-    // 5. As long as the heal state indicates there is work left todo we add
+    // 6. As long as the heal state indicates there is work left todo we add
     //    problematic modules (needDefer and needNorewrite) to the appropriate
     //    set and repeat the process
     //    Each new run will defer/norewrite more and more modules until we
@@ -369,7 +370,7 @@ export class SnapshotDoctor {
       await this._processCurrentScript(bundle, warnings, healState, circulars)
     }
 
-    // 6. Sort results
+    // 7. Sort results
     const sortedDeferred = sortDeferredByLeafness(
       meta,
       entries,
@@ -382,10 +383,10 @@ export class SnapshotDoctor {
     logInfo({ allDeferred: sortedDeferred, len: sortedDeferred.length })
     logInfo({ norewrite: sortedNorewrite, len: sortedNorewrite.length })
 
-    // 7. Cleanup
+    // 8. Cleanup
     await this._scriptProcessor.dispose()
 
-    // 8. Return collected metadata as well as the bundle that respected the
+    // 9. Return collected metadata as well as the bundle that respected the
     //    collected heal state
     return {
       healthy: pathifyAndSort(healState.healthy),
