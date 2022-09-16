@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import { $Location } from '../../../cypress/location'
 import Bluebird from 'bluebird'
+import { $Location } from '../../../cypress/location'
 
 type SessionData = Cypress.Commands.Session.SessionData
 

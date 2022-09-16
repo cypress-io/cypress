@@ -25,10 +25,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'firstOpenedCypress',
   'showedStudioModal',
   'preferredOpener',
-  'ctReporterWidth',
-  'ctIsSpecsListOpen',
   'isSpecsListOpen',
-  'ctSpecListWidth',
   'firstOpened',
   'lastOpened',
   'lastProjectId',
@@ -61,9 +58,6 @@ export type AllowedState = Partial<{
   firstOpenedCypress: Maybe<number>
   showedStudioModal: Maybe<boolean>
   preferredOpener: Editor | undefined
-  ctReporterWidth: Maybe<number>
-  ctIsSpecsListOpen: Maybe<boolean>
-  ctSpecListWidth: Maybe<number>
   lastProjectId: Maybe<string>
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
