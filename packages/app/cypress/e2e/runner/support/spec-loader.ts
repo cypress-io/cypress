@@ -20,6 +20,16 @@ export type LoadSpecOptions = {
   pendingCount?: number | string
   hasPreferredIde?: boolean
   projectName?: 'runner-e2e-specs' | 'session-and-origin-e2e-specs'
+  mode?: 'e2e' | 'component'
+  configFile?: string
+}
+
+export function initialize (options: Pick<LoadSpecOptions, 'projectName'>) {
+  const {
+    projectName = 'runner-e2e-specs',
+  } = options
+
+  cy.scaffoldProject(projectName)
 }
 
 export function loadSpec (options: LoadSpecOptions) {
@@ -30,12 +40,13 @@ export function loadSpec (options: LoadSpecOptions) {
     failCount = '--',
     hasPreferredIde = false,
     pendingCount,
+    mode = 'e2e',
+    configFile = 'cypress.config.js',
     projectName = 'runner-e2e-specs',
   } = options
 
-  cy.scaffoldProject(projectName)
-  cy.openProject(projectName)
-  cy.startAppServer()
+  cy.openProject(projectName, ['--config-file', configFile])
+  cy.startAppServer(mode)
 
   cy.withCtx((ctx, options) => {
     ctx.update((coreData) => {
