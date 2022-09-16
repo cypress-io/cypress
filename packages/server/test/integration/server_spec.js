@@ -103,8 +103,6 @@ describe('Server', () => {
 
               this.srv = this.server.getHttpServer()
 
-              // @session = new (Session({app: @srv}))
-
               this.proxy = `http://localhost:${port}`
 
               this.buffers = this.server._networkProxy.http.buffers

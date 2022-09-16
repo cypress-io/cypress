@@ -5,7 +5,6 @@ import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runna
 import statsStore, { StatsStore } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
-import { SessionProps } from '../sessions/sessions-model'
 
 import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
@@ -63,10 +62,6 @@ const events: Events = {
 
     runner.on('reporter:log:state:changed', action('log:update', (log: LogProps) => {
       runnablesStore.updateLog(log)
-    }))
-
-    runner.on('session:add', action('session:add', (props: SessionProps) => {
-      runnablesStore._withTest(props.testId, (test) => test.addSession(props))
     }))
 
     runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
