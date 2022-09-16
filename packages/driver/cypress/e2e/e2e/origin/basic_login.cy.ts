@@ -169,7 +169,7 @@ describe('Multi-step Auth', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23481
-  it.skip('final-auth redirects back to localhost - flat', () => {
+  it('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.origin('http://foobar.com:3500', () => { // Parent origin is localhost
