@@ -26,15 +26,18 @@ export function makeDefaultWebpackConfig (
 
   // Webpack 5 uses `emitOnErrors: true`
   // Webpack <= 4 uses `noEmitOnErrors: false`
-  const emitOnErrorsProperty = {
-    [config.sourceWebpackModulesResult.webpack.majorVersion === 5 ? 'emitOnErrors' : 'noEmitOnErrors']:
-    config.sourceWebpackModulesResult.webpack.majorVersion === 5,
+  const optimization = <Record<string, any>>{}
+
+  if (config.sourceWebpackModulesResult.webpack.majorVersion === 5) {
+    optimization.emitOnErrors = true
+  } else {
+    optimization.noEmitOnErrors = false
   }
 
   const finalConfig = {
     mode: 'development',
     optimization: {
-      ...emitOnErrorsProperty,
+      ...optimization,
       splitChunks: {
         chunks: 'all',
       },
