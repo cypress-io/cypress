@@ -36,6 +36,7 @@ const commandRunningFailed = (Cypress, state, err) => {
     end: true,
     snapshot: true,
     error: err,
+    // showError: true,
     consoleProps () {
       if (!current) return
 
@@ -374,8 +375,10 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
+      console.log('onError')
+
       if (this.state('onCommandFailed')) {
-        return this.state('onCommandFailed')(err, this, next)
+        return this.state('onCommandFailed')(err, this, next, commandRunningFailed)
       }
 
       debugErrors('caught error in promise chain: %o', err)

@@ -65,6 +65,7 @@ $code-border-radius: 4px;
     clear: both;
     color: $err-text;
     font-family: $monospace;
+    font-style: normal;
     margin-bottom: 0;
     margin-top: 5px;
     white-space: pre-wrap;
@@ -74,7 +75,7 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-header {
-    background-color: rgba($red-400, 0.05);
+    background-color: $red-300, 0.05;
     display: flex;
     justify-content: space-between;
     padding: 5px 10px;
@@ -87,6 +88,7 @@ $code-border-radius: 4px;
       color: $err-header-text;
 
       svg {
+        color: $red-400;
         margin-right: 10px;
       }
     }
@@ -99,14 +101,16 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-message {
-    font-family: $monospace;
-    font-size: 1em;
+    font-family: $font-sans;
+    font-size: 14px;
+    font-weight: 400;
     padding: 10px;
 
     code {
       background-color: rgba($black, 0.2);
       border-radius: 4px;
       color: $err-code-text;
+      font-family: $font-sans;
       padding: 2px 5px;
     }
 
@@ -184,10 +188,11 @@ $code-border-radius: 4px;
       div {
         color: $red-300;
         cursor: pointer;
+        font-family: $font-sans;
         font-size: 14px;
         font-weight: 500;
         height: 100%;
-        padding: 14px 10px;
+        padding: 16px 10px;
         width: 100%;
 
         &:focus {

@@ -257,6 +257,77 @@ interface Props {
   runnablesStore: RunnablesStore
   groupId?: number
 }
+const CommandDetails = ({ model, events, aliasesWithDuplicates }) => {
+  const commandName = model.name ? nameClassName(model.name) : ''
+  const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
+  const isSystemEvent = model.type === 'system' && model.event
+  const isSessionCommand = commandName === 'session'
+  const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
+
+  const _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    events.emit('studio:remove:command', model.number)
+  }
+
+  return (
+    <>
+      <span className={cs('command-info')}>
+        <span className='command-method'>
+          <span>
+            {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+          </span>
+        </span>
+        {model.referencesAlias ?
+          <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+          : <Message model={model} />
+        }
+      </span>
+      <span className='command-controls'>
+        {model.type === 'parent' && model.isStudio && (
+          <i
+            className='far fa-times-circle studio-command-remove'
+            onClick={_removeStudioCommand}
+          />
+        )}
+        {isSessionCommand && (
+          <Tag
+            content={model.renderProps.status}
+            type={`${model.renderProps.status === 'failed' ? 'failed' : 'successful'}-status`}
+          />
+        )}
+        {!model.visible && (
+          <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+            <span>
+              <HiddenIcon className='command-invisible' />
+            </span>
+          </Tooltip>
+        )}
+        {displayNumOfElements && (
+          <Tag
+            content={model.numElements.toString()}
+            type='count'
+            tooltipMessage={`${model.numElements} matched elements`}
+            customClassName='num-elements'
+          />
+        )}
+        <span className='alias-container'>
+          <Interceptions {...model.renderProps} />
+          <Aliases model={model} />
+          {displayNumOfChildren && (
+            <Tag
+              content={model.numChildren}
+              type='count'
+              tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
+              customClassName='num-children'
+            />
+          )}
+        </span>
+      </span>
+    </>
+  )
+}
 
 @observer
 class Command extends Component<Props> {
@@ -276,17 +347,7 @@ class Command extends Component<Props> {
       return null
     }
 
-    if (model.showError) {
-      // this error is rendered if an error occurs in session validation executed by cy.session
-      return <TestError model={model} onPrintToConsole={this._toggleColumnPin}/>
-    }
-
     const commandName = model.name ? nameClassName(model.name) : ''
-    const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
-    const isSystemEvent = model.type === 'system' && model.event
-    const isSessionCommand = commandName === 'session'
-    const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
-
     const groupPlaceholder: Array<JSX.Element> = []
 
     if (model.groupLevel !== undefined) {
@@ -313,78 +374,39 @@ class Command extends Component<Props> {
               {
                 'command-is-event': !!model.event,
                 'command-is-pinned': this._isPinned(),
-                'command-is-interactive': model.hasConsoleProps || model.hasSnapshot,
+                'command-is-interactive': !model.showError && (model.hasConsoleProps || model.hasSnapshot),
               },
             )
           }
         >
           <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
-          <FlashOnClick
-            message='Printed output to your console'
-            onClick={this._toggleColumnPin}
-            shouldShowMessage={this._shouldShowClickMessage}
-            wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
-          >
-            <div
-              className='command-wrapper-text'
-              onMouseEnter={() => this._snapshot(true)}
-              onMouseLeave={() => this._snapshot(false)}
+          {model.showError && (
+            <span className={cs('command-pin-target', { 'command-group': !!this.props.groupId })}>
+              <div
+                className='command-wrapper-text'
+              >
+                {groupPlaceholder}
+                <TestError model={model} onPrintToConsole={this._toggleColumnPin}/>
+              </div>
+            </span>
+          )}
+          {!model.showError && (
+            <FlashOnClick
+              message='Printed output to your console'
+              onClick={this._toggleColumnPin}
+              shouldShowMessage={this._shouldShowClickMessage}
+              wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
             >
-              {groupPlaceholder}
-              <span className={cs('command-info')}>
-                <span className='command-method'>
-                  <span>
-                    {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
-                  </span>
-                </span>
-                {model.referencesAlias ?
-                  <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                  : <Message model={model} />
-                }
-              </span>
-              <span className='command-controls'>
-                {model.type === 'parent' && model.isStudio && (
-                  <i
-                    className='far fa-times-circle studio-command-remove'
-                    onClick={this._removeStudioCommand}
-                  />
-                )}
-                {isSessionCommand && (
-                  <Tag
-                    content={model.renderProps.status}
-                    type={`${model.renderProps.status === 'failed' ? 'failed' : 'successful'}-status`}
-                  />
-                )}
-                {!model.visible && (
-                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                    <span>
-                      <HiddenIcon className='command-invisible' />
-                    </span>
-                  </Tooltip>
-                )}
-                {displayNumOfElements && (
-                  <Tag
-                    content={model.numElements.toString()}
-                    type='count'
-                    tooltipMessage={`${model.numElements} matched elements`}
-                    customClassName='num-elements'
-                  />
-                )}
-                <span className='alias-container'>
-                  <Interceptions {...model.renderProps} />
-                  <Aliases model={model} />
-                  {displayNumOfChildren && (
-                    <Tag
-                      content={model.numChildren}
-                      type='count'
-                      tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
-                      customClassName='num-children'
-                    />
-                  )}
-                </span>
-              </span>
-            </div>
-          </FlashOnClick>
+              <div
+                className='command-wrapper-text'
+                onMouseEnter={() => this._snapshot(true)}
+                onMouseLeave={() => this._snapshot(false)}
+              >
+                {groupPlaceholder}
+                <CommandDetails model={model} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
+              </div>
+            </FlashOnClick>
+          )}
         </div>
         <Progress model={model} />
         {this._children()}
@@ -480,15 +502,6 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
-  }
-
-  _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    const { model, events } = this.props
-
-    events.emit('studio:remove:command', model.number)
   }
 }
 
