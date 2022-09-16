@@ -5,6 +5,7 @@ const http = require('http')
 const rp = require('@cypress/request-promise')
 const Promise = require('bluebird')
 const evilDns = require('evil-dns')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -47,7 +48,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return config.setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically

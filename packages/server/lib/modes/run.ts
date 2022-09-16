@@ -718,7 +718,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     if (!options.quiet) {
-      printResults.displaySpecHeader(spec.baseName, index + 1, length, estimated)
+      printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)

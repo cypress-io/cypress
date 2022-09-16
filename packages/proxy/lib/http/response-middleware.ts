@@ -36,8 +36,8 @@ const debug = null
 
 // https://github.com/cypress-io/cypress/issues/1756
 const zlibOptions = {
-  flush: zlib.Z_SYNC_FLUSH,
-  finishFlush: zlib.Z_SYNC_FLUSH,
+  flush: zlib.constants.Z_SYNC_FLUSH,
+  finishFlush: zlib.constants.Z_SYNC_FLUSH,
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
