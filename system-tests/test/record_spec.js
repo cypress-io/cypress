@@ -1529,7 +1529,8 @@ describe('e2e record', () => {
 
       setupStubbedServer(routes)
 
-      it('warns and does not create or update instances', function () {
+      // TODO: Skipping for now. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
+      it.skip('warns and does not create or update instances', function () {
         process.env.API_RETRY_INTERVALS = '1000,2000,3000'
 
         return systemTests.exec(this, {

@@ -1,5 +1,5 @@
 import path from 'path'
-import { SnapshotGenerator } from '../../src/snapshot-generator'
+import { SnapshotGenerator } from '../../src/generator/snapshot-generator'
 import { exec as execOrig } from 'child_process'
 import { promisify } from 'util'
 import { electronExecutable } from '../utils/consts'
@@ -17,7 +17,7 @@ const scaffoldProject = async (project: string): Promise<string> => {
   await FixturesScaffold.symlinkNodeModule('@packages/v8-snapshot-require')
   const projectBaseDir = await Fixtures.scaffoldProject(project)
 
-  await FixturesScaffold.scaffoldProjectNodeModules({ project, updateLockFile: false })
+  await FixturesScaffold.scaffoldProjectNodeModules({ project, updateLockFile: false, forceCopyDependencies: true })
 
   return projectBaseDir
 }

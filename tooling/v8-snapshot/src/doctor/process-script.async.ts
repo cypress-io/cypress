@@ -9,17 +9,6 @@ const workerScript = require.resolve('../../dist/doctor/process-script.worker')
 const logInfo = debug('cypress:snapgen:info')
 const logTrace = debug('cypress:snapgen:trace')
 
-type AsyncScriptProcessorOpts = {
-  maxWorkers?: number
-}
-
-const DEFAULT_ASYNC_SCRIPT_PROCESSOR_OPTS = {
-  // By default we max out the machine in order to speed this up
-  // NOTE: that it becomes pretty much unusable for anything else during that
-  // time
-  maxWorkers: os.cpus().length,
-}
-
 /**
  * Spreads the assembling and processing snapshot scripts based on a generated
  * bundle across multiple workers.
@@ -31,17 +20,11 @@ export class AsyncScriptProcessor {
 
   /**
    * Creates a new {@link AsyncScriptProcessor} instance.
-   *
-   * @param args configure how much workers the processor can use
    */
-  constructor (args: AsyncScriptProcessorOpts) {
+  constructor () {
     logInfo('Initializing async script processor')
-    const processorOpts = Object.assign(
-      {},
-      DEFAULT_ASYNC_SCRIPT_PROCESSOR_OPTS,
-      args,
-    )
-    const { maxWorkers } = processorOpts
+
+    const maxWorkers = os.cpus().length
     const minWorkers = maxWorkers / 2
 
     const opts = {

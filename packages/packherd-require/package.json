@@ -26,7 +26,7 @@
     "mocha": "7.0.1"
   },
   "files": [
-    "dist/*",
+    "dist",
     "src/require.ts"
   ],
   "types": "src/require.ts"

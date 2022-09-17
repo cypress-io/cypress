@@ -214,6 +214,8 @@ export function packherdRequire (
         // eslint-disable-next-line no-debugger
         debugger
       }
+
+      throw err
     }
   }
 

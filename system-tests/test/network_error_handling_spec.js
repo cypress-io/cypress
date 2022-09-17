@@ -373,7 +373,8 @@ describe('e2e network error handling', function () {
       })
     })
 
-    it('tests run as expected', function () {
+    // TODO: skipping this test until we address stack traces: https://github.com/cypress-io/cypress/issues/22983
+    it.skip('tests run as expected', function () {
       return systemTests.exec(this, {
         spec: 'network_error_handling.cy.js',
         video: false,
@@ -409,7 +410,8 @@ describe('e2e network error handling', function () {
       })
     })
 
-    it('does not connect to the upstream proxy for the SNI server request', function () {
+    // TODO: Skipping for now. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
+    it.skip('does not connect to the upstream proxy for the SNI server request', function () {
       const onConnect = sinon.spy(() => {
         return true
       })

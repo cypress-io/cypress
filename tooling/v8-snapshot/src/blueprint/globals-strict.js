@@ -86,7 +86,7 @@ Object.defineProperties(Error, {
 //
 // Promise
 //
-Promise = proxyPrevent(Promise, {
+proxyPrevent(Promise, {
   construction: true,
   get: true,
   set: true,

@@ -1,6 +1,6 @@
 import path from 'path'
 import { readSnapshotResult } from '../utils/bundle'
-import { SnapshotGenerator } from '../../src/snapshot-generator'
+import { SnapshotGenerator } from '../../src/generator/snapshot-generator'
 import { expect } from 'chai'
 
 function assertMappingUrl (sourcemapComment: string | undefined) {

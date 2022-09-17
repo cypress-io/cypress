@@ -176,7 +176,8 @@ describe('e2e requests', () => {
     },
   })
 
-  it('fails when network immediately fails', function () {
+  // TODO: skipping this test until we address stack traces: https://github.com/cypress-io/cypress/issues/22983
+  it.skip('fails when network immediately fails', function () {
     return systemTests.exec(this, {
       spec: 'request_http_network_error_failing.cy.js',
       snapshot: true,

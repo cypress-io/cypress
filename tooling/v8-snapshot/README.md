@@ -167,6 +167,7 @@ our app. See [makeAndInstallSnapshot][makeAndInstallSnapshot].
 - `SNAPSHOT_BUNDLER` overrides Go binary to create the JavaScript bundle used to snapshot
 - `SNAPSHOT_KEEP_CONFIG` when set will not delete the temporary JSON config file that is
 	provided to the snapshot bundler
+- `V8_SNAPSHOT_FROM_SCRATCH` will not use the snapshot cache and generate v8 snapshots from scratch
  
 [doctor-next-stage]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L628
 [makeAndInstallSnapshot]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L669

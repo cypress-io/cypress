@@ -1,5 +1,5 @@
 import path from 'path'
-import { SnapshotGenerator } from '../../src/snapshot-generator'
+import { SnapshotGenerator } from '../../src/generator/snapshot-generator'
 import { exec as execOrig } from 'child_process'
 import { promisify } from 'util'
 import { electronExecutable } from '../utils/consts'

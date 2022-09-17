@@ -519,6 +519,28 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
+### V8 Snapshotting
+
+In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [V8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and prod.
+
+#### Snapshot Generation
+
+Locally, a v8 snapshot is generated in a post install step and set up to only include node modules. In this way, cypress code can be modified without having to regenerate a snapshot. If you do want or need to regenerate the snapshot for development you can run:
+
+```
+yarn build-v8-snapshot-dev
+```
+
+On CI and for binary builds we run:
+
+```
+yarn build-v8-snapshot-prod
+```
+
+which will include both node modules and cypress code.
+
+During the process of snapshot generation, metadata is created/updated in `tooling/v8-snapshot/cache`. Changes to these files can and should be committed to the repo as it will make subsequent snapshot generations faster.
+
 ## Committing Code
 
 ### Branches
