@@ -27,7 +27,7 @@ const javaScriptIntegrityReplacementRe = new RegExp(`[\\.](${STRIPPED_INTEGRITY_
  * but the match only starts at the word integrity, and not the character preceding it. In these cases, we always replace the word integrity with cypress-stripped-integrity.
  * The match for cypress-stripped-integrity is if we are replacing in the stripStream, and the replaced text is rematched no essentially complete a no op
  */
-const htmlIntegrityReplacementRe = new RegExp(`(?:(?<!(var|let|nst)\\s)[^\\.\\s'"]?)(${STRIPPED_INTEGRITY_TAG}|integrity)((?:'|")?\\]?(\\s?=|["|'],)\\s?(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
+const generalIntegrityReplacementRe = new RegExp(`(?:(?<!(var|let|nst)\\s)[^\\.\\s'"]?)(${STRIPPED_INTEGRITY_TAG}|integrity)((?:'|")?\\]?(\\s?=|["|'],)\\s?(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
 
 export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
@@ -41,7 +41,7 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
 
   if (modifyObstructiveThirdPartyCode) {
     rewrittenHTML = rewrittenHTML.replace(javaScriptIntegrityReplacementRe, `['${STRIPPED_INTEGRITY_TAG}']$2`)
-    rewrittenHTML = rewrittenHTML.replace(htmlIntegrityReplacementRe, `${STRIPPED_INTEGRITY_TAG}$3`)
+    rewrittenHTML = rewrittenHTML.replace(generalIntegrityReplacementRe, `${STRIPPED_INTEGRITY_TAG}$3`)
   }
 
   return rewrittenHTML
@@ -61,7 +61,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterUnMinifiedRe,
         ...(modifyObstructiveThirdPartyCode ? [
           javaScriptIntegrityReplacementRe,
-          htmlIntegrityReplacementRe,
+          generalIntegrityReplacementRe,
         ] : []),
       ],
       [
