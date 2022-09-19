@@ -3,7 +3,7 @@ import { SourceMapConsumer } from 'source-map'
 
 import type { BasicSourceMapConsumer } from 'source-map'
 // @ts-ignore
-import mappingsWasm from 'source-map/lib/mappings.wasm'
+import mappingsWasm from 'source-map/lib/mappings.wasm?init'
 
 import $utils from './utils'
 
@@ -15,9 +15,11 @@ let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return null
 
+  const mappings = await mappingsWasm()
+
   // @ts-ignore
   SourceMapConsumer.initialize({
-    'lib/mappings.wasm': mappingsWasm,
+    'lib/mappings.wasm': mappings,
   })
 
   const consumer = await new SourceMapConsumer(sourceMap)
