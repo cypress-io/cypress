@@ -26,10 +26,6 @@ describe('errors ui', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
-    specLoader.initialize({})
-  })
-
   it('assertion failures', () => {
     const verify = loadErrorSpec({
       filePath: 'errors/assertions.cy.js',

@@ -9,20 +9,28 @@ const DevServers = {
 }
 
 Object.entries(DevServers).forEach(([server, configFile]) => {
+  const DefaultOptions: Partial<specLoader.LoadSpecOptions> = {
+    mode: 'component',
+    configFile,
+    scaffold: false,
+  }
+
   /**
    * Navigates to desired error spec file within Cypress app and waits for completion.
    * Returns scoped verify function to aid inner spec validation.
    */
   function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
+    const effectiveOptions = {
+      ...DefaultOptions,
+      ...options,
+    }
+
     const {
       filePath,
       hasPreferredIde = false,
-    } = options
+    } = effectiveOptions
 
-    options.mode = 'component'
-    options.configFile = configFile
-
-    specLoader.loadSpec(options)
+    specLoader.loadSpec(effectiveOptions)
 
     // Return scoped verify function with spec options baked in
     return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde })
@@ -36,7 +44,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
     numTestsKeptInMemory: 1,
   }, () => {
     before(() => {
-      specLoader.initialize({})
+      cy.scaffoldProject('runner-e2e-specs')
     })
 
     it('assertion failures', () => {
@@ -428,6 +436,149 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       verify('fail handler exception', {
         column: 12,
         message: 'bar is not a function',
+      })
+    })
+
+    it('uncaught errors', () => {
+      const verify = loadErrorSpec({
+        filePath: 'errors/uncaught-ct.cy.js',
+        failCount: 11,
+      })
+
+      // TODO: Failing - command entry count
+      verify('sync app mount exception', {
+        uncaught: true,
+        command: 'mount',
+        originalMessage: 'mount error',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+        regex: /src\/Errors.jsx/,
+        hasCodeFrame: false,
+      })
+
+      // TODO: Failing - command entry count
+      verify('sync app exception after mount', {
+        uncaught: true,
+        originalMessage: 'sync error',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+        regex: /src\/Errors.jsx/,
+        hasCodeFrame: false,
+      })
+
+      // TODO: Failing - command entry count
+      verify('exception inside uncaught:exception', {
+        uncaught: true,
+        uncaughtMessage: 'sync error',
+        column: 12,
+        originalMessage: 'bar is not a function',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      // TODO: Failing - command entry count
+      verify('async app exception after mount', {
+        uncaught: true,
+        originalMessage: 'async error',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+        regex: /src\/Errors.jsx/,
+        hasCodeFrame: false,
+      })
+
+      // TODO: Failing - command entry count
+      verify('app unhandled rejection', {
+        uncaught: true,
+        originalMessage: 'promise rejection',
+        message: [
+          'The following error originated from your test code',
+          'It was caused by an unhandled promise rejection',
+        ],
+        regex: /src\/Errors.jsx/,
+        hasCodeFrame: false,
+      })
+
+      // TODO: Failing - command entry count
+      verify('async spec exception', {
+        uncaught: true,
+        column: 12,
+        originalMessage: 'bar is not a function',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      // TODO: Failing - command entry count
+      verify('async spec exception with done', {
+        uncaught: true,
+        column: 12,
+        originalMessage: 'bar is not a function',
+        message: [
+          'The following error originated from your test code',
+        ],
+        notInMessage: [
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      // TODO: Failing - command entry count
+      verify('spec unhandled rejection', {
+        uncaught: true,
+        column: 20,
+        originalMessage: 'Unhandled promise rejection from the spec',
+        message: [
+          'The following error originated from your test code',
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      verify('spec unhandled rejection with done', {
+        uncaught: true,
+        column: 20,
+        originalMessage: 'Unhandled promise rejection from the spec',
+        message: [
+          'The following error originated from your test code',
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      verify('spec Bluebird unhandled rejection', {
+        uncaught: true,
+        column: 21,
+        originalMessage: 'Unhandled promise rejection from the spec',
+        message: [
+          'The following error originated from your test code',
+          'It was caused by an unhandled promise rejection',
+        ],
+      })
+
+      verify('spec Bluebird unhandled rejection with done', {
+        uncaught: true,
+        column: 21,
+        originalMessage: 'Unhandled promise rejection from the spec',
+        message: [
+          'The following error originated from your test code',
+          'It was caused by an unhandled promise rejection',
+        ],
       })
     })
 
