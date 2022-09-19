@@ -2993,7 +2993,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
-    repoRoot: Readonly<string | null>
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
