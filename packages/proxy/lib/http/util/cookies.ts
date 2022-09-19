@@ -3,11 +3,47 @@ import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
 import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { calculateSiteContext } from './top-simulation'
+import type { RequestCredentialLevel, RequestResourceType } from '../../types'
 
 interface RequestDetails {
   url: string
   isAUTFrame: boolean
   needsCrossOriginHandling: boolean
+}
+
+export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel): boolean => {
+  if (!AUTUrl) return false
+
+  const siteContext = calculateSiteContext(requestUrl, AUTUrl)
+
+  switch (resourceType) {
+    case 'fetch':
+      // never attach cookies regardless of siteContext if omit is optioned
+      if (credentialLevel === 'omit') {
+        return false
+      }
+
+      // if the siteContext is same-origin and the credential status is undefined, same-origin, or include, attach cookies.
+      // Otherwise, if the credentials are set to include, attach cookies
+      if (siteContext === 'same-origin' || credentialLevel === 'include') {
+        return true
+      }
+
+      return false
+    case 'xhr':
+      // if context is same-origin regardless of credential status, attach cookies
+      // otherwise, if withCredentials is set to true, attach cookies
+
+      if (siteContext === 'same-origin' || credentialLevel) {
+        return true
+      }
+
+      return false
+    default:
+      // if we cannot determine a resource level, we likely should store the cookie as it is a navigation or another event
+      return true
+  }
 }
 
 export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {
