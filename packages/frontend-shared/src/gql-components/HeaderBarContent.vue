@@ -45,7 +45,7 @@
               <li
                 v-if="props.gql.isGlobalMode"
                 class="mx-2px align-middle inline-block"
-                aria-hidden
+                aria-hidden="true"
               >
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
               </li>
@@ -74,7 +74,7 @@
               <template v-if="currentProject.currentTestingType">
                 <li
                   class="mx-2px inline-block align-middle"
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
                 </li>

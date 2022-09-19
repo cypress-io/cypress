@@ -16,10 +16,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
   }
 
-  afterEach(() => {
-    cy.percySnapshot()
-  })
-
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
@@ -66,6 +62,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   describe('breadcrumbs', () => {
+    afterEach(() => {
+      cy.percySnapshot()
+    })
+
     context('with current project', () => {
       const currentProject = {
         title: 'app',
@@ -143,6 +143,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.percySnapshot()
     cy.get('body').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
+    cy.percySnapshot('after click')
   })
 
   it('docs menu has expected links with no current project', () => {
@@ -167,6 +168,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.wrap(Object.keys(expectedDocsLinks)).each((linkName: string) => {
       cy.contains('a', linkName).should('have.attr', 'href', expectedDocsLinks[linkName])
     })
+
+    cy.percySnapshot()
   })
 
   context('responsive design', () => {
@@ -181,6 +184,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           </div>
         ),
       })
+    })
+
+    afterEach(() => {
+      cy.percySnapshot()
     })
 
     // https://github.com/cypress-io/cypress/issues/21842
@@ -227,6 +234,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
+    cy.percySnapshot()
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
@@ -312,6 +320,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
     cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
+    cy.percySnapshot()
   })
 
   it('Shows a page name instead of project when a page name is provided', () => {
@@ -321,9 +330,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Project').should('not.exist')
     cy.contains('Test Page').should('be.visible')
+    cy.percySnapshot()
   })
 
   describe('prompts', () => {
+    afterEach(() => {
+      cy.percySnapshot()
+    })
+
     describe('the CI prompt', () => {
       context('opens on click', () => {
         beforeEach(() => {

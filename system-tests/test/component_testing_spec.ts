@@ -113,7 +113,11 @@ describe(`Angular CLI major versions`, () => {
   systemTests.setup()
 
   for (const majorVersion of ANGULAR_MAJOR_VERSIONS) {
-    const spec = `${majorVersion === '14' ? 'src/app/components/standalone.component.cy.ts,src/app/mount.cy.ts' : 'src/app/mount.cy.ts'}`
+    let spec = 'src/**/*.cy.ts'
+
+    if (majorVersion === '13') {
+      spec = `${spec},!src/app/components/standalone.component.cy.ts`
+    }
 
     systemTests.it(`v${majorVersion} with mount tests`, {
       project: `angular-${majorVersion}`,

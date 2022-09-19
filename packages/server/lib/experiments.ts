@@ -58,6 +58,7 @@ const _summaries: StringValues = {
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
+  experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
 }
 
 /**
@@ -78,6 +79,7 @@ const _names: StringValues = {
   experimentalSingleTabRunMode: 'Single Tab Run Mode',
   experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalStudio: 'Studio',
+  experimentalWebKitSupport: 'WebKit Support',
 }
 
 /**
@@ -138,7 +140,7 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 }
 
 /**
- * Whilelist known experiments here to avoid accidentally showing
+ * Allow known experiments here to avoid accidentally showing
  * any config key that starts with "experimental" prefix
 */
 // @ts-ignore
