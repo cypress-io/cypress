@@ -99,7 +99,7 @@ export class DataContext {
   }
 
   get git () {
-    return this._coreData.currentProjectGitInfo
+    return this.coreData.currentProjectGitInfo
   }
 
   get schema () {
