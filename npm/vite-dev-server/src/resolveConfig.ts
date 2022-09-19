@@ -50,9 +50,6 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     root,
     base: `${cypressConfig.devServerPublicPathRoute}/`,
     configFile,
-    esbuild: {
-      sourcemap: 'inline',
-    },
     optimizeDeps: {
       esbuildOptions: {
         incremental: true,
