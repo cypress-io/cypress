@@ -45,33 +45,26 @@ export class BrowserDataSource {
   /**
    * Gets the browsers from the machine and the project config
    */
-  allBrowsers () {
+  async allBrowsers () {
     if (!this.ctx.coreData.allBrowsers) {
-      const p = this.ctx.project.getConfig()
-      const machineBrowsers = this.machineBrowsers()
+      const p = await this.ctx.project.getConfig()
+      const machineBrowsers = await this.machineBrowsers()
 
-      this.ctx.coreData.allBrowsers = Promise.all([p, machineBrowsers]).then(async ([cfg, m]) => {
-        if (!cfg.browsers) return m
+      if (!p.browsers) {
+        this.ctx.coreData.allBrowsers = Promise.resolve(machineBrowsers)
+      } else {
+        const userBrowsers = p.browsers.reduce<FoundBrowser[]>((acc, b) => {
+          if (_.includes(_.map(machineBrowsers, getBrowserKey), getBrowserKey(b))) return acc
 
-        const userBrowsers = cfg.browsers.map<FoundBrowser | undefined>((b) => {
-          if (_.includes(_.map(m, getBrowserKey), getBrowserKey(b))) return
-
-          return {
+          return [...acc, {
             ...b,
             majorVersion: String(b.majorVersion),
             custom: true,
-          }
-        }).filter<FoundBrowser>((b): b is FoundBrowser => b != null) || []
+          }]
+        }, [])
 
-        return _.concat(m, userBrowsers)
-      }).catch((e) => {
-        this.ctx.update((coreData) => {
-          coreData.allBrowsers = null
-          coreData.diagnostics.error = e
-        })
-
-        throw e
-      })
+        this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
+      }
     }
 
     return this.ctx.coreData.allBrowsers
