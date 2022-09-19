@@ -27,6 +27,7 @@ import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
+import $Cypress from '@packages/driver'
 
 let _eventManager: EventManager | undefined
 
@@ -50,7 +51,7 @@ export function initializeEventManager (UnifiedRunner: any) {
   }
 
   _eventManager = new EventManager(
-    UnifiedRunner.CypressDriver,
+    $Cypress,
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
     window.ws,
