@@ -206,10 +206,5 @@ export const verifyInternalFailure = (props) => {
 
     cy.get('.runnable-err-stack-trace')
     .should('include.text', stackMethod || method)
-
-    // this is an internal cypress error and we can only show code frames
-    // from specs, so it should not show the code frame
-    cy.get('.test-err-code-frame')
-    .should('not.exist')
   })
 }
