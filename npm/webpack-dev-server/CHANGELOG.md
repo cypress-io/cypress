@@ -1,3 +1,15 @@
+# [@cypress/webpack-dev-server-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.2.0...@cypress/webpack-dev-server-v2.3.0) (2022-08-30)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** add custom project config to handler ([a07a2a1](https://github.com/cypress-io/cypress/commit/a07a2a118d7b62b90e790ef475c86959ae894b3b))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
 # [@cypress/webpack-dev-server-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.1.0...@cypress/webpack-dev-server-v2.2.0) (2022-08-15)
 
 

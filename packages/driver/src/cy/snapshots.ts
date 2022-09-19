@@ -241,7 +241,10 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const body = {
         get: () => {
           if (!attachedBody) {
-            attachedBody = $$(state('document').adoptNode($body[0]))
+            // If we don't have an AUT document, use the spec bridge document
+            const doc = state('document') || window.document
+
+            attachedBody = $$(doc.adoptNode($body[0]))
           }
 
           return attachedBody

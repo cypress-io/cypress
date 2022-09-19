@@ -43,6 +43,10 @@
               class="ml-4px"
             />
           </div>
+          <span
+            v-if="latestRun"
+            class="sr-only"
+          >{{ props.specFileName }}{{ props.specFileExtension }} test results</span>
         </div>
       </component>
       <template

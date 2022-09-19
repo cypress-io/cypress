@@ -1,7 +1,7 @@
 import SpecsListBanners from './SpecsListBanners.vue'
 import { ref } from 'vue'
 import type { Ref } from 'vue'
-import { SpecsListBannersFragment, SpecsListBannersFragmentDoc } from '../generated/graphql-test'
+import { SpecsListBannersFragment, SpecsListBannersFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
@@ -92,6 +92,12 @@ describe('<SpecsListBanners />', () => {
     })
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
+      beforeEach(() => {
+        cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
+          return defineResult({ determineCohort: { __typename: 'Cohort', name: 'foo', cohort: 'A' } })
+        })
+      })
+
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
