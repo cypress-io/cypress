@@ -24,9 +24,18 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
+  const optimization = <Record<string, any>>{}
+
+  if (config.sourceWebpackModulesResult.webpack.majorVersion === 5) {
+    optimization.emitOnErrors = true
+  } else {
+    optimization.noEmitOnErrors = false
+  }
+
   const finalConfig = {
     mode: 'development',
     optimization: {
+      ...optimization,
       splitChunks: {
         chunks: 'all',
       },
