@@ -28,6 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - fix-ci-deps
+        - issue-23843_electron_21_upgrade
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,6 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,6 +47,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,6 +68,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
     - equal: [ 'lmiller/fixing-flake-1', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
