@@ -14,8 +14,6 @@ describe('persist saved sessions between spec reruns', () => {
     })
 
     if (!top.count) {
-      cy.wait(4000)
-
       return cy.wrap(null).should(() => {
         expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
         expect(cy.$$('.commands-container li.command:nth-child(2)', top.document).text()).contain('created')

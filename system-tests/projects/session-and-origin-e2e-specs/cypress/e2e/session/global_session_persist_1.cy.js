@@ -1,9 +1,5 @@
 describe('creates global session', () => {
   it('creates global sessions', () => {
-    cy.then(async () => {
-      await Cypress.session.clearAllSavedSessions()
-    })
-
     cy.login('global_1', true)
 
     if (Cypress.env('SYSTEM_TESTS')) {
@@ -18,9 +14,7 @@ describe('creates global session', () => {
     })
   })
 
-  it.only('restores global session', async () => {
-    console.log('test two')
-    cy.session('global_1', () => {})
+  it('restores global session', () => {
     cy.login('global_1', true)
 
     if (Cypress.env('SYSTEM_TESTS')) {

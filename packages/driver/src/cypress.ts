@@ -219,14 +219,12 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    this.state = $SetterGetter.create({
-      ...config.cachedTestState,
-    }) as unknown as StateFunc
-
     // TODO: remove rawJson...
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'cachedTestState', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
+
+    this.state = $SetterGetter.create({}) as unknown as StateFunc
 
     /*
      * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.

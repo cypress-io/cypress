@@ -42,11 +42,10 @@ export class HtmlDataSource {
     throw err
   }
 
-  getPropertiesFromServerConfig (cfg: any) {
+  getPropertiesFromServerConfig (cfg: any = {}) {
     const keys = [
       'baseUrl',
       'browserUrl',
-      'cachedTestState',
       'port',
       'proxyServer',
       'proxyUrl',
@@ -63,9 +62,7 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const serverConfig = this.ctx._apis.projectApi.getConfig() ?? {}
-
-    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(serverConfig)
+    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
 
     let cfg = { ...propertiesFromLegacyConfig }
 

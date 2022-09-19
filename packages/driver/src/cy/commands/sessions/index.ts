@@ -21,6 +21,12 @@ type SessionData = Cypress.Commands.Session.SessionData
  */
 
 export default function (Commands, Cypress, cy) {
+  Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData) => {
+    if (sessionData.cacheAcrossSpecs) {
+      sessionsManager.registeredSessions.set(sessionData.id, true)
+    }
+  })
+
   function throwIfNoSessionSupport () {
     if (Cypress.isBrowser('webkit')) {
       $errUtils.throwErrByPath('webkit.session')
@@ -97,8 +103,12 @@ export default function (Commands, Cypress, cy) {
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
       if (!setup) {
-        if (!session || !isRegisteredSessionForSpec) {
+        if (!session && !isRegisteredSessionForSpec) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
+        }
+
+        if (session.cacheAcrossSpecs && _.isString(session.setup)) {
+          $errUtils.throwErrByPath('sessions.session.missing_global_setup', { args: { id } })
         }
       } else {
         const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
@@ -116,6 +126,10 @@ export default function (Commands, Cypress, cy) {
           })
 
           sessionsManager.registeredSessions.set(id, true)
+        }
+
+        if (session.cacheAcrossSpecs && _.isString(session.setup)) {
+          session.setup = setup
         }
       }
 
@@ -173,7 +187,7 @@ export default function (Commands, Cypress, cy) {
         const isValidSession = true
 
         if (!existingSession.validate) {
-          return
+          return isValidSession
         }
 
         return logGroup(Cypress, {
@@ -184,7 +198,7 @@ export default function (Commands, Cypress, cy) {
         }, (validateLog) => {
           return cy.then(async () => {
             const onSuccess = () => {
-              return
+              return isValidSession
             }
 
             const onFail = (err) => {
@@ -316,11 +330,9 @@ export default function (Commands, Cypress, cy) {
           return createSession(existingSession, recreateSession)
         })
         .then(() => validateSession(existingSession))
-        .then((err: Error) => {
-          if (err) {
-            $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
-
-            return cy.fail(err)
+        .then((isValidSession: boolean) => {
+          if (!isValidSession) {
+            return
           }
 
           setSessionLogStatus(recreateSession ? 'recreated' : 'created')
@@ -342,8 +354,8 @@ export default function (Commands, Cypress, cy) {
           return restoreSession(existingSession)
         })
         .then(() => validateSession(existingSession, true))
-        .then((err: Error) => {
-          if (err) {
+        .then((isValidSession: boolean) => {
+          if (!isValidSession) {
             return createSessionWorkflow(existingSession, true)
           }
 

@@ -1699,8 +1699,7 @@ export default {
     session: {
       duplicateId: {
         message: stripIndent`
-        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
-        `,
+        This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with different options, please call ${cmd('session')} with a unique identifier other than **{{id}}**.`,
         docsUrl: 'https://on.cypress.io/session',
       },
       wrongArgId: {
@@ -1726,6 +1725,13 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      missing_global_setup: {
+        message: stripIndent`
+        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
