@@ -16,12 +16,15 @@
   },
   "dependencies": {
     "debug": "4.3.3",
+    "esprima": "^4.0.1",
     "find-up": "6.3.0",
     "local-pkg": "0.4.1",
     "node-html-parser": "5.3.3",
-    "pathe": "0.2.0"
+    "pathe": "0.2.0",
+    "source-map": "0.8.0-beta.0"
   },
   "devDependencies": {
+    "@types/esprima": "^4.0.1",
     "chai": "^4.3.6",
     "dedent": "^0.7.0",
     "mocha": "^9.2.2",

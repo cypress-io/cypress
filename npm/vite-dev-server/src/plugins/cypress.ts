@@ -4,6 +4,8 @@ import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
+import sourceMap, { SourceNode } from 'source-map'
+import { tokenize, Token } from 'esprima'
 
 import type { ViteDevServerConfig } from '../devServer'
 import path from 'path'
@@ -104,6 +106,44 @@ export const Cypress = (
 
         return res.end(transformedIndexHtml)
       })
+    },
+    transform (code, id, options?) {
+      try {
+        if (/\.js$/.test(id) && !/\/\/# sourceMappingURL=/i.test(code)) {
+          // The Vite dev server always serves esnext, meaning JS files aren't transpiled thus no sourcemaps get generated.
+          // This is very fast but has the downside of making it difficult for Cypress to look up code frames for test stacktraces
+          // without doing a lot of extra processing in the browser. As a solution, we generate an "identity" sourcemap here
+          // (for files that don't have sourcemaps already) that maps JS files line-for-line thus allowing our optimized
+          // browser-side codeframe lookup to work as-is.
+
+          debug('Detected a Vite-served JS file %s that does not contain a sourcemap, generating an identity sourcemap', id)
+          const filename = id.substring(id.lastIndexOf('/') + 1)
+          const generator = new sourceMap.SourceMapGenerator({
+            file: filename,
+          })
+
+          generator.setSourceContent(filename, code)
+
+          const tokens = tokenize(code, { loc: true }) as (Token & { loc: { start: { line: number, column: number } } })[]
+
+          tokens.forEach((token) => {
+            generator.addMapping({
+              source: filename,
+              original: token.loc.start,
+              generated: token.loc.start,
+            })
+          })
+
+          const map = Buffer.from(generator.toString()).toString('base64')
+          const url = `//# sourceMappingURL=data:application/json;charset=utf-8;base64,${map}`
+
+          return {
+            code: `${code}\n${url}`,
+          }
+        }
+      } catch (_err) {
+        debug('Failed to generate sourcemap for %s: %o', id, _err)
+      }
     },
     handleHotUpdate: ({ server, file }) => {
       debug('handleHotUpdate - file', file)
