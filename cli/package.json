@@ -162,10 +162,6 @@
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
       "require": "./svelte/dist/cypress-svelte.cjs.js",
       "types": "./svelte/dist/index.d.ts"
-    },
-    "./xpath": {
-      "require": "./xpath/scripts",
-      "types": "./xpath/src"
     }
   },
   "workspaces": {

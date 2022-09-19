@@ -1881,11 +1881,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: Build
-          command: yarn workspace @cypress/xpath build
-      - run:
           name: Run tests
-          command: yarn workspace @cypress/xpath test
+          command: yarn workspace @cypress/xpath cy:run
       - store_test_results:
           path: npm/xpath/test_results
       - store_artifacts:

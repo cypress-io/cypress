@@ -77,14 +77,6 @@ cy.xpath('//body').within(() => {
 
 For more, see [Intelligent Code Completion](https://on.cypress.io/intellisense)
 
-## Roadmap
-
-- [x] wrap returned DOM nodes in jQuery [#2](https://github.com/cypress-io/cypress-xpath/issues/2)
-- [x] retry the assertion that follows [#3](https://github.com/cypress-io/cypress-xpath/issues/3)
-- [x] add TypeScript definitions [#4](https://github.com/cypress-io/cypress-xpath/issues/4)
-- [ ] search from the previous subject element [#5](https://github.com/cypress-io/cypress-xpath/issues/5)
-- [x] log or not, depending on user option [#19](https://github.com/cypress-io/cypress-xpath/issues/19)
-
 ## License
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
