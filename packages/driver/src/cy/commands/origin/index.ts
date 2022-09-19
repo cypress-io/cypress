@@ -85,12 +85,12 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       validator.validateLocation(location, urlOrDomain)
 
-      const originPolicy = location.originPolicy
+      const superDomainOriginPolicy = location.superDomainOriginPolicy
 
       // This is intentionally not reset after leaving the cy.origin command.
-      cy.state('latestActiveOriginPolicy', originPolicy)
+      cy.state('latestActiveOriginPolicy', superDomainOriginPolicy)
       // This is set while IN the cy.origin command.
-      cy.state('currentActiveOriginPolicy', originPolicy)
+      cy.state('currentActiveOriginPolicy', superDomainOriginPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
@@ -171,20 +171,20 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', async (_data, specBridgeOriginPolicy) => {
-          if (specBridgeOriginPolicy === originPolicy) {
+          if (specBridgeOriginPolicy === superDomainOriginPolicy) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
-            communicator.toSpecBridge(originPolicy, 'initialize:cypress', {
+            communicator.toSpecBridge(superDomainOriginPolicy, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
             })
 
             // Attach the spec bridge to the window to be tested.
-            communicator.toSpecBridge(originPolicy, 'attach:to:window')
+            communicator.toSpecBridge(superDomainOriginPolicy, 'attach:to:window')
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
             try {
-              communicator.toSpecBridge(originPolicy, 'run:origin:fn', {
+              communicator.toSpecBridge(superDomainOriginPolicy, 'run:origin:fn', {
                 args: options?.args || undefined,
                 fn: callbackFn.toString(),
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes

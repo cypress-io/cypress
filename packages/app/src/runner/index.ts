@@ -98,7 +98,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    autIframe.doesAUTMatchTopOriginPolicy,
+    autIframe.doesAUTMatchTopSuperOriginPolicy,
     getEventManager(),
     {
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
@@ -194,11 +194,11 @@ export async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.originPolicy}`
+  const id = `Spec Bridge: ${location.superDomainOriginPolicy}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
-    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+    getEventManager().notifyCrossOriginBridgeReady(location.superDomainOriginPolicy)
 
     return
   }
@@ -209,7 +209,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.superDomainOriginPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 

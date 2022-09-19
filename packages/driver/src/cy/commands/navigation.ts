@@ -312,7 +312,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   const onPageLoadErr = (err) => {
     state('onPageLoadErr', null)
 
-    const { originPolicy } = $Location.create(window.location.href)
+    const { superDomainOriginPolicy } = $Location.create(window.location.href)
 
     try {
       $errUtils.throwErrByPath('navigation.cross_origin', {
@@ -320,7 +320,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
         args: {
           configFile: Cypress.config('configFile'),
           message: err.message,
-          originPolicy,
+          superDomainOriginPolicy,
         },
       })
     } catch (error) {
@@ -1084,10 +1084,11 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the origin currently matches
+          // if the super origin currently matches
           // or if we have previously visited a location or are a spec bridge
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy
+          // we use the superDomainOriginPolicy policy as we can interact with subdomains based document.domain set to the superdomain
+          if (remote.superDomainOriginPolicy === existing.superDomainOriginPolicy
             || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
           ) {
             if (!previouslyVisitedLocation) {

@@ -37,6 +37,7 @@ const debug = Debug('cypress:server:remote-states')
  *     port: 443
  *     tld: "com"
  *     domain: "google"
+ *     protocol: "https"
  *   }
  * }
  */
@@ -52,7 +53,7 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    const state = this.remoteStates.get(cors.getOriginPolicy(url))
+    const state = this.remoteStates.get(cors.getSuperDomainOriginPolicy(url))
 
     debug('getting remote state: %o for: %s', state, url)
 
@@ -68,7 +69,7 @@ export class RemoteStates {
   }
 
   isPrimaryOrigin (url: string): boolean {
-    return this.primaryOriginKey === cors.getOriginPolicy(url)
+    return this.primaryOriginKey === cors.getSuperDomainOriginPolicy(url)
   }
 
   reset () {
@@ -90,7 +91,7 @@ export class RemoteStates {
 
     if (_.isString(urlOrState)) {
       const remoteOrigin = uri.origin(urlOrState)
-      const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
+      const { subdomain: _unused, ...remoteProps } = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
         state = {
@@ -115,7 +116,7 @@ export class RemoteStates {
       state = urlOrState
     }
 
-    const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
+    const remoteOriginPolicy = cors.getSuperDomainOriginPolicy(state.origin)
 
     this.currentOriginKey = remoteOriginPolicy
 

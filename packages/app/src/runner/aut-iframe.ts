@@ -93,7 +93,7 @@ export class AutIframe {
    * Otherwise, if top and the AUT match origins, the method returns true.
    * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
    */
-  doesAUTMatchTopOriginPolicy = () => {
+  doesAUTMatchTopSuperOriginPolicy = () => {
     const Cypress = this.eventManager.getCypress()
 
     if (!Cypress) return true
@@ -103,7 +103,7 @@ export class AutIframe {
       const locationTop = Cypress.Location.create(window.location.href)
       const locationAUT = Cypress.Location.create(currentHref)
 
-      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
+      return locationTop.superDomainOriginPolicy === locationAUT.superDomainOriginPolicy || locationAUT.superDomainOriginPolicy === 'about://blank'
     } catch (err) {
       if (err.name === 'SecurityError') {
         return false
@@ -147,7 +147,7 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
-    if (!this.doesAUTMatchTopOriginPolicy()) {
+    if (!this.doesAUTMatchTopSuperOriginPolicy()) {
       /**
        * A load event fires here when the src is removed (as does an unload event).
        * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).

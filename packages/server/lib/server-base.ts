@@ -446,7 +446,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
       const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
+      const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })

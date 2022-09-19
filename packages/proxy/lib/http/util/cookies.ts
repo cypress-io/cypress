@@ -10,28 +10,6 @@ interface RequestDetails {
   needsCrossOriginHandling: boolean
 }
 
-/**
- * Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
- * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
- * for more details.
- * @param {string} url1 - the first url
- * @param {string} url2 - the second url
- * @returns {boolean} whether or not the URL Scheme, Domain, and TLD match. This is called same-site and
- * is allowed to have a different port or subdomain. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
- * for more details.
- */
-export const areUrlsSameSite = (url1: string, url2: string) => {
-  if (!url1 || !url2) return false
-
-  const { port: port1, ...parsedUrl1 } = cors.parseUrlIntoDomainTldPort(url1)
-  const { port: port2, ...parsedUrl2 } = cors.parseUrlIntoDomainTldPort(url2)
-
-  // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
-  const doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
-
-  return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
-}
-
 export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {
   const cookieMap = new Map<string, Cookie>()
   const requestCookies: Cookie[] = requestCookieStringArray.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
@@ -62,7 +40,7 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
   // if there's no AUT URL, it's a request for the first URL visited, or if
   // the request origin is considered the same site as the AUT origin;
   // both indicate that it's not a cross-site request
-  if (!autUrl || areUrlsSameSite(autUrl, requestUrl)) {
+  if (!autUrl || cors.urlSameSiteMatch(autUrl, requestUrl)) {
     return 'strict'
   }
 

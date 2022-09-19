@@ -53,9 +53,9 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
+function reqMatchesSuperOriginOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesSuperDomainOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
 
   if (remoteState.strategy === 'file') {
@@ -248,7 +248,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isReqMatchOriginPolicy = reqMatchesSuperOriginOriginPolicy(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -256,7 +256,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
-    const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.getPrimary())
+    const isCrossOrigin = !reqMatchesSuperOriginOriginPolicy(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
 
     if (this.config.experimentalSessionAndOrigin && isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
