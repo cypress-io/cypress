@@ -3,7 +3,7 @@ import * as os from 'os'
 import path from 'path'
 import md5 from 'md5'
 import Bluebird from 'bluebird'
-import del from 'del'
+import fs from 'fs-extra'
 
 function createDeferred<T> () {
   let resolve: (thenableOrResult?: T | PromiseLike<T> | undefined) => void
@@ -26,7 +26,7 @@ function hash (contents: string) {
 }
 
 function rmdir (dirPath: string) {
-  return del(dirPath, { force: true })
+  return fs.emptyDir(dirPath)
 }
 
 function tmpdir (dirname?: string) {
