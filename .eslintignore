@@ -74,6 +74,8 @@ npm/cypress-schematic/src/**/*.js
 # The global eslint configuration is not set up to parse vue@2 files
 /npm/vue2/**/*.vue
 
+npm/grep/cypress
+
 packages/data-context/test/unit/codegen/files
 packages/config/test/__fixtures__/**/*
 packages/config/test/__babel_fixtures__/**/*
