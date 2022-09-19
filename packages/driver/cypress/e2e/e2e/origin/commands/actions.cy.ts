@@ -188,6 +188,24 @@ context('cy.origin actions', () => {
     })
   })
 
+  context('cross-origin AUT errors', () => {
+    // We only need to check .get here because the other commands are chained off of it.
+    it('.get()', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after 50ms:`)
+        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://foobar.com:3500\`.`)
+        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+        //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.get('#button')
+    })
+  })
+
   context('#consoleProps', () => {
     const { _ } = Cypress
     let logs: Map<string, any>

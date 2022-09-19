@@ -82,7 +82,7 @@ declare namespace Cypress {
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-  type BrowserFamily = 'chromium' | 'firefox'
+  type BrowserFamily = 'chromium' | 'firefox' | 'webkit'
 
   /**
    * Describes a browser Cypress can control
@@ -2889,6 +2889,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalStudio: boolean
+    /**
+     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
+     * @default false
+     */
+    experimentalWebKitSupport: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.

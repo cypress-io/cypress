@@ -1,6 +1,7 @@
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
+import { $Location } from '../cypress/location'
 import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
@@ -71,6 +72,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     const stateUpdates = {
       ...state,
+      autLocation: $Location.create(state.autLocation),
       redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each cy.origin command.
     }
 
