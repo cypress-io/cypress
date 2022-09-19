@@ -14,7 +14,6 @@ const expectCurrentSessionData = async (obj) => {
   })
 }
 
-// it('throws error when restoring a global session without a setup function')
 describe('cy.session', { retries: 0 }, () => {
   describe('args', () => {
     it('accepts string as id', () => {

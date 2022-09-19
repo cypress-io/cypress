@@ -5,13 +5,7 @@ const validateSessionsInstrumentPanel = (sessionIds: Array<string> = []) => {
   cy.get('.sessions-container')
   .should('contain', `Sessions (${sessionIds.length})`)
   .as('instrument_panel')
-
-  cy.pause()
-
-  cy.get('@instrument_panel').scrollIntoView()
-  cy.pause()
-
-  cy.get('@instrument_panel').click()
+  .click()
 
   sessionIds.forEach((id) => {
     cy.contains('.sessions-container', id)
