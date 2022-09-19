@@ -176,7 +176,7 @@ const attachToWindow = (autWindow: Window) => {
   cy.overrides.wrapNativeMethods(autWindow)
 
   // place after override incase fetch is polyfilled in the AUT injection
-  // this can do in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
+  // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
   // when the cy.origin block is active to track credential use
   patchFetch(Cypress, autWindow)
   patchXmlHttpRequest(Cypress, autWindow)
