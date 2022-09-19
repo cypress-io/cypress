@@ -463,9 +463,10 @@ export class ProjectConfigManager {
 
   private getRepoRoot = () => {
     /*
-      repoRoot is used to detect the full file path for the relativeFile in stack_utils
-      it's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard
-      right now we assume it's same as `.git` dir, if need be can update to look for most root-level package.json
+      Used to detect the correct file path when a test fails. 
+      It is derived and assigned in the packages/driver in stack_utils.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard.
+      Right now we assume the repoRoot is where the `.git` dir is located.
     */
     return this.options.ctx.git?.gitBaseDir
   }
