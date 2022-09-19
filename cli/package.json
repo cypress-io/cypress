@@ -109,8 +109,7 @@
     "vue2",
     "react18",
     "angular",
-    "svelte",
-    "xpath"
+    "svelte"
   ],
   "bin": {
     "cypress": "bin/cypress"
