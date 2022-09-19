@@ -157,7 +157,7 @@ export class CommandQueue extends Queue<$Command> {
 
       return command.get('args')
     })
-    .then((args) => {
+    .then((args: any) => {
       // store this if we enqueue new commands
       // to check for promise violations
       let ret

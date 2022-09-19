@@ -308,9 +308,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('serializable errors', () => {
     it('errors thrown prior to attaching are forwarded to top', (done) => {
-      cy.origin('http://foobar.com:3500', () => {})
-
-      cy.wrap(() => {
+      cy.origin('http://foobar.com:3500', () => {}).then(() => {
         // Force remove the spec bridge
         window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
       })
@@ -319,7 +317,10 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('this is the message')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
-        // expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+        expect(err.message).to.include('this is the message')
+        expect(err.message).to.include('\`cy.origin(\'http://foobar.com:3500\', () => {\`')
+        expect(err.message).to.include('\`cy.visit(\'http://www.foobar.com:3500/fixtures/auth/error-on-load.html\')\`')
+        expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application', 'https://on.cypress.io/origin'])
 
         done()
       })

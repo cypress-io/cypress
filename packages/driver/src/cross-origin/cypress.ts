@@ -69,14 +69,14 @@ const createCypress = () => {
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
     if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
-      // if true, this is the correct specbridge to take the snapshot and send it back
+      // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
       Cypress.specBridgeCommunicator.toPrimary('snapshot:final:generated', finalSnapshot)
     }
   })
 
-  Cypress.specBridgeCommunicator.on('generate:snapshot:for:log', ({ name, id }) => {
+  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name, specBridgeResponseEvent }) => {
     // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
     let requestedCrossOriginSnapshot = {}
 
@@ -86,7 +86,7 @@ const createCypress = () => {
       requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
     }
 
-    Cypress.specBridgeCommunicator.toPrimary(`snapshot:for:log:generated:${id}`, requestedCrossOriginSnapshot)
+    Cypress.specBridgeCommunicator.toPrimary(specBridgeResponseEvent, requestedCrossOriginSnapshot)
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
@@ -164,7 +164,7 @@ const attachToWindow = (autWindow: Window) => {
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')
 
-  // @ts-ignore - the injected code adds the cypressTimersReset function to window
+  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
   Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
   // @ts-ignore - the injected code adds the cypressTimersPause function to window
   Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
@@ -181,12 +181,8 @@ const attachToWindow = (autWindow: Window) => {
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)
     },
-    async onBeforeUnload (e) {
+    onBeforeUnload (e) {
       // The before unload event is propagated to primary through code injected into the AUT.
-      // We need to sync this state value prior to changing stability otherwise we will erroneously log a loading event.
-      const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
-
-      cy.state('duringUserTestExecution', duringUserTestExecution)
 
       cy.isStable(false, 'beforeunload')
 
@@ -205,9 +201,9 @@ const attachToWindow = (autWindow: Window) => {
 
       const remoteLocation = cy.getRemoteLocation()
 
-      Cypress.action('app:window:load', autWindow, remoteLocation.href)
-
       cy.state('autLocation', remoteLocation)
+
+      Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')

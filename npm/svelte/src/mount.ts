@@ -76,7 +76,7 @@ export function mount<T extends SvelteComponent> (
     // by waiting, we are delaying test execution for the next tick of event loop
     // and letting hooks and component lifecycle methods to execute mount
     return cy.wait(0, { log: false }).then(() => {
-      if (options.log) {
+      if (options.log !== false) {
         const mountMessage = `<${getComponentDisplayName(Component)} ... />`
 
         Cypress.log({

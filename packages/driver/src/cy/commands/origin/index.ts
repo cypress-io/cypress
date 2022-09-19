@@ -28,6 +28,10 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+      if (Cypress.isBrowser('webkit')) {
+        return $errUtils.throwErrByPath('webkit.origin')
+      }
+
       const userInvocationStack = state('current').get('userInvocationStack')
 
       // store the invocation stack in the case that `cy.origin` errors
@@ -195,7 +199,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   hookId: Cypress.state('hookId'),
                   originCommandBaseUrl: location.href,
                   isStable: Cypress.state('isStable'),
-                  autLocation: Cypress.state('autLocation').href,
+                  autLocation: Cypress.state('autLocation')?.href,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

@@ -163,7 +163,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   getRemoteLocation: ILocation['getRemoteLocation']
   getCrossOriginRemoteLocation: ILocation['getCrossOriginRemoteLocation']
-  isRunnerAbleToCommunicateWithAut: ILocation['isRunnerAbleToCommunicateWithAut']
 
   fireBlur: IFocused['fireBlur']
   fireFocus: IFocused['fireFocus']
@@ -288,7 +287,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.getRemoteLocation = location.getRemoteLocation
     this.getCrossOriginRemoteLocation = location.getCrossOriginRemoteLocation
-    this.isRunnerAbleToCommunicateWithAut = location.isRunnerAbleToCommunicateWithAut
 
     const focused = createFocused(state)
 
@@ -596,6 +594,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           this.contentWindowListeners(autWindow)
         } else {
           this.state('window', autWindow)
+          this.state('document', undefined)
           // we may need to update the url now
           this.urlNavigationEvent('load')
         }
@@ -608,9 +607,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // Get the location even if we're cross origin.
           const remoteLocation = await this.getCrossOriginRemoteLocation()
 
+          cy.state('autLocation', remoteLocation)
           this.Cypress.action('app:window:load', this.state('window'), remoteLocation.href)
 
-          cy.state('autLocation', remoteLocation)
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
         } catch (err: any) {
           // this catches errors thrown by user-registered event handlers

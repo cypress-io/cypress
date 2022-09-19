@@ -753,12 +753,15 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14445
-    // TODO: skip flaky test https://github.com/cypress-io/cypress/issues/23472
-    it.skip('should eventually fail on assertion despite redirects', (done) => {
+    it('should eventually fail on assertion despite redirects', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
-
         done()
+      })
+
+      // One time, set the amount of times we want the page to perform it's redirect loop.
+      cy.once('window:before:load', (win) => {
+        win.sessionStorage.setItem('redirectCount', 21)
       })
 
       cy.visit('fixtures/redirection-loop-a.html')

@@ -17,6 +17,7 @@ import type {
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
+import cohorts from './cohorts'
 import { openProject } from './open_project'
 import cache from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
@@ -64,8 +65,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium) {
-        return auth.start(onMessage, utmSource, utmMedium)
+      logIn (onMessage, utmSource, utmMedium, utmContent) {
+        return auth.start(onMessage, utmSource, utmMedium, utmContent)
       },
       logOut () {
         return user.logOut()
@@ -193,6 +194,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         const { availableEditors } = await getUserEditor(true)
 
         return availableEditors
+      },
+    },
+    cohortsApi: {
+      async getCohorts () {
+        return cohorts.get()
+      },
+      async getCohort (name: string) {
+        return cohorts.getByName(name)
+      },
+      async insertCohort (cohort) {
+        cohorts.set(cohort)
       },
     },
   })

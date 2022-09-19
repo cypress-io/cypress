@@ -7,6 +7,9 @@
  * dependencies.
  */
 
+// Globals defined in inject.ts
+/* global cypressConfig */
+
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchElementIntegrity } from './patches/setAttribute'
@@ -54,13 +57,15 @@ window.addEventListener('beforeunload', () => {
   parent.postMessage({ event: 'cross:origin:before:unload', data: window.location.origin }, '*')
 })
 
+// This error could also be handled by creating and attaching a spec bridge and re-throwing the error.
+// If this approach proves to be an issue we could try the new solution.
 const handleErrorEvent = (event) => {
   if (window.Cypress) {
     // A spec bridge has attached so we don't need to forward errors to top anymore.
     window.removeEventListener('error', handleErrorEvent)
   } else {
     const { error } = event
-    const data = {}
+    const data = { href: window.location.href }
 
     if (error && error.stack && error.message) {
       data.message = error.message
@@ -80,7 +85,7 @@ patchDocumentCookie(window)
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
-if (window.cypressConfig.modifyObstructiveCode) {
+if (cypressConfig.modifyObstructiveCode) {
   Object.defineProperty(window, 'frameElement', {
     get () {
       return null
@@ -88,7 +93,7 @@ if (window.cypressConfig.modifyObstructiveCode) {
   })
 }
 
-if (window.cypressConfig.modifyObstructiveThirdPartyCode) {
+if (cypressConfig.modifyObstructiveThirdPartyCode) {
   patchElementIntegrity(window)
 }
 
@@ -103,6 +108,7 @@ const Cypress = findCypress()
 window.cypressTimersReset = timers.reset
 window.cypressTimersPause = timers.pause
 
-if (Cypress) {
+// Check for cy too to prevent a race condition for attaching.
+if (Cypress && Cypress.cy) {
   Cypress.action('app:window:before:load', window)
 }

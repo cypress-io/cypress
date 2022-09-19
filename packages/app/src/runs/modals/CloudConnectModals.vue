@@ -11,6 +11,7 @@
     v-else-if="props.gql.cloudViewer?.organizations?.nodes.length ?? 0 > 0"
     :gql="props.gql"
     show
+    :utm-medium="props.utmMedium"
     @update-project-id-failed="showManualUpdate"
     @success="emit('success')"
     @cancel="emit('cancel')"
@@ -71,6 +72,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   gql: CloudConnectModalsFragment
+  utmMedium: string
 }>()
 
 const newProjectId = ref('')

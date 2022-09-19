@@ -152,8 +152,6 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       .try(() => {
         // If command is not same origin, this will throw an error. also, in this instance, this is cy
         this.ensureCommandCanCommunicateWithAUT()
-
-        return fn()
       })
       .catch((err) => {
         options.error = err
@@ -162,7 +160,9 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       })
     }
 
-    return retryValue()
+    return retryValue().then(() => {
+      return fn()
+    })
   },
 })
 

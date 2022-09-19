@@ -1,7 +1,6 @@
 import { $Location, LocationObject } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
-import * as cors from '@packages/network/lib/cors'
 
 const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<LocationObject> => {
   return new Promise((resolve, reject) => {
@@ -48,25 +47,14 @@ export const create = (state: StateFunc) => ({
 
       autLocation = $Location.create(remoteUrl)
     } catch (e) {
-      autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
+      if (Cypress.config('experimentalSessionAndOrigin')) {
+        autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
+      } else {
+        autLocation = $Location.create('')
+      }
     }
 
     return autLocation
-  },
-
-  isRunnerAbleToCommunicateWithAut (): boolean {
-    const autLocation = Cypress.state('autLocation')
-    const isChromium = Cypress.isBrowser({ family: 'chromium' })
-
-    // Special cases. About blanks is considered same origin as is an undefined AUT.
-    if (!autLocation || autLocation?.href === 'about://blank' || autLocation?.href === 'about:blank' || (isChromium && Cypress.config['chromeWebSecurity'] === false)) {
-      return true
-    }
-
-    const autOrigin = autLocation?.origin
-    const commandOrigin = window.location.origin
-
-    return autOrigin && cors.urlOriginsMatch(commandOrigin, autOrigin)
   },
 })
 

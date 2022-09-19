@@ -200,6 +200,7 @@ import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
 const { t } = useI18n()
 const online = useOnline()
@@ -263,8 +264,8 @@ mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
 `
 
 gql`
-mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean! ) {
-  cloudProjectCreate(name: $name, orgId: $orgId, public: $public) {
+mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean!, $campaign: String, $cohort: String, $medium: String, $source: String! ) {
+  cloudProjectCreate(name: $name, orgId: $orgId, public: $public, campaign: $campaign, cohort: $cohort, medium: $medium, source: $source) {
     id
     slug
   }
@@ -273,6 +274,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 
 const props = defineProps<{
   gql: SelectCloudProjectModalFragment
+  utmMedium: string
 }>()
 
 const emit = defineEmits<{
@@ -343,6 +345,10 @@ async function createOrConnectProject () {
       orgId: pickedOrganization.value!.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
+      campaign: 'Create project',
+      cohort: '',
+      medium: props.utmMedium,
+      source: getUtmSource(),
     })
 
     if (error?.graphQLErrors.length) {

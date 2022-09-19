@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_RECORD"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="record-banner"
     status="info"
@@ -8,6 +8,12 @@
     class="mb-16px"
     :icon="RecordIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Record Runs',
+      medium: 'Specs Record Runs Banner',
+      cohort: 'n/a'
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
@@ -52,27 +58,28 @@ query RecordBanner {
 }
 `
 
-withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
-}>(), {
-  modelValue: false,
-})
+  hasBannerBeenShown: boolean
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_RECORD
 
 const query = useQuery({ query: RecordBannerDocument })
 
 const firstRecordKey = computed(() => {
   return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
+
 const recordCommand = computed(() => {
   const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
 
-  return `cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
+  return `npx cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 
 </script>

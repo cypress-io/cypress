@@ -188,7 +188,7 @@ context('cy.origin actions', () => {
     })
   })
 
-  context('#cross origin AUT', () => {
+  context('cross-origin AUT errors', () => {
     // We only need to check .get here because the other commands are chained off of it.
     it('.get()', { defaultCommandTimeout: 50 }, (done) => {
       cy.on('fail', (err) => {

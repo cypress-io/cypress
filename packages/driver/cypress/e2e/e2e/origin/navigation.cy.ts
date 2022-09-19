@@ -439,8 +439,8 @@ describe('errors', () => {
       })
 
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
-      cy.window().then(() => {
-      // Force remove the spec bridge
+      cy.origin('http://foobar.com:3500', () => {}).then(() => {
+        // Force remove the spec bridge
         window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
       })
 

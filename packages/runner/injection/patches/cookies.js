@@ -45,13 +45,12 @@ export const patchDocumentCookie = (win) => {
   const syncCookieValues = () => {
     return setInterval(async () => {
       try {
-        const cookies = window.cypress ? await window.Cypress.automation('get:cookies', { domain: window.Cypress.Location.create(win.location.href).domain }) : await getCookiesFromCypress()
+        // If Cypress is defined on the window, that means we have a spec bridge and we should use that to set cookies. If not we have to delegate to the primary cypress instance.
+        const cookies = window.Cypress ? await window.Cypress.automation('get:cookies', { domain: window.Cypress.Location.create(win.location.href).domain }) : await getCookiesFromCypress()
 
         const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
 
         documentCookieValue = cookiesString
-
-      // console.log('documentCookieValue via sync', documentCookieValue)
       } catch (err) {
       // unlikely there will be errors, but ignore them in any case, since
       // they're not user-actionable
@@ -61,6 +60,7 @@ export const patchDocumentCookie = (win) => {
 
   let cookieSyncIntervalId = syncCookieValues()
   const setAutomationCookie = (cookie) => {
+    // If Cypress is defined on the window, that means we have a spec bridge and we should use that to set cookies. If not we have to delegate to the primary cypress instance.
     if (window.Cypress) {
       const { superDomain } = window.Cypress.Location.create(win.location.href)
       const automationCookie = window.Cypress.Cookies.toughCookieToAutomationCookie(window.Cypress.Cookies.parse(cookie), superDomain)
@@ -88,15 +88,10 @@ export const patchDocumentCookie = (win) => {
       window.top.postMessage({ event: 'cross:origin:aut:set:cookie', data: { cookie, href: window.location.href } }, '*')
     }
   }
-
-  // Because document.cookie can be patched after cookies have already been set, capture existing cookies.
-  // const existingCookieValue = win.document.cookie
   let documentCookieValue = ''
 
   Object.defineProperty(win.document, 'cookie', {
     get () {
-      // console.log('doc.cookie get', documentCookieValue)
-
       return documentCookieValue
     },
 

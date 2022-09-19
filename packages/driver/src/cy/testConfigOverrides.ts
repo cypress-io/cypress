@@ -3,7 +3,7 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-const mochaOverrideLevel = ['suite', 'test'] as const
+const mochaOverrideLevel = ['restoring', 'suite', 'test'] as const
 
 export type MochaOverrideLevel = typeof mochaOverrideLevel[number]
 
@@ -158,7 +158,10 @@ export class TestConfigOverride {
   private restoreTestConfigFn: Cypress.Nullable<() => void> = null
 
   restoreAndSetTestConfigOverrides (test, config, env) {
-    if (this.restoreTestConfigFn) this.restoreTestConfigFn()
+    if (this.restoreTestConfigFn) {
+      test._testConfig.applied = 'restoring'
+      this.restoreTestConfigFn()
+    }
 
     const resolvedTestConfig = test._testConfig || {
       unverifiedTestConfig: [],

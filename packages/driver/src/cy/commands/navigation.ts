@@ -8,6 +8,9 @@ import $errUtils from '../../cypress/error_utils'
 import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
+import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
+
+import type { RunState } from '@packages/types'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
@@ -61,7 +64,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   })
 }
 
-// TODO: remove with experimentalSessionAndOrigin
+// TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
 const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
@@ -228,7 +231,7 @@ const pageLoading = (bool, Cypress, state) => {
   Cypress.action('app:page:loading', bool)
 }
 
-const stabilityChanged = (Cypress, state, config, stable) => {
+const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
   if (currentlyVisitingAboutBlank) {
     if (stable === false) {
@@ -270,6 +273,13 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   // which at that point we may keep runnable around
   if (!state('runnable')) {
     return
+  }
+
+  // We need to sync this state value prior to checking it otherwise we will erroneously log a loading event after the test is complete.
+  if (Cypress.isCrossOriginSpecBridge) {
+    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
+
+    cy.state('duringUserTestExecution', duringUserTestExecution)
   }
 
   // this prevents a log occurring when we navigate to about:blank inbetween tests
@@ -340,27 +350,25 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    if (state('window')) {
-      const href = state('window').location.href
-      const count = getRedirectionCount(href)
-      const limit = config('redirectionLimit')
-
-      if (count === limit) {
-        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-          args: {
-            href,
-            limit,
-          },
-        })
-      }
-
-      updateRedirectionCount(href)
-    }
-
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
       const onWindowLoad = ({ url }) => {
+        const href = state('autLocation').href
+        const count = getRedirectionCount(href)
+        const limit = config('redirectionLimit')
+
+        if (count === limit) {
+          $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+            args: {
+              href,
+              limit,
+            },
+          })
+        }
+
+        updateRedirectionCount(href)
+
         // this prevents a log occurring when we navigate to about:blank in-between tests
         if (!state('duringUserTestExecution')) return
 
@@ -936,7 +944,7 @@ export default (Commands, Cypress, cy, state, config) => {
         win = state('window')
 
         // If we are visiting a cross origin domain and have onLoad or onBeforeLoad options specified, throw an error.
-        if (!cy.isRunnerAbleToCommunicateWithAut()) {
+        if (!isRunnerAbleToCommunicateWithAut()) {
           if (onLoadIsUserDefined) {
             $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }
@@ -1110,26 +1118,26 @@ export default (Commands, Cypress, cy, state, config) => {
           // tell our backend we're changing origins
           // TODO: add in other things we want to preserve
           // state for like scrollTop
-          let s: Record<string, any> = {
+          let runState: RunState = {
             currentId: id,
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),
             emissions: Cypress.runner.getEmissions(),
           }
 
-          s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
-          s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
-          s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
-          s.numLogs = LogUtils.countLogsByTests(s.tests)
+          runState.passed = Cypress.runner.countByTestState(runState.tests, 'passed')
+          runState.failed = Cypress.runner.countByTestState(runState.tests, 'failed')
+          runState.pending = Cypress.runner.countByTestState(runState.tests, 'pending')
+          runState.numLogs = LogUtils.countLogsByTests(runState.tests)
 
           return Cypress.action('cy:collect:run:state')
-          .then((a = []) => {
+          .then((otherRunStates = []) => {
             // merge all the states together holla'
-            s = _.reduce(a, (memo, obj) => {
+            runState = _.reduce(otherRunStates, (memo, obj) => {
               return _.extend(memo, obj)
-            }, s)
+            }, runState)
 
-            return Cypress.backend('preserve:run:state', s)
+            return Cypress.backend('preserve:run:state', runState)
           })
           .then(() => {
             // and now we must change the url to be the new
