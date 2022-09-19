@@ -461,7 +461,7 @@ export class ProjectConfigManager {
     )
   }
 
-  private getRepoRoot = () => {
+  get getRepoRoot () {
     /*
       repoRoot is used to detect the full file path for the relativeFile in stack_utils
       it's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard
