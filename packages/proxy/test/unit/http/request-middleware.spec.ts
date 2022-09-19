@@ -11,7 +11,7 @@ describe('http/request-middleware', () => {
   it('exports the members in the correct order', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
-      'ExtractIsAUTFrameHeader',
+      'ExtractCypressMetadataHeaders',
       'MaybeSimulateSecHeaders',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
@@ -26,8 +26,8 @@ describe('http/request-middleware', () => {
     ])
   })
 
-  describe('ExtractIsAUTFrameHeader', () => {
-    const { ExtractIsAUTFrameHeader } = RequestMiddleware
+  describe('ExtractCypressMetadataHeaders', () => {
+    const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
     it('removes x-cypress-is-aut-frame header when it exists, sets in on the req', async () => {
       const ctx = {
@@ -38,7 +38,7 @@ describe('http/request-middleware', () => {
         } as Partial<CypressIncomingRequest>,
       }
 
-      await testMiddleware([ExtractIsAUTFrameHeader], ctx)
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.true
@@ -52,10 +52,38 @@ describe('http/request-middleware', () => {
         } as Partial<CypressIncomingRequest>,
       }
 
-      await testMiddleware([ExtractIsAUTFrameHeader], ctx)
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.false
+      })
+    })
+
+    it('removes x-cypress-request header when it exists', async () => {
+      const ctx = {
+        req: {
+          headers: {
+            'x-cypress-request': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-request']).not.to.exist
+      })
+    })
+
+    it('removes x-cypress-request header when it does not exist', async () => {
+      const ctx = {
+        req: {
+          headers: {},
+        } as Partial<CypressIncomingRequest>,
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-request']).not.to.exist
       })
     })
   })
