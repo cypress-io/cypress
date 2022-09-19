@@ -1,0 +1,293 @@
+diff --git a/node_modules/@cypress/unique-selector/lib/index.esm.js b/node_modules/@cypress/unique-selector/lib/index.esm.js
+new file mode 100644
+index 0000000..60a443e
+--- /dev/null
++++ b/node_modules/@cypress/unique-selector/lib/index.esm.js
+@@ -0,0 +1,265 @@
++'use strict';
++
++Object.defineProperty(exports, "__esModule", {
++  value: true
++});
++
++var _getID = require('./getID');
++
++var _getClasses = require('./getClasses');
++
++var _getCombinations = require('./getCombinations');
++
++var _getAttributes = require('./getAttributes');
++
++var _getNthChild = require('./getNthChild');
++
++var _getTag = require('./getTag');
++
++var _isUnique = require('./isUnique');
++
++var _getParents = require('./getParents');
++
++var _getData = require('./getData');
++
++function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } } /**
++                                                                                                                                                                                                     * Expose `unique`
++                                                                                                                                                                                                     */
++
++var dataRegex = /^data-(.+)/;
++
++/**
++ * Returns all the selectors of the element
++ * @param  { Object } element
++ * @return { Object }
++ */
++function getAllSelectors(el, selectors, attributesToIgnore) {
++  var funcs = {
++    'tag': _getTag.getTag,
++    'nth-child': _getNthChild.getNthChild,
++    'attributes': function attributes(elem) {
++      return (0, _getAttributes.getAttributes)(elem, attributesToIgnore);
++    },
++    'class': _getClasses.getClassSelectors,
++    'id': _getID.getID
++  };
++
++  return selectors.filter(function (selector) {
++    return !dataRegex.test(selector);
++  }).reduce(function (res, next) {
++    res[next] = funcs[next](el);
++    return res;
++  }, {});
++}
++
++/**
++ * Tests uniqueNess of the element inside its parent
++ * @param  { Object } element
++ * @param { String } Selectors
++ * @return { Boolean }
++ */
++function testUniqueness(element, selector) {
++  var parentNode = element.parentNode;
++
++  var elements = parentNode.querySelectorAll(selector);
++  return elements.length === 1 && elements[0] === element;
++}
++
++/**
++ * Tests all selectors for uniqueness and returns the first unique selector.
++ * @param  { Object } element
++ * @param  { Array } selectors
++ * @return { String }
++ */
++function getFirstUnique(element, selectors) {
++  return selectors.find(testUniqueness.bind(null, element));
++}
++
++/**
++ * Checks all the possible selectors of an element to find one unique and return it
++ * @param  { Object } element
++ * @param  { Array } items
++ * @param  { String } tag
++ * @return { String }
++ */
++function getUniqueCombination(element, items, tag) {
++  var combinations = (0, _getCombinations.getCombinations)(items, 3),
++      firstUnique = getFirstUnique(element, combinations);
++
++  if (Boolean(firstUnique)) {
++    return firstUnique;
++  }
++
++  if (Boolean(tag)) {
++    combinations = combinations.map(function (combination) {
++      return tag + combination;
++    });
++    firstUnique = getFirstUnique(element, combinations);
++
++    if (Boolean(firstUnique)) {
++      return firstUnique;
++    }
++  }
++
++  return null;
++}
++
++/**
++ * Returns a uniqueSelector based on the passed options
++ * @param  { DOM } element
++ * @param  { Array } options
++ * @return { String }
++ */
++function getUniqueSelector(element, selectorTypes, attributesToIgnore) {
++  var foundSelector = void 0;
++
++  var attributes = [].concat(_toConsumableArray(element.attributes));
++
++  var elementSelectors = getAllSelectors(element, selectorTypes, attributesToIgnore);
++
++  var _iteratorNormalCompletion = true;
++  var _didIteratorError = false;
++  var _iteratorError = undefined;
++
++  try {
++    for (var _iterator = selectorTypes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
++      var selectorType = _step.value;
++
++      var selector = elementSelectors[selectorType];
++
++      // if we are a data attribute
++      if (dataRegex.test(selectorType)) {
++        var dataSelector = (0, _getData.getData)(selectorType, attributes);
++
++        // if we found a selector via data attributes
++        if (dataSelector) {
++          selector = dataSelector;
++          selectorType = 'data';
++        }
++      }
++
++      if (!Boolean(selector)) continue;
++
++      switch (selectorType) {
++        case 'data':
++        case 'id':
++        case 'tag':
++          if (testUniqueness(element, selector)) {
++            return selector;
++          }
++          break;
++        case 'class':
++        case 'attributes':
++          if (selector.length) {
++            foundSelector = getUniqueCombination(element, selector, elementSelectors.tag);
++            if (foundSelector) {
++              return foundSelector;
++            }
++          }
++          break;
++
++        case 'nth-child':
++          return selector;
++
++        default:
++          break;
++      }
++    }
++  } catch (err) {
++    _didIteratorError = true;
++    _iteratorError = err;
++  } finally {
++    try {
++      if (!_iteratorNormalCompletion && _iterator.return) {
++        _iterator.return();
++      }
++    } finally {
++      if (_didIteratorError) {
++        throw _iteratorError;
++      }
++    }
++  }
++
++  return '*';
++}
++
++/**
++ * Generate unique CSS selector for given DOM element
++ *
++ * @param {Element} el
++ * @return {String}
++ * @api private
++ */
++
++function unique(el) {
++  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
++  var _options$selectorType = options.selectorTypes,
++      selectorTypes = _options$selectorType === undefined ? ['id', 'class', 'tag', 'nth-child'] : _options$selectorType,
++      _options$attributesTo = options.attributesToIgnore,
++      attributesToIgnore = _options$attributesTo === undefined ? ['id', 'class', 'length'] : _options$attributesTo;
++
++  var allSelectors = [];
++  var parents = (0, _getParents.getParents)(el);
++
++  var _iteratorNormalCompletion2 = true;
++  var _didIteratorError2 = false;
++  var _iteratorError2 = undefined;
++
++  try {
++    for (var _iterator2 = parents[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
++      var elem = _step2.value;
++
++      var selector = getUniqueSelector(elem, selectorTypes, attributesToIgnore);
++      if (Boolean(selector)) {
++        allSelectors.push(selector);
++      }
++    }
++  } catch (err) {
++    _didIteratorError2 = true;
++    _iteratorError2 = err;
++  } finally {
++    try {
++      if (!_iteratorNormalCompletion2 && _iterator2.return) {
++        _iterator2.return();
++      }
++    } finally {
++      if (_didIteratorError2) {
++        throw _iteratorError2;
++      }
++    }
++  }
++
++  var selectors = [];
++  var _iteratorNormalCompletion3 = true;
++  var _didIteratorError3 = false;
++  var _iteratorError3 = undefined;
++
++  try {
++    for (var _iterator3 = allSelectors[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
++      var it = _step3.value;
++
++      selectors.unshift(it);
++      var _selector = selectors.join(' > ');
++      if ((0, _isUnique.isUnique)(el, _selector)) {
++        return _selector;
++      }
++    }
++  } catch (err) {
++    _didIteratorError3 = true;
++    _iteratorError3 = err;
++  } finally {
++    try {
++      if (!_iteratorNormalCompletion3 && _iterator3.return) {
++        _iterator3.return();
++      }
++    } finally {
++      if (_didIteratorError3) {
++        throw _iteratorError3;
++      }
++    }
++  }
++
++  return null;
++}
++
++export default unique;
+diff --git a/node_modules/@cypress/unique-selector/lib/index.js b/node_modules/@cypress/unique-selector/lib/index.js
+index 19f9cf1..a6c567d 100644
+--- a/node_modules/@cypress/unique-selector/lib/index.js
++++ b/node_modules/@cypress/unique-selector/lib/index.js
+@@ -262,3 +262,5 @@ function unique(el) {
+ 
+   return null;
+ }
++
++export default unique;
+diff --git a/node_modules/@cypress/unique-selector/package.json b/node_modules/@cypress/unique-selector/package.json
+index c6339a7..d43f131 100644
+--- a/node_modules/@cypress/unique-selector/package.json
++++ b/node_modules/@cypress/unique-selector/package.json
+@@ -3,6 +3,7 @@
+   "version": "0.4.4",
+   "description": "Given a DOM node, return a unique CSS selector matching only that element",
+   "main": "./lib/index.js",
++  "module": "./lib/index.esm.js",
+   "jsnext:main": "./src/index.js",
+   "directories": {
+     "test": "test"
