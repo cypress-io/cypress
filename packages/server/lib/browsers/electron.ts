@@ -437,6 +437,11 @@ export = {
     // set both because why not
     webContents.userAgent = userAgent
 
+    // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
+    webContents.debugger.sendCommand('Network.setUserAgentOverride', {
+      userAgent,
+    })
+
     return webContents.session.setUserAgent(userAgent)
   },
 

@@ -36,8 +36,8 @@ const debug = null
 
 // https://github.com/cypress-io/cypress/issues/1756
 const zlibOptions = {
-  flush: zlib.Z_SYNC_FLUSH,
-  finishFlush: zlib.Z_SYNC_FLUSH,
+  flush: zlib.constants.Z_SYNC_FLUSH,
+  finishFlush: zlib.constants.Z_SYNC_FLUSH,
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
@@ -234,33 +234,6 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
-  const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
-  const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
-  const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-  const isRenderedHTML = reqWillRenderHtml(this.req)
-  const isAUTFrame = this.req.isAUTFrame
-
-  // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
-  if (this.config.experimentalSessionAndOrigin && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
-    this.debug('is cross-origin, delay until cross:origin:release:html event')
-
-    this.serverBus.once('cross:origin:release:html', () => {
-      this.debug(`received cross:origin:release:html, let the response proceed`)
-
-      this.next()
-    })
-
-    this.serverBus.emit('cross:origin:delaying:html', {
-      href: this.req.proxiedUrl,
-    })
-
-    return
-  }
-
-  this.next()
-}
-
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
@@ -283,10 +256,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
-    const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin(this.req.proxiedUrl)
+    const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalSessionAndOrigin && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalSessionAndOrigin && isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -559,6 +532,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isHtml: isHtml(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
+      modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
     })
@@ -588,6 +562,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     isHtml: isHtml(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
+    modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
   })).on('error', this.onError)
@@ -620,7 +595,6 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForCrossOrigin,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,
