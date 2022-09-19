@@ -6365,13 +6365,6 @@
     "@types/estree" "*"
     "@types/json-schema" "*"
 
-"@types/esprima@^4.0.1":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@types/esprima/-/esprima-4.0.3.tgz#e9068297cc3dd75231fa5cdaa6d75c50d5fb632f"
-  integrity sha512-jo14dIWVVtF0iMsKkYek6++4cWJjwpvog+rchLulwgFJGTXqIeTdCOvY0B3yMLTaIwMcKCdJ6mQbSR6wYHy98A==
-  dependencies:
-    "@types/estree" "*"
-
 "@types/estree@*", "@types/estree@^0.0.51":
   version "0.0.51"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.51.tgz#cfd70924a25a3fd32b218e5e420e6897e1ac4f40"
