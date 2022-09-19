@@ -17,7 +17,7 @@
     "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/xpath#readme",
-  "author": "Jordan <jordan@jpdesigning.com>",
+  "author": "Cypress Tools Team",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
