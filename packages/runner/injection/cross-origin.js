@@ -23,7 +23,7 @@ const findCypress = () => {
       if (frame.Cypress) {
         // If the ending $ is included in the template string, it breaks transpilation
         // eslint-disable-next-line no-useless-concat
-        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replace(/\./gm, '\\.') }` + '$')
+        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replaceAll('.', '\\.') }` + '$')
 
         // Compare the locations origin policy without pulling in more dependencies.
         // Compare host, protocol and test that the window's host ends with the frame's host.
