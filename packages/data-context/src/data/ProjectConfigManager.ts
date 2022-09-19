@@ -537,6 +537,7 @@ export class ProjectConfigManager {
   }
 
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
+    // return cached configuration for new spec and/or new navigating load when Cypress is running tests
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
     }

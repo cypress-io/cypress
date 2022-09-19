@@ -182,6 +182,10 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
   const win = state('window')
   const doc = state('document')
 
+  if (!doc) {
+    return
+  }
+
   const resetScrollOverrides = scrollOverrides(win, doc)
 
   const docHeight = $(doc).height() as number
@@ -239,6 +243,10 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
 const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, automationOptions: AutomationOptions) => {
   const win = state('window')
   const doc = state('document')
+
+  if (!doc) {
+    return
+  }
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
@@ -444,7 +452,7 @@ const takeScreenshot = (
   // use the subject as $el or yield the wrapped documentElement
   const $el: JQuery<HTMLElement> = $dom.isElement(subject)
     ? subject
-    : $dom.wrap(state('document').documentElement)
+    : $dom.wrap(state('document')?.documentElement)
 
   // get the current body of the AUT to accurately calculate screenshot blackouts
   // as well as properly enable/disable CSS animations while screenshotting is happening
