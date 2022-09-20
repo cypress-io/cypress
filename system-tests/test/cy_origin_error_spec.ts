@@ -47,6 +47,7 @@ describe('e2e cy.origin errors', () => {
   })
 
   systemTests.it('errors when not using webpack-preprocessor', {
+    browser: '!webkit', // TODO(webkit): results in "TypeError: expecting an array or an iterable object but got [object Null]"
     project: 'passthru-preprocessor',
     spec: 'cross_origin.cy.js',
     expectedExitCode: 1,
