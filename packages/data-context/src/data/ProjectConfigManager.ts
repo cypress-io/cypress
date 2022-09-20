@@ -461,9 +461,9 @@ export class ProjectConfigManager {
     )
   }
 
-  private getRepoRoot = () => {
+  get repoRoot () {
     /*
-      Used to detect the correct file path when a test fails. 
+      Used to detect the correct file path when a test fails.
       It is derived and assigned in the packages/driver in stack_utils.
       It's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard.
       Right now we assume the repoRoot is where the `.git` dir is located.
@@ -489,7 +489,7 @@ export class ProjectConfigManager {
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
-      repoRoot: this.getRepoRoot(),
+      repoRoot: this.repoRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
