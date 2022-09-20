@@ -160,6 +160,15 @@
       "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
       "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
     },
+    "hoverButton": {
+      "connect": "Connect",
+      "connectProject": "Connect project",
+      "connectProjectShort": "Connect",
+      "requestAccess": "Request access",
+      "requestAccessShort": "Request",
+      "requestSent": "Request sent",
+      "requestSentShort": "Sent"
+    },
     "connectProjectButton": "Connect your project",
     "dashboardLoginButton": "Log in to the Dashboard",
     "reconnectProjectButton": "Reconnect your project",
@@ -188,17 +197,20 @@
     "banners": {
       "login": {
         "title": "Optimize and record your CI test runs with Cypress Dashboard",
-        "content": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
+        "contentA": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
+        "contentB": "When you configure Cypress to record tests to the Cypress Dashboard, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
         "buttonLabel": "Get started with Cypress Dashboard"
       },
       "createOrganization": {
-        "title": "Finish setting up Cypress Dashboard",
+        "titleA": "Finish setting up Cypress Dashboard",
+        "titleB": "Create or join an organization",
         "content": "Join or create an organization in Cypress Dashboard to access your projects and recorded test runs.",
         "buttonLabel": "Set up your organization"
       },
       "connectProject": {
         "title": "Connect your project to Cypress Dashboard",
-        "content": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
+        "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {
@@ -494,6 +506,14 @@
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
+      },
+      "experimentalStudio": {
+        "name": "Studio",
+        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
+      },
+      "experimentalWebKitSupport": {
+        "name": "WebKit Support",
+        "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
       }
     },
     "device": {
@@ -798,6 +818,27 @@
       "buttonHref": "https://on.cypress.io/viewport",
       "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
       "configText": "Additionally, you can override this value in your {2} or via the {4} command."
+    },
+    "studio": {
+      "studio": "Studio",
+      "studioDescription": "Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.",
+      "studioDetailedDescription": "Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:",
+      "getStartedButton": "Get Started",
+      "feedbackPrompt": "Your {0} will be highly influential to our team.",
+      "experimentalMessage": "This feature is currently experimental and we will be adding more commands and abilities in the future.",
+      "feedbackLink": "feedback",
+      "saveTest": "Save Test",
+      "testName": "Test Name",
+      "saveTestButton": "Save",
+      "closeStudio": "Close Studio",
+      "restartStudio": "Restart Studio",
+      "copyCommands": "Copy Commands to Clipboard",
+      "commandsCopied": "Commands Copied!",
+      "availableCommands": "Available commands",
+      "giveFeedback": "Give Feedback",
+      "enterValidUrl": "Enter a valid URL to visit",
+      "continue": "Continue",
+      "actionCancel": "Cancel"
     }
   },
   "warnings": {

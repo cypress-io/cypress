@@ -5,7 +5,6 @@ import $stackUtils from '../../../cypress/stack_utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
-  getSessionDetails,
   getConsoleProps,
   navigateAboutBlank,
 } from './utils'
@@ -53,6 +52,10 @@ export default function (Commands, Cypress, cy) {
 
   Commands.addAll({
     session (id, setup?: Function, options: { validate?: Function } = {}) {
+      if (Cypress.isBrowser('webkit')) {
+        return $errUtils.throwErrByPath('webkit.session')
+      }
+
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
@@ -112,6 +115,16 @@ export default function (Commands, Cypress, cy) {
 
           sessionsManager.registeredSessions.set(id, true)
         }
+      }
+
+      function setSessionLogStatus (status: string) {
+        _log.set({
+          sessionInfo: {
+            id: existingSession.id,
+            isGlobalSession: false,
+            status,
+          },
+        })
       }
 
       function createSession (existingSession, recreateSession = false) {
@@ -174,7 +187,8 @@ export default function (Commands, Cypress, cy) {
 
             const onFail = (err) => {
               validateLog.set({ state: 'failed' })
-              _log.set({ renderProps: { status: 'failed' } })
+              setSessionLogStatus('failed')
+
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
                 Cypress.log({
@@ -292,7 +306,8 @@ export default function (Commands, Cypress, cy) {
        */
       const createSessionWorkflow = (existingSession, recreateSession = false) => {
         return cy.then(async () => {
-          _log.set({ renderProps: { status: recreateSession ? 'recreating' : 'creating' } })
+          setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
+
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
@@ -304,7 +319,7 @@ export default function (Commands, Cypress, cy) {
             return
           }
 
-          _log.set({ renderProps: { status: recreateSession ? 'recreated' : 'created' } })
+          setSessionLogStatus(recreateSession ? 'recreated' : 'created')
         })
       }
 
@@ -316,7 +331,7 @@ export default function (Commands, Cypress, cy) {
        */
       const restoreSessionWorkflow = (existingSession) => {
         return cy.then(async () => {
-          _log.set({ renderProps: { status: 'restoring' } })
+          setSessionLogStatus('restoring')
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
@@ -328,7 +343,7 @@ export default function (Commands, Cypress, cy) {
             return createSessionWorkflow(existingSession, true)
           }
 
-          _log.set({ renderProps: { status: 'restored' } })
+          setSessionLogStatus('restored')
         })
       }
 
@@ -345,7 +360,6 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
-        sessionInfo: getSessionDetails(existingSession),
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
@@ -365,8 +379,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(existingSession)
-        }).then(async () => {
-          await navigateAboutBlank()
+        }).then(() => {
           _log.set({ state: 'passed' })
         })
       })

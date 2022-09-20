@@ -51,9 +51,9 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
   const isBrowserProcess = (proc: Process): boolean => {
     const instance = browsers.getBrowserInstance()
     // electron will return a list of pids, since it's not a hierarchy
-    const pid: number | number[] = instance && instance.pid
+    const pids: number[] = instance?.allPids ? instance.allPids : [instance?.pid]
 
-    return (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid)
+    return (pids.includes(proc.pid))
       || isParentProcessInGroup(proc, 'browser')
   }
 

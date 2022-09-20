@@ -113,18 +113,25 @@
   <RecordBanner
     v-else-if="showRecordBanner"
     v-model="showRecordBanner"
+    :has-banner-been-shown="hasRecordBannerBeenShown"
   />
   <ConnectProjectBanner
-    v-else-if="showConnectBanner"
+    v-else-if="showConnectBanner && cohorts.connectProject?.value"
     v-model="showConnectBanner"
+    :has-banner-been-shown="hasConnectBannerBeenShown"
+    :cohort-option="cohorts.connectProject.value"
   />
   <CreateOrganizationBanner
-    v-else-if="showCreateOrganizationBanner"
+    v-else-if="showCreateOrganizationBanner && cohorts.organization?.value"
     v-model="showCreateOrganizationBanner"
+    :has-banner-been-shown="hasCreateOrganizationBannerBeenShown"
+    :cohort-option="cohorts.organization.value"
   />
   <LoginBanner
-    v-else-if="showLoginBanner"
+    v-else-if="showLoginBanner && cohorts.login?.value"
     v-model="showLoginBanner"
+    :has-banner-been-shown="hasLoginBannerBeenShown"
+    :cohort-option="cohorts.login.value"
   />
 </template>
 
@@ -139,13 +146,14 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import interval from 'human-interval'
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
+import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -224,6 +232,11 @@ const showConnectBanner = ref(false)
 const showCreateOrganizationBanner = ref(false)
 const showLoginBanner = ref(false)
 
+const hasRecordBannerBeenShown = ref(false)
+const hasConnectBannerBeenShown = ref(false)
+const hasCreateOrganizationBannerBeenShown = ref(false)
+const hasLoginBannerBeenShown = ref(false)
+
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
   () => {
@@ -254,14 +267,69 @@ watch(
     showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && isLoggedIn && isMemberOfOrganization && !isProjectConnected && hasFourDaysOfCypressUse
     showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && isLoggedIn && isOrganizationLoaded && !isMemberOfOrganization && hasFourDaysOfCypressUse
     showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && !isLoggedIn && hasFourDaysOfCypressUse
+
+    hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
+    hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
+    hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
+    hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
   },
   { immediate: true },
 )
+
+const bannerCohortOptions = {
+  [BannerIds.ACI_082022_LOGIN]: [
+    { cohort: 'A', value: t('specPage.banners.login.contentA') },
+    { cohort: 'B', value: t('specPage.banners.login.contentB') },
+  ],
+  [BannerIds.ACI_082022_CREATE_ORG]: [
+    { cohort: 'A', value: t('specPage.banners.createOrganization.titleA') },
+    { cohort: 'B', value: t('specPage.banners.createOrganization.titleB') },
+  ],
+  [BannerIds.ACI_082022_CONNECT_PROJECT]: [
+    { cohort: 'A', value: t('specPage.banners.connectProject.contentA') },
+    { cohort: 'B', value: t('specPage.banners.connectProject.contentB') },
+  ],
+}
+
+const cohortBuilder = useCohorts()
+
+const getCohortForBanner = (bannerId: string) => {
+  const cohortConfig: CohortConfig = {
+    name: bannerId,
+    options: bannerCohortOptions[bannerId],
+  }
+
+  return cohortBuilder.getCohort(cohortConfig)
+}
+
+type BannerType = 'login' | 'connectProject' | 'organization'
+
+const cohorts: Partial<Record<BannerType, ReturnType<typeof getCohortForBanner>>> = {}
+
+watchEffect(() => {
+  if (!cohorts.login && showLoginBanner.value) {
+    cohorts.login = getCohortForBanner(BannerIds.ACI_082022_LOGIN)
+  }
+
+  if (!cohorts.organization && showCreateOrganizationBanner.value) {
+    cohorts.organization = getCohortForBanner(BannerIds.ACI_082022_CREATE_ORG)
+  }
+
+  if (!cohorts.connectProject && showConnectBanner.value) {
+    cohorts.connectProject = getCohortForBanner(BannerIds.ACI_082022_CONNECT_PROJECT)
+  }
+})
 
 function hasBannerBeenDismissed (bannerId: string) {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
   return !!bannersState?._disabled || !!bannersState?.[bannerId]?.dismissed
+}
+
+function hasBannerBeenShown (bannerId: string) {
+  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.lastShown
 }
 
 </script>

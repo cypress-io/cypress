@@ -5,7 +5,8 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Test, { UpdatableTestProps, TestProps } from '../test/test-model'
+import type { TestState } from '@packages/types'
 import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/types'
 import { LogProps } from '../runnables/runnables-store'
@@ -90,13 +91,14 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
-  @computed get studioIsNotEmpty () {
-    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
-  }
-
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
+        // @ts-ignore satisfied by CommandProps
+        if (props.sessionInfo) {
+          this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
+        }
+
         return this._addCommand(props as CommandProps)
       }
       case 'agent': {
@@ -115,6 +117,11 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
+      // @ts-ignore satisfied by CommandProps
+      if (props.sessionInfo) {
+        this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
+      }
+
       log.update(props)
     }
   }
@@ -180,7 +187,19 @@ export default class Attempt {
   _addSession (props: SessionProps) {
     const session = new Session(props)
 
-    this.sessions[props.sessionInfo.id] = session
+    this.sessions[props.id] = session
+  }
+
+  _updateOrAddSession (props: SessionProps) {
+    const session = this.sessions[props.id]
+
+    if (session) {
+      session.update(props)
+
+      return
+    }
+
+    this._addSession(props)
   }
 
   _addRoute (props: RouteProps) {

@@ -21,6 +21,9 @@
     <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
     <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
     <li><a data-cy="cookie-login-land-on-idp">Login with Social (lands on idp)</a></li>
+    <li><a data-cy="cookie-http" href="http://www.foobar.com:3500/fixtures/secondary-origin.html">Visit foobar.com over http</a></li>
+    <li><a data-cy="cookie-https" href="https://www.foobar.com:3502/fixtures/secondary-origin.html">Visit foobar.com over https</a></li>
+    <li><a data-cy="document-cookie" href="http://www.foobar.com:3500/fixtures/auth/document-cookie.html">http://www.foobar.com:3500/fixtures/auth/document-cookie.html</a></li>
   </ul>
   <script>
     function setHref (dataCy, redirect2, primaryQueryAddition = '') {
