@@ -5,6 +5,7 @@ const http = require('http')
 const rp = require('@cypress/request-promise')
 const Promise = require('bluebird')
 const evilDns = require('evil-dns')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -47,7 +48,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return config.setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically
@@ -101,8 +102,6 @@ describe('Server', () => {
               }
 
               this.srv = this.server.getHttpServer()
-
-              // @session = new (Session({app: @srv}))
 
               this.proxy = `http://localhost:${port}`
 
@@ -945,7 +944,7 @@ describe('Server', () => {
             fileServer: this.fileServer,
           })
 
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
@@ -960,9 +959,9 @@ describe('Server', () => {
             fileServer: null,
           })
 
-          expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
+          expect(this.server.remoteStates.isPrimaryOrigin('http://cypress.io')).to.be.false
 
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true })
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isFromSpecBridge: true })
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -995,20 +994,6 @@ describe('Server', () => {
               strategy: 'http',
               domainName: 'cypress.io',
               fileServer: null,
-            })
-
-            this.server.socket.localBus.emit('cross:origin:finished', 'http://cypress.io')
-
-            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.false
-
-            // Verify the primary remote state is now returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: undefined,
-              props: null,
-              origin: 'http://localhost:2000',
-              strategy: 'file',
-              domainName: 'localhost',
-              fileServer: this.fileServer,
             })
           })
         })
@@ -1046,7 +1031,7 @@ describe('Server', () => {
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when a url has already been visited and the origins don\'t match', function () {
+        it('does set a remote state and buffer the response when a url has already been visited and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1056,7 +1041,7 @@ describe('Server', () => {
           this.server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
           return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
           .then(() => {
@@ -1064,24 +1049,24 @@ describe('Server', () => {
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
+                domain: '',
+                port: '3500',
+                tld: 'localhost',
               },
-              origin: 'http://cypress.io',
+              origin: 'http://localhost:3500',
               strategy: 'http',
-              domainName: 'cypress.io',
+              domainName: 'localhost',
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
+            expect(buffer).to.not.be.empty
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
+        it('does set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1091,77 +1076,28 @@ describe('Server', () => {
           this.server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isCrossOrigin: true })
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isFromSpecBridge: true })
           .then(() => {
             // Verify the remote state was not updated
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
+                domain: '',
+                port: '3500',
+                tld: 'localhost',
               },
-              origin: 'http://cypress.io',
+              origin: 'http://localhost:3500',
               strategy: 'http',
-              domainName: 'cypress.io',
+              domainName: 'localhost',
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
-          })
-        })
-
-        it('doesn\'t override existing remote state on cross:origin:bridge:ready', function () {
-          nock('http://www.cypress.io/')
-          .get('/')
-          .reply(200, '<html>content</html>', {
-            'Content-Type': 'text/html',
-          })
-
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
-
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true, auth: { username: 'u', password: 'p' } })
-          .then(() => {
-            // Verify the secondary remote state is returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: {
-                username: 'u',
-                password: 'p',
-              },
-              props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
-              },
-              origin: 'http://www.cypress.io',
-              strategy: 'http',
-              domainName: 'cypress.io',
-              fileServer: null,
-            })
-
-            this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
-
-            // Verify the existing secondary remote state is not overridden
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: {
-                username: 'u',
-                password: 'p',
-              },
-              props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
-              },
-              origin: 'http://www.cypress.io',
-              strategy: 'http',
-              domainName: 'cypress.io',
-              fileServer: null,
-            })
+            expect(buffer).to.not.be.empty
           })
         })
       })

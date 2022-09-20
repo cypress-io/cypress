@@ -76,7 +76,9 @@ const ErrorStack = observer(({ err }: Props) => {
     )
 
     if (dontLink) {
-      return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])
+      const lineAndColumn = (Number.isInteger(line) || Number.isInteger(column)) ? `:${line}:${column}` : ''
+
+      return makeLine(key, [whitespace, `at ${fn} (${originalFile}${lineAndColumn})`])
     }
 
     const link = (

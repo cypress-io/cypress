@@ -153,7 +153,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = this.getConfig()
+    const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 

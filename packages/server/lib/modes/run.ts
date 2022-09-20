@@ -719,7 +719,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     if (!options.quiet) {
-      printResults.displaySpecHeader(spec.baseName, index + 1, length, estimated)
+      printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
@@ -924,7 +924,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.getAllBrowsersWith()
+  const browsers = await browserUtils.get()
 
   debug('found all system browsers %o', browsers)
   // TODO: refactor this so we don't need to extend options
