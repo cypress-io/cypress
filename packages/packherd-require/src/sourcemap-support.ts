@@ -209,7 +209,7 @@ class SourcemapSupport {
 
     if (script != null) {
       const line = frame.getLineNumber()
-      let column = frame.getColumnNumber() ?? 1 - 1
+      let column = frame.getColumnNumber() ?? 0
 
       if (line === 1 && column > headerLength && !frame.isEval()) {
         column -= headerLength
@@ -226,18 +226,8 @@ class SourcemapSupport {
       state.curPos = pos
       frame = cloneCallSite(frame)
 
-      const originalFunctionName = frame.getFunctionName
-
-      frame.getFunctionName = function () {
-        if (state.nextPos == null) {
-          return originalFunctionName()
-        }
-
-        return state.nextPos.name ?? originalFunctionName()
-      }
-
       frame.getFileName = function getFileName () {
-        return pos.source
+        return pos.source || pos.name || null
       }
 
       frame.getLineNumber = function getLineNumber () {
@@ -249,7 +239,7 @@ class SourcemapSupport {
       }
 
       frame.getScriptNameOrSourceURL = function getScriptNameOrSourceURL () {
-        return pos.source
+        return pos.source || pos.name
       }
 
       frame.codeFrames = pos.codeFrames
@@ -268,9 +258,6 @@ class SourcemapSupport {
 
     if (typeof sourceMap?.map?.originalPositionFor === 'function') {
       const origPos = sourceMap.map.originalPositionFor(pos)
-
-      // Sourcemap lines are 0 based so we adjust them to be 1 based to print correct stack frames
-      origPos.line++
       const codeFrames = includeCodeFrames
         ? extractCodeFrames(sourceMap.map, origPos)
         : []

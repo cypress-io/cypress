@@ -203,7 +203,7 @@ generateSnapshot = null
     sourceMap != null
   ) {
     offsetToBundle =
-      newLinesInBuffer(wrapperOpen) + newLinesInBuffer(BUNDLE_WRAPPER_OPEN) + 1
+      newLinesInBuffer(wrapperOpen) + newLinesInBuffer(BUNDLE_WRAPPER_OPEN)
 
     processedSourceMap = processSourceMap(sourceMap, basedir, offsetToBundle)
 
