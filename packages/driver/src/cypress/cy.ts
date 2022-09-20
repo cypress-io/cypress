@@ -815,7 +815,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  addQuery ({ name, fn }) {
+  _addQuery ({ name, fn }) {
     const cy = this
 
     const callback = (chainer, userInvocationStack, args) => {
