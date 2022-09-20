@@ -169,15 +169,20 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
 
   // if we found Cypress.require()s, re-generate the code from the AST
   if (hasDependencies) {
+    debug('callback with modified source')
+
     // TODO: handle sourcemaps for this correctly
     // https://github.com/cypress-io/cypress/issues/23365
     // the following causes error "Cannot read property 'replace' of undefined"
-    // return generate(ast, { sourceMaps: true }, source).code
-    this.callback(null, generate(ast, {}).code, map)
+    //   return generate(ast, { sourceMaps: true }, source).code
+    // and can't pass in original map or the output ends up with
+    // `undefinedundefined` appended, which is a syntax error
+    this.callback(null, generate(ast, {}).code)
 
     return
   }
 
+  debug('callback with original source')
   // if no Cypress.require()s were found, callback with the original source/map
   this.callback(null, source, map)
 }

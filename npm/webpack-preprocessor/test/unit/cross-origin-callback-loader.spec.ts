@@ -91,7 +91,7 @@ describe('./lib/cross-origin-callback-loader', () => {
     })
 
     it('replaces cy.origin() callback with an object', () => {
-      const { originalMap, resultingSource, resultingMap } = callLoader(stripIndent`
+      const { resultingSource, resultingMap } = callLoader(stripIndent`
         it('test', () => {
           cy.origin('http://foobar.com:3500', () => {
             Cypress.require('../support/utils')
@@ -106,11 +106,11 @@ describe('./lib/cross-origin-callback-loader', () => {
           });
         });`)
 
-      expect(resultingMap).to.equal(originalMap)
+      expect(resultingMap).to.be.undefined
     })
 
     it('replaces cy.other() when specified in commands', () => {
-      const { originalMap, resultingSource, resultingMap } = callLoader(stripIndent`
+      const { resultingSource, resultingMap } = callLoader(stripIndent`
         it('test', () => {
           cy.other('http://foobar.com:3500', () => {
             Cypress.require('../support/utils')
@@ -126,7 +126,7 @@ describe('./lib/cross-origin-callback-loader', () => {
           });
         });`)
 
-      expect(resultingMap).to.equal(originalMap)
+      expect(resultingMap).to.be.undefined
     })
 
     it('adds the file to the store, replacing Cypress.require() with require()', () => {
