@@ -46,26 +46,30 @@ export class BrowserDataSource {
    * Gets the browsers from the machine and the project config
    */
   async allBrowsers () {
-    if (!this.ctx.coreData.allBrowsers) {
-      const p = await this.ctx.project.getConfig()
-      const machineBrowsers = await this.machineBrowsers()
-
-      if (!p.browsers) {
-        this.ctx.coreData.allBrowsers = Promise.resolve(machineBrowsers)
-      } else {
-        const userBrowsers = p.browsers.reduce<FoundBrowser[]>((acc, b) => {
-          if (_.includes(_.map(machineBrowsers, getBrowserKey), getBrowserKey(b))) return acc
-
-          return [...acc, {
-            ...b,
-            majorVersion: String(b.majorVersion),
-            custom: true,
-          }]
-        }, [])
-
-        this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
-      }
+    if (this.ctx.coreData.allBrowsers) {
+      return this.ctx.coreData.allBrowsers
     }
+
+    const p = await this.ctx.project.getConfig()
+    const machineBrowsers = await this.machineBrowsers()
+
+    if (!p.browsers) {
+      this.ctx.coreData.allBrowsers = Promise.resolve(machineBrowsers)
+
+      return this.ctx.coreData.allBrowsers
+    }
+
+    const userBrowsers = p.browsers.reduce<FoundBrowser[]>((acc, b) => {
+      if (_.includes(_.map(machineBrowsers, getBrowserKey), getBrowserKey(b))) return acc
+
+      return [...acc, {
+        ...b,
+        majorVersion: String(b.majorVersion),
+        custom: true,
+      }]
+    }, [])
+
+    this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
 
     return this.ctx.coreData.allBrowsers
   }
@@ -75,24 +79,24 @@ export class BrowserDataSource {
    * so we only look them up once
    */
   machineBrowsers () {
-    if (!this.ctx.coreData.machineBrowsers) {
-      const p = this.ctx._apis.browserApi.getBrowsers()
-
-      this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
-        if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
-
-        return browsers
-      }).catch((e) => {
-        this.ctx.update((coreData) => {
-          coreData.machineBrowsers = null
-          coreData.diagnostics.error = e
-        })
-
-        throw e
-      })
+    if (this.ctx.coreData.machineBrowsers) {
+      return this.ctx.coreData.machineBrowsers
     }
 
-    return this.ctx.coreData.machineBrowsers
+    const p = this.ctx._apis.browserApi.getBrowsers()
+
+    return this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
+      if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
+
+      return browsers
+    }).catch((e) => {
+      this.ctx.update((coreData) => {
+        coreData.machineBrowsers = null
+        coreData.diagnostics.error = e
+      })
+
+      throw e
+    })
   }
 
   idForBrowser (obj: FoundBrowser) {
