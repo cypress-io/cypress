@@ -1,6 +1,6 @@
 # Testing other projects
 
-In `develop`, `master`, and any other branch configured in [the CircleCI config](../.circleci/config.yml), the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, tests are run, using a variety of real-world example repositories.
+In `develop` and any other branch configured in [the CircleCI config](../.circleci/config.yml), the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, tests are run, using a variety of real-world example repositories.
 
 Two main strategies are used to spawn these test projects:
 

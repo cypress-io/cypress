@@ -55,7 +55,6 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
     - false
-    # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
@@ -1031,7 +1030,7 @@ commands:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
+          # built on "develop" branches
           # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
