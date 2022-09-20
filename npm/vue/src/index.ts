@@ -70,6 +70,8 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
   }
 } & Partial<StyleOptions>
 
+export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
+
 Cypress.on('run:start', () => {
   // `mount` is designed to work with component testing only.
   // it assumes ROOT_SELECTOR exists, which is not the case in e2e.
