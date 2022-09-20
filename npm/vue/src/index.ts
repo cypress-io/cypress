@@ -1,6 +1,6 @@
 /* eslint-disable no-redeclare */
 /// <reference types="cypress" />
-import {
+import type {
   ComponentPublicInstance,
   VNodeProps,
   AllowedComponentProps,
