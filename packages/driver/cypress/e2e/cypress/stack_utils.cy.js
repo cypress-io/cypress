@@ -29,6 +29,15 @@ describe('driver/src/cypress/stack_utils', () => {
     const repoRoot = 'User/ruby/cypress'
     const relativePathFromRoot = 'packages/driver/relative/path/to/file.js'
 
+    const actualPlatform = Cypress.config('platform')
+    const actualRepoRoot = Cypress.config('repoRoot')
+
+    after(() => {
+      // restore config values to prevent bleeding into subsequent tests
+      Cypress.config('platform', actualPlatform)
+      Cypress.config('repoRoot', actualRepoRoot)
+    })
+
     it('returns relativeFile if absoluteFile is empty', () => {
       const result = $stackUtils.getRelativePathFromRoot(relativeFile, undefined)
 
@@ -53,6 +62,16 @@ describe('driver/src/cypress/stack_utils', () => {
       const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
 
       expect(result).to.equal(relativePathFromRoot)
+    })
+
+    it('uses posix on windows', () => {
+      Cypress.config('repoRoot', 'C:/Users/Administrator/Documents/GitHub/cypress')
+      Cypress.config('platform', 'win32')
+      const absoluteFile = 'C:\\Users\\Administrator\\Documents\\GitHub\\cypress\\packages\\app/cypress/e2e/reporter_header.cy.ts'
+      const relativeFile = 'cypress/e2e/reporter_header.cy.ts'
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal('packages/app/cypress/e2e/reporter_header.cy.ts')
     })
   })
 

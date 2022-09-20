@@ -153,9 +153,12 @@ const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
   // at this point relativeFile is relative to the cypress config
   // we need it to be relative to the repo root, which is different for monorepos
   const repoRoot = Cypress.config('repoRoot')
+  const posixAbsoluteFile = (Cypress.config('platform') === 'win32')
+    ? absoluteFile?.replaceAll('\\', '/')
+    : absoluteFile
 
-  if (absoluteFile?.startsWith(`${repoRoot}/`)) {
-    return absoluteFile.replace(`${repoRoot}/`, '')
+  if (posixAbsoluteFile?.startsWith(`${repoRoot}/`)) {
+    return posixAbsoluteFile.replace(`${repoRoot}/`, '')
   }
 
   return relativeFile

@@ -705,7 +705,7 @@ declare namespace Cypress {
      *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
-     *      fileContents: [{name: 'John Doe'}]
+     *      contents: [{name: 'John Doe'}]
      *    })
      */
     selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
