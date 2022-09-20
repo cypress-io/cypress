@@ -862,7 +862,7 @@ export default {
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_new_query: {
-      message: '`Cypress.Commands.addQuery()` is used to create new query commands, but `{{name}}` is an existing Cypress command or is reserved internally by Cypress.\n\n If you want to override an existing command, use `Cypress.Commands.overrideQuery()` instead.',
+      message: '`Cypress.Commands._addQuery()` is used to create new query commands, but `{{name}}` is an existing Cypress command or is reserved internally by Cypress.\n\n If you want to override an existing command, use `Cypress.Commands.overrideQuery()` instead.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {

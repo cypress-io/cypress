@@ -152,16 +152,16 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addQuery (name: string, fn: () => QueryFunction) {
+      _addQuery (name: string, fn: () => QueryFunction) {
         if (name !== 'get' && cy[name]) {
           internalError('miscellaneous.invalid_new_query', name)
         }
 
-        cy.addQuery({ name, fn })
+        cy._addQuery({ name, fn })
       },
 
       overwriteQuery (name, fn) {
-        cy.addQuery({ name, fn })
+        cy._addQuery({ name, fn })
       },
     }
 

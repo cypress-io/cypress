@@ -2,7 +2,7 @@ import _ from 'lodash'
 import $dom from '../../dom'
 
 export default function (Commands, Cypress, cy) {
-  Commands.addQuery('as', function asFn (alias) {
+  Commands._addQuery('as', function asFn (alias) {
     cy.ensureChildCommand(this, [alias])
     cy.validateAlias(alias)
 
