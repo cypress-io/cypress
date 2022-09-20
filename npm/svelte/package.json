@@ -28,7 +28,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/svelte/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/svelte/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fsvelte&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

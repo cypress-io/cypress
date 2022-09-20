@@ -94,6 +94,11 @@ export default class Attempt {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
+        // @ts-ignore satisfied by CommandProps
+        if (props.sessionInfo) {
+          this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
+        }
+
         return this._addCommand(props as CommandProps)
       }
       case 'agent': {
@@ -112,6 +117,11 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
+      // @ts-ignore satisfied by CommandProps
+      if (props.sessionInfo) {
+        this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
+      }
+
       log.update(props)
     }
   }
@@ -177,7 +187,19 @@ export default class Attempt {
   _addSession (props: SessionProps) {
     const session = new Session(props)
 
-    this.sessions[props.sessionInfo.id] = session
+    this.sessions[props.id] = session
+  }
+
+  _updateOrAddSession (props: SessionProps) {
+    const session = this.sessions[props.id]
+
+    if (session) {
+      session.update(props)
+
+      return
+    }
+
+    this._addSession(props)
   }
 
   _addRoute (props: RouteProps) {
