@@ -130,7 +130,7 @@ const verifyFailure = (options) => {
       hasPreferredIde,
       action: () => {
         cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
-        .click('left')
+        .click({ force: true })
       },
       line,
       column: stackColumn,
@@ -168,7 +168,7 @@ const verifyFailure = (options) => {
     .invoke('text')
     .should('match', codeFrameRegex)
 
-    cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
+    cy.get('.test-err-code-frame span').should('include.text', codeFrameText)
   })
 
   if (verifyOpenInIde) {

@@ -302,37 +302,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
     })
 
-    // it('cy.visit', () => {
-    //   const verify = loadErrorSpec({
-    //     filePath: 'errors/visit.cy.js',
-    //     failCount: 3,
-    //   })
-
-    //   verify('onBeforeLoad assertion failure', {
-    //     column: 29,
-    //     codeFrameText: 'onBeforeLoad',
-    //     message: `expected 'actual' to equal 'expected'`,
-    //   })
-
-    //   verify('onBeforeLoad exception', {
-    //     column: 14,
-    //     codeFrameText: 'onBeforeLoad',
-    //     message: 'bar is not a function',
-    //   })
-
-    //   verify('onLoad assertion failure', {
-    //     column: 29,
-    //     codeFrameText: 'onLoad',
-    //     message: `expected 'actual' to equal 'expected'`,
-    //   })
-
-    //   verify('onLoad exception', {
-    //     column: 14,
-    //     codeFrameText: 'onLoad',
-    //     message: 'bar is not a function',
-    //   })
-    // })
-
     it('cy.intercept', () => {
       const verify = loadErrorSpec({
         filePath: 'errors/intercept.cy.ts',
@@ -445,7 +414,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         failCount: 11,
       })
 
-      // TODO: Failing - command entry count
       verify('sync app mount exception', {
         uncaught: true,
         command: 'mount',
@@ -460,7 +428,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         hasCodeFrame: false,
       })
 
-      // TODO: Failing - command entry count
       verify('sync app exception after mount', {
         uncaught: true,
         originalMessage: 'sync error',
@@ -474,7 +441,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         hasCodeFrame: false,
       })
 
-      // TODO: Failing - command entry count
       verify('exception inside uncaught:exception', {
         uncaught: true,
         uncaughtMessage: 'sync error',
@@ -488,7 +454,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         ],
       })
 
-      // TODO: Failing - command entry count
       verify('async app exception after mount', {
         uncaught: true,
         originalMessage: 'async error',
@@ -502,7 +467,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         hasCodeFrame: false,
       })
 
-      // TODO: Failing - command entry count
       verify('app unhandled rejection', {
         uncaught: true,
         originalMessage: 'promise rejection',
@@ -514,7 +478,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         hasCodeFrame: false,
       })
 
-      // TODO: Failing - command entry count
       verify('async spec exception', {
         uncaught: true,
         column: 12,
@@ -527,7 +490,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         ],
       })
 
-      // TODO: Failing - command entry count
       verify('async spec exception with done', {
         uncaught: true,
         column: 12,
@@ -540,7 +502,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         ],
       })
 
-      // TODO: Failing - command entry count
       verify('spec unhandled rejection', {
         uncaught: true,
         column: 20,
