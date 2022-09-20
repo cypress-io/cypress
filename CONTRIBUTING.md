@@ -550,9 +550,9 @@ Independent packages are automatically released when code is merged into `master
 
 If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are three categories of tests you might consider:
 
-1. System Tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress). These are between System Tests and Unit Tests when it comes to speed of execution.
-2. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. 
-3. Unit test. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
+1. Unit test. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
+2. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
+3. System Tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
 
 When choosing what's most appropriate, consider:
 
