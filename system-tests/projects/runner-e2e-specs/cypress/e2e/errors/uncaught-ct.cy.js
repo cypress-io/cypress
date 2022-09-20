@@ -4,22 +4,22 @@ import React from 'react'
 
 describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   it('sync app mount exception', () => {
-    cy.mount(<Errors throwOnMount />)
+    cy.mount(React.createElement(Errors, { throwOnMount: true }, []))
   })
 
   it('sync app exception after mount', () => {
-    cy.mount(<Errors />)
+    cy.mount(React.createElement(Errors, null, []))
     cy.get('#trigger-sync-error').click()
   })
 
   it('async app exception after mount', () => {
-    cy.mount(<Errors />)
+    cy.mount(React.createElement(Errors, null, []))
     cy.get('#trigger-async-error').click()
     cy.wait(10000)
   })
 
   it('app unhandled rejection', () => {
-    cy.mount(<Errors />)
+    cy.mount(React.createElement(Errors, null, []))
     cy.get('#trigger-unhandled-rejection').click()
     cy.wait(10000)
   })
@@ -29,7 +29,7 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
       ({}).bar()
     })
 
-    cy.mount(<Errors throwOnMount />)
+    cy.mount(React.createElement(Errors, { throwOnMount: true }, []))
   })
 
   it('async spec exception', () => {

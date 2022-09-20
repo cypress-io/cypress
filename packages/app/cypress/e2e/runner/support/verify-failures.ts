@@ -42,6 +42,7 @@ const verifyFailure = (options) => {
     uncaughtMessage,
     line,
     regex,
+    mode,
   } = options
   let { codeFrameText, stackRegex, codeFrameRegex } = options
 
@@ -151,7 +152,7 @@ const verifyFailure = (options) => {
     if (uncaught) {
       cy.log('uncaught error has an associated log for the original error')
       cy.get('.command-name-uncaught-exception')
-      .should('have.length', 1)
+      .should(mode === 'component' ? 'have.length.gte' : 'have.length', 1)
       .find('.command-state-failed')
       .find('.command-message-text')
       .should('include.text', uncaughtMessage || originalMessage)
@@ -185,11 +186,12 @@ const verifyFailure = (options) => {
   }
 }
 
-export const createVerify = ({ fileName, hasPreferredIde }) => {
+export const createVerify = ({ fileName, hasPreferredIde, mode }) => {
   return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
+    props.mode = mode
 
     ;(props.verifyFn || verifyFailure).call(null, props)
   }

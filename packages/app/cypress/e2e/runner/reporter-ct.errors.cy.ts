@@ -28,12 +28,13 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
     const {
       filePath,
       hasPreferredIde = false,
+      mode,
     } = effectiveOptions
 
     specLoader.loadSpec(effectiveOptions)
 
     // Return scoped verify function with spec options baked in
-    return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde })
+    return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
   }
 
   describe(`${server} - errors ui`, {
@@ -56,23 +57,20 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('with expect().<foo>', {
         line: 3,
-        column: 25,
+        column: [25, 26],
         message: `expected 'actual' to equal 'expected'`,
-        verifyOpenInIde: true,
       })
 
       verify('with assert()', {
         line: 7,
-        column: [5, 12], // [chrome, firefox]
+        column: [5, 6, 12], // [chrome, firefox]
         message: `should be true`,
-        verifyOpenInIde: true,
       })
 
       verify('with assert.<foo>()', {
         line: 11,
-        column: 12,
+        column: [12, 13],
         message: `expected 'actual' to equal 'expected'`,
-        verifyOpenInIde: true,
       })
     })
 
@@ -83,10 +81,9 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('with expect().<foo>', {
-        column: 25,
+        column: [25, 26],
         message: `expected 'actual' to equal 'expected'`,
         codeFrameText: 'with expect().<foo>',
-        verifyOpenInIde: true,
       })
     })
 
@@ -119,7 +116,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       // https://github.com/cypress-io/cypress/issues/8288
       // https://github.com/cypress-io/cypress/issues/8350
       verify('test', {
-        column: [7, 18], // [chrome, firefox]
+        column: [7, 8, 18], // [chrome, firefox]
         codeFrameText: 'beforeEach(()=>',
         message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
       })
@@ -132,12 +129,12 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('failure', {
-        column: 8,
+        column: [8, 9],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       })
 
       verify('chained failure', {
-        column: 20,
+        column: [20, 21],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -149,17 +146,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 10,
+        column: [10, 11],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -171,45 +168,45 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('callback assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('callback exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('standard assertion failure', {
-        column: 6,
+        column: [6, 7],
         message: 'Timed out retrying after 0ms: expected {} to have property \'foo\'',
       })
 
       verify('after multiple', {
-        column: 6,
+        column: [6, 7],
         message: 'Timed out retrying after 0ms: expected \'foo\' to equal \'bar\'',
       })
 
       verify('after multiple callbacks exception', {
-        column: 12,
+        column: [12, 13],
         codeFrameText: '({}).bar()',
         message: 'bar is not a function',
       })
 
       verify('after multiple callbacks assertion failure', {
-        column: 27,
+        column: [27, 28],
         codeFrameText: '.should(()=>',
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('after callback success assertion failure', {
-        column: 6,
+        column: [6, 7],
         codeFrameText: '.should(\'have.property',
         message: `expected {} to have property 'foo'`,
       })
 
       verify('command failure after success', {
-        column: 8,
+        column: [8, 9],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -221,17 +218,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 10,
+        column: [10, 11],
         message: 'Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -243,17 +240,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 10,
+        column: [10, 11],
         message: 'Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -265,17 +262,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 10,
+        column: [10, 11],
         message: 'Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -287,17 +284,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 10,
+        column: [10, 11],
         message: 'Expected to find element: #does-not-exist, but never found it',
       })
     })
@@ -416,7 +413,6 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('sync app mount exception', {
         uncaught: true,
-        command: 'mount',
         originalMessage: 'mount error',
         message: [
           'The following error originated from your test code',
@@ -443,8 +439,8 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('exception inside uncaught:exception', {
         uncaught: true,
-        uncaughtMessage: 'sync error',
-        column: 12,
+        uncaughtMessage: 'mount error',
+        column: [5, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -480,7 +476,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('async spec exception', {
         uncaught: true,
-        column: 12,
+        column: [5, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -492,7 +488,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('async spec exception with done', {
         uncaught: true,
-        column: 12,
+        column: [6, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -517,7 +513,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
         column: 20,
         originalMessage: 'Unhandled promise rejection from the spec',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'It was caused by an unhandled promise rejection',
         ],
       })
