@@ -78,6 +78,7 @@ executors:
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
+      CYPRESS_NO_COMMAND_LOG: "1"
 
   # Docker image with non-root "node" user
   non-root-docker-user:
@@ -86,6 +87,7 @@ executors:
         user: node
     environment:
       PLATFORM: linux
+      CYPRESS_NO_COMMAND_LOG: "1"
 
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
@@ -97,6 +99,7 @@ executors:
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
+      CYPRESS_NO_COMMAND_LOG: "1"
 
   # executor to run on Windows - based off of the windows-orb default executor since it is
   # not customizable enough to align with our existing setup.
@@ -109,11 +112,13 @@ executors:
     resource_class: windows.large
     environment:
       PLATFORM: windows
+      CYPRESS_NO_COMMAND_LOG: "1"
 
   darwin-arm64:
     machine: true
     environment:
       PLATFORM: darwin
+      CYPRESS_NO_COMMAND_LOG: "1"
 
   linux-arm64:
     machine:
@@ -121,6 +126,7 @@ executors:
     resource_class: arm.medium
     environment:
       PLATFORM: linux
+      CYPRESS_NO_COMMAND_LOG: "1"
 
 commands:
   verify_should_persist_artifacts:
