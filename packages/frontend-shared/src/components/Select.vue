@@ -83,9 +83,9 @@
               <li
                 class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
-                  'font-medium bg-jade-50': option.isSelected,
+                  'font-medium bg-jade-50': option === props.modelValue,
                   'bg-gray-50': active,
-                  'text-gray-800': !option.isSelected && !active,
+                  'text-gray-800': option !== props.modelValue && !active,
                   'text-opacity-40': option.disabled || false
                 }]"
                 :data-cy="get(option, itemKey)"
@@ -107,7 +107,7 @@
                 >
                   <slot
                     name="item-body"
-                    :selected="option.isSelected"
+                    :selected="option === props.modelValue"
                     :active="active"
                     :value="option"
                   >
@@ -118,12 +118,12 @@
                 <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
-                    :selected="option.isSelected"
+                    :selected="option === props.modelValue"
                     :active="active"
                     :value="option"
                   >
                     <span
-                      v-if="option.isSelected"
+                      v-if="option === props.modelValue"
                       class="flex pr-3 right-0 text-jade-400 absolute items-center"
                     >
                       <i-mdi-check

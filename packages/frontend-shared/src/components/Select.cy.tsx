@@ -101,13 +101,13 @@ describe('<Select />', () => {
   })
 
   describe('#icons', () => {
-    // TODO: Enable with completion of UNIFY-1375
-    it.skip('marks the selected item with a check by default', () => {
+    it('marks the selected item with a check by default', () => {
       mountSelect().then(openSelect)
       .then(selectFirstOption)
       .then(openSelect)
       .get(optionsSelector).first()
       .find(checkIconSelector).should('be.visible')
+      .percySnapshot('Selected has check icon')
     })
 
     it('renders a caret by default', () => {
