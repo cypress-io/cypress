@@ -18,16 +18,22 @@ const expectAddFileSource = (store) => {
 describe('./lib/cross-origin-callback-loader', () => {
   const callLoader = (source, commands = ['origin']) => {
     const store = new CrossOriginCallbackStore()
+    const callback = sinon.spy()
     const context = {
+      callback,
       resourcePath: '/path/to/file',
       query: { commands },
     }
+    const originalMap = { sourcesContent: [] }
 
     store.addFile = sinon.stub()
+    loader.call(context, source, originalMap, null, store)
 
     return {
       store,
-      result: loader.call(context, source, null, null, store),
+      originalMap,
+      resultingSource: callback.lastCall.args[1],
+      resultingMap: callback.lastCall.args[2],
     }
   }
 
@@ -36,13 +42,22 @@ describe('./lib/cross-origin-callback-loader', () => {
   })
 
   describe('noop scenarios', () => {
+    it('is a noop when parsing source fails', () => {
+      const { originalMap, resultingSource, resultingMap, store } = callLoader(undefined)
+
+      expect(resultingSource).to.be.undefined
+      expect(resultingMap).to.be.equal(originalMap)
+      expect(store.addFile).not.to.be.called
+    })
+
     it('is a noop when source does not contain cy.origin()', () => {
       const source = `it('test', () => {
         cy.get('h1')
       })`
-      const { result, store } = callLoader(source)
+      const { originalMap, resultingSource, resultingMap, store } = callLoader(source)
 
-      expect(result).to.equal(source)
+      expect(resultingSource).to.be.equal(source)
+      expect(resultingMap).to.be.equal(originalMap)
       expect(store.addFile).not.to.be.called
     })
 
@@ -50,9 +65,10 @@ describe('./lib/cross-origin-callback-loader', () => {
       const source = `it('test', () => {
           cy.origin('http://foobar.com:3500', () => {})
         })`
-      const { result, store } = callLoader(source)
+      const { originalMap, resultingSource, resultingMap, store } = callLoader(source)
 
-      expect(result).to.equal(source)
+      expect(resultingSource).to.be.equal(source)
+      expect(resultingMap).to.be.equal(originalMap)
       expect(store.addFile).not.to.be.called
     })
 
@@ -60,9 +76,10 @@ describe('./lib/cross-origin-callback-loader', () => {
       const source = `it('test', () => {
           cy.origin('http://foobar.com:3500', {})
         })`
-      const { result, store } = callLoader(source)
+      const { originalMap, resultingSource, resultingMap, store } = callLoader(source)
 
-      expect(result).to.equal(source)
+      expect(resultingSource).to.be.equal(source)
+      expect(resultingMap).to.be.equal(originalMap)
       expect(store.addFile).not.to.be.called
     })
   })
@@ -74,40 +91,42 @@ describe('./lib/cross-origin-callback-loader', () => {
     })
 
     it('replaces cy.origin() callback with an object', () => {
-      const { result } = callLoader(
-        `it('test', () => {
+      const { originalMap, resultingSource, resultingMap } = callLoader(stripIndent`
+        it('test', () => {
           cy.origin('http://foobar.com:3500', () => {
             Cypress.require('../support/utils')
           })
-        })`,
-      )
+        })`)
 
-      expect(result).to.equal(stripIndent`
+      expect(resultingSource).to.equal(stripIndent`
         it('test', () => {
           cy.origin('http://foobar.com:3500', {
             "callbackName": "__cypressCrossOriginCallback",
             "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123.js"
           });
         });`)
+
+      expect(resultingMap).to.equal(originalMap)
     })
 
     it('replaces cy.other() when specified in commands', () => {
-      const { result } = callLoader(
-        `it('test', () => {
+      const { originalMap, resultingSource, resultingMap } = callLoader(stripIndent`
+        it('test', () => {
           cy.other('http://foobar.com:3500', () => {
             Cypress.require('../support/utils')
           })
         })`,
-        ['other'],
-      )
+      ['other'])
 
-      expect(result).to.equal(stripIndent`
+      expect(resultingSource).to.equal(stripIndent`
         it('test', () => {
           cy.other('http://foobar.com:3500', {
             "callbackName": "__cypressCrossOriginCallback",
             "outputFilePath": "/path/to/tmp/cross-origin-cb-abc123.js"
           });
         });`)
+
+      expect(resultingMap).to.equal(originalMap)
     })
 
     it('adds the file to the store, replacing Cypress.require() with require()', () => {

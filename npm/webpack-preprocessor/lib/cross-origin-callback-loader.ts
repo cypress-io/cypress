@@ -35,7 +35,6 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
   const options = typeof this.getOptions === 'function'
     ? this.getOptions() // webpack 5
     : loaderUtils.getOptions(this) // webpack 4
-
   const commands = (options.commands || []) as string[]
 
   let ast: t.File
@@ -54,11 +53,13 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
   } catch (err) {
     // it's unlikely there will be a parsing error, since that should have
     // already been caught by a previous loader, but if there is and it isn't
-    // possible to get the AST, there's nothing we can do, so just return the
-    // original source
+    // possible to get the AST, there's nothing we can do, so just callback
+    // with the original source
     debug('parsing error for file (%s): %s', resourcePath, err.stack)
 
-    return source
+    this.callback(null, source, map)
+
+    return
   }
 
   let hasDependencies = false
@@ -172,9 +173,11 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
     // https://github.com/cypress-io/cypress/issues/23365
     // the following causes error "Cannot read property 'replace' of undefined"
     // return generate(ast, { sourceMaps: true }, source).code
-    return generate(ast, {}).code
+    this.callback(null, generate(ast, {}).code, map)
+
+    return
   }
 
-  // if no Cypress.require()s were found, return the original source
-  return source
+  // if no Cypress.require()s were found, callback with the original source/map
+  this.callback(null, source, map)
 }
