@@ -78,19 +78,19 @@ Here are the criteria we use to gauge relative issue priority:
 
 | Criteria | Weight | Description |
 |:---------------------|:---------:|:-----------------------------------------------------------------------------------|
-| Scope | 1.0 | How many users does this affect? |
+| Scope | 0.7 | How many users does this affect? |
 | Severity | 1.0 | What does the problem prevent users from doing? Is it an edge case? A primary test flow? A minor annoyance? |
-| Visibility | 1.0 | Is this an important issue to our community? Is there a lot of discussion around it? |
-| Does Workaround Exist | 1.0 | Does a work around exist that is reasonable? |
-| Regression | 1.0 | Did this previously work? How long ago did it last work? Was this a regression within this last (current) major version? |
-| Cypress Priority | 1.0 | Does Cypress have a vested interest in resolving this issue? For example, does it ease the support burden for our staff? Is this part of a corporate milestone or objective? |
-| Effort | 1.0 | How much effort is needed to resolve the issue? Estimates are for a single developer being assigned to the issue. |
+| Visibility | 0.5 | Is this an important issue to our community? Is there a lot of discussion around it? |
+| Does Workaround Exist | 0.4 | Does a work around exist that is reasonable? |
+| Regression | 0.7 | Did this previously work? How long ago did it last work? Was this a regression within this last (current) major version? |
+| Cypress Priority | 0.75 | Does Cypress have a vested interest in resolving this issue? For example, does it ease the support burden for our staff? Is this part of a corporate milestone or objective? |
+| Effort | 0.75 | How much effort is needed to resolve the issue? Estimates are for a single developer being assigned to the issue. |
 
 ### Cypress Relative Priority Score
 
 The formula for calculating the Cypress Relative Priority Score (CRPS) is the weighted sum of our priority criteria:
 
-$$ \text{Cypress Relative Priority Score} = {{(Scope \times 1.0) + (Severity \times 1.0) + (Visibility \times 1.0) + (WorkAround \times 1.0) + (Regression \times 1.0) + (CypressPriority \times 1.0)}} $$
+$$ \text{Cypress Relative Priority Score} = {{(Scope \times 0.7) + (Severity \times 1.0) + (Visibility \times 0.5) + (WorkAround \times 0.4) + (Regression \times 0.7) + (CypressPriority \times 0.75)}} $$
 
 ### Cypress Relative Priority to Effort Score
 
