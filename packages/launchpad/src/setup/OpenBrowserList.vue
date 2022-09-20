@@ -29,6 +29,7 @@
           <Tooltip
             v-if="browser.warning"
             popper-class="max-w-lg"
+            :distance="25"
           >
             <i-cy-circle-bg-question-mark_x16
               data-cy="unsupported-browser-tooltip-trigger"

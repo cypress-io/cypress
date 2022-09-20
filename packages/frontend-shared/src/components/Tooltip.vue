@@ -95,6 +95,10 @@ const actualPopperClass = computed(() => {
   }
 
   &[data-popper-placement="top"] {
+    .v-popper__inner {
+      left: 62px;
+    }
+
     .v-popper__wrapper {
       transform: scaleY(0);
       @apply origin-bottom transition-transform;
@@ -102,6 +106,10 @@ const actualPopperClass = computed(() => {
 
     &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
       transform: scaleY(1);
+    }
+
+    .v-popper__arrow-outer {
+      left: 62px;
     }
   }
 
@@ -117,6 +125,10 @@ const actualPopperClass = computed(() => {
   }
 
   &[data-popper-placement="bottom"] {
+    .v-popper__inner {
+      left: 62px;
+    }
+
     .v-popper__wrapper {
       transform: scaleY(0);
       @apply origin-top transition-transform;
@@ -124,6 +136,10 @@ const actualPopperClass = computed(() => {
 
     &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
       transform: scaleY(1);
+    }
+
+    .v-popper__arrow-outer {
+      left: 62px;
     }
   }
 
