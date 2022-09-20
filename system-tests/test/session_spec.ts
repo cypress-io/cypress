@@ -145,7 +145,6 @@ describe('e2e sessions', () => {
     project: 'session-and-origin-e2e-specs',
     spec: 'session_persist_1.cy.js,session_persist_2.cy.js',
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
-    spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,

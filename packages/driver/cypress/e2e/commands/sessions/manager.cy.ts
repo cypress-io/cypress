@@ -28,6 +28,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -47,11 +48,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -62,6 +65,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_3': {
           id: 'session_3',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -96,11 +100,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -135,11 +141,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }

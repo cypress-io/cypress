@@ -176,17 +176,11 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * or re-running the current spec.
  */
 function teardownSpec (isRerun: boolean = false) {
-  useAutStore().$reset()
-
-  useStudioStore().cancel()
-
   useSnapshotStore().$reset()
 
   _eventManager?.stop()
 
-  getEventManager().teardown(getMobxRunnerStore(), isRerun)
-
-  return
+  return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
 let isTorndown = false
@@ -197,8 +191,9 @@ let isTorndown = false
  * any associated events.
  */
 export async function teardown () {
-  teardownSpec(false)
   UnifiedReporterAPI.setInitializedReporter(false)
+  _eventManager?.stop()
+  _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
   isTorndown = true
@@ -355,7 +350,14 @@ async function initialize () {
     return
   }
 
+  // Reset stores
   const autStore = useAutStore()
+
+  autStore.$reset()
+
+  const studioStore = useStudioStore()
+
+  studioStore.cancel()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
@@ -395,9 +397,11 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
-  await Promise.all([teardownSpec(isRerun), UnifiedReporterAPI.resetReporter()])
+  await teardownSpec(isRerun)
 
-  getMobxRunnerStore().setSpec(spec)
+  const mobxRunnerStore = getMobxRunnerStore()
+
+  mobxRunnerStore.setSpec(spec)
 
   UnifiedReporterAPI.setupReporter()
 

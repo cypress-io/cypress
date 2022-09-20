@@ -8,6 +8,7 @@ import {
   getConsoleProps,
   navigateAboutBlank,
 } from './utils'
+import type { ServerSessionData } from '@packages/types'
 
 type SessionData = Cypress.Commands.Session.SessionData
 
@@ -21,7 +22,7 @@ type SessionData = Cypress.Commands.Session.SessionData
  */
 
 export default function (Commands, Cypress, cy) {
-  Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData) => {
+  Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
     if (sessionData.cacheAcrossSpecs) {
       sessionsManager.registeredSessions.set(sessionData.id, true)
     }
@@ -61,7 +62,7 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id, setup?: Function, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
+    session (id: string | object, setup?: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
