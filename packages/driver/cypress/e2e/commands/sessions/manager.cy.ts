@@ -237,6 +237,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         validate: undefined,
         cookies: null,
         localStorage: null,
+        sessionStorage: null,
         hydrated: false,
       })
 
@@ -245,7 +246,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('sessions.clearAllSavedSessions()', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:session').resolves(null)
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions', true).resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')
@@ -253,7 +254,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       await sessionsManager.sessions.clearAllSavedSessions()
 
       expect(sessionsSpy).to.be.calledOnce
-      expect(cypressSpy).to.be.calledOnceWith('clear:session', null)
+      expect(cypressSpy).to.be.calledOnceWith('clear:sessions', true)
     })
 
     describe('.clearCurrentSessionData()', () => {

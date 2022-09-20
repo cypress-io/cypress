@@ -86,6 +86,10 @@ describe('Launchpad: Setup Project', () => {
       cy.containsPath('cypress/fixtures/example.json')
     })
 
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
     verifyScaffoldedFiles('e2e')
   })
 
@@ -241,6 +245,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+        })
+
         verifyScaffoldedFiles('e2e')
 
         cy.findByRole('button', { name: 'Continue' })
@@ -307,6 +315,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+        })
+
         verifyScaffoldedFiles('e2e')
 
         cy.findByRole('button', { name: 'Continue' })
@@ -337,6 +349,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -379,9 +395,9 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
         cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
 
-        cy.contains('li', 'webpack')
         cy.contains('li', 'react-scripts')
         cy.contains('li', 'react')
+        cy.contains('li', 'react-dom')
 
         cy.findByRole('button', { name: 'Skip' }).click()
 

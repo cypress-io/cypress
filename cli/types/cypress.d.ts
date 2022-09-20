@@ -82,7 +82,7 @@ declare namespace Cypress {
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-  type BrowserFamily = 'chromium' | 'firefox'
+  type BrowserFamily = 'chromium' | 'firefox' | 'webkit'
 
   /**
    * Describes a browser Cypress can control
@@ -705,7 +705,7 @@ declare namespace Cypress {
      *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
-     *      fileContents: [{name: 'John Doe'}]
+     *      contents: [{name: 'John Doe'}]
      *    })
      */
     selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
@@ -2721,6 +2721,13 @@ declare namespace Cypress {
      */
     pageLoadTimeout: number
     /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
+     *
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
@@ -2867,10 +2874,20 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+     * @default false
+     */
+    experimentalStudio: boolean
+    /**
+     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
+     * @default false
+     */
+    experimentalWebKitSupport: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -2964,13 +2981,6 @@ declare namespace Cypress {
      */
     isInteractive: boolean
     /**
-     * Whether Cypress will search for and replace
-     * obstructive JS code in .js or .html files.
-     *
-     * @see https://on.cypress.io/configuration#modifyObstructiveCode
-     */
-    modifyObstructiveCode: boolean
-    /**
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
@@ -3058,11 +3068,11 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue'
+    framework: 'react' | 'vue' | 'svelte'
     viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
   } | {
     bundler: 'webpack',
@@ -3073,7 +3083,7 @@ declare namespace Cypress {
     }
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin' | 'experimentalStudio'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
     /**

@@ -191,7 +191,8 @@ describe('cy.origin - cookie login', () => {
       verifyIdpNotLoggedIn({ expectNullCookie: false })
     })
 
-    it('SameSite=None -> not logged in', () => {
+    // FIXME: Currently in Firefox, the default cookie setting in the extension is no_restriction, which can be set with Secure=false.
+    it('SameSite=None -> not logged in', { browser: '!firefox' }, () => {
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="cookieProps"]').type('SameSite=None')
@@ -477,7 +478,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1000) // give cookie time to expire
+      cy.wait(1500) // give cookie time to expire
       cy.reload()
       verifyLocalhostNotLoggedIn()
     })
@@ -493,7 +494,7 @@ describe('cy.origin - cookie login', () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1000) // give cookie time to expire
+      cy.wait(1500) // give cookie time to expire
       cy.reload()
       cy.getCookie('user').should('be.null')
     })
@@ -507,7 +508,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       cy.origin('http://idp.com:3500', () => {
-        cy.wait(1000) // give cookie time to expire
+        cy.wait(1500) // give cookie time to expire
         cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
       })
@@ -527,7 +528,7 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(1000) // give cookie time to expire
+        cy.wait(1500) // give cookie time to expire
         cy.reload()
         verifyLocalhostNotLoggedIn()
       })
@@ -541,7 +542,7 @@ describe('cy.origin - cookie login', () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(1000) // ensure cookie doesn't expire in this time
+        cy.wait(1500) // ensure cookie doesn't expire in this time
         cy.reload()
         verifyLoggedIn(username)
       })
@@ -711,6 +712,8 @@ describe('cy.origin - cookie login', () => {
             value: 'value',
           })
         })
+
+        cy.document().its('cookie').should('equal', 'key=value')
       })
     })
 
@@ -794,6 +797,30 @@ describe('cy.origin - cookie login', () => {
         // ensure that each one is there
         cy.document().its('cookie').should('include', 'key=value')
         cy.document().its('cookie').should('include', `user=${username}`)
+      })
+    })
+
+    it('sets and reads document.cookie prior to attaching', () => {
+      cy.origin('http://foobar.com:3500', () => {}).then(() => {
+        // Force remove the spec bridge
+        window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
+      })
+
+      cy.get('[data-cy="document-cookie"]').click()
+      cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.document().its('cookie').should('include', 'name=value')
+        cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
+        cy.getCookie('name').then((cookie) => {
+          expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
+            domain: '.foobar.com',
+            httpOnly: false,
+            name: 'name',
+            path: '/',
+            sameSite: 'lax',
+            secure: false,
+            value: 'value',
+          })
+        })
       })
     })
   })

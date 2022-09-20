@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { FileDetails } from '@packages/types'
 
+import { FileDetails, TestState } from '@packages/types'
 import Attempt from '../attempts/attempt-model'
 import Err, { ErrProps } from '../errors/err-model'
 import { HookProps } from '../hooks/hook-model'
@@ -10,9 +10,6 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { SessionProps } from '../sessions/sessions-model'
-
-export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
 export type UpdateTestCallback = () => void
 
@@ -120,12 +117,6 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
-  @computed get studioIsNotEmpty () {
-    return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
-      return attempt.studioIsNotEmpty
-    })
-  }
-
   isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
@@ -134,10 +125,6 @@ export default class Test extends Runnable {
     return this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
-  }
-
-  addSession (props: SessionProps) {
-    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
   }
 
   updateLog (props: LogProps) {
