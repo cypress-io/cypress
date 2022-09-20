@@ -1030,7 +1030,7 @@ commands:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" branches
+          # built on the "develop" branch
           # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
