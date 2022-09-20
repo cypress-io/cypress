@@ -85,13 +85,6 @@ export function getAutIframeModel (): AutIframe {
   return _autIframeModel
 }
 
-export function destroyAutIframeModel () {
-  if (_autIframeModel) {
-    _autIframeModel.destroy()
-    _autIframeModel = null
-  }
-}
-
 /**
  * 1:1: relationship with the AUT IFrame model.
  * controls various things to do with snapshots, test url, etc.
@@ -177,8 +170,6 @@ function getSpecUrl (namespace: string, specSrc: string) {
  */
 function teardownSpec (isRerun: boolean = false) {
   useSnapshotStore().$reset()
-
-  _eventManager?.stop()
 
   return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
@@ -402,6 +393,8 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   const mobxRunnerStore = getMobxRunnerStore()
 
   mobxRunnerStore.setSpec(spec)
+
+  await UnifiedReporterAPI.resetReporter()
 
   UnifiedReporterAPI.setupReporter()
 
