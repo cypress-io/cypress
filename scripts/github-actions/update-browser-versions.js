@@ -78,7 +78,7 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
 
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
   const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
-  const newVersions = Object.assing(currentBrowserVersions, {
+  const newVersions = Object.assign(currentBrowserVersions, {
     'chrome:beta': latestBetaVersion,
     'chrome:stable': latestStableVersion,
   })
