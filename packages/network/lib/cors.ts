@@ -93,7 +93,8 @@ export function urlMatchesOriginProps (urlStr, props) {
  *
  * @param {string} urlStr - The url string
  * @param {ParsedHostWithProtocolAndHost|undefined} props - The broken down props from parseUrlIntoHostProtocolDomainTldPort
- * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOriginPolicies match
+ * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOrigins match.
+ * Otherwise, if set to false(default), the function checks a same-site comparison
  * @returns {boolean}
  */
 export function urlMatchesSameSiteProps (urlStr: string, props?: ParsedHostWithProtocolAndHost, strictPortMatch = false) {
@@ -134,7 +135,8 @@ export function urlsSuperDomainOriginMatch (url1: string, url2: string) {
  * for more details.
  * @param {string} url1 - the first url
  * @param {string} url2 - the second url
- * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOriginPolicies match
+ * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOrigins match.
+ * Otherwise, if set to false(default), the function checks a same-site comparison
  * @returns {boolean} whether or not the URL Scheme, Domain, and TLD match. This is called same-site and
  * is allowed to have a different port or subdomain. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
  * for more details.
