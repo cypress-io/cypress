@@ -97,7 +97,12 @@ export class $Location {
   }
 
   getOrigin () {
-    return cors.getOrigin(this.remote.href)
+    // https://github.com/unshiftio/url-parse/issues/38
+    if (this.remote.origin === 'null') {
+      return null
+    }
+
+    return this.remote.origin
   }
 
   getSuperDomainOrigin () {

@@ -306,7 +306,7 @@ describe('src/cypress/location', () => {
   context('.create', () => {
     it('returns an object literal', () => {
       const obj = Location.create(urls.cypress, urls.signin)
-      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'toString', 'origin', 'superDomainOrigin', 'superDomain']
+      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search', 'toString', 'origin', 'superDomainOrigin', 'superDomain']
 
       expect(obj).to.have.keys(keys)
     })

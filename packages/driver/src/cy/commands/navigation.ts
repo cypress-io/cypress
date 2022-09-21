@@ -1084,7 +1084,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the super origin currently matches
+          // if the super domain origin currently matches
           // or if we have previously visited a location or are a spec bridge
           // then go ahead and change the iframe's src
           // we use the superDomainOrigin policy as we can interact with subdomains based document.domain set to the superdomain
