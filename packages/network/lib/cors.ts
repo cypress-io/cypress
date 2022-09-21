@@ -4,7 +4,7 @@ import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
 
-type Policy = 'same-origin' | 'same-super-domain-origin' | 'same-site'
+type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-same-site'
 
 const debug = debugModule('cypress:network:cors')
 
@@ -102,7 +102,7 @@ function urlMatchesPolicyProps ({ policy, url, props }: {
       return _.isEqual(urlProps, props)
     }
     case 'same-super-domain-origin':
-    case 'same-site': {
+    case 'schemeful-same-site': {
       const { port: port1, subdomain: _unused1, ...parsedUrl } = urlProps
       const { port: port2, subdomain: _unused2, ...relevantProps } = props
 
@@ -158,7 +158,7 @@ export function urlMatchesSuperDomainOriginProps (url, props) {
 
 export function urlMatchesSameSiteProps (url: string, props: ParsedHostWithProtocolAndHost) {
   return urlMatchesPolicyProps({
-    policy: 'same-site',
+    policy: 'schemeful-same-site',
     url,
     props,
   })
@@ -182,7 +182,7 @@ export function urlsSuperDomainOriginMatch (url1: string, url2: string) {
 
 export const urlSameSiteMatch = (url1: string, url2: string) => {
   return urlMatchesPolicy({
-    policy: 'same-site',
+    policy: 'schemeful-same-site',
     url1,
     url2,
   })
