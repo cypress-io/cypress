@@ -79,9 +79,7 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
 /**
  * same-origin: Whether or not a a urls scheme, port, and host match. @see https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
  * same-super-domain-origin: Whether or not a url's scheme, domain, top-level domain, and port match
- * same-site: Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
- * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
- * for more details.
+ * same-site: Whether or not a url's scheme, domain, and top-level domain match. @see https://developer.mozilla.org/en-US/docs/Glossary/Site
  * @param {Policy} policy - the policy being used
  * @param {string} url - the url being compared
  * @param {ParsedHostWithProtocolAndHost} props - the props being compared against the url
