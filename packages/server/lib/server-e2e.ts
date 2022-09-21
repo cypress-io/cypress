@@ -192,6 +192,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // TODO: add `body` here once bodies can be statically matched
       }
 
+      // @ts-ignore
       const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
