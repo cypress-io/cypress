@@ -144,7 +144,7 @@ describe('svelte component testing', () => {
     systemTests.it(`svelte + ${bundler}`, {
       project: `svelte-${bundler}`,
       testingType: 'component',
-      spec: '**/*.cy.js,!src/errors.cy.ts',
+      spec: '**/*.cy.js,!src/errors.cy.js',
       browser: 'chrome',
       expectedExitCode: 0,
     })

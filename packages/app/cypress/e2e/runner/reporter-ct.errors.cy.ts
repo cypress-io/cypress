@@ -87,24 +87,27 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
     })
 
-    it('exception failures', () => {
-      const verify = loadErrorSpec({
-        filePath: 'errors/exceptions.cy.js',
-        failCount: 2,
-      })
+    // Vite does not provide the `require` syntax used by this test
+    if (server !== 'Vite') {
+      it('exception failures', () => {
+        const verify = loadErrorSpec({
+          filePath: 'errors/exceptions.cy.js',
+          failCount: 2,
+        })
 
-      verify('in spec file', {
-        column: 10,
-        message: 'bar is not a function',
-      })
+        verify('in spec file', {
+          column: 10,
+          message: 'bar is not a function',
+        })
 
-      verify('in file outside project', {
-        message: 'An outside error',
-        stackRegex: /\/throws\-error\.js:5:8/,
-        codeFrameRegex: /\/throws\-error\.js:5:9/,
-        codeFrameText: `thrownewError('An outside error')`,
+        verify('in file outside project', {
+          message: 'An outside error',
+          stackRegex: /\/throws\-error\.js:5:8/,
+          codeFrameRegex: /\/throws\-error\.js:5:9/,
+          codeFrameText: `thrownewError('An outside error')`,
+        })
       })
-    })
+    }
 
     it('hooks', { viewportHeight: 900 }, () => {
       const verify = loadErrorSpec({
@@ -349,7 +352,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('existence failure', {
-        column: 8,
+        column: [8, 9],
         message: 'failed because the file does not exist',
       })
     })
@@ -361,19 +364,19 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('from cypress', {
-        column: 8,
+        column: [8, 9],
         message: 'can only accept a string preset or',
         stack: ['throwErrBadArgs', 'From Your Spec Code:'],
       })
 
       verify('from chai expect', {
-        column: [5, 12], // [chrome, firefox]
+        column: [5, 6, 12], // [chrome, firefox]
         message: 'Invalid Chai property: nope',
         stack: ['proxyGetter', 'From Your Spec Code:'],
       })
 
       verify('from chai assert', {
-        column: 12,
+        column: [12, 13],
         message: 'object tested must be an array',
       })
     })
@@ -385,22 +388,22 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('event assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('event exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
 
       verify('fail handler assertion failure', {
-        column: 27,
+        column: [27, 28],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('fail handler exception', {
-        column: 12,
+        column: [12, 13],
         message: 'bar is not a function',
       })
     })
@@ -440,7 +443,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       verify('exception inside uncaught:exception', {
         uncaught: true,
         uncaughtMessage: 'mount error',
-        column: [5, 12],
+        column: [5, 6, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -476,7 +479,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('async spec exception', {
         uncaught: true,
-        column: [5, 12],
+        column: [3, 5, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -488,7 +491,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('async spec exception with done', {
         uncaught: true,
-        column: [6, 12],
+        column: [3, 6, 12],
         originalMessage: 'bar is not a function',
         message: [
           'The following error originated from your test code',
@@ -500,7 +503,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('spec unhandled rejection', {
         uncaught: true,
-        column: 20,
+        column: [20, 21],
         originalMessage: 'Unhandled promise rejection from the spec',
         message: [
           'The following error originated from your test code',
@@ -510,32 +513,35 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
 
       verify('spec unhandled rejection with done', {
         uncaught: true,
-        column: 20,
+        column: [20, 21],
         originalMessage: 'Unhandled promise rejection from the spec',
         message: [
           'The following error originated from your application code',
           'It was caused by an unhandled promise rejection',
         ],
+        hasCodeFrame: server !== 'Vite',
       })
 
       verify('spec Bluebird unhandled rejection', {
         uncaught: true,
-        column: 21,
+        column: [21, 22],
         originalMessage: 'Unhandled promise rejection from the spec',
         message: [
           'The following error originated from your test code',
           'It was caused by an unhandled promise rejection',
         ],
+        hasCodeFrame: server !== 'Vite',
       })
 
       verify('spec Bluebird unhandled rejection with done', {
         uncaught: true,
-        column: 21,
+        column: [21, 22],
         originalMessage: 'Unhandled promise rejection from the spec',
         message: [
           'The following error originated from your test code',
           'It was caused by an unhandled promise rejection',
         ],
+        hasCodeFrame: server !== 'Vite',
       })
     })
 
@@ -550,7 +556,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       // and uncaught: true causes the verification to look for the error
       // event command log
       verify('An uncaught error was detected outside of a test', {
-        column: 7,
+        column: [7, 8],
         message: [
           'The following error originated from your test code',
           'error from outside test',
@@ -567,7 +573,7 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('An uncaught error was detected outside of a test', {
-        column: 7,
+        column: [7, 8],
         message: [
           'error from outside test with only suite',
           'The following error originated from your test code',
@@ -584,19 +590,19 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 23,
+        column: [23, 24],
         message: `expected 'actual' to equal 'expected'`,
         codeFrameText: `add('failAssertion'`,
       })
 
       verify('exception', {
-        column: 8,
+        column: [8, 9],
         message: 'bar is not a function',
         codeFrameText: `add('failException'`,
       })
 
       verify('command failure', {
-        column: 6,
+        column: [6, 7],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
         codeFrameText: `add('failCommand'`,
       })
@@ -609,17 +615,17 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
 
       verify('assertion failure', {
-        column: 25,
+        column: [25, 26],
         message: `expected 'actual' to equal 'expected'`,
       })
 
       verify('exception', {
-        column: 10,
+        column: [10, 11],
         message: 'bar is not a function',
       })
 
       verify('command failure', {
-        column: 8,
+        column: [8, 9],
         message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
         codeFrameText: `.get('#does-not-exist')`,
       })

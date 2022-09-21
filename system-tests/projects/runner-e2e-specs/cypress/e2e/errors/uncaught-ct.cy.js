@@ -45,6 +45,8 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
     setTimeout(() => {
       ({}).bar()
     })
+
+    cy.wait(50)
   })
 
   it('spec unhandled rejection', () => {
@@ -56,6 +58,8 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   // eslint-disable-next-line mocha/handle-done-callback
   it('spec unhandled rejection with done', (done) => {
     Promise.reject(new Error('Unhandled promise rejection from the spec'))
+
+    cy.wait(50)
   })
 
   it('spec Bluebird unhandled rejection', () => {

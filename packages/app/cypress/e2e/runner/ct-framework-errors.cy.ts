@@ -24,9 +24,9 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
-  cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
-    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`)
-    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`)
+  cy.findByLabelText('Stats', { timeout: 20000 }).within(() => {
+    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`, { timeout: 20000 })
+    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`, { timeout: 20000 })
   })
 
   // Return scoped verify function with spec options baked in
@@ -57,30 +57,36 @@ function loadErrorSpec (options: Options): VerifyFunc {
         line: 6,
         column: 33,
         uncaught: true,
+        uncaughtMessage: 'mount error',
         message: [
           'The following error originated from your test code',
           'mount error',
         ],
+        codeFrameText: 'Errors.cy.jsx',
       })
 
       verify('sync error', {
         line: 11,
         column: 34,
         uncaught: true,
+        uncaughtMessage: 'sync error',
         message: [
           'The following error originated from your test code',
           'sync error',
         ],
+        codeFrameText: 'Errors.cy.jsx',
       })
 
       verify('async error', {
         line: 18,
         column: 38,
         uncaught: true,
+        uncaughtMessage: 'async error',
         message: [
           'The following error originated from your test code',
           'async error',
         ],
+        codeFrameText: 'Errors.cy.jsx',
       })
 
       verify('command failure', {
@@ -130,10 +136,12 @@ describe('Vue', {
       line: 24,
       column: 16,
       uncaught: true,
+      uncaughtMessage: 'sync error',
       message: [
         'The following error originated from your test code',
         'sync error',
       ],
+      codeFrameText: 'Errors.vue',
     })
 
     verify('async error', {
@@ -141,6 +149,7 @@ describe('Vue', {
       line: 28,
       column: 18,
       uncaught: true,
+      uncaughtMessage: 'async error',
       message: [
         'The following error originated from your test code',
         'async error',
