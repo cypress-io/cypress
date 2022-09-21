@@ -16,6 +16,10 @@ const DEFAULT_TRANSFORM_OPTS: TransformOptions = {
   format: 'cjs',
   sourcemap: 'inline',
   minify: false,
+  supported: {
+    // We won't be supporting dynamic imports since everything we're doing gets bundled into one snapshot anyway
+    'dynamic-import': false,
+  },
 }
 
 function transpileTsCode (
