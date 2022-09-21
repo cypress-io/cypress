@@ -25,8 +25,8 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.visitApp(`specs/runner?file=${filePath}`)
 
   cy.findByLabelText('Stats', { timeout: 20000 }).within(() => {
-    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`, { timeout: 20000 })
-    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`, { timeout: 20000 })
+    cy.get('.passed .num', { timeout: 20000 }).should('have.text', `${passCount}`)
+    cy.get('.failed .num', { timeout: 20000 }).should('have.text', `${failCount}`)
   })
 
   // Return scoped verify function with spec options baked in

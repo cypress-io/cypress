@@ -3,11 +3,11 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) =>
   failCount = failCount || '--'
 
   cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
-    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`, { timeout: 20000 })
-    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`, { timeout: 20000 })
+    cy.get('.passed .num', { timeout: 20000 }).should('have.text', `${passCount}`)
+    cy.get('.failed .num', { timeout: 20000 }).should('have.text', `${failCount}`)
 
     if (pendingCount) {
-      cy.get('.pending .num', { timeout: 10000 }).should('have.text', `${pendingCount}`, { timeout: 20000 })
+      cy.get('.pending .num', { timeout: 20000 }).should('have.text', `${pendingCount}`)
     }
   })
 }
