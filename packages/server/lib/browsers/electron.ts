@@ -12,6 +12,7 @@ import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import { getCtx } from '@packages/data-context'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -473,7 +474,11 @@ export = {
     if (launchOptions.args.length > 0) options.push('args')
 
     if (options.length > 0) {
-      errors.warning('BROWSER_UNSUPPORTED_LAUNCH_OPTION', 'electron', options)
+      const ctx = getCtx()
+      
+      ctx.onWarning(
+        errors.warning('BROWSER_UNSUPPORTED_LAUNCH_OPTION', 'electron', options)
+      )
     }
   },
 
