@@ -914,9 +914,9 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin }) {
+    cross_origin_command ({ commandOrigin, autSuperDomainOrigin }) {
       return stripIndent`\
-        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
+        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autSuperDomainOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
     },

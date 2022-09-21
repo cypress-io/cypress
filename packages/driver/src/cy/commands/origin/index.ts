@@ -88,13 +88,13 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       const superDomainOrigin = location.superDomainOrigin
 
       // This is intentionally not reset after leaving the cy.origin command.
-      cy.state('latestActiveOrigin', superDomainOrigin)
+      cy.state('latestActiveSuperDomainOrigin', superDomainOrigin)
       // This is set while IN the cy.origin command.
-      cy.state('currentActiveOrigin', superDomainOrigin)
+      cy.state('currentActiveSuperDomainOrigin', superDomainOrigin)
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
-          cy.state('currentActiveOrigin', undefined)
+          cy.state('currentActiveSuperDomainOrigin', undefined)
 
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
@@ -170,8 +170,8 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         }
 
         // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', async (_data, specBridgeOrigin) => {
-          if (specBridgeOrigin === superDomainOrigin) {
+        communicator.once('bridge:ready', async (_data, specBridgeSuperDomainOrigin) => {
+          if (specBridgeSuperDomainOrigin === superDomainOrigin) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(superDomainOrigin, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
