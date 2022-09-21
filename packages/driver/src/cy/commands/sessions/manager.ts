@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../../../cypress/location'
-
+import type { ServerSessionData } from '@packages/types'
 import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
@@ -120,6 +120,7 @@ export default class SessionsManager {
         id: options.id,
         cookies: null,
         localStorage: null,
+        sessionStorage: null,
         setup: options.setup,
         hydrated: false,
         validate: options.validate,
@@ -132,8 +133,9 @@ export default class SessionsManager {
 
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
+      const clearAllSessions = true
 
-      return this.Cypress.backend('clear:session', null)
+      return this.Cypress.backend('clear:sessions', clearAllSessions)
     },
 
     clearCurrentSessionData: async () => {
@@ -205,7 +207,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string) => {
+    getSession: (id: string): Promise<ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
 
