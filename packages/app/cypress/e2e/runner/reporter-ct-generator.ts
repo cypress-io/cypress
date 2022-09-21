@@ -3,12 +3,14 @@ import { createVerify, verifyInternalFailure } from './support/verify-failures'
 
 type VerifyFunc = (specTitle: string, verifyOptions: any) => void
 
-const DevServers = {
-  Webpack: 'cypress-ct-webpack.config.js',
-  Vite: 'cypress-ct-vite.config.js',
-}
-
-Object.entries(DevServers).forEach(([server, configFile]) => {
+/**
+ * Generate CT error reporting specs for a given dev server - have to structure this way to avoid
+ * Out of Memory issues if they're all contained in a single spec
+ *
+ * @param server 'Vite' | 'Webpack'
+ * @param configFile config file
+ */
+export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
   const DefaultOptions: Partial<specLoader.LoadSpecOptions> = {
     mode: 'component',
     configFile,
@@ -701,4 +703,4 @@ Object.entries(DevServers).forEach(([server, configFile]) => {
       })
     })
   })
-})
+}

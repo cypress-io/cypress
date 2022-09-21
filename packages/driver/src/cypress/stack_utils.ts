@@ -12,7 +12,8 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
-const webpackDevtoolNamespaceRegex = /webpack:\/\/(.*)?\.\//
+// string containing `webpack:///./`
+const webpackDevtoolNamespaceRegex = /webpack:\/{3}\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
