@@ -137,7 +137,7 @@ exports['e2e sessions / session tests'] = `
 
 `
 
-exports['e2e sessions / spec sessions persist on reload, and clear between specs'] = `
+exports['e2e sessions / handles spec and global sessions persistence on spec reload, and switching specs'] = `
 
 ====================================================================================================
 
@@ -146,105 +146,16 @@ exports['e2e sessions / spec sessions persist on reload, and clear between specs
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (session_persist_spec_1.cy.js, session_persist_spec_2.cy.js)             │
-  │ Searched:     cypress/e2e/session_persist_spec_1.cy.js, cypress/e2e/session_persist_spec_2.cy. │
-  │               js                                                                               │
+  │ Specs:        2 found (session_persist_1.cy.js, session_persist_2.cy.js)                       │
+  │ Searched:     cypress/e2e/session/session_persist_1.cy.js, cypress/e2e/session/session_persist │
+  │               _2.cy.js                                                                         │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_persist_spec_1.cy.js                                                    (1 of 2)
-
-
-  persist saved sessions between spec reruns
-
-
-  persist saved sessions between spec reruns
-    ✓ sets session
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_persist_spec_1.cy.js                                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  session_persist_spec_2.cy.js                                                    (2 of 2)
-
-
-  after running spec with saved session
-    ✓ has an initially blank session on new spec
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_persist_spec_2.cy.js                                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_persist_spec_1.cy.js             XX:XX        1        1        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  session_persist_spec_2.cy.js             XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
-
-
-`
-
-exports['e2e sessions / global sessions persist on reload, and persist between specs'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (global_session_persist_1.cy.js, global_session_persist_2.cy.js)         │
-  │ Searched:     cypress/e2e/session/global_session_persist_1.cy.js, cypress/e2e/session/global_s │
-  │               ession_persist_2.cy.js                                                           │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  global_session_persist_1.cy.js                                                  (1 of 2)
+  Running:  session_persist_1.cy.js                                                         (1 of 2)
 
 
   creates global session
@@ -268,32 +179,33 @@ exports['e2e sessions / global sessions persist on reload, and persist between s
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     global_session_persist_1.cy.js                                                   │
+  │ Spec Ran:     session_persist_1.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  global_session_persist_2.cy.js                                                  (2 of 2)
+  Running:  session_persist_2.cy.js                                                         (2 of 2)
 
 
-  ✓ restores global_1 session from last test
+  ✓ restores global session from last spec
+  ✓ creates spec session since it is a new spec
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     global_session_persist_2.cy.js                                                   │
+  │ Spec Ran:     session_persist_2.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -304,11 +216,11 @@ exports['e2e sessions / global sessions persist on reload, and persist between s
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  global_session_persist_1.cy.js           XX:XX        4        4        -        -        - │
+  │ ✔  session_persist_1.cy.js                  XX:XX        4        4        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  global_session_persist_2.cy.js           XX:XX        1        1        -        -        - │
+  │ ✔  session_persist_2.cy.js                  XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `

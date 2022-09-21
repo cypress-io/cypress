@@ -189,26 +189,14 @@ describe('e2e sessions', () => {
     },
   })
 
-  it('spec sessions persist on reload, and clear between specs', {
+  it('handles spec and global sessions persistence on spec reload, and switching specs', {
     project: 'session-and-origin-e2e-specs',
     spec: 'session/session_persist_1.cy.js,session/session_persist_2.cy.js',
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     snapshot: true,
     config: {
-      experimentalSessionAndOrigin: true,
-      video: false,
-    },
-  })
-
-  it('global sessions persist on reload, and persist between specs', {
-    project: 'session-and-origin-e2e-specs',
-    spec: 'session/global_session_persist_1.cy.js,session/global_session_persist_2.cy.js',
-    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
-    snapshot: true,
-    config: {
       env: { SYSTEM_TESTS: true },
       experimentalSessionAndOrigin: true,
-      port: 4455,
       video: false,
     },
   })

@@ -1,3 +1,7 @@
+/**
+ * Used in sessions_spec system-tests tests. Throws cross-origin errors
+ * cy-in-cy tests in @packages/app.
+ */
 /// <reference types="cypress" />
 window.top.__cySkipValidateConfig = true
 Cypress.config('isInteractive', true)

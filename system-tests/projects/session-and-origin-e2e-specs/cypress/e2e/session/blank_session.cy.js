@@ -1,3 +1,6 @@
+/**
+ * Used in cy-in-cy tests in @packages/app.
+ */
 it('t1', () => {
   cy.session('spec_session', () => {})
 

@@ -34,8 +34,6 @@ Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
       })
     }
 
-    console.log(Cypress.config('port'))
-
     cy.visit('https://localhost:4466/login')
     cy.contains('Not Signed in...')
     cy.get('button').click()

@@ -665,7 +665,7 @@ declare namespace Cypress {
      * after a session is restored and the page is cleared. If this returns `false`, throws an
      * exception, returns a Promise which resolves to `false` or rejects or contains any failing
      * Cypress command, the session is considered invalid.
-     * 
+     *
      * If validation fails immediately after `setup`, the test will fail.
      * If validation fails after restoring a session, `setup` will re-run.
      * @default {false}
