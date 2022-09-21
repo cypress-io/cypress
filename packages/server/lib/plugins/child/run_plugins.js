@@ -125,6 +125,15 @@ class RunPlugins {
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
+
+      // if the experimentalSessionAndOrigin flag is true, specify which
+      // commands should (potentially) have their callbacks replaced. this is
+      // currently used by the webpack preprocessor. see its implmentation for
+      // more details
+      if (this._getExperimentalSessionAndOriginValue(initialConfig, modifiedCfg)) {
+        global.__cypressCallbackReplacementCommands = ['origin']
+      }
+
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,
@@ -140,6 +149,19 @@ class RunPlugins {
         err,
       )))
     })
+  }
+
+  _getExperimentalSessionAndOriginValue (initialConfig, modifiedConfig) {
+    // prefer the modified value if it's specified
+    if (
+      typeof modifiedConfig === 'object'
+      && typeof modifiedConfig.experimentalSessionAndOrigin === 'boolean'
+    ) {
+      return modifiedConfig.experimentalSessionAndOrigin
+    }
+
+    // otherwise, use the initial value
+    return initialConfig.experimentalSessionAndOrigin
   }
 
   execute (event, ids, args = []) {

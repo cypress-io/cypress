@@ -358,7 +358,7 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered', async () => {
+    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered and experimentalSessionAndOrigin=true', async () => {
       const buffers = new HttpBuffers()
       const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
 
@@ -369,12 +369,38 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
         },
+        config: {
+          experimentalSessionAndOrigin: true,
+        },
         res: {} as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
       .then(() => {
         expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
+      })
+    })
+
+    it('sets wantsInjection to full when a cross origin request is buffered and experimentalSessionAndOrigin=false', async () => {
+      const buffers = new HttpBuffers()
+      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
+
+      buffers.set(buffer)
+
+      const ctx = {
+        buffers,
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+        },
+        config: {
+          experimentalSessionAndOrigin: false,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+      }
+
+      await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
+      .then(() => {
+        expect(ctx.res.wantsInjection).to.equal('full')
       })
     })
 

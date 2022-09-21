@@ -129,7 +129,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
+    this.res.wantsInjection = this.config.experimentalSessionAndOrigin && buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
