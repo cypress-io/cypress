@@ -196,7 +196,7 @@ class SourcemapSupport {
     }
     state.curPos = state.nextPos = undefined
 
-    return `${errorString + processedStack.reverse().join('') }`
+    return `${errorString + processedStack.reverse().join('')}\n`
   }
 
   wrapCallSite (
