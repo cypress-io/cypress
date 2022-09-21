@@ -550,8 +550,8 @@ describe('http/response-middleware', function () {
       remoteStates.set('http://127.0.0.1:3501')
 
       // set the secondary remote states
-      props.secondaryOrigins?.forEach((originPolicy) => {
-        remoteStates.set(originPolicy, {}, false)
+      props.secondaryOrigins?.forEach((origin) => {
+        remoteStates.set(origin, {}, false)
       })
 
       ctx = {
@@ -690,8 +690,8 @@ describe('http/response-middleware', function () {
       remoteStates.set('http://foobar.com')
 
       // set the secondary remote states
-      props.secondaryOrigins?.forEach((originPolicy) => {
-        remoteStates.set(originPolicy, {}, false)
+      props.secondaryOrigins?.forEach((origin) => {
+        remoteStates.set(origin, {}, false)
       })
 
       remoteStates.isPrimaryOrigin = () => false
