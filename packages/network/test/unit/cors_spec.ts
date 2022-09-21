@@ -215,13 +215,121 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesSameSiteProps', () => {
-    const assertSameSiteDoesNotMatch = (url, props, strictPortMatch = false) => {
-      expect(cors.urlMatchesSameSiteProps(url, props, strictPortMatch)).to.be.false
+  context('.urlMatchesSuperDomainOriginProps', () => {
+    const assertSuperDomainOriginDoesNotMatch = (url, props) => {
+      expect(cors.urlMatchesSuperDomainOriginProps(url, props)).to.be.false
     }
 
-    const assertSameSiteDoesMatch = (url, props, strictPortMatch = false) => {
-      expect(cors.urlMatchesSameSiteProps(url, props, strictPortMatch)).to.be.true
+    const assertSuperDomainOriginDoesMatch = (url, props) => {
+      expect(cors.urlMatchesSuperDomainOriginProps(url, props)).to.be.true
+    }
+
+    describe('domain + subdomain', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('https://staging.google.com')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('https://foo.bar:443', props)
+        assertSuperDomainOriginDoesNotMatch('http://foo.bar:80', props)
+        assertSuperDomainOriginDoesNotMatch('http://foo.bar', props)
+        assertSuperDomainOriginDoesNotMatch('http://staging.google.com', props)
+        assertSuperDomainOriginDoesNotMatch('http://staging.google.com:80', props)
+        assertSuperDomainOriginDoesNotMatch('https://staging.google2.com:443', props)
+        assertSuperDomainOriginDoesNotMatch('https://staging.google.net:443', props)
+        assertSuperDomainOriginDoesNotMatch('https://google.net:443', props)
+        assertSuperDomainOriginDoesNotMatch('http://google.com', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('https://staging.google.com:443', props)
+        assertSuperDomainOriginDoesMatch('https://google.com:443', props)
+        assertSuperDomainOriginDoesMatch('https://foo.google.com:443', props)
+        assertSuperDomainOriginDoesMatch('https://foo.bar.google.com:443', props)
+      })
+    })
+
+    describe('public suffix', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('https://example.gitlab.io')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('http://example.gitlab.io', props)
+        assertSuperDomainOriginDoesNotMatch('https://foo.gitlab.io:443', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('https://example.gitlab.io:443', props)
+        assertSuperDomainOriginDoesMatch('https://foo.example.gitlab.io:443', props)
+      })
+    })
+
+    describe('localhost', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://localhost:4200')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('http://localhoss:4200', props)
+        assertSuperDomainOriginDoesNotMatch('http://localhost:4201', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('http://localhost:4200', props)
+      })
+    })
+
+    describe('app.localhost', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://app.localhost:4200')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('http://app.localhoss:4200', props)
+        assertSuperDomainOriginDoesNotMatch('http://app.localhost:4201', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('http://app.localhost:4200', props)
+        assertSuperDomainOriginDoesMatch('http://name.app.localhost:4200', props)
+      })
+    })
+
+    describe('local', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://brian.dev.local')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('https://brian.dev.local:443', props)
+        assertSuperDomainOriginDoesNotMatch('https://brian.dev.local', props)
+        assertSuperDomainOriginDoesNotMatch('http://brian.dev2.local:81', props)
+        assertSuperDomainOriginDoesNotMatch('http://brian.dev.local:8081', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('http://brian.dev.local:80', props)
+        assertSuperDomainOriginDoesMatch('http://jennifer.dev.local:80', props)
+        assertSuperDomainOriginDoesMatch('http://jennifer.dev.local', props)
+      })
+    })
+
+    describe('ip address', () => {
+      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://192.168.5.10')
+
+      it('does not match', function () {
+        assertSuperDomainOriginDoesNotMatch('http://192.168.5.10:443', props)
+        assertSuperDomainOriginDoesNotMatch('https://192.168.5.10', props)
+        assertSuperDomainOriginDoesNotMatch('http://193.168.5.10', props)
+        assertSuperDomainOriginDoesNotMatch('http://193.168.5.10:80', props)
+        assertSuperDomainOriginDoesNotMatch('http://192.168.5.10:8081', props)
+      })
+
+      it('matches', function () {
+        assertSuperDomainOriginDoesMatch('http://192.168.5.10', props)
+        assertSuperDomainOriginDoesMatch('http://192.168.5.10:80', props)
+      })
+    })
+  })
+
+  context('.urlMatchesSameSiteProps', () => {
+    const assertSameSiteDoesNotMatch = (url, props) => {
+      expect(cors.urlMatchesSameSiteProps(url, props)).to.be.false
+    }
+
+    const assertSameSiteDoesMatch = (url, props) => {
+      expect(cors.urlMatchesSameSiteProps(url, props)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -266,7 +374,6 @@ describe('lib/cors', () => {
 
       it('does not match', function () {
         assertSameSiteDoesNotMatch('http://localhoss:4200', props)
-        assertSameSiteDoesNotMatch('http://localhost:4201', props, true)
       })
 
       it('matches', function () {
@@ -280,7 +387,6 @@ describe('lib/cors', () => {
 
       it('does not match', function () {
         assertSameSiteDoesNotMatch('http://app.localhoss:4200', props)
-        assertSameSiteDoesNotMatch('http://app.localhost:4201', props, true)
       })
 
       it('matches', function () {
@@ -297,13 +403,13 @@ describe('lib/cors', () => {
         assertSameSiteDoesNotMatch('https://brian.dev.local:443', props)
         assertSameSiteDoesNotMatch('https://brian.dev.local', props)
         assertSameSiteDoesNotMatch('http://brian.dev2.local:81', props)
-        assertSameSiteDoesNotMatch('http://brian.dev.local:8081', props, true)
       })
 
       it('matches', function () {
         assertSameSiteDoesMatch('http://brian.dev.local:80', props)
         assertSameSiteDoesMatch('http://jennifer.dev.local:80', props)
         assertSameSiteDoesMatch('http://jennifer.dev.local', props)
+        assertSameSiteDoesMatch('http://brian.dev.local:8081', props)
       })
     })
 
@@ -315,12 +421,12 @@ describe('lib/cors', () => {
         assertSameSiteDoesNotMatch('https://192.168.5.10', props)
         assertSameSiteDoesNotMatch('http://193.168.5.10', props)
         assertSameSiteDoesNotMatch('http://193.168.5.10:80', props)
-        assertSameSiteDoesNotMatch('http://192.168.5.10:8081', props, true)
       })
 
       it('matches', function () {
         assertSameSiteDoesMatch('http://192.168.5.10', props)
         assertSameSiteDoesMatch('http://192.168.5.10:80', props)
+        assertSameSiteDoesMatch('http://192.168.5.10:8081', props)
       })
     })
   })
@@ -429,13 +535,121 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlSameSiteMatch', () => {
-    const assertsUrlsAreNotSameSite = (url1, url2, strictPortMatch = false) => {
-      expect(cors.urlSameSiteMatch(url1, url2, strictPortMatch)).to.be.false
+  context('.urlsSuperDomainOriginMatch', () => {
+    const assertsUrlsAreNotASuperDomainOriginMatch = (url1, url2) => {
+      expect(cors.urlsSuperDomainOriginMatch(url1, url2)).to.be.false
     }
 
-    const assertsUrlsAreSameSite = (url1, url2, strictPortMatch = false) => {
-      expect(cors.urlSameSiteMatch(url1, url2, strictPortMatch)).to.be.true
+    const assertsUrlsAreASuperDomainOriginMatch = (url1, url2) => {
+      expect(cors.urlsSuperDomainOriginMatch(url1, url2)).to.be.true
+    }
+
+    describe('domain + subdomain', () => {
+      const url = 'https://staging.google.com'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('https://foo.bar:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://foo.bar:80', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://foo.bar', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://staging.google.com', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://staging.google.com:80', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://staging.google2.com:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://staging.google.net:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://google.net:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://google.com', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('https://staging.google.com:443', url)
+        assertsUrlsAreASuperDomainOriginMatch('https://google.com:443', url)
+        assertsUrlsAreASuperDomainOriginMatch('https://foo.google.com:443', url)
+        assertsUrlsAreASuperDomainOriginMatch('https://foo.bar.google.com:443', url)
+      })
+    })
+
+    describe('public suffix', () => {
+      const url = 'https://example.gitlab.io'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('http://example.gitlab.io', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://foo.gitlab.io:443', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('https://example.gitlab.io:443', url)
+        assertsUrlsAreASuperDomainOriginMatch('https://foo.example.gitlab.io:443', url)
+      })
+    })
+
+    describe('localhost', () => {
+      const url = 'http://localhost:4200'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('http://localhoss:4200', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://localhost:4201', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('http://localhost:4200', url)
+      })
+    })
+
+    describe('app.localhost', () => {
+      const url = 'http://app.localhost:4200'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('http://app.localhoss:4200', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://app.localhost:4201', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('http://app.localhost:4200', url)
+        assertsUrlsAreASuperDomainOriginMatch('http://name.app.localhost:4200', url)
+      })
+    })
+
+    describe('local', () => {
+      const url = 'http://brian.dev.local'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('https://brian.dev.local:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://brian.dev.local', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://brian.dev2.local:81', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://brian.dev.local:8081', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('http://jennifer.dev.local', url)
+        assertsUrlsAreASuperDomainOriginMatch('http://jennifer.dev.local:80', url)
+        assertsUrlsAreASuperDomainOriginMatch('http://jennifer.dev.local', url)
+      })
+    })
+
+    describe('ip address', () => {
+      const url = 'http://192.168.5.10'
+
+      it('does not match', function () {
+        assertsUrlsAreNotASuperDomainOriginMatch('http://192.168.5.10:443', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('https://192.168.5.10', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://193.168.5.10', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://193.168.5.10:80', url)
+        assertsUrlsAreNotASuperDomainOriginMatch('http://192.168.5.10:12345', url)
+      })
+
+      it('matches', function () {
+        assertsUrlsAreASuperDomainOriginMatch('http://192.168.5.10', url)
+        assertsUrlsAreASuperDomainOriginMatch('http://192.168.5.10:80', url)
+      })
+    })
+  })
+
+  context('.urlSameSiteMatch', () => {
+    const assertsUrlsAreNotSameSite = (url1, url2) => {
+      expect(cors.urlSameSiteMatch(url1, url2)).to.be.false
+    }
+
+    const assertsUrlsAreSameSite = (url1, url2) => {
+      expect(cors.urlSameSiteMatch(url1, url2)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -480,7 +694,6 @@ describe('lib/cors', () => {
 
       it('does not match', function () {
         assertsUrlsAreNotSameSite('http://localhoss:4200', url)
-        assertsUrlsAreNotSameSite('http://localhost:4201', url, true)
       })
 
       it('matches', function () {
@@ -494,7 +707,6 @@ describe('lib/cors', () => {
 
       it('does not match', function () {
         assertsUrlsAreNotSameSite('http://app.localhoss:4200', url)
-        assertsUrlsAreNotSameSite('http://app.localhost:4201', url, true)
       })
 
       it('matches', function () {
@@ -511,7 +723,6 @@ describe('lib/cors', () => {
         assertsUrlsAreNotSameSite('https://brian.dev.local:443', url)
         assertsUrlsAreNotSameSite('https://brian.dev.local', url)
         assertsUrlsAreNotSameSite('http://brian.dev2.local:81', url)
-        assertsUrlsAreNotSameSite('http://brian.dev.local:8081', url, true)
       })
 
       it('matches', function () {
@@ -530,7 +741,6 @@ describe('lib/cors', () => {
         assertsUrlsAreNotSameSite('https://192.168.5.10', url)
         assertsUrlsAreNotSameSite('http://193.168.5.10', url)
         assertsUrlsAreNotSameSite('http://193.168.5.10:80', url)
-        assertsUrlsAreNotSameSite('http://192.168.5.10:12345', url, true)
       })
 
       it('matches', function () {

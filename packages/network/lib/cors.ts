@@ -4,6 +4,8 @@ import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
 
+type Policy = 'same-origin' | 'same-super-domain-origin' | 'same-site'
+
 const debug = debugModule('cypress:network:cors')
 
 // match IP addresses or anything following the last .
@@ -74,77 +76,118 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
-export function urlMatchesSuperDomainOriginProps (urlStr, props) {
-  return urlMatchesSameSiteProps(urlStr, props, true)
-}
-
-export function urlMatchesOriginProps (urlStr, props) {
-  if (!props) {
-    return false
-  }
-
-  const parsedUrl = parseUrlIntoHostProtocolDomainTldPort(urlStr)
-
-  // does the parsedUrl match the parsedHost?
-  return _.isEqual(parsedUrl, props)
-}
-
 /**
- *
- * @param {string} urlStr - The url string
- * @param {ParsedHostWithProtocolAndHost|undefined} props - The broken down props from parseUrlIntoHostProtocolDomainTldPort
- * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOrigins match.
- * Otherwise, if set to false(default), the function checks a same-site comparison
- * @returns {boolean}
+ * same-origin: Whether or not a a urls scheme, port, and host match. @see https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
+ * same-super-domain-origin: Whether or not a url's scheme, domain, top-level domain, and port match
+ * same-site: Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
+ * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
+ * for more details.
+ * @param {Policy} policy - the policy being used
+ * @param {string} url - the url being compared
+ * @param {ParsedHostWithProtocolAndHost} props - the props being compared against the url
+ * @returns {boolean} whether or not the props and url fit the policy
  */
-export function urlMatchesSameSiteProps (urlStr: string, props?: ParsedHostWithProtocolAndHost, strictPortMatch = false) {
-  if (!props) {
+function urlMatchesPolicyProps ({ policy, url, props }: {
+  policy: Policy
+  url: string
+  props: ParsedHostWithProtocolAndHost
+}): boolean {
+  if (!policy || !url || !props) {
     return false
   }
 
-  const { port: port1, subdomain: _unused1, ...parsedUrl } = parseUrlIntoHostProtocolDomainTldPort(urlStr)
-  const { port: port2, subdomain: _unused2, ...relevantProps } = props
+  const urlProps = parseUrlIntoHostProtocolDomainTldPort(url)
 
-  // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
-  let doPortsPassSameSchemeCheck = true
+  switch (policy) {
+    case 'same-origin': {
+      // if same origin, all parts of the props needs to match, including subdomain and scheme
+      return _.isEqual(urlProps, props)
+    }
+    case 'same-super-domain-origin':
+    case 'same-site': {
+      const { port: port1, subdomain: _unused1, ...parsedUrl } = urlProps
+      const { port: port2, subdomain: _unused2, ...relevantProps } = props
 
-  if (strictPortMatch) {
-    doPortsPassSameSchemeCheck = port1 === port2
-  } else {
-    doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
+      let doPortsPassSameSchemeCheck: boolean
+
+      if (policy === 'same-super-domain-origin') {
+        // if a super domain origin comparison, the ports MUST be strictly equal
+        doPortsPassSameSchemeCheck = port1 === port2
+      } else {
+        // otherwise, this is a same-site comparison
+        // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
+        doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
+      }
+
+      return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl, relevantProps)
+    }
+    default:
+      return false
+  }
+}
+
+function urlMatchesPolicy ({ policy, url1, url2 }: {
+  policy: Policy
+  url1: string
+  url2: string
+}): boolean {
+  if (!policy || !url1 || !url2) {
+    return false
   }
 
-  // does the parsedUrl match the parsedHost?
-  return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl, relevantProps)
+  return urlMatchesPolicyProps({
+    policy,
+    url: url1,
+    props: parseUrlIntoHostProtocolDomainTldPort(url2),
+  })
+}
+
+export function urlMatchesOriginProps (url, props) {
+  return urlMatchesPolicyProps({
+    policy: 'same-origin',
+    url,
+    props,
+  })
+}
+
+export function urlMatchesSuperDomainOriginProps (url, props) {
+  return urlMatchesPolicyProps({
+    policy: 'same-super-domain-origin',
+    url,
+    props,
+  })
+}
+
+export function urlMatchesSameSiteProps (url: string, props: ParsedHostWithProtocolAndHost) {
+  return urlMatchesPolicyProps({
+    policy: 'same-site',
+    url,
+    props,
+  })
 }
 
 export function urlOriginsMatch (url1: string, url2: string) {
-  if (!url1 || !url2) return false
-
-  // To fully match origin policy, the full host (including subdomain) and port is required to match. @see https://developer.mozilla.org/en-US/docs/Glossary/Origin
-  return urlMatchesOriginProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2))
+  return urlMatchesPolicy({
+    policy: 'same-origin',
+    url1,
+    url2,
+  })
 }
 
 export function urlsSuperDomainOriginMatch (url1: string, url2: string) {
-  return urlSameSiteMatch(url1, url2, true)
+  return urlMatchesPolicy({
+    policy: 'same-super-domain-origin',
+    url1,
+    url2,
+  })
 }
 
-/**
- * Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
- * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
- * for more details.
- * @param {string} url1 - the first url
- * @param {string} url2 - the second url
- * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOrigins match.
- * Otherwise, if set to false(default), the function checks a same-site comparison
- * @returns {boolean} whether or not the URL Scheme, Domain, and TLD match. This is called same-site and
- * is allowed to have a different port or subdomain. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
- * for more details.
- */
-export const urlSameSiteMatch = (url1: string, url2: string, strictPortMatch = false) => {
-  if (!url1 || !url2) return false
-
-  return urlMatchesSameSiteProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2), strictPortMatch)
+export const urlSameSiteMatch = (url1: string, url2: string) => {
+  return urlMatchesPolicy({
+    policy: 'same-site',
+    url1,
+    url2,
+  })
 }
 
 declare module 'url' {
