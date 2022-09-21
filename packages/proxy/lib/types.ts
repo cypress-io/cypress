@@ -21,8 +21,6 @@ export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolea
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
-export type SecFetchSite = 'same-origin' | 'same-site' | 'cross-site' | 'none'
-
 /**
  * An outgoing response to an incoming request to the Cypress web server.
  */

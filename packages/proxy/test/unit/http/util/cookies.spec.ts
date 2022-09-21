@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { getSameSiteContext, shouldAttachAndSetCookies } from '../../../../lib/http/util/cookies'
+import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies } from '../../../../lib/http/util/cookies'
 
 context('getSameSiteContext', () => {
   describe('calculates the same site context correctly for', () => {
@@ -231,13 +231,35 @@ context('shouldAttachAndSetCookies', () => {
   })
 
   context('misc', () => {
-    it('returns true if the resource type is unknown (could be a navigation request to set top level cookies', () => {
+    it('returns true if the resource type is unknown, but the request comes from the aut frame (could be a navigation request to set top level cookies)', () => {
       // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
-      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).to.be.true
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl, undefined, undefined, true)).to.be.true
     })
 
-    it('return false if the AUT url is undefined', () => {
-      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', undefined)).to.be.false
+    it('returns true if the resource type is unknown, but the request is same-origin', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', 'http://www.foobar.com:3500/index.html')).to.be.true
     })
+
+    it('returns false if the resource type is unknown and the request does NOT come from the AUTFrame', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).to.be.false
+    })
+  })
+})
+
+context('.calculateSiteContext', () => {
+  const autUrl = 'https://staging.google.com'
+
+  it('calculates same-origin correctly for same-origin / same-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://staging.google.com')).to.equal('same-origin')
+  })
+
+  it('calculates same-site correctly for cross-origin / same-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://app.google.com')).to.equal('same-site')
+  })
+
+  it('calculates cross-site correctly for cross-origin / cross-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://staging.google2.com')).to.equal('cross-site')
   })
 })
