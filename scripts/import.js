@@ -18,7 +18,7 @@ const argv = require('minimist')(process.argv.slice(2))
 const from = argv.from
 const repo = argv.repo
 const to = path.join(argv.to, '/') // ensure trailing slash
-const branch = argv.branch || 'master'
+const branch = argv.branch || 'develop'
 const remoteName = snakeCase(to)
 const temp = path.join(process.cwd(), `.temp-import`)
 

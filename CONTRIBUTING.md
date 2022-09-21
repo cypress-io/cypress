@@ -4,8 +4,8 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Discord](https://on.cypress.io/discord) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
+- Join the [Cypress Discord](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#adding-examples).
 - Write some documentation or improve our existing docs. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
@@ -476,7 +476,7 @@ There are also a set of system tests in [`system-tests`](system-tests) which att
 
 Additionally, we test the code by running it against various other example projects in CI. See CI badges and links at the top of this document.
 
-If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
+If you're curious how we manage all of these tests in CI check out our [CircleCI config](.circleci/config.yml).
 
 #### Docker
 
@@ -489,7 +489,7 @@ Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. 
 $ yarn docker
 ```
 
-There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
+There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [CircleCI config](.circleci/config.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
@@ -545,42 +545,42 @@ During the process of snapshot generation, metadata is created/updated in `tooli
 
 ### Branches
 
-The repository is setup with two main (protected) branches.
+The repository has one protected branch:
 
-- `master` is the code already published, both for the main Cypress app and independent npm packages.
-- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests that update the main Cypress binary should be made against this branch.
+- `develop` contains the current latest "pre-release" code for the Cypress app and contains the already published code of all [standalone npm packages](./npm) Cypress maintains. This branch is set as the default branch, and all pull requests should be made against this branch.
 
-In general, we want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, any pull requests that only change independent `@cypress/` packages in the [`npm`](./npm) directory should be made directly off the `master` branch. We use [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automatically publish these packages to npm when a PR is merged directly into master.
+We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
 
-When updating the main Cypress app, pull requests should be made against the `develop` branch. We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. In addition, if you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against the `develop` branch.
-
-Essentially, if you only change files within the [`npm`](./npm) folder, then you should make a pull request against `master`. Otherwise, make it against `develop`.
-
-All updates to `master` are automatically merged into `develop`, so `develop` always has the latest version of every package.
-
-#### Workflow Diagrams
-
-<!-- To edit these diagrams, visit [`./assets/DIAGRAMS`](./assets/DIAGRAMS.md) -->
-<img src="./assets/branching-diagram.png" />
-<img src="./assets/sample-workflow.png" />
-
-### Independent Packages CI Workflow
-
-Independent packages are automatically released when code is merged into `master` and the entire build passes.
+We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against specifying this is not be merged until the scheduled  Cypress app release date.
 
 ### Pull Requests
 
 - Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant.
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
-- PR's can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
+- PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
 - If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+- All Pull Requests require a minimum of **two** approvals.
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
 - When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain from the file conversion.*
+
+### Write Some Tests
+
+If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are three categories of tests you might consider:
+
+1. Unit test. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
+2. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
+3. System Tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
+
+When choosing what's most appropriate, consider:
+
+- ease of understanding
+- ease of debugging
+- resilience to refactoring
 
 ### Dependencies
 
@@ -658,11 +658,13 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 - [ ] The PR been tagged with a release in ZenHub.
 - [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
 
-## Deployment
+## Releases
 
-We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
+[Standalone npm packages](./npm) are deployed immediately when a PR is merged into `develop` and the entire build passes.
 
-Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
+The Cypress app is typically released every two weeks. All PRs merged to `develop` will build a "pre-released" Cypress app which can be installed to verify or leverage your changes before the scheduled release. Read these instructions for [installing pre-release versions](https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version).
+
+If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
 
 ## Known problems
 

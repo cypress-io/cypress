@@ -34,7 +34,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/angular/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular/#readme",
   "author": "Jordan Powell",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
   "keywords": [

@@ -125,8 +125,10 @@ function getHighlightIndexes <T extends FoundSpec> (node: SpecTreeNode<T>) {
 }
 
 export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
+  const normalizedSearchValue = getPlatform() === 'win32' ? searchValue.replaceAll('/', '\\') : searchValue
+
   const fuzzySortResult = fuzzySort
-  .go(searchValue, specs, { keys: ['relative', 'baseName'], allowTypo: false, threshold: -3000 })
+  .go(normalizedSearchValue, specs, { keys: ['relative', 'baseName'], allowTypo: false, threshold: -3000 })
   .map((result) => {
     const [relative, baseName] = result
 

@@ -75,7 +75,9 @@ export class AuthActions {
       const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
         && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
 
-      if (!isBrowserFocusSupported) {
+      const isBrowserOpen = this.ctx.coreData.app.browserStatus === 'open'
+
+      if (!isBrowserFocusSupported || !isBrowserOpen) {
         this.ctx._apis.electronApi.focusMainWindow()
       } else {
         await this.ctx.actions.browser.focusActiveBrowserWindow()
