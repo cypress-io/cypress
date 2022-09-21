@@ -18,7 +18,7 @@ Cypress.on('uncaught:exception', () => false)
  * Returns scoped verify function to aid inner spec validation.
  */
 function loadErrorSpec (options: Options): VerifyFunc {
-  const { projectName, filePath, failCount, passCount = '--', configFile, mode } = options
+  const { projectName, filePath, failCount, passCount = '--', configFile } = options
 
   cy.openProject(projectName, ['--config-file', configFile])
   cy.startAppServer('component')
@@ -30,7 +30,7 @@ function loadErrorSpec (options: Options): VerifyFunc {
   })
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde: false, mode })
+  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde: false, mode: 'component' })
 }
 
 [17, 18].forEach((reactVersion) => {
