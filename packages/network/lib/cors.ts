@@ -74,11 +74,11 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
-export function urlMatchesSuperDomainOriginPolicyProps (urlStr, props) {
-  return urlMatchesSameSitePolicyProps(urlStr, props, true)
+export function urlMatchesSuperDomainOriginProps (urlStr, props) {
+  return urlMatchesSameSiteProps(urlStr, props, true)
 }
 
-export function urlMatchesOriginPolicyProps (urlStr, props) {
+export function urlMatchesOriginProps (urlStr, props) {
   if (!props) {
     return false
   }
@@ -96,7 +96,7 @@ export function urlMatchesOriginPolicyProps (urlStr, props) {
  * @param {boolean} [strictPortMatch] - Whether or not to make port comparison exactly match. If set to true, this function checks to see if superDomainOriginPolicies match
  * @returns {boolean}
  */
-export function urlMatchesSameSitePolicyProps (urlStr: string, props?: ParsedHostWithProtocolAndHost, strictPortMatch = false) {
+export function urlMatchesSameSiteProps (urlStr: string, props?: ParsedHostWithProtocolAndHost, strictPortMatch = false) {
   if (!props) {
     return false
   }
@@ -121,10 +121,10 @@ export function urlOriginsMatch (url1: string, url2: string) {
   if (!url1 || !url2) return false
 
   // To fully match origin policy, the full host (including subdomain) and port is required to match. @see https://developer.mozilla.org/en-US/docs/Glossary/Origin
-  return urlMatchesOriginPolicyProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2))
+  return urlMatchesOriginProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2))
 }
 
-export function urlsSuperDomainOriginPolicyMatch (url1: string, url2: string) {
+export function urlsSuperDomainOriginMatch (url1: string, url2: string) {
   return urlSameSiteMatch(url1, url2, true)
 }
 
@@ -142,7 +142,7 @@ export function urlsSuperDomainOriginPolicyMatch (url1: string, url2: string) {
 export const urlSameSiteMatch = (url1: string, url2: string, strictPortMatch = false) => {
   if (!url1 || !url2) return false
 
-  return urlMatchesSameSitePolicyProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2), strictPortMatch)
+  return urlMatchesSameSiteProps(url1, parseUrlIntoHostProtocolDomainTldPort(url2), strictPortMatch)
 }
 
 declare module 'url' {
@@ -158,7 +158,7 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }
 
-export function getOriginPolicy (url: string) {
+export function getOrigin (url: string) {
   // @ts-ignore
   const { port, protocol, hostname } = new URL(url)
 
@@ -174,7 +174,7 @@ export function getOriginPolicy (url: string) {
  * @returns the super domain origin policy -
  * ex: http://www.example.com:8081/my/path -> http://example.com:8081/my/path
  */
-export function getSuperDomainOriginPolicy (url: string) {
+export function getSuperDomainOrigin (url: string) {
   // @ts-ignore
   const { port, protocol } = new URL(url)
 

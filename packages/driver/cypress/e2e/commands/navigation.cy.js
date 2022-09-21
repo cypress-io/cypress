@@ -610,7 +610,7 @@ describe('src/cy/commands/navigation', () => {
       })
     }
 
-    it('can visit pages on the same originPolicy', () => {
+    it('can visit pages on the same origin', () => {
       cy
       .visit('http://localhost:3500/fixtures/jquery.html')
       .visit('http://localhost:3500/fixtures/generic.html')
@@ -690,7 +690,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('can visit relative pages on the same originPolicy', () => {
+    it('can visit relative pages on the same origin', () => {
       // as long as we are already on the localhost:3500
       // domain this will work
       cy

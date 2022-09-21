@@ -43,8 +43,8 @@ const createCypress = () => {
         const frame = window.parent.frames[index]
 
         try {
-          // the AUT would be the frame with a matching origin, but not the same exact href.
-          if (window.location.origin === cors.getSuperDomainOriginPolicy(frame.location.origin)
+          // the AUT would be the frame with a matching super domain origin, but not the same exact href.
+          if (window.location.origin === cors.getSuperDomainOrigin(frame.location.origin)
               && window.location.href !== frame.location.href) {
             return frame
           }
@@ -67,10 +67,10 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutSuperDomainOriginPolicy = cy.state('autLocation').superDomainOriginPolicy
+    const currentAutSuperDomainOrigin = cy.state('autLocation').superDomainOrigin
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
-    if (requestedSnapshotUrlLocation.superDomainOriginPolicy === currentAutSuperDomainOriginPolicy) {
+    if (requestedSnapshotUrlLocation.superDomainOrigin === currentAutSuperDomainOrigin) {
       // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 

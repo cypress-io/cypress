@@ -307,7 +307,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
-                  const isCrossOrigin = options.hasAlreadyVisitedUrl && !cors.urlsSuperDomainOriginPolicyMatch(primaryRemoteState.origin, newUrl || '') || options.isFromSpecBridge
+                  const isCrossOrigin = options.hasAlreadyVisitedUrl && !cors.urlsSuperDomainOriginMatch(primaryRemoteState.origin, newUrl || '') || options.isFromSpecBridge
 
                   if (!handlingLocalFile) {
                     this._remoteStates.set(newUrl as string, options, !isCrossOrigin)

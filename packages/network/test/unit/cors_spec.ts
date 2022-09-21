@@ -109,13 +109,13 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesOriginPolicyProps', () => {
+  context('.urlMatchesOriginProps', () => {
     const assertOriginsDoNotMatch = (url, props) => {
-      expect(cors.urlMatchesOriginPolicyProps(url, props)).to.be.false
+      expect(cors.urlMatchesOriginProps(url, props)).to.be.false
     }
 
     const assertOriginsDoMatch = (url, props) => {
-      expect(cors.urlMatchesOriginPolicyProps(url, props)).to.be.true
+      expect(cors.urlMatchesOriginProps(url, props)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -215,13 +215,13 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesSameSitePolicyProps', () => {
+  context('.urlMatchesSameSiteProps', () => {
     const assertSameSiteDoesNotMatch = (url, props, strictPortMatch = false) => {
-      expect(cors.urlMatchesSameSitePolicyProps(url, props, strictPortMatch)).to.be.false
+      expect(cors.urlMatchesSameSiteProps(url, props, strictPortMatch)).to.be.false
     }
 
     const assertSameSiteDoesMatch = (url, props, strictPortMatch = false) => {
-      expect(cors.urlMatchesSameSitePolicyProps(url, props, strictPortMatch)).to.be.true
+      expect(cors.urlMatchesSameSiteProps(url, props, strictPortMatch)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -592,27 +592,27 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.getSuperDomainOriginPolicy', () => {
+  context('.getSuperDomainOrigin', () => {
     it('ports', () => {
-      expect(cors.getSuperDomainOriginPolicy('https://example.com')).to.equal('https://example.com')
-      expect(cors.getSuperDomainOriginPolicy('http://example.com:8080')).to.equal('http://example.com:8080')
+      expect(cors.getSuperDomainOrigin('https://example.com')).to.equal('https://example.com')
+      expect(cors.getSuperDomainOrigin('http://example.com:8080')).to.equal('http://example.com:8080')
     })
 
     it('subdomain', () => {
-      expect(cors.getSuperDomainOriginPolicy('http://www.example.com')).to.equal('http://example.com')
-      expect(cors.getSuperDomainOriginPolicy('http://www.app.herokuapp.com:8080')).to.equal('http://app.herokuapp.com:8080')
+      expect(cors.getSuperDomainOrigin('http://www.example.com')).to.equal('http://example.com')
+      expect(cors.getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).to.equal('http://app.herokuapp.com:8080')
     })
   })
 
-  context('.getOriginPolicy', () => {
+  context('.getOrigin', () => {
     it('ports', () => {
-      expect(cors.getOriginPolicy('https://example.com')).to.equal('https://example.com')
-      expect(cors.getOriginPolicy('http://example.com:8080')).to.equal('http://example.com:8080')
+      expect(cors.getOrigin('https://example.com')).to.equal('https://example.com')
+      expect(cors.getOrigin('http://example.com:8080')).to.equal('http://example.com:8080')
     })
 
     it('subdomain', () => {
-      expect(cors.getOriginPolicy('http://www.example.com')).to.equal('http://www.example.com')
-      expect(cors.getOriginPolicy('http://www.app.herokuapp.com:8080')).to.equal('http://www.app.herokuapp.com:8080')
+      expect(cors.getOrigin('http://www.example.com')).to.equal('http://www.example.com')
+      expect(cors.getOrigin('http://www.app.herokuapp.com:8080')).to.equal('http://www.app.herokuapp.com:8080')
     })
   })
 })

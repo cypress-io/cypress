@@ -28,8 +28,7 @@ export interface LocationObject {
   port: number
   protocol: string
   search: string
-  originPolicy: string
-  superDomainOriginPolicy: string
+  superDomainOrigin: string
   superDomain: string
   toString: () => string
 }
@@ -81,15 +80,6 @@ export class $Location {
     return this.remote.hostname
   }
 
-  getOrigin () {
-    // https://github.com/unshiftio/url-parse/issues/38
-    if (this.remote.origin === 'null') {
-      return null
-    }
-
-    return this.remote.origin
-  }
-
   getProtocol () {
     return this.remote.protocol
   }
@@ -106,12 +96,12 @@ export class $Location {
     return this.remote.query
   }
 
-  getOriginPolicy () {
-    return cors.getOriginPolicy(this.remote.href)
+  getOrigin () {
+    return cors.getOrigin(this.remote.href)
   }
 
-  getSuperDomainOriginPolicy () {
-    return cors.getSuperDomainOriginPolicy(this.remote.href)
+  getSuperDomainOrigin () {
+    return cors.getSuperDomainOrigin(this.remote.href)
   }
 
   getSuperDomain () {
@@ -135,8 +125,7 @@ export class $Location {
       port: this.getPort(),
       protocol: this.getProtocol(),
       search: this.getSearch(),
-      originPolicy: this.getOriginPolicy(),
-      superDomainOriginPolicy: this.getSuperDomainOriginPolicy(),
+      superDomainOrigin: this.getSuperDomainOrigin(),
       superDomain: this.getSuperDomain(),
       toString: _.bind(this.getToString, this),
     }

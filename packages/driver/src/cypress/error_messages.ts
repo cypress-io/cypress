@@ -980,7 +980,7 @@ export default {
   },
 
   navigation: {
-    cross_origin ({ message, superDomainOriginPolicy, configFile, projectRoot }) {
+    cross_origin ({ message, superDomainOrigin, configFile, projectRoot }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
@@ -989,7 +989,7 @@ export default {
 
           Before the page load, you were bound to the origin policy:
 
-            > ${superDomainOriginPolicy}
+            > ${superDomainOrigin}
 
           A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
@@ -1253,7 +1253,7 @@ export default {
 
           \`<commands targeting ${args.attemptedUrl.origin} go here>\`
 
-          \`cy.origin('${args.previousUrl.superDomainOriginPolicy}', () => {\`
+          \`cy.origin('${args.previousUrl.superDomainOrigin}', () => {\`
           \`  <commands targeting ${args.previousUrl.origin} go here>\`
           \`})\`
 
@@ -1269,7 +1269,7 @@ export default {
 
           This error was thrown by a cross origin page. If you wish to suppress this error you will have to use the cy.origin command to handle the error prior to visiting the page.
 
-          \`cy.origin('${autLocation.superDomainOriginPolicy}', () => {\`
+          \`cy.origin('${autLocation.superDomainOrigin}', () => {\`
           \`  cy.on('uncaught:exception', (e) => {\`
           \`    if (e.message.includes('Things went bad')) {\`
           \`      // we expected this error, so let's ignore it\`
@@ -2154,7 +2154,7 @@ export default {
         message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
           If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.
 
-          \`cy.origin('${args.autLocation.superDomainOriginPolicy}', () => {\`
+          \`cy.origin('${args.autLocation.superDomainOrigin}', () => {\`
           \`  cy.on('window:load', () => {\`
           \`    <onLoad callback goes here>\`
           \`  })\`
@@ -2169,7 +2169,7 @@ export default {
         message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
         If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.
 
-        \`cy.origin('${args.autLocation.superDomainOriginPolicy}', () => {\`
+        \`cy.origin('${args.autLocation.superDomainOrigin}', () => {\`
         \`  cy.on('window:before:load', () => {\`
         \`    <onBeforeLoad callback goes here>\`
         \`  })\`
@@ -2194,7 +2194,7 @@ export default {
           ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
 
           ${args.isCrossOriginSpecBridge ?
-          `\`cy.origin('${args.previousUrl.superDomainOriginPolicy}', () => {\`
+          `\`cy.origin('${args.previousUrl.superDomainOrigin}', () => {\`
           \`  cy.visit('${args.previousUrl}')\`
           \`  <commands targeting ${args.previousUrl.origin} go here>\`
           \`})\`` :
@@ -2202,7 +2202,7 @@ export default {
           \`<commands targeting ${args.previousUrl.origin} go here>\``
           }
 
-          \`cy.origin('${args.attemptedUrl.superDomainOriginPolicy}', () => {\`
+          \`cy.origin('${args.attemptedUrl.superDomainOrigin}', () => {\`
           \`  cy.visit('${args.originalUrl}')\`
           \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
           \`})\`
