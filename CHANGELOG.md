@@ -1,4 +1,3 @@
-
 # Changelogs
 
 - [Cypress App](https://on.cypress.io/changelog)
