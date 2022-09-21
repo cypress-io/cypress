@@ -24,42 +24,19 @@ const normalizeOrigin = (urlOrDomain) => {
 }
 
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
-  let timeoutId
-
   const communicator = Cypress.primaryOriginCommunicator
-
-  communicator.on('delaying:html', (request) => {
-    // when a cross origin request is detected by the proxy, it holds it up
-    // to provide time for the spec bridge to be set up. normally, the queue
-    // will not continue until the page is stable, but this signals it to go
-    // ahead because we're anticipating a cross origin request
-    cy.isAnticipatingCrossOriginResponseFor(request)
-    const location = $Location.create(request.href)
-
-    // If this event has occurred while a cy.origin command is running with
-    // the same origin policy, do not set the time out and allow cy.origin
-    // to handle the ready for origin event
-    if (cy.state('currentActiveOriginPolicy') === location.originPolicy) {
-      return
-    }
-
-    // If we haven't seen a cy.origin and cleared the timeout within 300ms,
-    // go ahead and inform the server to release the response.
-    // This typically happens during a redirect where the user does
-    // not have a cy.origin for the intermediary origin.
-    timeoutId = setTimeout(() => {
-      Cypress.backend('cross:origin:release:html')
-    }, 300)
-  })
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+      if (Cypress.isBrowser('webkit')) {
+        return $errUtils.throwErrByPath('webkit.origin')
+      }
+
       const userInvocationStack = state('current').get('userInvocationStack')
 
       // store the invocation stack in the case that `cy.origin` errors
       communicator.userInvocationStack = userInvocationStack
 
-      clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // origin run, so it can't have its own timeout
       cy.clearTimeout()
@@ -94,9 +71,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       const validator = new Validator({
         log,
-        onFailure: () => {
-          Cypress.backend('cross:origin:release:html')
-        },
       })
 
       validator.validate({
@@ -121,9 +95,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
           cy.state('currentActiveOriginPolicy', undefined)
-          if (!readyForOriginFailed) {
-            Cypress.backend('cross:origin:finished', location.originPolicy)
-          }
 
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
@@ -161,10 +132,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
         communicator.once('ran:origin:fn', (details) => {
           const { subject, unserializableSubjectType, err, finished } = details
-
-          // lets the proxy know to allow the response for the secondary
-          // origin html through, so the page will finish loading
-          Cypress.backend('cross:origin:release:html')
 
           if (err) {
             if (err?.name === 'ReferenceError') {
@@ -211,14 +178,17 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
               env: preprocessEnv(Cypress.env()),
             })
 
-            await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
+            // Attach the spec bridge to the window to be tested.
+            communicator.toSpecBridge(originPolicy, 'attach:to:window')
+
+            const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
             try {
               communicator.toSpecBridge(originPolicy, 'run:origin:fn', {
                 args: options?.args || undefined,
-                fn: callbackFn.toString(),
+                fn,
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
                 // this should only be used for internal testing. Cast to boolean to guarantee serialization
                 // @ts-ignore
@@ -230,18 +200,14 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: Cypress.state('hookId'),
                   originCommandBaseUrl: location.href,
-                  parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
                   isStable: Cypress.state('isStable'),
-                  autOrigin: Cypress.state('autOrigin'),
+                  autLocation: Cypress.state('autLocation')?.href,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
-              // Release the request if 'run:origin:fn' fails
-              Cypress.backend('cross:origin:release:html')
-
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })

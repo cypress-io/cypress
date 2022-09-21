@@ -267,6 +267,34 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         return done()
       })
     })
+
+    it('defines global __cypressCallbackReplacementCommands if experimentalSessionAndOrigin: true', function () {
+      const setupNodeEventsFn = sinon.spy()
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      const config = {
+        experimentalSessionAndOrigin: true,
+      }
+
+      this.ipc.on.withArgs('load:plugins').yield(config)
+
+      expect(global.__cypressCallbackReplacementCommands).to.deep.equal(['origin'])
+    })
+
+    it('does not define global __cypressCallbackReplacementCommands if experimentalSessionAndOrigin: false', function () {
+      const setupNodeEventsFn = sinon.spy()
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      const config = {
+        experimentalSessionAndOrigin: false,
+      }
+
+      this.ipc.on.withArgs('load:plugins').yield(config)
+
+      expect(global.__cypressCallbackReplacementCommands).to.be.undefined
+    })
   })
 
   describe('on \'execute\' message', () => {

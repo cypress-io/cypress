@@ -43,7 +43,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
     - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] [`/scripts/run-docker-local.sh`](../../scripts/run-docker-local.sh) - update Docker image to the new matching `browsers` image
-    - [ ] [`/circle.yml`](../../circle.yml)
+    - [ ] [`/.circleci/config.yml`](../../.circleci/config.yml)
         - Update the Docker `image`s to the new matching `browsers` image.
         - Update the `xcode` version to one with the same major Node.js version bundled. There is usually not an exact match, this is ok as long as the major version number as the same.
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)

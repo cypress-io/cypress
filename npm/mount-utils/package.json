@@ -27,7 +27,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/mount-utils#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/mount-utils#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
