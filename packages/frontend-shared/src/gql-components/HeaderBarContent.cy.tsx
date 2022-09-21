@@ -365,6 +365,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           cy.clock(1609891200000)
         })
 
+        afterEach(() => {
+          // Setting the clock in the beforeEach was causing the cy.checkA11y call in cy.percySnapshot to timeout only in open mode.  Resetting
+          // the clock here prevents that timeout
+          cy.clock().invoke('restore')
+        })
+
         function mountWithSavedState (options?: {state?: object, projectId?: string }) {
           const mountResult = cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
