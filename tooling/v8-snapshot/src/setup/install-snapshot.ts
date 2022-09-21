@@ -60,7 +60,7 @@ function getSnapshotGenerator ({
     previousDeferred,
     previousHealthy,
     previousNoRewrite,
-    sourcemapEmbed: true,
+    // sourcemapEmbed: true,
     nodeModulesOnly,
     resolverMap,
     forceNoRewrite,
