@@ -376,7 +376,7 @@ export class Log {
     if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
       const activeSpecBridgeSuperDomainOriginIfApplicable = this.state('currentActiveSuperDomainOrigin') || undefined
       // @ts-ignore
-      const { superDomainOrigin: superDomainOriginThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
+      const { superDomainOrigin: superDomainOriginThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('url'))
 
       if (activeSpecBridgeSuperDomainOriginIfApplicable && activeSpecBridgeSuperDomainOriginIfApplicable === superDomainOriginThatIsSoonToBeOrIsActive) {
         Cypress.emit('request:snapshot:from:spec:bridge', {
