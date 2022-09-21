@@ -68,7 +68,7 @@
     "vite": "3.1.0",
     "vite-plugin-components": "0.11.3",
     "vite-svg-loader": "3.1.2",
-    "vue": "3.2.39",
+    "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0",
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
