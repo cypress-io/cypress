@@ -642,6 +642,12 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Used to import dependencies within the cy.origin() callback
+     * @see https://on.cypress.io/origin
+     */
+    require: (id: string) => any
+
+    /**
      * Trigger action
      * @private
      */
@@ -2993,6 +2999,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }

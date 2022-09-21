@@ -4,8 +4,8 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Discord](https://on.cypress.io/discord) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
+- Join the [Cypress Discord](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#adding-examples).
 - Write some documentation or improve our existing docs. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
@@ -508,28 +508,13 @@ They will outline development and test procedures. When in doubt just look at th
 
 ### Branches
 
-The repository is setup with two main (protected) branches.
+The repository has one protected branch:
 
-- `master` is the code already published, both for the main Cypress app and independent npm packages.
-- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests that update the main Cypress binary should be made against this branch.
+- `develop` contains the current latest "pre-release" code for the Cypress app and contains the already published code of all [standalone npm packages](./npm) Cypress maintains. This branch is set as the default branch, and all pull requests should be made against this branch.
 
-In general, we want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, any pull requests that only change independent `@cypress/` packages in the [`npm`](./npm) directory should be made directly off the `master` branch. We use [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automatically publish these packages to npm when a PR is merged directly into master.
+We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
 
-When updating the main Cypress app, pull requests should be made against the `develop` branch. We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. In addition, if you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against the `develop` branch.
-
-Essentially, if you only change files within the [`npm`](./npm) folder, then you should make a pull request against `master`. Otherwise, make it against `develop`.
-
-All updates to `master` are automatically merged into `develop`, so `develop` always has the latest version of every package.
-
-#### Workflow Diagrams
-
-<!-- To edit these diagrams, visit [`./assets/DIAGRAMS`](./assets/DIAGRAMS.md) -->
-<img src="./assets/branching-diagram.png" />
-<img src="./assets/sample-workflow.png" />
-
-### Independent Packages CI Workflow
-
-Independent packages are automatically released when code is merged into `master` and the entire build passes.
+We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against specifying this is not be merged until the scheduled  Cypress app release date.
 
 ### Pull Requests
 
@@ -636,11 +621,13 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 - [ ] The PR been tagged with a release in ZenHub.
 - [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
 
-## Deployment
+## Releases
 
-We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
+[Standalone npm packages](./npm) are deployed immediately when a PR is merged into `develop` and the entire build passes.
 
-Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
+The Cypress app is typically released every two weeks. All PRs merged to `develop` will build a "pre-released" Cypress app which can be installed to verify or leverage your changes before the scheduled release. Read these instructions for [installing pre-release versions](https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version).
+
+If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
 
 ## Known problems
 

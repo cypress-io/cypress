@@ -265,7 +265,7 @@ const originalWithModifyObstructiveThirdPartyCode = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
+        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
         document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
     <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
@@ -278,6 +278,17 @@ const originalWithModifyObstructiveThirdPartyCode = `\
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
       dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
       document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <script>
+      (function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po.integrity='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+      var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity = 'foo-bar'
+      foo.integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['integrity'] = 'sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity='foo-bar'
+      foo.integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
     </script>
   </body>
 </html>\
@@ -380,7 +391,7 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
         dynamicIntegrityScript.src = 'integrity.js'
         dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
         dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
-        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C"
+        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
         document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
     <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
@@ -391,8 +402,19 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
       dynamicIntegrityScript.rel = "stylesheet"
       dynamicIntegrityScript.href = 'integrity.css'
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
-      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
       document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <script>
+      (function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po['cypress-stripped-integrity']='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+      var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity = 'foo-bar'
+      foo['cypress-stripped-integrity'] = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['cypress-stripped-integrity'] = 'sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity='foo-bar'
+      foo['cypress-stripped-integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['cypress-stripped-integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
     </script>
   </body>
 </html>\
