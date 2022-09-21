@@ -87,8 +87,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       const superDomainOrigin = location.superDomainOrigin
 
-      // This is intentionally not reset after leaving the cy.origin command.
-      cy.state('latestActiveSuperDomainOrigin', superDomainOrigin)
       // This is set while IN the cy.origin command.
       cy.state('currentActiveSuperDomainOrigin', superDomainOrigin)
 
