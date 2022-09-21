@@ -83,6 +83,6 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
 
     cy.contains('button', 'Connect your project').click()
 
-    cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'test' })
+    cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'testing' })
   })
 })

@@ -230,12 +230,12 @@ fragment SelectCloudProjectModal on Query {
         }
       }
     }
-    ...CreateCloudOrgModal
+    ...CreateCloudOrgModal # TODO is this even needed here any more? The fields it pulls in are the first two in this section (id, cloudOrganizationUrl)
   }
   currentProject{
     id
     title
-    ...NeedManualUpdateModal
+    ...NeedManualUpdateModal # TODO Can this just be projectId and not be spread
   }
 }
 `
