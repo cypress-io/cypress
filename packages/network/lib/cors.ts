@@ -205,11 +205,11 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
 
 export function getOrigin (url: string) {
   // @ts-ignore
-  const { port, protocol, hostname } = new URL(url)
+  const { origin } = new URL(url)
 
   // origin policy is comprised of:
   // protocol + subdomain + superdomain + port
-  return _.compact([`${protocol}//${hostname}`, port]).join(':')
+  return origin
 }
 
 /**
