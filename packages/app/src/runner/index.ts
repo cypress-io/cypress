@@ -98,7 +98,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    autIframe.doesAUTMatchTopSuperOriginPolicy,
+    autIframe.doesAUTMatchTopSuperDomainOriginPolicy,
     getEventManager(),
     {
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
