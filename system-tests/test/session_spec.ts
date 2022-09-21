@@ -70,7 +70,55 @@ const onServer = function (app) {
   })
 
   app.get('/home', (req, res) => {
-    res.send('<html><h1>home</h1></html>')
+    res.send(`\
+  <!DOCTYPE html>
+  <head>
+    <title>Home</title>
+    <script>
+      window.onLoad = function() {
+        let cookies = document.cookie
+        if (!cookies || cookies !== 'token=1') {
+          window.location.href = "/cypress/fixtures/loginPage.html"
+        }
+      }
+    </script>
+  </head>
+  <body>
+      <h1>Home Page</h1>
+  </body>
+</html>
+`)
+  })
+
+  app.get('/login', (req, res) => {
+    res.send(`\
+    <!DOCTYPE html>
+  <head>
+    <title>Login Page</title>
+    <script>
+      window.onload = function(){
+        if (window.localStorage.getItem('persist') === 'true') {
+          document.cookie = "token=1"
+          window.localStorage.setItem('animal', 'tiger')
+          window.sessionStorage.setItem('food', 'zebra')
+        } else {
+          document.cookie = "token=2"
+          window.localStorage.setItem('animal', 'bear')
+          window.sessionStorage.setItem('food', 'salmon')
+        }
+      }
+      function login(){
+        window.location.href = "https://localhost:4466/home"
+      }
+    </script>
+  </head>
+  <body>
+      <h1>Not Signed in...</h1>
+
+      <button onClick="login()">Login</button>
+  </body>
+</html>
+`)
   })
 
   app.get('/redirect', (req, res) => {
@@ -132,8 +180,8 @@ describe('e2e sessions', () => {
 
   it('session tests', {
     project: 'session-and-origin-e2e-specs',
-    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
-    spec: 'session.cy.js',
+    browser: 'chrome', // TODO(webkit): fix+unskip (needs multidomain support)
+    spec: 'session/session.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,
@@ -141,9 +189,9 @@ describe('e2e sessions', () => {
     },
   })
 
-  it('sessions persist on reload, and clear between specs', {
+  it('spec sessions persist on reload, and clear between specs', {
     project: 'session-and-origin-e2e-specs',
-    spec: 'session_persist_1.cy.js,session_persist_2.cy.js',
+    spec: 'session/session_persist_1.cy.js,session/session_persist_2.cy.js',
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     snapshot: true,
     config: {
@@ -152,13 +200,15 @@ describe('e2e sessions', () => {
     },
   })
 
-  it('sessions recreated on reload in open mode', {
+  it('global sessions persist on reload, and persist between specs', {
     project: 'session-and-origin-e2e-specs',
+    spec: 'session/global_session_persist_1.cy.js,session/global_session_persist_2.cy.js',
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
-    spec: 'session_recreate_reload.cy.js',
     snapshot: true,
     config: {
+      env: { SYSTEM_TESTS: true },
       experimentalSessionAndOrigin: true,
+      port: 4455,
       video: false,
     },
   })

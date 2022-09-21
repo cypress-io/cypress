@@ -1,25 +1,29 @@
 Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
-  const specSessionDetails = {
+  const globalSessionDetails = {
     cookies: [
-      { name: 'token', value: '1', domain: 'localhost', path: '/cypress/fixtures', httpOnly: false, secure: false },
+      { name: '/login', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
+      { name: 'token', value: '1', path: '/', domain: 'localhost', secure: false, httpOnly: false },
+      { name: '/home', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
     ],
     localStorage: [
-      { origin: 'http://localhost:4455', value: { animal: 'tiger', persist: 'true' } },
+      { origin: 'https://localhost:4466', value: { animal: 'tiger', persist: 'true' } },
     ],
     sessionStorage: [
-      { origin: 'http://localhost:4455', value: { food: 'zebra' } },
+      { origin: 'https://localhost:4466', value: { food: 'zebra' } },
     ],
   }
 
-  const globalSessionDetails = {
+  const specSessionDetails = {
     cookies: [
-      { name: 'token', value: '2', domain: 'localhost', path: '/cypress/fixtures', httpOnly: false, secure: false },
+      { name: '/login', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
+      { name: 'token', value: '2', path: '/', domain: 'localhost', secure: false, httpOnly: false },
+      { name: '/home', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
     ],
     localStorage: [
-      { origin: 'http://localhost:4455', value: { animal: 'bear' } },
+      { origin: 'https://localhost:4466', value: { animal: 'bear' } },
     ],
     sessionStorage: [
-      { origin: 'http://localhost:4455', value: { food: 'salmon' } },
+      { origin: 'https://localhost:4466', value: { food: 'salmon' } },
     ],
   }
 
@@ -30,23 +34,27 @@ Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
       })
     }
 
-    cy.visit('/cypress/fixtures/loginPage.html')
+    console.log(Cypress.config('port'))
+
+    cy.visit('https://localhost:4466/login')
+    cy.contains('Not Signed in...')
     cy.get('button').click()
     cy.contains('Home Page')
   }, {
     validate: () => {
-      cy.visit('/cypress/fixtures/home.html')
+      cy.visit('https://localhost:4466/home')
       cy.contains('Home Page')
 
       cy.then(async () => {
         const result = await Cypress.session.getCurrentSessionData()
 
-        // console.log(result)
         const expectedResult = cacheAcrossSpecs ? globalSessionDetails : specSessionDetails
 
-        // console.log(expectedResult)
+        expect(result.cookies).to.have.length(3)
+        result.cookies.forEach((cookie, index) => {
+          expect(cookie).to.deep.include(expectedResult.cookies[index])
+        })
 
-        expect(result.cookies).deep.members(expectedResult.cookies)
         expect(result.localStorage).deep.members(expectedResult.localStorage)
         expect(result.sessionStorage).deep.members(expectedResult.sessionStorage)
       })

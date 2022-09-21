@@ -8,7 +8,7 @@ exports['e2e sessions / session tests'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (session.cy.js)                                                          │
-  │ Searched:     cypress/e2e/session.cy.js                                                        │
+  │ Searched:     cypress/e2e/session/session.cy.js                                                │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -137,7 +137,7 @@ exports['e2e sessions / session tests'] = `
 
 `
 
-exports['e2e sessions / sessions persist on reload, and clear between specs'] = `
+exports['e2e sessions / spec sessions persist on reload, and clear between specs'] = `
 
 ====================================================================================================
 
@@ -226,7 +226,7 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
 
 `
 
-exports['e2e sessions / sessions recreated on reload in open mode'] = `
+exports['e2e sessions / global sessions persist on reload, and persist between specs'] = `
 
 ====================================================================================================
 
@@ -235,23 +235,49 @@ exports['e2e sessions / sessions recreated on reload in open mode'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (session_recreate_reload.cy.js)                                          │
-  │ Searched:     cypress/e2e/session_recreate_reload.cy.js                                        │
+  │ Specs:        2 found (global_session_persist_1.cy.js, global_session_persist_2.cy.js)         │
+  │ Searched:     cypress/e2e/session/global_session_persist_1.cy.js, cypress/e2e/session/global_s │
+  │               ession_persist_2.cy.js                                                           │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_recreate_reload.cy.js                                                   (1 of 1)
+  Running:  global_session_persist_1.cy.js                                                  (1 of 2)
 
 
-  recreates session on spec reload in open mode
+  creates global session
+    ✓ creates global sessions
+    ✓ restores global session
+    ✓ creates spec session
+    ✓ restores spec session
 
 
-  recreates session on spec reload in open mode
-    ✓ sets session
+  4 passing
 
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     global_session_persist_1.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  global_session_persist_2.cy.js                                                  (2 of 2)
+
+
+  ✓ restores global_1 session from last test
 
   1 passing
 
@@ -267,7 +293,7 @@ exports['e2e sessions / sessions recreated on reload in open mode'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_recreate_reload.cy.js                                                    │
+  │ Spec Ran:     global_session_persist_2.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -278,9 +304,11 @@ exports['e2e sessions / sessions recreated on reload in open mode'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_recreate_reload.cy.js            XX:XX        1        1        -        -        - │
+  │ ✔  global_session_persist_1.cy.js           XX:XX        4        4        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  global_session_persist_2.cy.js           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
 
 
 `

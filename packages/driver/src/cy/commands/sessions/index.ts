@@ -112,9 +112,22 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.missing_global_setup', { args: { id } })
         }
       } else {
-        const isUniqSessionDefinition = !session || session.setup.toString().trim() !== setup.toString().trim()
+        if (session) {
+          const isUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
+          const isUniqValidateDefinition = session.validate && options.validate && session.validate.toString().trim() !== options.validate.toString().trim()
 
-        if (isUniqSessionDefinition) {
+          if (isRegisteredSessionForSpec && (isUniqSetupDefinition || isUniqValidateDefinition)) {
+            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
+          }
+
+          if (session.cacheAcrossSpecs && _.isString(session.setup)) {
+            session.setup = setup
+          }
+
+          if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
+            session.validate = options.validate
+          }
+        } else {
           if (isRegisteredSessionForSpec) {
             $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
           }
@@ -127,10 +140,6 @@ export default function (Commands, Cypress, cy) {
           })
 
           sessionsManager.registeredSessions.set(id, true)
-        }
-
-        if (session.cacheAcrossSpecs && _.isString(session.setup)) {
-          session.setup = setup
         }
       }
 
@@ -388,7 +397,7 @@ export default function (Commands, Cypress, cy) {
 
             // we have a saved session on the server and setup matches
             if (serverStoredSession && serverStoredSession.setup === session.setup.toString()) {
-              _.extend(session, _.omit(serverStoredSession, 'setup'))
+              _.extend(session, _.omit(serverStoredSession, 'setup', 'validate'))
               session.hydrated = true
             } else {
               return createSessionWorkflow(session)

@@ -3,12 +3,15 @@ describe('creates global session', () => {
     cy.login('global_1', true)
 
     if (Cypress.env('SYSTEM_TESTS')) {
-      cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
+      cy.get(top.document).within(() => {
+        cy.contains('.test', 'creates global session').as('creates_global_session').click()
+        cy.get('@creates_global_session').within(() => {
+          cy.get('.command-name-session').should('contain', 'global_1')
+          .find('.reporter-tag').should('contain', 'created')
+        })
       })
     }
 
-    cy.visit('/cypress/fixtures/home.html')
     cy.getCookie('token').then((cookie) => {
       expect(cookie.value).to.eq('1')
     })
@@ -18,12 +21,15 @@ describe('creates global session', () => {
     cy.login('global_1', true)
 
     if (Cypress.env('SYSTEM_TESTS')) {
-      cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('restored')
+      cy.get(top.document).within(() => {
+        cy.contains('.test', 'restores global session').as('restores_global_session').click()
+        cy.get('@restores_global_session').within(() => {
+          cy.get('.command-name-session').should('contain', 'global_1')
+          .find('.reporter-tag').should('contain', 'restored')
+        })
       })
     }
 
-    cy.visit('/cypress/fixtures/home.html')
     cy.getCookie('token').then((cookie) => {
       expect(cookie.value).to.eq('1')
     })
@@ -33,12 +39,15 @@ describe('creates global session', () => {
     cy.login('spec_session', false)
 
     if (Cypress.env('SYSTEM_TESTS')) {
-      cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('created')
+      cy.get(top.document).within(() => {
+        cy.contains('.test', 'creates spec session').as('creates_spec_session').click()
+        cy.get('@creates_spec_session').within(() => {
+          cy.get('.command-name-session').should('contain', 'spec_session')
+          .find('.reporter-tag').should('contain', 'created')
+        })
       })
     }
 
-    cy.visit('/cypress/fixtures/home.html')
     cy.getCookie('token').then((cookie) => {
       expect(cookie.value).to.eq('2')
     })
@@ -48,12 +57,15 @@ describe('creates global session', () => {
     cy.login('spec_session', false)
 
     if (Cypress.env('SYSTEM_TESTS')) {
-      cy.wrap(null).should(() => {
-        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('restored')
+      cy.get(top.document).within(() => {
+        cy.contains('.test', 'restores spec session').as('restores_spec_session').click()
+        cy.get('@restores_spec_session').within(() => {
+          cy.get('.command-name-session').should('contain', 'spec_session')
+          .find('.reporter-tag').should('contain', 'restored')
+        })
       })
     }
 
-    cy.visit('/cypress/fixtures/home.html')
     cy.getCookie('token').then((cookie) => {
       expect(cookie.value).to.eq('2')
     })
