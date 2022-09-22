@@ -228,3 +228,5 @@ export function packherdRequire (
     tryLoad: moduleLoader.tryLoad.bind(moduleLoader),
   }
 }
+
+export const sourceMapPath = path.join(__dirname, '..', 'dist', 'snapshot.js.map.gz')

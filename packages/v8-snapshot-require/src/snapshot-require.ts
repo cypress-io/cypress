@@ -6,12 +6,14 @@ import type {
   ModuleNeedsReload,
   PackherdTranspileOpts,
 } from '@packages/packherd-require'
-import { packherdRequire } from '@packages/packherd-require'
-import type { Snapshot, SnapshotAuxiliaryData, DependencyMapArray } from './types'
+import { packherdRequire, sourceMapPath } from '@packages/packherd-require'
+import type { Snapshot, DependencyMapArray } from './types'
 import { EMBEDDED } from './constants'
 import { forwardSlash } from './utils'
 import Module from 'module'
 import { DependencyMap } from './dependency-map'
+import fs from 'fs'
+import { gunzipSync } from 'zlib'
 
 export * from './types'
 
@@ -168,15 +170,23 @@ function getCaches (sr: Snapshot | undefined, useCache: boolean) {
  * Attempts to extract the sourcemap embedded in the snapshot
  */
 function getSourceMapLookup () {
-  // @ts-ignore global snapshotAuxiliaryData
-  if (typeof snapshotAuxiliaryData === 'undefined') {
-    return (_: string) => undefined
+  return (uri: string) => {
+    if (uri === EMBEDDED) {
+      try {
+        // Disabling syntax here as we are not in a state where we are reading files frequently on errors
+        // and fall back to the base stack trace on errors.
+        // eslint-disable-next-line no-restricted-syntax
+        const sourceMapContents = fs.readFileSync(sourceMapPath)
+        const sourceMap = JSON.parse(gunzipSync(sourceMapContents).toString())
+
+        return sourceMap
+      } catch {
+        // Go ahead and return undefined on errors
+      }
+    }
+
+    return undefined
   }
-
-  // @ts-ignore global snapshotAuxiliaryData
-  const sourceMap = (<SnapshotAuxiliaryData>snapshotAuxiliaryData).sourceMap
-
-  return (uri: string) => (uri === EMBEDDED ? sourceMap : undefined)
 }
 
 /**

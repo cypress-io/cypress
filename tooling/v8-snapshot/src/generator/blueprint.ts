@@ -1,10 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 import { BUNDLE_WRAPPER_OPEN } from './create-snapshot-script'
-import { inlineSourceMapComment } from '../sourcemap/inline-sourcemap'
 import { processSourceMap } from '../sourcemap/process-sourcemap'
 import debug from 'debug'
 import { forwardSlash } from '../utils'
+import { sourceMapPath } from '@packages/packherd-require'
+import { gzipSync } from 'zlib'
 
 const logDebug = debug('cypress:snapgen:debug')
 
@@ -207,34 +208,13 @@ generateSnapshot = null
 
     processedSourceMap = processSourceMap(sourceMap, basedir, offsetToBundle)
 
-    // Embed the sourcemaps as a JS object for fast retrieval
-    if (sourcemapEmbed && processedSourceMap != null) {
-      logDebug('[sourcemap] embedding')
-      buffers.push(
-        Buffer.from(
-          `snapshotAuxiliaryData.sourceMap = ${processedSourceMap}\n`,
-          'utf8',
-        ),
-      )
-    }
-
-    if (sourcemapInline && processedSourceMap != null) {
-      logDebug('[sourcemap] inlining')
-      // Inline the sourcemap comment (even though DevTools doesn't properly pick that up)
-      const sourceMapComment = inlineSourceMapComment(processedSourceMap)
-
-      if (sourceMapComment != null) {
-        buffers.push(Buffer.from(sourceMapComment, 'utf8'))
-      }
-    } else if (sourcemapExternalPath != null) {
+    if (processedSourceMap != null) {
       logDebug(
-        '[sourcemap] adding mapping url to load "%s"',
-        sourcemapExternalPath,
+        '[sourcemap] writing sourcemap to "%s"',
+        sourceMapPath,
       )
 
-      buffers.push(
-        Buffer.from(`// #sourceMappingUrl=${sourcemapExternalPath}`, 'utf8'),
-      )
+      fs.writeFileSync(sourceMapPath, gzipSync(processedSourceMap))
     }
   }
 
