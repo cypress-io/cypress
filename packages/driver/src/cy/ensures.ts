@@ -392,10 +392,11 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
    * @returns true or throws an error
    */
   const ensureCommandCanCommunicateWithAUT = (err?): boolean => {
+    // TODO: determine exact origin match vs super domain origin match
     if (!isRunnerAbleToCommunicateWithAut()) {
       const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
         commandOrigin: window.location.origin,
-        autSuperDomainOrigin: state('autLocation').superDomainOrigin,
+        origin: state('autLocation').origin,
       })
 
       if (err) {

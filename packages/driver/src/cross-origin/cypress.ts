@@ -40,14 +40,24 @@ const createCypress = () => {
     // It would be ideal to get a window identifier and attach to that window specifically instead of searching all parent windows.
     // This will be implemented for iFrames.
     const findWindow = () => {
+      // if the window we are attaching to is https://app.foobar.com, and we have spec bridges for https://app.foobar.com and https://foobar.com, leverage the https://app.foobar.com spec bridge
+      let mostSpecificWindow: Window | undefined = undefined
+
       for (let index = 0; index < window.parent.frames.length; index++) {
         const frame = window.parent.frames[index]
 
         try {
-          // the AUT would be the frame with a matching super domain origin, but not the same exact href.
-          if (window.location.origin === cors.getSuperDomainOrigin(frame.location.origin)
-              && window.location.href !== frame.location.href) {
-            return frame
+          // the AUT would be the frame with a matching origin policy or super origin policy, but not the same exact href.
+          if (window.location.href !== frame.location.href) {
+            if (window.location.origin === cors.getOrigin(frame.location.origin)) {
+              mostSpecificWindow = frame
+            }
+
+            // if we can't find a specific origin match for the spec bridge, see if window matches the superDomainOriginPolicy.
+            // In the case no exact origin matches, leverage the spec bridge that matches the super domain origin policy.
+            if (!mostSpecificWindow && window.location.origin === cors.getSuperDomainOrigin(frame.location.origin)) {
+              mostSpecificWindow = frame
+            }
           }
         } catch (error) {
           // Catch DOMException: Blocked a frame from accessing a cross-origin frame.
@@ -57,7 +67,7 @@ const createCypress = () => {
         }
       }
 
-      return undefined
+      return mostSpecificWindow
     }
 
     const autWindow = findWindow()
@@ -68,10 +78,12 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutSuperDomainOrigin = cy.state('autLocation').superDomainOrigin
-    const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
+    const { superDomainOrigin: currentAutSuperDomainOrigin, origin: currentAutOrigin } = cy.state('autLocation')
+    const { superDomainOrigin: requestedSnapshotUrlSuperDomainOrigin, origin: requestedSnapshotUrlOrigin } = $Location.create(snapshotUrl)
 
-    if (requestedSnapshotUrlLocation.superDomainOrigin === currentAutSuperDomainOrigin) {
+    // TODO: how does this work with 2 spec bridges , one foobar.com and another app.foobar.com
+    // maybe we need to check the active spec bridge?
+    if (currentAutOrigin === requestedSnapshotUrlOrigin || requestedSnapshotUrlSuperDomainOrigin === currentAutSuperDomainOrigin) {
       // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 

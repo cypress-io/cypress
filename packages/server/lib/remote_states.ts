@@ -69,7 +69,7 @@ export class RemoteStates {
   }
 
   isPrimaryOrigin (url: string): boolean {
-    return this.primaryOriginKey === cors.getSuperDomainOrigin(url)
+    return this.primaryOriginKey === cors.getOrigin(url) || this.primaryOriginKey === cors.getSuperDomainOrigin(url)
   }
 
   reset () {

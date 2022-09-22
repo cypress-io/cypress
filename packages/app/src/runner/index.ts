@@ -194,11 +194,11 @@ export async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.superDomainOrigin}`
+  const id = `Spec Bridge: ${location.origin}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
-    getEventManager().notifyCrossOriginBridgeReady(location.superDomainOrigin)
+    getEventManager().notifyCrossOriginBridgeReady(location.origin)
 
     return
   }
@@ -209,7 +209,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.superDomainOrigin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.origin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 
