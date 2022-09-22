@@ -75,7 +75,7 @@ export function writeConfigJSON (
   const configPath = path.join(
     tmpdir(),
     'v8-snapshot',
-    `snasphot-config.${configHash}.json`,
+    `snapshot-config.${configHash}.json`,
   )
 
   ensureDirSync(path.dirname(configPath))
