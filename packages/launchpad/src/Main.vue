@@ -74,6 +74,7 @@
         <OpenBrowser v-else />
       </template>
     </div>
+    <CloudViewerAndProject />
     <LoginConnectModals />
   </template>
   <div data-e2e />
@@ -100,6 +101,7 @@ import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 import { useOnline } from '@vueuse/core'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
+import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)

@@ -5,13 +5,17 @@
     />
   </router-view>
 
-  <LoginConnectModals v-if="route.name !== 'SpecRunner'" />
+  <template v-if="route.name !== 'SpecRunner'">
+    <CloudViewerAndProject />
+    <LoginConnectModals />
+  </template>
 </template>
 
 <script setup lang="ts">
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
+import CloudViewerAndProject from '../../frontend-shared/src/gql-components/CloudViewerAndProject.vue'
 const route = useRoute()
 
 </script>

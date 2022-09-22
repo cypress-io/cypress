@@ -10,7 +10,6 @@
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
-      :gql="props.gql"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -95,7 +94,6 @@ fragment RunsContainer on Query {
   cloudViewer {
     id
   }
-  ...RunsConnect
 }`
 
 gql`

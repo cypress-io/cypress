@@ -2,6 +2,7 @@ import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test
 import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '../store/login-connect-store'
 
 const text = defaultMessages.topNav
 
@@ -294,6 +295,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('the logged in state is correctly presented in header', () => {
+    const loginConnectStore = useLoginConnectStore()
+
+    loginConnectStore.setStatus('isLoggedIn', true)
+
     const cloudViewer = {
       ...CloudUserStubs.me,
       organizations: null,
@@ -305,6 +310,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       email: 'test@test.test',
       fullName: 'Tester Test',
     }
+
+    loginConnectStore.setUserData(cloudViewer)
 
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
