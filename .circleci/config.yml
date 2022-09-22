@@ -52,6 +52,8 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
           value: << pipeline.git.branch >>
 
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
+  unless:
+    or:
     - false
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
