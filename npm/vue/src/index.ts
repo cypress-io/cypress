@@ -17,9 +17,8 @@ import type {
   ComponentPropsOptions,
   ComponentOptionsWithArrayProps,
   ComponentOptionsWithoutProps,
-  Prop,
 } from 'vue'
-import type { MountingOptions as VTUMountingOptions, VueWrapper } from '@vue/test-utils'
+import type { MountingOptions, VueWrapper } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
   StyleOptions,
@@ -45,7 +44,7 @@ export { VueTestUtils }
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-type GlobalMountOptions = Required<VTUMountingOptions<any>>['global']
+type GlobalMountOptions = Required<MountingOptions<any>>['global']
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -59,7 +58,7 @@ declare global {
   }
 }
 
-type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, 'attachTo'> & {
+export type CyMountOptions<Props, Data= {}> = Omit<MountingOptions<Props, Data>, 'attachTo'> & {
   log?: boolean
   /**
    * @deprecated use vue-test-utils `global` instead
@@ -69,8 +68,6 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
     mixin?: GlobalMountOptions['mixins']
   }
 } & Partial<StyleOptions>
-
-export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
 Cypress.on('run:start', () => {
   // `mount` is designed to work with component testing only.
@@ -92,79 +89,38 @@ Cypress.on('run:start', () => {
 })
 
 /**
- * The types for mount have been copied directly from the VTU mount
- * https://github.com/vuejs/vue-test-utils-next/blob/master/src/mount.ts.
+ * the types for mount have been copied directly from the VTU mount
+ * https://github.com/vuejs/vue-test-utils-next/blob/master/src/mount.ts
  *
- * There isn't a good way to make them generic enough that we can extend them.
- *
- * In addition, we modify the types slightly.
- *
- * `MountOptions` are modifying, including some Cypress specific options like `styles`.
- * The return type is different. Instead of VueWrapper, it's Cypress.Chainable<VueWrapper<...>>.
+ * If they are updated please copy and pase them again here.
  */
-type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps
 
-type ComponentMountingOptions<T> = T extends DefineComponent<
-  infer PropsOrPropOptions,
-  any,
-  infer D,
-  any,
-  any
->
-  ? MountingOptions<
-      Partial<ExtractDefaultPropTypes<PropsOrPropOptions>> &
-      Omit<
-          Readonly<ExtractPropTypes<PropsOrPropOptions>> & PublicProps,
-          keyof ExtractDefaultPropTypes<PropsOrPropOptions>
-        >,
-      D
-    > &
-  Record<string, any>
-  : MountingOptions<any>
-
-// Class component (without vue-class-component) - no props
-export function mount<V extends {}>(
-  originalComponent: {
-    new (...args: any[]): V
-    __vccOpts: any
-  },
-  options?: MountingOptions<any> & Record<string, any>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<V>>>
-
-// Class component (without vue-class-component) - props
-export function mount<V extends {}, P>(
-  originalComponent: {
-    new (...args: any[]): V
-    __vccOpts: any
-    defaultProps?: Record<string, Prop<any>> | string[]
-  },
-  options?: MountingOptions<P & PublicProps> & Record<string, any>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<V>>>
+type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps;
 
 // Class component - no props
-export function mount<V extends {}>(
+export function mount<V>(
   originalComponent: {
     new (...args: any[]): V
     registerHooks(keys: string[]): void
   },
-  options?: MountingOptions<any> & Record<string, any>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<V>>>
+  options?: MountingOptions<any>
+): Cypress.Chainable
 
 // Class component - props
-export function mount<V extends {}, P>(
+export function mount<V, P>(
   originalComponent: {
     new (...args: any[]): V
     props(Props: P): any
     registerHooks(keys: string[]): void
   },
-  options?: MountingOptions<P & PublicProps> & Record<string, any>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<V>>>
+  options?: CyMountOptions<P & PublicProps>
+): Cypress.Chainable
 
 // Functional component with emits
-export function mount<Props extends {}, E extends EmitsOptions = {}>(
+export function mount<Props, E extends EmitsOptions = {}>(
   originalComponent: FunctionalComponent<Props, E>,
-  options?: MountingOptions<Props & PublicProps> & Record<string, any>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<Props>>>
+  options?: CyMountOptions<Props & PublicProps>
+): Cypress.Chainable
 
 // Component declared with defineComponent
 export function mount<
@@ -179,7 +135,7 @@ export function mount<
   EE extends string = string,
   PP = PublicProps,
   Props = Readonly<ExtractPropTypes<PropsOrPropOptions>>,
-  Defaults extends {} = ExtractDefaultPropTypes<PropsOrPropOptions>
+  Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
 >(
   component: DefineComponent<
     PropsOrPropOptions,
@@ -195,43 +151,17 @@ export function mount<
     Props,
     Defaults
   >,
-  options?: MountingOptions<
+  options?: CyMountOptions<
     Partial<Defaults> & Omit<Props & PublicProps, keyof Defaults>,
     D
-  > &
-  Record<string, any>
-): Cypress.Chainable<
-  VueWrapper<
-    InstanceType<
-      DefineComponent<
-        PropsOrPropOptions,
-        RawBindings,
-        D,
-        C,
-        M,
-        Mixin,
-        Extends,
-        E,
-        EE,
-        PP,
-        Props,
-        Defaults
-      >
-    >
   >
->
-
-// component declared by vue-tsc ScriptSetup
-export function mount<T extends DefineComponent<any, any, any, any>>(
-  component: T,
-  options?: ComponentMountingOptions<T>
-): Cypress.Chainable<VueWrapper<InstanceType<T>>>
+): Cypress.Chainable
 
 // Component declared with no props
 export function mount<
   Props = {},
   RawBindings = {},
-  D extends {} = {},
+  D = {},
   C extends ComputedOptions = {},
   M extends Record<string, Function> = {},
   E extends EmitsOptions = Record<string, any>,
@@ -242,31 +172,25 @@ export function mount<
   componentOptions: ComponentOptionsWithoutProps<
     Props,
     RawBindings,
-    D,
-    C,
-    M,
-    E,
-    Mixin,
-    Extends,
-    EE
+    D
   >,
-  options?: MountingOptions<Props & PublicProps, D>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E, VNodeProps & Props>>> & Record<string, any>
+  options?: CyMountOptions<Props & PublicProps, D>
+): Cypress.Chainable
 
 // Component declared with { props: [] }
 export function mount<
   PropNames extends string,
   RawBindings,
-  D extends {},
+  D,
   C extends ComputedOptions = {},
   M extends Record<string, Function> = {},
   E extends EmitsOptions = Record<string, any>,
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   EE extends string = string,
-  Props extends Readonly<{ [key in PropNames]?: any }> = Readonly<{
-    [key in PropNames]?: any
-  }>
+  Props extends Readonly<{ [key in PropNames]?: any }> = Readonly<
+    { [key in PropNames]?: any }
+  >
 >(
   componentOptions: ComponentOptionsWithArrayProps<
     PropNames,
@@ -280,8 +204,8 @@ export function mount<
     EE,
     Props
   >,
-  options?: MountingOptions<Props & PublicProps, D>
-): Cypress.Chainable<VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E>>>
+  options?: CyMountOptions<Props & PublicProps, D>
+): Cypress.Chainable
 
 // Component declared with { props: { ... } }
 export function mount<
@@ -289,7 +213,7 @@ export function mount<
   // as constant instead of boolean.
   PropsOptions extends Readonly<ComponentPropsOptions>,
   RawBindings,
-  D extends {},
+  D,
   C extends ComputedOptions = {},
   M extends Record<string, Function> = {},
   E extends EmitsOptions = Record<string, any>,
@@ -308,23 +232,14 @@ export function mount<
     Extends,
     EE
   >,
-  options?: MountingOptions<ExtractPropTypes<PropsOptions> & PublicProps, D>
-): Cypress.Chainable<
-  VueWrapper<
-    ComponentPublicInstance<
-      ExtractPropTypes<PropsOptions>,
-      RawBindings,
-      D,
-      C,
-      M,
-      E,
-      VNodeProps & ExtractPropTypes<PropsOptions>
-    >
-  >
->
+  options?: CyMountOptions<ExtractPropTypes<PropsOptions> & PublicProps, D>
+): Cypress.Chainable
 
 // implementation
-export function mount (componentOptions: any, options: any) {
+export function mount (
+  componentOptions: any,
+  options: CyMountOptions<any> = {},
+) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)
 
