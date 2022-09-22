@@ -21,12 +21,32 @@ for (const project of PROJECTS) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('HelloWorld.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
       cy.get('.commands-container').within(() => {
         cy.contains('mount')
         cy.contains('<HelloWorld ... />')
       })
+    })
+
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('HelloWorld.cy.js').click()
+      cy.waitForSpecToFinish({ passCount: 1 })
+
+      // Create compilation error
+      cy.withCtx(async (ctx) => {
+        const helloWorldVuePath = ctx.path.join('src', 'components', 'HelloWorld.vue')
+
+        await ctx.actions.file.writeFileInProject(
+          helloWorldVuePath,
+          (await ctx.file.readFileInProject(helloWorldVuePath)).replace('export', 'expart'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
   })
 }

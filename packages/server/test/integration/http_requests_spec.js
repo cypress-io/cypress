@@ -17,6 +17,7 @@ const { SocketE2E } = require(`../../lib/socket-e2e`)
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const pluginsModule = require(`../../lib/plugins`)
@@ -107,7 +108,7 @@ describe('Routes', () => {
       // get all the config defaults
       // and allow us to override them
       // for each test
-      return config.setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+      return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -2654,10 +2655,6 @@ describe('Routes', () => {
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
           'Content-Type': 'text/html',
-        })
-
-        this.server._eventBus.on('cross:origin:delaying:html', () => {
-          this.server._eventBus.emit('cross:origin:release:html')
         })
 
         return this.rp({
