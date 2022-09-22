@@ -7,7 +7,7 @@
  * and global session data is persisted between specs in run mode.
  */
 
-it('restores global session from last spec', async () => {
+it('restores global session from last spec', () => {
   cy.login('global_1')
 
   if (Cypress.env('SYSTEM_TESTS')) {
@@ -25,7 +25,7 @@ it('restores global session from last spec', async () => {
   })
 })
 
-it('creates spec session since it is a new spec', async () => {
+it('creates spec session since it is a new spec', () => {
   cy.login('spec_session', false)
 
   if (Cypress.env('SYSTEM_TESTS')) {
