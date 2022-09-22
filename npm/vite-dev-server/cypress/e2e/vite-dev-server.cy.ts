@@ -58,4 +58,20 @@ describe('Config options', () => {
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
   })
+
+  it('supports viteConfig as an async function', () => {
+    cy.scaffoldProject('vite2.9.1-react')
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-async-function-config.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+    cy.withCtx(async (ctx) => {
+      const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
+
+      expect(verifyFile).to.eq('OK')
+    })
+  })
 })
