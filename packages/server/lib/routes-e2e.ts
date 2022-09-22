@@ -1,3 +1,4 @@
+import fs from 'fs-extra'
 import path from 'path'
 import Debug from 'debug'
 import { Router } from 'express'
@@ -26,6 +27,26 @@ export const createRoutesE2E = ({
     const test = CacheBuster.strip(req.query.p)
 
     specController.handle(test, req, res, config, next, onError)
+  })
+
+  routesE2E.get(`/${config.namespace}/get-file/:filePath`, async (req, res) => {
+    const { filePath } = req.params
+
+    debug('get file: %s', filePath)
+
+    try {
+      const contents = await fs.readFile(filePath)
+
+      res.json({ contents: contents.toString() })
+    } catch (err) {
+      const errorMessage = `Getting the file at the following path errored:\nPath: ${filePath}\nError: ${err.stack}`
+
+      debug(errorMessage)
+
+      res.json({
+        error: errorMessage,
+      })
+    }
   })
 
   routesE2E.get(`/${config.namespace}/socket.io.js`, (req, res) => {

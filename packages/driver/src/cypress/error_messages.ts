@@ -1192,6 +1192,12 @@ export default {
 
         The value you synchronously returned was: \`{{value}}\``,
     },
+    failed_to_get_callback: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to run the callback function due to the following error:
+
+      {{error}}`,
+    },
     failed_to_serialize_object: {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
@@ -1243,22 +1249,6 @@ export default {
         message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
         docsUrl: 'https://on.cypress.io/session-api',
       },
-    },
-    cannot_visit_previous_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
-
-          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
-
-          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
-
-          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`
-
-          \`cy.visit('${args.originalUrl}')\``,
-      }
     },
     aut_error_prior_to_spec_bridge_attach ({ args }) {
       const { errorMessage, autLocation } = args
@@ -1450,6 +1440,17 @@ export default {
     url_wrong_type: {
       message: `${cmd('request')} requires the \`url\` to be a string.`,
       docsUrl: 'https://on.cypress.io/request',
+    },
+  },
+
+  require: {
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_inside_origin: {
+      message: `Importing dependencies with ${cmd('Cypress.require')} requires using the latest version of \`@cypress/webpack-preprocessor\`.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
   },
 

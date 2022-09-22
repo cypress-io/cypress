@@ -38,7 +38,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/react18/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/react18/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact18&template=1-bug-report.md&title=",
   "keywords": [
     "react",
