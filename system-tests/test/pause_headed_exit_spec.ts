@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 describe('cy.pause() in run mode', () => {
   systemTests.setup()
 
-  systemTests.it('pauses with --headed and --no-exit', {
+  systemTests.it.skip('pauses with --headed and --no-exit', {
     spec: 'pause.cy.js',
     config: {
       env: {
@@ -23,7 +23,7 @@ describe('cy.pause() in run mode', () => {
     },
   })
 
-  systemTests.it('does not pause if headless', {
+  systemTests.it.skip('does not pause if headless', {
     spec: 'pause.cy.js',
     config: {
       env: {
@@ -57,7 +57,7 @@ describe('cy.pause() in run mode', () => {
     expectedExitCode: 0,
   })
 
-  systemTests.it('does not pause without --headed and --no-exit', {
+  systemTests.it.skip('does not pause without --headed and --no-exit', {
     spec: 'pause.cy.js',
     config: {
       env: {
