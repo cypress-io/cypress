@@ -13,10 +13,10 @@ import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
 
-import type { E2ETaskMap } from '../e2ePluginSetup'
-import { installCustomPercyCommand } from '../../support/customPercyCommand'
-import i18n from '../../../src/locales/en-US.json'
-import { addNetworkCommands } from '../../support/onlineNetwork'
+import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
+import { installCustomPercyCommand } from './customPercyCommand'
+import i18n from '../../src/locales/en-US.json'
+import { addNetworkCommands } from './onlineNetwork'
 
 configure({ testIdAttribute: 'data-cy' })
 
