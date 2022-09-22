@@ -152,6 +152,7 @@ const verifyFailure = (options) => {
     if (uncaught) {
       cy.log('uncaught error has an associated log for the original error')
       cy.get('.command-name-uncaught-exception')
+      // https://github.com/cypress-io/cypress/issues/23920
       .should(mode === 'component' ? 'have.length.gte' : 'have.length', 1)
       .find('.command-state-failed')
       .find('.command-message-text')

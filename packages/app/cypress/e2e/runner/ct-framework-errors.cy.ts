@@ -33,7 +33,9 @@ function loadErrorSpec (options: Options): VerifyFunc {
   return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde: false, mode: 'component' })
 }
 
-[17, 18].forEach((reactVersion) => {
+const reactVersions = [17, 18] as const
+
+reactVersions.forEach((reactVersion) => {
   describe(`React ${reactVersion}`, {
     viewportHeight: 768,
     viewportWidth: 1024,
@@ -42,12 +44,12 @@ function loadErrorSpec (options: Options): VerifyFunc {
     numTestsKeptInMemory: 1,
   }, () => {
     before(() => {
-      cy.scaffoldProject(`react${reactVersion}` as ProjectFixtureDir)
+      cy.scaffoldProject(`react${reactVersion}`)
     })
 
     it('error conditions', () => {
       const verify = loadErrorSpec({
-        projectName: `react${reactVersion}` as ProjectFixtureDir,
+        projectName: `react${reactVersion}`,
         configFile: 'cypress-vite.config.ts',
         filePath: 'src/Errors.cy.jsx',
         failCount: 4,
@@ -170,6 +172,7 @@ describe('Vue', {
 })
 
 // TODO: Svelte sourcemaps are generated but are not working properly on Webpack or Vite
+//       https://github.com/cypress-io/cypress/issues/23918
 describe.skip('Svelte', {
   viewportHeight: 768,
   viewportWidth: 1024,
@@ -233,7 +236,9 @@ describe.skip('Svelte', {
   })
 })
 
-;[13, 14].forEach((angularVersion) => {
+const angularVersions = [13, 14] as const
+
+angularVersions.forEach((angularVersion) => {
   describe(`Angular ${angularVersion}`, {
     viewportHeight: 768,
     viewportWidth: 1024,
@@ -242,12 +247,12 @@ describe.skip('Svelte', {
     numTestsKeptInMemory: 1,
   }, () => {
     before(() => {
-      cy.scaffoldProject(`angular-${angularVersion}` as ProjectFixtureDir)
+      cy.scaffoldProject(`angular-${angularVersion}`)
     })
 
     it('error conditions', () => {
       const verify = loadErrorSpec({
-        projectName: `angular-${angularVersion}` as ProjectFixtureDir,
+        projectName: `angular-${angularVersion}`,
         configFile: 'cypress.config.ts',
         filePath: 'src/app/errors.cy.ts',
         failCount: 1,

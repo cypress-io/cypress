@@ -90,7 +90,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
     })
 
     // Vite does not provide the `require` syntax used by this test
-    if (server !== 'Vite') {
+    if (server === 'Webpack') {
       it('exception failures', () => {
         const verify = loadErrorSpec({
           filePath: 'errors/exceptions.cy.js',

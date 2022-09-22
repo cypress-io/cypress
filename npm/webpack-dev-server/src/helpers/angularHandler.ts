@@ -256,7 +256,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
 
 function removeSourceMapPlugin (config: Configuration) {
   config.plugins = config.plugins?.filter((plugin) => {
-    return (plugin as any).constructor.name !== 'SourceMapDevToolPlugin'
+    return plugin?.constructor?.name !== 'SourceMapDevToolPlugin'
   })
 }
 
