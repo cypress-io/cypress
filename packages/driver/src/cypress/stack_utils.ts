@@ -12,8 +12,8 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
-// string containing `webpack:///./`
-const webpackDevtoolNamespaceRegex = /webpack:\/{3}\.\//
+// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
@@ -291,6 +291,9 @@ const stripCustomProtocol = (filePath) => {
     return
   }
 
+  // Check the path to see if custom namespaces have been applied and, if so, remove them
+  // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
+  // need to strip off the `_N_E` so that "Open in IDE" links work correctly
   if (webpackDevtoolNamespaceRegex.test(filePath)) {
     return filePath.replace(webpackDevtoolNamespaceRegex, '')
   }
