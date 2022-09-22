@@ -135,7 +135,7 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [app](./packages/app)           | `@packages/app`      | The the front-end for the Cypress App that renders in the launched browser instance.             |
+ | [app](./packages/app)           | `@packages/app`      | The front-end for the Cypress App that renders in the launched browser instance.             |
  | [config](./packages/config)           | `@packages/config`      | The Cypress configuration types and validation used in the server, data-context and driver.             |
  | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application.             |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
