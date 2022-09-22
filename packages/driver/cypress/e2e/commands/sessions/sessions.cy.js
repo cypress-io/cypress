@@ -907,7 +907,7 @@ describe('cy.session', { retries: 0 }, () => {
       cy.session('some-session')
     })
 
-    it('throws when setup function is not provided for and global session is registered', function (done) {
+    it('throws when setup function is not provided and global session is registered', function (done) {
       cy.once('fail', (err) => {
         expect(lastLog.get('error')).to.eq(err)
         expect(lastLog.get('state')).to.eq('failed')

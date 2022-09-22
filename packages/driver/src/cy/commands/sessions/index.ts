@@ -24,7 +24,7 @@ type SessionData = Cypress.Commands.Session.SessionData
 export default function (Commands, Cypress, cy) {
   // @ts-ignore
   Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
-    if (sessionData.cacheAcrossSpecs) {
+    if (sessionData?.cacheAcrossSpecs) {
       sessionsManager.registeredSessions.set(sessionData.id, true)
     }
   })
