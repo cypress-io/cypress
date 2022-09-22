@@ -2406,7 +2406,7 @@
     check-more-types "2.24.0"
     lazy-ass "1.6.0"
 
-"@cypress/react-tooltip@0.5.3", "@cypress/react-tooltip@^0.5.3":
+"@cypress/react-tooltip@0.5.3":
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/@cypress/react-tooltip/-/react-tooltip-0.5.3.tgz#3e0635304b2bf7dab5b7c251eb1ad23048b05dac"
   integrity sha512-5/CkKmEtirHAsMh8B6vdzcRHVAYsspviQhv8aw4S+DM/RjAdxALiof8nw941GfmWzgu8qDXGkxgKvv3oxZrfNw==
@@ -5426,30 +5426,12 @@
     "@percy/env" "1.2.0"
     "@percy/logger" "1.2.0"
 
-"@percy/client@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.8.1.tgz#bbc81c2a41ab44e5f79c93aac6afa68c17a90af8"
-  integrity sha512-2T0SdIUFwMCsnaUTM0hNQx5lrkg2qPHPKBL/MRrbbTPJVJe3J9PzeR84RJtKviyy+ciEkkm6UaQsWBngbyXXsQ==
-  dependencies:
-    "@percy/env" "1.8.1"
-    "@percy/logger" "1.8.1"
-
 "@percy/config@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.2.0.tgz#0e842cec70f8a644b8f9fd6496dbb923c3ba00c2"
   integrity sha512-PRGTkxaMT1L/02Eg5HVxWVZTfRL4rfju1TlotTkR8umiql6CFTSHl5GIPFRyl93XRE7rjibsYQ5hx2ezZIlh6g==
   dependencies:
     "@percy/logger" "1.2.0"
-    ajv "^8.6.2"
-    cosmiconfig "^7.0.0"
-    yaml "^2.0.0"
-
-"@percy/config@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.8.1.tgz#46d73b8cdb0e1d7400e8d91fe12e9f6ea08d2b31"
-  integrity sha512-yKdKx0kh5xyVxBdNVExXsoNuSmKcmpma31DkqqacDUu2nYSjuCGxr3j3y8BRAKURfj59fdhwpFNmjVVB1xiVWA==
-  dependencies:
-    "@percy/logger" "1.8.1"
     ajv "^8.6.2"
     cosmiconfig "^7.0.0"
     yaml "^2.0.0"
@@ -5473,25 +5455,6 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/core@^1.0.0-beta.48":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/core/-/core-1.8.1.tgz#b1e419da98251b370cdcea436bb702ee3461d203"
-  integrity sha512-wwTSJWoKK8tr8AbORlJGJ7uz55v8oUdOrfZtCnRPssWiceaWFXecRbjLXcNCCz0/2nT6Y1ilDsEOjlExYnKhww==
-  dependencies:
-    "@percy/client" "1.8.1"
-    "@percy/config" "1.8.1"
-    "@percy/dom" "1.8.1"
-    "@percy/logger" "1.8.1"
-    content-disposition "^0.5.4"
-    cross-spawn "^7.0.3"
-    extract-zip "^2.0.1"
-    fast-glob "^3.2.11"
-    micromatch "^4.0.4"
-    mime-types "^2.1.34"
-    path-to-regexp "^6.2.0"
-    rimraf "^3.0.2"
-    ws "^8.0.0"
-
 "@percy/cypress@^3.1.0", "@percy/cypress@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.1.tgz#4e7c5bdeccf1240b2150fc9d608df72c2f213d4b"
@@ -5504,27 +5467,17 @@
   resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.2.0.tgz#c59aae392539cc493145daa928c8d43cfbfdd819"
   integrity sha512-OThOEuEyczxToc/+Df/aHDFY0O5balTG1w0k91wyZCNEIjD2nhwiAj09m28SmybNpq6TC6j0qnuPTD9rk2vgDw==
 
-"@percy/dom@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.8.1.tgz#b3daa0f6f8d95a5b72df4edfdca615ed04f14f93"
-  integrity sha512-h9XJV+VcVHrMkfIgJ6sJLujtYLzkvRy3aBvUY/iS7yh88qM16pSuTgEHG9fzbOp8ZNZpu6zZdxy4QmeACqzGzw==
-
 "@percy/env@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.2.0.tgz#22ec45884f2e7c6d962237c9350ab16625e4e196"
   integrity sha512-+In1gN8ArNMwyFj8tZMEpqI8CAoLeuZpa99DPP4QNqyNW1+mUEzYobqBJ8VrJDBWqCayWtuxiofQO+ihReBo0Q==
-
-"@percy/env@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.8.1.tgz#338d87479dc48fc2ca3e0a66c98f0b5235f322c2"
-  integrity sha512-noxlV3fesivvXxnWEODUzdoToIurOolvwlEk+ETmpB933zKTpo55UFD5leV5LWP5Oxwrv4uen2i7ZdHRXPD47Q==
 
 "@percy/logger@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.2.0.tgz#4739e57df77db1377a67be1d2a34575a68718f4a"
   integrity sha512-UfCJA2jRBwBqGdCNKlNK2Y5QYf0h5dsI56GdYO97hCv1GOj29X+1xQsfYFTbocTR5EmoBsS41sErBZ1aVBtDng==
 
-"@percy/logger@1.8.1", "@percy/logger@^1.0.0-beta.48":
+"@percy/logger@^1.0.0-beta.48":
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.8.1.tgz#91e1fb3ec2952dfd170201ab101aa1a7f505c778"
   integrity sha512-O1GpuuN6pzBk/dso57LS90APbRNfc4y0qsGEIph+8f1zK6dBZmalwKLzhgrvb267rLe3pduYM5fCiYel0pqh7Q==
@@ -5581,13 +5534,6 @@
     "@types/warning" "^3.0.0"
     tslib "^2.0.0"
     warning "^4.0.3"
-
-"@reach/visually-hidden@0.10.4":
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.10.4.tgz#ab390db0adf759393af4d856f84375468b1df676"
-  integrity sha512-GnuPuTRCf+Ih47BoKvGyB+jP8EVWLb04GfbGa5neOrjdp90qrb4zr7pMSL4ZvTsrxt9MRooJA2BhSxs5DbyqCQ==
-  dependencies:
-    tslib "^2.0.0"
 
 "@rollup/plugin-commonjs@^17.1.0":
   version "17.1.0"
@@ -10919,8 +10865,8 @@ brorand@^1.0.1, brorand@^1.1.0:
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
 "browser-logos@github:alrra/browser-logos":
-  version "69.0.4"
-  resolved "https://codeload.github.com/alrra/browser-logos/tar.gz/90fdf03c58819fd31892869712feb7d614d79a96"
+  version "72.0.0"
+  resolved "https://codeload.github.com/alrra/browser-logos/tar.gz/6e3e6a8da0dc8ec9851a6987fd9bd3523fe1876c"
 
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
@@ -23863,13 +23809,6 @@ mobx-react-lite@^1.4.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-1.5.2.tgz#c4395b0568b9cb16f07669d8869cc4efa1b8656d"
   integrity sha512-PyZmARqqWtpuQaAoHF5pKX7h6TKNLwq6vtovm4zZvG6sEbMRHHSqioGXSeQbpRmG8Kw8uln3q/W1yMO5IfL5Sg==
-
-mobx-react@6.1.7:
-  version "6.1.7"
-  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-6.1.7.tgz#2fe620851ef33df38e50645101321830a07fc4e2"
-  integrity sha512-TXwqweY7yEbMl+0F5jOO5bHWUbgeNJr8o1or+1NdhWWg6duIqsGW1D6ojNmn2RO27vRJHkZrp4kjv6919nHS0A==
-  dependencies:
-    mobx-react-lite "^1.4.2"
 
 mobx-react@6.1.8:
   version "6.1.8"
