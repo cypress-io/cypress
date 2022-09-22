@@ -37,8 +37,8 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
   if (!this.config.experimentalSessionAndOrigin ||
     !doesTopNeedToBeSimulated(this) ||
-    // this should be unreachable happen as the x-cypress-request header is only attached if the resource type is 'xhr'
-    // inside the extension or electron equivalent. This should only be needed for defensive purposes
+    // this should be unreachable, as the x-cypress-request header is only attached if the resource type is 'xhr'
+    // inside the extension or electron equivalent. This is only needed for defensive purposes.
     (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
     this.next()
 
