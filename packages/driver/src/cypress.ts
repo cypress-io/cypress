@@ -219,7 +219,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    // TODO: remove rawJson...
+    // TODO: remove rawJson - https://github.com/cypress-io/cypress/issues/23945
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
