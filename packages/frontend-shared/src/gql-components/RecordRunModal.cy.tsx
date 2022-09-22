@@ -3,6 +3,8 @@ import RecordRunModalVue from './RecordRunModal.vue'
 describe('RecordRunModal', () => {
   it('is not open by default', () => {
     cy.mount(<RecordRunModalVue isModalOpen={false} close={cy.stub()} utmMedium="Nav" />)
+
+    cy.findByTestId('record-run-modal').should('not.exist')
   })
 
   it('renders open', () => {
