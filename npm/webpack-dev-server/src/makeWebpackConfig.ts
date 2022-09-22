@@ -80,7 +80,7 @@ export async function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  let userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  let userWebpackConfig = config.devServerConfig.webpackConfig
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
   const {
     cypressConfig: {
@@ -124,6 +124,10 @@ export async function makeWebpackConfig (
       }
     }
   }
+
+  userWebpackConfig = typeof userWebpackConfig === 'function'
+    ? await userWebpackConfig()
+    : userWebpackConfig
 
   const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
     merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
