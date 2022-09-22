@@ -26,6 +26,7 @@ describe('makeWebpackConfig', () => {
         optimization: {
           noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
         },
+        devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
       },
       devServerEvents: new EventEmitter(),
     }
@@ -72,6 +73,7 @@ describe('makeWebpackConfig', () => {
         optimization: {
           emitOnErrors: false, // This will be overridden by makeWebpackConfig.ts
         },
+        devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
       },
       devServerEvents: new EventEmitter(),
     }
