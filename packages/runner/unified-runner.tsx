@@ -10,8 +10,6 @@ import { dom } from './src/dom'
 export const UnifiedRunner = {
   CypressJQuery: $Cypress.$,
 
-  CypressDriver: $Cypress,
-
   dom,
 
   shortcuts,
