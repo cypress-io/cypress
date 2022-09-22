@@ -2,12 +2,91 @@ import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
+import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
 import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { RequestCredentialLevel, RequestResourceType } from '../../types'
+
+type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
 
 interface RequestDetails {
   url: string
   isAUTFrame: boolean
   needsCrossOriginHandling: boolean
+}
+
+/**
+ * Determines whether or not a request should attach cookies from the tough-cookie jar or whether a response should set cookies inside the tough-cookie jar.
+ * same-origin requests send cookies by default (unless 'omit' is specified by the fetch API). Otherwise, for same-site/cross-site requests, credentials either need to
+ * be 'include' via the fetch API or 'true for XmlHttpRequest. If the AUT Iframe is making the request, this is likely a navigation and we should attach/set cookies in the browser,
+ * which is critical for lax cookies
+ * @param {string} requestUrl - the url of the request
+ * @param {string} AUTUrl - The current url of the app under test
+ * @param {RequestResourceType} [resourceType] -
+ * @param {RequestCredentialLevel} [credentialLevel] - The credentialLevel of the request. For `fetch` this is `omit|same-origin|include` (defaults to same-origin)
+ * and for `XmlHttpRequest` it is `true|false` (defaults to false)
+ * @param {isAutFrame} [boolean] - whether or not the request is from the AUT Iframe or not
+ * @returns {boolean}
+ */
+export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
+  if (!AUTUrl) return false
+
+  const siteContext = calculateSiteContext(requestUrl, AUTUrl)
+
+  switch (resourceType) {
+    case 'fetch':
+      // never attach cookies regardless of siteContext if omit is optioned
+      if (credentialLevel === 'omit') {
+        return false
+      }
+
+      // attach cookies here if at least one of the following is true
+      // a) The siteContext is 'same-origin' (since 'omit' is handled above)
+      // b) The credentialLevel is 'include' regardless of siteContext
+      if (siteContext === 'same-origin' || credentialLevel === 'include') {
+        return true
+      }
+
+      return false
+    case 'xhr':
+      // attach cookies here if at least one of the following is true
+      // a) The siteContext is 'same-origin'
+      // b) The credentialLevel (withCredentials) is set to true
+      if (siteContext === 'same-origin' || credentialLevel) {
+        return true
+      }
+
+      return false
+    default:
+      // if we cannot determine a resource level, we likely should store the cookie as it is a navigation or another event as long as the context is same-origin
+      if (siteContext === 'same-origin' || isAutFrame) {
+        return true
+      }
+
+      return false
+  }
+}
+
+/**
+ * Calculates the site context of two urls.
+ * This is needed to figure out if cookies are sent by default, as well as if first/third-party cookies apply to a given request
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
+ *
+ * @param {string} url1 - the first url being compared
+ * @param {string} url2 - the second url being compared
+ * @returns {SiteContext} - the appropriate site context. This is most similar to the Sec-Fetch-Site Directive when
+ * calculating the siteContext barring the none option. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
+ * to see definitions for same-origin, same-site, and cross-site
+ */
+export const calculateSiteContext = (url1: string, url2: string): SiteContext => {
+  if (urlOriginsMatch(url1, url2)) {
+    return 'same-origin'
+  }
+
+  if (urlSameSiteMatch(url1, url2)) {
+    return 'same-site'
+  }
+
+  return 'cross-site'
 }
 
 export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {

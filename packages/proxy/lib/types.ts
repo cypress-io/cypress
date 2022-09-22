@@ -15,6 +15,10 @@ export type CypressIncomingRequest = Request & {
   isAUTFrame: boolean
 }
 
+export type RequestResourceType = 'fetch' | 'xhr'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
+
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
 /**
