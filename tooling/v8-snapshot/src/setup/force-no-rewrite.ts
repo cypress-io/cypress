@@ -27,5 +27,5 @@ export default [
   'packages/https-proxy/lib/ca.js',
 
   // TODO: This should be temporary. Will address with https://github.com/cypress-io/cypress/issues/22986
-  'packages/server/lib/routes-e2e.ts',
+  // 'packages/server/lib/routes-e2e.ts',
 ]
