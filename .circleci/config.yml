@@ -1732,26 +1732,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  ui-components-integration-tests:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-for-tests
-          working_directory: packages/ui-components
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            yarn cypress:run --record --parallel --group ui-components
-          working_directory: packages/ui-components
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
@@ -2488,10 +2468,6 @@ linux-x64-workflow: &linux-x64-workflow
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
-    - ui-components-integration-tests:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
     - npm-webpack-dev-server:
         requires:
           - system-tests-node-modules-install
@@ -2563,7 +2539,6 @@ linux-x64-workflow: &linux-x64-workflow
           - server-integration-tests
           - server-unit-tests
           - test-kitchensink
-          - ui-components-integration-tests
           - unit-tests
           - unit-tests-release
           - cli-visual-tests

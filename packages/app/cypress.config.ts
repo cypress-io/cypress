@@ -34,7 +34,7 @@ export default defineConfig({
             'just-my-luck',
             'combine-properties',
             'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
+            '@packages/frontend-shared/cypress/support/customPercyCommand',
           ],
         },
       },
@@ -43,7 +43,7 @@ export default defineConfig({
   'e2e': {
     experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
-    supportFile: 'cypress/e2e/support/e2eSupport.ts',
+    supportFile: 'cypress/e2e/support/e2e.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
         throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')

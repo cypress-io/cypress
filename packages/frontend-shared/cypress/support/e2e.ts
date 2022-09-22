@@ -1,21 +1,22 @@
 import '@testing-library/cypress/add-commands'
 import { browsers } from '@packages/launcher/lib/browsers'
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { configure } from '@testing-library/cypress'
-import i18n from '../../../src/locales/en-US.json'
-import { addNetworkCommands } from '../../support/onlineNetwork'
 import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
-
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
-import type { E2ETaskMap } from '../e2ePluginSetup'
+
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
+
+import type { E2ETaskMap } from '../e2ePluginSetup'
+import { installCustomPercyCommand } from '../../support/customPercyCommand'
+import i18n from '../../../src/locales/en-US.json'
+import { addNetworkCommands } from '../../support/onlineNetwork'
 
 configure({ testIdAttribute: 'data-cy' })
 
