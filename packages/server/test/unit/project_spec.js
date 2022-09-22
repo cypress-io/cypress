@@ -3,6 +3,7 @@ require('../spec_helper')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
 const user = require(`../../lib/user`)
@@ -44,7 +45,7 @@ describe.skip('lib/project-base', () => {
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
-      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' }, getCtx().file.getFilesByGlob)
+      return setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' }, getCtx().file.getFilesByGlob)
       .then((config1) => {
         this.config = config1
         this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })

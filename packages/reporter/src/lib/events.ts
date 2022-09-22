@@ -2,10 +2,11 @@ import { EventEmitter } from 'events'
 import { action } from 'mobx'
 import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
-import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
+import statsStore, { StatsStore } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
-import { SessionProps } from '../sessions/sessions-model'
+
+import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 const localBus = new EventEmitter()
 
@@ -33,16 +34,7 @@ export interface Events {
   __off: (() => void)
 }
 
-interface StartInfo extends StatsStoreStartInfo {
-  autoScrollingEnabled: boolean
-  scrollTop: number
-  studioActive: boolean
-}
-
-type CollectRunStateCallback = (arg: {
-  autoScrollingEnabled: boolean
-  scrollTop: number
-}) => void
+type CollectRunStateCallback = (arg: ReporterRunState) => void
 
 const events: Events = {
   appState,
@@ -72,10 +64,6 @@ const events: Events = {
       runnablesStore.updateLog(log)
     }))
 
-    runner.on('session:add', action('session:add', (props: SessionProps) => {
-      runnablesStore._withTest(props.testId, (test) => test.addSession(props))
-    }))
-
     runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
       runnablesStore.removeLog(log)
     }))
@@ -93,7 +81,7 @@ const events: Events = {
       }
     }))
 
-    runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
+    runner.on('reporter:start', action('start', (startInfo: ReporterStartInfo) => {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       appState.setStudioActive(startInfo.studioActive)
@@ -193,8 +181,8 @@ const events: Events = {
       runner.emit('get:user:editor', cb)
     })
 
-    localBus.on('clear:session', (cb) => {
-      runner.emit('clear:session', cb)
+    localBus.on('clear:all:sessions', (cb) => {
+      runner.emit('clear:all:sessions', cb)
     })
 
     localBus.on('set:user:editor', (editor) => {

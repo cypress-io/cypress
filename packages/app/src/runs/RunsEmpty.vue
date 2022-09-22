@@ -61,7 +61,7 @@ const firstRecordKey = computed(() => {
 const recordCommand = computed(() => {
   const componentFlagOrSpace = props.gql.currentTestingType === 'component' ? ' --component ' : ' '
 
-  return `cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
+  return `npx cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 </script>
 

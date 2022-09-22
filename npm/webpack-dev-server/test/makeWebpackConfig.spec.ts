@@ -1,10 +1,14 @@
-import { expect } from 'chai'
+import Chai, { expect } from 'chai'
 import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
+import { IgnorePlugin } from 'webpack'
 import { WebpackDevServerConfig } from '../src/devServer'
-import { sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
 import { CYPRESS_WEBPACK_ENTRYPOINT, makeWebpackConfig } from '../src/makeWebpackConfig'
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
+import sinon from 'sinon'
+import SinonChai from 'sinon-chai'
+
+Chai.use(SinonChai)
 
 describe('makeWebpackConfig', () => {
   it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v3', async () => {
@@ -24,12 +28,18 @@ describe('makeWebpackConfig', () => {
           progress: true,
           overlay: true, // This will be overridden by makeWebpackConfig.ts
         },
+        optimization: {
+          noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
+        },
       },
       devServerEvents: new EventEmitter(),
     }
     const actual = await makeWebpackConfig({
       devServerConfig,
-      sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig),
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 4,
+        webpackDevServer: 3,
+      }),
     })
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
@@ -64,13 +74,16 @@ describe('makeWebpackConfig', () => {
             overlay: true, // This will be overridden by makeWebpackConfig.ts
           },
         },
+        optimization: {
+          emitOnErrors: false, // This will be overridden by makeWebpackConfig.ts
+        },
       },
       devServerEvents: new EventEmitter(),
     }
     const actual = await makeWebpackConfig({
       devServerConfig,
       sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
+        webpack: 5,
         webpackDevServer: 4,
       }),
     })
@@ -135,5 +148,46 @@ describe('makeWebpackConfig', () => {
       main: 'src/index.js',
       'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
     })
+  })
+
+  it('calls webpackConfig if it is a function, passing in the base config', async () => {
+    const testPlugin = new IgnorePlugin({
+      contextRegExp: /aaa/,
+      resourceRegExp: /bbb/,
+    })
+
+    const modifyConfig = sinon.spy(async () => {
+      return {
+        plugins: [testPlugin],
+      }
+    })
+
+    const devServerConfig: WebpackDevServerConfig = {
+      specs: [],
+      cypressConfig: {
+        isTextTerminal: false,
+        projectRoot: '.',
+        supportFile: '/support.js',
+        devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
+      } as Cypress.PluginConfigOptions,
+      webpackConfig: modifyConfig,
+      devServerEvents: new EventEmitter(),
+    }
+
+    const actual = await makeWebpackConfig({
+      devServerConfig,
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 4,
+        webpackDevServer: 4,
+      }),
+    })
+
+    expect(actual.plugins.length).to.eq(3)
+    expect(modifyConfig).to.have.been.called
+    // merged plugins get added at the top of the chain by default
+    // should be merged, not overriding existing plugins
+    expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
+    expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
+    expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
   })
 })

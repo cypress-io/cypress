@@ -144,6 +144,7 @@ declare global {
     Cypress: any
     state: AppState
     render: ((props: Partial<BaseReporterProps>) => void)
+    __CYPRESS_MODE__: 'run' | 'open'
   }
 }
 
