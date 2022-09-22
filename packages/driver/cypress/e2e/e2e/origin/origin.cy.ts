@@ -1,14 +1,4 @@
 describe('cy.origin', () => {
-  afterEach(() => {
-    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-    // commands may have origin's unload event bleed into subsequent tests
-    // and prevent stability from being reached, causing those tests to hang.
-    // We enqueue another cy command after each test to ensure stability
-    // is reached for the next test. This additional command can be removed with the
-    // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
-  })
-
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
@@ -25,6 +15,76 @@ describe('cy.origin', () => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
 
       expect(secondaryViewport).to.deep.equal(expectedViewport)
+    })
+  })
+
+  describe('ensure that visiting a cross origin page with a cy.origin command with no cy commands may cause subsequent tests to hang.', () => {
+    it('executes quickly', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://foobar.com:3500', () => {
+        expect(true).to.equal(true)
+      })
+    })
+
+    it('does not hang', () => {
+      cy.log('I log correctly')
+    })
+  })
+
+  describe('async attach', () => {
+    it('attaches to an origin at any time', () => {
+      cy.visit('/fixtures/auth/index.html')
+      // Visit a cross origin page
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      // execute a command on the primary origin while the AUT is cross origin
+      cy.log('This command runs in the primary origin while the AUT is cross origin.')
+      // attach to the cross origin aut.
+      cy.origin('http://www.idp.com:3500', () => {
+        cy.get('[data-cy="login-idp"]')
+      })
+    })
+
+    it('errors if you try to use onload when visiting a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.visit()\` was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')\``)
+
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html')
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html', {
+        onLoad: () => {
+          cy.log('onLoad')
+        },
+      })
+    })
+
+    it('errors if you try to use onBeforeLoad when visiting a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.visit()\` was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:before:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onBeforeLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')\``)
+
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html')
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html', {
+        onBeforeLoad: () => {
+          cy.log('onBeforeLoad')
+        },
+      })
     })
   })
 

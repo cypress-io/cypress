@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_LOGIN"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="login-banner"
     status="info"
@@ -12,12 +12,12 @@
     :event-data="{
       campaign: 'Log In',
       medium: 'Specs Login Banner',
-      cohort: '' // TODO Connect cohort
+      cohort: cohortOption.cohort
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ t('specPage.banners.login.content') }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -33,6 +33,7 @@
       v-model="isLoginOpen"
       :gql="loginModalQuery.data.value"
       utm-medium="Specs Login Banner"
+      :utm-content="cohortOption.cohort"
     />
   </TrackedBanner>
 </template>
@@ -45,6 +46,7 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
+import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 
@@ -54,19 +56,18 @@ query LoginBanner {
 }
 `
 
-withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
   hasBannerBeenShown: boolean
-}>(), {
-  modelValue: false,
-  hasBannerBeenShown: true,
-})
+  cohortOption: CohortOption
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_LOGIN
 const isLoginOpen = ref(false)
 const loginModalQuery = useQuery({ query: LoginBannerDocument, pause: true })
 

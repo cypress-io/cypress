@@ -3,7 +3,6 @@ import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
 import { IgnorePlugin } from 'webpack'
 import { WebpackDevServerConfig } from '../src/devServer'
-import { sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
 import { CYPRESS_WEBPACK_ENTRYPOINT, makeWebpackConfig } from '../src/makeWebpackConfig'
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
 import sinon from 'sinon'
@@ -29,12 +28,18 @@ describe('makeWebpackConfig', () => {
           progress: true,
           overlay: true, // This will be overridden by makeWebpackConfig.ts
         },
+        optimization: {
+          noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
+        },
       },
       devServerEvents: new EventEmitter(),
     }
     const actual = await makeWebpackConfig({
       devServerConfig,
-      sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig),
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 4,
+        webpackDevServer: 3,
+      }),
     })
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
@@ -69,13 +74,16 @@ describe('makeWebpackConfig', () => {
             overlay: true, // This will be overridden by makeWebpackConfig.ts
           },
         },
+        optimization: {
+          emitOnErrors: false, // This will be overridden by makeWebpackConfig.ts
+        },
       },
       devServerEvents: new EventEmitter(),
     }
     const actual = await makeWebpackConfig({
       devServerConfig,
       sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
+        webpack: 5,
         webpackDevServer: 4,
       }),
     })

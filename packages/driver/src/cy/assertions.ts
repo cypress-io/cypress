@@ -283,7 +283,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       }
 
       const determineEl = ($el, subject) => {
-        // prefer $el unless it is strickly undefined
+        // prefer $el unless it is strictly undefined
         if (!_.isUndefined($el)) {
           return $el
         }
@@ -307,6 +307,8 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
+          // Ensure the command is on the same origin as the AUT
+          cy.ensureCommandCanCommunicateWithAUT(err)
           ensureExistence()
         } catch (e2) {
           err = e2
@@ -342,6 +344,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         if (_.isFunction(onRetry)) {
+          //@ts-expect-error
           return cy.retry(onRetry, options)
         }
 

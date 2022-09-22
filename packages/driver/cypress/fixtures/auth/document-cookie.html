@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <p id='test' data-cy="doc-cookie">should be replaced</p>
+  <script>
+    document.cookie = 'name=value'
+
+    document.getElementById('test').innerText = document.cookie
+  </script>
+</body>
+</html>
