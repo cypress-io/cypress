@@ -109,6 +109,9 @@ exports['deprecated before:browser:launch args / using non-deprecated API - no w
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 1)
+Warning: The following browser launch options were provided but are not supported by electron
+
+ - args
 
 
   ✓ asserts on browser args
