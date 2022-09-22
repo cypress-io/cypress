@@ -1,4 +1,5 @@
 import { makeConfig } from '../frontend-shared/vite.config.mjs'
+import { driverConfig } from '@packages/driver/vite.config.mjs'
 import Layouts from 'vite-plugin-vue-layouts'
 import Pages from 'vite-plugin-pages'
 import Copy from 'rollup-plugin-copy'
@@ -6,6 +7,11 @@ import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
 export default makeConfig({
+  resolve: {
+    alias: {
+      ...driverConfig.resolve.alias,
+    },
+  },
   optimizeDeps: {
     include: [
       '@urql/core',
@@ -34,6 +40,6 @@ export default makeConfig({
       targets: ['Chrome >= 64', 'Firefox >= 86', 'Edge >= 79'],
       modernPolyfills: true,
       renderLegacyChunks: false,
-    })
+    }),
   ],
 })
