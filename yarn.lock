@@ -5418,6 +5418,14 @@
     "@percy/client" "1.2.0"
     "@percy/logger" "1.2.0"
 
+"@percy/client@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.10.4.tgz#558ec16d8780d6513881da8550d453e390571d63"
+  integrity sha512-TQq4TOL86cXZUoLhz4mje0OAvQtxjNZIpYLvhJ5ekOdFrBuU5xXVegXjAQRTN90SokPT80/lPfRVwQgsaBaXSw==
+  dependencies:
+    "@percy/env" "1.10.4"
+    "@percy/logger" "1.10.4"
+
 "@percy/client@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.2.0.tgz#d7d7f06c98fbd1d7c6ecf2a3200080d9fdae6595"
@@ -5425,6 +5433,16 @@
   dependencies:
     "@percy/env" "1.2.0"
     "@percy/logger" "1.2.0"
+
+"@percy/config@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.10.4.tgz#8df1d07f718e5ba377cd4acc6da6df5c5933ce2f"
+  integrity sha512-K0p4fKE77jsXWaNJIOP61IbGaA4KHbGXuqchHrFAsxh8HsdzadntFsTkXxtyS6eu6v4kfeLo0j25Mq6xkgQ5gQ==
+  dependencies:
+    "@percy/logger" "1.10.4"
+    ajv "^8.6.2"
+    cosmiconfig "^7.0.0"
+    yaml "^2.0.0"
 
 "@percy/config@1.2.0":
   version "1.2.0"
@@ -5455,32 +5473,61 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/cypress@^3.1.0", "@percy/cypress@^3.1.1":
+"@percy/core@^1.0.0-beta.48":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/core/-/core-1.10.4.tgz#65fd447e19f2cb870880ab97575bbcb4012b9d50"
+  integrity sha512-7Fu9h6XjMNjJF0RDft0GQ6A3uo1SQip+x8yp1oTF3K4qoKywc28EnfPyGeQ83Jju40cu1z6VzjnvnyIWK3/B6Q==
+  dependencies:
+    "@percy/client" "1.10.4"
+    "@percy/config" "1.10.4"
+    "@percy/dom" "1.10.4"
+    "@percy/logger" "1.10.4"
+    content-disposition "^0.5.4"
+    cross-spawn "^7.0.3"
+    extract-zip "^2.0.1"
+    fast-glob "^3.2.11"
+    micromatch "^4.0.4"
+    mime-types "^2.1.34"
+    path-to-regexp "^6.2.0"
+    rimraf "^3.0.2"
+    ws "^8.0.0"
+
+"@percy/cypress@^3.1.0":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.1.tgz#4e7c5bdeccf1240b2150fc9d608df72c2f213d4b"
   integrity sha512-khvWmCOJW7pxwDZPB5ovvbSe11FfNtH8Iyq8PHRYLD9ibAkiAWHZVs07bLK5wju1Q9X8s7zg5uj2yWxIlB1yjA==
   dependencies:
     "@percy/sdk-utils" "^1.0.0-beta.44"
 
+"@percy/dom@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.10.4.tgz#c8c6227d6e074547e309da0563fb485ca5d2fb3a"
+  integrity sha512-EevExMWUKvBFe2UvXuskJCoj8Xc28PeX60ktSRvc7Z68wSQZmE2hlu8mfnkQ6KSDyO96duBPrKWJn9EeYFvIWg==
+
 "@percy/dom@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.2.0.tgz#c59aae392539cc493145daa928c8d43cfbfdd819"
   integrity sha512-OThOEuEyczxToc/+Df/aHDFY0O5balTG1w0k91wyZCNEIjD2nhwiAj09m28SmybNpq6TC6j0qnuPTD9rk2vgDw==
+
+"@percy/env@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.10.4.tgz#1ba30add5920703e44314d680d469671390d8acd"
+  integrity sha512-11xPV2/yNga+2RZnTkleIdcpqqb4WGNUBhdjMds/45YQJXX1ZbtzGi8eU/UPEHYCeY7L6IZlatIyaE50wZg/Jw==
 
 "@percy/env@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.2.0.tgz#22ec45884f2e7c6d962237c9350ab16625e4e196"
   integrity sha512-+In1gN8ArNMwyFj8tZMEpqI8CAoLeuZpa99DPP4QNqyNW1+mUEzYobqBJ8VrJDBWqCayWtuxiofQO+ihReBo0Q==
 
+"@percy/logger@1.10.4", "@percy/logger@^1.0.0-beta.48":
+  version "1.10.4"
+  resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.10.4.tgz#a95532c558bc6ea73c0dd99778c1963871733369"
+  integrity sha512-8rUE5hhwIRoPAdA3Osh4+dkVbXE6q4Pn7xyt63NLoFHt9JR2H/iFowsaetkCCHa6VKKfGMjXm04hmrP2o0vUWw==
+
 "@percy/logger@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.2.0.tgz#4739e57df77db1377a67be1d2a34575a68718f4a"
   integrity sha512-UfCJA2jRBwBqGdCNKlNK2Y5QYf0h5dsI56GdYO97hCv1GOj29X+1xQsfYFTbocTR5EmoBsS41sErBZ1aVBtDng==
-
-"@percy/logger@^1.0.0-beta.48":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.8.1.tgz#91e1fb3ec2952dfd170201ab101aa1a7f505c778"
-  integrity sha512-O1GpuuN6pzBk/dso57LS90APbRNfc4y0qsGEIph+8f1zK6dBZmalwKLzhgrvb267rLe3pduYM5fCiYel0pqh7Q==
 
 "@percy/sdk-utils@^1.0.0-beta.44":
   version "1.0.0-beta.48"
