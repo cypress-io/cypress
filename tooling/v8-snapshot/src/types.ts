@@ -83,8 +83,6 @@ export type CreateBundleOpts = {
   includeStrictVerifiers?: boolean
   sourcemap?: boolean
   sourcemapExternalPath?: string
-  sourcemapEmbed: boolean
-  sourcemapInline: boolean
 }
 
 /**

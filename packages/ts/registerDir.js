@@ -35,9 +35,9 @@ module.exports = function (scopeDir) {
         debug('skipping ts-node registration while testing the app')
       }
 
-    // do we need to prevent any other TypeScript hooks?
+      // do we need to prevent any other TypeScript hooks?
     } catch (e) {
-    // continue running without TypeScript require hook
+      // continue running without TypeScript require hook
       debug('Running without ts-node hook in environment "%s"', process.env.CYPRESS_INTERNAL_ENV)
     }
   }

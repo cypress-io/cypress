@@ -82,8 +82,6 @@ export function processScript ({
       entryPoint,
       includeStrictVerifiers: true,
       nodeEnv,
-      sourcemapEmbed: false,
-      sourcemapInline: false,
       sourcemapExternalPath: undefined,
     }).script
   } catch (err: any) {
