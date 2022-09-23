@@ -6,14 +6,11 @@ import type {
   ModuleNeedsReload,
   PackherdTranspileOpts,
 } from '@packages/packherd-require'
-import { packherdRequire, sourceMapPath } from '@packages/packherd-require'
+import { packherdRequire } from '@packages/packherd-require'
 import type { Snapshot, DependencyMapArray } from './types'
-import { EMBEDDED } from './constants'
 import { forwardSlash } from './utils'
 import Module from 'module'
 import { DependencyMap } from './dependency-map'
-import fs from 'fs'
-import { gunzipSync } from 'zlib'
 
 export * from './types'
 
@@ -167,29 +164,6 @@ function getCaches (sr: Snapshot | undefined, useCache: boolean) {
 }
 
 /**
- * Attempts to extract the sourcemap embedded in the snapshot
- */
-function getSourceMapLookup () {
-  return (uri: string) => {
-    if (uri === EMBEDDED) {
-      try {
-        // Disabling syntax here as we are not in a state where we are reading files frequently on errors
-        // and fall back to the base stack trace on errors.
-        // eslint-disable-next-line no-restricted-syntax
-        const sourceMapContents = fs.readFileSync(sourceMapPath)
-        const sourceMap = JSON.parse(gunzipSync(sourceMapContents).toString())
-
-        return sourceMap
-      } catch {
-        // Go ahead and return undefined on errors
-      }
-    }
-
-    return undefined
-  }
-}
-
-/**
  * Sets up the require hook to use assets embedded in the snapshot.
  *
  * @param projectBaseDir project root
@@ -262,7 +236,6 @@ export function snapshotRequire (
         getModuleKey,
         requireStatsFile: opts.requireStatsFile,
         transpileOpts: opts.transpileOpts,
-        sourceMapLookup: getSourceMapLookup(),
         moduleNeedsReload,
       })
 

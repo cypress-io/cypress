@@ -1,6 +1,6 @@
 import type { Debugger } from 'debug'
 import { TransformOptions, transformSync } from 'esbuild'
-import type { TranspileCache, SourceMapLookup } from './types'
+import type { TranspileCache } from './types'
 import path from 'path'
 import { installSourcemapSupport } from './sourcemap-support'
 
@@ -27,11 +27,10 @@ function transpileTsCode (
   ts: string,
   cache: TranspileCache,
   projectBaseDir: string,
-  sourceMapLookup?: SourceMapLookup,
   // TODO: consider 'error' for importsNotUsedAsValues (maybe) to add some type checking
   tsconfig?: TransformOptions['tsconfigRaw'],
 ): string {
-  installSourcemapSupport(cache, projectBaseDir, sourceMapLookup)
+  installSourcemapSupport(cache, projectBaseDir)
 
   // Try to get from cache first
   const cached = (cache != null && cache.get(fullModuleUri)) || null
@@ -72,10 +71,9 @@ export function hookTranspileTs (
   log: Debugger,
   diagnostics: boolean,
   cache: TranspileCache,
-  sourceMapLookup?: SourceMapLookup,
   tsconfig?: TransformOptions['tsconfigRaw'],
 ) {
-  installSourcemapSupport(cache, projectBaseDir, sourceMapLookup)
+  installSourcemapSupport(cache, projectBaseDir)
 
   const defaultLoader = Module._extensions['.js']
 
@@ -97,7 +95,6 @@ export function hookTranspileTs (
           code,
           cache,
           projectBaseDir,
-          sourceMapLookup,
           tsconfig,
         )
 

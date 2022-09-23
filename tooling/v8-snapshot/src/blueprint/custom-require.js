@@ -10,7 +10,7 @@ let require = (moduleName) => {
 }
 
 /**
- * The `require` function that is used from inside the snaphot.
+ * The `require` function that is used from inside the snapshot.
  * It is invoked during snapshot creation as well as while the app is running
  * and `require`s originate from inside the snapshot.
  *
@@ -147,37 +147,27 @@ function customRequire (
       // 6.4. if it wasn't cached we need to load it via the Node.js loader
       //      which we'll do via packherd's `tryLoad` which was attached to the
       //      `require`
-      try {
-        if (!snapshotting) {
-          loadedFrom = 'Counted already'
-          const { exports, fullPath } = require._tryLoad(
-            modulePath,
-            parent,
-            false,
-          )
-          // 6.5. If all went well the module should now be in the module
-          //      cache, otherwise we use the module we constructed above and fill
-          //      in the exports
-          const cachedMod = require.cache[fullPath]
+      if (!snapshotting) {
+        loadedFrom = 'Counted already'
+        const { exports, fullPath } = require._tryLoad(
+          modulePath,
+          parent,
+          false,
+        )
+        // 6.5. If all went well the module should now be in the module
+        //      cache, otherwise we use the module we constructed above and fill
+        //      in the exports
+        const cachedMod = require.cache[fullPath]
 
-          if (cachedMod != null) {
-            mod = cachedMod
-          } else {
-            mod.exports = exports
-          }
+        if (cachedMod != null) {
+          mod = cachedMod
         } else {
-          // While snapshotting we load the module and add it to the exports cache
-          mod.exports = require(modulePath)
-          customRequire.exports[modulePath] = mod
+          mod.exports = exports
         }
-      } catch (err) {
-        if (require.isStrict) {
-          throw err
-        } else {
-          throw new Error(
-            `Failed to require ${modulePath} with key ${key}.\n${err.toString()}`,
-          )
-        }
+      } else {
+        // While snapshotting we load the module and add it to the exports cache
+        mod.exports = require(modulePath)
+        customRequire.exports[modulePath] = mod
       }
     }
   }

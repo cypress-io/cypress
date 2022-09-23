@@ -57,8 +57,6 @@ class SnapshotEntryGeneratorViaWalk {
       baseDirPath: this.projectBaseDir,
       entryFilePath: this.entryFile,
       nodeModulesOnly: this.nodeModulesOnly,
-      sourcemapEmbed: false,
-      sourcemapInline: false,
       sourcemap: false,
     }
     const { meta } = await createBundleAsync(opts)

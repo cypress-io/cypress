@@ -599,8 +599,6 @@ export class SnapshotDoctor {
         entryFilePath: this.entryFilePath,
         bundlerPath: this.bundlerPath,
         nodeModulesOnly: this.nodeModulesOnly,
-        sourcemapEmbed: false,
-        sourcemapInline: false,
         sourcemap: false,
         includeStrictVerifiers: true,
         deferred: deferredArg,

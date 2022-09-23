@@ -3,7 +3,6 @@ import path from 'path'
 import { MappedPosition, RawSourceMap, SourceMapConsumer } from 'source-map-js'
 import type {
   MapAndSourceContent,
-  SourceMapLookup,
   TranspileCache,
   UrlAndMap,
 } from './types'
@@ -71,12 +70,10 @@ export function getSourceMap (
   projectBaseDir: string,
   bundleUri: string,
   cache: TranspileCache = new DefaultTranspileCache(),
-  sourceMapLookup?: SourceMapLookup,
 ): UrlAndMap {
   const sourcemapSupport = SourcemapSupport.createSingletonInstance(
     cache,
     projectBaseDir,
-    sourceMapLookup,
   )
 
   return sourcemapSupport.retrieveSourceMap(bundleUri)
@@ -99,13 +96,11 @@ export function getSourceMapAndContent (
   bundleUri: string,
   fileUri: string,
   cache: TranspileCache = new DefaultTranspileCache(),
-  sourceMapLookup?: SourceMapLookup,
 ): MapAndSourceContent | undefined {
   const { map, url } = getSourceMap(
     projectBaseDir,
     bundleUri,
     cache,
-    sourceMapLookup,
   )
 
   if (map == null || url == null) return undefined
@@ -125,18 +120,15 @@ export function getSourceMapAndContent (
  *
  * @param cache used to look up script content from which to extract source maps
  * @param projectBaseDir directory that is the root of relative source map sources
- * @param sourceMapLookup: when provided is queried for source maps for a particular URI first
  */
 export function installSourcemapSupport (
   cache: TranspileCache,
   projectBaseDir: string,
-  sourceMapLookup?: SourceMapLookup,
 ) {
   // NOTE: this is a noop if an instance was created previously
   const sourcemapSupport = SourcemapSupport.createSingletonInstance(
     cache,
     projectBaseDir,
-    sourceMapLookup,
   )
 
   if (Error.prepareStackTrace === sourcemapSupport.prepareStackTrace) return
@@ -154,7 +146,6 @@ class SourcemapSupport {
   private constructor (
     private readonly _cache: TranspileCache,
     private readonly _projectBaseDir: string,
-    private readonly _sourceMapLookup?: SourceMapLookup,
   ) {}
 
   // This function is part of the V8 stack trace API, for more info see:
@@ -192,7 +183,7 @@ class SourcemapSupport {
     }
     state.curPos = state.nextPos = undefined
 
-    return `${errorString}${processedStack.reverse().join('')}`
+    return `${errorString}${processedStack.reverse().join('')}\n`
   }
 
   wrapCallSite (
@@ -310,32 +301,11 @@ class SourcemapSupport {
       return fromMemory
     }
 
-    // 2. Try to look it up via externally provided function
-    if (this._sourceMapLookup != null) {
-      const map = this._sourceMapLookup(script)
-
-      try {
-        if (map != null) {
-          const urlAndMap = { url: script, map: new SourceMapConsumer(map) }
-
-          this._sourcemapCache.set(script, urlAndMap)
-          logTrace('Retrieved sourcemap for "%s" from sourcemap lookup', script)
-
-          return urlAndMap
-        }
-      } catch (err) {
-        logError('Looked up invalid source map "%s"', script)
-        logError(err)
-
-        return EMPTY_URL_AND_MAP
-      }
-    }
-
-    // 3. Try to parse a source map out of the script
+    // 2. Try to parse a source map out of the script
     // Only supporting our own TypeScript modules for now
     if (path.extname(script) !== '.ts') return EMPTY_URL_AND_MAP
 
-    logTrace('retrieving sourcemap for  %s', script)
+    logTrace('retrieving sourcemap for %s', script)
 
     return this.mapFromInlined(script)
   }
@@ -354,13 +324,11 @@ class SourcemapSupport {
   static createSingletonInstance (
     cache: TranspileCache,
     projectBaseDir: string,
-    sourceMapLookup?: SourceMapLookup,
   ): SourcemapSupport {
     if (SourcemapSupport._instance == null) {
       SourcemapSupport._instance = new SourcemapSupport(
         cache,
         projectBaseDir,
-        sourceMapLookup,
       )
     }
 

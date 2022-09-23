@@ -7,7 +7,6 @@ import { expect, assert } from 'chai'
 import Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import fs from 'fs-extra'
-import { SourceMapConsumer } from 'source-map-js'
 
 const exec = promisify(execOrig)
 
@@ -32,7 +31,6 @@ describe('loading', () => {
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
     const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
-      sourcemapEmbed: true,
       nodeModulesOnly: false,
     })
 
@@ -54,30 +52,6 @@ describe('loading', () => {
       const res = JSON.parse(stdout.trim())
 
       expect(res.healthyCodeLen).to.be.gte(100)
-
-      const outJs = await fs.readFile(path.join(cacheDir, 'snapshot.js'), 'utf-8')
-
-      const outMap = new SourceMapConsumer(res.sourcemap)
-      const outLines = outJs.trimRight().split('\n')
-      let insideGeneratedCode = false
-
-      for (let outLine = 0; outLine < outLines.length; outLine++) {
-        if (insideGeneratedCode) {
-          for (let outColumn = 0; outColumn <= outLines[outLine].length; outColumn++) {
-            const { line, column } = outMap.originalPositionFor({ line: outLine + 1, column: outColumn })
-
-            expect(line !== null && column !== null, `missing location for line ${outLine + 1} and column ${outColumn}`).to.be.true
-          }
-        }
-
-        if (/^__commonJS\[\"\S+.js/.test(outLines[outLine])) {
-          insideGeneratedCode = true
-        }
-
-        if (outLines[outLine].startsWith('}')) {
-          insideGeneratedCode = false
-        }
-      }
     } catch (err: any) {
       assert.fail(err.toString())
     }

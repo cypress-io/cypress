@@ -39,8 +39,6 @@ const setGlobals = read('set-globals')
  * @property basedir the base dir of the project for which we are creating the
  * snapshot
  * @property sourceMap {@link Buffer} with content of raw sourcemaps
- * @property sourcemapInline see {@link GenerationOpts} sourcemapInline
- * @property sourcemapEmbedsee {@link GenerationOpts} sourcemapEmbed
  * @property sourcemapExternalPath path relative to the snapshot script where
  * the sourcemaps are stored
  */
@@ -54,8 +52,6 @@ export type BlueprintConfig = {
   nodeEnv: string
   basedir: string
   sourceMap: Buffer | undefined
-  sourcemapInline: boolean
-  sourcemapEmbed: boolean
   sourcemapExternalPath: string | undefined
 }
 
@@ -106,9 +102,6 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     nodeEnv,
     basedir,
     sourceMap,
-    sourcemapInline,
-    sourcemapEmbed,
-    sourcemapExternalPath,
   } = config
 
   const normalizedMainModuleRequirePath = forwardSlash(mainModuleRequirePath)
@@ -199,10 +192,7 @@ generateSnapshot = null
 
   let processedSourceMap: string | undefined
 
-  if (
-    (sourcemapEmbed || sourcemapInline || sourcemapExternalPath != null) &&
-    sourceMap != null
-  ) {
+  if (sourceMap != null) {
     offsetToBundle =
       newLinesInBuffer(wrapperOpen) + newLinesInBuffer(BUNDLE_WRAPPER_OPEN)
 
