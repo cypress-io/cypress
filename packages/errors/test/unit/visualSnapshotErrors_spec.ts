@@ -1206,5 +1206,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+
+    BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
+      return {
+        default: ['electron', ['env']],
+      }
+    },
   })
 })
