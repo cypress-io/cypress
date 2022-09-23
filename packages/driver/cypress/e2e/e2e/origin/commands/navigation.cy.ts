@@ -381,7 +381,8 @@ context('cy.origin navigation', () => {
       })
     })
 
-    it('does not propagate the auth options across tests', (done) => {
+    // FIXME: flaky
+    it.skip('does not propagate the auth options across tests', (done) => {
       cy.intercept('/basic_auth', (req) => {
         req.on('response', (res) => {
           // clear the www-authenticate header so the browser doesn't prompt for username/password
