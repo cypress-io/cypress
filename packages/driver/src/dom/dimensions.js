@@ -1,3 +1,7 @@
+// NOTE: Non-JQuery version of getElementDimensions is at app/runner/dimensions.
+// This duplication of code has been created when migrating legacy runner to app.
+// When migrating `driver`, we might need to remove this function and use the `app` version instead.
+
 import _ from 'lodash'
 
 const getElementDimensions = ($el) => {
@@ -76,14 +80,6 @@ const getMargin = ($el, dir) => {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 
-const getOuterSize = ($el) => {
-  return {
-    width: $el.outerWidth(true),
-    height: $el.outerHeight(true),
-  }
-}
-
 export default {
-  getOuterSize,
   getElementDimensions,
 }

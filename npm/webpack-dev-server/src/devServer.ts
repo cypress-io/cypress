@@ -27,12 +27,16 @@ type FrameworkConfig = {
   }
 }
 
+export type ConfigHandler =
+  Partial<Configuration>
+  | (() => Partial<Configuration> | Promise<Partial<Configuration>>)
+
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
-  webpackConfig?: unknown // Derived from the user's webpack
+  webpackConfig?: ConfigHandler // Derived from the user's webpack config
 } & FrameworkConfig
 
 /**
