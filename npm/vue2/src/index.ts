@@ -142,14 +142,14 @@ type VuePlugins = VuePlugin[]
  * local components, plugins, etc.
  *
  * @interface MountOptionsExtensions
- * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+ * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
  */
 interface MountOptionsExtensions {
   /**
    * Extra local components
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    * @example
    *  import Hello from './Hello.vue'
    *  // imagine Hello needs AppComponent
@@ -167,7 +167,7 @@ interface MountOptionsExtensions {
    * Optional Vue filters to install while mounting the component
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    * @example
    *  const filters = {
    *    reverse: (s) => s.split('').reverse().join(''),
@@ -181,7 +181,7 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixins
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    */
   mixin?: VueMixins
 
@@ -190,14 +190,14 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixin
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    */
   mixins?: VueMixins
 
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    * @alias plugins
    * @memberof MountOptionsExtensions
    */
@@ -206,7 +206,7 @@ interface MountOptionsExtensions {
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    * @alias use
    * @memberof MountOptionsExtensions
    */
@@ -233,7 +233,7 @@ interface MountOptions {
    * mounting this component
    *
    * @memberof MountOptions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
    */
   extensions: MountOptionsExtensions
 }
