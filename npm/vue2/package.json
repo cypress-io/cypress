@@ -9,8 +9,7 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "test": "echo \"Tests for @cypress/vue2 are run from system-tests\"",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*",
-    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
     "@vue/test-utils": "^1.1.3"
@@ -40,7 +39,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/vue/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/vue/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

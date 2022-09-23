@@ -1,5 +1,12 @@
 import { shouldHaveTestResults } from '../runner/support/spec-loader'
 
+export interface ExpectedResults
+{
+  passCount?: number
+  failCount?: number
+  pendingCount?: number
+}
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -11,11 +18,7 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish(expectedResults?: {
-        passCount?: number
-        failCount?: number
-        pendingCount?: number
-      }): void
+      waitForSpecToFinish(expectedResults?: ExpectedResults): void
     }
   }
 }
@@ -29,7 +32,7 @@ export const waitForSpecToFinish = (expectedResults) => {
   cy.get('.failed > .num').should('contain', '--')
 
   // Then ensure the tests are running
-  cy.contains('Your tests are loading...', { timeout: 10000 }).should('not.exist')
+  cy.contains('Your tests are loading...', { timeout: 20000 }).should('not.exist')
 
   // Then ensure the tests have finished
   cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })

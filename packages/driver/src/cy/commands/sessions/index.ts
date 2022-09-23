@@ -5,7 +5,6 @@ import $stackUtils from '../../../cypress/stack_utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
-  getSessionDetails,
   getConsoleProps,
   navigateAboutBlank,
 } from './utils'
@@ -126,9 +125,6 @@ export default function (Commands, Cypress, cy) {
             isGlobalSession: false,
             status,
           },
-          renderProps: {
-            status,
-          },
         })
       }
 
@@ -200,6 +196,9 @@ export default function (Commands, Cypress, cy) {
             }
 
             const onFail = (err) => {
+              // validateLog.set({ state: 'failed' })
+              // setSessionLogStatus('failed')
+
               // show validation error and allow sessions workflow to recreate the session
               if (sessionStatus === 'restored') {
                 $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, _.add)
@@ -344,7 +343,7 @@ export default function (Commands, Cypress, cy) {
        */
       const createSessionWorkflow = (existingSession, sessionStatus: 'creating' | 'recreating' = 'creating') => {
         return cy.then(async () => {
-          setSessionLogStatus(sessionStatus)
+          setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
 
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
@@ -357,7 +356,7 @@ export default function (Commands, Cypress, cy) {
             return
           }
 
-          setSessionLogStatus(sessionStatus === 'recreating' ? 'recreated' : 'created')
+          setSessionLogStatus(recreateSession ? 'recreated' : 'created')
         })
       }
 
@@ -398,7 +397,6 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substring(0, 47)}...` : existingSession.id}`,
-        sessionInfo: getSessionDetails(existingSession),
       }
 
       return logGroup(Cypress, groupDetails, (log) => {

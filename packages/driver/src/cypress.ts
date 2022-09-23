@@ -42,6 +42,8 @@ import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
+import type { CachedTestState } from '@packages/types'
+
 const debug = debugFn('cypress:driver:cypress')
 
 declare global {
@@ -280,10 +282,12 @@ class $Cypress {
     }
   }
 
-  run (fn) {
+  run (cachedTestState: CachedTestState, fn) {
     if (!this.runner) {
       $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
+
+    this.state(cachedTestState)
 
     return this.runner.run(fn)
   }
@@ -769,6 +773,11 @@ class $Cypress {
 
   addUtilityCommand () {
     return throwPrivateCommandInterface('addUtilityCommand')
+  }
+
+  // Cypress.require() is only valid inside the cy.origin() callback
+  require () {
+    $errUtils.throwErrByPath('require.invalid_outside_origin')
   }
 
   get currentTest () {

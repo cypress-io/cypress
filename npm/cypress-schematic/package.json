@@ -35,7 +35,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/cypress-schematic#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
   "author": "Cypress DX Team",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
   "keywords": [
