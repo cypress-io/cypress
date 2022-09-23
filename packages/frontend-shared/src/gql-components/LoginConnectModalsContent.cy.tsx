@@ -50,10 +50,6 @@ describe('<LoginConnectModalsContent />', () => {
                 },
               }],
             },
-            firstOrganization: {
-              __typename: 'CloudOrganizationConnection',
-              nodes: [{ __typename: 'CloudOrganization', id: '123' }],
-            },
           }
 
           result.currentProject = null
