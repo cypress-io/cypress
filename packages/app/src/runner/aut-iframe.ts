@@ -392,18 +392,18 @@ export class AutIframe {
     const selector = Cypress.SelectorPlayground.getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    this._addOrUpdateSelectorPlaygroundHighlight(
+    this._addOrUpdateSelectorPlaygroundHighlight({
       $el,
       $body,
       selector,
-      true,
-      () => {
+      showTooltip: true,
+      onClick: () => {
         selectorPlaygroundStore.setNumElements(1)
         selectorPlaygroundStore.resetMethod()
         selectorPlaygroundStore.setSelector(selector)
         selectorPlaygroundStore.setValidity(!!el)
       },
-    )
+    })
   }
 
   _clearHighlight = () => {
@@ -411,7 +411,11 @@ export class AutIframe {
 
     if (!$body) return
 
-    this._addOrUpdateSelectorPlaygroundHighlight(null, $body)
+    this._addOrUpdateSelectorPlaygroundHighlight({
+      $el: null,
+      $body,
+    })
+
     if (this._highlightedEl) {
       this._highlightedEl = undefined
     }
@@ -440,12 +444,12 @@ export class AutIframe {
       }
     }
 
-    this._addOrUpdateSelectorPlaygroundHighlight(
-      $el && $el.length ? $el : null,
-      this._body(),
-      selectorPlaygroundStore.selector,
-      false,
-    )
+    this._addOrUpdateSelectorPlaygroundHighlight({
+      $el: $el && $el.length ? $el : null,
+      $body: this._body(),
+      selector: selectorPlaygroundStore.selector,
+      showTooltip: false,
+    })
   }
 
   getElements (cypressDom) {
@@ -752,7 +756,7 @@ export class AutIframe {
 
   private listeners: any[] = []
 
-  private _addOrUpdateSelectorPlaygroundHighlight ($el, $body, selector?, showTooltip?, onClick?) {
+  private _addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }: any) {
     const { container, shadowRoot, vueContainer } = getOrCreateHelperDom({
       body: $body?.get(0) || document.body,
       className: '__cypress-selector-playground',
