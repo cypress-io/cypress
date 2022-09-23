@@ -55,7 +55,6 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
     - false
-    # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
@@ -902,7 +901,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else 
+            else
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
@@ -1031,7 +1030,7 @@ commands:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
+          # built on the "develop" branch
           # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
@@ -1873,6 +1872,20 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
+      - store-npm-logs
+  
+  npm-xpath:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/xpath cy:run
+      - store_test_results:
+          path: npm/xpath/test_results
+      - store_artifacts:
+          path: npm/xpath/test_results
       - store-npm-logs
 
   npm-create-cypress-tests:

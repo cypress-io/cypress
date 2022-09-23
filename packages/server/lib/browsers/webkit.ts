@@ -70,6 +70,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     },
     extensions: [],
     args: [],
+    env: {},
   }
 
   const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)

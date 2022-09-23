@@ -642,6 +642,12 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Used to import dependencies within the cy.origin() callback
+     * @see https://on.cypress.io/origin
+     */
+    require: (id: string) => any
+
+    /**
      * Trigger action
      * @private
      */
@@ -2993,6 +2999,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
@@ -3066,18 +3073,21 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
+  type ConfigHandler<T> = T
+    | (() => T | Promise<T>)
+
   type DevServerConfigOptions = {
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
-    webpackConfig?: PickConfigOpt<'webpackConfig'>
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
-    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+    viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack',
     framework: 'angular',
-    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
@@ -5485,6 +5495,7 @@ declare namespace Cypress {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
+    env: { [key: string]: any }
   }
 
   interface Dimensions {
