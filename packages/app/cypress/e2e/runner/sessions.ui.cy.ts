@@ -329,18 +329,33 @@ describe('runner/cypress sessions.ui.spec', {
 
   describe('errors', () => {
     it('test error when setup has failing Cypress command', () => {
-      cy.contains('.test', 'fails to create with failing command').as('test')
-      // test marked as failed
-      // test is expanded
-      // cy.get('test')
-
-      // session is marked as 'failed'
-      // setup group is expanded
-      // has error
-      cy.get('@test').within(() => {
-        cy.get('.command-name-session').should('contain', 'session_1')
-        .find('.reporter-tag').should('contain', 'failed')
+      loadSpec({
+        projectName: 'session-and-origin-e2e-specs',
+        filePath: 'session/session_errors.cy.js',
+        failCount: 1,
       })
+
+      cy.contains('.test', 'setup has failing command').as('setup_failed')
+      // // test marked as failed and is expanded
+      cy.get('@setup_failed').should('have.attr', 'data-model-state', 'failed')
+      .children('.collapsible').should('have.class', 'is-open')
+      .within(() => {
+        // session is marked as 'failed' and is expanded
+        // setup group is expanded
+        cy.get('.command-name-session').eq(0).should('contain', 'session_1').as('session_command')
+        .children('.command-wrapper').find('.reporter-tag').should('contain', 'failed')
+
+        cy.get('@session_command')
+        .children('.command-child-container').should('exist')
+        .within(() => {
+          cy.get('.command-name-session')
+          .should('contain', 'Create new session')
+          .get('.command-child-container').should('exist')
+        })
+      })
+
+      // // has error
+      cy.get('@setup_failed').contains('This error occurred while creating session. Because the session setup failed, we failed the test.')
     })
 
     describe('created session failed validation', () => {

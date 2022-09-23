@@ -9,6 +9,7 @@ import Tooltip from '@cypress/react-tooltip'
 import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
+import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
 import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
@@ -257,7 +258,8 @@ interface Props {
   runnablesStore: RunnablesStore
   groupId?: number
 }
-const CommandDetails = ({ model, events, aliasesWithDuplicates }) => {
+
+const CommandDetails = observer(({ model, groupId, events, aliasesWithDuplicates }) => {
   const commandName = model.name ? nameClassName(model.name) : ''
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
@@ -279,6 +281,7 @@ const CommandDetails = ({ model, events, aliasesWithDuplicates }) => {
             {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
           </span>
         </span>
+        {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
         {model.referencesAlias ?
           <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
           : <Message model={model} />
@@ -327,7 +330,7 @@ const CommandDetails = ({ model, events, aliasesWithDuplicates }) => {
       </span>
     </>
   )
-}
+})
 
 @observer
 class Command extends Component<Props> {
@@ -403,7 +406,7 @@ class Command extends Component<Props> {
                 onMouseLeave={() => this._snapshot(false)}
               >
                 {groupPlaceholder}
-                <CommandDetails model={model} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandDetails model={model} groupId={this.props.groupId} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
               </div>
             </FlashOnClick>
           )}

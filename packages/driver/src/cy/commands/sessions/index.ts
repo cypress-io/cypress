@@ -134,13 +134,15 @@ export default function (Commands, Cypress, cy) {
           displayName: recreateSession ? 'Recreate session' : 'Create new session',
           message: '',
           type: 'system',
-        }, () => {
+        }, (createLog) => {
           return cy.then(async () => {
-            // catch when a cypress command fails in the validate callback to move the queue index
+            // Catch when a cypress command fails in the setup function to correctly update log status
+            // before failing command and ending command queue.
             cy.state('onCommandFailed', (err, queue, next) => {
-              cy.state('onCommandFailed', null)
-              console.log('onCommandFailed', err)
+              createLog.set({ state: 'failed' })
               setSessionLogStatus('failed')
+
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while creating session. Because the session setup failed, we failed the test.`, _.add)
 
               return false
             })
@@ -343,7 +345,7 @@ export default function (Commands, Cypress, cy) {
        */
       const createSessionWorkflow = (existingSession, sessionStatus: 'creating' | 'recreating' = 'creating') => {
         return cy.then(async () => {
-          setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
+          setSessionLogStatus(sessionStatus ? 'recreating' : 'creating')
 
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
@@ -356,7 +358,7 @@ export default function (Commands, Cypress, cy) {
             return
           }
 
-          setSessionLogStatus(recreateSession ? 'recreated' : 'created')
+          setSessionLogStatus(sessionStatus ? 'recreated' : 'created')
         })
       }
 

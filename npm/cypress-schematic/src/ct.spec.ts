@@ -41,14 +41,13 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
   this.timeout(1000 * 60 * 4)
 
   for (const project of ANGULAR_PROJECTS) {
-    it('should install ct files with option and no component specs', async (done) => {
+    it('should install ct files with option and no component specs', async () => {
       const projectPath = await scaffoldAngularProject(project)
 
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
       await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
       await copyAngularMount(projectPath)
       await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
-      done()
     })
   }
 })

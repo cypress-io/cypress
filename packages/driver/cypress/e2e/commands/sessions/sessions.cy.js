@@ -786,7 +786,7 @@ describe('cy.session', { retries: 0 }, () => {
 
     beforeEach(() => {
       cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'session') {
+        if (attrs.name === 'session' || (attrs.name === 'get' && attrs.message === '#does_not_exist')) {
           lastLog = log
           logs.push(log)
         }
@@ -912,6 +912,20 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       cy.session('some-session')
+    })
+
+    it('throws when setup function has a failing cypress command', function (done) {
+      cy.once('fail', (err) => {
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.contain('This error occurred while creating session. Because the session setup failed, we failed the test.')
+
+        done()
+      })
+
+      cy.session(`session-${Cypress.state('test').id}`, () => {
+        cy.get('#does_not_exist', { timeout: 500 })
+      })
     })
 
     it('throws when multiple session calls with same sessionId but different options', function (done) {

@@ -255,7 +255,7 @@
     &:not(.command-type-system) {
       border-left: 2px solid $fail;
       background-color: $err-header-background;
-          
+
       &.command-is-interactive:hover {
         background: rgba($red-400, 0.3);
       }
@@ -265,6 +265,10 @@
     .command-method,
     .command-message {
       color: $err-header-text;
+    }
+
+    .failed-indicator {
+      vertical-align: middle;
     }
 
     .command-group {
