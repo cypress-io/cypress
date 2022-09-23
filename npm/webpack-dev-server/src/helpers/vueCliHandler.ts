@@ -1,5 +1,5 @@
 import debugLib from 'debug'
-//import type { Configuration } from 'webpack'
+import type { Configuration } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
@@ -9,13 +9,13 @@ export async function vueCliHandler (devServerConfig: WebpackDevServerConfig): P
   const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
 
   try {
-    const Service = require(require.resolve('@vue/cli-service/lib/Service', {
+    const Service = require(require.resolve('@vue/cli-service', {
       paths: [devServerConfig.cypressConfig.projectRoot],
     }))
     let service = new Service(process.env.VUE_CLI_CONTEXT || process.cwd())
 
     await service.init(process.env.VUE_CLI_MODE || process.env.NODE_ENV)
-    const webpackConfig = service.resolveWebpackConfig()
+    const webpackConfig = service.resolveWebpackConfig() as Configuration
 
     debug('webpack config %o', webpackConfig)
 
