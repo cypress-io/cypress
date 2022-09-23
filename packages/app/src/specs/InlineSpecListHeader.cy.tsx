@@ -47,7 +47,7 @@ describe('InlineSpecListHeader', () => {
     .realHover()
 
     cy.get('.v-popper__popper--shown')
-    .should('contain.text', 'Create new spec')
+    .should('contain.text', defaultMessages.createSpec.createNewSpec)
 
     cy.percySnapshot()
   })
