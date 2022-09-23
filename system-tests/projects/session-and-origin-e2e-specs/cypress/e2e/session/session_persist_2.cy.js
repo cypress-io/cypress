@@ -8,8 +8,7 @@
  */
 
 it('restores global session from last spec', () => {
-  cy.login('global_1')
-
+  cy.login('global_1', true)
   if (Cypress.env('SYSTEM_TESTS')) {
     cy.get(top.document).within(() => {
       cy.contains('.test', 'restores global session ').as('restores_global_session').click()

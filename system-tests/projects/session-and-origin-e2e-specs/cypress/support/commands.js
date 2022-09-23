@@ -1,8 +1,12 @@
-Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
+Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs) => {
+  if (cacheAcrossSpecs === undefined) {
+    throw new Error('Explicitly set cacheAcrossSpecs in test.')
+  }
+
   const globalSessionDetails = {
     cookies: [
       { name: '/login', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
-      { name: 'token', value: '1', path: '/', domain: 'localhost', secure: false, httpOnly: false },
+      { name: 'token', value: '1', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
       { name: '/home', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
     ],
     localStorage: [
@@ -16,7 +20,7 @@ Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
   const specSessionDetails = {
     cookies: [
       { name: '/login', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
-      { name: 'token', value: '2', path: '/', domain: 'localhost', secure: false, httpOnly: false },
+      { name: 'token', value: '2', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
       { name: '/home', value: 'value', path: '/', domain: 'localhost', secure: true, httpOnly: false, sameSite: 'no_restriction' },
     ],
     localStorage: [
@@ -48,11 +52,7 @@ Cypress.Commands.add('login', (sessionId, cacheAcrossSpecs = false) => {
 
         const expectedResult = cacheAcrossSpecs ? globalSessionDetails : specSessionDetails
 
-        expect(result.cookies).to.have.length(3)
-        result.cookies.forEach((cookie, index) => {
-          expect(cookie).to.deep.include(expectedResult.cookies[index])
-        })
-
+        expect(result.cookies).deep.members(expectedResult.cookies)
         expect(result.localStorage).deep.members(expectedResult.localStorage)
         expect(result.sessionStorage).deep.members(expectedResult.sessionStorage)
       })

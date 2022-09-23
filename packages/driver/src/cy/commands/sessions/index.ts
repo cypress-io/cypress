@@ -23,11 +23,6 @@ type SessionData = Cypress.Commands.Session.SessionData
 
 export default function (Commands, Cypress, cy) {
   // @ts-ignore
-  Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
-    if (sessionData?.cacheAcrossSpecs) {
-      sessionsManager.registeredSessions.set(sessionData.id, true)
-    }
-  })
 
   function throwIfNoSessionSupport () {
     if (Cypress.isBrowser('webkit')) {
@@ -49,6 +44,12 @@ export default function (Commands, Cypress, cy) {
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
+    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
+      if (sessionData.cacheAcrossSpecs) {
+        sessionsManager.registeredSessions.set(sessionData.id, true)
+      }
+    })
+
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
         const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
@@ -114,11 +115,19 @@ export default function (Commands, Cypress, cy) {
         }
       } else {
         if (session) {
-          const isUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
-          const isUniqValidateDefinition = session.validate && options.validate && session.validate.toString().trim() !== options.validate.toString().trim()
+          const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
+          const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
+          const hasUniqPersistence = session.cacheAcrossSpecs !== options.cacheAcrossSpecs
 
-          if (isRegisteredSessionForSpec && (isUniqSetupDefinition || isUniqValidateDefinition)) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
+          if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
+            $errUtils.throwErrByPath('sessions.session.duplicateId', {
+              args: {
+                id,
+                hasUniqSetupDefinition,
+                hasUniqValidateDefinition,
+                hasUniqPersistence,
+              },
+            })
           }
 
           if (session.cacheAcrossSpecs && _.isString(session.setup)) {

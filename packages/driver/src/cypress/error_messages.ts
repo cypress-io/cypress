@@ -1698,10 +1698,26 @@ export default {
       }
     },
     session: {
-      duplicateId: {
-        message: stripIndent`
-        This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with different options, please call ${cmd('session')} with a unique identifier other than **{{id}}**.`,
-        docsUrl: 'https://on.cypress.io/session',
+      duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
+        const differences: string[] = []
+
+        if (hasUniqSetupDefinition) {
+          differences.push('setup function')
+        }
+
+        if (hasUniqValidateDefinition) {
+          differences.push('validate function')
+        }
+
+        if (hasUniqPersistence) {
+          differences.push('persistence')
+        }
+
+        return {
+          message: stripIndent`
+           This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different ${differences.join(' and ')}, please call ${cmd('session')} with a unique identifier other than **${id}**.`,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgId: {
         message: stripIndent`

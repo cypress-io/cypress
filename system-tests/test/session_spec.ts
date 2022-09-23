@@ -98,11 +98,13 @@ const onServer = function (app) {
     <script>
       window.onload = function(){
         if (window.localStorage.getItem('persist') === 'true') {
-          document.cookie = "token=1"
+          // global session data
+          document.cookie = "token=1; Secure=true; SameSite=None"
           window.localStorage.setItem('animal', 'tiger')
           window.sessionStorage.setItem('food', 'zebra')
         } else {
-          document.cookie = "token=2"
+          // spec session data
+          document.cookie = "token=2; Secure=true; SameSite=None"
           window.localStorage.setItem('animal', 'bear')
           window.sessionStorage.setItem('food', 'salmon')
         }
