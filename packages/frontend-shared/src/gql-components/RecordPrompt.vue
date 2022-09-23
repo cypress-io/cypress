@@ -39,11 +39,11 @@ query RecordPrompt {
 `
 
 const firstRecordKey = computed(() => {
-  return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data?.value?.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
+  return (query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value?.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
 })
 
 const recordCommand = computed(() => {
-  const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
+  const componentFlagOrSpace = query.data.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
 
   return `npx cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
