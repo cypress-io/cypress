@@ -4,8 +4,8 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 // TODO: This is a temporary workaround. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
-// const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react', 'vite3.0.2-react']
-const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react', 'vite3.0.2-react']
+// const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()

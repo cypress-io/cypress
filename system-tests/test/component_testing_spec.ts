@@ -141,8 +141,8 @@ describe('svelte component testing', () => {
   systemTests.setup()
 
   // TODO: This is a temporary workaround. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
-  // for (const bundler of ['webpack', 'vite']) {
-  for (const bundler of ['webpack']) {
+  for (const bundler of ['webpack', 'vite']) {
+  // for (const bundler of ['webpack']) {
     systemTests.it(`svelte + ${bundler}`, {
       project: `svelte-${bundler}`,
       testingType: 'component',

@@ -410,7 +410,7 @@ describe('e2e network error handling', function () {
     })
 
     // TODO: Skipping for now. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
-    it.skip('does not connect to the upstream proxy for the SNI server request', function () {
+    it('does not connect to the upstream proxy for the SNI server request', function () {
       const onConnect = sinon.spy(() => {
         return true
       })
