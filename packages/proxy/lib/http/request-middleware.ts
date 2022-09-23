@@ -46,7 +46,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  let { resourceType, credentialStatus } = this.getCredentialLevelOfRequest(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+  let { resourceType, credentialStatus } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
 
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 

@@ -23,16 +23,6 @@ export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolea
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
-export type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
-  resourceType: RequestResourceType
-  credentialStatus: RequestCredentialLevel
-}>>
-
-export type GetCredentialLevelOfRequest = (url: string, optionalResourceType?: RequestResourceType) => {
-  resourceType: RequestResourceType
-  credentialStatus: RequestCredentialLevel
-}
-
 /**
  * An outgoing response to an incoming request to the Cypress web server.
  */
