@@ -168,4 +168,5 @@ The error we received was:
 Error: error thrown in before:spec
       [stack trace lines]
 
+
 `
