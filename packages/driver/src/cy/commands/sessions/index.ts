@@ -44,6 +44,7 @@ export default function (Commands, Cypress, cy) {
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
+    // @ts-ignore
     Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
       if (sessionData.cacheAcrossSpecs) {
         sessionsManager.registeredSessions.set(sessionData.id, true)
