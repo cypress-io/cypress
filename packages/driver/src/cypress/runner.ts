@@ -1111,8 +1111,18 @@ export default {
       return undefined
     }
 
-    specWindow.addEventListener('error', onSpecError('error'))
-    specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    // Unlike End To End Testing which has two iframes
+    // - Spec Frame, for the spec.
+    // - AUT Frame, for the user's application.
+    // Component Testing only has one iframe. The AUT Frame is also the Spec Frame,
+    // since we serve the specs from a dev server - they are bundled as a single file.
+    // We don't want to bind two error handlers, or we end up logging errors twice.
+    // For this reason, we conditionally add these event listeners here - Component Testing errors are captured and logged
+    // in contentWindowListeners#bindToListeners in cypress/cy.ts.
+    if (Cypress.testingType === 'e2e') {
+      specWindow.addEventListener('error', onSpecError('error'))
+      specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    }
 
     // hold onto the _runnables for faster lookup later
     let _test: any = null
