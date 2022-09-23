@@ -249,11 +249,14 @@ describe('cy.session', { retries: 0 }, () => {
         setupTestContext()
         cy.log('Creating new session with validation to test against')
 
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        // cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        cy.session(`session-${Cypress.state('test').id}`, () => {
+          cy.get('does_not_exist')
+        })
       })
 
       // test must be first to run before blank page visit between each test
-      it('does not clear page visit from validate function', () => {
+      it.only('does not clear page visit from validate function', () => {
         cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
@@ -637,7 +640,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('recreates existing session with failed validation flow', () => {
-      it.only('fails to recreate session and logs correctly', function () {
+      it('fails to recreate session and logs correctly', function () {
         setupTestContext()
         cy.log('Creating new session for test')
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate })

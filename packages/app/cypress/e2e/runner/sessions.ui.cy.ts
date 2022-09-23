@@ -326,6 +326,74 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['user1', 'user2'])
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
+
+  describe('errors', () => {
+    it('test error when setup has failing Cypress command', () => {
+      cy.contains('.test', 'fails to create with failing command').as('test')
+      // test marked as failed
+      // test is expanded
+      // cy.get('test')
+
+      // session is marked as 'failed'
+      // setup group is expanded
+      // has error
+      cy.get('@test').within(() => {
+        cy.get('.command-name-session').should('contain', 'session_1')
+        .find('.reporter-tag').should('contain', 'failed')
+      })
+    })
+
+    describe('created session failed validation', () => {
+      it('has test error when validate returned false', () => {
+        // test marked as failed
+        // test is expanded
+        // session is marked as 'failed'
+        // validates group is expanded
+      })
+
+      it('test error when validate resolved false', () => {
+        // test marked as failed
+        // test is expanded
+        // session is marked as 'failed'
+        // validates group is expanded
+      })
+
+      it('test error when validate rejected with false', () => {
+        // test marked as failed
+        // test is expanded
+        // session is marked as 'failed'
+        // validates group is expanded
+      })
+
+      it('test error when validate threw error', () => {
+        // test marked as failed
+        // test is expanded
+        // session is marked as 'failed'
+        // validates group is expanded
+      })
+
+      it('test error when validate has failing Cypress command', () => {
+        // test marked as failed
+        // test is expanded
+        // session is marked as 'failed'
+        // validates group is expanded
+      })
+    })
+
+    describe('restored session fails validation and session is recreated', () => {
+      it('has inline error where validate returned false', () => {
+        // test marked as passed
+        // test is collapsed
+        // session is marked as 'successful'
+        // validates group is collapsed
+      })
+
+      it('has inline error where validate resolved false')
+      it('has inline error where validate rejected with false')
+      it('has inline error where validate threw error')
+      it('has inline error where validate has failing Cypress command')
+    })
+  })
 })
 
 describe('runner/cypress sessions.open_mode.spec', () => {

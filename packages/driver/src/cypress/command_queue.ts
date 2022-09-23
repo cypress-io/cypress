@@ -378,7 +378,11 @@ export class CommandQueue extends Queue<$Command> {
       console.log('onError')
 
       if (this.state('onCommandFailed')) {
-        return this.state('onCommandFailed')(err, this, next, commandRunningFailed)
+        const handledError = this.state('onCommandFailed')(err, this, next, commandRunningFailed)
+
+        if (handledError) {
+          return
+        }
       }
 
       debugErrors('caught error in promise chain: %o', err)

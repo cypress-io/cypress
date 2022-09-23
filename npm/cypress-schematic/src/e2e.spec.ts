@@ -30,12 +30,13 @@ describe('ng add @cypress/schematic / only e2e', function () {
   this.timeout(1000 * 60 * 4)
 
   for (const project of ANGULAR_PROJECTS) {
-    it('should install e2e files by default', async () => {
+    it('should install e2e files by default', async (done) => {
       const projectPath = await scaffoldAngularProject(project)
 
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
       await runCommandInProject('yarn ng add @cypress/schematic --e2e --component false --add-ct-specs false', projectPath)
       await runCommandInProject('yarn ng e2e --watch false', projectPath)
+      done()
     })
   }
 })

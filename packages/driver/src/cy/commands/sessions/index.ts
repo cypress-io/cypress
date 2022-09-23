@@ -76,6 +76,7 @@ export default function (Commands, Cypress, cy) {
 
         const validOpts = {
           'validate': 'function',
+          'cacheAcrossSpecs': 'boolean',
         }
 
         Object.entries(options).forEach(([key, value]) => {
@@ -139,6 +140,15 @@ export default function (Commands, Cypress, cy) {
           type: 'system',
         }, () => {
           return cy.then(async () => {
+            // catch when a cypress command fails in the validate callback to move the queue index
+            cy.state('onCommandFailed', (err, queue, next) => {
+              cy.state('onCommandFailed', null)
+              console.log('onCommandFailed', err)
+              setSessionLogStatus('failed')
+
+              return false
+            })
+
             return existingSession.setup()
           })
           .then(async () => {
@@ -210,9 +220,7 @@ export default function (Commands, Cypress, cy) {
               setSessionLogStatus('failed')
               $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the ${sessionStatus} session. Because validation failed immediately after creating the session, we failed the test.`, _.add)
 
-              return cy.then(() => {
-                cy.fail(err)
-              })
+              return cy.fail(err)
             }
 
             return validate(existingSession, sessionStatus, onSuccess, onFail)
