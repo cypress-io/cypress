@@ -21,7 +21,7 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from '@packages/server/lib/util/cookies'
-import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/ResourceTypeAndCredentialManager'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { Automation } from '@packages/server/lib/automation/automation'
 
 function getRandomColorFn () {

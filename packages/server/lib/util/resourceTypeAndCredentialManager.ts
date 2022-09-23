@@ -16,7 +16,7 @@ const hashUrl = (url: string): string => {
 // leverage a singleton Map throughout the server to prevent clashes with this context bindings
 const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap = new Map()
 
-export class ResourceTypeAndCredentialManagerClass {
+class ResourceTypeAndCredentialManagerClass {
   get (url: string, optionalResourceType?: RequestResourceType): {
     resourceType: RequestResourceType
     credentialStatus: RequestCredentialLevel

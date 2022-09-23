@@ -218,6 +218,8 @@ export class CookiesHelper {
     }
 
     // cross site cookies cannot set lax/strict cookies in the browser for xhr/fetch requests (but ok with navigation/document requests)
+    // NOTE: This is allowable in firefox as the default cookie behavior is no_restriction (none). However, this shouldn't
+    // impact what is happening in the server-side cookie jar as Set-Cookie is still called and firefox will allow it to be set in the browser
     if (this.request.resourceType && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
       this.debug(`cannot set cookie with SameSite=${toughCookie.sameSite} when site context is ${this.siteContext}`)
 
