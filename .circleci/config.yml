@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 'feature/v8-snapshots'
-        - 'ryanm/feat/incorporate-snapshot-in-monorepo'
+        - 'ryanm/fix/windows-snapshots'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/incorporate-snapshot-in-monorepo', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/windows-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,13 +48,11 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/incorporate-snapshot-in-monorepo', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/windows-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
-# uncomment & add to the branch conditions below to disable the main linux
-# flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
@@ -67,7 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/incorporate-snapshot-in-monorepo', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/windows-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -113,8 +111,6 @@ executors:
     resource_class: windows.large
     environment:
       PLATFORM: windows
-      # TODO: Disabling snapshots for now on Windows. Will revisit with https://github.com/cypress-io/cypress/issues/23122
-      DISABLE_SNAPSHOT_REQUIRE: 1
 
   darwin-arm64: &darwin-arm64-executor
     machine: true
@@ -1347,8 +1343,7 @@ jobs:
       - unless:
           condition:
             or:
-              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557 
-              - equal: [ *windows-executor, << parameters.executor >> ] # TODO: Figure out how to support windows when we support the windows build: https://github.com/cypress-io/cypress/issues/23122
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557
           steps:
             - run:
                 name: Run v8 integration tests
@@ -1361,7 +1356,6 @@ jobs:
           condition:
             or:
               - equal: [ *linux-arm64-executor, << parameters.executor >> ]
-              - equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
                 name: Run v8 integration tests
@@ -1934,6 +1928,20 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
+      - store-npm-logs
+  
+  npm-xpath:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/xpath cy:run
+      - store_test_results:
+          path: npm/xpath/test_results
+      - store_artifacts:
+          path: npm/xpath/test_results
       - store-npm-logs
 
   npm-create-cypress-tests:
