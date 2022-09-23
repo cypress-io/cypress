@@ -117,7 +117,7 @@ export default function (Commands, Cypress, cy) {
         if (session) {
           const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
           const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
-          const hasUniqPersistence = session.cacheAcrossSpecs !== options.cacheAcrossSpecs
+          const hasUniqPersistence = session.cacheAcrossSpecs !== !!options.cacheAcrossSpecs
 
           if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
             $errUtils.throwErrByPath('sessions.session.duplicateId', {

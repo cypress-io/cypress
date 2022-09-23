@@ -933,7 +933,7 @@ describe('cy.session', { retries: 0 }, () => {
       cy.once('fail', async (err) => {
         expect(lastLog.get('error')).to.eq(err)
         expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with different options, please call `cy.session()` with a unique identifier other than **duplicate-session**.')
+        expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different setup function, please call `cy.session()` with a unique identifier other than **duplicate-session**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         try {
@@ -962,7 +962,7 @@ describe('cy.session', { retries: 0 }, () => {
       cy.once('fail', async (err) => {
         expect(lastLog.get('error')).to.eq(err)
         expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with different options, please call `cy.session()` with a unique identifier other than **duplicate-sess**.')
+        expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different validate function, please call `cy.session()` with a unique identifier other than **duplicate-sess**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
@@ -971,6 +971,21 @@ describe('cy.session', { retries: 0 }, () => {
       cy.session('duplicate-sess', () => {}, { validate: () => {} })
 
       cy.session('duplicate-sess', () => {}, { validate: () => { /* do something */ } })
+    })
+
+    it('throws when multiple session calls with same sessionId but different cacheAcrossSpec opt', function (done) {
+      cy.once('fail', async (err) => {
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different persistence, please call `cy.session()` with a unique identifier other than **duplicate-sess**.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+
+        done()
+      })
+
+      cy.session('duplicate-sess', () => {}, { validate: () => {} })
+
+      cy.session('duplicate-sess', () => {}, { validate: () => {}, cacheAcrossSpecs: true })
     })
 
     describe('options.validate failures', () => {
