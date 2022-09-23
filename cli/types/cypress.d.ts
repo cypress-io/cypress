@@ -2144,7 +2144,7 @@ declare namespace Cypress {
      *    // type "hello" + press Enter
      *    cy.get('input').type('hello{enter}')
      */
-    type(text: string, options?: Partial<TypeOptions>): Chainable<Subject>
+    type(text: number | string, options?: Partial<TypeOptions>): Chainable<Subject>
 
     /**
      * Uncheck checkbox(es).
