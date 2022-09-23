@@ -1250,22 +1250,6 @@ export default {
         docsUrl: 'https://on.cypress.io/session-api',
       },
     },
-    cannot_visit_previous_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
-
-          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
-
-          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
-
-          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`
-
-          \`cy.visit('${args.originalUrl}')\``,
-      }
-    },
     aut_error_prior_to_spec_bridge_attach ({ args }) {
       const { errorMessage, autLocation } = args
 

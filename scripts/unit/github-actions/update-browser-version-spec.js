@@ -246,7 +246,13 @@ describe('update browser version github action', () => {
   })
 
   context('.updateBrowserVersionsFile', () => {
-    it('updates browser-versions.json with specified versions', () => {
+    it('updates browser-versions.json with specified versions, leaving other entries in place', () => {
+      sinon.stub(fs, 'readFileSync').returns(`{
+        "chrome:beta": "1.1",
+        "chrome:stable": "1.0",
+        "chrome:other": "0.4"
+      }`)
+
       sinon.stub(fs, 'writeFileSync')
 
       updateBrowserVersionsFile({
@@ -256,7 +262,8 @@ describe('update browser version github action', () => {
 
       expect(fs.writeFileSync).to.be.calledWith('./browser-versions.json', `{
   "chrome:beta": "2.1",
-  "chrome:stable": "2.0"
+  "chrome:stable": "2.0",
+  "chrome:other": "0.4"
 }
 `)
     })

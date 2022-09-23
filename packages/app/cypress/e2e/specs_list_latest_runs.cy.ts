@@ -31,21 +31,17 @@ function assertCorrectRunsLink (specFileName: string, status: string) {
 }
 
 function validateTooltip (status: string) {
-  cy.validateExternalLink({
-    // TODO: (#23778) This name is so long because the entire tooltip is wrapped in a link,
-    // we can make this more accessible by having the name of the link describe the destination
-    // (which is currently not described) and keeping the other content separate.
-    name: `accounts_new.spec.js ${status} 4 months ago 2:23 - 2:39 skipped pending passed failed`,
-    // the main thing about testing this link is that is gets composed with the expected UTM params
-    href: makeTestingCloudLink(status),
-  })
+  cy.get(`a[href="${makeTestingCloudLink(status)}"]`)
   .should('contain.text', 'accounts_new.spec.js')
-  .and('contain.text', '4 months ago')
   .and('contain.text', '2:23 - 2:39')
   .and('contain.text', 'skipped 0')
   .and('contain.text', 'pending 1-2')
   .and('contain.text', `passed 22-23`)
   .and('contain.text', 'failed 1-2')
+  .invoke('text')
+  .should((text) => {
+    expect(text).to.match(/\d+ (day|week|month|year)s? ago/)
+  })
 }
 
 function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus|'PLACEHOLDER') {

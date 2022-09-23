@@ -216,7 +216,8 @@ function resolvePathsAndParent (
   }
 
   if (snapshotting || !modulePathFromAppRoot.startsWith('.')) {
-    filename = modulePathFromAppRoot
+    // Have to hard code / here since we can't use `path` in the snapshot
+    filename = modulePathFromAppRoot.split('/').join(PATH_SEP)
     dirname = filename.split(PATH_SEP).slice(0, -1).join(PATH_SEP)
     parentFilename = parentRelFilename
     parentDirname = parentRelDirname
