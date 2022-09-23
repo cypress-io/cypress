@@ -15,9 +15,7 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-let intervals
-
-const DELAYS = process.env.API_RETRY_INTERVALS ? intervals.split(',').map(_.toNumber) : [
+const DELAYS = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
   THIRTY_SECONDS,
   SIXTY_SECONDS,
   TWO_MINUTES,
