@@ -542,7 +542,7 @@ export class PackherdModuleLoader {
     if (path.isAbsolute(moduleUri)) {
       const moduleCached: NodeModule = this.Module._cache[moduleUri]
 
-      if (moduleCached != null) {
+      if (moduleCached != null && moduleCached.loaded) {
         const fullPath = moduleUri
         const resolved = 'module-uri:node'
 
