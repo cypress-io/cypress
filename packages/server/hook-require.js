@@ -28,7 +28,7 @@ function runWithSnapshot () {
   })
 }
 
-if (process.env.DISABLE_SNAPSHOT_REQUIRE != null) {
+if (process.env.DISABLE_SNAPSHOT_REQUIRE != null || typeof snapshotResult === 'undefined') {
   require('@packages/ts/register')
 } else {
   runWithSnapshot()
