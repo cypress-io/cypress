@@ -3,21 +3,22 @@ require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
-
-const errors = require(`../../lib/errors`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
-const { Automation } = require(`../../lib/automation`)
-const exec = require(`../../lib/exec`)
-const preprocessor = require(`../../lib/plugins/preprocessor`)
-const { fs } = require(`../../lib/util/fs`)
-
+const socketIo = require('@packages/socket/lib/browser')
 const Fixtures = require('@tooling/system-tests')
-const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
-const { createRoutes } = require(`../../lib/routes`)
-const { getCtx } = require(`../../lib/makeDataContext`)
+
+const errors = require('../../lib/errors')
+const { SocketE2E } = require('../../lib/socket-e2e')
+const { ServerE2E } = require('../../lib/server-e2e')
+const { Automation } = require('../../lib/automation')
+const exec = require('../../lib/exec')
+const preprocessor = require('../../lib/plugins/preprocessor')
+const { fs } = require('../../lib/util/fs')
+const session = require('../../lib/session')
+
+const firefoxUtil = require('../../lib/browsers/firefox-util').default
+const { createRoutes } = require('../../lib/routes')
+const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
 
 let ctx
@@ -33,6 +34,7 @@ describe('lib/socket', () => {
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
     Fixtures.scaffold()
+    session.clearSessions(true)
 
     this.todosPath = Fixtures.projectPath('todos')
 
@@ -453,7 +455,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(get:fixture)', () => {
+    context('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {
           expect(resp.response).to.deep.eq([
@@ -488,7 +490,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(http:request)', () => {
+    context('on(backend:request, http:request)', () => {
       it('calls socket#onRequest', function (done) {
         sinon.stub(this.options, 'onRequest').resolves({ foo: 'bar' })
 
@@ -512,7 +514,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(exec)', () => {
+    context('on(backend:request, exec)', () => {
       it('calls exec#run with project root and options', function (done) {
         const run = sinon.stub(exec, 'run').returns(Promise.resolve('Desktop Music Pictures'))
 
@@ -539,7 +541,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(firefox:force:gc)', () => {
+    context('on(backend:request, firefox:force:gc)', () => {
       it('calls firefoxUtil#collectGarbage', function (done) {
         sinon.stub(firefoxUtil, 'collectGarbage').resolves()
 
@@ -599,40 +601,177 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(cross:origin:bridge:ready)', () => {
-      it('emits cross:origin:bridge:ready on local bus', function (done) {
-        this.server.socket.localBus.once('cross:origin:bridge:ready', ({ originPolicy }) => {
-          expect(originPolicy).to.equal('http://foobar.com')
+    context('on(backend:request, save:session)', () => {
+      it('saves spec sessions', function (done) {
+        const sessionData = {
+          id: 'spec',
+          cacheAcrossSpecs: false,
+        }
+
+        this.client.emit('backend:request', 'save:session', sessionData, () => {
+          const state = session.getState()
+
+          expect(state).to.deep.eq({
+            globalSessions: {},
+            specSessions: {
+              'spec': sessionData,
+            },
+          })
 
           done()
         })
+      })
 
-        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+      it('saves global sessions', function (done) {
+        const sessionData = {
+          id: 'global',
+          cacheAcrossSpecs: true,
+        }
+
+        this.client.emit('backend:request', 'save:session', sessionData, () => {
+          const state = session.getState()
+
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': sessionData,
+            },
+            specSessions: {},
+          })
+
+          done()
+        })
+      })
+
+      it('returns error if session data has no id', function (done) {
+        const sessionData = {}
+
+        this.client.emit('backend:request', 'save:session', sessionData, ({ error }) => {
+          expect(error.message).to.eq('session data had no id')
+          done()
+        })
       })
     })
 
-    context('on(cross:origin:release:html)', () => {
-      it('emits cross:origin:release:html on local bus', function (done) {
-        this.server.socket.localBus.once('cross:origin:release:html', () => {
+    context('on(backend:request, clear:sessions)', () => {
+      it('clears spec sessions', function (done) {
+        let state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          spec: { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'clear:sessions', false, () => {
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': { id: 'global' },
+            },
+            specSessions: {},
+          })
+
           done()
         })
+      })
 
-        this.client.emit('backend:request', 'cross:origin:release:html', () => {})
+      it('clears all sessions', function (done) {
+        let state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          spec: { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'clear:sessions', true, () => {
+          expect(state).to.deep.eq({
+            globalSessions: {},
+            specSessions: {},
+          })
+
+          done()
+        })
       })
     })
 
-    context('on(cross:origin:finished)', () => {
-      it('emits cross:origin:finished on local bus', function (done) {
-        this.server.socket.localBus.once('cross:origin:finished', (originPolicy) => {
-          expect(originPolicy).to.equal('http://foobar.com')
+    context('on(backend:request, get:session)', () => {
+      it('returns global session', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        this.client.emit('backend:request', 'get:session', 'global', ({ response, error }) => {
+          expect(error).to.be.undefined
+          expect(response).deep.eq({
+            id: 'global',
+          })
 
           done()
         })
+      })
 
-        // add the origin before calling cross:origin:finished (otherwise we'll fail trying to remove the origin)
-        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+      it('returns spec session', function (done) {
+        const state = session.getState()
 
-        this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
+        state.globalSessions = {}
+        state.specSessions = {
+          'spec': { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'get:session', 'spec', ({ response, error }) => {
+          expect(error).to.be.undefined
+          expect(response).deep.eq({
+            id: 'spec',
+          })
+
+          done()
+        })
+      })
+
+      it('returns error when session does not exist', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {}
+        state.specSessions = {}
+        this.client.emit('backend:request', 'get:session', 1, ({ response, error }) => {
+          expect(response).to.be.undefined
+          expect(error.message).to.eq('session with id "1" not found')
+
+          done()
+        })
+      })
+    })
+
+    context('on(backend:request, reset:cached:test:state)', () => {
+      it('clears spec sessions', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          local: { id: 'local' },
+        }
+
+        this.client.emit('backend:request', 'reset:cached:test:state', ({ error }) => {
+          expect(error).to.be.undefined
+
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': { id: 'global' },
+            },
+            specSessions: {},
+          })
+
+          done()
+        })
       })
     })
   })
@@ -642,6 +781,11 @@ describe('lib/socket', () => {
       this.mockClient = sinon.stub({
         on () {},
         emit () {},
+        conn: {
+          transport: {
+            name: 'websocket',
+          },
+        },
       })
 
       this.io = {

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "10.7.0",
+  "version": "10.8.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -36,7 +36,6 @@
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
-    "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",

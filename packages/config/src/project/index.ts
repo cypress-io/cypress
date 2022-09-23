@@ -21,7 +21,7 @@ const debug = Debug('cypress:config:project')
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
 export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
   debug('setting config object %o', obj)
-  let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
+  let { projectRoot, projectName, config, envFile, options, cliConfig, repoRoot } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
@@ -35,6 +35,7 @@ export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any)
   config.envFile = envFile
   config.projectRoot = projectRoot
   config.projectName = projectName
+  config.repoRoot = repoRoot
 
   // @ts-ignore
   return mergeDefaults(config, options, cliConfig, getFilesByGlob)
