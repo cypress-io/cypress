@@ -62,7 +62,7 @@ export default function loader (this: unknown) {
   const { files, projectRoot, supportFile } = ctx._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
-  const supportFileRelativePath = supportFile ? path.relative(projectRoot, supportFileAbsolutePath || '') : undefined
+  const supportFileRelativePath = supportFile ? JSON.stringify(path.relative(projectRoot, supportFileAbsolutePath || '')) : undefined
   const result = `
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
@@ -78,10 +78,10 @@ export default function loader (this: unknown) {
 
   if (${!!supportFile}) {
     var supportFile = {
-      absolute: "${supportFileAbsolutePath}",
-      relative: "${supportFileRelativePath}",
+      absolute: ${supportFileAbsolutePath},
+      relative: ${supportFileRelativePath},
       relativeUrl: "/__cypress/src/cypress-support-file.js",
-      load: () => import("${supportFileAbsolutePath}" /* webpackChunkName: "cypress-support-file" */),
+      load: () => import(${supportFileAbsolutePath} /* webpackChunkName: "cypress-support-file" */),
     }
     scriptLoaders.unshift(supportFile)
   }
