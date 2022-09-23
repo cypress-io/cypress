@@ -61,7 +61,7 @@ export default function loader (this: unknown) {
   ctx.cacheable(false)
   const { files, projectRoot, supportFile } = ctx._cypress
 
-  const supportFileAbsolutePath = supportFile ? path.resolve(projectRoot, supportFile) : undefined
+  const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
   const supportFileRelativePath = supportFile ? path.relative(projectRoot, supportFileAbsolutePath || '') : undefined
   const result = `
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
