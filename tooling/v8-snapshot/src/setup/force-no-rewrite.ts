@@ -29,6 +29,7 @@ export default [
   // TODO: This should be temporary. Will address with https://github.com/cypress-io/cypress/issues/22986
   'packages/server/lib/routes-e2e.ts',
 
-  // TODO: Figure out why this doesn't properly get flagged as norewrite
+  // TODO: Figure out why these don't properly get flagged as norewrite
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
+  'packages/server/lib/modes/run.ts',
 ]
