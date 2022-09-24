@@ -31,5 +31,6 @@ export default [
 
   // TODO: Figure out why these don't properly get flagged as norewrite
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
+  'packages/server/lib/modes/record.js',
   'packages/server/lib/modes/run.ts',
 ]
