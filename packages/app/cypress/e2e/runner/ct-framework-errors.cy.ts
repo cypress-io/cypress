@@ -104,6 +104,73 @@ reactVersions.forEach((reactVersion) => {
   })
 })
 
+describe('Next.js', {
+  viewportHeight: 768,
+  viewportWidth: 1024,
+  // Limiting tests kept in memory due to large memory cost
+  // of nested spec snapshots
+  numTestsKeptInMemory: 1,
+}, () => {
+  before(() => {
+    cy.scaffoldProject('next-12')
+  })
+
+  it('error conditions', () => {
+    const verify = loadErrorSpec({
+      projectName: 'next-12',
+      configFile: 'cypress.config.js',
+      filePath: 'cypress/Errors.cy.jsx',
+      failCount: 4,
+    })
+
+    verify('error on mount', {
+      line: 7,
+      column: 33,
+      uncaught: true,
+      uncaughtMessage: 'mount error',
+      message: [
+        'The following error originated from your test code',
+        'mount error',
+      ],
+      codeFrameText: 'Errors.cy.jsx',
+    })
+
+    verify('sync error', {
+      line: 12,
+      column: 34,
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      message: [
+        'The following error originated from your test code',
+        'sync error',
+      ],
+      codeFrameText: 'Errors.cy.jsx',
+    })
+
+    verify('async error', {
+      line: 19,
+      column: 38,
+      uncaught: true,
+      uncaughtMessage: 'async error',
+      message: [
+        'The following error originated from your test code',
+        'async error',
+      ],
+      codeFrameText: 'Errors.cy.jsx',
+    })
+
+    verify('command failure', {
+      line: 44,
+      column: 8,
+      command: 'get',
+      message: [
+        'Timed out retrying',
+        'element-that-does-not-exist',
+      ],
+    })
+  })
+})
+
 describe('Vue', {
   viewportHeight: 768,
   viewportWidth: 1024,
@@ -156,6 +223,73 @@ describe('Vue', {
         'The following error originated from your test code',
         'async error',
       ],
+      codeFrameText: 'Errors.vue',
+    })
+
+    verify('command failure', {
+      command: 'get',
+      message: [
+        'Timed out retrying',
+        'element-that-does-not-exist',
+      ],
+      codeFrameRegex: /Errors\.cy\.js:26/,
+      stackRegex: /Errors\.cy\.js:26/,
+    })
+  })
+})
+
+describe('Nuxt', {
+  viewportHeight: 768,
+  viewportWidth: 1024,
+  // Limiting tests kept in memory due to large memory cost
+  // of nested spec snapshots
+  numTestsKeptInMemory: 1,
+}, () => {
+  before(() => {
+    cy.scaffoldProject('nuxtjs-vue2-configured')
+  })
+
+  it('error conditions', () => {
+    const verify = loadErrorSpec({
+      projectName: 'nuxtjs-vue2-configured',
+      configFile: 'cypress.config.js',
+      filePath: 'components/Errors.cy.js',
+      failCount: 3,
+    })
+
+    verify('error on mount', {
+      fileName: 'Errors.vue',
+      line: 19,
+      message: [
+        'mount error',
+      ],
+      stackRegex: /Errors\.vue:19/,
+      codeFrameText: 'Errors.vue',
+    })
+
+    // verify('sync error', {
+    //   fileName: 'Errors.vue',
+    //   line: 24,
+    //   column: 16,
+    //   uncaught: true,
+    //   uncaughtMessage: 'sync error',
+    //   message: [
+    //     'The following error originated from your test code',
+    //     'sync error',
+    //   ],
+    //   codeFrameText: 'Errors.vue',
+    // })
+
+    verify('async error', {
+      fileName: 'Errors.vue',
+      line: 28,
+      uncaught: true,
+      uncaughtMessage: 'async error',
+      message: [
+        'The following error originated from your test code',
+        'async error',
+      ],
+      stackRegex: /Errors\.vue:28/,
       codeFrameText: 'Errors.vue',
     })
 
