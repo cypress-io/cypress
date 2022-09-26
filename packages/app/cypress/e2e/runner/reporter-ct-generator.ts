@@ -4,6 +4,34 @@ import { createVerify, verifyInternalFailure } from './support/verify-failures'
 type VerifyFunc = (specTitle: string, verifyOptions: any) => void
 
 /**
+   * Navigates to desired error spec file within Cypress app and waits for completion.
+   * Returns scoped verify function to aid inner spec validation.
+   */
+function loadErrorSpec (options: specLoader.LoadSpecOptions, configFile: string): VerifyFunc {
+  const DefaultOptions: Partial<specLoader.LoadSpecOptions> = {
+    projectName: 'runner-ct-specs',
+    mode: 'component',
+    configFile,
+  }
+
+  const effectiveOptions = {
+    ...DefaultOptions,
+    ...options,
+  }
+
+  const {
+    filePath,
+    hasPreferredIde = false,
+    mode,
+  } = effectiveOptions
+
+  specLoader.loadSpec(effectiveOptions)
+
+  // Return scoped verify function with spec options baked in
+  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
+}
+
+/**
  * Generate CT error reporting specs for a given dev server - have to structure this way to avoid
  * Out of Memory issues if they're all contained in a single spec
  *
@@ -11,35 +39,6 @@ type VerifyFunc = (specTitle: string, verifyOptions: any) => void
  * @param configFile config file
  */
 export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
-  const DefaultOptions: Partial<specLoader.LoadSpecOptions> = {
-    projectName: 'runner-ct-specs',
-    mode: 'component',
-    configFile,
-    scaffold: false,
-  }
-
-  /**
-   * Navigates to desired error spec file within Cypress app and waits for completion.
-   * Returns scoped verify function to aid inner spec validation.
-   */
-  function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
-    const effectiveOptions = {
-      ...DefaultOptions,
-      ...options,
-    }
-
-    const {
-      filePath,
-      hasPreferredIde = false,
-      mode,
-    } = effectiveOptions
-
-    specLoader.loadSpec(effectiveOptions)
-
-    // Return scoped verify function with spec options baked in
-    return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
-  }
-
   describe(`${server} - errors ui`, {
     viewportHeight: 768,
     viewportWidth: 1024,
@@ -47,16 +46,12 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
     // of nested spec snapshots
     numTestsKeptInMemory: 1,
   }, () => {
-    before(() => {
-      cy.scaffoldProject('runner-ct-specs')
-    })
-
     it('assertion failures', () => {
       const verify = loadErrorSpec({
         filePath: 'errors/assertions.cy.js',
         hasPreferredIde: true,
         failCount: 3,
-      })
+      }, configFile)
 
       verify('with expect().<foo>', {
         line: 3,
@@ -81,7 +76,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/assertions.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('with expect().<foo>', {
         column: [25, 26],
@@ -96,7 +91,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
         const verify = loadErrorSpec({
           filePath: 'errors/exceptions.cy.js',
           failCount: 2,
-        })
+        }, configFile)
 
         verify('in spec file', {
           column: 10,
@@ -116,7 +111,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/hooks.cy.js',
         failCount: 1,
-      })
+      }, configFile)
 
       // https://github.com/cypress-io/cypress/issues/8214
       // https://github.com/cypress-io/cypress/issues/8288
@@ -132,7 +127,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/commands.cy.js',
         failCount: 2,
-      })
+      }, configFile)
 
       verify('failure', {
         column: [8, 9],
@@ -149,7 +144,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/then.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [27, 28],
@@ -171,7 +166,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/should.cy.js',
         failCount: 8,
-      })
+      }, configFile)
 
       verify('callback assertion failure', {
         column: [27, 28],
@@ -221,7 +216,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/each.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [27, 28],
@@ -243,7 +238,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/spread.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [27, 28],
@@ -265,7 +260,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/within.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [27, 28],
@@ -287,7 +282,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/wrap.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [27, 28],
@@ -309,7 +304,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/intercept.cy.ts',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure in request callback', {
         column: 22,
@@ -352,7 +347,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/readfile.cy.js',
         failCount: 1,
-      })
+      }, configFile)
 
       verify('existence failure', {
         column: [8, 9],
@@ -364,7 +359,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/validation.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('from cypress', {
         column: [8, 9],
@@ -388,7 +383,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/events.cy.js',
         failCount: 4,
-      })
+      }, configFile)
 
       verify('event assertion failure', {
         column: [27, 28],
@@ -411,186 +406,11 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       })
     })
 
-    it('uncaught errors', () => {
-      const verify = loadErrorSpec({
-        filePath: 'errors/uncaught-ct.cy.js',
-        failCount: 11,
-      })
-
-      verify('sync app mount exception', {
-        uncaught: true,
-        originalMessage: 'mount error',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /src\/Errors.jsx/,
-        hasCodeFrame: false,
-      })
-
-      verify('sync app exception after mount', {
-        uncaught: true,
-        originalMessage: 'sync error',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /src\/Errors.jsx/,
-        hasCodeFrame: false,
-      })
-
-      verify('exception inside uncaught:exception', {
-        uncaught: true,
-        uncaughtMessage: 'mount error',
-        column: [5, 6, 12],
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
-
-      verify('async app exception after mount', {
-        uncaught: true,
-        originalMessage: 'async error',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /src\/Errors.jsx/,
-        hasCodeFrame: false,
-      })
-
-      verify('app unhandled rejection', {
-        uncaught: true,
-        originalMessage: 'promise rejection',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /src\/Errors.jsx/,
-        hasCodeFrame: false,
-      })
-
-      verify('async spec exception', {
-        uncaught: true,
-        column: [3, 5, 12],
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
-
-      verify('async spec exception with done', {
-        uncaught: true,
-        column: [3, 6, 12],
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
-
-      verify('spec unhandled rejection', {
-        uncaught: true,
-        column: [20, 21],
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
-
-      verify('spec unhandled rejection with done', {
-        uncaught: true,
-        column: [20, 21],
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your application code',
-          'It was caused by an unhandled promise rejection',
-        ],
-        hasCodeFrame: server !== 'Vite',
-      })
-
-      verify('spec Bluebird unhandled rejection', {
-        uncaught: true,
-        column: [21, 22],
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-        hasCodeFrame: server !== 'Vite',
-      })
-
-      verify('spec Bluebird unhandled rejection with done', {
-        uncaught: true,
-        column: [21, 22],
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-        hasCodeFrame: server !== 'Vite',
-      })
-    })
-
-    it('uncaught errors: outside test', () => {
-      const verify = loadErrorSpec({
-        filePath: 'errors/uncaught_outside_test.cy.js',
-        failCount: 1,
-      })
-
-      // NOTE: the following 2 test don't have uncaught: true because we don't
-      // display command logs if there are only events and not true commands
-      // and uncaught: true causes the verification to look for the error
-      // event command log
-      verify('An uncaught error was detected outside of a test', {
-        column: [7, 8],
-        message: [
-          'The following error originated from your test code',
-          'error from outside test',
-          'Cypress could not associate this error to any specific test',
-        ],
-        codeFrameText: `thrownewError('error from outside test')`,
-      })
-    })
-
-    it('uncaught errors: outside test only suite', () => {
-      const verify = loadErrorSpec({
-        filePath: 'errors/uncaught_outside_test_only_suite.cy.js',
-        failCount: 1,
-      })
-
-      verify('An uncaught error was detected outside of a test', {
-        column: [7, 8],
-        message: [
-          'error from outside test with only suite',
-          'The following error originated from your test code',
-          'Cypress could not associate this error to any specific test',
-        ],
-        codeFrameText: `thrownewError('error from outside test with only suite')`,
-      })
-    })
-
     it('custom commands', () => {
       const verify = loadErrorSpec({
         filePath: 'errors/custom_commands.cy.js',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [23, 24],
@@ -615,7 +435,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/typescript.cy.ts',
         failCount: 3,
-      })
+      }, configFile)
 
       verify('assertion failure', {
         column: [25, 26],
@@ -654,7 +474,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
         const verify = loadErrorSpec({
           filePath: 'errors/docs_url.cy.js',
           failCount: 2,
-        })
+        }, configFile)
 
         verify('displays as link in interactive mode', {
           verifyFn () {
@@ -691,7 +511,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       const verify = loadErrorSpec({
         filePath: 'errors/unexpected.cy.js',
         failCount: 2,
-      })
+      }, configFile)
 
       verify('Cypress method error', {
         verifyFn: verifyInternalFailure,
@@ -702,6 +522,183 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
         verifyFn: verifyInternalFailure,
         method: 'cy.expect',
       })
+    })
+  })
+}
+
+export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
+  it('uncaught errors', () => {
+    const verify = loadErrorSpec({
+      filePath: 'errors/uncaught-ct.cy.js',
+      failCount: 11,
+    }, configFile)
+
+    verify('sync app mount exception', {
+      uncaught: true,
+      originalMessage: 'mount error',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /src\/Errors.jsx/,
+      hasCodeFrame: false,
+    })
+
+    verify('sync app exception after mount', {
+      uncaught: true,
+      originalMessage: 'sync error',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /src\/Errors.jsx/,
+      hasCodeFrame: false,
+    })
+
+    verify('exception inside uncaught:exception', {
+      uncaught: true,
+      uncaughtMessage: 'mount error',
+      column: [5, 6, 12],
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('async app exception after mount', {
+      uncaught: true,
+      originalMessage: 'async error',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /src\/Errors.jsx/,
+      hasCodeFrame: false,
+    })
+
+    verify('app unhandled rejection', {
+      uncaught: true,
+      originalMessage: 'promise rejection',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /src\/Errors.jsx/,
+      hasCodeFrame: false,
+    })
+
+    verify('async spec exception', {
+      uncaught: true,
+      column: [3, 5, 12],
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('async spec exception with done', {
+      uncaught: true,
+      column: [3, 6, 12],
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('spec unhandled rejection', {
+      uncaught: true,
+      column: [20, 21],
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('spec unhandled rejection with done', {
+      uncaught: true,
+      column: [20, 21],
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your application code',
+        'It was caused by an unhandled promise rejection',
+      ],
+      hasCodeFrame: server !== 'Vite',
+    })
+
+    verify('spec Bluebird unhandled rejection', {
+      uncaught: true,
+      column: [21, 22],
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+      hasCodeFrame: server !== 'Vite',
+    })
+
+    verify('spec Bluebird unhandled rejection with done', {
+      uncaught: true,
+      column: [21, 22],
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+      hasCodeFrame: server !== 'Vite',
+    })
+  })
+
+  it('uncaught errors: outside test', () => {
+    const verify = loadErrorSpec({
+      filePath: 'errors/uncaught_outside_test.cy.js',
+      failCount: 1,
+    }, configFile)
+
+    // NOTE: the following 2 test don't have uncaught: true because we don't
+    // display command logs if there are only events and not true commands
+    // and uncaught: true causes the verification to look for the error
+    // event command log
+    verify('An uncaught error was detected outside of a test', {
+      column: [7, 8],
+      message: [
+        'The following error originated from your test code',
+        'error from outside test',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test')`,
+    })
+  })
+
+  it('uncaught errors: outside test only suite', () => {
+    const verify = loadErrorSpec({
+      filePath: 'errors/uncaught_outside_test_only_suite.cy.js',
+      failCount: 1,
+    }, configFile)
+
+    verify('An uncaught error was detected outside of a test', {
+      column: [7, 8],
+      message: [
+        'error from outside test with only suite',
+        'The following error originated from your test code',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test with only suite')`,
     })
   })
 }
