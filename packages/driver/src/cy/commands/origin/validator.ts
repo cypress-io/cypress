@@ -40,12 +40,31 @@ export class Validator {
       }
     }
 
-    if (typeof callbackFn !== 'function') {
+    if (!this._isValidCallbackFn(callbackFn)) {
       $errUtils.throwErrByPath('origin.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
       })
     }
+  }
+
+  _isValidCallbackFn (callbackFn) {
+    if (_.isFunction(callbackFn)) return true
+
+    // the user must pass a function, but at runtime the function may be
+    // replaced with an object in the form
+    // { callbackName: string, outputFilePath: string }
+    // by the webpack-preprocessor. if it doesn't have that form, it's
+    // an invalid input by the user
+    if (_.isPlainObject(callbackFn)) {
+      return (
+        Object.keys(callbackFn).length === 2
+        && _.isString(callbackFn.callbackName)
+        && _.isString(callbackFn.outputFilePath)
+      )
+    }
+
+    return false
   }
 
   validateLocation (location, urlOrDomain) {

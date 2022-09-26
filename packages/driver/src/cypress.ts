@@ -175,7 +175,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  configure (config: Cypress.ObjectLike = {}) {
+  configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -219,6 +219,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
+    // TODO: remove rawJson - https://github.com/cypress-io/cypress/issues/23945
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
@@ -361,7 +362,6 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-
       this.onSpecReady()
     })
   }
@@ -775,6 +775,11 @@ class $Cypress {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
+  // Cypress.require() is only valid inside the cy.origin() callback
+  require () {
+    $errUtils.throwErrByPath('require.invalid_outside_origin')
+  }
+
   get currentTest () {
     const r = this.cy.state('runnable')
 
@@ -795,7 +800,7 @@ class $Cypress {
     }
   }
 
-  static create (config) {
+  static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
     cypress.configure(config)

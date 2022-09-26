@@ -124,6 +124,7 @@ export default class SessionsManager {
         setup: options.setup,
         hydrated: false,
         validate: options.validate,
+        cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
 
       this.setActiveSession({ [sess_state.id]: sess_state })
@@ -158,7 +159,7 @@ export default class SessionsManager {
 
       // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
       // eslint-disable-next-line no-console
-      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString() }).catch(console.error)
+      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString(), validate: data.validate?.toString() }).catch(console.error)
     },
 
     setSessionData: async (data) => {
