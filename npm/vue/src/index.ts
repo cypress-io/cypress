@@ -324,7 +324,7 @@ export function mount<
 >
 
 // implementation
-export function mount (componentOptions: any, options: any) {
+export function mount (componentOptions: any, options: any = {}) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)
 
