@@ -297,14 +297,53 @@ export class WebKitAutomation {
     return normalizeGetCookieProps(cookie)
   }
 
-  private async clearCookie (filter: CookieFilter) {
+  /**
+   * Clears one specific cookie
+   * @param filter the cookie to be cleared
+   * @returns the cleared cookie
+   */
+  private async clearCookie (filter: CookieFilter): Promise<CookieFilter> {
+    await this.clearCookies([filter])
+
+    return filter
+  }
+
+  /**
+   * Clear specified cookies, we don't clear the cypress specific cookies that are not listed.
+   * @param cookies a list of name value cookies to clear
+   * @returns the list of cleared cookies
+   */
+  private async clearCookies (cookies: [CookieFilter?]): Promise<[CookieFilter?]> {
+    if (!cookies || cookies.length === 0) {
+      return cookies
+    }
+
     const allCookies = await this.context.cookies()
+
+    if (!allCookies || allCookies.length === 0) {
+      return cookies
+    }
+
+    // Find the list of cookies that shouldn't be cleared.
     const persistCookies = allCookies.filter((cookie) => {
-      return !_cookieMatches(cookie, filter)
+      for (let index = 0; index < cookies.length; index++) {
+        const filter = cookies[index]! // This cannot be
+
+        const matches = _cookieMatches(cookie, filter)
+
+        if (matches) {
+          return false
+        }
+      }
+
+      return true
     })
 
     await this.context.clearCookies()
+    // Re-apply persisted cookies.
     if (persistCookies.length) await this.context.addCookies(persistCookies)
+
+    return cookies
   }
 
   private async takeScreenshot (data) {
@@ -333,7 +372,7 @@ export class WebKitAutomation {
       case 'set:cookies':
         return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'clear:cookies':
-        return await this.context.clearCookies()
+        return await this.clearCookies(data)
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':
