@@ -7,6 +7,7 @@ export default (Commands, Cypress, cy, state) => {
     cy.state('current').set('timeout', options.timeout)
 
     return () => {
+      cy.ensureCommandCanCommunicateWithAUT()
       const $el = state('withinSubject') || cy.$$('html')
 
       log && log.set({

@@ -35,6 +35,7 @@ function getAlias (selector, log, cy) {
       const requests = getAliasedRequests(alias, cy.state)
 
       if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
+        err.retry = false
         throw err
       }
 

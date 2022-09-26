@@ -91,7 +91,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
       onRetry,
       onFail: command.get('onFail'),
       subjectFn: () => {
-        let subject = cy.currentSubject(command.get('chainerId'))
+        const subject = cy.currentSubject(command.get('chainerId'))
 
         cy.ensureSubjectByType(subject, command.get('prevSubject'))
 

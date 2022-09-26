@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import utils from './utils'
 
+let idCounter = 1
+
 export class $Command {
   attributes!: Record<string, any>
 
@@ -12,7 +14,7 @@ export class $Command {
       // the id prefix needs to be unique per origin, so there are not
       // collisions when commands created in a secondary origin are passed
       // to the primary origin for the command log, etc.
-      attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
+      attrs.id = `${attrs.chainerId}-cmd-${idCounter++}`
     }
 
     this.set(attrs)
