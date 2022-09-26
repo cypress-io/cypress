@@ -47,8 +47,6 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
     'Test Project',
     eventManager,
     null, // CypressJQuery, shouldn't be using driver in component tests anyway
-    // dom - imports driver which causes problems
-    // so just stubbing it out for now
-    mockDom,
+    window.top?.UnifiedRunner.highlight,
   )
 }
