@@ -31,4 +31,10 @@ describe('RecordRunModal', () => {
 
     cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_medium=Nav&utm_source=Binary%3A+Launchpad&utm_content=content')
   })
+
+  it('sends UTM parameters with help link without UTM content prop', () => {
+    cy.mount(<RecordRunModalVue isModalOpen={true} close={cy.stub()} utmMedium="Nav" />)
+
+    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_medium=Nav&utm_source=Binary%3A+Launchpad&utm_content=')
+  })
 })
