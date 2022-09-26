@@ -32,7 +32,7 @@ describe('src/cy/commands/aliasing', () => {
 
         expect(subjectChain.length).to.eql(2)
         expect(subjectChain[0]).to.be.undefined
-        // subjectChain[1] is the query function for .get()
+        expect(subjectChain[1].commandName).to.eq('get')
       })
     })
 
