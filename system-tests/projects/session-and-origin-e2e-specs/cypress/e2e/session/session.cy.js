@@ -1,3 +1,7 @@
+/**
+ * Used in sessions_spec system-tests tests. Throws cross-origin errors
+ * cy-in-cy tests in @packages/app.
+ */
 /// <reference types="cypress" />
 window.top.__cySkipValidateConfig = true
 Cypress.config('isInteractive', true)
@@ -23,12 +27,14 @@ before(() => {
   cy.wrap(Cypress.session.clearAllSavedSessions())
 })
 
-const sessionUser = (name = 'user0') => {
+const sessionUser = (name = 'user0', cacheAcrossSpecs = false) => {
   return cy.session(name, () => {
     cy.visit(`https://localhost:4466/cross_origin_iframe/${name}`)
     cy.window().then((win) => {
       win.localStorage.username = name
     })
+  }, {
+    cacheAcrossSpecs,
   })
 }
 
@@ -183,9 +189,6 @@ describe('clears session data beforeEach test even with no session', () => {
 
 describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
   it('t1', () => {
-    // only warns after initial blank page
-    // unfortunately this fails when run alongside other tests
-    // cy.contains('experimentalSessionAndOrigin').should('not.exist')
     cy.contains('Default blank page')
     cy.contains('This page was cleared by navigating to about:blank.')
     cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')

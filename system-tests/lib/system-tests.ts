@@ -8,7 +8,6 @@ import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
 import {
-  e2ePath,
   DEFAULT_BROWSERS,
   replaceStackTraceLines,
   pathUpToProjectName,
@@ -401,14 +400,14 @@ const startServer = function (obj) {
 
 const stopServer = (srv) => srv.destroyAsync()
 
-const copy = function () {
+const copy = function (projectPath: string) {
   const ca = process.env.CIRCLE_ARTIFACTS
 
   debug('Should copy Circle Artifacts?', Boolean(ca))
 
   if (ca) {
-    const videosFolder = path.join(e2ePath, 'cypress/videos')
-    const screenshotsFolder = path.join(e2ePath, 'cypress/screenshots')
+    const videosFolder = path.join(projectPath, 'cypress/videos')
+    const screenshotsFolder = path.join(projectPath, 'cypress/screenshots')
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
@@ -796,6 +795,7 @@ const systemTests = {
     const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
+    const projectPath = Fixtures.projectPath(options.project)
 
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
@@ -813,7 +813,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.writeForTesting(e2ePath, ctx.settings)
+      await settings.writeForTesting(projectPath, ctx.settings)
     }
 
     let stdout = ''
@@ -969,7 +969,7 @@ const systemTests = {
       sp.on('exit', resolve)
     })
 
-    await copy()
+    await copy(projectPath)
 
     return exit(exitCode)
   },
