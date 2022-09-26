@@ -93,26 +93,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureNull = (subject, name) => {
-    // Null or undefined
-    if (subject != null) {
-      const previous = state('current').get('prev').get('name')
-
-      $errUtils.throwErrByPath('subject.not_null', {
-        args: { name, previous },
-      })
-    }
-  }
-
-  const ensureNotNull = (subject, name) => {
-    // Not null or undefined
-    if (subject == null) {
-      $errUtils.throwErrByPath('subject.is_null', {
-        args: { name },
-      })
-    }
-  }
-
   const ensureRunnable = (name) => {
     if (!state('runnable')) {
       $errUtils.throwErrByPath('miscellaneous.outside_test_with_cmd', {
@@ -459,8 +439,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
-    ensureNull,
-    ensureNotNull,
     ensureCommandCanCommunicateWithAUT,
 
     // internal functions

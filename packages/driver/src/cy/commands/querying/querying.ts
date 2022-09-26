@@ -163,12 +163,12 @@ export default (Commands, Cypress, cy, state) => {
   /*
    * cy.get() is currently in a strange state: There are two implementations of it in this file, registered one after
    * another. It first is registered as a command (Commands.addAll()) - but below it, we *also* add .get()
-   * via Commands.overwriteQuery(), which overwrites it.
+   * via Commands._overwriteQuery(), which overwrites it.
    *
    * This is because other commands in the driver rely on the original .get() implementation, via
    * `cy.now('get', selector, getOptions)`.
    *
-   * The key is that cy.now() relies on `cy.commandFns[name]` - which addAll() sets, but overwriteQuery() does not.
+   * The key is that cy.now() relies on `cy.commandFns[name]` - which addAll() sets, but _overwriteQuery() does not.
    *
    * The upshot is that any test that relies on `cy.get()` is using the query-based implementation, but various
    * driver commands have access to the original implementation of .get() via cy.now(). This is a temporary state
@@ -515,7 +515,7 @@ export default (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.overwriteQuery('get', function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
+  Commands._overwriteQuery('get', function get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable> = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },

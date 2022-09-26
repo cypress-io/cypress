@@ -153,14 +153,18 @@ export default {
       },
 
       _addQuery (name: string, fn: () => QueryFunction) {
-        if (name !== 'get' && cy[name]) {
+        if (reservedCommandNames.has(name)) {
+          internalError('miscellaneous.reserved_command_query', name)
+        }
+
+        if (cy[name]) {
           internalError('miscellaneous.invalid_new_query', name)
         }
 
         cy._addQuery({ name, fn })
       },
 
-      overwriteQuery (name, fn) {
+      _overwriteQuery (name, fn) {
         cy._addQuery({ name, fn })
       },
     }

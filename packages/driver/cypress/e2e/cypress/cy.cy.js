@@ -503,7 +503,7 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => Promise.resolve())
+      Cypress.Commands._overwriteQuery('aQuery', () => Promise.resolve())
       cy.aQuery()
     })
 
@@ -513,7 +513,7 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => 1)
+      Cypress.Commands._overwriteQuery('aQuery', () => 1)
       cy.aQuery()
     })
 
@@ -523,14 +523,14 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => cy.visit('/'))
+      Cypress.Commands._overwriteQuery('aQuery', () => cy.visit('/'))
       cy.aQuery()
     })
 
     // TODO: Make this work. Setting aside for now.
     it.skip('does allow queries to use other queries', () => {
-      Cypress.Commands.overwriteQuery('aQuery', () => cy.bQuery())
-      Cypress.Commands.overwriteQuery('bQuery', () => {})
+      Cypress.Commands._overwriteQuery('aQuery', () => cy.bQuery())
+      Cypress.Commands._overwriteQuery('bQuery', () => {})
 
       cy.aQuery()
     })

@@ -194,8 +194,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
   ensureExistence: IEnsures['ensureExistence']
   ensureElExistence: IEnsures['ensureElExistence']
-  ensureNull: IEnsures['ensureNull']
-  ensureNotNull: IEnsures['ensureNotNull']
   ensureDescendents: IEnsures['ensureDescendents']
   ensureValidPosition: IEnsures['ensureValidPosition']
   ensureScrollability: IEnsures['ensureScrollability']
@@ -346,8 +344,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.ensureNotHiddenByAncestors = ensures.ensureNotHiddenByAncestors
     this.ensureExistence = ensures.ensureExistence
     this.ensureElExistence = ensures.ensureElExistence
-    this.ensureNull = ensures.ensureNull
-    this.ensureNotNull = ensures.ensureNotNull
     this.ensureDescendents = ensures.ensureDescendents
     this.ensureValidPosition = ensures.ensureValidPosition
     this.ensureScrollability = ensures.ensureScrollability

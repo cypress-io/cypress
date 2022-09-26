@@ -862,7 +862,11 @@ export default {
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_new_query: {
-      message: '`Cypress.Commands._addQuery()` is used to create new query commands, but `{{name}}` is an existing Cypress command or is reserved internally by Cypress.\n\n If you want to override an existing command, use `Cypress.Commands.overrideQuery()` instead.',
+      message: '`Cypress.Commands._addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
+    reserved_command_query: {
+      message: '`Cypress.Commands._addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {
@@ -1856,18 +1860,6 @@ export default {
   },
 
   subject: {
-    is_null (obj) {
-      return stripIndent`\
-        ${cmd(obj.name)} failed because it requires a subject, but didn't receive one. This usually happens because you're trying to use a child query as if it were a parent.`
-    },
-    not_null (obj) {
-      return stripIndent`\
-        ${cmd(obj.name)} failed because it does not accept a subject. This usually happens because you're trying to use a parent query as if it were a child.
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
-    },
     not_dom (obj) {
       return stripIndent`\
         ${cmd(obj.name)} failed because it requires a valid DOM object.
