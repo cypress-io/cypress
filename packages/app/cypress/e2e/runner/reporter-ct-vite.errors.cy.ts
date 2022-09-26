@@ -1,3 +1,3 @@
 import { generateCtErrorTests } from './reporter-ct-generator'
 
-generateCtErrorTests('Vite', 'cypress-ct-vite.config.js')
+generateCtErrorTests('Vite', 'cypress-vite.config.js')

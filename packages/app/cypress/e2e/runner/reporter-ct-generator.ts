@@ -12,6 +12,7 @@ type VerifyFunc = (specTitle: string, verifyOptions: any) => void
  */
 export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
   const DefaultOptions: Partial<specLoader.LoadSpecOptions> = {
+    projectName: 'runner-ct-specs',
     mode: 'component',
     configFile,
     scaffold: false,
@@ -47,7 +48,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
     numTestsKeptInMemory: 1,
   }, () => {
     before(() => {
-      cy.scaffoldProject('runner-e2e-specs')
+      cy.scaffoldProject('runner-ct-specs')
     })
 
     it('assertion failures', () => {
