@@ -12,6 +12,8 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
@@ -149,13 +151,17 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
   }
 }
 
-const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
+export const toPosix = (file: string) => {
+  return Cypress.config('platform') === 'win32'
+    ? file.replaceAll('\\', '/')
+    : file
+}
+
+const getRelativePathFromRoot = (relativeFile: string, absoluteFile?: string) => {
   // at this point relativeFile is relative to the cypress config
   // we need it to be relative to the repo root, which is different for monorepos
   const repoRoot = Cypress.config('repoRoot')
-  const posixAbsoluteFile = (Cypress.config('platform') === 'win32')
-    ? absoluteFile?.replaceAll('\\', '/')
-    : absoluteFile
+  const posixAbsoluteFile = absoluteFile ? toPosix(absoluteFile) : ''
 
   if (posixAbsoluteFile?.startsWith(`${repoRoot}/`)) {
     return posixAbsoluteFile.replace(`${repoRoot}/`, '')
@@ -289,6 +295,13 @@ const stripCustomProtocol = (filePath) => {
     return
   }
 
+  // Check the path to see if custom namespaces have been applied and, if so, remove them
+  // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
+  // need to strip off the `_N_E` so that "Open in IDE" links work correctly
+  if (webpackDevtoolNamespaceRegex.test(filePath)) {
+    return filePath.replace(webpackDevtoolNamespaceRegex, '')
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 
@@ -328,6 +341,10 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
+
+    if (relativeFile.includes(projectRoot)) {
+      relativeFile = relativeFile.replace(projectRoot, '').substring(1)
+    }
   }
 
   let absoluteFile
@@ -471,7 +488,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
-    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
+    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]') || line.includes('cy.<computed>') || line.includes('$Chainer.<computed>')
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)
@@ -495,4 +512,5 @@ export default {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
+  toPosix,
 }

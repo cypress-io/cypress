@@ -1,18 +1,18 @@
 describe('event handlers', { defaultCommandTimeout: 0 }, () => {
   it('event assertion failure', () => {
-    cy.on('window:load', () => {
+    cy.on('command:end', () => {
       expect('actual').to.equal('expected')
     })
 
-    cy.visit('http://localhost:1919')
+    cy.wrap({})
   })
 
   it('event exception', () => {
-    cy.on('window:load', () => {
+    cy.on('command:end', () => {
       ({}).bar()
     })
 
-    cy.visit('http://localhost:1919')
+    cy.wrap({})
   })
 
   it('fail handler assertion failure', () => {

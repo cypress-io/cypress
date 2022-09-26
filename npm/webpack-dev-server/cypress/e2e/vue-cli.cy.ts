@@ -28,6 +28,36 @@ for (const project of PROJECTS) {
       })
     })
 
+    it('should live-reload on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('HelloWorld.cy.js').click()
+      cy.waitForSpecToFinish({ passCount: 1 })
+
+      cy.withCtx(async (ctx) => {
+        const helloWorldVuePath = ctx.path.join('src', 'components', 'HelloWorld.vue')
+
+        await ctx.actions.file.writeFileInProject(
+          helloWorldVuePath,
+          (await ctx.file.readFileInProject(helloWorldVuePath)).replace('{{ msg }}', ''),
+        )
+      })
+
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const helloWorldVuePath = ctx.path.join('src', 'components', 'HelloWorld.vue')
+
+        await ctx.actions.file.writeFileInProject(
+          helloWorldVuePath,
+          (await ctx.file.readFileInProject(helloWorldVuePath)).replace('<h1></h1>', '<h1>{{ msg }}</h1>'),
+        )
+      })
+
+      cy.waitForSpecToFinish({ passCount: 1 })
+    })
+
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
 
