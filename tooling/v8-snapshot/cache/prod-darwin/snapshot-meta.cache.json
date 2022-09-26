@@ -922,7 +922,6 @@
     "./packages/server/node_modules/mocha/lib/test.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/browser.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/index.js",
-    "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./packages/server/node_modules/readable-stream/errors.js",
     "./packages/server/node_modules/readable-stream/lib/_stream_duplex.js",
     "./packages/server/node_modules/readable-stream/lib/_stream_passthrough.js",
