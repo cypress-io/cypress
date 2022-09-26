@@ -563,6 +563,10 @@ export default (Commands, Cypress, cy, state) => {
           $el.selector = selector
         }
       } catch (err: any) {
+        if (err.message.startsWith('Syntax error')) {
+          err.retry = false
+        }
+
         // this is usually a sizzle error (invalid selector)
         if (log) {
           err.onFail = () => log.error(err)
