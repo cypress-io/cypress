@@ -14,9 +14,7 @@ module.exports = {
   },
 
   httpsServer (onRequest) {
-    const testServer = 'https_server'
-
-    return require(`../test/helpers/${testServer}`).create(onRequest)
+    return require('../test/helpers/https_server').create(onRequest)
   },
 
 }
