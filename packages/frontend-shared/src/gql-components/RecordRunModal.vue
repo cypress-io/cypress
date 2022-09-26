@@ -10,7 +10,7 @@
     @update:model-value="close"
   >
     <div class="max-w-175 py-7 px-6 text-gray-600">
-      <RecordPrompt />
+      <RecordPromptAdapter />
     </div>
   </StandardModal>
 </template>
@@ -18,8 +18,9 @@
 <script setup lang="ts" >
 import { useI18n } from '@cy/i18n'
 import StandardModal from '../components/StandardModal.vue'
-import RecordPrompt from './RecordPrompt.vue'
+import RecordPromptAdapter from './RecordPromptAdapter.vue'
 import { getUtmSource } from '../utils/getUtmSource'
+import { getUrlWithParams } from '../utils/getUrlWithParams'
 
 const { t } = useI18n()
 
@@ -30,7 +31,13 @@ const props = defineProps<{
   utmContent?: string
 }>()
 
-const helpLink =
-`https://on.cypress.io/cypress-run-record-key?utm_medium="${props.utmMedium}",utm_source="${getUtmSource()}"${props.utmContent ? `,utm_content="${props.utmContent}"` : ''}`
+const helpLink = getUrlWithParams({
+  url: 'https://on.cypress.io/cypress-run-record-key',
+  params: {
+    utm_medium: props.utmMedium,
+    utm_source: getUtmSource(),
+    utm_content: props.utmContent || '',
+  },
+})
 
 </script>

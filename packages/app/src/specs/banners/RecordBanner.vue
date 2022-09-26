@@ -16,7 +16,7 @@
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
-    <RecordPrompt />
+    <RecordPromptAdapter />
   </TrackedBanner>
 </template>
 
@@ -25,7 +25,7 @@ import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
-import RecordPrompt from '@packages/frontend-shared/src/gql-components/RecordPrompt.vue'
+import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
 
 defineProps<{
   modelValue: boolean
