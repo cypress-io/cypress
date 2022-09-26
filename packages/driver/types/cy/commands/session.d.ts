@@ -13,6 +13,7 @@ declare namespace Cypress {
 
       interface SessionData {
         id: string
+        cacheAcrossSpecs: boolean
         cookies?: Array<Cypress.Cookie> | null
         localStorage?: Array<Storage> | null
         sessionStorage?: Array<Storage> | null
