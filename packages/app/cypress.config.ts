@@ -1,12 +1,8 @@
 import { defineConfig } from 'cypress'
-import getenv from 'getenv'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
-const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
-const CYPRESS_INTERNAL_DEV_PROJECT_ID = getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'sehy69')
-
 export default defineConfig({
-  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : CYPRESS_INTERNAL_DEV_PROJECT_ID,
+  projectId: 'ypt4pf',
   retries: {
     runMode: 2,
     openMode: 0,
