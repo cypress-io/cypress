@@ -123,7 +123,7 @@ const DEFAULT_ARGS = [
 let browserCriClient: BrowserCriClient | undefined
 
 /**
- * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
+ * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
