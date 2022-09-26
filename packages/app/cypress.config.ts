@@ -1,9 +1,8 @@
 import { defineConfig } from 'cypress'
-import getenv from 'getenv'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
 export default defineConfig({
-  projectId: getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'ypt4pf'),
+  projectId: 'ypt4pf',
   retries: {
     runMode: 2,
     openMode: 0,

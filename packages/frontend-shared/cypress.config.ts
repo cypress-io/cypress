@@ -1,8 +1,7 @@
 import { defineConfig } from 'cypress'
-import getenv from 'getenv'
 
 export default defineConfig({
-  projectId: getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'ypt4pf'),
+  projectId: 'ypt4pf',
   viewportWidth: 800,
   viewportHeight: 850,
   retries: {

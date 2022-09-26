@@ -1,10 +1,9 @@
 import { defineConfig } from 'cypress'
-import getenv from 'getenv'
 import { snapshotCypressDirectory } from './cypress/tasks/snapshotsScaffold'
 import { uninstallDependenciesInScaffoldedProject } from './cypress/tasks/uninstallDependenciesInScaffoldedProject'
 
 export default defineConfig({
-  projectId: getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'ypt4pf'),
+  projectId: 'ypt4pf',
   viewportWidth: 800,
   viewportHeight: 850,
   retries: {
