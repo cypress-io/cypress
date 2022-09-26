@@ -2,13 +2,13 @@
   <div
     v-if="step"
     :data-cy="`migration-step ${step?.name}`"
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block"
+    class="border rounded bg-light-50 mb-4 w-full block"
+    :class="{
+      'default-ring': step.isCurrentStep,
+      'bg-gray-50 ': !step.isCurrentStep
+    }"
   >
     <ListRowHeader
-      :class="{
-        'rounded-b-none default-ring': step.isCurrentStep,
-        'bg-gray-50': !step.isCurrentStep
-      }"
       class="-m-1px w-auto"
       :description="description"
       @click="emit('toggle')"
