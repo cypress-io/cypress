@@ -43,7 +43,7 @@ reactVersions.forEach((reactVersion) => {
     // of nested spec snapshots
     numTestsKeptInMemory: 1,
   }, () => {
-    before(() => {
+    beforeEach(() => {
       cy.scaffoldProject(`react${reactVersion}`)
     })
 
@@ -111,7 +111,7 @@ describe('Next.js', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('next-12')
   })
 
@@ -178,7 +178,7 @@ describe('Vue', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('vuecli5-vue3')
   })
 
@@ -245,7 +245,7 @@ describe('Nuxt', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('nuxtjs-vue2-configured')
   })
 
@@ -266,19 +266,6 @@ describe('Nuxt', {
       stackRegex: /Errors\.vue:19/,
       codeFrameText: 'Errors.vue',
     })
-
-    // verify('sync error', {
-    //   fileName: 'Errors.vue',
-    //   line: 24,
-    //   column: 16,
-    //   uncaught: true,
-    //   uncaughtMessage: 'sync error',
-    //   message: [
-    //     'The following error originated from your test code',
-    //     'sync error',
-    //   ],
-    //   codeFrameText: 'Errors.vue',
-    // })
 
     verify('async error', {
       fileName: 'Errors.vue',
@@ -314,7 +301,7 @@ describe.skip('Svelte', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('svelte-webpack')
   })
 
@@ -380,7 +367,7 @@ angularVersions.forEach((angularVersion) => {
     // of nested spec snapshots
     numTestsKeptInMemory: 1,
   }, () => {
-    before(() => {
+    beforeEach(() => {
       cy.scaffoldProject(`angular-${angularVersion}`)
     })
 

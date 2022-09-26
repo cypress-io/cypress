@@ -8,8 +8,6 @@
     "@babel/preset-env": "^7",
     "@babel/preset-react": "^7",
     "@babel/preset-typescript": "^7",
-    "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
-    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "@vitejs/plugin-react": "^2.1.0",
     "babel-loader": "^8.2.4",
     "typescript": "^4.7.4",
