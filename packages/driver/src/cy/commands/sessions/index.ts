@@ -170,11 +170,23 @@ export default function (Commands, Cypress, cy) {
           displayName: recreateSession ? 'Recreate session' : 'Create new session',
           message: '',
           type: 'system',
-        }, () => {
+        }, (setupLogGroup) => {
           return cy.then(async () => {
+            // Catch when a cypress command fails in the setup function to correctly update log status
+            // before failing command and ending command queue.
+            cy.state('onCommandFailed', (err) => {
+              setupLogGroup.set({ state: 'failed' })
+              setSessionLogStatus('failed')
+
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while creating session. Because the session setup failed, we failed the test.`, _.add)
+
+              return false
+            })
+
             return existingSession.setup()
           })
           .then(async () => {
+            cy.state('onCommandFailed', null)
             await navigateAboutBlank()
             const data = await sessions.getCurrentSessionData()
 

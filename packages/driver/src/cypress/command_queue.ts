@@ -375,7 +375,13 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       if (this.state('onCommandFailed')) {
-        return this.state('onCommandFailed')(err, this, next)
+        const handledError = this.state('onCommandFailed')(err, this, next)
+
+        cy.state('onCommandFailed', null)
+
+        if (handledError) {
+          return
+        }
       }
 
       debugErrors('caught error in promise chain: %o', err)
