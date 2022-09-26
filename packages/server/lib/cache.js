@@ -186,7 +186,13 @@ module.exports = {
   },
 
   getCohorts () {
-    return fileUtil.get('COHORTS', {})
+    return fileUtil.get('COHORTS', {}).then((cohorts) => {
+      Object.keys(cohorts).forEach((key) => {
+        cohorts[key].name = key
+      })
+
+      return cohorts
+    })
   },
 
   insertCohort (cohort) {
@@ -194,7 +200,9 @@ module.exports = {
       return tx.get('COHORTS', {}).then((cohorts) => {
         return tx.set('COHORTS', {
           ...cohorts,
-          [cohort.name]: cohort,
+          [cohort.name]: {
+            cohort: cohort.cohort,
+          },
         })
       })
     })
