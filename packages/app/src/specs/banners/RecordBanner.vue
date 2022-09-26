@@ -16,6 +16,9 @@
     }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
+    <p class="mb-24px">
+      {{ t('specPage.banners.record.content') }}
+    </p>
     <RecordPromptAdapter />
   </TrackedBanner>
 </template>

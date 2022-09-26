@@ -20,7 +20,6 @@
     />
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
-      :gql="currentProject"
     />
     <div
       v-else

@@ -10,6 +10,9 @@
     @update:model-value="close"
   >
     <div class="max-w-175 py-7 px-6 text-gray-600">
+      <p class="mb-24px">
+        {{ t('specPage.banners.record.content') }}
+      </p>
       <RecordPromptAdapter />
     </div>
   </StandardModal>
