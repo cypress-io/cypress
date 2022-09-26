@@ -87,12 +87,17 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
   }
 
   const onRetry = () => {
-    let subject = cy.currentSubject(command.get('chainerId'))
+    return cy.verifyUpcomingAssertions(undefined, options, {
+      onRetry,
+      onFail: command.get('onFail'),
+      subjectFn: () => {
+        let subject = cy.currentSubject(command.get('chainerId'))
 
-    cy.ensureSubjectByType(subject, command.get('prevSubject'))
-    subject = ret(subject)
+        cy.ensureSubjectByType(subject, command.get('prevSubject'))
 
-    return cy.verifyUpcomingAssertions(subject, options, { onRetry })
+        return ret(subject)
+      },
+    })
   }
 
   return onRetry()

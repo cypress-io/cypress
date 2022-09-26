@@ -242,6 +242,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     ensureExistenceFor?: 'subject' | 'dom' | boolean
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
     onRetry?: () => any
+    subjectFn?: () => any
   }
 
   return {
@@ -262,6 +263,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       })
 
       const ensureExistence = () => {
+        subject = callbacks.subjectFn ? callbacks.subjectFn() : subject
         // by default, ensure existence for dom subjects,
         // but not non-dom subjects
         switch (callbacks.ensureExistenceFor) {

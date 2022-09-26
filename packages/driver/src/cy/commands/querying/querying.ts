@@ -539,6 +539,8 @@ export default (Commands, Cypress, cy, state) => {
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
     return () => {
+      cy.ensureCommandCanCommunicateWithAUT()
+
       let $el
 
       try {
