@@ -151,13 +151,17 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
   }
 }
 
-const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
+export const toPosix = (file: string) => {
+  return Cypress.config('platform') === 'win32'
+    ? file.replaceAll('\\', '/')
+    : file
+}
+
+const getRelativePathFromRoot = (relativeFile: string, absoluteFile?: string) => {
   // at this point relativeFile is relative to the cypress config
   // we need it to be relative to the repo root, which is different for monorepos
   const repoRoot = Cypress.config('repoRoot')
-  const posixAbsoluteFile = (Cypress.config('platform') === 'win32')
-    ? absoluteFile?.replaceAll('\\', '/')
-    : absoluteFile
+  const posixAbsoluteFile = absoluteFile ? toPosix(absoluteFile) : ''
 
   if (posixAbsoluteFile?.startsWith(`${repoRoot}/`)) {
     return posixAbsoluteFile.replace(`${repoRoot}/`, '')
@@ -508,4 +512,5 @@ export default {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
+  toPosix,
 }
