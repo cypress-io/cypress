@@ -559,7 +559,7 @@ commands:
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
-              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
