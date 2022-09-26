@@ -355,6 +355,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
+    this.ensureChildCommand = ensures.ensureChildCommand
     this.ensureCommandCanCommunicateWithAUT = ensures.ensureCommandCanCommunicateWithAUT
 
     const snapshots = createSnapshots(this.$$, state)
