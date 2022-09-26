@@ -79,7 +79,6 @@ fragment RunsContainer on Query {
   currentProject {
     id
     projectId
-    ...RunsEmpty
     ...RunsConnectSuccessAlert
     cloudProject {
       __typename
