@@ -259,7 +259,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       })
 
       const ensureExistence = () => {
-        subject = callbacks.subjectFn ? callbacks.subjectFn() : subject
         // by default, ensure existence for dom subjects,
         // but not non-dom subjects
         switch (callbacks.ensureExistenceFor) {
@@ -349,6 +348,14 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return
       }
 
+      if (callbacks.subjectFn) {
+        try {
+          subject = callbacks.subjectFn()
+        } catch (err) {
+          return onFailFn(err)
+        }
+      }
+
       // bail if we have no assertions and apply
       // the default assertions if applicable
       if (!cmds.length) {
@@ -424,8 +431,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       }
 
       cy.state('overrideAssert', overrideAssert)
-
-      subject = callbacks.subjectFn ? callbacks.subjectFn() : subject
 
       return Promise
       .reduce(fns, assertions, [subject])
