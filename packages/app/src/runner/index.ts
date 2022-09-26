@@ -67,7 +67,7 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
-let _autIframeModel: AutIframe
+let _autIframeModel: AutIframe | null
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -147,7 +147,7 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.dom,
+    window.UnifiedRunner.highlight,
   )
 
   createIframeModel()
