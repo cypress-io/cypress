@@ -9,7 +9,7 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = null
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 
@@ -56,7 +56,7 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 
@@ -69,7 +69,7 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 

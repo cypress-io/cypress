@@ -85,7 +85,7 @@ describe('FileRow', () => {
     })
 
     cy.get('[data-cy=error] [data-cy=collapsible-header]').each((element) => {
-      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
     })
 
     cy.percySnapshot()

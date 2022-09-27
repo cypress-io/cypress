@@ -28,6 +28,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -47,11 +48,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -62,6 +65,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_3': {
           id: 'session_3',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -96,11 +100,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -135,11 +141,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         'session_1': {
           id: 'session_1',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: false,
         },
         'session_2': {
           id: 'session_2',
           setup: () => {},
+          cacheAcrossSpecs: false,
           hydrated: true,
         },
       }
@@ -236,7 +244,9 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         setup,
         validate: undefined,
         cookies: null,
+        cacheAcrossSpecs: false,
         localStorage: null,
+        sessionStorage: null,
         hydrated: false,
       })
 
@@ -245,7 +255,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('sessions.clearAllSavedSessions()', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:session').resolves(null)
+      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions', true).resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')
@@ -253,7 +263,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       await sessionsManager.sessions.clearAllSavedSessions()
 
       expect(sessionsSpy).to.be.calledOnce
-      expect(cypressSpy).to.be.calledOnceWith('clear:session', null)
+      expect(cypressSpy).to.be.calledOnceWith('clear:sessions', true)
     })
 
     describe('.clearCurrentSessionData()', () => {

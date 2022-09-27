@@ -130,9 +130,14 @@ describe('SelectorPlayground', () => {
 
   it('prints elements when selected elements found', () => {
     const { autIframe } = mountSelectorPlayground()
+    const fakeJQueryElements = Array(2)
+
+    // It is necessary to mimic JQuery behavior.
+    // @ts-ignore
+    fakeJQueryElements.get = () => fakeJQueryElements
 
     cy.spy(logger, 'logFormatted')
-    cy.stub(autIframe, 'getElements').callsFake(() => Array(2))
+    cy.stub(autIframe, 'getElements').callsFake((() => fakeJQueryElements))
 
     cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
 

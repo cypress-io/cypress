@@ -3,12 +3,7 @@ import { action, computed, observable } from 'mobx'
 import { TestState } from '../test/test-model'
 import { IntervalID } from '../lib/types'
 
-export interface StatsStoreStartInfo {
-  startTime: string
-  numPassed?: number
-  numFailed?: number
-  numPending?: number
-}
+import type { StatsStoreStartInfo } from '@packages/types'
 
 const defaults = {
   numPassed: 0,

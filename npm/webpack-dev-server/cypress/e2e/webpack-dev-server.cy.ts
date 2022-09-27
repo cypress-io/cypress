@@ -22,4 +22,21 @@ describe('Config options', () => {
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
   })
+
+  it('supports webpackConfig as an async function', () => {
+    cy.scaffoldProject('webpack5_wds4-react')
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+
+    cy.withCtx(async (ctx) => {
+      const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
+
+      expect(verifyFile).to.eq('OK')
+    })
+  })
 })

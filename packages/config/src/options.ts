@@ -228,6 +228,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'browser',
   }, {
+    name: 'experimentalWebKitSupport',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
@@ -493,6 +499,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
+    validation: validate.isString,
+    isInternal: true,
+  }, {
+    name: 'repoRoot',
+    defaultValue: null,
     validation: validate.isString,
     isInternal: true,
   }, {

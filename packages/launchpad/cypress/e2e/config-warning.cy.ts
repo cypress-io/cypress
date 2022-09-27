@@ -73,7 +73,6 @@ describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
-    cy.visitLaunchpad()
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `
         const { defineConfig } = require('cypress')
@@ -94,8 +93,10 @@ describe('experimentalSingleTabRunMode', () => {
         })`)
     })
 
+    cy.visitLaunchpad()
+
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
+    cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
   })
 
@@ -105,37 +106,19 @@ describe('experimentalSingleTabRunMode', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header').contains('Cypress configuration error')
-    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component testing.')
+    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
   })
 })
 
 describe('experimentalStudio', () => {
-  it('is not a valid config for component testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+  it('is not a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
+
     cy.visitLaunchpad()
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalStudio: true,
-            devServer () {
-              // This test doesn't need to actually run any component tests
-              // so we create a fake dev server to make it run faster and
-              // avoid flake on CI.
-              return {
-                port: 1234,
-                close: () => {},
-              }
-            },
-          },
-        })`)
-    })
-
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('alert-body').contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
   })
 
   it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
@@ -156,8 +139,8 @@ describe('experimentalStudio', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').contains('Initializing Config').should('not.exist')
-    cy.get('h1').contains('Choose a Browser')
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
   })
 })
 
@@ -219,7 +202,7 @@ describe('component testing dependency warnings', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 })

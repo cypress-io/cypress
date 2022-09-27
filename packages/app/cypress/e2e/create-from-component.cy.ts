@@ -82,7 +82,7 @@ function validateCreateFromComponentCard (beforeEachFn: () => void, expectedSpec
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })
 
-    cy.findByText('<HelloWorld ... />').should('be.visible')
+    cy.findByText('<HelloWorld ... />', { timeout: 10000 }).should('be.visible')
   })
 }
 

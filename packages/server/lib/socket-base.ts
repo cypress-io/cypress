@@ -26,22 +26,13 @@ import runEvents from './plugins/run_events'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
+import type { RunState, CachedTestState } from '@packages/types'
+
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
-
-const runnerEvents: RunnerEvent[] = [
+const runnerEvents = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -51,18 +42,9 @@ const runnerEvents: RunnerEvent[] = [
   'paused',
   'test:after:hooks',
   'run:end',
-]
+] as const
 
-type ReporterEvent =
-  'runner:restart'
-  | 'runner:abort'
-  | 'runner:console:log'
-  | 'runner:console:error'
-  | 'runner:show:snapshot'
-  | 'runner:hide:snapshot'
-  | 'reporter:restarted'
-
-const reporterEvents: ReporterEvent[] = [
+const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -71,7 +53,7 @@ const reporterEvents: ReporterEvent[] = [
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',
-]
+] as const
 
 const debug = Debug('cypress:server:socket-base')
 
@@ -144,8 +126,8 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      // allow polling in dev-mode-only, remove once webkit is no longer gated behind development
-      transports: process.env.CYPRESS_INTERNAL_ENV === 'production' ? ['websocket'] : ['websocket', 'polling'],
+      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
+      transports: ['websocket', 'polling'],
     })
   }
 
@@ -156,7 +138,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let existingState = null
+    let runState: RunState | undefined = undefined
 
     _.defaults(options, {
       socketId: null,
@@ -206,6 +188,14 @@ export class SocketBase {
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+      if (socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
+        debug('polling WebSocket request received with non-WebKit browser, disconnecting')
+
+        // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
+        // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
+        return socket.disconnect(true)
+      }
+
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
@@ -342,7 +332,6 @@ export class SocketBase {
       })
 
       // TODO: what to do about runner disconnections?
-
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
@@ -394,8 +383,7 @@ export class SocketBase {
           })
         }
 
-        // retry for up to data.timeout
-        // or 1 second
+        // retry for up to data.timeout or 1 second
         return Bluebird
         .try(tryConnected)
         .timeout(data.timeout != null ? data.timeout : 1000)
@@ -420,7 +408,7 @@ export class SocketBase {
 
           switch (eventName) {
             case 'preserve:run:state':
-              existingState = args[0]
+              runState = args[0]
 
               return null
             case 'resolve:url': {
@@ -459,27 +447,20 @@ export class SocketBase {
               return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
-            case 'clear:session':
-              return session.clearSessions()
+            case 'clear:sessions':
+              return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])
-            case 'reset:session:state':
+            case 'reset:cached:test:state':
+              runState = undefined
               cookieJar.removeAllCookies()
               session.clearSessions()
-              resetRenderedHTMLOrigins()
 
-              return
+              return resetRenderedHTMLOrigins()
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
-            case 'reset:rendered:html:origins': {
+            case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            }
-            case 'cross:origin:bridge:ready':
-              return this.localBus.emit('cross:origin:bridge:ready', args[0])
-            case 'cross:origin:release:html':
-              return this.localBus.emit('cross:origin:release:html')
-            case 'cross:origin:finished':
-              return this.localBus.emit('cross:origin:finished', args[0])
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             default:
@@ -495,16 +476,18 @@ export class SocketBase {
         })
       })
 
-      socket.on('get:existing:run:state', (cb) => {
-        const s = existingState
+      socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        const s = runState
 
-        if (s) {
-          existingState = null
-
-          return cb(s)
+        const cachedTestState: CachedTestState = {
+          activeSessions: session.getActiveSessions(),
         }
 
-        return cb()
+        if (s) {
+          runState = undefined
+        }
+
+        return cb(s || {}, cachedTestState)
       })
 
       socket.on('save:app:state', (state, cb) => {
@@ -545,7 +528,7 @@ export class SocketBase {
         // todo(lachlan): post 10.0 we should not pass the
         // editor (in the `fileDetails.where` key) from the
         // front-end, but rather rely on the server context
-        // to grab the prefered editor, like I'm doing here,
+        // to grab the preferred editor, like I'm doing here,
         // so we do not need to
         // maintain two sources of truth for the preferred editor
         // adding this conditional to maintain backwards compat with
@@ -578,6 +561,8 @@ export class SocketBase {
       })
 
       callbacks.onSocketConnection(socket)
+
+      return
     })
 
     io.of('/data-context').on('connection', (socket: Socket) => {
