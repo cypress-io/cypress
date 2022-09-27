@@ -30,7 +30,7 @@ export default defineConfig({
             'just-my-luck',
             'combine-properties',
             'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
+            '@packages/frontend-shared/cypress/support/customPercyCommand',
           ],
         },
       },

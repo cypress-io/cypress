@@ -213,7 +213,7 @@
     "field": "scrollBehavior"
   },
   {
-    "value": "cypress/e2e/support/e2eSupport.ts",
+    "value": "cypress/support/e2e.ts",
     "from": "config",
     "field": "supportFile"
   },
@@ -290,7 +290,7 @@
               "just-my-luck",
               "combine-properties",
               "faker",
-              "@packages/ui-components/cypress/support/customPercyCommand"
+              "cypress/support/customPercyCommand"
             ]
           }
         }
