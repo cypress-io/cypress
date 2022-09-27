@@ -23,7 +23,7 @@ const props = defineProps <{
   style: StyleValue
 }>()
 
-const highlightStyle = props.style as CSSProperties
+const highlightStyle = props.style as CSSProperties || {}
 const highlightTop = parseFloat(highlightStyle.top as string)
 const highlightLeft = parseFloat(highlightStyle.left as string)
 const highlightHeight = parseFloat(highlightStyle.height as string)
