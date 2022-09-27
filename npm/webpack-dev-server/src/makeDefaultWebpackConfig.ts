@@ -51,6 +51,7 @@ export function makeDefaultWebpackConfig (
         ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
       }),
     ],
+    devtool: 'inline-source-map',
   } as any
 
   if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {

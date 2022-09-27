@@ -11,12 +11,13 @@ function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   const {
     filePath,
     hasPreferredIde = false,
+    mode,
   } = options
 
   specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde })
+  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
 }
 
 describe('errors ui', {
