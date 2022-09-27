@@ -34,11 +34,24 @@ export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
+    const commandEnqueued = (obj) => {
+      $errUtils.throwErrByPath(
+        'should.command_inside_should', {
+          args: { action: obj.name },
+        },
+      )
+    }
+
     return Promise
     .try(() => {
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
+      Cypress.once('command:enqueued', commandEnqueued)
+
       return fn.call(this, remoteSubject ? remoteSubject : subject)
+    })
+    .finally(() => {
+      Cypress.removeListener('command:enqueued', commandEnqueued)
     })
     .tap(() => {
       state('current')?.set('followedByShouldCallback', false)
