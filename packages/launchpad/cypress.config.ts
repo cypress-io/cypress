@@ -24,7 +24,7 @@ export default defineConfig({
       viteConfig: {
         optimizeDeps: {
           include: [
-            '@packages/ui-components/cypress/support/customPercyCommand',
+            '@packages/frontend-shared/cypress/support/customPercyCommand',
           ],
         },
       },
