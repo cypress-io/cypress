@@ -151,15 +151,9 @@ Here is a list of the core packages in this repository with a short description,
  | [launchpad](./packages/launchpad)       | `@packages/launcher`    | The portal to running Cypress that displays in `open` mode.                        |
  | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
  | [network](./packages/network)         | `@packages/network`     | Various utilities related to networking.                                     |
- | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [packherd-require](./packages/packherd-require) | `@packages/packherd-require` | Loads modules that have been bundled by `@tooling/packherd`.  |
- | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
- | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
- | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.    
- | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
+ | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
- | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |
- | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
  | [types](./packages/types)             | `@packages/types`          | The shared internal Cypress types.                                         |
@@ -171,7 +165,10 @@ Here is a list of the packages in this repository with a short description, loca
 
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
+ | [electron-mksnapshot](./electron-mksnapshot) | `electron-mksnapshot` | A rewrite of [electron/mksnapshot](https://github.com/electron/mksnapshot) to support multiple
+versions. |
  | [packherd](./tooling/packherd)        | `packherd`              | Herds all dependencies reachable from an entry and packs them.               |
+ | [v8-snapshot](./tooling/v8-snapshot)  | `v8-snapshot`           | Tool to create a snapshot for Electron applications.                         |
 
 Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 

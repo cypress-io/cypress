@@ -123,7 +123,7 @@ const DEFAULT_ARGS = [
 let browserCriClient: BrowserCriClient | undefined
 
 /**
- * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
+ * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
@@ -651,7 +651,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
+    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
 

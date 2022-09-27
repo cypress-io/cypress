@@ -1,3 +1,6 @@
+/**
+ * Used in cy-in-cy tests in @packages/app.
+ */
 let setupFn
 let validateFn
 

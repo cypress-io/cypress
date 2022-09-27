@@ -32,7 +32,7 @@ describe('EventCollectorActions', () => {
 
       expect(ctx.util.fetch).to.have.been.calledOnceWith(
         sinon.match(/anon-collect$/), // Verify URL ends with expected 'anon-collect' path
-        { method: 'POST', body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123"}' },
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123"}' },
       )
     })
 
