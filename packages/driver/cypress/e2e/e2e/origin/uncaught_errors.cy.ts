@@ -12,7 +12,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.then(() => {
           expect(true).to.be.false
         })
@@ -42,7 +42,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('.trigger-sync-error').click()
       })
     })
@@ -55,7 +55,7 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.on('uncaught:exception', () => false)
         cy.get('.trigger-sync-error').click()
       }).then(() => {
@@ -75,7 +75,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.once('uncaught:exception', () => true)
         cy.get('.trigger-sync-error').click()
       })
@@ -84,7 +84,7 @@ describe('cy.origin - uncaught errors', () => {
     // if we mutate the error, the app's listeners for 'error' or
     // 'unhandledrejection' will have our wrapped error instead of the original
     it('original error is not mutated for "error" in the origin', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-sync-error').click()
@@ -105,7 +105,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -137,7 +137,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('.trigger-async-error').click()
 
         // add the cy.wait here to keep commands streaming in,
@@ -154,7 +154,7 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
         cy.get('.trigger-async-error').click()
       }).then(() => {
@@ -173,7 +173,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -185,7 +185,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('unhandled rejections', () => {
     it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const r = cy.state('runnable')
 
         const afterUncaughtException = new Promise<void>((resolve) => {
@@ -209,7 +209,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('original error is not mutated for "unhandledrejection"', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-unhandled-rejection').click()
@@ -228,7 +228,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
 
         // add the cy.wait here to keep commands streaming in, forcing the
@@ -248,7 +248,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
       })
 
@@ -264,7 +264,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw document.createElement('h1')
       })
     })
@@ -276,7 +276,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw () => undefined
       })
     })
@@ -288,7 +288,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw Symbol('foo')
       })
     })
@@ -300,7 +300,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw new Promise(() => {})
       })
     })
@@ -308,9 +308,9 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('serializable errors', () => {
     it('errors thrown prior to attaching are forwarded to top', (done) => {
-      cy.origin('http://foobar.com:3500', () => {}).then(() => {
+      cy.origin('http://www.foobar.com:3500', () => {}).then(() => {
         // Force remove the spec bridge
-        window?.top?.document.getElementById('Spec Bridge: http://foobar.com:3500')?.remove()
+        window?.top?.document.getElementById('Spec Bridge: http://www.foobar.com:3500')?.remove()
       })
 
       cy.on('fail', (err) => {
@@ -318,7 +318,7 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.message).to.include('this is the message')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
         expect(err.message).to.include('this is the message')
-        expect(err.message).to.include('\`cy.origin(\'http://foobar.com:3500\', () => {\`')
+        expect(err.message).to.include('\`cy.origin(\'http://www.foobar.com:3500\', () => {\`')
         expect(err.message).to.include('\`cy.visit(\'http://www.foobar.com:3500/fixtures/auth/error-on-load.html\')\`')
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application', 'https://on.cypress.io/origin'])
 
@@ -338,7 +338,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/error-on-load.html')
       })
     })
@@ -357,7 +357,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         class CustomError extends Error {
           private _name = 'CustomError'
           get name () {
@@ -393,7 +393,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         class FooBar {
           private _metasyntaticList = ['foo']
           get metasyntaticList (): string[] {
@@ -421,7 +421,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw 'oops'
       })
     })
@@ -433,7 +433,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw ['why would anyone do this?', 'this is odd']
       })
     })
@@ -445,7 +445,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw 2
       })
     })
@@ -457,7 +457,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw true
       })
     })
@@ -469,7 +469,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw null
       })
     })
@@ -481,7 +481,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw undefined
       })
     })
@@ -493,7 +493,7 @@ describe('cy.origin - uncaught errors', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         throw new Date()
       })
     })

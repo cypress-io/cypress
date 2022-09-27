@@ -205,23 +205,23 @@ export function getOrigin (url: string) {
   // @ts-ignore
   const { origin } = new URL(url)
 
-  // origin policy is comprised of:
+  // origin is comprised of:
   // protocol + subdomain + superdomain + port
   return origin
 }
 
 /**
- * We use the super domain origin policy in the driver to determine whether or not we need to reload/interact with the AUT, and
+ * We use the super domain origin in the driver to determine whether or not we need to reload/interact with the AUT, and
  * currently in the spec bridge to interact with the AUT frame, which uses document.domain set to the super domain
  * @param url - the full absolute url
- * @returns the super domain origin policy -
+ * @returns the super domain origin -
  * ex: http://www.example.com:8081/my/path -> http://example.com:8081/my/path
  */
 export function getSuperDomainOrigin (url: string) {
   // @ts-ignore
   const { port, protocol } = new URL(url)
 
-  // super domain origin policy is comprised of:
+  // super domain origin is comprised of:
   // protocol + superdomain + port (subdomain is not factored in)
   return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
 }

@@ -7,7 +7,7 @@ describe('cy.origin - rerun', { }, () => {
 
   it('successfully reruns tests', () => {
     // @ts-ignore
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {
