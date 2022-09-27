@@ -51,7 +51,8 @@ Cypress.on("run:start", () => {
   }
 
   Cypress.on("test:before:run", () => {
-    // Do some cleanup from previous test
+    // Do some cleanup from previous test - for example, clear the DOM.
+    getContainerEl().innerHTML = "";
   });
 });
 
