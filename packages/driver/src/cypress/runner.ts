@@ -1684,6 +1684,10 @@ export default {
         const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
 
         if (logAttrs) {
+          if (logAttrs._hasBeenCleanedUp) {
+            return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
+          }
+
           return LogUtils.getConsoleProps(logAttrs)
         }
 

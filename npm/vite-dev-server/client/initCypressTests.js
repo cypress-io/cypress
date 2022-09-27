@@ -24,12 +24,22 @@ if (supportFile) {
 
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
-  importsToLoad.push(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`))
+  importsToLoad.push({
+    load: () => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`),
+    absolute: supportFile,
+    relative: supportRelativeToProjectRoot,
+    relativeUrl: `${devServerPublicPathRoute}${supportRelativeToProjectRoot}`,
+  })
 }
 
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
-importsToLoad.push(() => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`))
+importsToLoad.push({
+  load: () => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`),
+  absolute: CypressInstance.spec.absolute,
+  relative: CypressInstance.spec.relative,
+  relativeUrl: `${devServerPublicPathRoute}/${CypressInstance.spec.relative}`,
+})
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
