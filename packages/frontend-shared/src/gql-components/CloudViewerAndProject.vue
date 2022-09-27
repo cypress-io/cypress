@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { CloudViewerAndProject_RequiredDataDocument, CloudViewerAndProject_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { useLoginConnectStore } from '../store/login-connect-store'
@@ -26,7 +26,7 @@ fragment CloudViewerAndProject on Query {
   }
   currentProject {
     id
-    projectId
+    config
     savedState
     cloudProject {
       __typename
@@ -67,6 +67,10 @@ useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument }
 
 const query = useQuery({ query: CloudViewerAndProject_RequiredDataDocument })
 
+const cloudProjectId = computed(() => {
+  return query.data.value?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+})
+
 watchEffect(() => {
   if (!query.data) {
     return
@@ -77,7 +81,7 @@ watchEffect(() => {
   // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
   const isOrganizationLoaded = !!query.data.value?.cloudViewer?.firstOrganization
   const isMemberOfOrganization = (query.data.value?.cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
-  const isProjectConnected = !!query.data.value?.currentProject?.projectId && query.data.value?.currentProject.cloudProject?.__typename === 'CloudProject'
+  const isProjectConnected = !!cloudProjectId.value && query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
   const hasRecordedRuns = query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && (query.data.value?.currentProject.cloudProject?.runs?.nodes?.length ?? 0) > 0
   const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(query.data.value?.authState?.name ?? '')
 
