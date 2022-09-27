@@ -47,7 +47,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       close: browsers.close,
       getBrowsers,
       async ensureAndGetByNameOrPath (nameOrPath: string) {
-        const browsers = await ctx.browser.machineBrowsers()
+        const browsers = await ctx.browser.allBrowsers()
 
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },
