@@ -1952,7 +1952,6 @@ jobs:
 
   npm-cypress-schematic:
     <<: *defaults
-    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
