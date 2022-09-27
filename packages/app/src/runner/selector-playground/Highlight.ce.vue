@@ -1,56 +1,57 @@
 <template>
   <div
-    ref="highlightRef"
     class="highlight"
-    :style="style"
+    :style="highlightStyle"
   />
   <div
-    ref="tooltipRef"
     class="tooltip"
+    :style="tooltipStyle"
   >
     <span>{{ selector }}</span>
     <div
-      ref="arrow"
       class="arrow"
+      :style="arrowStyle"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computePosition, flip, offset, arrow } from '@floating-ui/dom'
-import { StyleValue, onMounted, nextTick, ref, Ref } from 'vue'
+import type { StyleValue, CSSProperties } from 'vue'
 
-defineProps <{
+const props = defineProps <{
   selector: string
   style: StyleValue
 }>()
 
-const highlightRef: Ref<HTMLElement | null> = ref(null)
-const tooltipRef: Ref<HTMLElement | null> = ref(null)
+const highlightStyle = props.style as CSSProperties
+const highlightTop = parseFloat(highlightStyle.top as string)
+const highlightLeft = parseFloat(highlightStyle.left as string)
+const highlightHeight = parseFloat(highlightStyle.height as string)
+const placeOnBottom = highlightTop < 35
 
-onMounted(() => {
-  nextTick(() => {
-    const ref = highlightRef.value as HTMLElement
-    const tooltip = tooltipRef.value as HTMLElement
-    const arrowEl = tooltip.querySelector('.arrow') as HTMLElement
+const tooltipStyle =
+  placeOnBottom
+    ? {
+      top: `${highlightTop + highlightHeight + 10}px`,
+      left: `${highlightLeft}px`,
+    }
+    : {
+      top: `${highlightTop - 33}px`,
+      left: `${highlightLeft}px`,
+    }
 
-    computePosition(ref, tooltip, {
-      placement: 'top-start',
-      middleware: [flip(), offset(6), arrow({ element: arrowEl })],
-    }).then(({ x, y, placement }) => {
-      Object.assign(tooltip.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      })
-
-      Object.assign(arrowEl.style, {
-        left: `8px`,
-        top: placement === 'top-start' ? `24px` : `-6px`,
-        transform: placement === 'top-start' ? 'rotate(180deg)' : 'rotate(0deg)',
-      })
-    })
-  })
-})
+const arrowStyle =
+  placeOnBottom
+    ? {
+      left: `8px`,
+      top: `-6px`,
+      transform: 'rotate(0deg)',
+    }
+    : {
+      left: `8px`,
+      top: `24px`,
+      transform: 'rotate(180deg)',
+    }
 </script>
 
 <style>
