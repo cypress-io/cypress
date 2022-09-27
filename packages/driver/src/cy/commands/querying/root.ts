@@ -4,7 +4,7 @@ export default (Commands, Cypress, cy, state) => {
       timeout: options.timeout,
     })
 
-    cy.state('current').set('timeout', options.timeout)
+    this.set('timeout', options.timeout)
 
     return () => {
       cy.ensureCommandCanCommunicateWithAUT()

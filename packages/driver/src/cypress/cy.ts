@@ -900,7 +900,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   now (name, ...args) {
     if (this.queryFns[name]) {
-      return this.queryFns[name].apply(this, args)
+      return this.queryFns[name].apply(this.state('current'), args)
     }
 
     return Promise.resolve(

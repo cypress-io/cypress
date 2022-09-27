@@ -164,8 +164,8 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({}),
     })
 
-    cy.state('current').set('timeout', userOptions.timeout)
-    cy.state('current').set('_log', log)
+    this.set('timeout', userOptions.timeout)
+    this.set('_log', log)
 
     if (aliasRe.test(selector)) {
       return getAlias.call(this, selector, log, cy)
@@ -181,8 +181,12 @@ export default (Commands, Cypress, cy, state) => {
       try {
         let scope = cy.state('withinSubject') || userOptions.withinSubject
 
+        if (scope && scope[0]) {
+          scope = scope[0]
+        }
+
         if (includeShadowDom) {
-          const root = scope ? scope[0] : cy.state('document')
+          const root = scope || cy.state('document')
           const elementsWithShadow = $dom.findAllShadowRoots(root)
 
           scope = elementsWithShadow.concat(root)
@@ -264,7 +268,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const getOptions = _.extend({}, userOptions) as GetOptions
     const getFn = cy.now('get', selector, getOptions)
-    const log = cy.state('current').get('_log')
+    const log = this.get('_log')
 
     const getPhrase = () => {
       if (filter && !(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
@@ -286,8 +290,8 @@ export default (Commands, Cypress, cy, state) => {
       return ''
     }
 
-    cy.state('current').set('timeout', userOptions.timeout)
-    cy.state('current').set('onFail', (err) => {
+    this.set('timeout', userOptions.timeout)
+    this.set('onFail', (err) => {
       switch (err.type) {
         case 'length':
           if (err.expected > 1) {
@@ -356,7 +360,20 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({}),
     })
 
-    cy.state('current').set('timeout', userOptions.timeout)
+    this.set('timeout', userOptions.timeout)
+    this.set('onFail', (err) => {
+      switch (err.type) {
+        case 'existence': {
+          const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+
+          err.message = message
+          err.docsUrl = docsUrl
+          break
+        }
+        default:
+          break
+      }
+    })
 
     return (subject) => {
       cy.ensureSubjectByType(subject, 'element')
