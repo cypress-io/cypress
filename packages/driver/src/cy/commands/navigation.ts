@@ -1149,9 +1149,6 @@ export default (Commands, Cypress, cy, state, config) => {
             .set('query', existing.search)
             .set('hash', existing.hash)
 
-            // replace is broken in electron so switching
-            // to href for now
-            // $utils.locReplace(window, newUri.toString())
             $utils.locHref(newUri.toString(), window)
 
             // we are returning a Promise which never resolves
