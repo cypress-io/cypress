@@ -27,7 +27,7 @@
     "dataloader": "^2.0.0",
     "dayjs": "^1.9.3",
     "dedent": "^0.7.0",
-    "ejs": "^3.1.6",
+    "ejs": "^3.1.7",
     "endent": "2.0.1",
     "execa": "1.0.0",
     "front-matter": "^4.0.2",
@@ -46,9 +46,9 @@
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
     "semver": "7.3.2",
-    "simple-git": "3.4.0",
+    "simple-git": "3.5.0",
     "stringify-object": "^3.0.0",
-    "underscore.string": "^3.3.5",
+    "underscore.string": "^3.3.6",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
