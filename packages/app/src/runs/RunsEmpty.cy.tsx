@@ -1,4 +1,5 @@
 import RunsEmpty from './RunsEmpty.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('RunsEmpty', () => {
   it('renders expected content', () => {
@@ -19,7 +20,7 @@ describe('RunsEmpty', () => {
       } as any,
     } as any
 
-    cy.contains('Record your first run').should('be.visible')
+    cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
     cy.contains('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
   })
 })
