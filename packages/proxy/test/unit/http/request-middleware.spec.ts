@@ -152,7 +152,7 @@ describe('http/request-middleware', () => {
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
-    it('provides getCredentialLevelOfRequest with resourceType if able to determine from header (xhr)', async () => {
+    it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (xhr)', async () => {
       const ctx = {
         config: {
           experimentalSessionAndOrigin: true,
@@ -161,7 +161,9 @@ describe('http/request-middleware', () => {
         remoteStates: {
           isPrimaryOrigin: sinon.stub().returns(false),
         },
-        getCredentialLevelOfRequest: sinon.stub().returns({}),
+        resourceTypeAndCredentialManager: {
+          get: sinon.stub().returns({}),
+        },
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
@@ -172,12 +174,12 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.getCredentialLevelOfRequest).to.have.been.calledWith('http://localhost:8080', `xhr`)
+        expect(ctx.resourceTypeAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `xhr`)
       })
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
-    it('provides getCredentialLevelOfRequest with resourceType if able to determine from header (fetch)', async () => {
+    it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (fetch)', async () => {
       const ctx = {
         config: {
           experimentalSessionAndOrigin: true,
@@ -186,7 +188,9 @@ describe('http/request-middleware', () => {
         remoteStates: {
           isPrimaryOrigin: sinon.stub().returns(false),
         },
-        getCredentialLevelOfRequest: sinon.stub().returns({}),
+        resourceTypeAndCredentialManager: {
+          get: sinon.stub().returns({}),
+        },
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
@@ -197,11 +201,11 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.getCredentialLevelOfRequest).to.have.been.calledWith('http://localhost:8080', `fetch`)
+        expect(ctx.resourceTypeAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `fetch`)
       })
     })
 
-    it('sets the resourceType and credentialsLevel on the request from whatever is returned by getCredentialLevelOfRequest if conditions apply', async () => {
+    it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply', async () => {
       const ctx = {
         config: {
           experimentalSessionAndOrigin: true,
@@ -210,10 +214,12 @@ describe('http/request-middleware', () => {
         remoteStates: {
           isPrimaryOrigin: sinon.stub().returns(false),
         },
-        getCredentialLevelOfRequest: sinon.stub().returns({
-          resourceType: 'fetch',
-          credentialStatus: 'same-origin',
-        }),
+        resourceTypeAndCredentialManager: {
+          get: sinon.stub().returns({
+            resourceType: 'fetch',
+            credentialStatus: 'same-origin',
+          }),
+        },
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
