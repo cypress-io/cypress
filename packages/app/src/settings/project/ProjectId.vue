@@ -33,7 +33,6 @@
     </div>
     <CloudConnectButton
       v-else
-      :gql="props.gql"
       utm-medium="Settings Tab"
     />
   </SettingsSection>
@@ -58,7 +57,6 @@ fragment ProjectId on Query {
     id
     projectId
   }
-  ...CloudConnectButton
 }`
 
 const props = defineProps<{

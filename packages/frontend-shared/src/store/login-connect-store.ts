@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia'
 
+interface LoginUserData {
+  fullName: string | null
+  email: string | null
+}
+
 export interface LoginConnectState {
   isLoginConnectOpen: boolean
   utmMedium: string
@@ -9,9 +14,14 @@ export interface LoginConnectState {
   isMemberOfOrganization: boolean
   hasNoRecordedRuns: boolean
   error: boolean
+  hasRecordedRuns: boolean
+  loginError: boolean
+  userData?: LoginUserData
 }
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
+
+type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
 
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',
@@ -26,6 +36,9 @@ export const useLoginConnectStore = defineStore({
       isMemberOfOrganization: false,
       hasNoRecordedRuns: false,
       error: false,
+      hasRecordedRuns: false,
+      loginError: false,
+      userData: undefined,
     }
   },
   actions: {
@@ -38,8 +51,14 @@ export const useLoginConnectStore = defineStore({
       this.isLoginConnectOpen = false
       this.utmMedium = ''
     },
-    setStatus (name: 'isLoggedIn' | 'isProjectConnected', newVal: boolean) {
+    setStatus (name: StatusField, newVal: boolean) {
       this[name] = newVal
+    },
+    setLoginError (error) {
+      this.loginError = error
+    },
+    setUserData (userData?: LoginUserData) {
+      this.userData = userData
     },
   },
   getters: {

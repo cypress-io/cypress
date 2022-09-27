@@ -31,8 +31,9 @@ describe('<LoginConnectModalsContent />', () => {
 
   context('when user is logged in', () => {
     it('shows "Create Project" state if project is not set up', () => {
-      const loginConnectStore = useLoginConnectStore()
-      const { openLoginConnectModal } = loginConnectStore
+      const { openLoginConnectModal, setStatus } = useLoginConnectStore()
+
+      setStatus('isLoggedIn', true)
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
@@ -48,10 +49,6 @@ describe('<LoginConnectModalsContent />', () => {
                   nodes: [],
                 },
               }],
-            },
-            firstOrganization: {
-              __typename: 'CloudOrganizationConnection',
-              nodes: [{ __typename: 'CloudOrganization', id: '123' }],
             },
           }
 

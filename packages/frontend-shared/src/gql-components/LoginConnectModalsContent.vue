@@ -1,34 +1,27 @@
 <template>
   <template v-if="loginConnectStore.isLoginConnectOpen">
-    <CloudViewerAndProject
-      v-if="props.gql"
-      v-slot="{status}"
+    <LoginModal
+      v-if="!loginConnectStore.isLoggedIn || keepLoginOpen"
       :gql="props.gql"
-    >
-      <LoginModal
-        v-if="status && (!status.isLoggedIn || keepLoginOpen)"
-        :gql="props.gql"
-        :model-value="!status.isLoggedIn || keepLoginOpen"
-        :utm-medium="loginConnectStore.utmMedium"
-        :show-connect-button-after-login="!status.isProjectConnected && !!props.gql.currentProject?.currentTestingType"
-        @connect-project="handleConnectProject"
-        @cancel="handleCancel"
-        @loggedin="handleLoginSuccess(status.isProjectConnected)"
-        @update:model-value="handleUpdate(status.isProjectConnected, status.error)"
-      />
-      <CloudConnectModals
-        v-else-if="status?.isLoggedIn && !keepLoginOpen && !status.isProjectConnected"
-        :show="status?.isLoggedIn"
-        :gql="props.gql"
-        :utm-medium="loginConnectStore.utmMedium"
-        @cancel="handleCancelConnect"
-        @success="handleConnectSuccess"
-      />
-    </CloudViewerAndProject>
+      :model-value="!loginConnectStore.isLoggedIn || keepLoginOpen"
+      :utm-medium="loginConnectStore.utmMedium"
+      :show-connect-button-after-login="!loginConnectStore.isProjectConnected"
+      @connect-project="handleConnectProject"
+      @cancel="handleCancel"
+      @loggedin="handleLoginSuccess(loginConnectStore.isProjectConnected)"
+      @update:model-value="handleUpdate(loginConnectStore.isProjectConnected, loginConnectStore.loginError)"
+    />
+    <CloudConnectModals
+      v-else-if="loginConnectStore.isLoggedIn && !keepLoginOpen && !loginConnectStore.isProjectConnected"
+      :show="loginConnectStore.isLoggedIn"
+      :gql="props.gql"
+      :utm-medium="loginConnectStore.utmMedium"
+      @cancel="handleCancelConnect"
+      @success="handleConnectSuccess"
+    />
   </template>
 </template>
 <script setup lang="ts">
-import CloudViewerAndProject from './CloudViewerAndProject.vue'
 import { gql } from '@urql/vue'
 import type { LoginConnectModalsContentFragment } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
@@ -38,7 +31,6 @@ import CloudConnectModals from './modals/CloudConnectModals.vue'
 
 gql`
 fragment LoginConnectModalsContent on Query {
-  ...CloudViewerAndProject
   ...LoginModal
   ...CloudConnectModals
   currentProject {

@@ -45,7 +45,7 @@
               <li
                 v-if="props.gql.isGlobalMode"
                 class="mx-2px align-middle inline-block"
-                aria-hidden
+                aria-hidden="true"
               >
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
               </li>
@@ -74,7 +74,7 @@
               <template v-if="currentProject.currentTestingType">
                 <li
                   class="mx-2px inline-block align-middle"
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
                 </li>
@@ -86,78 +86,73 @@
           </ol>
         </nav>
       </div>
-      <CloudViewerAndProject
-        v-slot="{status, userData}"
-        :gql="props.gql"
-      >
-        <div class="flex gap-6">
-          <TopNav
-            :gql="props.gql"
-            :show-browsers="props.showBrowsers"
-            :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedState"
-            @clear-force-open="isForceOpenAllowed = false"
+      <div class="flex gap-6">
+        <TopNav
+          :gql="props.gql"
+          :show-browsers="props.showBrowsers"
+          :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedState"
+          @clear-force-open="isForceOpenAllowed = false"
+        >
+          <template
+            v-if="loginConnectStore.isLoggedIn"
+            #login-title
           >
-            <template
-              v-if="status?.isLoggedIn"
-              #login-title
+            <UserAvatar
+              :email="loginConnectStore.userData?.email"
+              class="h-24px w-24px"
+              data-cy="user-avatar-title"
+            />
+            <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
+          </template>
+          <template
+            v-if="loginConnectStore.userData"
+            #login-panel
+          >
+            <div
+              class="min-w-248px"
+              data-cy="login-panel"
             >
-              <UserAvatar
-                :email="userData?.email"
-                class="h-24px w-24px"
-                data-cy="user-avatar-title"
-              />
-              <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
-            </template>
-            <template
-              v-if="userData"
-              #login-panel
-            >
-              <div
-                class="min-w-248px"
-                data-cy="login-panel"
-              >
-                <div class="border-b flex border-b-gray-100 p-16px">
-                  <UserAvatar
-                    :email="userData?.email"
-                    class="h-48px mr-16px w-48px"
-                    data-cy="user-avatar-panel"
-                  />
-                  <div>
-                    <span class="text-gray-800">{{ userData?.fullName }}</span>
-                    <br>
-                    <span class="text-gray-600">{{ userData?.email }}</span>
-                    <br>
-                    <ExternalLink
-                      href="https://on.cypress.io/dashboard/profile"
-                    >
-                      Profile Settings
-                    </ExternalLink>
-                  </div>
-                </div>
-
-                <div class="p-16px">
-                  <Auth
-                    :gql="props.gql"
-                    :show-logout="true"
-                    utm-medium="Nav"
-                  />
+              <div class="border-b flex border-b-gray-100 p-16px">
+                <UserAvatar
+                  :email="loginConnectStore.userData?.email"
+                  class="h-48px mr-16px w-48px"
+                  data-cy="user-avatar-panel"
+                />
+                <div>
+                  <span class="text-gray-800">{{ loginConnectStore.userData?.fullName }}</span>
+                  <br>
+                  <span class="text-gray-600">{{ loginConnectStore.userData?.email }}</span>
+                  <br>
+                  <ExternalLink
+                    href="https://on.cypress.io/dashboard/profile"
+                  >
+                    Profile Settings
+                  </ExternalLink>
                 </div>
               </div>
-            </template>
-          </TopNav>
-          <div v-if="!status?.isLoggedIn">
-            <button
-              class="flex text-gray-600 items-center group focus:outline-transparent"
-              @click="openLoginConnectModal({ utmMedium: 'Nav' })"
-            >
-              <i-cy-profile_x16
-                class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-              />
-              <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
-            </button>
-          </div>
+
+              <div class="p-16px">
+                <Auth
+                  :gql="props.gql"
+                  :show-logout="true"
+                  utm-medium="Nav"
+                />
+              </div>
+            </div>
+          </template>
+        </TopNav>
+        <div v-if="!loginConnectStore.isLoggedIn">
+          <button
+            class="flex text-gray-600 items-center group focus:outline-transparent"
+            @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
+          >
+            <i-cy-profile_x16
+              class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+            />
+            <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+          </button>
         </div>
-      </CloudViewerAndProject>
+      </div>
     </div>
   </div>
 </template>
@@ -180,9 +175,8 @@ import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
 import type { AllowedState } from '@packages/types'
 import { useLoginConnectStore } from '../store/login-connect-store'
-import CloudViewerAndProject from '../gql-components/CloudViewerAndProject.vue'
 
-const { openLoginConnectModal } = useLoginConnectStore()
+const loginConnectStore = useLoginConnectStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -236,24 +230,11 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
-    # FIXME: added cloudProject to avoid infinite loop in testing
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        runs(first: 10) {
-          nodes {
-            id
-          }
-        }
-      }
-    }
   }
   isGlobalMode
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth
-  ...CloudViewerAndProject
 }
 `
 

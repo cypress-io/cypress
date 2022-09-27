@@ -8,12 +8,13 @@ import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
 
 // Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
-import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
-const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
+const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
+
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 const hasCrossFrameStacks = (specWindow) => {
@@ -127,9 +128,12 @@ const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
 
-const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absoluteFile }) => {
+const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, relativeFile, absoluteFile }) => {
   if (!sourceCode) return
 
+  // stack columns are 0-based but code frames and IDEs start columns at 1.
+  // add 1 so the code frame and "open in IDE" point to the right line
+  const column = originalColumn + 1
   const frame = codeFrameColumns(sourceCode, { start: { line, column } })
 
   if (!frame) return
@@ -138,11 +142,26 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
     line,
     column,
     originalFile: relativeFile,
-    relativeFile,
+    relativeFile: getRelativePathFromRoot(relativeFile, absoluteFile),
     absoluteFile,
     frame,
     language: getLanguageFromExtension(relativeFile),
   }
+}
+
+const getRelativePathFromRoot = (relativeFile, absoluteFile) => {
+  // at this point relativeFile is relative to the cypress config
+  // we need it to be relative to the repo root, which is different for monorepos
+  const repoRoot = Cypress.config('repoRoot')
+  const posixAbsoluteFile = (Cypress.config('platform') === 'win32')
+    ? absoluteFile?.replaceAll('\\', '/')
+    : absoluteFile
+
+  if (posixAbsoluteFile?.startsWith(`${repoRoot}/`)) {
+    return posixAbsoluteFile.replace(`${repoRoot}/`, '')
+  }
+
+  return relativeFile
 }
 
 const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userInvocationStack?: string | false) => {
@@ -241,9 +260,7 @@ const cleanFunctionName = (functionName) => {
 }
 
 const parseLine = (line) => {
-  const isStackLine = stackLineRegex.test(line)
-
-  if (!isStackLine) return
+  if (!stackLineRegex.test(line)) return
 
   const parsed = errorStackParser.parse({ stack: line } as any)[0]
 
@@ -298,7 +315,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
     return {
-      message: line,
+      message: line.replace(whitespace, ''), // strip leading whitespace
       whitespace,
     }
   }
@@ -315,7 +332,13 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   let absoluteFile
 
-  if (relativeFile && projectRoot) {
+  // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
+  // We ensure that the absolute path is not set in this case.
+  const canBuildAbsolutePath = relativeFile && projectRoot && (
+    !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
+  )
+
+  if (canBuildAbsolutePath) {
     absoluteFile = path.resolve(projectRoot, relativeFile)
 
     // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have
@@ -332,8 +355,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile,
     absoluteFile,
     line: sourceDetails.line,
-    // adding 1 to column makes more sense for code frame and opening in editor
-    column: sourceDetails.column + 1,
+    column: sourceDetails.column,
     whitespace,
   }
 }
@@ -354,8 +376,10 @@ const reconstructStack = (parsedStack) => {
 
     const { whitespace, originalFile, function: fn, line, column } = parsedLine
 
-    return `${whitespace}at ${fn} (${originalFile || '<unknown>'}:${line}:${column})`
-  }).join('\n')
+    const lineAndColumn = (Number.isInteger(line) || Number.isInteger(column)) ? `:${line}:${column}` : ''
+
+    return `${whitespace}at ${fn} (${originalFile || '<unknown>'}${lineAndColumn})`
+  }).join('\n').trimEnd()
 }
 
 const getSourceStack = (stack, projectRoot?) => {
@@ -390,7 +414,35 @@ const normalizedStack = (err) => {
   // Chromium-based errors do, so we normalize them so that the stack
   // always includes the name/message
   const errString = err.toString()
-  const errStack = err.stack || ''
+  let errStack = err.stack || ''
+
+  if (Cypress.isBrowser('webkit')) {
+    // WebKit will not determine the proper stack trace for an error, with stack entries
+    // missing function names, call locations, or both. This is due to a number of documented
+    // issues with WebKit:
+    // https://bugs.webkit.org/show_bug.cgi?id=86493
+    // https://bugs.webkit.org/show_bug.cgi?id=243668
+    // https://bugs.webkit.org/show_bug.cgi?id=174380
+    //
+    // We update these stack entries with placeholder names/locations to more closely align
+    // the output with other browsers, minimizing the visual impact to the stack traces we render
+    // within the command log and console and ensuring that the stacks can be identified within
+    // and parsed out of test snapshots that include them.
+    errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
+      // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
+      // be presented within the stack. If we detect it within the stack, we remove it.
+      if (parts[0] === '__CyWebKitError') {
+        return ''
+      }
+
+      return [
+        parts[0] || '<unknown>',
+        '@',
+        parts[1] || '<unknown>',
+        parts[2],
+      ].join('')
+    })
+  }
 
   // the stack has already been normalized and normalizing the indentation
   // again could mess up the whitespace
@@ -429,6 +481,7 @@ export default {
   replacedStack,
   getCodeFrame,
   getCodeFrameFromSource,
+  getRelativePathFromRoot,
   getSourceStack,
   getStackLines,
   getSourceDetailsForFirstLine,

@@ -1,3 +1,28 @@
+# [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-09-23)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+* Fix missing `it.skip` function in Angular tests ([#23829](https://github.com/cypress-io/cypress/issues/23829)) ([64c0f45](https://github.com/cypress-io/cypress/commit/64c0f45182456bd43f4b64b2311e816dde615236))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-08-30)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
 # @cypress/angular-v1.0.0 (2022-08-17)
 
 

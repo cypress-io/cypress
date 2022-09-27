@@ -437,6 +437,11 @@ export = {
     // set both because why not
     webContents.userAgent = userAgent
 
+    // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
+    webContents.debugger.sendCommand('Network.setUserAgentOverride', {
+      userAgent,
+    })
+
     return webContents.session.setUserAgent(userAgent)
   },
 
@@ -460,6 +465,18 @@ export = {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
+  validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {
+    const options: string[] = []
+
+    if (Object.keys(launchOptions.env).length > 0) options.push('env')
+
+    if (launchOptions.args.length > 0) options.push('args')
+
+    if (options.length > 0) {
+      errors.warning('BROWSER_UNSUPPORTED_LAUNCH_OPTION', 'electron', options)
+    }
+  },
+
   async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) {
     debug('open %o', { browser, url })
 
@@ -480,6 +497,8 @@ export = {
     })
 
     const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, electronOptions)
+
+    this.validateLaunchOptions(launchOptions)
 
     const { preferences } = launchOptions
 

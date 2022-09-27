@@ -407,6 +407,7 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx(async (ctx, options) => {
+          ctx.coreData.app.browserStatus = 'open'
           options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
@@ -455,7 +456,6 @@ describe('App Top Nav Workflows', () => {
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })
-
           cy.withCtx((ctx, o) => {
             // validate utmSource
             expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')

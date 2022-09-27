@@ -113,11 +113,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           result.authState.browserOpened = true
           result.cloudViewer = {
             ...CloudUserStubs.me,
-            organizations: null,
-            firstOrganization: {
-              __typename: 'CloudOrganizationConnection' as const,
-              nodes: [],
-            },
           }
         },
         render: (gqlVal) => (
