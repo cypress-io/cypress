@@ -83,10 +83,11 @@ export function mount(
   /// Register Web Component
   maybeRegisterComponent(name, webComponent);
 
+  // Inject user styles before mounting the component
+  injectStylesBeforeElement(options ?? {}, document, getContainerEl())
+
   // Render HTML containing component.
   $root.innerHTML = `<${name} id="root"></${name}>`;
-
-  injectStylesBeforeElement(options ?? {}, document, getContainerEl())
 
   // Log a messsage in the Command Log.
   Cypress.log({
