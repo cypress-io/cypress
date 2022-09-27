@@ -14,7 +14,7 @@ const debugStats = Debug('cypress:webpack:stats')
 
 declare global {
   // this indicates which commands should be acted upon by the
-  // cross-origin-callback-loader. its absense means the loader
+  // cross-origin-callback-loader. its absence means the loader
   // should not be utilized at all
   // eslint-disable-next-line no-var
   var __cypressCallbackReplacementCommands: string[] | undefined
